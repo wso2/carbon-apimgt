@@ -90,3 +90,12 @@
 /components/apimgt/org.wso2.carbon.apimgt.api/src/main/java/org/wso2/carbon/apimgt/api/model/WebSocketTopicMappingConfiguration.java  @Arshardh @arunans23 @SajinieKavindya @senthuran16
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/inbound/ @Arshardh @arunans23 @SajinieKavindya @senthuran16 @dushaniw
 
+# Area : Websub, SSE
+/components/apimgt/org.wso2.carbon.apimgt.api/src/main/java/org/wso2/carbon/apimgt/api/model/WebsubSubscriptionConfiguration.java @senthuran16  @chanikag
+/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1.common/src/test/resources/repository/resources/api_templates/websub_api_template.xml  @senthuran16  @chanikag
+/components/apimgt/org.wso2.carbon.apimgt.api/src/main/java/org/wso2/carbon/apimgt/api/model/webhooks/  @senthuran16  @chanikag
+/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/webhooks/  @senthuran16  @chanikag
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/webhooks/  @senthuran16  @chanikag
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/mediators/webhooks/  @senthuran16  @chanikag
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/streaming/webhook @senthuran16  @chanikag
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/streaming/sse/  @senthuran16  @chanikag
