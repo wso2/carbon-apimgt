@@ -18,16 +18,10 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
-import java.util.Base64;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.RolesApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.impl.RolesApiCommonImpl;
 
 import javax.ws.rs.core.Response;
 
@@ -36,26 +30,16 @@ import javax.ws.rs.core.Response;
  */
 public class RolesApiServiceImpl implements RolesApiService {
 
-    private static final Log log = LogFactory.getLog(RolesApiServiceImpl.class);
-
     /**
      * Check whether the given role exists in the system
      *
      * @param roleId Base64 URL encoded form of role name -Base64URLEncode{user-store-name/role-name}
      * @return 200 if the given role exists
      */
-    public Response validateSystemRole(String roleId, MessageContext messageContext) {
-        boolean isRoleExist = false;
-        String username = RestApiCommonUtil.getLoggedInUsername();
-        if (roleId != null) {
-            String roleName = new String(Base64.getUrlDecoder().decode(roleId));
-            log.debug("Checking whether the role : " + roleName + "exists");
-            isRoleExist = APIUtil.isRoleNameExist(username, roleName);
-        }
-        if (isRoleExist) {
-            return Response.status(Response.Status.OK).build();
-        } else {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
+    @Override
+    public Response validateSystemRole(String roleId, MessageContext messageContext) throws APIManagementException {
+
+        RolesApiCommonImpl.validateSystemRole(roleId);
+        return Response.status(Response.Status.OK).build();
     }
 }

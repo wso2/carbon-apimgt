@@ -36,7 +36,6 @@ import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Yaml;
-import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -44,6 +43,13 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MapSchema;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -77,9 +83,9 @@ import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -92,27 +98,26 @@ import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 
-import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashMap;
-import java.util.stream.Collectors;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Arrays;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 /**
@@ -905,8 +910,7 @@ public class OASParserUtil {
      * @throws APIManagementException if error occurred while parsing definition
      */
     public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url ,
-                                                                        boolean returnJsonContent)
-            throws APIManagementException {
+                                                                        boolean returnJsonContent) throws APIManagementException {
         APIDefinitionValidationResponse validationResponse =
                 oas3Parser.validateAPIDefinition(apiDefinition, url, returnJsonContent);
         if (!validationResponse.isValid()) {

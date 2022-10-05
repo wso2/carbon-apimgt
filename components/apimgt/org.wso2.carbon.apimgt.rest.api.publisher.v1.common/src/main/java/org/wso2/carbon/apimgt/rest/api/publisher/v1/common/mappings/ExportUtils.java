@@ -130,7 +130,8 @@ public class ExportUtils {
             // If there is no provider in current domain, the API cannot be exported
             if (providerName == null) {
                 throw new APIMgtResourceNotFoundException(
-                        "Error occurred while exporting. API: " + name + " version: " + version + " not found");
+                        "Error occurred while exporting. API: " + name + " version: " + version + " not found",
+                        ExceptionCodes.RESOURCE_NOT_FOUND);
             }
         }
 

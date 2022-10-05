@@ -450,7 +450,8 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
             } else {
                 String msg = "WSDL errors! Extensibility Element is null";
                 log.error(msg);
-                throw new APIMgtWSDLException(msg);
+                throw new APIMgtWSDLException(msg,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, msg));
             }
         } else {
             throw new APIMgtWSDLException("Unsupported WSDL Extensibility element",

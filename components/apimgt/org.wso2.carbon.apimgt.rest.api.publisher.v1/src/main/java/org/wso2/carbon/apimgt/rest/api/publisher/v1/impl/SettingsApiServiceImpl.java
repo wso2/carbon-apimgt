@@ -22,19 +22,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-
-import org.wso2.carbon.apimgt.impl.restapi.publisher.SettingsApiServiceImplUtil;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.SettingsApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.impl.SettingsApiCommonImpl;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-
 import javax.ws.rs.core.Response;
 
 public class SettingsApiServiceImpl implements SettingsApiService {
@@ -42,28 +37,18 @@ public class SettingsApiServiceImpl implements SettingsApiService {
     private static final Log log = LogFactory.getLog(SettingsApiServiceImpl.class);
 
     @Override
-    public Response getSettings(MessageContext messageContext){
+    public Response getSettings(MessageContext messageContext) throws APIManagementException {
 
-        try {
-            String username = RestApiCommonUtil.getLoggedInUsername();
-            boolean isUserAvailable = false;
-            if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
-                isUserAvailable = true;
-            }
-            SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO(isUserAvailable, organization);
-            settingsDTO.setScopes(getScopeList());
-            return Response.ok().entity(settingsDTO).build();
-        } catch (APIManagementException | IOException e) {
-            String errorMessage = "Error while retrieving Publisher Settings";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return null;
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        SettingsDTO settingsDTO = SettingsApiCommonImpl.getSettings(organization);
+        settingsDTO.setScopes(getScopeList());
+        return Response.ok().entity(settingsDTO).build();
     }
+
     /**
      * This method returns the scope list from the publisher-api.yaml
-     * @return  List<String> scope list
+     *
+     * @return List<String> scope list
      * @throws APIManagementException
      */
     private List<String> getScopeList() throws APIManagementException {
@@ -75,6 +60,6 @@ public class SettingsApiServiceImpl implements SettingsApiService {
         } catch (IOException e) {
             log.error("Error while reading the swagger definition", e);
         }
-        return SettingsApiServiceImplUtil.getScopeListForSwaggerDefinition(definition);
+        return SettingsApiCommonImpl.getScopeListForSwaggerDefinition(definition);
     }
 }

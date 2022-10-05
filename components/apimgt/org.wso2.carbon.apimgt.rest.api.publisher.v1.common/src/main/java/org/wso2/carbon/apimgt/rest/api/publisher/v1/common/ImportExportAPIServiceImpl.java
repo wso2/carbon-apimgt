@@ -193,7 +193,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         try {
             extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
         } catch (APIImportExportException e) {
-            throw new APIManagementException(e);
+            throw new APIManagementException(e.getMessage(), e, ExceptionCodes.API_IMPORT_ERROR);
         }
         return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, rotateRevision,
                 overwrite, false, tokenScopes, null, organization);
@@ -209,7 +209,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         try {
             extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
         } catch (APIImportExportException e) {
-            throw new APIManagementException(e);
+            throw new APIManagementException(e.getMessage(), e, ExceptionCodes.API_PRODUCT_IMPORT_ERROR);
         }
         return ImportUtils.importApiProduct(extractedFolderPath, preserveProvider, rotateRevision, overwriteAPIProduct,
                 overwriteAPIs, importAPIs, tokenScopes, organization);

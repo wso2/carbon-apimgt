@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtDAOException;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -115,7 +116,8 @@ public class SystemConfigurationsDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve " + type + " Configuration for org: " + organization, e);
+            handleExceptionWithExceptionCode( "Failed to retrieve configuration", e,
+                    ExceptionCodes.from(ExceptionCodes.FAILED_RETRIEVE_CONFIGURATION_FOR_ORGANIZATION, type, organization));
         }
         return systemConfig;
     }
@@ -175,5 +177,11 @@ public class SystemConfigurationsDAO {
         } catch (SQLException e1) {
             log.error("Error while rolling back the transaction.", e1);
         }
+    }
+
+    private void handleExceptionWithExceptionCode(String message, Throwable e, ErrorHandler errorHandler)
+            throws APIMgtDAOException {
+
+        throw new APIMgtDAOException(message, e, errorHandler);
     }
 }

@@ -29,7 +29,10 @@ import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,6 +60,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -70,6 +74,10 @@ import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
@@ -89,9 +97,16 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -671,9 +686,8 @@ public class PublisherCommonUtils {
      *
      * @param inputRoles Input roles.
      * @return relevant error string or empty string.
-     * @throws APIManagementException API Management Exception.
      */
-    public static String validateRoles(List<String> inputRoles) throws APIManagementException {
+    public static String validateRoles(List<String> inputRoles) {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         boolean isMatched = false;
@@ -1082,7 +1096,7 @@ public class PublisherCommonUtils {
         //Get all existing versions of  api been adding
         List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(body.getName(),
                 username, organization);
-        if (apiVersions.size() > 0) {
+        if (!apiVersions.isEmpty()) {
             //If any previous version exists
             for (String version : apiVersions) {
                 if (version.equalsIgnoreCase(body.getVersion())) {
@@ -1136,7 +1150,7 @@ public class PublisherCommonUtils {
         //check whether the added API's tiers are all valid
         Set<Tier> definedTiers = apiProvider.getTiers();
         List<String> invalidTiers = getInvalidTierNames(definedTiers, tiersFromDTO);
-        if (invalidTiers.size() > 0) {
+        if (!invalidTiers.isEmpty()) {
             throw new APIManagementException(
                     "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid",
                     ExceptionCodes.TIER_NAME_INVALID);
@@ -1158,14 +1172,6 @@ public class PublisherCommonUtils {
             //we are setting the api owner as the logged in user until we support checking admin privileges and
             //assigning the owner as a different user
             apiToAdd.setApiOwner(provider);
-        }
-
-        if (body.getKeyManagers() instanceof List) {
-            apiToAdd.setKeyManagers((List<String>) body.getKeyManagers());
-        } else if (body.getKeyManagers() == null) {
-            apiToAdd.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
-        } else {
-            throw new APIManagementException("KeyManagers value need to be an array");
         }
 
         // Set default gatewayVendor
@@ -1895,5 +1901,190 @@ public class PublisherCommonUtils {
 
         apiProvider.addAPI(apiToAdd);
         return apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization);
+    }
+
+    /**
+     * Attaches a file to the specified document
+     *
+     * @param apiId         identifier of the API, the document belongs to
+     * @param documentation Documentation object
+     * @param inputStream   input Stream containing the file
+     * @param fileName      File name
+     * @param mediaType     Media type
+     * @param organization  identifier of an organization
+     * @throws APIManagementException if unable to add the file
+     */
+    public static void attachFileToDocument(String apiId, Documentation documentation, InputStream inputStream,
+                                            String fileName, String mediaType, String organization)
+            throws APIManagementException {
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String documentId = documentation.getId();
+        String randomFolderName = RandomStringUtils.randomAlphanumeric(10);
+        String tmpFolder = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator
+                + RestApiConstants.DOC_UPLOAD_TMPDIR + File.separator + randomFolderName;
+        File docFile = new File(tmpFolder);
+
+        boolean folderCreated = docFile.mkdirs();
+        if (!folderCreated) {
+            throw new APIManagementException("Failed to add content to the document " + documentId,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+
+        InputStream docInputStream = null;
+        try {
+            if (StringUtils.isBlank(fileName)) {
+                fileName = RestApiConstants.DOC_NAME_DEFAULT + randomFolderName;
+                log.warn(
+                        "Couldn't find the name of the uploaded file for the document " + documentId + ". Using name '"
+                                + fileName + "'");
+            }
+            //APIIdentifier apiIdentifier = APIMappingUtil
+            //        .getAPIIdentifierFromUUID(apiId, tenantDomain);
+
+            transferFile(inputStream, fileName, docFile.getAbsolutePath());
+            docInputStream = new FileInputStream(docFile.getAbsolutePath() + File.separator + fileName);
+            mediaType = mediaType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : mediaType;
+            PublisherCommonUtils
+                    .addDocumentationContentForFile(docInputStream, mediaType, fileName, apiProvider, apiId,
+                            documentId, organization);
+            docFile.deleteOnExit();
+        } catch (FileNotFoundException e) {
+            throw new APIManagementException("Unable to read the file from path ", e, ExceptionCodes.INTERNAL_ERROR);
+        } finally {
+            IOUtils.closeQuietly(docInputStream);
+        }
+    }
+
+    /**
+     * This method uploads a given file to specified location
+     *
+     * @param uploadedInputStream input stream of the file
+     * @param newFileName         name of the file to be created
+     * @param storageLocation     destination of the new file
+     * @throws APIManagementException if the file transfer fails
+     */
+    public static void transferFile(InputStream uploadedInputStream, String newFileName, String storageLocation)
+            throws APIManagementException {
+        FileOutputStream outFileStream = null;
+
+        try {
+            outFileStream = new FileOutputStream(new File(storageLocation, newFileName));
+            int read;
+            byte[] bytes = new byte[1024];
+            while ((read = uploadedInputStream.read(bytes)) != -1) {
+                outFileStream.write(bytes, 0, read);
+            }
+        } catch (IOException e) {
+            String errorMessage = "Error in transferring files.";
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, ExceptionCodes.INTERNAL_ERROR);
+        } finally {
+            IOUtils.closeQuietly(outFileStream);
+        }
+    }
+
+    /**
+     * This method validates monetization properties
+     *
+     * @param monetizationProperties map of monetization properties
+     * @throws APIManagementException
+     */
+    public static void validateMonetizationProperties(Map<String, String> monetizationProperties)
+            throws APIManagementException {
+
+        String errorMessage;
+        if (monetizationProperties != null) {
+            for (Map.Entry<String, String> entry : monetizationProperties.entrySet()) {
+                String monetizationPropertyKey = entry.getKey().trim();
+                String propertyValue = entry.getValue();
+                if (monetizationPropertyKey.contains(" ")) {
+                    errorMessage = "Monetization property names should not contain space character. " +
+                            "Monetization property '" + monetizationPropertyKey + "' "
+                            + "contains space in it.";
+                    throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_PARAMETERS_PROVIDED);
+                }
+                // Maximum allowable characters of registry property name and value is 100 and 1000.
+                // Hence we are restricting them to be within 80 and 900.
+                if (monetizationPropertyKey.length() > 80) {
+                    errorMessage = "Monetization property name can have maximum of 80 characters. " +
+                            "Monetization property '" + monetizationPropertyKey + "' + contains "
+                            + monetizationPropertyKey.length() + "characters";
+                    throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_PARAMETERS_PROVIDED);
+                }
+                if (propertyValue.length() > 900) {
+                    errorMessage = "Monetization property value can have maximum of 900 characters. " +
+                            "Property '" + monetizationPropertyKey + "' + "
+                            + "contains a value with " + propertyValue.length() + "characters";
+                    throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_PARAMETERS_PROVIDED);
+                }
+            }
+        }
+    }
+
+    /**
+     * This method is used to read input stream of a file and return the string content.
+     * @param fileInputStream File input stream
+     * @return String
+     * @throws APIManagementException*/
+    public static String readInputStream(InputStream fileInputStream)
+            throws APIManagementException {
+
+        String content = null;
+        if (fileInputStream != null) {
+            try {
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                IOUtils.copy(fileInputStream, outputStream);
+                byte[] sequenceBytes = outputStream.toByteArray();
+                InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
+                content = IOUtils.toString(inSequenceStream, StandardCharsets.UTF_8.name());
+            } catch (IOException e) {
+                throw new APIManagementException("Error occurred while reading inputs", e,
+                        ExceptionCodes.INTERNAL_ERROR);
+            }
+
+        }
+        return content;
+    }
+
+    public static File exportOperationPolicyData(OperationPolicyData policyData, String format)
+            throws APIManagementException {
+
+        File exportFolder = null;
+        try {
+            exportFolder = CommonUtil.createTempDirectoryFromName(policyData.getSpecification().getName()
+                    + "_" + policyData.getSpecification().getVersion());
+            String exportAPIBasePath = exportFolder.toString();
+            String archivePath =
+                    exportAPIBasePath.concat(File.separator + policyData.getSpecification().getName());
+            CommonUtil.createDirectory(archivePath);
+            String policyName = archivePath + File.separator + policyData.getSpecification().getName();
+            if (policyData.getSpecification() != null) {
+                if (format.equalsIgnoreCase(ExportFormat.YAML.name())) {
+                    CommonUtil.writeDtoToFile(policyName, ExportFormat.YAML,
+                            ImportExportConstants.TYPE_POLICY_SPECIFICATION,
+                            policyData.getSpecification());
+                } else if (format.equalsIgnoreCase(ExportFormat.JSON.name())) {
+                    CommonUtil.writeDtoToFile(policyName, ExportFormat.JSON,
+                            ImportExportConstants.TYPE_POLICY_SPECIFICATION,
+                            policyData.getSpecification());
+                }
+            }
+            if (policyData.getSynapsePolicyDefinition() != null) {
+                CommonUtil.writeFile(policyName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION,
+                        policyData.getSynapsePolicyDefinition().getContent());
+            }
+            if (policyData.getCcPolicyDefinition() != null) {
+                CommonUtil.writeFile(policyName + APIConstants.CC_POLICY_DEFINITION_EXTENSION,
+                        policyData.getCcPolicyDefinition().getContent());
+            }
+
+            CommonUtil.archiveDirectory(exportAPIBasePath);
+            FileUtils.deleteQuietly(new File(exportAPIBasePath));
+            return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
+        } catch (APIImportExportException | IOException e) {
+            throw new APIManagementException("Error while exporting operation policy", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
     }
 }

@@ -7,6 +7,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -155,10 +157,14 @@ public class LifeCycleUtils {
                         || api.isAdvertiseOnly() && (api.getApiExternalProductionEndpoint() != null
                         || api.getApiExternalSandboxEndpoint() != null)) {
                     if ((isOauthProtected && (tiers == null || tiers.size() == 0)) && !api.isAdvertiseOnly()) {
-                        throw new APIManagementException("Failed to publish service to API store. No Tiers selected");
+                        String message = "Failed to publish service to API store. No Tiers selected";
+                        throw new APIManagementException(message,
+                                ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, message));
                     }
                 } else {
-                    throw new APIManagementException("Failed to publish service to API store. No endpoint selected");
+                    String message = "Failed to publish service to API store. No endpoint selected";
+                    throw new APIManagementException(message,
+                            ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, message));
                 }
             }
 
@@ -208,7 +214,9 @@ public class LifeCycleUtils {
                 log.debug(logMessage);
             }
         } else {
-            throw new APIManagementException("Invalid Lifecycle status for default APIExecutor :" + targetState);
+            String message = "Invalid Lifecycle status for default APIExecutor :" + targetState;
+            throw new APIManagementException(message,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, message));
         }
 
         boolean deprecateOldVersions = false;
@@ -549,7 +557,9 @@ public class LifeCycleUtils {
                 try {
                     apiPersistence.updateAPI(new Organization(api.getOrganization()), publisherAPI);
                 } catch (APIPersistenceException e) {
-                    handleException("Error while persisting the updated API ", e);
+                    String message = "Error while persisting the updated API ";
+                    handleExceptionWithCode(message, e,
+                            ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, message));
                 }
 
             }
@@ -566,5 +576,11 @@ public class LifeCycleUtils {
     private static void handleException(String msg, Exception e) throws APIManagementException {
 
         throw new APIManagementException(msg, e);
+    }
+
+    private static void handleExceptionWithCode(String msg, Exception e, ErrorHandler errorHandler)
+            throws APIManagementException {
+
+        throw new APIManagementException(msg, e, errorHandler);
     }
 }

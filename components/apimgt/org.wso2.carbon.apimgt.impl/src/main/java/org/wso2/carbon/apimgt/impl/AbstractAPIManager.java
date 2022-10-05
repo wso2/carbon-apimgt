@@ -248,10 +248,12 @@ public abstract class AbstractAPIManager implements APIManager {
                 return resourceFile;
             } else {
                 String msg = "Failed to get WSDL. Artifact corresponding to artifactId " + apiId + " does not exist";
-                throw new APIMgtResourceNotFoundException(msg);
+                throw new APIMgtResourceNotFoundException(msg, ExceptionCodes.RESOURCE_NOT_FOUND);
             }
         } catch (WSDLPersistenceException e) {
-            throw new APIManagementException("Error while retrieving wsdl resource for api " + apiId, e);
+            String errorMessage = "Error while retrieving wsdl resource for api " + apiId;
+            throw new APIManagementException(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
     }
 

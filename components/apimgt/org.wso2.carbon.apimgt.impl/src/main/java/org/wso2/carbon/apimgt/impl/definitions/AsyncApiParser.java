@@ -1786,10 +1786,10 @@ public class AsyncApiParser extends APIDefinition {
             validationErrorMessages = e.getAllMessages();
         } catch (URISyntaxException e) {
             String msg = "Error occurred when registering the schema";
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.from(ExceptionCodes.URI_PARSE_ERROR, msg));
         } catch (ParseException e) {
             String msg = "Error occurred when parsing the schema";
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.JSON_PARSE_ERROR);
         }
 
         // TODO: Validation is failing. Need to fix this. Therefore overriding the value as True.
@@ -2100,9 +2100,8 @@ public class AsyncApiParser extends APIDefinition {
      *
      * @param definition Async API Definition
      * @return List<String> List of available transport protocols
-     * @throws APIManagementException If the async env configuration if not provided properly
      */
-    public static List<String> getTransportProtocolsForAsyncAPI(String definition) throws APIManagementException {
+    public static List<String> getTransportProtocolsForAsyncAPI(String definition) {
         Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(definition);
         HashSet<String> asyncTransportProtocols = new HashSet<>();
         for (AaiChannelItem channel : aai20Document.getChannels()) {

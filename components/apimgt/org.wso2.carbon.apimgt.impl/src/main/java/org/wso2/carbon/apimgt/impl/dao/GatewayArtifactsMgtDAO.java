@@ -4,6 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
@@ -138,6 +140,12 @@ public class GatewayArtifactsMgtDAO {
 
         log.error(msg, t);
         throw new APIManagementException(msg, t);
+    }
+
+    private void handleExceptionWithCode(String msg, Throwable t, ErrorHandler errorHandler) throws APIManagementException {
+
+        log.error(msg, t);
+        throw new APIManagementException(msg, t, errorHandler);
     }
 
     /**
@@ -278,10 +286,10 @@ public class GatewayArtifactsMgtDAO {
                 } catch (SQLException | APIManagementException e) {
                     // APIManagementException if failed to revolve default vhost and set null to DB
                     connection.rollback();
-                    throw new APIManagementException("Failed to attach labels", e);
+                    throw new APIManagementException("Failed to attach labels", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
                 }
             } catch (SQLException e) {
-                handleException("Failed to attach labels" + apiId, e);
+                handleExceptionWithCode("Failed to attach labels" + apiId, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         }
     }
@@ -320,10 +328,12 @@ public class GatewayArtifactsMgtDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to delete Gateway Artifact" + apiId, e);
+                handleExceptionWithCode("Failed to delete Gateway Artifact" + apiId, e,
+                        ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
-        } catch (SQLException | APIManagementException e) {
-            handleException("Failed to delete Gateway Artifact" + apiId, e);
+        } catch (SQLException e) {
+            handleExceptionWithCode("Failed to delete Gateway Artifact" + apiId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -922,7 +932,7 @@ public class GatewayArtifactsMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            handleException("Failed to delete Gateway Artifact", e);
+            handleExceptionWithCode("Failed to delete Gateway Artifact", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -1010,7 +1020,7 @@ public class GatewayArtifactsMgtDAO {
                 throw e;
             }
         } catch (SQLException | IOException e) {
-            handleException("Failed to Add Artifact to Database", e);
+            handleExceptionWithCode("Failed to Add Artifact to Database", e, ExceptionCodes.INTERNAL_ERROR);
         }
     }
 

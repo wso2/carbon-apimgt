@@ -43,6 +43,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
@@ -344,7 +345,7 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
                 wsdlInfo.setParameterModelMap(parameterModelMap);
             }
         } else {
-            throw new APIMgtWSDLException("WSDL Definition is not initialized.");
+            throw new APIMgtWSDLException("WSDL Definition is not initialized.", ExceptionCodes.INTERNAL_ERROR);
         }
         return wsdlInfo;
     }

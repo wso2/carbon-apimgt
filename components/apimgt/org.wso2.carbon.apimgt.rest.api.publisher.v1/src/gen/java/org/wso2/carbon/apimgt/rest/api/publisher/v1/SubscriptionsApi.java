@@ -4,25 +4,17 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.SubscriptionsApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.inject.Inject;
 
 import io.swagger.annotations.*;
-import java.io.InputStream;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
-import java.util.Map;
-import java.util.List;
 import javax.validation.constraints.*;
 @Path("/subscriptions")
 

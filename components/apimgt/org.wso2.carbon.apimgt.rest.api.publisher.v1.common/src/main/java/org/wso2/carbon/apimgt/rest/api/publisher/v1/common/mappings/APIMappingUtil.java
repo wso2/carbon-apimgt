@@ -145,7 +145,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getDefaultWebsubSubscriptionConfiguration;
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleExceptionWithCode;
 
 /**
@@ -193,7 +192,8 @@ public class APIMappingUtil {
             try {
                 model.setEndpointConfig(mapper.writeValueAsString(dto.getEndpointConfig()));
             } catch (IOException e) {
-                handleException("Error while converting endpointConfig to json", e);
+                handleExceptionWithCode("Error while converting endpointConfig to json", e,
+                        ExceptionCodes.JSON_PARSE_ERROR);
             }
         }
 
@@ -384,7 +384,8 @@ public class APIMappingUtil {
         } else if (dto.getKeyManagers() == null) {
             model.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         } else {
-            throw new APIManagementException("KeyManagers value need to be an array");
+            throw new APIManagementException("KeyManagers value need to be an array",
+                    ExceptionCodes.INVALID_KEY_MANAGERS_VALUE);
         }
 
         APIServiceInfoDTO serviceInfoDTO = dto.getServiceInfo();
@@ -412,10 +413,10 @@ public class APIMappingUtil {
                 model.setServiceInfo(serviceInfoJson);
             } catch (JsonProcessingException | ParseException e) {
                 String msg = "Error while getting json representation of APIServiceInfo";
-                handleException(msg, e);
+                handleExceptionWithCode(msg, e, ExceptionCodes.JSON_PARSE_ERROR);
             } catch (UserStoreException e) {
                 String msg = "Error while getting tenantId from the given tenant domain " + tenantDomain;
-                handleException(msg, e);
+                handleExceptionWithCode(msg, e, ExceptionCodes.INTERNAL_ERROR);
             }
         }
         if (dto.getAudience() != null) {
@@ -1946,7 +1947,7 @@ public class APIMappingUtil {
     }
 
     public static AsyncAPISpecificationValidationResponseDTO getAsyncAPISpecificationValidationResponseFromModel(
-            APIDefinitionValidationResponse model, boolean returnContent) throws APIManagementException {
+            APIDefinitionValidationResponse model, boolean returnContent) {
 
         AsyncAPISpecificationValidationResponseDTO responseDTO = new AsyncAPISpecificationValidationResponseDTO();
         responseDTO.setIsValid(model.isValid());
@@ -3092,7 +3093,9 @@ public class APIMappingUtil {
             try {
                 apiRevisionDTO.setCreatedTime(parseStringToDate(model.getCreatedTime()));
             } catch (java.text.ParseException e) {
-                throw new APIManagementException("Error while parsing the created time:" + model.getCreatedTime(), e);
+                String errorMessage = "Error while parsing the created time:" + model.getCreatedTime();
+                throw new APIManagementException(errorMessage, e,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
             }
         }
         APIRevisionAPIInfoDTO apiRevisionAPIInfoDTO = new APIRevisionAPIInfoDTO();
@@ -3135,15 +3138,19 @@ public class APIMappingUtil {
             try {
                 apiRevisionDeploymentDTO.setDeployedTime(parseStringToDate(model.getDeployedTime()));
             } catch (java.text.ParseException e) {
-                throw new APIManagementException("Error while parsing the deployed time:" + model.getDeployedTime(), e);
+                String errorMessage = "Error while parsing the deployed time:" + model.getDeployedTime();
+                throw new APIManagementException(errorMessage, e,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
             }
         }
         if (model.getSuccessDeployedTime() != null) {
             try {
                 apiRevisionDeploymentDTO.setSuccessDeployedTime(parseStringToDate(model.getSuccessDeployedTime()));
             } catch (java.text.ParseException e) {
-                throw new APIManagementException("Error while parsing the successfully deployed time:"
-                        + model.getSuccessDeployedTime(), e);
+                String errorMessage = "Error while parsing the successfully deployed time:"
+                        + model.getSuccessDeployedTime();
+                throw new APIManagementException(errorMessage, e,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
             }
         }
         return apiRevisionDeploymentDTO;

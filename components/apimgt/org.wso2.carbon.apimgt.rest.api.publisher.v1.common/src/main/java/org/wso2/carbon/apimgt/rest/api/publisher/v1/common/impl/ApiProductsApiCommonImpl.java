@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.restapi.publisher;
+package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.impl;
 
 
 import org.apache.commons.lang3.StringUtils;
@@ -25,9 +25,13 @@ import org.wso2.carbon.apimgt.api.model.APIRevision;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ApiProductsApiServiceImplUtils {
 
-    private ApiProductsApiServiceImplUtils() {
+/**
+ * Utility class for operations related to ApiProductsApiService
+ */
+public class ApiProductsApiCommonImpl {
+
+    private ApiProductsApiCommonImpl() {
     }
 
     /**
