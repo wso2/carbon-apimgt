@@ -950,21 +950,20 @@ public class PublisherCommonUtils {
      */
     private static void extractExternalEndpoints(APIDTO apiDto, ArrayList<String> endpoints) {
 
-        if (apiDto != null && apiDto.getAdvertiseInfo() != null) {
+        if (apiDto != null && apiDto.getAdvertiseInfo() != null &&
+                Boolean.TRUE.equals(apiDto.getAdvertiseInfo().isAdvertised())) {
             AdvertiseInfoDTO advertiseInfoDto = apiDto.getAdvertiseInfo();
-            if (Boolean.TRUE.equals(advertiseInfoDto.isAdvertised())) {
-                String externalProductionEndpoint = advertiseInfoDto.getApiExternalProductionEndpoint();
+            String externalProductionEndpoint = advertiseInfoDto.getApiExternalProductionEndpoint();
+            if (externalProductionEndpoint != null && !externalProductionEndpoint.isEmpty()) {
                 endpoints.add(externalProductionEndpoint);
-
-                String externalSandboxEndpoint = advertiseInfoDto.getApiExternalSandboxEndpoint();
-                if (externalSandboxEndpoint != null && !externalSandboxEndpoint.isEmpty()) {
-                    endpoints.add(externalSandboxEndpoint);
-                }
-
-                String originalDevPortalUrl = advertiseInfoDto.getOriginalDevPortalUrl();
-                if (originalDevPortalUrl != null && !originalDevPortalUrl.isEmpty()) {
-                    endpoints.add(originalDevPortalUrl);
-                }
+            }
+            String externalSandboxEndpoint = advertiseInfoDto.getApiExternalSandboxEndpoint();
+            if (externalSandboxEndpoint != null && !externalSandboxEndpoint.isEmpty()) {
+                endpoints.add(externalSandboxEndpoint);
+            }
+            String originalDevPortalUrl = advertiseInfoDto.getOriginalDevPortalUrl();
+            if (originalDevPortalUrl != null && !originalDevPortalUrl.isEmpty()) {
+                endpoints.add(originalDevPortalUrl);
             }
         }
     }
