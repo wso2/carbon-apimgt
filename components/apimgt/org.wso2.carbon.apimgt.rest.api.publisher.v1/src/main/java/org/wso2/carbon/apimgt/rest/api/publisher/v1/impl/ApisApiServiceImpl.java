@@ -535,8 +535,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                                             MessageContext messageContext) throws APIManagementException {
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
-        String fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
+        String fileName = null;
+        if (certificateDetail != null) {
+            fileName = certificateDetail.getContentDisposition()
+                    .getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
+        }
         String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                 .get(RestApiConstants.USER_REST_API_SCOPES);
 
@@ -642,16 +645,20 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIInfo apiInfo = RestApiCommonUtil.validateAPIExistence(apiId);
         //validate API update operation permitted based on the LC state
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
-        String fileName = fileDetail.getContentDisposition().getFilename();
-        String mediaType = fileDetail.getHeader(RestApiConstants.HEADER_CONTENT_TYPE);
+
+        String fileName = null;
+        String mediaType = null;
+        if (fileDetail != null) {
+            fileName = fileDetail.getContentDisposition().getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
+            mediaType = fileDetail.getHeader(RestApiConstants.HEADER_CONTENT_TYPE);
+        }
 
         DocumentDTO documentDTO = ApisApiCommonImpl.addAPIDocumentContent(apiId, documentId, inputStream, inlineContent,
                 organization, fileName, mediaType);
 
+        String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENT_CONTENT.replace(RestApiConstants.APIID_PARAM, apiId)
+                .replace(RestApiConstants.DOCUMENTID_PARAM, documentId);
         try {
-            String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENT_CONTENT
-                    .replace(RestApiConstants.APIID_PARAM, apiId)
-                    .replace(RestApiConstants.DOCUMENTID_PARAM, documentId);
             URI uri = new URI(uriString);
             return Response.created(uri).entity(documentDTO).build();
         } catch (URISyntaxException e) {
@@ -936,8 +943,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             fileContentType = policySpecFileDetail.getContentType().toString();
         }
 
-        OperationPolicyDefinition synapseDefinition = null;
-        OperationPolicyDefinition ccPolicyDefinition = null;
+        OperationPolicyDefinition synapseDefinition;
+        OperationPolicyDefinition ccPolicyDefinition;
         OperationPolicySpecification policySpecification =
                 OperationPoliciesApiCommonImpl.getPolicySpecification(fileContentType, jsonContent);
 
@@ -952,7 +959,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     synapsePolicyDefinition, OperationPolicyDefinition.GatewayType.Synapse);
         }
         if (ccPolicyDefinitionFileInputStream != null) {
-            String choreoConnectPolicyDefinition = PublisherCommonUtils.readInputStream(ccPolicyDefinitionFileInputStream);
+            String choreoConnectPolicyDefinition =
+                    PublisherCommonUtils.readInputStream(ccPolicyDefinitionFileInputStream);
             ccPolicyDefinition = new OperationPolicyDefinition();
             OperationPoliciesApiCommonImpl.preparePolicyDefinition(operationPolicyData, ccPolicyDefinition,
                     choreoConnectPolicyDefinition, OperationPolicyDefinition.GatewayType.ChoreoConnect);
@@ -1184,18 +1192,15 @@ public class ApisApiServiceImpl implements ApisApiService {
         validateAPIOperationsPerLC(apiInfo.getStatus().getStatus());
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-        if (fileDetail == null || fileDetail.getContentDisposition() == null ||
-                fileDetail.getContentDisposition().getFilename() == null) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE,
-                    FILE_DETAILS_MISSING));
+        String fileName = null;
+        if (fileDetail != null) {
+            fileName = fileDetail.getContentDisposition().getFilename();
         }
-        String filename = fileDetail.getContentDisposition().getFilename();
 
         String updatedSwagger = ApisApiCommonImpl.updateAPISwagger(apiId, apiDefinition, url, fileInputStream,
-                organization, filename);
+                organization, fileName);
         return Response.ok().entity(updatedSwagger).build();
     }
-
 
     /**
      * Retrieves the thumbnail image of an API specified by API identifier
@@ -1302,15 +1307,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                                               MessageContext messageContext)
             throws APIManagementException {
 
-        if (fileDetail == null || fileDetail.getContentDisposition() == null ||
-                fileDetail.getContentDisposition().getFilename() == null) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE,
-                    FILE_DETAILS_MISSING));
+        String fileName = null;
+        if (fileDetail != null) {
+            fileName = fileDetail.getContentDisposition().getFilename();
         }
-        String filename = fileDetail.getContentDisposition().getFilename();
         OpenAPIDefinitionValidationResponseDTO validationResponseDTO =
                 ApisApiCommonImpl.validateOpenAPIDefinition(returnContent, url, fileInputStream, inlineApiDefinition,
-                        filename);
+                        fileName);
         return Response.ok().entity(validationResponseDTO).build();
     }
 
@@ -1333,15 +1336,13 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-        if (fileDetail == null || fileDetail.getContentDisposition() == null ||
-                fileDetail.getContentDisposition().getFilename() == null) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE,
-                    FILE_DETAILS_MISSING));
+        String fileName = null;
+        if (fileDetail != null ) {
+            fileName = fileDetail.getContentDisposition().getFilename();
         }
-        String filename = fileDetail.getContentDisposition().getFilename();
 
         APIDTO createdApiDTO = ApisApiCommonImpl.importOpenAPIDefinition(fileInputStream, url, additionalProperties,
-                inlineApiDefinition, organization, filename);
+                inlineApiDefinition, organization, fileName);
         try {
             // This URI used to set the location header of the POST response
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -1367,15 +1368,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response validateWSDLDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
                                            MessageContext messageContext) throws APIManagementException {
 
-        if (fileDetail == null || fileDetail.getContentDisposition() == null ||
-                fileDetail.getContentDisposition().getFilename() == null) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE,
-                    FILE_DETAILS_MISSING));
+        String fileName = null;
+        if (fileDetail != null ) {
+            fileName = fileDetail.getContentDisposition().getFilename();
         }
-
-        String filename = fileDetail.getContentDisposition().getFilename();
         WSDLValidationResponseDTO validationResponseDTO = ApisApiCommonImpl.validateWSDLDefinition(url, fileInputStream,
-                filename);
+                fileName);
         return Response.ok().entity(validationResponseDTO).build();
     }
 
@@ -1397,13 +1395,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             throws APIManagementException {
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        if (fileDetail == null || fileDetail.getContentDisposition() == null ||
-                fileDetail.getContentDisposition().getFilename() == null) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE,
-                    FILE_DETAILS_MISSING));
+
+        String fileName = null;
+        String fileContentType = null;
+        if (fileDetail != null) {
+            fileContentType = fileDetail.getContentType().toString();
+            fileName = fileDetail.getContentDisposition().getFilename();
         }
-        String fileName = fileDetail.getContentDisposition().getFilename();
-        String fileContentType = fileDetail.getContentType().toString();
 
         APIDTO createdApiDTO = ApisApiCommonImpl.importWSDLDefinition(fileInputStream, fileName, fileContentType,
                 url, additionalProperties, implementationType, organization);
@@ -1455,13 +1453,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         //validate API update operation permitted based on the LC state
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-        if (fileDetail == null || fileDetail.getContentDisposition() == null ||
-                fileDetail.getContentDisposition().getFilename() == null) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE,
-                    FILE_DETAILS_MISSING));
+        String fileName = null;
+        String contentType = null;
+        if (fileDetail != null) {
+            fileName = fileDetail.getContentDisposition().getFilename();
+            contentType = fileDetail.getContentType().toString();
         }
-        String fileName = fileDetail.getContentDisposition().getFilename();
-        String contentType = fileDetail.getContentType().toString();
 
         ApisApiCommonImpl.updateWSDLOfAPI(apiId, fileInputStream, fileName, contentType, url, organization);
         return Response.ok().build();
@@ -1585,7 +1582,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response importAPI(InputStream fileInputStream, Attachment fileDetail,
-                              Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite, MessageContext messageContext) throws APIManagementException {
+                              Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite,
+                              MessageContext messageContext) throws APIManagementException {
         // Check whether to update. If not specified, default value is false.
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
@@ -1638,35 +1636,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         List<Tier> apiThrottlingPolicies = ApisApiCommonImpl.getAPISubscriptionPolicies(apiId, organization);
         return Response.ok().entity(apiThrottlingPolicies).build();
-    }
-
-    /**
-     * Validate API import definition/validate definition parameters
-     *
-     * @param fileInputStream file content stream
-     * @param url             URL of the definition
-     * @param apiDefinition   Swagger API definition String
-     */
-    private void handleInvalidParams(InputStream fileInputStream, Attachment fileDetail, String url,
-                                     String apiDefinition, Boolean isServiceAPI) {
-
-        String msg = "";
-        boolean isFileSpecified = (fileInputStream != null && fileDetail != null &&
-                fileDetail.getContentDisposition() != null && fileDetail.getContentDisposition().getFilename() != null)
-                || (fileInputStream != null && isServiceAPI);
-        if (url == null && !isFileSpecified && apiDefinition == null) {
-            msg = "One out of 'file' or 'url' or 'inline definition' should be specified";
-        }
-
-        boolean isMultipleSpecificationGiven = (isFileSpecified && url != null) || (isFileSpecified &&
-                apiDefinition != null) || (apiDefinition != null && url != null);
-        if (isMultipleSpecificationGiven) {
-            msg = "Only one of 'file', 'url', and 'inline definition' should be specified";
-        }
-
-        if (StringUtils.isNotBlank(msg)) {
-            RestApiUtil.handleBadRequest(msg, log);
-        }
     }
 
     /**
@@ -1853,12 +1822,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                   Attachment fileDetail, MessageContext messageContext)
             throws APIManagementException {
 
-        if (fileDetail == null || fileDetail.getContentDisposition() == null ||
-                fileDetail.getContentDisposition().getFilename() == null) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE,
-                    FILE_DETAILS_MISSING));
+        String fileName = null;
+        if (fileDetail != null) {
+            fileName = fileDetail.getContentDisposition().getFilename();
         }
-        String fileName = fileDetail.getContentDisposition().getFilename();
         AsyncAPISpecificationValidationResponseDTO validationResponseDTO =
                 ApisApiCommonImpl.validateAsyncAPISpecification(returnContent, url, fileInputStream, fileName);
         return Response.ok().entity(validationResponseDTO).build();
@@ -1881,12 +1848,10 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-        if (fileDetail == null || fileDetail.getContentDisposition() == null ||
-                fileDetail.getContentDisposition().getFilename() == null) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE,
-                    FILE_DETAILS_MISSING));
+        String fileName = null;
+        if (fileDetail != null) {
+            fileName = fileDetail.getContentDisposition().getFilename();
         }
-        String fileName = fileDetail.getContentDisposition().getFilename();
 
         APIDTO createdAPIDTO = ApisApiCommonImpl.importAsyncAPISpecification(fileInputStream, url, additionalProperties,
                 organization, fileName);
@@ -1922,12 +1887,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIInfo apiInfo = RestApiCommonUtil.validateAPIExistence(apiId);
         //validate API update operation permitted based on the LC state
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
-        if (fileDetail == null || fileDetail.getContentDisposition() == null ||
-                fileDetail.getContentDisposition().getFilename() == null) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE,
-                    FILE_DETAILS_MISSING));
+        String fileName = null;
+        if (fileDetail != null) {
+            fileName = fileDetail.getContentDisposition().getFilename();
         }
-        String fileName = fileDetail.getContentDisposition().getFilename();
 
         String updatedAsyncAPIDefinition = ApisApiCommonImpl.updateAsyncAPIDefinition(apiId, apiDefinition, url,
                 fileInputStream, organization, fileName);
