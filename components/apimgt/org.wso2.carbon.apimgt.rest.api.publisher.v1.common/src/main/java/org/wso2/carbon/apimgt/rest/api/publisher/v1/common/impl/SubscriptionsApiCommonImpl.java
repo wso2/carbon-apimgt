@@ -74,7 +74,8 @@ public class SubscriptionsApiCommonImpl {
      * @return Updated Subscribed API
      * @throws APIManagementException if an error occurred in status update
      */
-    public static SubscribedAPI changeBlockStatus(String subscriptionId, String blockState) throws APIManagementException {
+    public static SubscribedAPI changeBlockStatus(String subscriptionId, String blockState)
+            throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         // validates the subscriptionId if it exists

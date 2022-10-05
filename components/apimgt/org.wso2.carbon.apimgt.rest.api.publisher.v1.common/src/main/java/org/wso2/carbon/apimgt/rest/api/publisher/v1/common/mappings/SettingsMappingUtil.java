@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityAuditAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -45,8 +44,9 @@ public class SettingsMappingUtil {
      * This method feeds data into the settingsDTO.
      *
      * @param isUserAvailable check if user is logged in
+     * @param organization Organization
      * @return SettingsDTO
-     * @throws APIManagementException,IOException
+     * @throws APIManagementException
      */
     public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable, String organization) throws APIManagementException {
 
