@@ -79,3 +79,14 @@
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/GoogleAnalyticsConfigDeployer.java @AnuGayan
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/analytics/  @AnuGayan
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/DataPublisherUtil.java  @AnuGayan
+
+# Area : Websockets
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/streaming/websocket/ @Arshardh @arunans23 @SajinieKavindya @senthuran16
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/WebsocketHandler.java @Arshardh @arunans23 @SajinieKavindya @senthuran16
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/WebsocketInboundHandler.java  @Arshardh @arunans23 @SajinieKavindya @senthuran16
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/WebsocketOutboundHandler.java @Arshardh @arunans23 @SajinieKavindya @senthuran16
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/WebsocketUtil.java  @Arshardh @arunans23 @SajinieKavindya @senthuran16
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/WebsocketWSClient.java  @Arshardh @arunans23 @SajinieKavindya @senthuran16
+/components/apimgt/org.wso2.carbon.apimgt.api/src/main/java/org/wso2/carbon/apimgt/api/model/WebSocketTopicMappingConfiguration.java  @Arshardh @arunans23 @SajinieKavindya @senthuran16
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/inbound/ @Arshardh @arunans23 @SajinieKavindya @senthuran16 @dushaniw
+
