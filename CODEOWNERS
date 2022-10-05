@@ -7,3 +7,46 @@
 /components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1.common/ @hisanhunais @Krishanx92
 /components/apimgt/org.wso2.carbon.apimgt.rest.api.util/  @hisanhunais @Krishanx92
 /components/apimgt/org.wso2.carbon.apimgt.rest.api.common/  @hisanhunais @Krishanx92
+
+# Area : DCR (Dynamic Client Registration)
+/components/apimgt/org.wso2.carbon.apimgt.rest.api.dcr/ @HiranyaKavishani @CrowleyRajapakse
+
+# Area : Event Hub
+/components/apimgt/org.wso2.carbon.apimgt.eventing.hub/ @tharindu1st @1akshitha
+/components/apimgt/org.wso2.carbon.apimgt.eventing/ @tharindu1st @1akshitha
+/components/apimgt/org.wso2.carbon.apimgt.internal.service/  @tharindu1st @1akshitha
+
+# Area : Key Management, Token Management
+/components/apimgt/org.wso2.carbon.apimgt.tokenmgt/ @tharindu1st @CrowleyRajapakse @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/keymgt/  @tharindu1st @CrowleyRajapakse @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/kmclient/  @tharindu1st @CrowleyRajapakse @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/token/  @tharindu1st @CrowleyRajapakse @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.api/src/main/java/org/wso2/carbon/apimgt/api/model/KeyManager.java  @tharindu1st @CrowleyRajapakse @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.api/src/main/java/org/wso2/carbon/apimgt/api/model/KeyManagerConfiguration.java @tharindu1st @CrowleyRajapakse @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.api/src/main/java/org/wso2/carbon/apimgt/api/model/KeyManagerConnectorConfiguration.java  @tharindu1st @CrowleyRajapakse @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.api/src/main/java/org/wso2/carbon/apimgt/api/dto/KeyManagerConfigurationDTO.java  @tharindu1st @CrowleyRajapakse @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/dto/KeyManagerDto.java @tharindu1st @CrowleyRajapakse @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/factory/KeyManagerHolder.java  @tharindu1st @CrowleyRajapakse @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/AbstractKeyManager.java  @tharindu1st @CrowleyRajapakse @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/DefaultKeyManagerConnectorConfiguration.java @tharindu1st @CrowleyRajapakse @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/AbstractKeyManager.java  @tharindu1st @CrowleyRajapakse @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/AMDefaultKeyManagerImpl.java @tharindu1st @CrowleyRajapakse @chamilaadhi
+
+# Area : OpenAPI Spec, OASParser
+/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/definitions/APIDefinitionFromOpenAPISpec.java @tgtshanika @tharikaGitHub @dushaniw
+/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/definitions/OAS2Parser.java  @tgtshanika @tharikaGitHub @dushaniw
+/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/definitions/OAS3Parser.java  @tgtshanika @tharikaGitHub @dushaniw
+/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/definitions/OASParserUtil.java @tgtshanika @tharikaGitHub @dushaniw
+
+# Area : KeyValidation, JWTValidation, BackendJWT Generation, OAuth mediators, OPA mediator, Endpoint Certificate Deployer
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/jwt/   @tharindu1st @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/security/ @tharindu1st @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/mediators/oauth/ @tharindu1st @chamilaadhi 
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/mediators/DigestAuthMediator.java  @tharindu1st @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/mediators/OneTimeTokenRevocationMediator.java  @tharindu1st @chamilaadhi  
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/opa/ @tharindu1st @chamilaadhi 
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/EndpointCertificateDeployer.java @tharindu1st @chamilaadhi 
+/components/apimgt/org.wso2.carbon.apimgt.keymgt/ @tharindu1st @chamilaadhi
+
+
+
