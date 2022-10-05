@@ -215,6 +215,7 @@ public class ApisApiCommonImpl {
     public static final String ERROR_WHILE_UPDATING_API = "Error while updating API : ";
 
     private ApisApiCommonImpl() {
+
     }
 
     private static final Log log = LogFactory.getLog(ApisApiCommonImpl.class);
@@ -267,7 +268,6 @@ public class ApisApiCommonImpl {
 
     public static APIDTO createAPI(APIDTO body, String oasVersion, String organization) throws APIManagementException {
 
-
         API createdApi = PublisherCommonUtils
                 .addAPIWithGeneratedSwaggerDefinition(body, oasVersion, RestApiCommonUtil.getLoggedInUsername(),
                         organization);
@@ -287,7 +287,7 @@ public class ApisApiCommonImpl {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
         Comment comment = createComment(postRequestBodyDTO.getContent(), postRequestBodyDTO.getCategory(),
-                        replyTo, username, apiId);
+                replyTo, username, apiId);
         String createdCommentId = apiProvider.addComment(apiId, comment, username);
         Comment createdComment = apiProvider.getComment(apiTypeWrapper, createdCommentId, 0, 0);
         return CommentMappingUtil.fromCommentToDTO(createdComment);
@@ -353,7 +353,7 @@ public class ApisApiCommonImpl {
     }
 
     public static CommentListDTO getRepliesOfComment(String commentId, String apiId, Integer limit, Integer offset,
-                                               Boolean includeCommenterInfo, String requestedTenantDomain)
+                                                     Boolean includeCommenterInfo, String requestedTenantDomain)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -393,6 +393,7 @@ public class ApisApiCommonImpl {
 
     public static JSONObject deleteComment(String commentId, String apiId, String[] tokenScopes)
             throws APIManagementException {
+
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String username = RestApiCommonUtil.getLoggedInUsername();
 
@@ -491,6 +492,7 @@ public class ApisApiCommonImpl {
      * @return URITemplate
      */
     public static URITemplate createUriTemplate(String name, String verb) {
+
         URITemplate uriTemplate = new URITemplate();
         uriTemplate.setUriTemplate(name);
         uriTemplate.setHTTPVerb(verb.toUpperCase());
@@ -578,6 +580,7 @@ public class ApisApiCommonImpl {
     }
 
     private static void validateAPIOperationsPerLC(String status, String[] tokenScopes) throws APIManagementException {
+
         boolean updatePermittedForPublishedDeprecated = false;
 
         for (String scope : tokenScopes) {
@@ -614,7 +617,7 @@ public class ApisApiCommonImpl {
      * @param apiId        API ID
      * @param organization Organization
      * @return JSONObject with arns
-     * @throws SdkClientException if AWSLambda SDK throws an error
+     * @throws SdkClientException     if AWSLambda SDK throws an error
      * @throws APIManagementException
      */
     public static JSONObject getAmazonResourceNamesOfAPI(String apiId, String organization)
@@ -706,6 +709,7 @@ public class ApisApiCommonImpl {
      * @return AWS Lambda Client
      */
     private static AWSLambda getARNsWithIAMRole(String roleArn, String roleSessionName, String roleRegion) {
+
         AWSLambda awsLambdaClient;
         if (log.isDebugEnabled()) {
             log.debug("Using temporary credentials supplied by the IAM role attached to AWS " +
@@ -765,6 +769,7 @@ public class ApisApiCommonImpl {
     private static AWSLambda getARNsWithStoredCredentials(String accessKey, String secretKey, String region,
                                                           String roleArn, String roleSessionName, String roleRegion)
             throws CryptoException {
+
         AWSLambda awsLambdaClient;
         if (log.isDebugEnabled()) {
             log.debug("Using user given stored credentials");
@@ -982,6 +987,7 @@ public class ApisApiCommonImpl {
     public static JSONObject getAuditReport(API api, JSONObject securityAuditPropertyObject,
                                             String apiDefinition, String organization)
             throws APIManagementException {
+
         boolean isDebugEnabled = log.isDebugEnabled();
         APIIdentifier apiIdentifier = api.getId();
         String apiToken = (String) securityAuditPropertyObject.get("apiToken");
@@ -1118,6 +1124,7 @@ public class ApisApiCommonImpl {
                                          String apiDefinition, String baseUrl, boolean isDebugEnabled,
                                          String organization)
             throws APIManagementException {
+
         HttpURLConnection httpConn;
         OutputStream outputStream;
         String auditUuid = null;
@@ -1172,6 +1179,7 @@ public class ApisApiCommonImpl {
      */
     private static void writeAuditResponse(OutputStream outputStream, APIIdentifier apiIdentifier,
                                            String apiDefinition, String collectionId) {
+
         PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8), true);
         // Name property
         writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY).append(APIConstants.MULTIPART_LINE_FEED)
@@ -1200,6 +1208,7 @@ public class ApisApiCommonImpl {
 
     private static void handleAuditCreateError(HttpURLConnection httpConn)
             throws IOException, ParseException, APIManagementException {
+
         if (httpConn.getErrorStream() != null) {
             BufferedReader reader =
                     new BufferedReader(new InputStreamReader(httpConn.getErrorStream(), StandardCharsets.UTF_8));
@@ -1234,6 +1243,7 @@ public class ApisApiCommonImpl {
      * @throws APIManagementException when prerequisites for API delete are not met
      */
     public static void deleteAPI(String apiId, String organization) throws APIManagementException {
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         //check if the API has subscriptions
         List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiId, organization);
@@ -1424,7 +1434,7 @@ public class ApisApiCommonImpl {
     /**
      * Retrieves API Lifecycle state information
      *
-     * @param apiId API Id
+     * @param apiId        API Id
      * @param organization organization
      * @return API Lifecycle state information
      */
@@ -1503,7 +1513,7 @@ public class ApisApiCommonImpl {
     /**
      * update swagger definition of the given api. The swagger will be validated before updating.
      *
-     * @param apiId API Id
+     * @param apiId         API Id
      * @param apiDefinition swagger definition
      * @param organization  Organization Identifier
      * @return updated swagger definition
@@ -1601,9 +1611,9 @@ public class ApisApiCommonImpl {
     }
 
     public static OpenAPIDefinitionValidationResponseDTO validateOpenAPIDefinition(Boolean returnContent, String url,
-                                                                             InputStream fileInputStream,
-                                                                             String inlineApiDefinition,
-                                                                             String filename)
+                                                                                   InputStream fileInputStream,
+                                                                                   String inlineApiDefinition,
+                                                                                   String filename)
             throws APIManagementException {
         // Validate and retrieve the OpenAPI definition
         Map<String, Object> validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, filename,
@@ -1629,11 +1639,10 @@ public class ApisApiCommonImpl {
     }
 
     public static Map<String, Object> validateOpenAPIDefinition(String url, InputStream inputStream, String fileName,
-                                                          String apiDefinition, Boolean returnContent,
-                                                          Boolean isServiceAPI) throws APIManagementException {
+                                                                String apiDefinition, Boolean returnContent,
+                                                                Boolean isServiceAPI) throws APIManagementException {
         //validate inputs
         handleInvalidParams(inputStream, fileName, url, apiDefinition, isServiceAPI);
-
 
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         if (url != null) {
@@ -1682,6 +1691,7 @@ public class ApisApiCommonImpl {
                                                                             String apiDefinition, String fileName,
                                                                             boolean returnContent)
             throws APIManagementException {
+
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         if (url != null) {
             validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, returnContent);
@@ -1712,7 +1722,7 @@ public class ApisApiCommonImpl {
 
     public static APIDTO importWSDLDefinition(InputStream fileInputStream, String fileName, String fileContentType,
                                               String url, String additionalProperties, String implementationType,
-                                        String organization) throws APIManagementException {
+                                              String organization) throws APIManagementException {
 
         WSDLValidationResponse validationResponse = validateWSDLAndReset(fileInputStream, fileName, url);
 
@@ -1756,7 +1766,7 @@ public class ApisApiCommonImpl {
         } else {
             throw new APIManagementException(
                     ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE,
-                    "Invalid implementationType parameter"));
+                            "Invalid implementationType parameter"));
         }
         return APIMappingUtil.fromAPItoDTO(createdApi);
     }
@@ -1772,7 +1782,7 @@ public class ApisApiCommonImpl {
         if (StringUtils.isNotBlank(url)) {
             apiToAdd.setWsdlUrl(url);
             apiProvider.addWSDLResource(apiToAdd.getUuid(), null, url, organization);
-        } else if (fileContentType!= null && fileInputStream != null) {
+        } else if (fileContentType != null && fileInputStream != null) {
             PublisherCommonUtils
                     .addWsdl(fileContentType, fileInputStream, apiToAdd, apiProvider,
                             organization);
@@ -1796,18 +1806,19 @@ public class ApisApiCommonImpl {
     /**
      * Import an API from WSDL as a SOAP-to-REST API
      *
-     * @param fileInputStream file data as input stream
+     * @param fileInputStream          file data as input stream
      * @param fileName                 File name
-     * @param url URL of the WSDL
+     * @param url                      URL of the WSDL
      * @param wsdlArchiveExtractedPath Extraction path
-     * @param apiToAdd API object to be added to the system (which is not added yet)
-     * @param organization  Organization Identifier
+     * @param apiToAdd                 API object to be added to the system (which is not added yet)
+     * @param organization             Organization Identifier
      * @return API added api
      * @throws APIManagementException
      */
     private static API importSOAPToRESTAPI(InputStream fileInputStream, String fileName, String url,
-                                    String wsdlArchiveExtractedPath, API apiToAdd, String organization)
+                                           String wsdlArchiveExtractedPath, API apiToAdd, String organization)
             throws APIManagementException {
+
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //adding the api
@@ -1831,15 +1842,16 @@ public class ApisApiCommonImpl {
      *
      * @param fileInputStream file input stream
      * @param fileName        File name
-     * @param url WSDL url
+     * @param url             WSDL url
+     * @return WSDL validation response
      * @throws APIManagementException when error occurred during the operation
-     * @return
      */
     private static WSDLValidationResponse validateWSDLAndReset(InputStream fileInputStream, String fileName, String url)
             throws APIManagementException {
+
         Map<String, Object> validationResponseMap = validateWSDL(url, fileInputStream, fileName, false);
         WSDLValidationResponse validationResponse =
-                (WSDLValidationResponse)validationResponseMap.get(RestApiConstants.RETURN_MODEL);
+                (WSDLValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
 
         if (validationResponse.getWsdlInfo() == null) {
             // Validation failure
@@ -1887,11 +1899,10 @@ public class ApisApiCommonImpl {
     }
 
     private static APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, String inlineDefinition,
-                                           APIDTO apiDTOFromProperties, String fileName, ServiceEntry service,
-                                           String organization) throws APIManagementException {
+                                                  APIDTO apiDTOFromProperties, String fileName, ServiceEntry service,
+                                                  String organization) throws APIManagementException {
         // Validate and retrieve the OpenAPI definition
         boolean isServiceAPI = service != null;
-
 
         Map<String, Object> validationResponseMap = validateOpenAPIDefinition(definitionUrl, definition, fileName,
                 inlineDefinition, true, isServiceAPI);
@@ -1997,8 +2008,8 @@ public class ApisApiCommonImpl {
         // validate 'additionalProperties' json
         if (StringUtils.isBlank(additionalProperties)) {
             String errorMessage = "'additionalProperties' is required and should not be null";
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE,
-                    errorMessage));
+            throw new APIManagementException(
+                    ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE, errorMessage));
         }
 
         // Convert the 'additionalProperties' json into an APIDTO object
@@ -2078,20 +2089,20 @@ public class ApisApiCommonImpl {
         //validate and retrieve the AsyncAPI specification
         Map<String, Object> validationResponseMap = validateAsyncAPISpecification(url, fileInputStream, fileName,
                 returnContent, false);
-        return (AsyncAPISpecificationValidationResponseDTO)validationResponseMap.get(RestApiConstants.RETURN_DTO);
+        return (AsyncAPISpecificationValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
     }
 
     /**
      * Validate the provided AsyncAPI specification (via file or url) and return a Map with the validation response
      * information
      *
-     * @param url AsyncAPI specification url
+     * @param url             AsyncAPI specification url
      * @param fileInputStream file as input stream
-     * @param returnContent whether to return the content of the definition in the response DTO
-     * @param isServiceAPI whether the request is to create API from a service in Service Catalog
+     * @param returnContent   whether to return the content of the definition in the response DTO
+     * @param isServiceAPI    whether the request is to create API from a service in Service Catalog
      * @return Map with the validation response information. A value with key 'dto' will have the response DTO
-     *  of type AsyncAPISpecificationValidationResponseDTO for the REST API. A value with the key 'model' will have the
-     *  validation response of type APIDefinitionValidationResponse coming from the impl level
+     * of type AsyncAPISpecificationValidationResponseDTO for the REST API. A value with the key 'model' will have the
+     * validation response of type APIDefinitionValidationResponse coming from the impl level
      */
     private static Map<String, Object> validateAsyncAPISpecification(String url, InputStream fileInputStream,
                                                                      String fileName, Boolean returnContent,
@@ -2180,7 +2191,7 @@ public class ApisApiCommonImpl {
     }
 
     public static void importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
-                           Boolean overwrite, String organization, String[] tokenScopes)
+                                 Boolean overwrite, String organization, String[] tokenScopes)
             throws APIManagementException {
 
         overwrite = overwrite != null && overwrite;
@@ -2279,7 +2290,7 @@ public class ApisApiCommonImpl {
     }
 
     public static List<APIRevisionDeploymentDTO> deployAPIRevision(String apiId, String revisionId,
-                                                                   List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
+                                                                   List<APIRevisionDeploymentDTO> revisionDeployments,
                                                                    String organization) throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -2293,7 +2304,7 @@ public class ApisApiCommonImpl {
 
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
-        for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
+        for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : revisionDeployments) {
             String environment = apiRevisionDeploymentDTO.getName();
             Boolean displayOnDevportal = apiRevisionDeploymentDTO.isDisplayOnDevportal();
             String vhost = apiRevisionDeploymentDTO.getVhost();
@@ -2325,7 +2336,8 @@ public class ApisApiCommonImpl {
     public static List<APIRevisionDeploymentDTO> undeployAPIRevision(String apiId, String revisionId,
                                                                      String revisionNum, Boolean allEnvironments,
                                                                      List<APIRevisionDeploymentDTO> revisionDeployments,
-                                                               String organization) throws APIManagementException {
+                                                                     String organization)
+            throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
@@ -2572,6 +2584,7 @@ public class ApisApiCommonImpl {
                                           ServiceEntry service, APIDefinitionValidationResponse validationResponse,
                                           boolean isServiceAPI, boolean syncOperations)
             throws APIManagementException {
+
         String username = RestApiCommonUtil.getLoggedInUsername();
         if (isServiceAPI) {
             apiToAdd.setServiceInfo("key", service.getServiceKey());
@@ -2970,8 +2983,9 @@ public class ApisApiCommonImpl {
      * @throws APIManagementException when a monetization related error occurs
      */
     private static boolean addAPIMonetization(String apiId, String organization,
-                                             boolean monetizationEnabled, Map<String, String> monetizationProperties)
+                                              boolean monetizationEnabled, Map<String, String> monetizationProperties)
             throws APIManagementException {
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API api = apiProvider.getAPIbyUUID(apiId, organization);
         if (!APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus())) {
@@ -3065,6 +3079,7 @@ public class ApisApiCommonImpl {
                                                                        OperationPolicyData operationPolicyData,
                                                                        String apiId, String organization)
             throws APIManagementException {
+
         String policyId;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         OperationPolicyData existingPolicy =
@@ -3246,8 +3261,6 @@ public class ApisApiCommonImpl {
         return APIMappingUtil.fromResourcePolicyStrToInfoDTO(policyContent);
     }
 
-
-
     /**
      * @param apiId            API UUID
      * @param organization     Tenant organization
@@ -3298,6 +3311,7 @@ public class ApisApiCommonImpl {
      * @throws APIManagementException when validating API existence fails
      */
     public static void validateAPI(String query, String organization) throws APIManagementException {
+
         if (StringUtils.isEmpty(query)) {
             throw new APIManagementException("The query should not be empty", ExceptionCodes.PARAMETER_NOT_PROVIDED);
         }
@@ -3323,7 +3337,7 @@ public class ApisApiCommonImpl {
                             apiProvider.isApiNameWithDifferentCaseExist(query, organization);
 
         }
-        if(!isSearchArtifactExists){
+        if (!isSearchArtifactExists) {
             throw new APIManagementException(ExceptionCodes.RESOURCE_NOT_FOUND);
         }
     }
@@ -3372,14 +3386,16 @@ public class ApisApiCommonImpl {
     }
 
     public static void validateEnvironment(String organization, String envId) throws APIManagementException {
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         // if apiProvider.getEnvironment(organization, envId) return null, it will throw an exception
         apiProvider.getEnvironment(organization, envId);
     }
 
     private static Map<String, Object> validateWSDL(String url, InputStream fileInputStream, String fileName,
-                                                   Boolean isServiceAPI)
+                                                    Boolean isServiceAPI)
             throws APIManagementException {
+
         handleInvalidParams(fileInputStream, fileName, url, null, isServiceAPI);
         WSDLValidationResponseDTO responseDTO;
         WSDLValidationResponse validationResponse = new WSDLValidationResponse();
@@ -3428,7 +3444,7 @@ public class ApisApiCommonImpl {
     }
 
     private static void handleInvalidParams(InputStream fileInputStream, String fileName, String url,
-                                     String apiDefinition, Boolean isServiceAPI) throws APIManagementException {
+                                            String apiDefinition, Boolean isServiceAPI) throws APIManagementException {
 
         String msg = "";
         boolean isFileSpecified = (fileInputStream != null && fileName != null)
@@ -3444,7 +3460,8 @@ public class ApisApiCommonImpl {
         }
 
         if (StringUtils.isNotBlank(msg)) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, msg));
+            throw new APIManagementException(
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, msg));
         }
     }
 
@@ -3496,6 +3513,7 @@ public class ApisApiCommonImpl {
     }
 
     private static APIDTO createAPIDTO(API existingAPI, String newVersion) {
+
         APIDTO apidto = new APIDTO();
         apidto.setName(existingAPI.getId().getApiName());
         apidto.setContext(existingAPI.getContextTemplate());
@@ -3504,6 +3522,7 @@ public class ApisApiCommonImpl {
     }
 
     private static String getSOAPOperation() {
+
         return "{\"/*\":{\"post\":{\"parameters\":[{\"schema\":{\"type\":\"string\"},\"description\":\"SOAP request.\","
                 + "\"name\":\"SOAP Request\",\"required\":true,\"in\":\"body\"},"
                 + "{\"description\":\"SOAPAction header for soap 1.1\",\"name\":\"SOAPAction\",\"type\":\"string\","
