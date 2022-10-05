@@ -47,6 +47,28 @@
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/opa/ @tharindu1st @chamilaadhi 
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/EndpointCertificateDeployer.java @tharindu1st @chamilaadhi 
 /components/apimgt/org.wso2.carbon.apimgt.keymgt/ @tharindu1st @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.common.gateway/src/main/java/org/wso2/carbon/apimgt/common/gateway/jwtgenerator @tharindu1st @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.common.gateway/src/main/java/org/wso2/carbon/apimgt/common/gateway/jwttransformer @tharindu1st @chamilaadhi
 
+# Area : Traffic Management
+/components/apimgt/org.wso2.carbon.apimgt.throttle.policy.deployer/ @tharindu1st
+/components/apimgt/org.wso2.carbon.apimgt.throttling.siddhi.extension/  @tharindu1st
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/throttling/ @tharindu1st
 
+# Area : Solace
+/components/apimgt/org.wso2.carbon.apimgt.solace/ @tharindu1st @sanjeewa-malalgoda @RakhithaRR
 
+# Area : Gateway Runtime
+/components/apimgt/org.wso2.carbon.apimgt.gateway/  @tharindu1st @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.common.gateway/ @tharindu1st @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.rest.api.gateway/ @tharindu1st @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.notification/ @tharindu1st @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.common.jms/   @tharindu1st @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.jms.listener/   @tharindu1st @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.common.jms/   @tharindu1st @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.broker.lifecycle/ @tharindu1st @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.cache.invalidation/ @tharindu1st @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.common.gateway/ @tharindu1st @chamilaadhi
+
+# Area : DevOps REST API
+/components/apimgt/org.wso2.carbon.apimgt.rest.api.devops/ @binodmx
