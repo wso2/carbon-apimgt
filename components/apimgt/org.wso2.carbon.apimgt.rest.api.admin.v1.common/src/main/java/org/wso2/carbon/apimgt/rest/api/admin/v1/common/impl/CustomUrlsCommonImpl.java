@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomUrlInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomUrlInfoDevPortalDTO;
-import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
 
 import java.util.Map;
 
@@ -59,7 +59,7 @@ public class CustomUrlsCommonImpl {
             customUrlInfoDTO.setEnabled(perTenantServiceProviderEnabled);
             customUrlInfoDTO.setTenantDomain(tenantDomain);
             return customUrlInfoDTO;
-        } catch (UserStoreException | APIManagementException e) {
+        } catch (UserException | APIManagementException e) {
             throw new APIManagementException("Error while retrieving custom url info for tenant : " + tenantDomain, e,
                     ExceptionCodes.from(ExceptionCodes.ERROR_GETTING_CUSTOM_URLS, tenantDomain));
         }

@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TenantDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TenantListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +80,7 @@ public class TenantsServiceImpl {
             paginationDTO.setTotal(tenantDTOList.size());
             tenantList.setPagination(paginationDTO);
             return tenantList;
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             RestApiUtil.handleInternalServerError("Error while getting active tenant domains", e, log);
         }
         return null;

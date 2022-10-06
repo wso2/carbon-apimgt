@@ -25,7 +25,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TenantDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TenantListDTO;
-import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +57,7 @@ public class TenantsApiServiceCommonImpl {
         boolean isTenantExist;
         try {
             isTenantExist = APIUtil.isTenantAvailable(tenantDomain);
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             throw new APIManagementException("Error while getting checking if tenant exists", e,
                     ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE,
                             "Error while getting checking if tenant exists"));
@@ -85,7 +85,7 @@ public class TenantsApiServiceCommonImpl {
         Set<String> tenantDomains;
         try {
             tenantDomains = APIUtil.getTenantDomainsByState(state);
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             throw new APIManagementException("Error while getting active tenant domains", e,
                     ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE,
                             "Error while getting active tenant domains"));

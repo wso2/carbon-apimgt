@@ -120,10 +120,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWs
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoEndpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -395,8 +396,7 @@ public class APIMappingUtil {
             JSONObject serviceInfoJson;
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             try {
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                        getTenantId(tenantDomain);
+                int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
                 serviceInfoJson = (JSONObject) parser.parse(mapper.writeValueAsString(serviceInfoDTO));
 
                 ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
@@ -414,7 +414,7 @@ public class APIMappingUtil {
             } catch (JsonProcessingException | ParseException e) {
                 String msg = "Error while getting json representation of APIServiceInfo";
                 handleExceptionWithCode(msg, e, ExceptionCodes.JSON_PARSE_ERROR);
-            } catch (UserStoreException e) {
+            } catch (UserException e) {
                 String msg = "Error while getting tenantId from the given tenant domain " + tenantDomain;
                 handleExceptionWithCode(msg, e, ExceptionCodes.INTERNAL_ERROR);
             }

@@ -30,20 +30,19 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.apimgt.api.OAuthTokenInfo;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -126,7 +125,6 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 String tenantDomain = MultitenantUtils.getTenantDomain(tokenInfo.getEndUserName());
                 int tenantId;
                 PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                RealmService realmService = (RealmService) carbonContext.getOSGiService(RealmService.class, null);
                 try {
                     String username = tokenInfo.getEndUserName();
                     if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -142,7 +140,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     if (log.isDebugEnabled()) {
                         log.debug("username = " + username);
                     }
-                    tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
+                    tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
                     carbonContext.setTenantDomain(tenantDomain);
                     carbonContext.setTenantId(tenantId);
                     carbonContext.setUsername(username);
@@ -152,7 +150,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                         APIUtil.loadTenantConfigBlockingMode(tenantDomain);
                     }
                     return true;
-                } catch (UserStoreException e) {
+                } catch (UserException e) {
                     log.error("Error while retrieving tenant id for tenant domain: " + tenantDomain, e);
                 }
             } else {
