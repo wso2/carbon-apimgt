@@ -23,10 +23,10 @@ import java.util.TreeMap;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.user.api.UserStoreException;
 
 public class OnPremResolver implements OrganizationResolver {
     public static final String HEADER_X_WSO2_TENANT = "x-wso2-tenant";
@@ -53,7 +53,7 @@ public class OnPremResolver implements OrganizationResolver {
                     throw new APIMgtBadRequestException(errorMessage);
 
                 }
-            } catch (UserStoreException e) {
+            } catch (UserException e) {
                 String errorMessage = "Error while checking availability of tenant " + tenantDomain;
                 throw new APIMgtInternalException(errorMessage);
             }
@@ -72,9 +72,8 @@ public class OnPremResolver implements OrganizationResolver {
     public int getInternalId(String organization) throws APIManagementException {
         int tenantId;
         try {
-            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(organization);
-        } catch (UserStoreException e) {
+            tenantId = UserManagerHolder.getUserManager().getTenantId(organization);
+        } catch (UserException e) {
             throw new APIManagementException("Error while accessing tenant manager ", e,
                     ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         }

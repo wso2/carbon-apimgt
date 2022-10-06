@@ -19,12 +19,13 @@
 package org.wso2.carbon.apimgt.impl.handlers;
 
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.core.bean.context.MessageContext;
@@ -37,9 +38,6 @@ import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.recovery.IdentityRecoveryConstants;
 import org.wso2.carbon.identity.recovery.IdentityRecoveryServerException;
 import org.wso2.carbon.identity.recovery.util.Utils;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
-import org.wso2.carbon.user.core.service.RealmService;
 
 import java.util.List;
 
@@ -87,25 +85,15 @@ public class UserPostSelfRegistrationHandler extends AbstractEventHandler {
     private void executeUserRegistrationWorkflow(String tenantDomain, String userName)
             throws org.wso2.carbon.identity.recovery.IdentityRecoveryServerException {
         try {
-            //Realm service is used for user management tasks
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-            UserStoreManager userStoreManager;
-            try {
-                userStoreManager = realmService.getTenantUserRealm(IdentityTenantUtil.getTenantId(tenantDomain))
-                        .getUserStoreManager();
-            } catch (UserStoreException e) {
-                throw Utils
-                        .handleServerException(IdentityRecoveryConstants.ErrorMessages.ERROR_CODE_UNEXPECTED, userName,
-                                e);
-            }
             //Start a tenant flow
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
             carbonContext.setTenantId(IdentityTenantUtil.getTenantId(tenantDomain));
             carbonContext.setTenantDomain(tenantDomain);
 
-            if (userStoreManager.isExistingUser(userName)) {
-                List<String> roleList = asList(userStoreManager.getRoleListOfUser(userName));
+            if (UserManagerHolder.getUserManager().isExistingUser(IdentityTenantUtil.getTenantId(tenantDomain),
+                    userName)) {
+                List<String> roleList = asList(UserManagerHolder.getUserManager().getRoleListOfUser(IdentityTenantUtil.getTenantId(tenantDomain), userName));
                 //User should have selfSignup role. Checking whether the user is in the new role
                 if (roleList.contains(SELF_SIGNUP_ROLE) && !roleList.contains(SUBSCRIBER_ROLE)) {
                     WorkflowExecutor userSignUpWFExecutor = WorkflowExecutorFactory.getInstance()
@@ -125,7 +113,7 @@ public class UserPostSelfRegistrationHandler extends AbstractEventHandler {
 
                 }
             }
-        } catch (UserStoreException | WorkflowException e) {
+        } catch (UserException | WorkflowException e) {
             throw Utils
                     .handleServerException(IdentityRecoveryConstants.ErrorMessages.ERROR_CODE_UNEXPECTED, userName, e);
         } finally {

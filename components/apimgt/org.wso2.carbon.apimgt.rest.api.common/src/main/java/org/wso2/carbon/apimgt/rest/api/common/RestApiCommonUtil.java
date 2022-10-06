@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.restapi.Constants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -399,12 +400,12 @@ public class RestApiCommonUtil {
 
     public static String getLoggedInUsername() {
 
-        return CarbonContext.getThreadLocalCarbonContext().getUsername();
+        return UserContext.getThreadLocalUserContext().getUsername();
     }
 
     public static String getLoggedInUserTenantDomain() {
 
-        return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        return UserContext.getThreadLocalUserContext().getOrganization();
     }
 
     /**
@@ -415,7 +416,6 @@ public class RestApiCommonUtil {
      * @return date string in RFC3339 format.
      */
     public static String getRFC3339Date(Date date) {
-
         DateTimeFormatter jodaDateTimeFormatter = ISODateTimeFormat.dateTime();
         DateTime dateTime = new DateTime(date);
         return jodaDateTimeFormatter.print(dateTime);

@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
 
 import java.util.Base64;
 
@@ -58,7 +58,7 @@ public class MeApiCommonImpl {
             if (!isUserInRole) {
                 throw new APIManagementException(ExceptionCodes.ROLE_DOES_NOT_EXIST);
             }
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             throw new APIManagementException("Error while validating user role", e,
                     ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
         }

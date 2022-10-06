@@ -22,6 +22,8 @@ import javax.cache.Cache;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.registry.api.GhostResource;
@@ -33,7 +35,6 @@ import org.wso2.carbon.registry.core.config.Mount;
 import org.wso2.carbon.registry.core.config.RemoteConfiguration;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
-import org.wso2.carbon.user.api.UserStoreException;
 
 /**
  * This service contains the methods to invalidate registry cache for a given resource
@@ -52,8 +53,7 @@ public class RegistryCacheInvalidationService extends AbstractAdmin {
         Registry registry;
         boolean isTenantFlowStarted = false;
         try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                                                                                            .getTenantId(tenantDomain);            
+            int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);            
             isTenantFlowStarted = true;
@@ -97,7 +97,7 @@ public class RegistryCacheInvalidationService extends AbstractAdmin {
         } catch (RegistryException e) {
             APIUtil.handleException("Error in accessing governance registry while invalidating cache for " 
                                                     + path + "in tenant " + tenantDomain, e);
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             APIUtil.handleException("Error in retrieving Tenant Information while invalidating cache for " 
                                                     + path + "in tenant " + tenantDomain, e);
         } finally {

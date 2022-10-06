@@ -55,8 +55,9 @@ import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
@@ -134,8 +135,7 @@ public class WSO2APIPublisher implements APIPublisher {
             // Get tenant domain and ID to generate the original DevPortal URL (redirect URL) for the original Store
             tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(
                     api.getId().getProviderName()));
-            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
+            tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
 
             //Export API as an archive file and set it as a multipart entity in the request
             ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
@@ -157,7 +157,7 @@ public class WSO2APIPublisher implements APIPublisher {
             String errorMessage = "Error while exporting API: " + api.getId().getApiName() + " version: "
                     + api.getId().getVersion();
             throw new APIManagementException(errorMessage, e);
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             String errorMessage =
                     "Error while getting tenantId for tenant domain: " + tenantDomain + " when exporting API:" + api
                             .getId().getApiName() + " version: " + api.getId().getVersion();
