@@ -468,9 +468,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void addAPI(API api, int tenantId) throws APIManagementException {
         int apiId = apiMgtDAO.addAPI(api, tenantId, api.getOrganization());
         addLocalScopes(api.getId().getApiName(), api.getUriTemplates(), api.getOrganization());
-        String tenantDomain = MultitenantUtils
-                .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        validateOperationPolicyParameters(api, tenantDomain);
+        String organization = api.getOrganization();
+        validateOperationPolicyParameters(api, organization);
         addURITemplates(apiId, api, tenantId);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
@@ -795,7 +794,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             migrateMediationPoliciesOfAPI(api, tenantDomain, false);
         }
         //Validate Operation Policies
-        validateOperationPolicyParameters(api, tenantDomain);
+        validateOperationPolicyParameters(api, organization);
 
         //get product resource mappings on API before updating the API. Update uri templates on api will remove all
         //product mappings as well.
