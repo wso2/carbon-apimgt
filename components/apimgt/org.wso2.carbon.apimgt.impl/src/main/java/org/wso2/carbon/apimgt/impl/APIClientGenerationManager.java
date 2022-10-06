@@ -27,9 +27,10 @@ import org.openapitools.codegen.ClientOptInput;
 import org.openapitools.codegen.DefaultGenerator;
 import org.openapitools.codegen.config.CodegenConfigurator;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -222,10 +223,10 @@ public class APIClientGenerationManager {
      *
      * @param requestedTenant Tenant domain
      * @return Tenant Id
-     * @throws UserStoreException if an error occurs when getting tenant ID
+     * @throws UserException if an error occurs when getting tenant ID
      */
-    protected int getTenantId(String requestedTenant) throws UserStoreException {
-        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(requestedTenant);
+    protected int getTenantId(String requestedTenant) throws UserException {
+        return UserManagerHolder.getUserManager().getTenantId(requestedTenant);
     }
 
     /**

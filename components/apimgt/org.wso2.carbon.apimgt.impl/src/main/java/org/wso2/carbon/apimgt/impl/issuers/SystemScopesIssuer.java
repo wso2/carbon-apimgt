@@ -29,8 +29,10 @@ import org.apache.commons.logging.LogFactory;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.SystemScopeUtils;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.UserConstants;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.application.common.model.*;
@@ -59,11 +61,6 @@ import org.wso2.carbon.identity.oauth2.validators.OAuth2TokenValidationMessageCo
 import org.wso2.carbon.identity.oauth2.validators.scope.ScopeValidator;
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.idp.mgt.IdentityProviderManager;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
-import org.wso2.carbon.user.core.UserCoreConstants;
-import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.text.ParseException;
@@ -375,18 +372,16 @@ public class SystemScopesIssuer implements ScopeValidator {
             username = authenticatedUser.getUserName();
         }
         String userStoreDomain = authenticatedUser.getUserStoreDomain();
-        RealmService realmService = getRealmService();
         try {
-            int tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
+            int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
             // If tenant Id is not set in the tokenReqContext, deriving it from username.
             if (tenantId == 0 || tenantId == -1) {
                 tenantId = getTenantIdOfUser(username);
             }
-            UserStoreManager userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
             String endUsernameWithDomain = addDomainToName(username, userStoreDomain);
-            userRoles = userStoreManager.getRoleListOfUser(endUsernameWithDomain);
+            userRoles = UserManagerHolder.getUserManager().getRoleListOfUser(tenantId, endUsernameWithDomain);
 
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             //Log and return since we do not want to stop issuing the token in case of scope validation failures.
             log.error("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
         }
@@ -482,8 +477,7 @@ public class SystemScopesIssuer implements ScopeValidator {
      * @return String
      */
     protected String addDomainToName(String username, String domainName) {
-
-        return UserCoreUtil.addDomainToName(username, domainName);
+        return UserManagerHolder.getUserManager().addDomainToName(username, domainName);
     }
 
     /**
@@ -666,7 +660,7 @@ public class SystemScopesIssuer implements ScopeValidator {
                     if (roleMapping.getRemoteRole().equals(receivedRole)) {
                         updatedLocalRole = StringUtils.isEmpty(roleMapping.getLocalRole().getUserStoreId())
                                 ? roleMapping.getLocalRole().getLocalRoleName()
-                                : roleMapping.getLocalRole().getUserStoreId() + UserCoreConstants.DOMAIN_SEPARATOR
+                                : roleMapping.getLocalRole().getUserStoreId() + UserConstants.DOMAIN_SEPARATOR
                                 + roleMapping.getLocalRole().getLocalRoleName();
                         updatedRoleClaimValues.add(updatedLocalRole);
                         continue loop;
@@ -751,16 +745,6 @@ public class SystemScopesIssuer implements ScopeValidator {
             requestedScopes.add(DEFAULT_SCOPE_NAME);
         }
         return requestedScopes;
-    }
-
-
-    /**
-     * Get RealmService
-     *
-     * @return RealmService
-     */
-    protected RealmService getRealmService() {
-        return ServiceReferenceHolder.getInstance().getRealmService();
     }
 
     /**

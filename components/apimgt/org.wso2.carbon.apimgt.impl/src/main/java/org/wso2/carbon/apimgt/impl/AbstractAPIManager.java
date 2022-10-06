@@ -64,10 +64,11 @@ import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.TenantManager;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -488,8 +489,7 @@ public abstract class AbstractAPIManager implements APIManager {
         Subscriber subscriber = new Subscriber(username);
         subscriber.setSubscribedDate(new Date());
         try {
-            int tenantId = getTenantManager()
-                    .getTenantId(getTenantDomain(username));
+            int tenantId = UserManagerHolder.getUserManager().getTenantId(getTenantDomain(username));
                 subscriber.setEmail(StringUtils.EMPTY);
             subscriber.setTenantId(tenantId);
             apiMgtDAO.addSubscriber(subscriber, groupingId);
@@ -498,7 +498,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 // Add a default application once subscriber is added
                 addDefaultApplicationForSubscriber(subscriber);
             }
-        } catch (APIManagementException | UserStoreException e) {
+        } catch (APIManagementException | UserException e) {
             String msg = "Error while adding the subscriber " + subscriber.getName();
             throw new APIManagementException(msg, e);
         }

@@ -29,4 +29,5 @@ public class UserConstants {
 
     public static final String TENANT_STATE_ACTIVE = "ACTIVE";
     public static final String TENANT_STATE_INACTIVE = "INACTIVE";
+    public static final String INTERNAL_DOMAIN = "Internal";
 }

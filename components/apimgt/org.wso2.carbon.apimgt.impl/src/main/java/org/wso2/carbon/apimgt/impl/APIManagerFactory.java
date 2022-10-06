@@ -25,7 +25,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManager;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.impl.utils.LRUCache;
-import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.apimgt.user.mgt.UserConstants;
 
 public class APIManagerFactory {
 
@@ -78,7 +78,7 @@ public class APIManagerFactory {
     }
 
     public APIConsumer getAPIConsumer(String username, String organization) throws APIManagementException {
-        String cacheKey = username + UserCoreConstants.TENANT_DOMAIN_COMBINER + organization;
+        String cacheKey = username + UserConstants.TENANT_DOMAIN_COMBINER + organization;
         return getAPIConsumerFromCache(cacheKey, () -> newConsumer(username, organization));
     }
 
