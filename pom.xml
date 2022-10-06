@@ -511,6 +511,11 @@
                 <artifactId>org.wso2.carbon.captcha.mgt</artifactId>
                 <version>${carbon.identity.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
+                <artifactId>org.wso2.carbon.user.mgt</artifactId>
+                <version>${carbon.identity.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.wso2.orbit.com.nimbusds</groupId>

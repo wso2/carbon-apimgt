@@ -68,7 +68,6 @@ import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -118,14 +117,14 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 String tenantDomainName = APIUtil.getInternalOrganizationDomain(organization);
                 String tenantUserName = getTenantAwareUsername(username);
-                int tenantId = getTenantManager().getTenantId(tenantDomainName);
+                int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomainName);
                 this.tenantId = tenantId;
                 this.tenantDomain = tenantDomainName;
                 this.organization = organization;
                 this.username = tenantUserName;
 
             }
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserException e) {
             String msg = "Error while getting user registry for user:" + username;
             throw new APIManagementException(msg, e,
                     ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
@@ -192,12 +191,6 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     public APIInfo getAPIInfoByUUID(String id) throws APIManagementException {
         return apiMgtDAO.getAPIInfoByUUID(id);
-    }
-
-
-    protected TenantManager getTenantManager() {
-
-        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager();
     }
 
     protected void endTenantFlow() {

@@ -21,7 +21,9 @@ package org.wso2.carbon.apimgt.user.mgt;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.user.api.Tenant;
 
+import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 
 public interface UserManager {
 
@@ -76,4 +78,16 @@ public interface UserManager {
     String getDomainFromThreadLocal();
 
     boolean authenticate(String username, String password) throws UserException;
+
+    String getProperty(int tenantId, String propertyName) throws UserException;
+
+    void changePasswordByUser(String username, String currentPassword, String newPassword) throws UserException;
+
+    void createRole(String roleName, Map<String, String> permissions, int tenantId) throws UserException;
+
+    String getPropertyFromFile(String propertyName) throws UserException;
+
+    SortedMap<String, String> getClaims(String username, int tenantId, String dialectURI) throws UserException;
+
+    String getClaimDisplayName(String claimURI, String username, int tenantId) throws UserException;
 }

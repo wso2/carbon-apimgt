@@ -37,8 +37,6 @@ import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
-import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.security.KeyStore;
@@ -50,11 +48,9 @@ import java.util.Set;
 public class ServiceReferenceHolder {
 
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
-    private static UserRealm userRealm;
     private static ConfigurationContextService contextService;
     private RegistryService registryService;
     private APIManagerConfigurationService amConfigurationService;
-    private RealmService realmService;
     private TenantIndexingLoader indexLoader;
     private OutputEventAdapterService outputEventAdapterService;
     private KeyStore trustStore;
@@ -113,16 +109,6 @@ public class ServiceReferenceHolder {
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigurationService) {
 
         this.amConfigurationService = amConfigurationService;
-    }
-
-    public RealmService getRealmService() {
-
-        return realmService;
-    }
-
-    public void setRealmService(RealmService realmService) {
-
-        this.realmService = realmService;
     }
 
     public TenantIndexingLoader getIndexLoaderService() {
