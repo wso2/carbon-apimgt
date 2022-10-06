@@ -416,12 +416,14 @@ public class OAS3Parser extends APIDefinition {
                         opScopes = getScopeOfOperations("OAuth2Security", operation);
                         if (opScopes.size() == 1) {
                             String firstScope = opScopes.get(0);
-                            Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
-                            if (scope == null) {
-                                throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                            if (StringUtils.isNoneBlank(firstScope)) {
+                                Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
+                                if (scope == null) {
+                                    throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                                }
+                                template.setScope(scope);
+                                template.setScopes(scope);
                             }
-                            template.setScope(scope);
-                            template.setScopes(scope);
                         } else {
                             template = OASParserUtil.setScopesToTemplate(template, opScopes, scopes);
                         }
