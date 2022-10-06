@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
@@ -118,7 +119,7 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
 
     @MethodStats
     private void loadTenantRegistry() throws APIManagementException {
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
         try {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             APIUtil.loadTenantRegistry(tenantId);

@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
@@ -49,7 +50,7 @@ public class WorkflowExecutorFactory {
 
     public TenantWorkflowConfigHolder getWorkflowConfigurations() throws WorkflowException {
 
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
         String cacheName = tenantDomain + "_" + APIConstants.WORKFLOW_CACHE_NAME;
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         //synchronized (cacheName.intern()){

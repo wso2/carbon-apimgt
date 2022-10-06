@@ -31,7 +31,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 
 
 import java.util.Map;
@@ -81,8 +81,8 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
 
         try {
             Map<String, Environment> environments = APIUtil.getEnvironments(deployAPIInGatewayEvent.getTenantDomain());
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(UserContext
+                    .getThreadLocalUserContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiId, apiMgtDAO.getOrganizationByAPIUUID(apiId));
 
             for (String deploymentEnv : gateways) {

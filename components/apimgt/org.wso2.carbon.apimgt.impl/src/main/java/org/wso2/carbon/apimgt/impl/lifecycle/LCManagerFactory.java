@@ -18,7 +18,7 @@ package org.wso2.carbon.apimgt.impl.lifecycle;
 
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 
 import java.io.IOException;
 
@@ -56,7 +56,7 @@ public class LCManagerFactory {
      */
     public LCManager getLCManager() {
 
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
         return new LCManager(tenantDomain);
     }
 }

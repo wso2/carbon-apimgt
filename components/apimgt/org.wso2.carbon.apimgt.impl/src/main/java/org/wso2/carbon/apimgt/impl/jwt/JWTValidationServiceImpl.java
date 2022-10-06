@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 
 public class JWTValidationServiceImpl implements JWTValidationService {
 
@@ -35,7 +35,7 @@ public class JWTValidationServiceImpl implements JWTValidationService {
     @Override
     public JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo) throws APIManagementException {
 
-        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
         if (StringUtils.isNotEmpty(issuer)) {
@@ -53,7 +53,7 @@ public class JWTValidationServiceImpl implements JWTValidationService {
 
     @Override
     public String getKeyManagerNameIfJwtValidatorExist(SignedJWTInfo signedJWTInfo) throws APIManagementException {
-        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
 
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
         KeyManagerDto keyManagerDto = KeyManagerHolder.getKeyManagerByIssuer(tenantDomain, issuer);

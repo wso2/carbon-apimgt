@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.message.clustering.TenantLoadMessage;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
@@ -113,7 +114,7 @@ public class TenantLoadMessageSender extends AbstractAxis2ConfigurationContextOb
      * @return tenant id
      */
     String getTenantDomain() {
-        return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        return UserContext.getThreadLocalUserContext().getOrganization();
     }
 
     /**

@@ -38,7 +38,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashMap;
@@ -155,7 +155,7 @@ public class ApplicationsCommonImpl {
             throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
         Application application = apiConsumer.getApplicationByUUID(applicationId, organization);
         if (application != null) {
             String applicationTenantDomain = MultitenantUtils.getTenantDomain(application.getOwner());

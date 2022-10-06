@@ -66,7 +66,6 @@ import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -294,7 +293,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public List<Documentation> getAllDocumentation(String uuid, String organization) throws APIManagementException {
 
-        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        String username = org.wso2.carbon.apimgt.user.ctx.UserContext.getThreadLocalUserContext().getUsername();
 
         Organization org = new Organization(organization);
         UserContext ctx = new UserContext(username, org, null, null);

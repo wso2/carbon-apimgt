@@ -31,7 +31,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 
 import java.util.HashSet;
 import java.util.List;
@@ -58,7 +58,7 @@ public class CommonUtils {
      * @return The logged-in user
      */
     public static String getLoggedInUsername() {
-        return CarbonContext.getThreadLocalCarbonContext().getUsername();
+        return UserContext.getThreadLocalUserContext().getUsername();
     }
 
     /**
@@ -198,6 +198,6 @@ public class CommonUtils {
     }
 
     public static String getLoggedInUserTenantDomain() {
-        return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        return UserContext.getThreadLocalUserContext().getOrganization();
     }
 }

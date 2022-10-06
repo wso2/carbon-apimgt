@@ -192,6 +192,7 @@ import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.proxy.ExtendedProxyRoutePlanner;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.resolver.OnPremResolver;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.UserConstants;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
@@ -867,7 +868,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, apiProduct.getApiSecurity());
 
             //Validate if the API has an unsupported context before setting it in the artifact
-            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
             if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
                 String invalidContext = File.separator + APIConstants.VERSION_PLACEHOLDER;
                 if (invalidContext.equals(apiProduct.getContextTemplate())) {
@@ -7400,7 +7401,7 @@ public final class APIUtil {
     }
 
     public static Map<String, Environment> getEnvironments() throws APIManagementException {
-        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
         // get dynamic gateway environments read from database
         Map<String, Environment> envFromDB = ApiMgtDAO.getInstance().getAllEnvironments(tenantDomain).stream()
                 .collect(Collectors.toMap(Environment::getName, env -> env));

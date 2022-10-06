@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
 import org.wso2.carbon.registry.core.Registry;
@@ -284,7 +284,7 @@ public class NewAPIVersionEmailNotifier extends Notifier {
      * @return Retrieve tenant domain fot the current user
      */
     protected String getTenantDomain() {
-        return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        return UserContext.getThreadLocalUserContext().getOrganization();
     }
 
     protected void getOutputEventAdapterTypes() {

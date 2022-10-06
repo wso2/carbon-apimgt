@@ -192,7 +192,6 @@ import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
@@ -1543,7 +1542,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         for (APIProductResource productResource : productResources) {
             API api = getAPIbyUUID(productResource.getApiId(),
-                    CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+                    org.wso2.carbon.apimgt.user.ctx.UserContext.getThreadLocalUserContext().getOrganization());
             apis.add(api);
         }
 
@@ -4385,7 +4384,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         APIProduct oldApi = getAPIProductbyUUID(product.getUuid(),
-                CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+                org.wso2.carbon.apimgt.user.ctx.UserContext.getThreadLocalUserContext().getOrganization());
         Gson gson = new Gson();
         Map<String, String> oldMonetizationProperties = gson.fromJson(oldApi.getMonetizationProperties().toString(),
                 HashMap.class);
@@ -4484,7 +4483,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             publisherAPIProduct.setProviderName(apiProduct.getId().getProviderName());
             publisherAPIProduct.setVersion(apiProduct.getId().getVersion());
             addedAPIProduct = apiPersistenceInstance.addAPIProduct(
-                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()),
+                    new Organization(org.wso2.carbon.apimgt.user.ctx.UserContext.getThreadLocalUserContext()
+                            .getOrganization()),
                     publisherAPIProduct);
 
             apiProductUUID = addedAPIProduct.getId();
@@ -4519,7 +4519,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             publisherAPIProduct.setProviderName(apiProduct.getId().getProviderName());
             publisherAPIProduct.setVersion(apiProduct.getId().getVersion());
             addedAPIProduct = apiPersistenceInstance.updateAPIProduct(
-                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()),
+                    new Organization(org.wso2.carbon.apimgt.user.ctx.UserContext.getThreadLocalUserContext()
+                            .getOrganization()),
                     publisherAPIProduct);
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while creating API product ");

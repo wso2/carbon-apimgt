@@ -19,7 +19,7 @@ package org.wso2.carbon.apimgt.impl.handlers;
 */
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.registry.core.jdbc.handlers.Handler;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
 
@@ -39,7 +39,7 @@ public class APIConfigMediaTypeHandler extends Handler {
     private void clearConfigCache() {
         Cache workflowCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
                 getCache(APIConstants.WORKFLOW_CACHE_NAME);
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
         String cacheName = tenantDomain + "_" + APIConstants.WORKFLOW_CACHE_NAME;
         if (workflowCache.containsKey(cacheName)) {
             workflowCache.remove(cacheName);

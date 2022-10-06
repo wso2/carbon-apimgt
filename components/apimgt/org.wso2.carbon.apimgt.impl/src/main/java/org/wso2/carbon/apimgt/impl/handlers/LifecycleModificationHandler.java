@@ -18,7 +18,7 @@ package org.wso2.carbon.apimgt.impl.handlers;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.jdbc.handlers.Handler;
@@ -48,7 +48,7 @@ public class LifecycleModificationHandler extends Handler {
             if (resourceImpl != null && APIConstants.API_LIFE_CYCLE.equals(resourceImpl.getName())) {
                 Cache lcCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                         .getCache(APIConstants.LC_CACHE_NAME);
-                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+                String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
                 String cacheName = tenantDomain + "_" + APIConstants.LC_CACHE_NAME;
                 if (lcCache.containsKey(cacheName)) {
                     lcCache.remove(cacheName);

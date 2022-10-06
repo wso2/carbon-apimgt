@@ -32,7 +32,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 
 import java.util.List;
 import java.util.Map;
@@ -85,8 +85,8 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
         }
 
         try {
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(UserContext
+                    .getThreadLocalUserContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiId, apiMgtDAO.getOrganizationByAPIUUID(apiId));
             List<APIRevisionDeployment> test = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
 

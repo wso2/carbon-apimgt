@@ -38,7 +38,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
-import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -118,8 +118,8 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
             if (isContainsSolaceApis) {
                 if (application.getKeys() != null) {
                     String consumerSecret = null;
-                    APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(CarbonContext.
-                            getThreadLocalCarbonContext().getUsername());
+                    APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(UserContext
+                            .getThreadLocalUserContext().getUsername());
                     Set<APIKey> consumerKeys  = apiConsumer.getApplicationKeysOfApplication(application.getId());
                     for (APIKey key : consumerKeys) {
                         if (key.getConsumerKey().equals(event.getConsumerKey()) && SolaceConstants
