@@ -31,26 +31,17 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.HashSet;
-import java.util.Set;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({RestApiCommonUtil.class, Application.class, Subscriber.class, ServiceReferenceHolder.class, RestApiUtil.class, LogFactory.class, RestAPIStoreUtils.class, APIManagerFactory.class, MultitenantUtils.class})
@@ -163,7 +154,10 @@ public class RestAPIStoreUtilsTest {
             errorMessage = ex.getMessage();
         }
 
-        Assert.assertEquals("Failed to retrieve the API " + apiUUID + " to check user " + username + " has access to the API", errorMessage);
+        Assert.assertEquals(
+                "Failed to retrieve the API " + apiUUID + " to check user " + username
+                        + " has access to the API",
+                errorMessage);
     }
 
     @Test
@@ -202,7 +196,8 @@ public class RestAPIStoreUtilsTest {
         Mockito.when(application.getGroupId()).thenReturn(groupID);
         Mockito.when(application.getSubscriber()).thenReturn(subscriber);
         PowerMockito.spy(RestAPIStoreUtils.class);
-        PowerMockito.doReturn(true).when(RestAPIStoreUtils.class, "isUserOwnerOfApplication", application);
+        PowerMockito.doReturn(true).when(RestAPIStoreUtils.class, "isUserOwnerOfApplication",
+                application);
         Assert.assertEquals(true, RestAPIStoreUtils.isUserAccessAllowedForApplication(application));
     }
 
@@ -246,7 +241,4 @@ public class RestAPIStoreUtilsTest {
         Application application = null;
         Assert.assertEquals(false, RestAPIStoreUtils.isUserAccessAllowedForApplication(application));
     }
-
-
-
 }

@@ -476,7 +476,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             }
 
         } catch (KeyManagerClientException e) {
-            throw new APIManagementException("Error occurred while calling token endpoint - " + e.getReason(), e);
+            throw new APIManagementException("Error occurred while calling token endpoint - " + e.getReason(), e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
 
         tokenInfo = new AccessTokenInfo();

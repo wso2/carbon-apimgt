@@ -17,22 +17,15 @@
  */
 package org.wso2.carbon.apimgt.rest.api.store.v1.common.mappings;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsIdentityProviderDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.application.authentication.framework.exception.FrameworkException;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
@@ -43,24 +36,18 @@ import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
 
 /**
  * Util class for settings mapping to DTO
  */
 public class SettingsMappingUtil {
 
-    private static final Log log = LogFactory.getLog(SettingsMappingUtil.class);
-
     public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable, Boolean moneatizationEnabled,
                                          boolean recommendationEnabled, boolean anonymousEnabled, String organization)
             throws APIManagementException {
         SettingsDTO settingsDTO = new SettingsDTO();
-        settingsDTO.setScopes(getScopeList());
         settingsDTO.setApplicationSharingEnabled(APIUtil.isMultiGroupAppSharingEnabled());
         settingsDTO.setRecommendationEnabled(recommendationEnabled);
         settingsDTO.setMapExistingAuthApps(APIUtil.isMapExistingAuthAppsEnabled());
@@ -149,22 +136,5 @@ public class SettingsMappingUtil {
             }
         }
         return settingsDTO;
-    }
-
-    private List<String> getScopeList() throws APIManagementException {
-        String definition = null;
-        try {
-            definition = IOUtils
-                    .toString(RestApiUtil.class.getResourceAsStream("/devportal-api.yaml"), "UTF-8");
-        } catch (IOException e) {
-            log.error("Error while reading the swagger definition", e);
-        }
-        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
-        Set<Scope> scopeSet = oasParser.getScopes(definition);
-        List<String> scopeList = new ArrayList<>();
-        for (Scope entry : scopeSet) {
-            scopeList.add(entry.getKey());
-        }
-        return scopeList;
     }
 }

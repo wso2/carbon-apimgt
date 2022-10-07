@@ -309,8 +309,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     @Override
     public AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret,
-                                            String validityTime, String[] requestedScopes, String jsonInput,
-                                            String keyManagerName, String grantType) throws APIManagementException {
+            String validityTime, String[] requestedScopes, String jsonInput, String keyManagerName, String grantType)
+            throws APIManagementException {
         // Create Token Request with parameters provided from UI.
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(clientId);
@@ -320,51 +320,43 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         tokenRequest.setScope(requestedScopes);
         tokenRequest.setGrantType(grantType);
 
-        try {
-            // Populating additional parameters.
-            KeyManagerConfigurationDTO keyManagerConfiguration =
-                    apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
-            String keyManagerTenant = tenantDomain;
-            if (keyManagerConfiguration != null) {
-                keyManagerName = keyManagerConfiguration.getName();
-                keyManagerTenant = keyManagerConfiguration.getOrganization();
-            } else {
-                //keeping this just in case the name is sent by mistake.
-                keyManagerConfiguration =
-                        apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
-                if (keyManagerConfiguration == null) {
-                    throw new APIManagementException(KEY_MANAGER + " " + keyManagerName + " couldn't found.",
-                            ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
-                }
+        // Populating additional parameters.
+        KeyManagerConfigurationDTO keyManagerConfiguration = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
+        String keyManagerTenant = tenantDomain;
+        if (keyManagerConfiguration != null) {
+            keyManagerName = keyManagerConfiguration.getName();
+            keyManagerTenant = keyManagerConfiguration.getOrganization();
+        } else {
+            //keeping this just in case the name is sent by mistake.
+            keyManagerConfiguration = apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+            if (keyManagerConfiguration == null) {
+                throw new APIManagementException(KEY_MANAGER + " " + keyManagerName + " couldn't found.",
+                        ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
             }
-            if (keyManagerConfiguration.isEnabled()) {
-                Object enableTokenGeneration =
-                        keyManagerConfiguration.getProperty(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION);
-                if (enableTokenGeneration != null && !(Boolean) enableTokenGeneration) {
-                    throw new APIManagementException(
-                            "Key Manager didn't support to generate token Generation From portal",
-                            ExceptionCodes.KEY_MANAGER_NOT_SUPPORTED_TOKEN_GENERATION);
-                }
-                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerTenant, keyManagerName);
-                if (keyManager == null) {
-                    throw new APIManagementException(KEY_MANAGER + " " + keyManagerName + " not initialized",
-                            ExceptionCodes.KEY_MANAGER_INITIALIZATION_FAILED);
-                }
-                tokenRequest = ApplicationUtils.populateTokenRequest(keyManager, jsonInput, tokenRequest);
-
-                JSONObject appLogObject = new JSONObject();
-                appLogObject.put("Re-Generated Keys for application with client Id", clientId);
-                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
-                        APIConstants.AuditLogConstants.UPDATED, this.username);
-
-                return keyManager.getNewApplicationAccessToken(tokenRequest);
-            } else {
-                throw new APIManagementException(KEY_MANAGER + " " + keyManagerName + " not enabled",
-                        ExceptionCodes.KEY_MANAGER_NOT_ENABLED);
+        }
+        if (keyManagerConfiguration.isEnabled()) {
+            Object enableTokenGeneration = keyManagerConfiguration.getProperty(
+                    APIConstants.KeyManager.ENABLE_TOKEN_GENERATION);
+            if (enableTokenGeneration != null && !(Boolean) enableTokenGeneration) {
+                throw new APIManagementException("Key Manager didn't support to generate token Generation From portal",
+                        ExceptionCodes.KEY_MANAGER_NOT_SUPPORTED_TOKEN_GENERATION);
             }
-        } catch (APIManagementException e) {
-            log.error("Error while re-generating AccessToken", e);
-            throw e;
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerTenant, keyManagerName);
+            if (keyManager == null) {
+                throw new APIManagementException(KEY_MANAGER + " " + keyManagerName + " not initialized",
+                        ExceptionCodes.KEY_MANAGER_INITIALIZATION_FAILED);
+            }
+            tokenRequest = ApplicationUtils.populateTokenRequest(keyManager, jsonInput, tokenRequest);
+
+            JSONObject appLogObject = new JSONObject();
+            appLogObject.put("Re-Generated Keys for application with client Id", clientId);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                    APIConstants.AuditLogConstants.UPDATED, this.username);
+
+            return keyManager.getNewApplicationAccessToken(tokenRequest);
+        } else {
+            throw new APIManagementException(KEY_MANAGER + " " + keyManagerName + " not enabled",
+                    ExceptionCodes.KEY_MANAGER_NOT_ENABLED);
         }
     }
 
@@ -1204,7 +1196,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (workflowResponse == null) {
                     workflowResponse = new GeneralWorkflowResponse();
                 }
-
             }
 
             // get the workflow state once the executor is executed.
@@ -1237,8 +1228,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             return new SubscriptionResponse(subscriptionStatus, subscriptionUUID, workflowResponse);
         } else {
-            throw new APIMgtResourceNotFoundException("Subscriptions not allowed on APIs/API Products in the state: " +
-                    state);
+            String errorMessage = "Subscriptions not allowed on APIs/API Products in the state: " +
+                    state;
+            throw new APIManagementException(errorMessage, ExceptionCodes.SUBSCRIPTION_STATE_INVALID);
+
         }
     }
 
@@ -2370,7 +2363,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             if (!isUserAppOwner) {
                 throw new APIManagementException("user: " + application.getSubscriber().getName() + ", " +
-                        "attempted to generate tokens for application owned by: " + userId);
+                        "attempted to generate tokens for application owned by: " + userId,
+                        ExceptionCodes.FORBIDDEN_ERROR);
             }
 
             // if its a PRODUCTION application.
@@ -2392,7 +2386,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
                                 .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
             } else {
-                throw new APIManagementException("Invalid Token Type '" + tokenType + "' requested.");
+                throw new APIManagementException("Invalid Token Type '" + tokenType + "' requested.",
+                        ExceptionCodes.INVALID_KEY_TYPE);
             }
 
             //check whether callback url is empty and set null
@@ -3829,7 +3824,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     return;
                 }
             }
-            throw new APIMgtResourceNotFoundException("API not found "); // for backword compatibility we send 404
+
+            throw new APIManagementException(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the api",
+                    ExceptionCodes.NO_VIEW_UPDATE_PERMISSIONS);
         }
 
     }
@@ -4142,19 +4139,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
 
         Set<SubscribedAPI> subscribedAPIs = null;
-        try {
-                subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIsByApplication(application, offset,
-                    limit, organization);
-            if (subscribedAPIs != null && !subscribedAPIs.isEmpty()) {
-                Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
-                for (SubscribedAPI subscribedApi : subscribedAPIs) {
-                    Tier tier = tiers.get(subscribedApi.getTier().getName());
-                    subscribedApi.getTier().setDisplayName(tier != null ? tier.getDisplayName() : subscribedApi
-                            .getTier().getName());
-                }
+
+        subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIsByApplication(application, offset, limit, organization);
+        if (subscribedAPIs != null && !subscribedAPIs.isEmpty()) {
+            Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
+            for (SubscribedAPI subscribedApi : subscribedAPIs) {
+                Tier tier = tiers.get(subscribedApi.getTier().getName());
+                subscribedApi.getTier()
+                        .setDisplayName(tier != null ? tier.getDisplayName() : subscribedApi.getTier().getName());
             }
-        } catch (APIManagementException e) {
-            handleException("Failed to get subscribed APIs of application " + application.getUUID(), e);
         }
         return subscribedAPIs;
     }
@@ -4295,7 +4288,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *
      * @param apiTypeWrapper Api Type wrapper that contains either an API or API Product
      * @throws APIManagementException if the subscription allow check was failed. If the user is not allowed to add the
-     *                                subscription, this will throw an instance of APIMgtAuthorizationFailedException with the reason as the message
+     *                                subscription, this will throw the reason as the message
      */
     private void checkSubscriptionAllowed(ApiTypeWrapper apiTypeWrapper)
             throws APIManagementException {
@@ -4313,9 +4306,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             String apiSecurity = api.getApiSecurity();
             if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
                     !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
-                String msg = "Subscription is not allowed for API " + apiTypeWrapper.toString() + ". To access the API, "
-                        + "please use the client certificate";
-                throw new APIMgtAuthorizationFailedException(msg);
+                String msg = "Subscription is not allowed for API " + apiTypeWrapper.getApi().getId()
+                        + ". To access the API, please use the client certificate";
+                throw new APIManagementException(msg,
+                        ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_NOT_ALLOWED, "API", msg));
             }
             tiers = api.getAvailableTiers();
             subscriptionAvailability = api.getSubscriptionAvailability();
@@ -4344,7 +4338,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             subscriptionAllowed = true;
         }
         if (!subscriptionAllowed) {
-            throw new APIMgtAuthorizationFailedException("Subscription is not allowed for " + userNameWithoutChange);
+            String msg = "Subscription is not allowed for " + userNameWithoutChange;
+            throw new APIManagementException(msg,
+                    ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_NOT_ALLOWED, userNameWithoutChange, msg));
         }
 
         //check whether the specified tier is within the allowed tiers for the API
@@ -4359,8 +4355,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             allowedTierList.add(t.getName());
         }
         if (!isTierAllowed) {
-            String msg = "Tier " + apiTypeWrapper.getTier() + " is not allowed for API/API Product " + apiTypeWrapper + ". Only "
-                    + Arrays.toString(allowedTierList.toArray()) + " Tiers are allowed.";
+            String msg = "Tier " + apiTypeWrapper.getTier() + " is not allowed for API/API Product "
+                    + apiTypeWrapper + ". Only " + Arrays.toString(allowedTierList.toArray()) + " Tiers are allowed.";
             throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_TIER_NOT_ALLOWED,
                     apiTypeWrapper.getTier(), username));
         }

@@ -59,8 +59,6 @@ import java.util.Set;
  */
 public class SubscriptionServiceImpl {
 
-    private static final Log log = LogFactory.getLog(SubscriptionServiceImpl.class);
-
     private SubscriptionServiceImpl() {
     }
 
@@ -76,8 +74,8 @@ public class SubscriptionServiceImpl {
      * @param limit         max num of subscriptions returned
      * @return matched subscriptions as a list of SubscriptionDTOs
      */
-    public static SubscriptionListDTO getSubscriptions(String apiId, String applicationId, String groupId
-            , Integer offset, Integer limit, String organization) {
+    public static SubscriptionListDTO getSubscriptions(String apiId, String applicationId, String groupId,
+            Integer offset, Integer limit, String organization) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         Subscriber subscriber = new Subscriber(username);
         Set<SubscribedAPI> subscriptions;
@@ -87,77 +85,66 @@ public class SubscriptionServiceImpl {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
-        // currently groupId is taken from the user so that groupId coming as a query parameter is not honored.
-        // As a improvement, we can check admin privileges of the user and honor groupId.
-        groupId = RestApiUtil.getLoggedInUserGroupId();
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+        SubscriptionListDTO subscriptionListDTO;
+        if (!StringUtils.isEmpty(apiId)) {
+            // todo : FIX properly, need to done properly with backend side pagination.
+            // todo : getSubscribedIdentifiers() method should NOT be used. Appears to be too slow.
 
-        try {
-            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            SubscriptionListDTO subscriptionListDTO;
-            if (!StringUtils.isEmpty(apiId)) {
-                // todo : FIX properly, need to done properly with backend side pagination.
-                // todo : getSubscribedIdentifiers() method should NOT be used. Appears to be too slow.
+            // This will fail with an authorization failed exception if user does not have permission to
+            // access the API
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
 
-                // This will fail with an authorization failed exception if user does not have permission to
-                // access the API
-                ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
-
-                if (apiTypeWrapper.isAPIProduct()) {
-                    subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber,
-                            apiTypeWrapper.getApiProduct().getId(), groupId, organization);
-                } else {
-                    subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber, apiTypeWrapper.getApi().getId(),
-                            groupId, organization);
-                }
-
-                //sort by application name
-                subscribedAPIList.addAll(subscriptions);
-
-                subscribedAPIList.sort(Comparator.comparing(o -> o.getApplication().getName()));
-
-                subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedAPIList, limit,
-                        offset, organization);
-
-                SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, "", limit, offset,
-                        subscribedAPIList.size());
-
-                return subscriptionListDTO;
-            } else if (!StringUtils.isEmpty(applicationId)) {
-                Application application = apiConsumer.getApplicationByUUID(applicationId);
-
-                if (application == null) {
-                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-                    return null;
-                }
-
-                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-                }
-
-                subscriptions = apiConsumer.getPaginatedSubscribedAPIsByApplication(application, offset, limit,
-                        organization);
-                subscribedAPIList.addAll(subscriptions);
-
-                subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedAPIList, limit,
-                        offset, organization);
-                return subscriptionListDTO;
-
+            if (apiTypeWrapper.isAPIProduct()) {
+                subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber, apiTypeWrapper.getApiProduct().getId(),
+                        groupId, organization);
             } else {
-                //neither apiId nor applicationId is given
-                RestApiUtil.handleBadRequest("Either applicationId or apiId should be available", log);
-                return null;
+                subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber, apiTypeWrapper.getApi().getId(),
+                        groupId, organization);
             }
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Error while getting subscriptions of the user " + username,
-                        e, log);
+
+            //sort by application name
+            subscribedAPIList.addAll(subscriptions);
+
+            subscribedAPIList.sort(Comparator.comparing(o -> o.getApplication().getName()));
+
+            subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedAPIList, limit, offset,
+                    organization);
+
+            SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, "", limit, offset,
+                    subscribedAPIList.size());
+
+            return subscriptionListDTO;
+        } else if (!StringUtils.isEmpty(applicationId)) {
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+
+            if (application == null) {
+                throw new APIManagementException("Request application is with id " + applicationId + " not found",
+                        ExceptionCodes.APPLICATION_NOT_FOUND);
             }
+
+            if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                throw new APIManagementException(
+                        "User " + username + " does not have permission to access application with Id : "
+                                + applicationId,
+                        ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR, RestApiConstants.RESOURCE_APPLICATION,
+                                applicationId));
+            }
+
+            subscriptions = apiConsumer.getPaginatedSubscribedAPIsByApplication(application, offset, limit,
+                    organization);
+            subscribedAPIList.addAll(subscriptions);
+
+            subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedAPIList, limit, offset,
+                    organization);
+            return subscriptionListDTO;
+
+        } else {
+            //neither apiId nor applicationId is given
+            String errorMessage = "Either applicationId or apiId should be available";
+            throw new APIManagementException(
+                    ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE, errorMessage));
         }
-        return null;
     }
 
     /**
@@ -179,32 +166,39 @@ public class SubscriptionServiceImpl {
             // this will throw a APIMgtResourceNotFoundException
             if (body.getApiId() != null) {
                 if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(body.getApiId(), organization)) {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, body.getApiId(), log);
+                    throw new APIManagementException(
+                            "User " + username + " does not have permission to access the API : " + body.getApiId(),
+                            ExceptionCodes.NO_READ_PERMISSIONS);
                 }
             } else {
-                RestApiUtil.handleBadRequest(
-                        "Request must contain either apiIdentifier or apiProductIdentifier and the relevant type",
-                        log);
-                return null;
+                String errorMessage = "Request must contain either apiIdentifier or apiProductIdentifier "
+                        + "and the relevant type";
+                throw new APIManagementException(
+                        ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE, errorMessage));
             }
 
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application == null) {
                 //required application not found
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-                return null;
+                throw new APIManagementException("Request application is with id " + applicationId + " not found",
+                        ExceptionCodes.APPLICATION_NOT_FOUND);
             }
 
             // If application creation workflow status is pending or rejected, throw a Bad request exception
             if (application.getStatus().equals(WorkflowStatus.REJECTED.toString()) || application.getStatus()
                     .equals(WorkflowStatus.CREATED.toString())) {
-                RestApiUtil.handleBadRequest("Workflow status is not Approved", log);
-                return null;
+                String errorMessage = "Workflow status is not Approved";
+                throw new APIManagementException(
+                        ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE, errorMessage));
             }
 
             if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                 //application access failure occurred
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                throw new APIManagementException(
+                        "User " + username + " does not have permission to access application with Id : "
+                                + applicationId,
+                        ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR, RestApiConstants.RESOURCE_APPLICATION,
+                                applicationId));
             }
 
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(body.getApiId(), organization);
@@ -226,14 +220,13 @@ public class SubscriptionServiceImpl {
         } catch (APIMgtAuthorizationFailedException e) {
             //this occurs when the api:application:tier mapping is not allowed. The reason for the message is taken from
             // the message of the exception e
-            RestApiUtil.handleAuthorizationFailure(e.getMessage(), e, log);
+            throw new APIManagementException(e.getMessage(), ExceptionCodes.FORBIDDEN_ERROR);
         } catch (SubscriptionAlreadyExistingException e) {
-            throw new APIManagementException(RestApiConstants.STATUS_CONFLICT_MESSAGE_SUBSCRIPTION_ALREADY_EXISTS
-                    + " " + body.getApiId() + ", for application "
-                    + body.getApplicationId(), e,
-                    ExceptionCodes.SUBSCRIPTION_ALREADY_EXISTS);
+            throw new APIManagementException(
+                    RestApiConstants.STATUS_CONFLICT_MESSAGE_SUBSCRIPTION_ALREADY_EXISTS + " " + body.getApiId() +
+                            ", for application " + body.getApplicationId(),
+                    e, ExceptionCodes.SUBSCRIPTION_ALREADY_EXISTS);
         }
-        return null;
     }
 
     /**
@@ -242,8 +235,8 @@ public class SubscriptionServiceImpl {
      * @param body new subscription details
      * @return newly added subscription as a SubscriptionDTO if successful
      */
-    public static SubscriptionDTO updateSubscriptions(String subscriptionId, SubscriptionDTO body,
-            String organization) throws APIManagementException {
+    public static SubscriptionDTO updateSubscriptions(String subscriptionId, SubscriptionDTO body, String organization)
+            throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer;
 
@@ -260,38 +253,44 @@ public class SubscriptionServiceImpl {
                         body.getStatus().value()) || "REJECTED".equals(body.getStatus().value()) || "BLOCKED".equals(
                         subscribedAPI.getSubStatus()) || "ON_HOLD".equals(
                         subscribedAPI.getSubStatus()) || "REJECTED".equals(subscribedAPI.getSubStatus())) {
-                    RestApiUtil.handleBadRequest("Cannot update subscriptions with provided or existing status",
-                            log);
-                    return null;
+                    String errorMessage = "Cannot update subscriptions with provided or existing status";
+                    throw new APIManagementException(
+                            ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE, errorMessage));
                 }
             } else {
-                RestApiUtil.handleBadRequest("Request must contain status of the subscription", log);
-                return null;
+                String errorMessage = "Request must contain status of the subscription";
+                throw new APIManagementException(
+                        ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE, errorMessage));
             }
 
             //check whether user is permitted to access the API. If the API does not exist,
             // this will throw a APIMgtResourceNotFoundException
             if (body.getApiId() != null) {
                 if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(body.getApiId(), organization)) {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, body.getApiId(), log);
+                    throw new APIManagementException(
+                            "User " + username + " does not have permission to access API with Id : " + body.getApiId(),
+                            ExceptionCodes.NO_READ_PERMISSIONS);
                 }
             } else {
-                RestApiUtil.handleBadRequest(
-                        "Request must contain either apiIdentifier or apiProductIdentifier and the relevant type",
-                        log);
-                return null;
+                String errorMessage = "Request must contain either apiIdentifier or apiProductIdentifier and the " +
+                        "relevant type";
+                throw new APIManagementException(
+                        ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE, errorMessage));
             }
 
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application == null) {
                 //required application not found
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-                return null;
+                throw new APIManagementException("Request application is with id " + applicationId + " not found",
+                        ExceptionCodes.APPLICATION_NOT_FOUND);
             }
 
             if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                 //application access failure occurred
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                throw new APIManagementException(
+                        "User " + username + " does not have permission to access application with Id : "
+                                + applicationId, ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
+                        RestApiConstants.RESOURCE_APPLICATION, applicationId));
             }
 
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(body.getApiId(), organization);
@@ -315,25 +314,13 @@ public class SubscriptionServiceImpl {
         } catch (APIMgtAuthorizationFailedException e) {
             //this occurs when the api:application:tier mapping is not allowed. The reason for the message is taken from
             // the message of the exception e
-            RestApiUtil.handleAuthorizationFailure(e.getMessage(), e, log);
+            throw new APIManagementException(e.getMessage(), ExceptionCodes.FORBIDDEN_ERROR);
         } catch (SubscriptionAlreadyExistingException e) {
-            throw new APIManagementException(RestApiConstants.STATUS_CONFLICT_MESSAGE_SUBSCRIPTION_ALREADY_EXISTS
-                    + " " + body.getApiId() + ", for application "
-                    + body.getApplicationId(), e,
-                    ExceptionCodes.SUBSCRIPTION_ALREADY_EXISTS);
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
-                //this happens when the specified API identifier does not exist
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, body.getApiId(), e, log);
-            } else {
-                //unhandled exception
-                RestApiUtil.handleInternalServerError(
-                        "Error while adding the subscription API:" + body.getApiId() + ", application:" +
-                                body.getApplicationId() + ", tier:" + body.getThrottlingPolicy(),
-                        e, log);
-            }
+            throw new APIManagementException(
+                    RestApiConstants.STATUS_CONFLICT_MESSAGE_SUBSCRIPTION_ALREADY_EXISTS + " " + body.getApiId() +
+                            ", for application " + body.getApplicationId(),
+                    e, ExceptionCodes.SUBSCRIPTION_ALREADY_EXISTS);
         }
-        return null;
     }
 
     /**
@@ -354,19 +341,24 @@ public class SubscriptionServiceImpl {
                 //check whether user is permitted to access the API. If the API does not exist,
                 // this will throw a APIMgtResourceNotFoundException
                 if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(subscriptionDTO.getApiId(), organization)) {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, subscriptionDTO.getApiId(),
-                            log);
+                    throw new APIManagementException(
+                            "User " + username + " does not have permission to access API : "
+                                    + subscriptionDTO.getApiId(), ExceptionCodes.NO_READ_PERMISSIONS);
                 }
 
                 Application application = apiConsumer.getApplicationByUUID(applicationId);
                 if (application == null) {
                     //required application not found
-                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                    throw new APIManagementException("Request application is with id " + applicationId + " not found",
+                            ExceptionCodes.APPLICATION_NOT_FOUND);
                 }
 
                 if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                     //application access failure occurred
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                    throw new APIManagementException(
+                            "User " + username + " does not have permission to access application with Id : "
+                                    + applicationId, ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
+                                    RestApiConstants.RESOURCE_APPLICATION, applicationId));
                 }
 
                 ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(subscriptionDTO.getApiId(),
@@ -384,7 +376,7 @@ public class SubscriptionServiceImpl {
             } catch (APIMgtAuthorizationFailedException e) {
                 //this occurs when the api:application:tier mapping is not allowed. The reason for the message is
                 // taken from the message of the exception e
-                RestApiUtil.handleAuthorizationFailure(e.getMessage(), e, log);
+                throw new APIManagementException(e.getMessage(), ExceptionCodes.FORBIDDEN_ERROR);
             } catch (SubscriptionAlreadyExistingException e) {
                 throw new APIManagementException(
                         RestApiConstants.STATUS_CONFLICT_MESSAGE_SUBSCRIPTION_ALREADY_EXISTS + " "
@@ -407,7 +399,7 @@ public class SubscriptionServiceImpl {
         APIConsumer apiConsumer;
         try {
             apiConsumer = RestApiCommonUtil.getConsumer(username);
-            SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
+            SubscribedAPI subscribedAPI = validateAndGetSubscription(username, subscriptionId, apiConsumer);
             return SubscriptionMappingUtil.fromSubscriptionToDTO(subscribedAPI, organization);
         } catch (APIManagementException e) {
             throw new APIManagementException("Failed to get subscribed API information of " + subscriptionId,
@@ -416,11 +408,12 @@ public class SubscriptionServiceImpl {
         }
     }
 
-    public static APIMonetizationUsageDTO getSubscriptionsUsage(String subscriptionId) {
+    public static APIMonetizationUsageDTO getSubscriptionsUsage(String subscriptionId) throws APIManagementException {
 
         if (StringUtils.isBlank(subscriptionId)) {
             String errorMessage = "Subscription ID cannot be empty or null when getting monetization usage.";
-            RestApiUtil.handleBadRequest(errorMessage, log);
+            throw new APIManagementException(
+                    ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE, errorMessage));
         }
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -429,7 +422,8 @@ public class SubscriptionServiceImpl {
                     subscriptionId, RestApiCommonUtil.getLoggedInUserProvider());
             if (MapUtils.isEmpty(billingEngineUsageData)) {
                 String errorMessage = "Billing engine usage data was not found for subscription ID : " + subscriptionId;
-                RestApiUtil.handleBadRequest(errorMessage, log);
+                throw new APIManagementException(
+                        ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE, errorMessage));
             }
             APIMonetizationUsageDTO apiMonetizationUsageDTO = new APIMonetizationUsageDTO();
             apiMonetizationUsageDTO.setProperties(billingEngineUsageData);
@@ -437,12 +431,13 @@ public class SubscriptionServiceImpl {
         } catch (APIManagementException e) {
             String errorMessage = "Failed to retrieve billing engine usage data for subscription ID : "
                     + subscriptionId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC, errorMessage));
         } catch (MonetizationException e) {
             String errorMessage = "Failed to get current usage for subscription ID : " + subscriptionId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC, errorMessage));
         }
-        return null;
     }
 
     /**
@@ -451,30 +446,35 @@ public class SubscriptionServiceImpl {
      * @param subscriptionId subscription identifier
      * @return 200 response if successfully deleted the subscription
      */
-    public static SubscribedAPI deleteSubscriptionsBySubscriptionId(String subscriptionId, String organization) {
+    public static SubscribedAPI deleteSubscriptionsBySubscriptionId(String subscriptionId, String organization)
+            throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer;
         try {
             apiConsumer = RestApiCommonUtil.getConsumer(username);
-            SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
+            SubscribedAPI subscribedAPI = validateAndGetSubscription(username, subscriptionId, apiConsumer);
             apiConsumer.removeSubscription(subscribedAPI, organization);
             return subscribedAPI;
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while deleting subscription with id " + subscriptionId, e,
-                    log);
+            String errorMessage = "Error while deleting subscription with id " + subscriptionId;
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC, errorMessage));
         }
-        return null;
     }
 
-    private static SubscribedAPI validateAndGetSubscription(String subscriptionId, APIConsumer apiConsumer)
-            throws APIManagementException {
+    private static SubscribedAPI validateAndGetSubscription(String username, String subscriptionId,
+            APIConsumer apiConsumer) throws APIManagementException {
         SubscribedAPI subscribedAPI = apiConsumer.getSubscriptionByUUID(subscriptionId);
         if (subscribedAPI == null) {
-            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
-            return null;
+            throw new APIManagementException("Request Subscription is with id " + subscriptionId + " not found",
+                    ExceptionCodes.SUBSCRIPTION_NOT_FOUND);
         }
         if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(subscribedAPI.getApplication())) {
-            RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
+            throw new APIManagementException(
+                    "User " + username + " does not have permission to access application with Id : "
+                            + subscribedAPI.getApplication().getUUID(),
+                    ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR, RestApiConstants.RESOURCE_APPLICATION,
+                            subscribedAPI.getApplication().getUUID()));
         }
         return subscribedAPI;
     }
@@ -488,7 +488,7 @@ public class SubscriptionServiceImpl {
      * @return Response with additional Info of the GraphQL API
      */
     public static AdditionalSubscriptionInfoListDTO getAdditionalInfoOfAPISubscriptions(String apiId, String groupId,
-            Integer offset, Integer limit, String organization) {
+            Integer offset, Integer limit, String organization) throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         Subscriber subscriber = new Subscriber(username);
@@ -513,27 +513,24 @@ public class SubscriptionServiceImpl {
             subscribedAPIList.addAll(subscriptions);
             subscribedAPIList.sort(Comparator.comparing(o -> o.getApplication().getName()));
             additionalSubscriptionInfoListDTO = AdditionalSubscriptionInfoMappingUtil
-                    .fromAdditionalSubscriptionInfoListToDTO(
-                    subscribedAPIList, limit, offset, organization);
-            AdditionalSubscriptionInfoMappingUtil.setPaginationParams(additionalSubscriptionInfoListDTO,
-                    apiId, "", limit, offset, subscribedAPIList.size());
+                    .fromAdditionalSubscriptionInfoListToDTO(subscribedAPIList, limit, offset, organization);
+            AdditionalSubscriptionInfoMappingUtil.setPaginationParams(additionalSubscriptionInfoListDTO, apiId,
+                    "", limit, offset, subscribedAPIList.size());
             return additionalSubscriptionInfoListDTO;
 
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving additional information details of the API : "
-                                + apiId,
-                        e, log);
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                String errorMessage = "Authorization failure while retrieving additional information details " +
+                        "of the API : " + apiId;
+                throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
+                        "additional information details of the API", apiId));
             } else {
-                String msg = "Error while retrieving additional information details of the API " + apiId;
-                RestApiUtil.handleInternalServerError(msg, e, log);
+                String errorMessage = "Error while retrieving additional information details of the API " + apiId;
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC, errorMessage));
             }
         }
-        return null;
     }
 }

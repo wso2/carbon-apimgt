@@ -637,7 +637,9 @@ public class ApiMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            handleException("Failed to add subscriber data ", e);
+            handleExceptionWithCode("Failed to add subscriber data", e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE,
+                            "Failed to add subscriber data"));
         }
         return subscriptionId;
     }
@@ -680,10 +682,12 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback the update subscription ", e1);
+                    log.error("Failed to rollback the update subscription", e1);
                 }
             }
-            handleException("Failed to update subscription data ", e);
+            handleExceptionWithCode("Failed to update subscription data", e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE,
+                            "Failed to update subscription data"));
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
             APIMgtDBUtil.closeAllConnections(preparedStForUpdate, null, null);
@@ -734,7 +738,9 @@ public class ApiMgtDAO {
                 removeSubscription(subscribedAPI, conn);
             } else {
                 throw new APIManagementException("UUID does not exist for the given apiId:" + id + " and " +
-                        "application id:" + applicationId);
+                        "application id:" + applicationId,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE,
+                                "Failed to remove subscription data"));
             }
 
             conn.commit();
@@ -791,8 +797,9 @@ public class ApiMgtDAO {
             }
             preparedStForUpdateOrDelete.executeUpdate();
         } catch (SQLException e) {
-            log.error("Failed to add subscriber data ", e);
-            handleException("Failed to add subscriber data ", e);
+            handleExceptionWithCode("Failed to remove subscriber data " + subscription.getUUID(), e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE,
+                            "Failed to remove subscription data"));
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
             APIMgtDBUtil.closeAllConnections(preparedStForUpdateOrDelete, null, null);
@@ -829,7 +836,9 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback remove subscription ", e1);
                 }
             }
-            handleException("Failed to remove subscription data ", e);
+            handleExceptionWithCode("Failed to remove subscriber data of " + subscription_id, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE,
+                            "Failed to remove subscription data"));
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
@@ -885,7 +894,10 @@ public class ApiMgtDAO {
             }
             return subscriptionStatus;
         } catch (SQLException e) {
-            handleException("Failed to retrieve subscription status", e);
+            String errorMessage = "Failed to retrieve subscription status";
+            handleExceptionWithCode(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
+
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
@@ -940,7 +952,9 @@ public class ApiMgtDAO {
             }
             return subscribedAPI;
         } catch (SQLException e) {
-            handleException("Failed to retrieve subscription from subscription id", e);
+            String errorMessage = "Failed to retrieve subscription from subscription id";
+            handleExceptionWithCode(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
@@ -1093,7 +1107,8 @@ public class ApiMgtDAO {
             }
             return topicSet;
         } catch (SQLException e) {
-            handleException("Failed to retrieve topics available in api " + apiId, e);
+            handleExceptionWithCode("Failed to retrieve topics available in api " + apiId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
@@ -1133,7 +1148,8 @@ public class ApiMgtDAO {
                 subscriptionSet.add(subscription);
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve topic subscriptions for application  " + applicationId, e);
+            handleExceptionWithCode("Failed to retrieve topic subscriptions for application  " + applicationId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
@@ -1177,7 +1193,8 @@ public class ApiMgtDAO {
             }
             return subscriptionSet;
         } catch (SQLException e) {
-            handleException("Failed to retrieve topic subscriptions for application  " + applicationId, e);
+            handleExceptionWithCode("Failed to retrieve topic subscriptions for application  " + applicationId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
@@ -1281,7 +1298,8 @@ public class ApiMgtDAO {
                 subscribedAPIs.add(subscribedAPI);
             }
         } catch (SQLException e) {
-            handleException("Failed to get SubscribedAPI of :" + subscriber.getName(), e);
+            handleExceptionWithCode("Failed to get SubscribedAPI of :" + subscriber.getName(), e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, result);
         }
@@ -1335,7 +1353,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve scopes for application subscription ", e);
+            handleExceptionWithCode("Failed to retrieve scopes for application subscription ", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(getSubscribedApisAndProducts, null, resultSet);
             APIMgtDBUtil.closeAllConnections(getIncludedApisInProduct, null, null);
@@ -1407,7 +1426,8 @@ public class ApiMgtDAO {
                 subscriptionCount = result.getInt("SUB_COUNT");
             }
         } catch (SQLException e) {
-            handleException("Failed to get SubscribedAPI of :" + subscriber.getName(), e);
+            handleExceptionWithCode("Failed to get SubscribedAPI of :" + subscriber.getName(), e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, result);
         }
@@ -9115,7 +9135,8 @@ public class ApiMgtDAO {
             return getKeyManagerConfigurationByUUID(conn, uuid);
         } catch (SQLException | IOException e) {
             throw new APIManagementException(
-                    "Error while retrieving key manager configuration for key manager uuid: " + uuid, e);
+                    "Error while retrieving key manager configuration for key manager uuid: " + uuid, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -18270,7 +18291,9 @@ public class ApiMgtDAO {
         }
 
         } catch (SQLException e) {
-            handleException("Failed to get SubscribedAPI of application :" + application.getName(), e);
+            String errorMessage =  "Failed to get subscribed APIs of application: " +  application.getName();
+            handleExceptionWithCode(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
 
         return subscribedAPIs;

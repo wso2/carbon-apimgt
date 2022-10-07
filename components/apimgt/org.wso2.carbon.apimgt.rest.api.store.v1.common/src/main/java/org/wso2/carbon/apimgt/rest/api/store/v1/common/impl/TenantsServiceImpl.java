@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.common.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
@@ -40,8 +40,6 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.TENANT_STATE_INACTIVE;
  */
 public class TenantsServiceImpl {
 
-    private static final Log log = LogFactory.getLog(TenantsServiceImpl.class);
-
     private TenantsServiceImpl() {
     }
 
@@ -52,7 +50,7 @@ public class TenantsServiceImpl {
      * @param offset Starting index
      * @return List of tenant domains
      */
-    public static TenantListDTO getTenants(String state, Integer limit, Integer offset) {
+    public static TenantListDTO getTenants(String state, Integer limit, Integer offset) throws APIManagementException {
         try {
             List<TenantDTO> tenantDTOList = new ArrayList<>();
             Integer paginationLimit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -62,7 +60,7 @@ public class TenantsServiceImpl {
             paginationDTO.setLimit(paginationLimit);
 
             if (!state.equalsIgnoreCase(TENANT_STATE_ACTIVE) && !state.equalsIgnoreCase(TENANT_STATE_INACTIVE)) {
-                RestApiUtil.handleBadRequest("Invalid tenant state", log);
+                throw new APIManagementException(ExceptionCodes.INVALID_TENANT_STATE);
             }
 
             String status = TENANT_STATE_ACTIVE.equalsIgnoreCase(state) ? TENANT_STATE_ACTIVE : TENANT_STATE_INACTIVE;
@@ -81,8 +79,9 @@ public class TenantsServiceImpl {
             tenantList.setPagination(paginationDTO);
             return tenantList;
         } catch (UserException e) {
-            RestApiUtil.handleInternalServerError("Error while getting active tenant domains", e, log);
+            throw new APIManagementException("Error while getting active tenant domains", e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE,
+                            "Error while getting active tenant domains"));
         }
-        return null;
     }
 }
