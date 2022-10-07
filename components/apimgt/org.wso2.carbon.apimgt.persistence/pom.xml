@@ -77,16 +77,6 @@
                     </dependency>
                 </dependencies>
             </plugin>
-
-            <plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-            <configuration>
-              <excludes>
-                <exclude>*</exclude>
-              </excludes>
-            </configuration>
-          </plugin>
         </plugins>
     </build>
 	<dependencies>
@@ -105,10 +95,6 @@
 			</exclusions>
 		</dependency>
 
-		<dependency>
-			<groupId>org.wso2.carbon.apimgt</groupId>
-			<artifactId>org.wso2.carbon.apimgt.api</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon.apimgt</groupId>
 			<artifactId>org.wso2.carbon.apimgt.api</artifactId>
