@@ -29,7 +29,9 @@ import org.wso2.carbon.apimgt.persistence.dto.Documentation;
 import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
 import org.wso2.carbon.apimgt.persistence.exceptions.*;
 
+import java.sql.Connection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -1018,6 +1020,140 @@ public interface ApiDAO {
      * @throws APIManagementException
      */
     List<API> getAllAPIVersions(String apiName, String apiProvider) throws APIManagementException;
+
+    /**
+     * Retrieve URI Templates for the given API
+     *
+     * @param api API
+     * @return Map of URITemplate with key as Method:resourcepath
+     * @throws APIManagementException exception
+     */
+    Map<String, URITemplate> getURITemplatesForAPI(API api) throws APIManagementException;
+
+    /**
+     * Add API Product
+     *
+     * @param apiProduct API Product Object
+     * @param organization Organization
+     * @return added/failed
+     * @throws APIManagementException
+     */
+    void addAPIProduct(APIProduct apiProduct, String organization) throws APIManagementException;
+
+    /**
+     * Add api product url mappings to DB
+     * - url templeates to product mappings (resource bundling) - AM_API_PRODUCT_MAPPING
+     *
+     * @param productResources
+     * @param organization
+     * @param connection
+     * @throws APIManagementException
+     */
+    void addAPIProductResourceMappings(List<APIProductResource> productResources, String organization,
+                                       Connection connection) throws APIManagementException;
+
+    /**
+     * Delete API product and its related scopes
+     *
+     * @param productIdentifier product ID
+     * @throws APIManagementException
+     */
+    void deleteAPIProduct(APIProductIdentifier productIdentifier) throws APIManagementException;
+
+    /**
+     * Get API Product UUID by the API Product Identifier and organization.
+     *
+     * @param identifier API Product Identifier
+     * @param organization
+     * @return String UUID
+     * @throws APIManagementException if an error occurs
+     */
+    String getUUIDFromIdentifier(APIProductIdentifier identifier, String organization)
+            throws APIManagementException;
+
+    /**
+     * Update API Product
+     *
+     * @param product API Product Object
+     * @param username Username
+     * @return added/failed
+     * @throws APIManagementException
+     */
+    void updateAPIProduct(APIProduct product, String username) throws APIManagementException;
+
+    /**
+     * Get Resource Paths of an API.
+     *
+     * @param apiId API Product Identifier
+     * @return List of Resource Paths
+     * @throws APIManagementException if an error occurs
+     */
+    List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException;
+
+    /**
+     * Get API UUID by passed parameters.
+     *
+     * @param provider Provider of the API
+     * @param apiName  Name of the API
+     * @param version  Version of the API
+     * @param organization identifier of the organization
+     * @return String UUID
+     * @throws APIManagementException if an error occurs
+     */
+    String getUUIDFromIdentifier(String provider, String apiName, String version, String organization)
+            throws APIManagementException;
+
+    /**
+     * Get API Tier
+     *
+     * @param apiUUID  API UUID
+     * @param revisionUUID  Revision UUID
+     * @return String Tier
+     * @throws APIManagementException if an error occurs
+     */
+    String getAPILevelTier(String apiUUID, String revisionUUID) throws APIManagementException;
+
+    /**
+     * Get API Status
+     *
+     * @param uuid  API UUID
+     * @return String Status
+     * @throws APIManagementException if an error occurs
+     */
+    String getAPIStatusFromAPIUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Get URI Templates of API with Product Mapping
+     *
+     * @param uuid  API UUID
+     * @return URI Templates of each mapping
+     * @throws APIManagementException if an error occurs
+     */
+    Map<Integer, URITemplate> getURITemplatesOfAPIWithProductMapping(String uuid) throws APIManagementException;
+
+    /**
+     * Adds an API Product revision record to the database
+     *
+     * @param apiRevision content of the revision
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    void addAPIProductRevision(APIRevision apiRevision) throws APIManagementException;
+
+    /**
+     * Restore API Product revision database records as the Current API Product of an API Product
+     *
+     * @param apiRevision content of the revision
+     * @throws APIManagementException if an error occurs when restoring an API revision
+     */
+    void restoreAPIProductRevision(APIRevision apiRevision) throws APIManagementException;
+
+    /**
+     * Delete API Product revision database records
+     *
+     * @param apiRevision content of the revision
+     * @throws APIManagementException if an error occurs when restoring an API revision
+     */
+    void deleteAPIProductRevision(APIRevision apiRevision) throws APIManagementException;
 
 
 

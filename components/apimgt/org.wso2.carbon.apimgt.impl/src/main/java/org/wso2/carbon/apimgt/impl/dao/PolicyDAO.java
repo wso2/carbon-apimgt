@@ -142,4 +142,81 @@ public interface PolicyDAO {
     void removeThrottlePolicy(String policyLevel, String policyName, int tenantId)
             throws APIManagementException;
 
+    /**
+     * Returns true if the key template exist in DB
+     *
+     * @param policy Global Policy
+     * @return true if key template already exists
+     * @throws APIManagementException
+     */
+    boolean isKeyTemplatesExist(GlobalPolicy policy) throws APIManagementException;
+
+    /**
+     * Returns true if Application Policy is attached to Application
+     *
+     * @param policyName Policy Name
+     * @param organization Organization
+     * @return true if key template already exists
+     * @throws APIManagementException
+     */
+    boolean hasApplicationPolicyAttachedToApplication(String policyName, String organization) throws APIManagementException;
+
+    /**
+     * Returns true if Subscription Policy is attached
+     *
+     * @param policyName Policy Name
+     * @param organization Organization
+     * @return true if key template already exists
+     * @throws APIManagementException
+     */
+    boolean hasSubscriptionPolicyAttached(String policyName, String organization) throws APIManagementException;
+
+    /**
+     * Returns true if API Policy is attached
+     *
+     * @param policyName Policy Name
+     * @param organization Organization
+     * @return true if key template already exists
+     * @throws APIManagementException
+     */
+    boolean hasAPIPolicyAttached(String policyName, String organization) throws APIManagementException;
+
+    /**
+     * Retrieves {@link APIPolicy} with name <code>uuid</code>
+     * <p>This will retrieve complete details about the APIPolicy with all pipelines and conditions.</p>
+     *
+     * @param uuid uuid of the policy to retrieve from the database
+     * @return {@link APIPolicy}
+     * @throws APIManagementException
+     */
+    APIPolicy getAPIPolicyByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Retrieves {@link ApplicationPolicy} with name <code>uuid</code>
+     *
+     * @param uuid uuid of the policy to retrieve from the database
+     * @return {@link ApplicationPolicy}
+     * @throws APIManagementException
+     */
+    ApplicationPolicy getApplicationPolicyByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Retrieves {@link SubscriptionPolicy} with name <code>uuid</code>
+     *
+     * @param uuid name of the policy to retrieve from the database
+     * @return {@link SubscriptionPolicy}
+     * @throws APIManagementException
+     */
+    SubscriptionPolicy getSubscriptionPolicyByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Get a particular Global level policy given UUID.
+     *
+     * @param uuid name of the global polixy
+     * @return {@link GlobalPolicy}
+     * @throws APIManagementException
+     */
+    GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException;
+
+
 }
