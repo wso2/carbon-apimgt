@@ -55,9 +55,9 @@ import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
@@ -567,8 +567,7 @@ public class WSO2APIPublisher implements APIPublisher {
      * @return username
      */
     protected String getLoggedInUsername() {
-
-        return CarbonContext.getThreadLocalCarbonContext().getUsername();
+        return UserContext.getThreadLocalUserContext().getUsername();
     }
 
     /**

@@ -17,6 +17,9 @@
  */
 package org.wso2.carbon.apimgt.rest.api.store.v1.common.mappings;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -26,14 +29,11 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsIdentityProviderDTO;
-import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.identity.application.authentication.framework.exception.FrameworkException;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.application.common.model.Property;
-import org.wso2.carbon.user.api.RealmConfiguration;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.core.UserStoreManager;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
@@ -43,6 +43,8 @@ import java.util.Map;
  * Util class for settings mapping to DTO
  */
 public class SettingsMappingUtil {
+
+    private static final Log log = LogFactory.getLog(SettingsMappingUtil.class);
 
     public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable, Boolean moneatizationEnabled,
                                          boolean recommendationEnabled, boolean anonymousEnabled, String organization)
@@ -73,21 +75,14 @@ public class SettingsMappingUtil {
 
         try {
             // Get password pattern from the UserStoreManager configuration
-            RealmConfiguration realmConfiguration = null;
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-
-            if (realmService != null && tenantId != MultitenantConstants.INVALID_TENANT_ID) {
-                UserStoreManager userStoreManager = null;
-                userStoreManager = (UserStoreManager) realmService.getTenantUserRealm(tenantId).getUserStoreManager();
-                realmConfiguration = userStoreManager.getRealmConfiguration();
-            }
-
-            if (realmConfiguration != null) {
-                String passwordJavaRegEx = realmConfiguration
-                        .getUserStoreProperty(APIConstants.PASSWORD_JAVA_REGEX_PROPERTY);
+            try {
+                String passwordJavaRegEx = UserManagerHolder.getUserManager()
+                        .getProperty(tenantId, APIConstants.PASSWORD_JAVA_REGEX_PROPERTY);
                 if (passwordJavaRegEx != null && !passwordJavaRegEx.trim().isEmpty()) {
                     userStorePasswordPattern = passwordJavaRegEx;
                 }
+            } catch (UserException e) {
+                log.error("Error occurred while reading the realm configurations", e);
             }
 
             // Get password pattern from the Password policy
@@ -103,9 +98,6 @@ public class SettingsMappingUtil {
                 passwordPolicyMaxLength = Integer.parseInt(FrameworkUtils.getResidentIdpConfiguration(
                         APIConstants.PASSWORD_POLICY_MAX_LENGTH_PROPERTY, tenantDomain).getValue());
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error occurred in getting userRealm for the tenant: " + tenantId;
-            throw new APIManagementException(errorMessage, e);
         } catch (FrameworkException e) {
             String errorMessage = "Error occurred in getting Resident Idp Configurations for tenant: " + tenantId;
             throw new APIManagementException(errorMessage, e);

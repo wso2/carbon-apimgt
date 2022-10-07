@@ -36,7 +36,7 @@ import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 
 import java.io.IOException;
 import java.net.URL;
@@ -67,7 +67,7 @@ public class DBRetriever implements ArtifactRetriever {
     public String retrieveArtifact(String apiId, String gatewayLabel)
             throws ArtifactSynchronizerException {
 
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
         try {
             Thread.sleep(gatewayArtifactSynchronizerProperties.getEventWaitingTime());
         } catch (InterruptedException e) {

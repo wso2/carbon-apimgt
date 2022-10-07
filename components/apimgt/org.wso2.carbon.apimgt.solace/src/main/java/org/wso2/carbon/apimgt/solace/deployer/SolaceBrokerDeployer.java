@@ -37,7 +37,7 @@ import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
-import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 
 import java.util.List;
 import java.util.Set;
@@ -291,10 +291,10 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
         APIConsumer apiConsumer;
 
         try {
-            apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
-            apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
+            apiProvider = APIManagerFactory.getInstance().getAPIProvider(UserContext.getThreadLocalUserContext()
+                    .getUsername());
+            apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(UserContext.getThreadLocalUserContext()
+                    .getUsername());
             List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(api.getUuid(), api.getOrganization());
             apiMgtDAO = ApiMgtDAO.getInstance();
             for (SubscribedAPI usage : apiUsages) {

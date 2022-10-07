@@ -24,9 +24,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
-import org.wso2.carbon.context.CarbonContext;
 
 public class OnPremResolver implements OrganizationResolver {
     public static final String HEADER_X_WSO2_TENANT = "x-wso2-tenant";
@@ -43,7 +43,7 @@ public class OnPremResolver implements OrganizationResolver {
         if (requestedTenantDomain != null) {
             String header = requestedTenantDomain.get(0).toString();
             if (StringUtils.isEmpty(header)) {
-                tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+                tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
             } else {
                 tenantDomain = header;
             }
@@ -59,7 +59,7 @@ public class OnPremResolver implements OrganizationResolver {
             }
         }
         if (StringUtils.isEmpty(tenantDomain)) {
-            tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
         }
         // Set "carbon.super" if tenantDomain is still not resolved.
         if (StringUtils.isEmpty(tenantDomain)) {

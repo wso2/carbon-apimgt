@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
-import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -90,12 +90,12 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
         String applicationUUID = event.getApplicationUUID();
 
         try {
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(UserContext
+                    .getThreadLocalUserContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
 
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(UserContext
+                    .getThreadLocalUserContext().getUsername());
             Application application = apiMgtDAO.getApplicationByUUID(applicationUUID);
             Set<APIKey> consumerKeys  = apiConsumer.getApplicationKeysOfApplication(application.getId());
             for (APIKey apiKey : consumerKeys) {
@@ -126,12 +126,12 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
         String applicationUUID = event.getApplicationUUID();
 
         try {
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(UserContext
+                    .getThreadLocalUserContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
 
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(UserContext
+                    .getThreadLocalUserContext().getUsername());
             Application application = apiMgtDAO.getApplicationByUUID(applicationUUID);
             Set<APIKey> consumerKeys  = apiConsumer.getApplicationKeysOfApplication(application.getId());
             for (APIKey apiKey : consumerKeys) {
@@ -162,8 +162,8 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
         String applicationUUID = event.getApplicationUUID();
 
         try {
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(UserContext
+                    .getThreadLocalUserContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
             Application application = apiProvider.getApplicationByUUID(applicationUUID);
 

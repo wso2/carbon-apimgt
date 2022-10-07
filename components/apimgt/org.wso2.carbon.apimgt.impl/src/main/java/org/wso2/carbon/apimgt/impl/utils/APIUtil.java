@@ -192,6 +192,7 @@ import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.proxy.ExtendedProxyRoutePlanner;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.resolver.OnPremResolver;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.UserConstants;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
@@ -230,16 +231,6 @@ import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
-import org.wso2.carbon.user.api.ClaimManager;
-import org.wso2.carbon.user.api.ClaimMapping;
-import org.wso2.carbon.user.api.Permission;
-import org.wso2.carbon.user.api.RealmConfiguration;
-import org.wso2.carbon.user.api.Tenant;
-import org.wso2.carbon.user.api.UserStoreException;
-//import org.wso2.carbon.user.api.UserStoreManager;
-import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -877,7 +868,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, apiProduct.getApiSecurity());
 
             //Validate if the API has an unsupported context before setting it in the artifact
-            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
             if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
                 String invalidContext = File.separator + APIConstants.VERSION_PLACEHOLDER;
                 if (invalidContext.equals(apiProduct.getContextTemplate())) {
@@ -2862,11 +2853,10 @@ public final class APIUtil {
      * @throws APIManagementException
      */
     public static void createSubscriberRole(String roleName, int tenantId) throws APIManagementException {
-
-        Permission[] subscriberPermissions = new Permission[]{
-                new Permission(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION),
-                new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserConstants.EXECUTE_ACTION)};
-        createRole(roleName, subscriberPermissions, tenantId);
+        Map<String, String> permissions = new HashMap<>();
+        permissions.put(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION);
+        permissions.put(APIConstants.Permissions.API_SUBSCRIBE, UserConstants.EXECUTE_ACTION);
+        createRole(roleName, permissions, tenantId);
     }
 
     /**
@@ -2877,11 +2867,10 @@ public final class APIUtil {
      * @throws APIManagementException
      */
     public static void createPublisherRole(String roleName, int tenantId) throws APIManagementException {
-
-        Permission[] publisherPermissions = new Permission[]{
-                new Permission(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION),
-                new Permission(APIConstants.Permissions.API_PUBLISH, UserConstants.EXECUTE_ACTION)};
-        createRole(roleName, publisherPermissions, tenantId);
+        Map<String, String> permissions = new HashMap<>();
+        permissions.put(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION);
+        permissions.put(APIConstants.Permissions.API_PUBLISH, UserConstants.EXECUTE_ACTION);
+        createRole(roleName, permissions, tenantId);
     }
 
     /**
@@ -2892,13 +2881,12 @@ public final class APIUtil {
      * @throws APIManagementException
      */
     public static void createCreatorRole(String roleName, int tenantId) throws APIManagementException {
-
-        Permission[] creatorPermissions = new Permission[]{
-                new Permission(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION),
-                new Permission(APIConstants.Permissions.API_CREATE, UserConstants.EXECUTE_ACTION),
-                new Permission(APIConstants.Permissions.CONFIGURE_GOVERNANCE, UserConstants.EXECUTE_ACTION),
-                new Permission(APIConstants.Permissions.RESOURCE_GOVERN, UserConstants.EXECUTE_ACTION)};
-        createRole(roleName, creatorPermissions, tenantId);
+        Map<String, String> permissions = new HashMap<>();
+        permissions.put(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION);
+        permissions.put(APIConstants.Permissions.API_CREATE, UserConstants.EXECUTE_ACTION);
+        permissions.put(APIConstants.Permissions.CONFIGURE_GOVERNANCE, UserConstants.EXECUTE_ACTION);
+        permissions.put(APIConstants.Permissions.RESOURCE_GOVERN, UserConstants.EXECUTE_ACTION);
+        createRole(roleName, permissions, tenantId);
     }
 
     /**
@@ -2909,14 +2897,12 @@ public final class APIUtil {
      * @throws APIManagementException
      */
     public static void createDevOpsRole(String roleName, int tenantId) throws APIManagementException {
-
-        Permission[] devOpsPermissions = new Permission[]{
-                new Permission(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION),
-                new Permission(APIConstants.Permissions.API_CREATE, UserConstants.EXECUTE_ACTION),
-                new Permission(APIConstants.Permissions.API_PUBLISH, UserConstants.EXECUTE_ACTION),
-                new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserConstants.EXECUTE_ACTION),
-        };
-        createRole(roleName, devOpsPermissions, tenantId);
+        Map<String, String> permissions = new HashMap<>();
+        permissions.put(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION);
+        permissions.put(APIConstants.Permissions.API_CREATE, UserConstants.EXECUTE_ACTION);
+        permissions.put(APIConstants.Permissions.API_PUBLISH, UserConstants.EXECUTE_ACTION);
+        permissions.put(APIConstants.Permissions.API_SUBSCRIBE, UserConstants.EXECUTE_ACTION);
+        createRole(roleName, permissions, tenantId);
     }
 
     /**
@@ -2927,11 +2913,9 @@ public final class APIUtil {
      * @throws APIManagementException
      */
     public static void createObserverRole(String roleName, int tenantId) throws APIManagementException {
-
-        Permission[] observerPermissions = new Permission[]{
-                new Permission(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION)
-        };
-        createRole(roleName, observerPermissions, tenantId);
+        Map<String, String> permissions = new HashMap<>();
+        permissions.put(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION);
+        createRole(roleName, permissions, tenantId);
     }
 
     /**
@@ -2942,9 +2926,8 @@ public final class APIUtil {
      * @throws APIManagementException
      */
     public static void createIntegrationDeveloperRole(String roleName, int tenantId) throws APIManagementException {
-
-        Permission[] integrationDeveloperPermissions = new Permission[]{};
-        createRole(roleName, integrationDeveloperPermissions, tenantId);
+        Map<String, String> permissions = new HashMap<>();
+        createRole(roleName, permissions, tenantId);
     }
 
     /**
@@ -2955,10 +2938,9 @@ public final class APIUtil {
      * @throws APIManagementException
      */
     public static void createAnalyticsRole(String roleName, int tenantId) throws APIManagementException {
-
-        Permission[] analyticsPermissions = new Permission[]{
-                new Permission(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION)};
-        createRole(roleName, analyticsPermissions, tenantId);
+        Map<String, String> permissions = new HashMap<>();
+        permissions.put(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION);
+        createRole(roleName, permissions, tenantId);
     }
 
     /**
@@ -2969,32 +2951,11 @@ public final class APIUtil {
      * @param tenantId    id of the tenant
      * @throws APIManagementException
      */
-    public static void createRole(String roleName, Permission[] permissions, int tenantId)
+    public static void createRole(String roleName, Map<String, String> permissions, int tenantId)
             throws APIManagementException {
-
         try {
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-            UserRealm realm;
-            org.wso2.carbon.user.api.UserRealm tenantRealm;
-            UserStoreManager manager;
-
-            if (tenantId < 0) {
-                realm = realmService.getBootstrapRealm();
-                manager = realm.getUserStoreManager();
-            } else {
-                tenantRealm = realmService.getTenantUserRealm(tenantId);
-                manager = tenantRealm.getUserStoreManager();
-            }
-            if (!manager.isExistingRole(roleName)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Creating role: " + roleName);
-                }
-                String tenantAdminName = ServiceReferenceHolder.getInstance().getRealmService()
-                        .getTenantUserRealm(tenantId).getRealmConfiguration().getAdminUserName();
-                String[] userList = new String[]{tenantAdminName};
-                manager.addRole(roleName, userList, permissions);
-            }
-        } catch (UserStoreException e) {
+            UserManagerHolder.getUserManager().createRole(roleName, permissions, tenantId);
+        } catch (UserException e) {
             throw new APIManagementException("Error while creating role: " + roleName, e);
         }
     }
@@ -3013,33 +2974,13 @@ public final class APIUtil {
             throw new APIManagementException("Required subscriber role parameter missing "
                     + "in the self sign up configuration");
         }
+        Map<String, String> permissions = new HashMap<>();
+        permissions.put("/permission/admin/login", UserConstants.EXECUTE_ACTION);
+        permissions.put(APIConstants.Permissions.API_SUBSCRIBE, UserConstants.EXECUTE_ACTION);
 
         try {
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-            UserRealm realm;
-            org.wso2.carbon.user.api.UserRealm tenantRealm;
-            UserStoreManager manager;
-
-            if (tenantId < 0) {
-                realm = realmService.getBootstrapRealm();
-                manager = realm.getUserStoreManager();
-            } else {
-                tenantRealm = realmService.getTenantUserRealm(tenantId);
-                manager = tenantRealm.getUserStoreManager();
-            }
-            if (!manager.isExistingRole(role)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Creating subscriber role: " + role);
-                }
-                Permission[] subscriberPermissions = new Permission[]{
-                        new Permission("/permission/admin/login", UserConstants.EXECUTE_ACTION),
-                        new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserConstants.EXECUTE_ACTION)};
-                String tenantAdminName = ServiceReferenceHolder.getInstance().getRealmService()
-                        .getTenantUserRealm(tenantId).getRealmConfiguration().getAdminUserName();
-                String[] userList = new String[]{tenantAdminName};
-                manager.addRole(role, userList, subscriberPermissions);
-            }
-        } catch (UserStoreException e) {
+            UserManagerHolder.getUserManager().createRole(role, permissions, tenantId);
+        } catch (UserException e) {
             throw new APIManagementException("Error while creating subscriber role: " + role + " - "
                     + "Self registration might not function properly.", e);
         }
@@ -3064,19 +3005,6 @@ public final class APIUtil {
     public static float getAverageRating(int apiId) throws APIManagementException {
 
         return ApiMgtDAO.getInstance().getAverageRating(apiId);
-    }
-
-    public static List<Tenant> getAllTenantsWithSuperTenant() throws UserStoreException {
-
-        Tenant[] tenants = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
-        ArrayList<Tenant> tenantArrayList = new ArrayList<Tenant>();
-        Collections.addAll(tenantArrayList, tenants);
-        Tenant superAdminTenant = new Tenant();
-        superAdminTenant.setDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        superAdminTenant.setId(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID);
-        superAdminTenant.setAdminName(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
-        tenantArrayList.add(superAdminTenant);
-        return tenantArrayList;
     }
 
     /**
@@ -4062,7 +3990,6 @@ public final class APIUtil {
      * @return System properties resolved text
      */
     public static String replaceSystemProperty(String text) {
-
         int indexOfStartingChars = -1;
         int indexOfClosingBrace;
 
@@ -4083,14 +4010,12 @@ public final class APIUtil {
                     propValue = ServiceReferenceHolder.getContextService().getServerConfigContext().getContextRoot();
                 } else if ("admin.username".equals(sysProp) || "admin.password".equals(sysProp)) {
                     try {
-                        RealmConfiguration realmConfig =
-                                new RealmConfigXMLProcessor().buildRealmConfigurationFromFile();
                         if ("admin.username".equals(sysProp)) {
-                            propValue = realmConfig.getAdminUserName();
+                            propValue = UserManagerHolder.getUserManager().getPropertyFromFile("admin.username");
                         } else {
-                            propValue = realmConfig.getAdminPassword();
+                            propValue = UserManagerHolder.getUserManager().getPropertyFromFile("admin.password");
                         }
-                    } catch (UserStoreException e) {
+                    } catch (UserException e) {
                         // Can't throw an exception because the server is
                         // starting and can't be halted.
                         log.error("Unable to build the Realm Configuration", e);
@@ -7476,7 +7401,7 @@ public final class APIUtil {
     }
 
     public static Map<String, Environment> getEnvironments() throws APIManagementException {
-        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
         // get dynamic gateway environments read from database
         Map<String, Environment> envFromDB = ApiMgtDAO.getInstance().getAllEnvironments(tenantDomain).stream()
                 .collect(Collectors.toMap(Environment::getName, env -> env));
@@ -8593,19 +8518,9 @@ public final class APIUtil {
      */
     public static SortedMap<String, String> getClaims(String endUserName, int tenantId, String dialectURI)
             throws APIManagementException {
-
-        SortedMap<String, String> claimValues;
         try {
-            ClaimManager claimManager = ServiceReferenceHolder.getInstance().getRealmService().
-                    getTenantUserRealm(tenantId).getClaimManager();
-            ClaimMapping[] claims = claimManager.getAllClaimMappings(dialectURI);
-            String[] claimURIs = claimMappingtoClaimURIString(claims);
-            UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance().getRealmService().
-                    getTenantUserRealm(tenantId).getUserStoreManager();
-            String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(endUserName);
-            claimValues = new TreeMap(userStoreManager.getUserClaimValues(tenantAwareUserName, claimURIs, null));
-            return claimValues;
-        } catch (UserStoreException e) {
+            return UserManagerHolder.getUserManager().getClaims(endUserName, tenantId, dialectURI);
+        } catch (UserException e) {
             throw new APIManagementException("Error while retrieving user claim values from user store", e,
                     ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         }
@@ -8620,37 +8535,14 @@ public final class APIUtil {
      * @throws APIManagementException
      */
     public static String getClaimDisplayName(String claimURI, String subscriber) throws APIManagementException {
-
         String tenantDomain = MultitenantUtils.getTenantDomain(subscriber);
-        int tenantId;
-        String displayName;
         try {
-            tenantId = getTenantId(tenantDomain);
-            ClaimManager claimManager = ServiceReferenceHolder.getInstance().getRealmService().
-                    getTenantUserRealm(tenantId).getClaimManager();
-            displayName = claimManager.getClaim(claimURI).getDisplayTag();
-        } catch (UserStoreException e) {
+            int tenantId = getTenantId(tenantDomain);
+            return UserManagerHolder.getUserManager().getClaimDisplayName(claimURI, subscriber, tenantId);
+        } catch (UserException e) {
             throw new APIManagementException("Error while retrieving claim values from user store", e,
                     ExceptionCodes.ERROR_RETRIEVING_CLAIM_VALUES);
         }
-        return displayName;
-    }
-
-    /**
-     * Helper method to convert array of <code>Claim</code> object to
-     * array of <code>String</code> objects corresponding to the ClaimURI values.
-     *
-     * @param claims claims object
-     * @return String array of claims
-     */
-    private static String[] claimMappingtoClaimURIString(ClaimMapping[] claims) {
-
-        String[] temp = new String[claims.length];
-        for (int i = 0; i < claims.length; i++) {
-            temp[i] = claims[i].getClaim().getClaimUri();
-
-        }
-        return temp;
     }
 
     public static KeyManagerConfigurationDTO getAndSetDefaultKeyManagerConfiguration(
