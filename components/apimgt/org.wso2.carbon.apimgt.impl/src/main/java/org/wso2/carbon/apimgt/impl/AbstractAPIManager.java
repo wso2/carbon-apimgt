@@ -48,7 +48,7 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
-import org.wso2.carbon.apimgt.impl.dao.impl.ApiDAOImpl;
+import org.wso2.carbon.apimgt.impl.dao.impl.*;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -85,6 +85,11 @@ public abstract class AbstractAPIManager implements APIManager {
     protected Log log = LogFactory.getLog(getClass());
     protected ApiMgtDAO apiMgtDAO;
     protected ApiDAOImpl apiDAOImpl;
+    protected EnvironmentDAOImpl environmentDAO;
+    protected ApplicationDAOImpl applicationDAOImpl;
+    protected TierDAOImpl tierDAOImpl;
+    protected WorkflowDAOImpl workflowDAOImpl;
+    protected PolicyDAOImpl policyDAOImpl;
     protected EnvironmentSpecificAPIPropertyDAO environmentSpecificAPIPropertyDAO;
     protected ScopesDAO scopesDAO;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
@@ -109,6 +114,11 @@ public abstract class AbstractAPIManager implements APIManager {
         apiMgtDAO = ApiMgtDAO.getInstance();
         scopesDAO = ScopesDAO.getInstance();
         environmentSpecificAPIPropertyDAO = EnvironmentSpecificAPIPropertyDAO.getInstance();
+        environmentDAO = EnvironmentDAOImpl.getInstance();
+        applicationDAOImpl = ApplicationDAOImpl.getInstance();
+        tierDAOImpl = TierDAOImpl.getInstance();
+        workflowDAOImpl = WorkflowDAOImpl.getInstance();
+        policyDAOImpl = PolicyDAOImpl.getInstance();
 
         try {
             if (username == null) {

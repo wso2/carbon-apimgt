@@ -20,11 +20,17 @@
 package org.wso2.carbon.apimgt.impl.dao;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.persistence.dto.*;
+import org.wso2.carbon.apimgt.persistence.dto.Documentation;
+import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
 import org.wso2.carbon.apimgt.persistence.exceptions.*;
+
+import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -415,5 +421,604 @@ public interface ApiDAO {
      * @throws APIManagementException if an error occurs
      */
     int getAPIID(String uuid) throws APIManagementException;
+
+    /**
+     * Get count of the revisions created for a particular API.
+     *
+     * @return revision count
+     * @throws APIManagementException if an error occurs while retrieving revision count
+     */
+    int getRevisionCountByAPI(String apiUUID) throws APIManagementException;
+
+    /**
+     * Get most recent revision id of the revisions created for a particular API.
+     *
+     * @return revision id
+     * @throws APIManagementException if an error occurs while retrieving revision id
+     */
+    int getMostRecentRevisionId(String apiUUID) throws APIManagementException;
+
+    /**
+     * Get revision details by providing revision UUID
+     *
+     * @return revision object
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    APIRevision getRevisionByRevisionUUID(String revisionUUID) throws APIManagementException;
+
+    /**
+     * Get revision UUID providing revision number
+     *
+     * @param revisionNum Revision number
+     * @param apiUUID     UUID of the API
+     * @return UUID of the revision
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    String getRevisionUUID(String revisionNum, String apiUUID) throws APIManagementException;
+
+    /**
+     * Get revision UUID providing revision number and organization
+     *
+     * @param revisionNum   Revision number
+     * @param apiUUID       UUID of the API
+     * @param organization  organization ID of the API
+     * @return UUID of the revision
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    String getRevisionUUIDByOrganization(String revisionNum, String apiUUID, String organization) throws APIManagementException;
+
+    /**
+     * Get the earliest revision UUID from the revision list for a given API
+     *
+     * @param apiUUID UUID of the API
+     * @return UUID of the revision
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    String getEarliestRevision(String apiUUID) throws APIManagementException;
+
+    /**
+     * Get the latest revision UUID from the revision list for a given API
+     *
+     * @param apiUUID UUID of the API
+     * @return UUID of the revision
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    String getLatestRevisionUUID(String apiUUID) throws APIManagementException;
+
+    /**
+     * Get revision details by providing revision UUID
+     *
+     * @return revisions List object
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    List<APIRevision> getRevisionsListByAPIUUID(String apiUUID) throws APIManagementException;
+
+    /**
+     * Get APIRevisionDeployment details by providing API uuid
+     *
+     * @return List<APIRevisionDeployment> object
+     * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
+     */
+    List<APIRevisionDeployment> getAPIRevisionDeploymentByApiUUID(String apiUUID) throws APIManagementException;
+
+    /**
+     * Get APIRevisionDeployment details by providing ApiUUID
+     *
+     * @return List<APIRevisionDeployment> object
+     * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
+     */
+    List<APIRevisionDeployment> getAPIRevisionDeploymentsByApiUUID(String apiUUID) throws APIManagementException;
+
+    /**
+     * Remove an API revision Deployment mapping record to the database
+     *
+     * @param apiUUID          uuid of the revision
+     * @param deployments content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    void removeAPIRevisionDeployment(String apiUUID, Set<APIRevisionDeployment> deployments)
+            throws APIManagementException;
+
+    /**
+     * Adds an API revision Deployment mapping record to the database
+     *
+     * @param apiRevisionId          uuid of the revision
+     * @param apiRevisionDeployments content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    void addAPIRevisionDeployment(String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments)
+            throws APIManagementException;
+
+    /**
+     * Update Default API Published Version
+     *
+     * @param identifier APIIdentifier
+     * @throws APIManagementException if an error occurs when updating
+     */
+    void updateDefaultAPIPublishedVersion(APIIdentifier identifier)
+            throws APIManagementException;
+
+    /**
+     * Get DeployedAPIRevision details by providing ApiUUID
+     *
+     * @return List<DeployedAPIRevision> object
+     * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
+     */
+    List<DeployedAPIRevision> getDeployedAPIRevisionByApiUUID(String apiUUID) throws APIManagementException;
+
+    /**
+     * Remove an deployed API revision in the database
+     *
+     * @param apiUUID     uuid of the revision
+     * @param deployments content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    void removeDeployedAPIRevision(String apiUUID, Set<DeployedAPIRevision> deployments)
+            throws APIManagementException;
+
+    /**
+     * Adds an deployed API revision to the database
+     *
+     * @param deployedAPIRevisionList content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    void addDeployedAPIRevision(String apiRevisionId, List<DeployedAPIRevision> deployedAPIRevisionList)
+            throws APIManagementException;
+
+    /**
+     * Update API revision Deployment mapping record
+     *
+     * @param apiUUID     API UUID
+     * @param deployments content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    void updateAPIRevisionDeployment(String apiUUID, Set<APIRevisionDeployment> deployments)
+            throws APIManagementException;
+
+    /**
+     * Get APIRevisionDeployment details by providing deployment name and revision uuid
+     *
+     * @return APIRevisionDeployment object
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    APIRevisionDeployment getAPIRevisionDeploymentByNameAndRevsionID(String name, String revisionId) throws APIManagementException;
+
+    /**
+     * Get APIRevisionDeployment details by providing revision uuid
+     *
+     * @return List<APIRevisionDeployment> object
+     * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
+     */
+    List<APIRevisionDeployment> getAPIRevisionDeploymentByRevisionUUID(String revisionUUID) throws APIManagementException;
+
+    /**
+     * Remove an API revision Deployment mapping record to the database
+     *
+     * @param apiRevisionId          uuid of the revision
+     * @param apiRevisionDeployments content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    void removeAPIRevisionDeployment(String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments)
+            throws APIManagementException;
+
+    /**
+     * Retrieve basic information about the given API by the UUID quering only from AM_API
+     *
+     * @param apiId UUID of the API
+     * @return basic information about the API
+     * @throws APIManagementException error while getting the API information from AM_API
+     */
+    APIInfo getAPIInfoByUUID(String apiId) throws APIManagementException;
+
+    /**
+     * Get the set of URI templates that have Operation policies
+     *
+     * @param apiUUID Unique Identifier of API
+     * @return URITemplate set
+     * @throws APIManagementException
+     */
+    Set<URITemplate> getURITemplatesWithOperationPolicies(String apiUUID) throws APIManagementException;
+
+    /**
+     * Add a new API specific operation policy to the database
+     *
+     * @param apiUUID      Unique Identifier of API
+     * @param revisionUUID Unique Identifier of API revision
+     * @param policyData   Unique Identifier of API
+     * @return UUID of the newly created shared policy
+     * @throws APIManagementException
+     */
+    String addAPISpecificOperationPolicy(String apiUUID, String revisionUUID, OperationPolicyData policyData)
+            throws APIManagementException;
+
+    /**
+     * Add a new common operation policy to the database. This will first add the operation policy content to the
+     * AM_OPERATION_POLICY table and another entry to AM_COMMON_OPERATION_POLICY table.
+     *
+     * @param policyData Operation policy data.
+     * @return UUID of the newly created shared policy
+     * @throws APIManagementException
+     */
+    String addCommonOperationPolicy(OperationPolicyData policyData) throws APIManagementException;
+
+    /**
+     * Retrieve an API Specific operation policy by providing the policy name. In order to narrow down the specific policy
+     * this needs policy name, apiUUID, api revision UUID (if exists) and organization. If revision UUID is not provided,
+     * that means the policy is not a revisioned policy.
+     *
+     * @param policyName             Policy name
+     * @param apiUUID                UUID of API
+     * @param revisionUUID           UUID of API revision
+     * @param organization           Organization name
+     * @param isWithPolicyDefinition Include the policy definition to the output or not
+     * @return operation policy
+     * @throws APIManagementException
+     */
+    OperationPolicyData getAPISpecificOperationPolicyByPolicyName(String policyName, String policyVersion,
+                                                                  String apiUUID, String revisionUUID,
+                                                                  String organization, boolean isWithPolicyDefinition)
+            throws APIManagementException;
+
+    /**
+     * Retrieve a common operation policy by providing the policy name and organization
+     *
+     * @param policyName             Policy name
+     * @param policyVersion          Policy version
+     * @param organization           Organization name
+     * @param isWithPolicyDefinition Include the policy definition to the output or not
+     * @return operation policy
+     * @throws APIManagementException
+     */
+    OperationPolicyData getCommonOperationPolicyByPolicyName(String policyName, String policyVersion,
+                                                             String organization, boolean isWithPolicyDefinition)
+            throws APIManagementException;
+
+    /**
+     * Update an existing operation policy
+     *
+     * @param policyId   Shared policy UUID
+     * @param policyData Updated policy definition
+     * @throws APIManagementException
+     */
+    void updateOperationPolicy(String policyId, OperationPolicyData policyData) throws APIManagementException;
+
+    /**
+     * Get the list of all operation policies. If the API UUID is provided, this will return all the operation policies
+     * for that API. If not, it will return the common operation policies which are not bound to any API.
+     * This list will include policy specification of each policy and policy ID. It will not contain the
+     * policy definition as it is not useful for the operation.
+     *
+     * @param apiUUID      UUID of the API if exists. Null for common operation policies
+     * @param organization Organization name
+     * @return List of Operation Policies
+     * @throws APIManagementException
+     */
+    List<OperationPolicyData> getLightWeightVersionOfAllOperationPolicies(String apiUUID,
+                                                                          String organization)
+            throws APIManagementException;
+
+    /**
+     * Delete an operation policy by providing the policy UUID
+     *
+     * @param policyId UUID of the policy to be deleted
+     * @return True if deleted successfully
+     * @throws APIManagementException
+     */
+    void deleteOperationPolicyByPolicyId(String policyId) throws APIManagementException;
+
+    /**
+     * Get a provided api uuid is in the revision db table
+     *
+     * @return String apiUUID
+     * @throws APIManagementException if an error occurs while checking revision table
+     */
+    APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException;
+
+    /**
+     * Get All API Usage by given provider
+     *
+     * @param providerName Name of the provider
+     * @return UserApplicationAPIUsage of given provider
+     * @throws APIManagementException if failed to get UserApplicationAPIUsage for given provider
+     */
+    UserApplicationAPIUsage[] getAllAPIUsageByProvider(String providerName) throws APIManagementException;
+
+    /**
+     * Get API Identifier by the API UUID.
+     *
+     * @param uuid uuid of the API
+     * @return API Identifier
+     * @throws APIManagementException if an error occurs
+     */
+    APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Get All API Usage by given provider and API UUID
+     *
+     * @param uuid API uuid
+     * @param organization Organization of the API
+     * @return UserApplicationAPIUsage of given provider
+     * @throws APIManagementException if failed to get UserApplicationAPIUsage for given provider
+     */
+    UserApplicationAPIUsage[] getAllAPIUsageByProviderAndApiId(String uuid, String organization)
+            throws APIManagementException;
+
+    /**
+     * Get All API Product Usage by given provider
+     *
+     * @param providerName Name of the provider
+     * @return UserApplicationAPIUsage of given provider
+     * @throws APIManagementException if failed to get UserApplicationAPIUsage for given provider
+     */
+    UserApplicationAPIUsage[] getAllAPIProductUsageByProvider(String providerName) throws APIManagementException;
+
+    /**
+     * Get All Subscribers per given API
+     *
+     * @param identifier API Identifier
+     * @return Subscribers of given API
+     * @throws APIManagementException
+     */
+    Set<Subscriber> getSubscribersOfAPI(APIIdentifier identifier) throws APIManagementException;
+
+    /**
+     * Get all subscriptions of a given API
+     *
+     * @param apiName    Name of the API
+     * @param apiVersion Version of the API
+     * @param provider   Name of API creator
+     * @return All subscriptions of a given API
+     * @throws APIManagementException
+     */
+    List<SubscribedAPI> getSubscriptionsOfAPI(String apiName, String apiVersion, String provider)
+            throws APIManagementException;
+
+    /**
+     * Get All Subscribers count per given API
+     *
+     * @param identifier API Identifier
+     * @return Subscribers Count of given API
+     * @throws APIManagementException
+     */
+    long getAPISubscriptionCountByAPI(Identifier identifier) throws APIManagementException;
+
+    /**
+     * Get details of the subscription block condition by condition value and tenant domain
+     *
+     * @param conditionValue condition value of the block condition
+     * @param tenantDomain   tenant domain of the block condition
+     * @return Block condition
+     * @throws APIManagementException
+     */
+    BlockConditionsDTO getSubscriptionBlockCondition(String conditionValue, String tenantDomain)
+            throws APIManagementException;
+
+    /**
+     * Get Product Mappings by given API
+     *
+     * @param api API
+     * @return List of mapped API product resources
+     * @throws APIManagementException
+     */
+    List<APIProductResource> getProductMappingsForAPI(API api) throws APIManagementException;
+
+    /**
+     * Get Key Manager Configurations by given Organization
+     *
+     * @param organization Organization name
+     * @return List of Key Manager Configurations DTOs
+     * @throws APIManagementException
+     */
+    List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization)
+            throws APIManagementException;
+
+
+    /**
+     * Get the local scope keys set of the API.
+     *
+     * @param uuid API uuid
+     * @param tenantId      Tenant Id
+     * @return Local Scope keys set
+     * @throws APIManagementException if fails to get local scope keys for API
+     */
+    Set<String> getAllLocalScopeKeysForAPI(String uuid, int tenantId) throws APIManagementException;
+
+    /**
+     * Get the versioned local scope keys set of the API.
+     *
+     * @param uuid API uuid
+     * @param tenantId      Tenant Id
+     * @return Local Scope keys set
+     * @throws APIManagementException if fails to get local scope keys for API
+     */
+    Set<String> getVersionedLocalScopeKeysForAPI(String uuid, int tenantId) throws APIManagementException;
+
+    /**
+     * Update URI templates define for an API.
+     *
+     * @param api      API to update
+     * @param tenantId tenant Id
+     * @throws APIManagementException if fails to update URI template of the API.
+     */
+    void updateURITemplates(API api, int tenantId) throws APIManagementException;
+
+    /**
+     * Add Operation Policy Mapping.
+     *
+     * @param uriTemplates URITemplates objects
+     * @throws APIManagementException if fails
+     */
+    void addOperationPolicyMapping(Set<URITemplate> uriTemplates) throws APIManagementException;
+
+    /**
+     * Get subscriber name using subscription ID
+     *
+     * @param subscriptionId
+     * @return subscriber name
+     * @throws APIManagementException
+     */
+    String getSubscriberName(String subscriptionId) throws APIManagementException;
+
+    /**
+     * Clone an operation policy to the API. This method is used to clone policy to a newly created api version.
+     * Cloning a common policy to API.
+     * Cloning a dependent policy of a product
+     * Each of these scenarios, original APIs' policy ID will be recorded as the cloned policy ID.
+     *
+     * @param apiUUID      UUID of the API
+     * @param operationPolicyData
+     * @return cloned policyID
+     * @throws APIManagementException
+     **/
+    String cloneOperationPolicy(String apiUUID, OperationPolicyData operationPolicyData)
+            throws APIManagementException;
+
+    /**
+     * Retrieve the Unique Identifier of the Service used in API
+     *
+     * @param apiId    Unique Identifier of API
+     * @param tenantId Tenant ID
+     * @return Service Key
+     * @throws APIManagementException
+     */
+    String retrieveServiceKeyByApiId(int apiId, int tenantId) throws APIManagementException;
+
+    /**
+     * Returns the details of all the life-cycle changes done per API or API Product
+     *
+     * @param uuid Unique UUID of the API or API Product
+     * @return List of lifecycle events per given API or API Product
+     * @throws APIManagementException if failed to copy docs
+     */
+    List<LifeCycleEvent> getLifeCycleEvents(String uuid) throws APIManagementException;
+
+    /**
+     * This method is used to update the subscription
+     *
+     * @param identifier    APIIdentifier
+     * @param subStatus     Subscription Status[BLOCKED/UNBLOCKED]
+     * @param applicationId Application id
+     * @param organization  Organization
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update subscriber
+     */
+    void updateSubscription(APIIdentifier identifier, String subStatus, int applicationId, String organization)
+            throws APIManagementException;
+
+    /**
+     * This method is used to update the subscription
+     *
+     * @param subscribedAPI subscribedAPI object that represents the new subscription detals
+     * @throws APIManagementException if failed to update subscription
+     */
+    void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException;
+
+    /**
+     * Get the unversioned local scope keys set of the API.
+     *
+     * @param uuid API uuid
+     * @param tenantId      Tenant Id
+     * @return Local Scope keys set
+     * @throws APIManagementException if fails to get local scope keys for API
+     */
+    Set<String> getUnversionedLocalScopeKeysForAPI(String uuid, int tenantId)
+            throws APIManagementException;
+
+    /**
+     * Delete API.
+     *
+     * @param uuid API uuid
+     * @throws APIManagementException if fails to delete API
+     */
+    void deleteAPI(String uuid) throws APIManagementException;
+
+    /**
+     * Get external APIStores details which are stored in database
+     *
+     * @param apiIdentifier API Identifier
+     * @throws APIManagementException if failed to get external APIStores
+     */
+    String getLastPublishedAPIVersionFromAPIStore(APIIdentifier apiIdentifier, String storeName)
+            throws APIManagementException;
+
+    /**
+     * Delete the records of external APIStore details.
+     *
+     * @param uuid       API uuid
+     * @param apiStoreSet APIStores set
+     * @return added/failed
+     * @throws APIManagementException
+     */
+    boolean deleteExternalAPIStoresDetails(String uuid, Set<APIStore> apiStoreSet)
+            throws APIManagementException;
+
+    /**
+     * Update the records of external APIStore details.
+     *
+     * @param uuid       API uuid
+     * @param apiStoreSet APIStores set
+     * @throws APIManagementException
+     */
+    void updateExternalAPIStoresDetails(String uuid, Set<APIStore> apiStoreSet)
+            throws APIManagementException;
+
+    /**
+     * Store external APIStore details to which APIs successfully published
+     *
+     * @param uuid       API uuid
+     * @param apiStoreSet APIStores set
+     * @return added/failed
+     * @throws APIManagementException
+     */
+    boolean addExternalAPIStoresDetails(String uuid, Set<APIStore> apiStoreSet)
+            throws APIManagementException;
+
+    /**
+     * Return external APIStore details on successfully APIs published
+     *
+     * @param uuid API uuid
+     * @return Set of APIStore
+     * @throws APIManagementException
+     */
+    Set<APIStore> getExternalAPIStoresDetails(String uuid) throws APIManagementException;
+
+    /**
+     * Get API UUID by the API Identifier.
+     *
+     * @param identifier API Identifier
+     * @param organization identifier of the organization
+     * @return String UUID
+     * @throws APIManagementException if an error occurs
+     */
+    String getUUIDFromIdentifier(APIIdentifier identifier, String organization) throws APIManagementException;
+
+    /**
+     * Get API Product ID by the API Product Identifier.
+     *
+     * @param identifier API Product Identifier
+     * @return int ID
+     * @throws APIManagementException if an error occurs
+     */
+    int getAPIProductId(APIProductIdentifier identifier) throws APIManagementException;
+
+    /**
+     * Retrieve the gateway vendor of an API by providing the UUID
+     *
+     * @param apiId UUID of the API
+     * @return gatewayVendor of the API
+     * @throws APIManagementException
+     */
+    String getGatewayVendorByAPIUUID(String apiId) throws APIManagementException;
+
+    /**
+     * Return ids of the versions for the given name for the given provider
+     *
+     * @param apiName     api name
+     * @param apiProvider provider
+     * @return set ids
+     * @throws APIManagementException
+     */
+    List<API> getAllAPIVersions(String apiName, String apiProvider) throws APIManagementException;
+
+
 
 }
