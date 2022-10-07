@@ -317,10 +317,9 @@ public class ExportUtils {
     public static void addThumbnailToArchive(String archivePath, Identifier identifier, APIProvider apiProvider)
             throws APIImportExportException, APIManagementException {
 
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String localImagePath = archivePath + File.separator + ImportExportConstants.IMAGE_RESOURCE;
         try {
-            ResourceFile thumbnailResource = apiProvider.getIcon(identifier.getUUID(), tenantDomain);
+            ResourceFile thumbnailResource = apiProvider.getIcon(identifier.getUUID(), identifier.getOrganization());
             if (thumbnailResource != null) {
                 String mediaType = thumbnailResource.getContentType();
                 String extension = ImportExportConstants.fileExtensionMapping.get(mediaType);

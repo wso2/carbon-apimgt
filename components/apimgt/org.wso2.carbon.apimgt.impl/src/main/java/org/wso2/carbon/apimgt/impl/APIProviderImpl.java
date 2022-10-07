@@ -4712,6 +4712,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
                 APIIdentifier apiIdentifier = api.getId();
                 apiIdentifier.setUuid(uuid);
+                apiIdentifier.setOrganization(organization);
                 api.setId(apiIdentifier);
                 //Gateway type is obtained considering the gateway vendor.
                 api.setGatewayType(APIUtil.getGatewayType(publisherAPI.getGatewayVendor()));
