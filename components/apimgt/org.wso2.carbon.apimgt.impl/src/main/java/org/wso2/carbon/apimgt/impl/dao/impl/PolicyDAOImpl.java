@@ -21,9 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class PolicyDAOImpl implements PolicyDAO {
     private static final Log log = LogFactory.getLog(PolicyDAOImpl.class);
@@ -1528,6 +1526,268 @@ public class PolicyDAOImpl implements PolicyDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(deleteStatement, connection, null);
         }
+    }
+
+    @Override
+    public boolean isKeyTemplatesExist(GlobalPolicy policy) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            sqlQuery = SQLConstants.GET_GLOBAL_POLICY_KEY_TEMPLATE;
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, policy.getTenantId());
+            ps.setString(2, policy.getKeyTemplate());
+            ps.setString(3, policy.getPolicyName());
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while executing SQL to get GLOBAL_POLICY_KEY_TEMPLATE", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean hasApplicationPolicyAttachedToApplication(String policyName, String organization) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement =
+                         connection.prepareStatement(SQLConstants.ThrottleSQLConstants.TIER_HAS_ATTACHED_TO_APPLICATION)) {
+                preparedStatement.setString(1, organization);
+                preparedStatement.setString(2,policyName);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    return resultSet.next();
+                }
+            }
+        } catch (SQLException e) {
+            handleExceptionWithCode("Error while checking existence of Policy "
+                    + policyName + "Attached to Application.", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean hasSubscriptionPolicyAttached(String policyName, String organization) throws APIManagementException {
+
+        String sql = SQLConstants.ThrottleSQLConstants.TIER_HAS_ATTACHED_TO_SUBSCRIPTION_SUPER_TENANT;
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, organization);
+                preparedStatement.setString(2, policyName);
+                preparedStatement.setString(3, organization);
+                preparedStatement.setString(4, policyName);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    return resultSet.next();
+                }
+            }
+        } catch (SQLException e) {
+            handleExceptionWithCode("Error while checking existence of Policy "
+                    + policyName + "Attached to Subscription.", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean hasAPIPolicyAttached(String policyName, String organization) throws APIManagementException {
+
+        String sql = SQLConstants.ThrottleSQLConstants.TIER_HAS_ATTACHED_TO_API_RESOURCE_TENANT;
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, organization);
+                preparedStatement.setString(2, policyName);
+                preparedStatement.setString(3, organization);
+                preparedStatement.setString(4, policyName);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    return resultSet.next();
+                }
+            }
+        } catch (SQLException e) {
+            handleExceptionWithCode("Error while checking existence of Policy "
+                    + policyName + "Attached to API/Resouce.", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        return false;
+    }
+
+    @Override
+    public APIPolicy getAPIPolicyByUUID(String uuid) throws APIManagementException {
+
+        APIPolicy policy = null;
+        Connection connection = null;
+        PreparedStatement selectStatement = null;
+        ResultSet resultSet = null;
+
+        String sqlQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICY_BY_UUID_SQL;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICY_BY_UUID_SQL;
+        }
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            selectStatement = connection.prepareStatement(sqlQuery);
+            selectStatement.setString(1, uuid);
+
+            // Should return only single result
+            resultSet = selectStatement.executeQuery();
+            if (resultSet.next()) {
+                policy = new APIPolicy(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                setCommonPolicyDetails(policy, resultSet);
+                policy.setUserLevel(resultSet.getString(ThrottlePolicyConstants.COLUMN_APPLICABLE_LEVEL));
+                policy.setPipelines(getPipelines(policy.getPolicyId()));
+            }
+        } catch (SQLException e) {
+            handleExceptionWithCode("Failed to get api policy: " + uuid, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
+        }
+        return policy;
+    }
+
+    @Override
+    public ApplicationPolicy getApplicationPolicyByUUID(String uuid) throws APIManagementException {
+
+        ApplicationPolicy policy = null;
+        Connection connection = null;
+        PreparedStatement selectStatement = null;
+        ResultSet resultSet = null;
+
+        String sqlQuery = SQLConstants.GET_APPLICATION_POLICY_BY_UUID_SQL;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_APPLICATION_POLICY_BY_UUID_SQL;
+        }
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            selectStatement = connection.prepareStatement(sqlQuery);
+            selectStatement.setString(1, uuid);
+
+            // Should return only single row
+            resultSet = selectStatement.executeQuery();
+            if (resultSet.next()) {
+                policy = new ApplicationPolicy(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                setCommonPolicyDetails(policy, resultSet);
+            }
+        } catch (SQLException e) {
+            handleExceptionWithCode("Failed to get application policy: " + uuid, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
+        }
+        return policy;
+    }
+
+    @Override
+    public SubscriptionPolicy getSubscriptionPolicyByUUID(String uuid) throws APIManagementException {
+
+        SubscriptionPolicy policy = null;
+        Connection connection = null;
+        PreparedStatement selectStatement = null;
+        ResultSet resultSet = null;
+
+        String sqlQuery = SQLConstants.GET_SUBSCRIPTION_POLICY_BY_UUID_SQL;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_SUBSCRIPTION_POLICY_BY_UUID_SQL;
+        }
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            selectStatement = connection.prepareStatement(sqlQuery);
+            selectStatement.setString(1, uuid);
+
+            // Should return only single row
+            resultSet = selectStatement.executeQuery();
+            if (resultSet.next()) {
+                policy = new SubscriptionPolicy(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                setCommonPolicyDetails(policy, resultSet);
+                policy.setRateLimitCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
+                policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+                policy.setStopOnQuotaReach(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
+                policy.setBillingPlan(resultSet.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
+                policy.setGraphQLMaxDepth(resultSet.getInt(ThrottlePolicyConstants.COLUMN_MAX_DEPTH));
+                policy.setGraphQLMaxComplexity(resultSet.getInt(ThrottlePolicyConstants.COLUMN_MAX_COMPLEXITY));
+                policy.setSubscriberCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_CONNECTION_COUNT));
+                InputStream binary = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+                if (binary != null) {
+                    byte[] customAttrib = APIUtil.toByteArray(binary);
+                    policy.setCustomAttributes(customAttrib);
+                }
+                if (APIConstants.COMMERCIAL_TIER_PLAN.equals(resultSet.getString(
+                        ThrottlePolicyConstants.COLUMN_BILLING_PLAN))) {
+                    policy.setMonetizationPlan(resultSet.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
+                    Map<String, String> monetizationPlanProperties = new HashMap<String, String>();
+                    monetizationPlanProperties.put(APIConstants.Monetization.FIXED_PRICE,
+                            resultSet.getString(ThrottlePolicyConstants.COLUMN_FIXED_RATE));
+                    monetizationPlanProperties.put(APIConstants.Monetization.BILLING_CYCLE,
+                            resultSet.getString(ThrottlePolicyConstants.COLUMN_BILLING_CYCLE));
+                    monetizationPlanProperties.put(APIConstants.Monetization.PRICE_PER_REQUEST,
+                            resultSet.getString(ThrottlePolicyConstants.COLUMN_PRICE_PER_REQUEST));
+                    monetizationPlanProperties.put(APIConstants.Monetization.CURRENCY,
+                            resultSet.getString(ThrottlePolicyConstants.COLUMN_CURRENCY));
+                    policy.setMonetizationPlanProperties(monetizationPlanProperties);
+                }
+            }
+        } catch (SQLException e) {
+            handleExceptionWithCode("Failed to get subscription policy: " + uuid, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } catch (IOException e) {
+            handleExceptionWithCode("Error while converting input stream to byte array", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
+        }
+        return policy;
+    }
+
+    @Override
+    public GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_GLOBAL_POLICY_BY_UUID;
+
+        GlobalPolicy globalPolicy = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, uuid);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String siddhiQuery = null;
+                globalPolicy = new GlobalPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                globalPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
+                globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                globalPolicy.setUUID(rs.getString(ThrottlePolicyConstants.COLUMN_UUID));
+                globalPolicy.setTenantId(rs.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
+                globalPolicy.setDeployed(rs.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
+                InputStream siddhiQueryBlob = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
+                if (siddhiQueryBlob != null) {
+                    siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
+                }
+                globalPolicy.setSiddhiQuery(siddhiQuery);
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving global policy by uuid " + uuid, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return globalPolicy;
     }
 
 }

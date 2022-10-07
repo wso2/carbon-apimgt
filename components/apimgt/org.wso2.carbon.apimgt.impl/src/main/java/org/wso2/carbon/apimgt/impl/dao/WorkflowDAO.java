@@ -15,4 +15,13 @@ public interface WorkflowDAO {
      */
     WorkflowDTO retrieveWorkflowFromInternalReference(String workflowReference, String workflowType)
             throws APIManagementException;
+
+    /**
+     * Retries the WorkflowExternalReference for a subscription.
+     *
+     * @param subscriptionId ID of the subscription
+     * @return External workflow reference for the subscription <code>subscriptionId</code>
+     * @throws APIManagementException
+     */
+    String getExternalWorkflowReferenceForSubscription(int subscriptionId) throws APIManagementException;
 }

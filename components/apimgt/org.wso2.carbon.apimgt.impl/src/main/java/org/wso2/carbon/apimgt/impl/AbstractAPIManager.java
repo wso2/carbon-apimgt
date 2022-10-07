@@ -90,6 +90,9 @@ public abstract class AbstractAPIManager implements APIManager {
     protected TierDAOImpl tierDAOImpl;
     protected WorkflowDAOImpl workflowDAOImpl;
     protected PolicyDAOImpl policyDAOImpl;
+    protected BlockConditionDAOImpl blockConditionDAOImpl;
+    protected ScopeDAOImpl scopeDAOImpl;
+    protected CommentDAOImpl commentDAOImpl;
     protected EnvironmentSpecificAPIPropertyDAO environmentSpecificAPIPropertyDAO;
     protected ScopesDAO scopesDAO;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
@@ -119,6 +122,9 @@ public abstract class AbstractAPIManager implements APIManager {
         tierDAOImpl = TierDAOImpl.getInstance();
         workflowDAOImpl = WorkflowDAOImpl.getInstance();
         policyDAOImpl = PolicyDAOImpl.getInstance();
+        blockConditionDAOImpl = BlockConditionDAOImpl.getInstance();
+        scopeDAOImpl = ScopeDAOImpl.getInstance();
+        commentDAOImpl = CommentDAOImpl.getInstance();
 
         try {
             if (username == null) {
