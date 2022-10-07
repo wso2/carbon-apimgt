@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
 import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
@@ -890,6 +891,133 @@ public interface ApiDAO {
      * @throws APIManagementException if failed to copy docs
      */
     List<LifeCycleEvent> getLifeCycleEvents(String uuid) throws APIManagementException;
+
+    /**
+     * This method is used to update the subscription
+     *
+     * @param identifier    APIIdentifier
+     * @param subStatus     Subscription Status[BLOCKED/UNBLOCKED]
+     * @param applicationId Application id
+     * @param organization  Organization
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update subscriber
+     */
+    void updateSubscription(APIIdentifier identifier, String subStatus, int applicationId, String organization)
+            throws APIManagementException;
+
+    /**
+     * This method is used to update the subscription
+     *
+     * @param subscribedAPI subscribedAPI object that represents the new subscription detals
+     * @throws APIManagementException if failed to update subscription
+     */
+    void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException;
+
+    /**
+     * Get the unversioned local scope keys set of the API.
+     *
+     * @param uuid API uuid
+     * @param tenantId      Tenant Id
+     * @return Local Scope keys set
+     * @throws APIManagementException if fails to get local scope keys for API
+     */
+    Set<String> getUnversionedLocalScopeKeysForAPI(String uuid, int tenantId)
+            throws APIManagementException;
+
+    /**
+     * Delete API.
+     *
+     * @param uuid API uuid
+     * @throws APIManagementException if fails to delete API
+     */
+    void deleteAPI(String uuid) throws APIManagementException;
+
+    /**
+     * Get external APIStores details which are stored in database
+     *
+     * @param apiIdentifier API Identifier
+     * @throws APIManagementException if failed to get external APIStores
+     */
+    String getLastPublishedAPIVersionFromAPIStore(APIIdentifier apiIdentifier, String storeName)
+            throws APIManagementException;
+
+    /**
+     * Delete the records of external APIStore details.
+     *
+     * @param uuid       API uuid
+     * @param apiStoreSet APIStores set
+     * @return added/failed
+     * @throws APIManagementException
+     */
+    boolean deleteExternalAPIStoresDetails(String uuid, Set<APIStore> apiStoreSet)
+            throws APIManagementException;
+
+    /**
+     * Update the records of external APIStore details.
+     *
+     * @param uuid       API uuid
+     * @param apiStoreSet APIStores set
+     * @throws APIManagementException
+     */
+    void updateExternalAPIStoresDetails(String uuid, Set<APIStore> apiStoreSet)
+            throws APIManagementException;
+
+    /**
+     * Store external APIStore details to which APIs successfully published
+     *
+     * @param uuid       API uuid
+     * @param apiStoreSet APIStores set
+     * @return added/failed
+     * @throws APIManagementException
+     */
+    boolean addExternalAPIStoresDetails(String uuid, Set<APIStore> apiStoreSet)
+            throws APIManagementException;
+
+    /**
+     * Return external APIStore details on successfully APIs published
+     *
+     * @param uuid API uuid
+     * @return Set of APIStore
+     * @throws APIManagementException
+     */
+    Set<APIStore> getExternalAPIStoresDetails(String uuid) throws APIManagementException;
+
+    /**
+     * Get API UUID by the API Identifier.
+     *
+     * @param identifier API Identifier
+     * @param organization identifier of the organization
+     * @return String UUID
+     * @throws APIManagementException if an error occurs
+     */
+    String getUUIDFromIdentifier(APIIdentifier identifier, String organization) throws APIManagementException;
+
+    /**
+     * Get API Product ID by the API Product Identifier.
+     *
+     * @param identifier API Product Identifier
+     * @return int ID
+     * @throws APIManagementException if an error occurs
+     */
+    int getAPIProductId(APIProductIdentifier identifier) throws APIManagementException;
+
+    /**
+     * Retrieve the gateway vendor of an API by providing the UUID
+     *
+     * @param apiId UUID of the API
+     * @return gatewayVendor of the API
+     * @throws APIManagementException
+     */
+    String getGatewayVendorByAPIUUID(String apiId) throws APIManagementException;
+
+    /**
+     * Return ids of the versions for the given name for the given provider
+     *
+     * @param apiName     api name
+     * @param apiProvider provider
+     * @return set ids
+     * @throws APIManagementException
+     */
+    List<API> getAllAPIVersions(String apiName, String apiProvider) throws APIManagementException;
 
 
 

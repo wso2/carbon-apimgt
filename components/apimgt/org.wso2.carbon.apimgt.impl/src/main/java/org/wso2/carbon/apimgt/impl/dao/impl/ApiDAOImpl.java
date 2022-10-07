@@ -41,9 +41,11 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.ResourceCategory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiDAO;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ResourceCategoryDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.PostgreSQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -5473,6 +5475,721 @@ public class ApiDAOImpl implements ApiDAO {
         }
         return events;
     }
+
+    @Override
+    public void updateSubscription(APIIdentifier identifier, String subStatus, int applicationId, String organization)
+            throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        PreparedStatement updatePs = null;
+        int apiId = -1;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            String getApiQuery = SQLConstants.GET_API_ID_SQL;
+            ps = conn.prepareStatement(getApiQuery);
+            ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            ps.setString(2, identifier.getApiName());
+            ps.setString(3, identifier.getVersion());
+            resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                apiId = resultSet.getInt("API_ID");
+            }
+
+            if (apiId == -1) {
+                String msg = "Unable to get the API ID for: " + identifier;
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+
+            String subsCreateStatus = getSubscriptionCreaeteStatus(identifier, applicationId, organization, conn);
+
+            if (APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subsCreateStatus)) {
+                deleteSubscriptionByApiIDAndAppID(apiId, applicationId, conn);
+            }
+
+            //This query to update the AM_SUBSCRIPTION table
+            String sqlQuery = SQLConstants.UPDATE_SUBSCRIPTION_OF_APPLICATION_SQL;
+
+            //Updating data to the AM_SUBSCRIPTION table
+            updatePs = conn.prepareStatement(sqlQuery);
+            updatePs.setString(1, subStatus);
+            updatePs.setString(2, identifier.getProviderName());
+            updatePs.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            updatePs.setInt(4, apiId);
+            updatePs.setInt(5, applicationId);
+            updatePs.execute();
+
+            // finally commit transaction
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the add subscription ", e1);
+                }
+            }
+            handleException("Failed to update subscription data ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            APIMgtDBUtil.closeAllConnections(updatePs, null, null);
+        }
+    }
+
+    /**
+     * Delete a user subscription based on API_ID, APP_ID, TIER_ID
+     *
+     * @param apiId - subscriber API ID
+     * @param appId - application ID used to subscribe
+     * @throws java.sql.SQLException - Letting the caller to handle the roll back
+     */
+    private void deleteSubscriptionByApiIDAndAppID(int apiId, int appId, Connection conn) throws SQLException {
+
+        String deleteQuery = SQLConstants.REMOVE_SUBSCRIPTION_BY_APPLICATION_ID_SQL;
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(deleteQuery);
+            ps.setInt(1, apiId);
+            ps.setInt(2, appId);
+
+            ps.executeUpdate();
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, null);
+        }
+    }
+
+    /**
+     * Retrieve subscription create state for APIIdentifier and applicationID
+     *
+     * @param identifier    - api identifier which is subscribed
+     * @param applicationId - application used to subscribed
+     * @param organization identifier of the organization
+     * @param connection
+     * @return subscription create status
+     * @throws APIManagementException
+     */
+    private String getSubscriptionCreaeteStatus(APIIdentifier identifier, int applicationId, String organization,
+                                               Connection connection) throws APIManagementException {
+
+        String status = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_SUBSCRIPTION_CREATION_STATUS_SQL;
+        try {
+            String uuid;
+            if (identifier.getUUID() != null) {
+                uuid = identifier.getUUID();
+            } else {
+                uuid = getUUIDFromIdentifier(identifier, organization);
+            }
+            int apiId = getAPIID(uuid, connection);
+            ps = connection.prepareStatement(sqlQuery);
+            ps.setInt(1, apiId);
+            ps.setInt(2, applicationId);
+            rs = ps.executeQuery();
+
+            // returns only one row
+            while (rs.next()) {
+                status = rs.getString("SUBS_CREATE_STATE");
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while getting subscription entry for " +
+                    "Application : " + applicationId + ", API: " + identifier, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, rs);
+        }
+        return status;
+    }
+
+    public String getUUIDFromIdentifier(APIIdentifier identifier, String organization) throws APIManagementException {
+
+        String uuid = null;
+        String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_AND_ORGANIZATION_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sql)) {
+            prepStmt.setString(1, identifier.getApiName());
+            prepStmt.setString(2, identifier.getVersion());
+            prepStmt.setString(3, organization);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    uuid = resultSet.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException(
+                    "Failed to get the UUID for API : " + identifier.getApiName() + '-' + identifier.getVersion(), e);
+        }
+        return uuid;
+    }
+
+    @Override
+    public void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            //This query to update the AM_SUBSCRIPTION table
+            String sqlQuery = SQLConstants.UPDATE_SUBSCRIPTION_OF_UUID_SQL;
+
+            //Updating data to the AM_SUBSCRIPTION table
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, subscribedAPI.getSubStatus());
+            //TODO Need to find logged in user who does this update.
+            ps.setString(2, null);
+            ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            ps.setString(4, subscribedAPI.getUUID());
+            ps.execute();
+
+            // finally commit transaction
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the update subscription ", e1);
+                }
+            }
+            handleExceptionWithCode("Failed to update subscription data ", e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, "Subscription update failed"));
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
+    @Override
+    public Set<String> getUnversionedLocalScopeKeysForAPI(String uuid, int tenantId)
+            throws APIManagementException {
+
+        int apiId;
+        Set<String> localScopes = new HashSet<>();
+        String getUnVersionedLocalScopes = SQLConstants.GET_UNVERSIONED_LOCAL_SCOPES_FOR_API_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(getUnVersionedLocalScopes)) {
+            apiId = getAPIID(uuid, connection);
+            preparedStatement.setInt(1, apiId);
+            preparedStatement.setInt(2, tenantId);
+            preparedStatement.setInt(3, tenantId);
+            preparedStatement.setInt(4, apiId);
+            preparedStatement.setInt(5, tenantId);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                while (rs.next()) {
+                    localScopes.add(rs.getString("SCOPE_NAME"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed while getting unversioned local scopes for API with UUID:" + uuid + " tenant: "
+                    + tenantId, e);
+        }
+        return localScopes;
+    }
+
+    @Override
+    public void deleteAPI(String uuid) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        int id;
+        String deleteLCEventQuery = SQLConstants.REMOVE_FROM_API_LIFECYCLE_SQL;
+        String deleteAuditAPIMapping = SQLConstants.REMOVE_SECURITY_AUDIT_MAP_SQL;
+        String deleteCommentQuery = SQLConstants.REMOVE_FROM_API_COMMENT_SQL;
+        String deleteRatingsQuery = SQLConstants.REMOVE_FROM_API_RATING_SQL;
+        String deleteSubscriptionQuery = SQLConstants.REMOVE_FROM_API_SUBSCRIPTION_SQL;
+        String deleteExternalAPIStoresQuery = SQLConstants.REMOVE_FROM_EXTERNAL_STORES_SQL;
+        String deleteAPIQuery = SQLConstants.REMOVE_FROM_API_SQL_BY_UUID;
+        String deleteResourceScopeMappingsQuery = SQLConstants.REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL;
+        String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
+        String deleteGraphqlComplexityQuery = SQLConstants.REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            APIIdentifier identifier = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(uuid);
+            id = getAPIID(uuid, connection);
+
+            prepStmt = connection.prepareStatement(deleteAuditAPIMapping);
+            prepStmt.setInt(1, id);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            prepStmt = connection.prepareStatement(deleteGraphqlComplexityQuery);
+            prepStmt.setInt(1, id);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            prepStmt = connection.prepareStatement(deleteSubscriptionQuery);
+            prepStmt.setInt(1, id);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            //Delete all comments associated with given API
+            deleteAPIComments(id, uuid, connection);
+
+            prepStmt = connection.prepareStatement(deleteRatingsQuery);
+            prepStmt.setInt(1, id);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            prepStmt = connection.prepareStatement(deleteLCEventQuery);
+            prepStmt.setInt(1, id);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            //Delete all external APIStore details associated with a given API
+            prepStmt = connection.prepareStatement(deleteExternalAPIStoresQuery);
+            prepStmt.setInt(1, id);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            //Delete resource scope mappings of the API
+            prepStmt = connection.prepareStatement(deleteResourceScopeMappingsQuery);
+            prepStmt.setInt(1, id);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            // Delete URL Templates (delete the resource scope mappings on delete cascade)
+            prepStmt = connection.prepareStatement(deleteURLTemplateQuery);
+            prepStmt.setInt(1, id);
+            prepStmt.execute();
+
+            deleteAllAPISpecificOperationPoliciesByAPIUUID(connection, uuid, null);
+
+            prepStmt = connection.prepareStatement(deleteAPIQuery);
+            prepStmt.setString(1, uuid);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            String curDefaultVersion = getDefaultVersion(identifier);
+            String pubDefaultVersion = getPublishedDefaultVersion(identifier);
+            if (identifier.getVersion().equals(curDefaultVersion)) {
+                ArrayList<APIIdentifier> apiIdList = new ArrayList<APIIdentifier>() {{
+                    add(identifier);
+                }};
+                removeAPIFromDefaultVersion(apiIdList, connection);
+            } else if (identifier.getVersion().equals(pubDefaultVersion)) {
+                setPublishedDefVersion(identifier, connection, null);
+            }
+
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while removing the API with UUID: " + uuid + " from the database", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
+    private void deleteAPIComments(int apiId, String uuid, Connection connection) throws APIManagementException {
+        try {
+            connection.setAutoCommit(false);
+            String deleteChildComments = SQLConstants.DELETE_API_CHILD_COMMENTS;
+            String deleteParentComments = SQLConstants.DELETE_API_PARENT_COMMENTS;
+            try (PreparedStatement childCommentPreparedStmt = connection.prepareStatement(deleteChildComments);
+                 PreparedStatement parentCommentPreparedStmt = connection.prepareStatement(deleteParentComments)) {
+                childCommentPreparedStmt.setInt(1, apiId);
+                childCommentPreparedStmt.execute();
+
+                parentCommentPreparedStmt.setInt(1, apiId);
+                parentCommentPreparedStmt.execute();
+            }
+        } catch (SQLException e) {
+            handleException("Error while deleting comments for API " + uuid, e);
+        }
+    }
+
+    @Override
+    public String getLastPublishedAPIVersionFromAPIStore(APIIdentifier apiIdentifier, String storeName)
+            throws APIManagementException {
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        Connection conn = null;
+        String version = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String sqlQuery = SQLConstants.GET_LAST_PUBLISHED_API_VERSION_SQL;
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, apiIdentifier.getProviderName());
+            ps.setString(2, apiIdentifier.getApiName());
+            ps.setString(3, storeName);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                version = rs.getString("API_VERSION");
+            }
+        } catch (SQLException e) {
+            handleException("Error while getting External APIStore details from the database for  the API : " +
+                    apiIdentifier.getApiName() + '-' + apiIdentifier.getVersion(), e);
+
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return version;
+    }
+
+    @Override
+    public boolean deleteExternalAPIStoresDetails(String uuid, Set<APIStore> apiStoreSet)
+            throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        boolean state = false;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            String sqlQuery = SQLConstants.REMOVE_EXTERNAL_API_STORE_SQL;
+
+            //Get API Id
+            int apiIdentifier;
+            apiIdentifier = getAPIID(uuid, conn);
+            if (apiIdentifier == -1) {
+                String msg = "Could not load API record for API with UUID: " + uuid;
+                log.error(msg);
+            }
+            ps = conn.prepareStatement(sqlQuery);
+            for (Object storeObject : apiStoreSet) {
+                APIStore store = (APIStore) storeObject;
+                ps.setInt(1, apiIdentifier);
+                ps.setString(2, store.getName());
+                ps.setString(3, store.getType());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+
+            conn.commit();
+            state = true;
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback deleting external apistore details ", e1);
+                }
+            }
+            log.error("Failed to delete external apistore details", e);
+            state = false;
+        } catch (APIManagementException e) {
+            log.error("Failed to delete external apistore details", e);
+            state = false;
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+        return state;
+    }
+
+    @Override
+    public void updateExternalAPIStoresDetails(String uuid, Set<APIStore> apiStoreSet)
+            throws APIManagementException {
+
+        Connection conn = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            updateExternalAPIStoresDetails(uuid, apiStoreSet, conn);
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback updating external apistore details ", e1);
+                }
+            }
+            log.error("Failed to update external apistore details", e);
+        } catch (APIManagementException e) {
+            log.error("Failed to updating external apistore details", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, conn, null);
+        }
+    }
+
+    /**
+     * Update external APIStores details to which APIs published
+     *
+     * @param uuid API uuid
+     * @throws APIManagementException if failed to add Application
+     */
+    private void updateExternalAPIStoresDetails(String uuid, Set<APIStore> apiStoreSet, Connection conn)
+            throws APIManagementException, SQLException {
+
+        PreparedStatement ps = null;
+
+        try {
+            conn.setAutoCommit(false);
+            //This query to add external APIStores to database table
+            String sqlQuery = SQLConstants.UPDATE_EXTERNAL_API_STORE_SQL;
+
+            ps = conn.prepareStatement(sqlQuery);
+            //Get API Id
+            int apiId;
+            apiId = getAPIID(uuid, conn);
+            if (apiId == -1) {
+                String msg = "Could not load API record for API with UUID: " + uuid;
+                log.error(msg);
+            }
+
+            for (Object storeObject : apiStoreSet) {
+                APIStore store = (APIStore) storeObject;
+                ps.setString(1, store.getEndpoint());
+                ps.setString(2, store.getType());
+                ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+                ps.setInt(4, apiId);
+                ps.setString(5, store.getName());
+                ps.addBatch();
+            }
+
+            ps.executeBatch();
+            ps.clearBatch();
+
+            conn.commit();
+        } catch (SQLException e) {
+            log.error("Error while updating External APIStore details to the database for API : ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, null);
+        }
+    }
+
+    @Override
+    public boolean addExternalAPIStoresDetails(String uuid, Set<APIStore> apiStoreSet)
+            throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        boolean state = false;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            //This query to add external APIStores to database table
+            String sqlQuery = SQLConstants.ADD_EXTERNAL_API_STORE_SQL;
+
+            //Get API Id
+            int apiIdentifier;
+            apiIdentifier = getAPIID(uuid, conn);
+            if (apiIdentifier == -1) {
+                String msg = "Could not load API record for API with uuid: " + uuid;
+                log.error(msg);
+            }
+            ps = conn.prepareStatement(sqlQuery);
+            for (Object storeObject : apiStoreSet) {
+                APIStore store = (APIStore) storeObject;
+                ps.setInt(1, apiIdentifier);
+                ps.setString(2, store.getName());
+                ps.setString(3, store.getDisplayName());
+                ps.setString(4, store.getEndpoint());
+                ps.setString(5, store.getType());
+                ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+                ps.addBatch();
+            }
+
+            ps.executeBatch();
+            conn.commit();
+            state = true;
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback storing external apistore details ", e1);
+                }
+            }
+            log.error("Failed to store external apistore details", e);
+            state = false;
+        } catch (APIManagementException e) {
+            log.error("Failed to store external apistore details", e);
+            state = false;
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+        return state;
+    }
+
+    @Override
+    public Set<APIStore> getExternalAPIStoresDetails(String uuid) throws APIManagementException {
+
+        Connection conn = null;
+        Set<APIStore> storesSet = new HashSet<APIStore>();
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            storesSet = getExternalAPIStoresDetails(uuid, conn);
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback getting external apistore details ", e1);
+                }
+            }
+            log.error("Failed to get external apistore details", e);
+        } catch (APIManagementException e) {
+            log.error("Failed to get external apistore details", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, conn, null);
+        }
+        return storesSet;
+    }
+
+    /**
+     * Get external APIStores details which are stored in database
+     *
+     * @param uuid API uuid
+     * @throws APIManagementException if failed to get external APIStores
+     */
+    private Set<APIStore> getExternalAPIStoresDetails(String uuid, Connection conn)
+            throws APIManagementException, SQLException {
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        Set<APIStore> storesSet = new HashSet<APIStore>();
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            //This query to add external APIStores to database table
+            String sqlQuery = SQLConstants.GET_EXTERNAL_API_STORE_DETAILS_SQL;
+
+            ps = conn.prepareStatement(sqlQuery);
+            int apiId;
+            apiId = getAPIID(uuid, conn);
+            if (apiId == -1) {
+                String msg = "Could not load API record for API with UUID: " + uuid;
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+            ps.setInt(1, apiId);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                APIStore store = new APIStore();
+                store.setName(rs.getString("STORE_ID"));
+                store.setDisplayName(rs.getString("STORE_DISPLAY_NAME"));
+                store.setEndpoint(rs.getString("STORE_ENDPOINT"));
+                store.setType(rs.getString("STORE_TYPE"));
+                store.setLastUpdated(rs.getTimestamp("LAST_UPDATED_TIME"));
+                store.setPublished(true);
+                storesSet.add(store);
+            }
+        } catch (SQLException e) {
+            handleException(
+                    "Error while getting External APIStore details from the database for the API with UUID: " + uuid,
+                    e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return storesSet;
+    }
+
+    @Override
+    public int getAPIProductId(APIProductIdentifier identifier) throws APIManagementException {
+
+        Connection conn = null;
+        String queryGetProductId = SQLConstants.GET_PRODUCT_ID;
+        PreparedStatement preparedStatement = null;
+        ResultSet rs = null;
+        int productId = -1;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            preparedStatement = conn.prepareStatement(queryGetProductId);
+            preparedStatement.setString(1, identifier.getName());
+            preparedStatement.setString(2, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            preparedStatement.setString(3, APIConstants.API_PRODUCT_VERSION); //versioning is not supported atm
+
+            rs = preparedStatement.executeQuery();
+
+            if (rs.next()) {
+                productId = rs.getInt("API_ID");
+            }
+
+            if (productId == -1) {
+                String msg = "Unable to find the API Product : " + productId + " in the database";
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+        } catch (SQLException e) {
+            handleExceptionWithCode("Error while retrieving api product id for product " + identifier.getName() + " by " +
+                    APIUtil.replaceEmailDomainBack(identifier.getProviderName()), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, conn, rs);
+        }
+        return productId;
+    }
+
+    @Override
+    public String getGatewayVendorByAPIUUID(String apiId) throws APIManagementException {
+        String gatewayVendor = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_GATEWAY_VENDOR_BY_API_ID)) {
+            ResultSet result = null;
+            try {
+                connection.setAutoCommit(false);
+                ps.setString(1, apiId);
+                result = ps.executeQuery();
+
+                while (result.next()) {
+                    gatewayVendor = result.getString("GATEWAY_VENDOR");
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                APIMgtDBUtil.rollbackConnection(connection, "Failed to rollback while fetching gateway vendor" +
+                        " of the API", e);
+            }
+        } catch (SQLException e) {
+            handleExceptionWithCode("Error occurred while fetching gateway vendor of the API with ID " + apiId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        gatewayVendor = APIUtil.handleGatewayVendorRetrieval(gatewayVendor);
+        return gatewayVendor;
+    }
+
+    @Override
+    public List<API> getAllAPIVersions(String apiName, String apiProvider) throws APIManagementException {
+
+        List<API> apiVersions = new ArrayList<API>();
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_VERSIONS_UUID)) {
+            statement.setString(1, APIUtil.replaceEmailDomainBack(apiProvider));
+            statement.setString(2, apiName);
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                String version = resultSet.getString("API_VERSION");
+                String status = resultSet.getString("STATUS");
+                String versionTimestamp = resultSet.getString("VERSION_COMPARABLE");
+                String context = resultSet.getString("CONTEXT");
+                String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
+
+                String uuid = resultSet.getString("API_UUID");
+                if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
+                    // skip api products
+                    continue;
+                }
+                API api = new API(new APIIdentifier(apiProvider, apiName,
+                        version, uuid));
+                api.setUuid(uuid);
+                api.setStatus(status);
+                api.setVersionTimestamp(versionTimestamp);
+                api.setContext(context);
+                api.setContextTemplate(contextTemplate);
+                apiVersions.add(api);
+            }
+        } catch (SQLException e) {
+            String errorMessage = "Error while retrieving versions for api " + apiName + " for the provider " + apiProvider;
+            handleExceptionWithCode(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
+        }
+        return apiVersions;
+    }
+
 
 
 
