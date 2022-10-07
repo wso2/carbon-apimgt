@@ -39,7 +39,7 @@ import org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings.KeyManagerMap
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 
 import java.util.List;
 

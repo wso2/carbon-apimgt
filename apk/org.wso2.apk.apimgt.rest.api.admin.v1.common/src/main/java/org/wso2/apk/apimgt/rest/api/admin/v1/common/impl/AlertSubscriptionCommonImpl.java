@@ -33,7 +33,7 @@ import org.wso2.apk.apimgt.rest.api.admin.v1.dto.AlertTypeDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.AlertsSubscriptionDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptionDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 
 import java.util.ArrayList;
 import java.util.List;

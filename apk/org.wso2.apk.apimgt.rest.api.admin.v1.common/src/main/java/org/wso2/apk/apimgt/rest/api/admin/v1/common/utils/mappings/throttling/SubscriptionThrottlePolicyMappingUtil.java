@@ -29,7 +29,7 @@ import org.wso2.apk.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.*;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;
 
 import java.util.*;
 

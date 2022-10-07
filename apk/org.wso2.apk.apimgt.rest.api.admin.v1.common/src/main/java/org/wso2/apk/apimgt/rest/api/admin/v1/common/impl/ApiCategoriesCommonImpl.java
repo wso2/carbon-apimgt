@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings.APICategoryMappingUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.APICategoryDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.APICategoryListDTO;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 
 import java.util.List;
 import java.util.regex.Matcher;

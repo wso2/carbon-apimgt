@@ -21,7 +21,7 @@ package org.wso2.apk.apimgt.rest.api.admin.v1.common.impl;
 import org.wso2.apk.apimgt.api.APIAdmin;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 
 public class TenantConfigCommonImpl {
 

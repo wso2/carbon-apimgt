@@ -21,8 +21,8 @@ package org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings;
 import org.wso2.apk.apimgt.api.model.Workflow;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.WorkflowInfoDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.WorkflowListDTO;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;
 
 import java.util.ArrayList;
 import java.util.List;

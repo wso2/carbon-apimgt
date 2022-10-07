@@ -29,7 +29,7 @@ import org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings.SystemScopesM
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.RoleAliasListDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 
 import java.util.Base64;
 import java.util.Map;
