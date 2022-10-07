@@ -2130,7 +2130,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public void updateSubscription(APIIdentifier apiId, String subStatus, int appId, String organization)
             throws APIManagementException {
-        apiMgtDAO.updateSubscription(apiId, subStatus, appId, organization);
+        apiDAOImpl.updateSubscription(apiId, subStatus, appId, organization);
     }
 
     /**
@@ -2140,8 +2140,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to update subscription
      */
     public void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException {
-        apiMgtDAO.updateSubscription(subscribedAPI);
-        subscribedAPI = apiMgtDAO.getSubscriptionByUUID(subscribedAPI.getUUID());
+        apiDAOImpl.updateSubscription(subscribedAPI);
+        subscribedAPI = applicationDAOImpl.getSubscriptionByUUID(subscribedAPI.getUUID());
         Identifier identifier =
                 subscribedAPI.getAPIIdentifier() != null ? subscribedAPI.getAPIIdentifier() : subscribedAPI.getProductId();
         String tenantDomain = MultitenantUtils
@@ -2177,7 +2177,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // get api id from db
         try {
-            apiId = apiMgtDAO.getAPIID(apiUuid);
+            apiId = apiDAOImpl.getAPIID(apiUuid);
         } catch (APIManagementException e) {
             log.error("Error while getting API ID from DB for deleting API " + apiUuid + " on organization "
                     + organization, e);
@@ -2327,9 +2327,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         // Get local scopes for the given API which are not already assigned for different versions of the same API
-        Set<String> localScopeKeysToDelete = apiMgtDAO.getUnversionedLocalScopeKeysForAPI(api.getUuid(), tenantId);
+        Set<String> localScopeKeysToDelete = apiDAOImpl.getUnversionedLocalScopeKeysForAPI(api.getUuid(), tenantId);
         // Get the URI Templates for the given API to detach the resources scopes from
-        Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesOfAPI(api.getUuid());
+        Set<URITemplate> uriTemplates = apiDAOImpl.getURITemplatesOfAPI(api.getUuid());
         // Detach all the resource scopes from the API resources in KM
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
@@ -2355,14 +2355,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         deleteScopes(localScopeKeysToDelete, tenantId);
-        apiMgtDAO.deleteAPI(api.getUuid());
+        apiDAOImpl.deleteAPI(api.getUuid());
         if (log.isDebugEnabled()) {
             log.debug("API : " + apiIdentifier + " is successfully deleted from the database and Key Manager.");
         }
     }
 
     public void deleteAPIRevisions(String apiUUID, String organization) throws APIManagementException {
-        List<APIRevision> apiRevisionList = apiMgtDAO.getRevisionsListByAPIUUID(apiUUID);
+        List<APIRevision> apiRevisionList = apiDAOImpl.getRevisionsListByAPIUUID(apiUUID);
         for (APIRevision apiRevision : apiRevisionList) {
             if (apiRevision.getApiRevisionDeploymentList().size() != 0) {
                 undeployAPIRevisionDeployment(apiUUID, apiRevision.getRevisionUUID(),
@@ -2373,7 +2373,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public void deleteAPIProductRevisions(String apiProductUUID, String organization) throws APIManagementException {
-        List<APIRevision> apiRevisionList = apiMgtDAO.getRevisionsListByAPIUUID(apiProductUUID);
+        List<APIRevision> apiRevisionList = apiDAOImpl.getRevisionsListByAPIUUID(apiProductUUID);
         for (APIRevision apiRevision : apiRevisionList) {
             if (apiRevision.getApiRevisionDeploymentList().size() != 0) {
                 undeployAPIProductRevisionDeployment(apiProductUUID, apiRevision.getRevisionUUID(), apiRevision.getApiRevisionDeploymentList());
@@ -2391,22 +2391,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException If failed to update subscription status
      */
     public void updateTierPermissions(String tierName, String permissionType, String roles) throws APIManagementException {
-        apiMgtDAO.updateTierPermissions(tierName, permissionType, roles, tenantId);
+        tierDAOImpl.updateTierPermissions(tierName, permissionType, roles, tenantId);
     }
 
     @Override
     public void deleteTierPermissions(String tierName) throws APIManagementException {
-        apiMgtDAO.deleteThrottlingPermissions(tierName, tenantId);
+        tierDAOImpl.deleteThrottlingPermissions(tierName, tenantId);
     }
 
     @Override
     public Set<TierPermissionDTO> getTierPermissions() throws APIManagementException {
-        return apiMgtDAO.getTierPermissions(tenantId);
+        return tierDAOImpl.getTierPermissions(tenantId);
     }
 
     @Override
     public TierPermissionDTO getThrottleTierPermission(String tierName) throws APIManagementException {
-        return apiMgtDAO.getThrottleTierPermission(tierName, tenantId);
+        return tierDAOImpl.getThrottleTierPermission(tierName, tenantId);
     }
 
     /**
@@ -2419,12 +2419,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public void updateThrottleTierPermissions(String tierName, String permissionType, String roles) throws
             APIManagementException {
-        apiMgtDAO.updateThrottleTierPermissions(tierName, permissionType, roles, tenantId);
+        tierDAOImpl.updateThrottleTierPermissions(tierName, permissionType, roles, tenantId);
     }
 
     @Override
     public Set<TierPermissionDTO> getThrottleTierPermissions() throws APIManagementException {
-        return apiMgtDAO.getThrottleTierPermissions(tenantId);
+        return tierDAOImpl.getThrottleTierPermissions(tenantId);
     }
 
     /**
@@ -2489,7 +2489,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             try {
                 // First trying to publish the API to external APIStore
                 boolean published;
-                String version = ApiMgtDAO.getInstance().getLastPublishedAPIVersionFromAPIStore(api.getId(),
+                String version = apiDAOImpl.getLastPublishedAPIVersionFromAPIStore(api.getId(),
                         store.getName());
 
                 if (apiOlderVersionExist && version != null && !(publisher instanceof WSO2APIPublisher)) {
@@ -2616,7 +2616,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void removeExternalAPIStoreDetails(String id, Set<APIStore> removalCompletedStores)
             throws APIManagementException {
-        apiMgtDAO.deleteExternalAPIStoresDetails(id, removalCompletedStores);
+        apiDAOImpl.deleteExternalAPIStoresDetails(id, removalCompletedStores);
     }
 
     private boolean isAPIAvailableInExternalAPIStore(API api, APIStore store) throws APIManagementException {
@@ -2668,14 +2668,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void updateExternalAPIStoresDetails(String apiId, Set<APIStore> apiStoreSet)
             throws APIManagementException {
-        apiMgtDAO.updateExternalAPIStoresDetails(apiId, apiStoreSet);
+        apiDAOImpl.updateExternalAPIStoresDetails(apiId, apiStoreSet);
 
 
     }
 
 
     private boolean addExternalAPIStoresDetails(String apiId, Set<APIStore> apiStoreSet) throws APIManagementException {
-        return apiMgtDAO.addExternalAPIStoresDetails(apiId, apiStoreSet);
+        return apiDAOImpl.addExternalAPIStoresDetails(apiId, apiStoreSet);
     }
 
     /**
@@ -2690,7 +2690,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
         if (APIUtil.isAPIsPublishToExternalAPIStores(tenantId)) {
             SortedSet<APIStore> sortedApiStores = new TreeSet<APIStore>(new APIStoreNameComparator());
-            Set<APIStore> publishedStores = apiMgtDAO.getExternalAPIStoresDetails(apiId);
+            Set<APIStore> publishedStores = apiDAOImpl.getExternalAPIStoresDetails(apiId);
             sortedApiStores.addAll(publishedStores);
             return APIUtil.getExternalAPIStores(sortedApiStores, tenantId);
         } else {
@@ -2711,7 +2711,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         SortedSet<APIStore> configuredAPIStores = new TreeSet<>(new APIStoreNameComparator());
         configuredAPIStores.addAll(APIUtil.getExternalStores(tenantId));
         if (APIUtil.isAPIsPublishToExternalAPIStores(tenantId)) {
-            storesSet = apiMgtDAO.getExternalAPIStoresDetails(apiId);
+            storesSet = apiDAOImpl.getExternalAPIStoresDetails(apiId);
             //Retains only the stores that contained in configuration
             storesSet.retainAll(configuredAPIStores);
             return storesSet;
@@ -2801,8 +2801,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else if (api.getId().getUUID() != null) {
             apiId = api.getId().getUUID();
         } else {
-            apiId = apiMgtDAO.getUUIDFromIdentifier(api.getId().getProviderName(), api.getId().getApiName(),
-                    api.getId().getVersion(), organization);
+            apiId = apiDAOImpl.getUUIDFromIdentifier(api.getId(), organization);
         }
         saveSwaggerDefinition(apiId, jsonText, organization);
     }
@@ -2882,7 +2881,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiVersion = apiProduct.getId().getVersion();
                 currentStatus = apiProduct.getState();
                 uuid = apiProduct.getUuid();
-                apiOrApiProductId = apiMgtDAO.getAPIProductId(apiTypeWrapper.getApiProduct().getId());
+                apiOrApiProductId = apiDAOImpl.getAPIProductId(apiTypeWrapper.getApiProduct().getId());
                 workflowType = WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE;
             } else {
                 API api = apiTypeWrapper.getApi();
@@ -2893,13 +2892,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiVersion = api.getId().getVersion();
                 currentStatus = api.getStatus();
                 uuid = api.getUuid();
-                apiOrApiProductId = apiMgtDAO.getAPIID(uuid);
+                apiOrApiProductId = apiDAOImpl.getAPIID(uuid);
                 workflowType = WorkflowConstants.WF_TYPE_AM_API_STATE;
             }
-            String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(uuid);
+            String gatewayVendor = apiDAOImpl.getGatewayVendorByAPIUUID(uuid);
 
             WorkflowStatus apiWFState = null;
-            WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
+            WorkflowDTO wfDTO = workflowDAOImpl.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
                     workflowType);
             if (wfDTO != null) {
                 apiWFState = wfDTO.getStatus();
@@ -2910,7 +2909,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 response = executeStateChangeWorkflow(currentStatus, action, apiName, apiContext, apiType,
                         apiVersion, providerName, apiOrApiProductId, uuid, gatewayVendor, workflowType);
                 // get the workflow state once the executor is executed.
-                wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
+                wfDTO = workflowDAOImpl.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
                         workflowType);
                 if (wfDTO != null) {
                     apiWFState = wfDTO.getStatus();
@@ -3028,7 +3027,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private List<API> getAPIVersionsByProviderAndName(String provider, String apiName, String organization)
             throws APIManagementException {
-        return apiMgtDAO.getAllAPIVersions(apiName, provider);
+        return apiDAOImpl.getAllAPIVersions(apiName, provider);
     }
 
 
@@ -3096,7 +3095,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         ExceptionCodes.from(ExceptionCodes.ADVANCED_POLICY_EXISTS, apiPolicy.getPolicyName()));
             }
             apiPolicy.setUserLevel(PolicyConstants.ACROSS_ALL);
-            apiPolicy = apiMgtDAO.addAPIPolicy(apiPolicy);
+            apiPolicy = policyDAOImpl.addAPIPolicy(apiPolicy);
             List<Integer> addedConditionGroupIds = new ArrayList<>();
             for (Pipeline pipeline : apiPolicy.getPipelines()) {
                 addedConditionGroupIds.add(pipeline.getId());
@@ -3115,9 +3114,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException(error,
                         ExceptionCodes.from(ExceptionCodes.APPLICATION_POLICY_EXISTS, appPolicy.getPolicyName()));
             }
-            apiMgtDAO.addApplicationPolicy(appPolicy);
+            policyDAOImpl.addApplicationPolicy(appPolicy);
             //policy id is not set. retrieving policy to get the id.
-            ApplicationPolicy retrievedPolicy = apiMgtDAO.getApplicationPolicy(appPolicy.getPolicyName(), tenantId);
+            ApplicationPolicy retrievedPolicy = policyDAOImpl.getApplicationPolicy(appPolicy.getPolicyName(), tenantId);
             ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
                     appPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(), appPolicy.getPolicyName(),
@@ -3132,14 +3131,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException(error,
                         ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_POLICY_EXISTS, subPolicy.getPolicyName()));
             }
-            apiMgtDAO.addSubscriptionPolicy(subPolicy);
+            policyDAOImpl.addSubscriptionPolicy(subPolicy);
             String monetizationPlan = subPolicy.getMonetizationPlan();
             Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
             if (StringUtils.isNotBlank(monetizationPlan) && MapUtils.isNotEmpty(monetizationPlanProperties)) {
                 createMonetizationPlan(subPolicy);
             }
             //policy id is not set. retrieving policy to get the id.
-            SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
+            SubscriptionPolicy retrievedPolicy = policyDAOImpl.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
             SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId, subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
                     subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
@@ -3155,11 +3154,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException("Policy name already exists", ExceptionCodes.GLOBAL_POLICY_EXISTS);
             }
 
-            apiMgtDAO.addGlobalPolicy(globalPolicy);
+            policyDAOImpl.addGlobalPolicy(globalPolicy);
 
             publishKeyTemplateEvent(globalPolicy.getKeyTemplate(), "add");
 
-            GlobalPolicy retrievedPolicy = apiMgtDAO.getGlobalPolicy(globalPolicy.getPolicyName());
+            GlobalPolicy retrievedPolicy = policyDAOImpl.getGlobalPolicy(globalPolicy.getPolicyName());
             GlobalPolicyEvent globalPolicyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
                     globalPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
@@ -3310,8 +3309,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
             }
-            APIPolicy existingPolicy = apiMgtDAO.getAPIPolicy(policy.getPolicyName(), policy.getTenantId());
-            apiPolicy = apiMgtDAO.updateAPIPolicy(apiPolicy);
+            APIPolicy existingPolicy = policyDAOImpl.getAPIPolicy(policy.getPolicyName(), policy.getTenantId());
+            apiPolicy = policyDAOImpl.updateAPIPolicy(apiPolicy);
             //TODO rename level to  resource or appropriate name
 
             APIManagerConfiguration config = getAPIManagerConfiguration();
@@ -3336,9 +3335,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof ApplicationPolicy) {
             ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
-            apiMgtDAO.updateApplicationPolicy(appPolicy);
+            policyDAOImpl.updateApplicationPolicy(appPolicy);
             //policy id is not set. retrieving policy to get the id.
-            ApplicationPolicy retrievedPolicy = apiMgtDAO.getApplicationPolicy(appPolicy.getPolicyName(), tenantId);
+            ApplicationPolicy retrievedPolicy = policyDAOImpl.getApplicationPolicy(appPolicy.getPolicyName(), tenantId);
             ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
                     appPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(), appPolicy.getPolicyName(),
@@ -3346,7 +3345,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof SubscriptionPolicy) {
             SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
-            apiMgtDAO.updateSubscriptionPolicy(subPolicy);
+            policyDAOImpl.updateSubscriptionPolicy(subPolicy);
             String monetizationPlan = subPolicy.getMonetizationPlan();
             Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
             //call the monetization extension point to create plans (if any)
@@ -3354,7 +3353,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 updateMonetizationPlan(subPolicy);
             }
             //policy id is not set. retrieving policy to get the id.
-            SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
+            SubscriptionPolicy retrievedPolicy = policyDAOImpl.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
             SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
                     subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
@@ -3365,13 +3364,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GlobalPolicy globalPolicy = (GlobalPolicy) policy;
 
             // getting key templates before updating database
-            GlobalPolicy oldGlobalPolicy = apiMgtDAO.getGlobalPolicy(policy.getPolicyName());
+            GlobalPolicy oldGlobalPolicy = policyDAOImpl.getGlobalPolicy(policy.getPolicyName());
             oldKeyTemplate = oldGlobalPolicy.getKeyTemplate();
             newKeyTemplate = globalPolicy.getKeyTemplate();
 
-            apiMgtDAO.updateGlobalPolicy(globalPolicy);
+            policyDAOImpl.updateGlobalPolicy(globalPolicy);
 
-            GlobalPolicy retrievedPolicy = apiMgtDAO.getGlobalPolicy(globalPolicy.getPolicyName());
+            GlobalPolicy retrievedPolicy = policyDAOImpl.getGlobalPolicy(globalPolicy.getPolicyName());
             GlobalPolicyEvent globalPolicyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
                     globalPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
@@ -3396,7 +3395,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     public String[] getPolicyNames(String username, String level) throws APIManagementException {
-        String[] policyNames = apiMgtDAO.getPolicyNames(level, username);
+        String[] policyNames = policyDAOImpl.getPolicyNames(level, username);
         return policyNames;
     }
 
@@ -3411,7 +3410,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
             //need to load whole policy object to get the pipelines
-            APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
+            APIPolicy policy = policyDAOImpl.getAPIPolicy(policyName, APIUtil.getTenantId(username));
             List<Integer> deletedConditionGroupIds = new ArrayList<>();
             for (Pipeline pipeline : policy.getPipelines()) {
                 deletedConditionGroupIds.add(pipeline.getId());
@@ -3423,14 +3422,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
 
         } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
-            ApplicationPolicy appPolicy = apiMgtDAO.getApplicationPolicy(policyName, tenantID);
+            ApplicationPolicy appPolicy = policyDAOImpl.getApplicationPolicy(policyName, tenantID);
             ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,
                     appPolicy.getTenantDomain(), appPolicy.getPolicyId(), appPolicy.getPolicyName(),
                     appPolicy.getDefaultQuotaPolicy().getType());
             APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
-            SubscriptionPolicy subscriptionPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantID);
+            SubscriptionPolicy subscriptionPolicy = policyDAOImpl.getSubscriptionPolicy(policyName, tenantID);
             //call the monetization extension point to delete plans if any
             deleteMonetizationPlan(subscriptionPolicy);
             SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
@@ -3442,7 +3441,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     subscriptionPolicy.getGraphQLMaxComplexity(), subscriptionPolicy.getSubscriberCount());
             APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
-            GlobalPolicy globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);
+            GlobalPolicy globalPolicy = policyDAOImpl.getGlobalPolicy(policyName);
             GlobalPolicyEvent globalPolicyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,
                     globalPolicy.getTenantDomain(), globalPolicy.getPolicyId(), globalPolicy.getPolicyName());
@@ -3451,10 +3450,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         GlobalPolicy globalPolicy = null;
         if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
-            globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);
+            globalPolicy = policyDAOImpl.getGlobalPolicy(policyName);
         }
         //remove from database
-        apiMgtDAO.removeThrottlePolicy(policyLevel, policyName, tenantID);
+        policyDAOImpl.removeThrottlePolicy(policyLevel, policyName, tenantID);
 
         if (globalPolicy != null) {
             publishKeyTemplateEvent(globalPolicy.getKeyTemplate(), "remove");
@@ -3609,7 +3608,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public APIPolicy getAPIPolicy(String username, String policyName) throws APIManagementException {
-        return apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
+        return policyDAOImpl.getAPIPolicy(policyName, APIUtil.getTenantId(username));
     }
 
     @Override
