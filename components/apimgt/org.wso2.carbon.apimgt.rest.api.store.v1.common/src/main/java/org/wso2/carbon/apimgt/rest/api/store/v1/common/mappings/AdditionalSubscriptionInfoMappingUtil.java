@@ -22,7 +22,6 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdditionalSubscriptionInfoSo
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdditionalSubscriptionInfoSolaceURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SolaceTopicsDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.solace.dtos.SolaceDeployedEnvironmentDTO;
 import org.wso2.carbon.apimgt.solace.dtos.SolaceTopicsObjectDTO;
 import org.wso2.carbon.apimgt.solace.dtos.SolaceURLsDTO;
@@ -101,12 +100,7 @@ public class AdditionalSubscriptionInfoMappingUtil {
         API api = null;
 
         if (apiId != null) {
-            try {
-                api = apiConsumer.getLightweightAPIByUUID(apiId.getUUID(), organization);
-            } catch (APIManagementException e) {
-                String msg = "User :" + username + " does not have access to the API " + apiId;
-                RestApiUtil.handleInternalServerError(msg, e, log);
-            }
+            api = apiConsumer.getLightweightAPIByUUID(apiId.getUUID(), organization);
         }
 
         Application application = subscription.getApplication();

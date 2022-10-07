@@ -1,8 +1,27 @@
+/*
+ *  Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 package org.wso2.carbon.apimgt.rest.api.store.v1.common.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -10,13 +29,9 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.common.mappings.ThrottlingPolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer.log;
 
 /**
  * This is the service implementation class for throttling policies operations
@@ -65,7 +80,7 @@ public class ThrottlingPoliciesServiceImpl {
             Tier foundTier = null;
 
             if (StringUtils.isBlank(policyLevel)) {
-                RestApiUtil.handleBadRequest("policyLevel cannot be empty", log);
+                throw new APIManagementException(ExceptionCodes.POLICY_LEVEL_EMPTY);
             }
 
             //retrieves the tier based on the given tier-level
@@ -74,10 +89,10 @@ public class ThrottlingPoliciesServiceImpl {
             } else if (ThrottlingPolicyDTO.PolicyLevelEnum.APPLICATION.toString().equals(policyLevel)) {
                 policyType = APIConstants.TIER_APPLICATION_TYPE;
             } else {
-                RestApiUtil.handleResourceNotFoundError(
-                        "Policy level should be one of " +
-                                Arrays.toString(ThrottlingPolicyDTO.PolicyLevelEnum.values()), log);
-                return null;
+                String errorMessage = "Policy Level should be one of " +
+                        Arrays.toString(ThrottlingPolicyDTO.PolicyLevelEnum.values());
+                throw new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.POLICY_LEVEL_NOT_FOUND, policyLevel));
             }
             foundTier = apiConsumer.getThrottlePolicyByName(policyId, policyType, organization);
             //returns if the tier is found, otherwise send 404
@@ -85,13 +100,13 @@ public class ThrottlingPoliciesServiceImpl {
                 return ThrottlingPolicyMappingUtil.fromTierToDTO(foundTier,
                         ThrottlingPolicyDTO.PolicyLevelEnum.fromValue(policyLevel).toString());
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_TIER, policyId, log);
+                throw new APIMgtResourceNotFoundException("Policy tier not found",
+                        ExceptionCodes.from(ExceptionCodes.THROTTLE_TIER_NOT_FOUND));
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving the tier with name " + policyId;
             throw new APIManagementException(errorMessage, e.getErrorHandler());
         }
-        return null;
     }
 
     /**
@@ -102,11 +117,11 @@ public class ThrottlingPoliciesServiceImpl {
     public static List<Tier> getThrottlingPolicyList(String policyLevel, String organization)
             throws APIManagementException {
 
-        List<Tier> throttlingPolicyList = new ArrayList<>();
+        List<Tier> throttlingPolicyList;
         int tierLevel = -1;
         try {
             if (StringUtils.isBlank(policyLevel)) {
-                RestApiUtil.handleBadRequest("tierLevel cannot be empty", log);
+                throw new APIManagementException(ExceptionCodes.POLICY_LEVEL_EMPTY);
             }
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
@@ -117,8 +132,10 @@ public class ThrottlingPoliciesServiceImpl {
             } else if (ThrottlingPolicyDTO.PolicyLevelEnum.APPLICATION.toString().equals(policyLevel)) {
                 tierLevel = APIConstants.TIER_APPLICATION_TYPE;
             } else {
-                RestApiUtil.handleResourceNotFoundError("tierLevel should be one of " +
-                        Arrays.toString(ThrottlingPolicyDTO.PolicyLevelEnum.values()), log);
+                String errorMessage = "Tier Level should be one of " +
+                        Arrays.toString(ThrottlingPolicyDTO.PolicyLevelEnum.values());
+                throw new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.POLICY_LEVEL_NOT_FOUND, policyLevel));
             }
             throttlingPolicyList = apiConsumer.getThrottlePolicies(tierLevel, organization);
 

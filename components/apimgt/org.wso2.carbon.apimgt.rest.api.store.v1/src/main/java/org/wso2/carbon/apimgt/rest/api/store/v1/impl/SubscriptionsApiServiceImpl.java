@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -65,6 +64,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             MessageContext messageContext) throws APIManagementException {
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        // currently groupId is taken from the user so that groupId coming as a query parameter is not honored.
+        // As a improvement, we can check admin privileges of the user and honor groupId.
+        groupId = RestApiUtil.getLoggedInUserGroupId();
         SubscriptionListDTO subscriptionListDTO = SubscriptionServiceImpl.getSubscriptions(apiId,
                 applicationId, groupId, offset, limit, organization);
         return Response.ok().entity(subscriptionListDTO).build();
@@ -87,8 +89,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
         if (addedSubscriptionDTO != null) {
             try {
-                URI uri = new URI(
-                        RestApiConstants.RESOURCE_PATH_SUBSCRIPTIONS + "/" + addedSubscriptionDTO.getSubscriptionId());
+                URI uri = new URI(RestApiConstants.RESOURCE_PATH_SUBSCRIPTIONS + "/"
+                        + addedSubscriptionDTO.getSubscriptionId());
                 return Response.created(uri).entity(addedSubscriptionDTO).build();
             } catch (URISyntaxException e) {
                 if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -172,7 +174,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     }
 
     @Override
-    public Response subscriptionsSubscriptionIdUsageGet(String subscriptionId, MessageContext messageContext) {
+    public Response subscriptionsSubscriptionIdUsageGet(String subscriptionId, MessageContext messageContext)
+            throws APIManagementException {
 
         APIMonetizationUsageDTO apiMonetizationUsageDTO = SubscriptionServiceImpl
                 .getSubscriptionsUsage(subscriptionId);
@@ -214,14 +217,13 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return Response with additional Info of the GraphQL API
      */
     @Override
-    public Response getAdditionalInfoOfAPISubscriptions(String apiId, String groupId, String xWSO2Tenant, Integer offset,
-            Integer limit, String ifNoneMatch, MessageContext messageContext)
-            throws APIMgtResourceNotFoundException {
+    public Response getAdditionalInfoOfAPISubscriptions(String apiId, String groupId, String xWSO2Tenant,
+            Integer offset, Integer limit, String ifNoneMatch, MessageContext messageContext)
+            throws APIManagementException {
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        AdditionalSubscriptionInfoListDTO additionalSubscriptionInfoListDTO =
-                SubscriptionServiceImpl.getAdditionalInfoOfAPISubscriptions(apiId,
-                        groupId, offset, limit, organization);
+        AdditionalSubscriptionInfoListDTO additionalSubscriptionInfoListDTO = SubscriptionServiceImpl
+                .getAdditionalInfoOfAPISubscriptions(apiId, groupId, offset, limit, organization);
         return Response.ok().entity(additionalSubscriptionInfoListDTO).build();
     }
 }

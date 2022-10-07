@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.common.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -42,7 +40,6 @@ import java.util.Map;
  * This is the service implementation class for search API
  */
 public class SearchServiceImpl {
-    private static final Log log = LogFactory.getLog(SearchServiceImpl.class);
 
     private SearchServiceImpl() {
     }

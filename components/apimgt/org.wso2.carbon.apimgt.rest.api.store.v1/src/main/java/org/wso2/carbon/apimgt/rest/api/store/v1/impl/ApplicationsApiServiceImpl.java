@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -282,8 +281,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return
      */
     @Override
-    public Response applicationsApplicationIdKeysKeyTypeCleanUpPost(String applicationId, String keyType, String ifMatch,
-            MessageContext messageContext) throws APIManagementException {
+    public Response applicationsApplicationIdKeysKeyTypeCleanUpPost(String applicationId, String keyType,
+            String ifMatch, MessageContext messageContext) throws APIManagementException {
 
         ApplicationServiceImpl.cleanupApplicationRegistration(applicationId, keyType);
         return Response.ok().build();

@@ -475,5 +475,4 @@ public class RestApiUtilTest {
         String expectedDomain = RestApiUtil.getRequestedTenantDomain("");
         Assert.assertEquals(tenantDomain, expectedDomain);
     }
-
 }

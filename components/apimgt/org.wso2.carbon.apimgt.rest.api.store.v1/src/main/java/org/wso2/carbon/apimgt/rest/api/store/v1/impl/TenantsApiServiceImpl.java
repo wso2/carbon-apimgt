@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.store.v1.TenantsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.common.impl.TenantsServiceImpl;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
@@ -32,8 +33,6 @@ import javax.ws.rs.core.Response;
  */
 public class TenantsApiServiceImpl implements TenantsApiService {
 
-    private static final Log log = LogFactory.getLog(TenantsApiServiceImpl.class);
-
     /**
      * This is used to get the tenants using its state
      * @param state Tenant state either active or inactive
@@ -43,7 +42,8 @@ public class TenantsApiServiceImpl implements TenantsApiService {
      * @return List of tenant domains
      */
     @Override
-    public Response tenantsGet(String state, Integer limit, Integer offset, MessageContext messageContext) {
+    public Response tenantsGet(String state, Integer limit, Integer offset, MessageContext messageContext)
+            throws APIManagementException {
 
         TenantListDTO tenantList = TenantsServiceImpl.getTenants(state, limit, offset);
         return Response.ok().entity(tenantList).build();

@@ -121,7 +121,8 @@ public class RestAPIStoreUtils {
      * @param organization Identifier of the organization
      * @throws APIManagementException
      */
-    public static boolean isUserAccessAllowedForAPIByUUID(String apiId, String organization) throws APIManagementException {
+    public static boolean isUserAccessAllowedForAPIByUUID(String apiId, String organization)
+            throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer consumer = RestApiCommonUtil.getLoggedInUserConsumer();
         //this is just to check whether the user has access to the api or the api exists. 

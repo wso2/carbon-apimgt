@@ -17,59 +17,57 @@
 */
 package org.wso2.carbon.apimgt.rest.api.store.v1.common.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.common.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.common.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This class has Setting API service related Implementation
  */
 public class SettingsServiceImpl {
 
-    private static final Log log = LogFactory.getLog(SettingsServiceImpl.class);
-
     private SettingsServiceImpl() {
     }
 
     /**
      *
-     * @param organization organization
-     * @param xWSO2Tenant  xWSO2Tenant
+     * @param organization
+     * @param requestedTenantDomain
+     * @param anonymousEnabled
      * @return
-     * @throws APIManagementException APIManagementException
+     * @throws APIManagementException
      */
-    public static SettingsDTO getSettings(String organization, String xWSO2Tenant)
+    public static SettingsDTO getSettings(String organization, String requestedTenantDomain, boolean anonymousEnabled)
             throws APIManagementException {
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+
             boolean monetizationEnabled = apiConsumer.isMonetizationEnabled(requestedTenantDomain);
             boolean recommendationEnabled = apiConsumer.isRecommendationEnabled(requestedTenantDomain);
-            boolean anonymousEnabled = RestApiUtil.isDevPortalAnonymousEnabled(requestedTenantDomain);
             boolean isUserAvailable = false;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
                 isUserAvailable = true;
             }
             SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
-            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO(isUserAvailable, monetizationEnabled,
+            return settingsMappingUtil.fromSettingstoDTO(isUserAvailable, monetizationEnabled,
                     recommendationEnabled, anonymousEnabled, organization);
-            return settingsDTO;
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Store Settings";
             throw new APIManagementException(errorMessage, e.getErrorHandler());
@@ -80,7 +78,7 @@ public class SettingsServiceImpl {
      *
      * @return ApplicationAttributeListDTO
      */
-    public static ApplicationAttributeListDTO getSettingAttributes() {
+    public static ApplicationAttributeListDTO getSettingAttributes() throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -92,13 +90,28 @@ public class SettingsServiceImpl {
                         .fromApplicationAttributeJsonToDTO(obj);
                 applicationAttributeDTOList.add(applicationAttributeDTO);
             }
-            ApplicationAttributeListDTO applicationAttributeListDTO = ApplicationMappingUtil
+            return ApplicationMappingUtil
                     .fromApplicationAttributeListToDTO(applicationAttributeDTOList);
-            return applicationAttributeListDTO;
         } catch (APIManagementException e) {
-            RestApiUtil
-                    .handleInternalServerError("Error occurred in reading application attributes from config", e, log);
+            String errorMessage = "Error occurred in reading application attributes from config";
+            throw new APIManagementException(errorMessage, e.getErrorHandler());
         }
-        return null;
     }
+
+    /**
+     *
+     * @param definition
+     * @return
+     * @throws APIManagementException
+     */
+    public static List<String> getScopes(String definition) throws APIManagementException {
+        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+        Set<Scope> scopeSet = oasParser.getScopes(definition);
+        List<String> scopeList = new ArrayList<>();
+        for (Scope entry : scopeSet) {
+            scopeList.add(entry.getKey());
+        }
+        return scopeList;
+    }
+
 }

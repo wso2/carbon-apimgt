@@ -34,20 +34,23 @@ public enum ExceptionCodes implements ErrorHandler {
     API_VERSION_ALREADY_EXISTS(900252, "The API version already exists.", 409, "An API with version '%s' already exists for API '%s'"),
     API_EMPTY_PASSWORD_FOR_SECURED_ENDPOINT(900253, "Empty password is given for endpointSecurity when creating API: %s",
             400, "An empty password is given for endpointSecurity when creating API: %s"),
+    SEARCH_API_EXCEPTION(900254, "Internal server error.", 500, "Error occurred while searching APIs"),
 
     API_PRODUCT_CONTEXT_ALREADY_EXISTS(900275, "The API Product context already exists.", 409, "An API Product with context '%s' already exists"),
 
     API_ALREADY_EXISTS(900300, "The API already exists.", 409, "The API already exists"),
-    APPLICATION_ALREADY_EXISTS(900301, "The application already exists.", 409, "The application already exists"),
+    API_NOT_FOUND(900301, "API Not Found", 404, "Requested API with id '%s' not found"),
+
     APIMGT_DAO_EXCEPTION(900302, "Internal server error.", 500, "Error occurred while persisting/retrieving data"),
     APIMGT_LIFECYCLE_EXCEPTION(900303, "Lifecycle exception occurred", 500, "Error occurred while changing " +
             "lifecycle state"),
     TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, "The tier cannot be null"),
     TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, "The tier name is invalid"),
-    SEARCH_API_EXCEPTION(900306, "Internal server error.", 500, "Error occurred while searching APIs"),
-    APPLICATION_NOT_FOUND(900307, "Application not found", 404, "Application not found"),
-    API_NOT_FOUND(900308, "API Not Found", 404, "Requested API with id '%s' not found"),
-    APPLICATION_DELETE_FAILED(900309, "Error has occurred. Could not delete the application", 500, "Error has occurred. Could not delete the application '%s'"),
+    APPLICATION_NOT_FOUND(900306, "Application not found", 404, "Application not found"),
+    APPLICATION_ALREADY_EXISTS(900307, "The application already exists.", 409, "The application already exists"),
+    APPLICATION_DELETE_FAILED(900308, "Error has occurred. Could not delete the application", 500, "Error has occurred. Could not delete the application '%s'"),
+
+    SUBSCRIPTION_NOT_ALLOWED(900309, "Subscription is not allowed for %s", 403, "%s"),
     SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 404, "Couldn't retrieve Subscriptions for API"),
     UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be done"),
     DOCUMENT_ALREADY_EXISTS(900312, "Document already exists", 409, "Document already exists"),
@@ -62,7 +65,7 @@ public enum ExceptionCodes implements ErrorHandler {
     API_IMPORT_ERROR(900317, "API import Error", 500, "Error while importing the given APIs"),
     API_PRODUCT_IMPORT_ERROR(900318, "API product import Error", 500,
             "Error while importing the given API Products"),
-    SUBSCRIPTION_STATE_INVALID(900320, "Invalid state change for subscription", 400, "Invalid state change for " +
+    SUBSCRIPTION_STATE_INVALID(900320, "Invalid state for subscription", 400, "Invalid state for " +
             "subscription"),
     API_RETRIEVE_EXCEPTION(900319, "Internal server error.", 500, "Error occurred while retrieving %s"),
     APPLICATION_RETRIEVE_EXCEPTION(900320, "Internal server error.", 500, "Error occurred while retrieving %s"),
@@ -411,6 +414,7 @@ public enum ExceptionCodes implements ErrorHandler {
     UNSUPPORTED_POLICY_TYPE(901001, "Policy type error", 400, "Unsupported policy type"),
     UNSUPPORTED_TIER_TYPE(901002, "Policy tier error", 400, "Unsupported policy tier"),
     INVALID_THROTTLE_TIER(901003, "Invalid throttle tier", 400, "Invalid x-throttling tier"),
+    THROTTLE_TIER_NOT_FOUND(901004, "Throttle policy tier not found", 404, "Policy tier not found"),
 
     THROTTLING_POLICY_NOT_FOUND(903005, "Throttling Policy Not Found", 404,
             "Requested throttling policy with name '%s' and type '%s' not found"),
@@ -475,7 +479,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Shared Scope display name not specified"),
     SCOPE_ALREADY_ASSIGNED(900988, "Scope already assigned locally by another API", 400,
             "Scope already assigned locally by another API"),
-    TOKEN_VALIDATION_FAILED(900989, "Validation failed for the given token", 500, "Validation failed for the given token"),
+    TOKEN_VALIDATION_FAILED(900989, "Validation failed for the given token", 400, "Validation failed for the given token"),
     ERROR_CHECKING_SCOPE_NAME(901000, "Error while checking scope name", 500,
             "Error occurred while checking scope name %s"),
     ERROR_CREATING_URI_FOR_SHARED_SCOPE(901004, "Error while creating shared scope URI", 500,

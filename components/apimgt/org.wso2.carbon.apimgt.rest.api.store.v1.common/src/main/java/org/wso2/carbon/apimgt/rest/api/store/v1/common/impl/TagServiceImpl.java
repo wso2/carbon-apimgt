@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.common.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tag;
@@ -36,8 +34,6 @@ import java.util.Set;
  * This class has TagsApi service related Implementation
  */
 public class TagServiceImpl {
-
-    private static final Log log = LogFactory.getLog(TagServiceImpl.class);
 
     private TagServiceImpl() {
     }

@@ -473,7 +473,6 @@ public class ApisServiceImpl {
         ratingListDTO.setAvgRating(String.valueOf(avgRating));
         APIMappingUtil.setRatingPaginationParams(ratingListDTO, id, offset, limit, ratingDTOList.size());
         return ratingListDTO;
-
     }
 
     /**
