@@ -19,8 +19,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.common.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
@@ -34,8 +32,6 @@ import java.util.stream.Collectors;
  * This is the service implementation class for Sdk generate related operations
  */
 public class SdkGenServiceImpl {
-
-    private static final Log log = LogFactory.getLog(SdkGenServiceImpl.class);
 
     private SdkGenServiceImpl() {
     }
