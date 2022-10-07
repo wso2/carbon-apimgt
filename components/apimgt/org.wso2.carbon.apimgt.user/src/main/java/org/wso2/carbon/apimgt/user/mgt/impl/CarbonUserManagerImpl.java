@@ -56,15 +56,6 @@ public class CarbonUserManagerImpl implements UserManager {
     }
 
     @Override
-    public Tenant[] getAllTenants() throws UserException {
-        try {
-            return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
-        } catch (UserStoreException e) {
-            throw new UserException(e.getMessage(), e);
-        }
-    }
-
-    @Override
     public int getTenantId(String tenantDomain) throws UserException {
         try {
             return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
@@ -279,7 +270,12 @@ public class CarbonUserManagerImpl implements UserManager {
     @Override
     public Set<String> getTenantDomainsByState(String state) throws UserException {
         boolean isActive = state.equalsIgnoreCase(UserConstants.TENANT_STATE_ACTIVE);
-        Tenant[] tenants = this.getAllTenants();
+        Tenant[] tenants = new Tenant[0];
+        try {
+            tenants = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
+        } catch (UserStoreException e) {
+            logger.error("Error while fetching all tenants", e);
+        }
         if (tenants == null || tenants.length == 0) {
             return Collections.emptySet();
         }

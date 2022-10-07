@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.user.mgt;
 
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
-import org.wso2.carbon.user.api.Tenant;
 
 import java.util.Map;
 import java.util.Set;
@@ -28,8 +27,6 @@ import java.util.SortedMap;
 public interface UserManager {
 
     boolean isTenantAvailable(String tenantDomain) throws UserException;
-
-    Tenant[] getAllTenants() throws UserException;
 
     int getTenantId(String tenantDomain) throws UserException;
 
