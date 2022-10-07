@@ -34,7 +34,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -50,7 +50,8 @@ import java.util.zip.ZipInputStream;
 
 public class RestApiAdminUtils {
 
-    private RestApiAdminUtils() {}
+    private RestApiAdminUtils() {
+    }
 
     //using a set for file extensions white list since it will be faster to search
     private static final Set<String> EXTENSION_WHITELIST = new HashSet<String>(Arrays.asList(
@@ -59,13 +60,12 @@ public class RestApiAdminUtils {
     /**
      * Checks whether given policy is allowed to access to user
      *
-     * @param user   username with tenant domain
      * @param policy policy to check
      * @return true if user is allowed to access the policy
      */
-    public static boolean isPolicyAccessibleToUser(String user, Policy policy) {
+    public static boolean isPolicyAccessibleToUser(Policy policy) {
         //This block checks whether policy's tenant domain and user's tenant domain are same
-        String userTenantDomain = MultitenantUtils.getTenantDomain(user);
+        String userTenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
         if (!StringUtils.isBlank(policy.getTenantDomain())) {
             return policy.getTenantDomain().equals(userTenantDomain);
         } else {
@@ -77,13 +77,12 @@ public class RestApiAdminUtils {
     /**
      * Checks whether given block condition is allowed to access to user
      *
-     * @param user           username with tenant domain
      * @param blockCondition Block condition to check
      * @return true if user is allowed to access the block condition
      */
-    public static boolean isBlockConditionAccessibleToUser(String user, BlockConditionsDTO blockCondition) {
+    public static boolean isBlockConditionAccessibleToUser(BlockConditionsDTO blockCondition) {
 
-        String userTenantDomain = MultitenantUtils.getTenantDomain(user);
+        String userTenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
         return !StringUtils.isBlank(blockCondition.getTenantDomain()) && blockCondition.getTenantDomain()
                 .equals(userTenantDomain);
     }

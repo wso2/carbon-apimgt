@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Base64;
 import java.util.Map;
@@ -83,8 +82,8 @@ public class SystemScopesCommonImpl {
      */
     public static ScopeListDTO systemScopesGet() throws APIManagementException {
         try {
-            Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenantWithoutRoleMappings(MultitenantUtils
-                    .getTenantDomain(RestApiCommonUtil.getLoggedInUsername()));
+            Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenantWithoutRoleMappings(
+                    RestApiCommonUtil.getLoggedInUserTenantDomain());
             return SystemScopesMappingUtil.fromScopeListToScopeListDTO(scopeRoleMapping);
         } catch (APIManagementException e) {
             String error = "Error when getting the list of scopes-role mapping";
@@ -103,8 +102,8 @@ public class SystemScopesCommonImpl {
     public static ScopeListDTO updateRolesForScope(ScopeListDTO body) throws APIManagementException {
         JSONObject newScopeRoleJson = SystemScopesMappingUtil.createJsonObjectOfScopeMapping(body);
         APIUtil.updateTenantConfOfRoleScopeMapping(newScopeRoleJson, RestApiCommonUtil.getLoggedInUsername());
-        Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenantWithoutRoleMappings(MultitenantUtils
-                .getTenantDomain(RestApiCommonUtil.getLoggedInUsername()));
+        Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenantWithoutRoleMappings(
+                RestApiCommonUtil.getLoggedInUserTenantDomain());
         return SystemScopesMappingUtil.fromScopeListToScopeListDTO(scopeRoleMapping);
     }
 
@@ -115,7 +114,7 @@ public class SystemScopesCommonImpl {
      * @throws APIManagementException When an internal error occurs
      */
     public static RoleAliasListDTO getRoleAliasMappings() throws APIManagementException {
-        String tenantDomain = MultitenantUtils.getTenantDomain(RestApiCommonUtil.getLoggedInUsername());
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);
         JSONObject roleMapping = (JSONObject) tenantConfig.get(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG);
         RoleAliasListDTO roleAliasListDTO = new RoleAliasListDTO();
@@ -137,7 +136,7 @@ public class SystemScopesCommonImpl {
         RoleAliasListDTO roleAliasListDTO = new RoleAliasListDTO();
         JSONObject newRoleMappingJson = SystemScopesMappingUtil.createJsonObjectOfRoleMapping(body);
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIUtil.updateTenantConfRoleAliasMapping(newRoleMappingJson, username);
         JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);
         JSONObject roleMapping = (JSONObject) tenantConfig.get(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG);

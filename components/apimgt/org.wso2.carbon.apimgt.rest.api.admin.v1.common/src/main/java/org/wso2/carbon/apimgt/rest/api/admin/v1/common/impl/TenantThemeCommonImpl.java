@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,12 +41,12 @@ public class TenantThemeCommonImpl {
 
     public static void importTenantTheme(InputStream fileInputStream) throws APIManagementException {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            String errorMessage = "Super Tenant " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME +
+        if (RestApiConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            String errorMessage = "Super Tenant " + RestApiConstants.SUPER_TENANT_DOMAIN_NAME +
                     " is not allowed to import a tenant theme";
             throw new APIManagementException(errorMessage,
                     ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_NOT_ALLOWED,
-                            MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
+                            RestApiConstants.SUPER_TENANT_DOMAIN_NAME));
         }
         try {
             RestApiAdminUtils.importTenantTheme(fileInputStream, tenantDomain);
