@@ -56,6 +56,10 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.dao.impl.AdminDAOImpl;
+import org.wso2.carbon.apimgt.impl.dao.impl.ApplicationDAOImpl;
+import org.wso2.carbon.apimgt.impl.dao.impl.EnvironmentDAOImpl;
+import org.wso2.carbon.apimgt.impl.dao.impl.KeyManagerDAOImpl;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -111,14 +115,22 @@ public class APIAdminImpl implements APIAdmin {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
     protected ApiMgtDAO apiMgtDAO;
+    protected EnvironmentDAOImpl environmentDAOImpl;
+    protected ApplicationDAOImpl applicationDAOImpl;
+    protected AdminDAOImpl adminDAOImpl;
+    protected KeyManagerDAOImpl keyManagerDAOImpl;
 
     public APIAdminImpl() {
         apiMgtDAO = ApiMgtDAO.getInstance();
+        environmentDAOImpl = EnvironmentDAOImpl.getInstance();
+        applicationDAOImpl = ApplicationDAOImpl.getInstance();
+        adminDAOImpl = AdminDAOImpl.getInstance();
+        keyManagerDAOImpl = KeyManagerDAOImpl.getInstance();
     }
 
     @Override
     public List<Environment> getAllEnvironments(String tenantDomain) throws APIManagementException {
-        List<Environment> dynamicEnvs = apiMgtDAO.getAllEnvironments(tenantDomain);
+        List<Environment> dynamicEnvs = environmentDAOImpl.getAllEnvironments(tenantDomain);
         // gateway environment name should be unique, ignore environments defined in api-manager.xml with the same name
         // if a dynamic (saved in database) environment exists.
         List<String> dynamicEnvNames = dynamicEnvs.stream().map(Environment::getName).collect(Collectors.toList());
@@ -135,7 +147,7 @@ public class APIAdminImpl implements APIAdmin {
         // name is the UUID of environments configured in api-manager.xml
         Environment env = APIUtil.getReadOnlyEnvironments().get(uuid);
         if (env == null) {
-            env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
+            env = environmentDAOImpl.getEnvironment(tenantDomain, uuid);
             if (env == null) {
                 String errorMessage = String.format("Failed to retrieve Environment with UUID %s. Environment not found",
                         uuid);
@@ -158,7 +170,7 @@ public class APIAdminImpl implements APIAdmin {
                             String.format("name '%s'", environment.getName())));
         }
         validateForUniqueVhostNames(environment);
-        return apiMgtDAO.addEnvironment(tenantDomain, environment);
+        return environmentDAOImpl.addEnvironment(tenantDomain, environment);
     }
 
     @Override
@@ -171,7 +183,7 @@ public class APIAdminImpl implements APIAdmin {
             throw new APIMgtResourceNotFoundException(errorMessage,
                     ExceptionCodes.from(ExceptionCodes.READONLY_GATEWAY_ENVIRONMENT, String.format("UUID '%s'", uuid)));
         }
-        apiMgtDAO.deleteEnvironment(uuid);
+        environmentDAOImpl.deleteEnvironment(uuid);
     }
 
     @Override
@@ -196,7 +208,7 @@ public class APIAdminImpl implements APIAdmin {
 
         validateForUniqueVhostNames(environment);
         environment.setId(existingEnv.getId());
-        return apiMgtDAO.updateEnvironment(environment);
+        return environmentDAOImpl.updateEnvironment(environment);
     }
 
     private void validateForUniqueVhostNames(Environment environment) throws APIManagementException {
@@ -217,7 +229,7 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws APIManagementException {
 
-        return apiMgtDAO.getAllApplicationsOfTenantForMigration(appTenantDomain);
+        return applicationDAOImpl.getAllApplicationsOfTenantForMigration(appTenantDomain);
     }
 
     /**
@@ -227,7 +239,7 @@ public class APIAdminImpl implements APIAdmin {
                                                        int offset, String applicationName, String sortBy,
                                                        String sortOrder) throws APIManagementException {
 
-        return apiMgtDAO.getApplicationsWithPagination(user, owner, tenantId, limit, offset, sortBy, sortOrder,
+        return applicationDAOImpl.getApplicationsWithPagination(user, owner, tenantId, limit, offset, sortBy, sortOrder,
                 applicationName);
     }
 
@@ -243,7 +255,7 @@ public class APIAdminImpl implements APIAdmin {
     public int getApplicationsCount(int tenantId, String searchOwner, String searchApplication)
             throws APIManagementException {
 
-        return apiMgtDAO.getApplicationsCount(tenantId, searchOwner, searchApplication);
+        return applicationDAOImpl.getApplicationsCount(tenantId, searchOwner, searchApplication);
     }
 
     /**
@@ -282,7 +294,7 @@ public class APIAdminImpl implements APIAdmin {
      */
     public MonetizationUsagePublishInfo getMonetizationUsagePublishInfo() throws APIManagementException {
 
-        return apiMgtDAO.getMonetizationUsagePublishInfo();
+        return adminDAOImpl.getMonetizationUsagePublishInfo();
     }
 
     /**
@@ -293,7 +305,7 @@ public class APIAdminImpl implements APIAdmin {
     public void updateMonetizationUsagePublishInfo(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
             throws APIManagementException {
 
-        apiMgtDAO.updateUsagePublishInfo(monetizationUsagePublishInfo);
+        adminDAOImpl.updateUsagePublishInfo(monetizationUsagePublishInfo);
     }
 
     /**
@@ -304,7 +316,7 @@ public class APIAdminImpl implements APIAdmin {
     public void addMonetizationUsagePublishInfo(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
             throws APIManagementException {
 
-        apiMgtDAO.addMonetizationUsagePublishInfo(monetizationUsagePublishInfo);
+        adminDAOImpl.addMonetizationUsagePublishInfo(monetizationUsagePublishInfo);
     }
 
     /**
@@ -347,7 +359,7 @@ public class APIAdminImpl implements APIAdmin {
         }
 
         List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant =
-                apiMgtDAO.getKeyManagerConfigurationsByOrganization(tenantDomain);
+                keyManagerDAOImpl.getKeyManagerConfigurationsByOrganization(tenantDomain);
         Iterator<KeyManagerConfigurationDTO> iterator = keyManagerConfigurationsByTenant.iterator();
         KeyManagerConfigurationDTO defaultKeyManagerConfiguration = null;
         while (iterator.hasNext()) {
@@ -367,7 +379,7 @@ public class APIAdminImpl implements APIAdmin {
         // and append those to the previous list
         if (!StringUtils.equals(organization, tenantDomain)) {
             List<KeyManagerConfigurationDTO> keyManagerConfigurationsByOrganization =
-                    apiMgtDAO.getKeyManagerConfigurationsByOrganization(organization);
+                    keyManagerDAOImpl.getKeyManagerConfigurationsByOrganization(organization);
             keyManagerConfigurationsByTenant.addAll(keyManagerConfigurationsByOrganization);
         }
 
@@ -439,7 +451,7 @@ public class APIAdminImpl implements APIAdmin {
     public Map<String, List<KeyManagerConfigurationDTO>> getAllKeyManagerConfigurations()
             throws APIManagementException {
 
-        List<KeyManagerConfigurationDTO> keyManagerConfigurations = apiMgtDAO.getKeyManagerConfigurations();
+        List<KeyManagerConfigurationDTO> keyManagerConfigurations = keyManagerDAOImpl.getKeyManagerConfigurations();
         Map<String, List<KeyManagerConfigurationDTO>> keyManagerConfigurationsByTenant = new HashMap<>();
         for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
             List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS;
@@ -464,7 +476,7 @@ public class APIAdminImpl implements APIAdmin {
             throws APIManagementException {
 
         KeyManagerConfigurationDTO keyManagerConfigurationDTO =
-                apiMgtDAO.getKeyManagerConfigurationByID(organization, id);
+                keyManagerDAOImpl.getKeyManagerConfigurationByID(organization, id);
         if (keyManagerConfigurationDTO == null){
             return null;
         }
@@ -500,7 +512,7 @@ public class APIAdminImpl implements APIAdmin {
 
     @Override
     public boolean isIDPExistInOrg(String organization, String resourceId) throws APIManagementException {
-        return apiMgtDAO.isIDPExistInOrg(organization, resourceId);
+        return keyManagerDAOImpl.isIDPExistInOrg(organization, resourceId);
     }
 
     @Override

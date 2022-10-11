@@ -23,11 +23,10 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.persistence.dto.*;
-import org.wso2.carbon.apimgt.persistence.dto.Documentation;
-import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
-import org.wso2.carbon.apimgt.persistence.exceptions.*;
+import org.wso2.carbon.apimgt.impl.dao.dto.*;
+import org.wso2.carbon.apimgt.impl.dao.dto.Documentation;
+import org.wso2.carbon.apimgt.impl.dao.dto.ResourceFile;
+import org.wso2.carbon.apimgt.impl.dao.exceptions.*;
 
 import java.sql.Connection;
 import java.util.List;
