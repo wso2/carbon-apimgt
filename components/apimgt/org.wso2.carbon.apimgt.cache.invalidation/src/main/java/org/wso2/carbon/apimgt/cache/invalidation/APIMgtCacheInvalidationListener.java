@@ -27,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.cache.invalidation.internal.DataHolder;
 import org.wso2.carbon.apimgt.impl.CacheInvalidationConfiguration;
 import org.wso2.carbon.caching.impl.CacheImpl;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -101,10 +100,6 @@ public class APIMgtCacheInvalidationListener implements MessageListener {
         if (!DataHolder.getNodeId().equals(nodeId) &&
                 cacheInvalidationConfiguration.getDomain().equals(clusterDomain)) {
             try {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                carbonContext.setTenantId(tenantId);
-                carbonContext.setTenantDomain(tenantDomain);
                 CacheManager cacheManager = Caching.getCacheManagerFactory().getCacheManager(cacheManagerName);
                 Cache<Object, Object> cache = cacheManager.getCache(cacheName);
                 Object cacheKeyObject = constructCacheKeyObject(cacheKey);
@@ -118,8 +113,6 @@ public class APIMgtCacheInvalidationListener implements MessageListener {
                 }
             } catch (ClassNotFoundException e) {
                 log.error("Error while removing cache Object", e);
-            } finally {
-                PrivilegedCarbonContext.endTenantFlow();
             }
         }
     }

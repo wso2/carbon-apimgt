@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -80,7 +79,6 @@ public class JWTUtil {
                 //If scope validation successful then set tenant name and user name to current context
                 String tenantDomain = MultitenantUtils.getTenantDomain(oauthTokenInfo.getEndUserName());
                 int tenantId;
-                PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                 try {
                     String username = oauthTokenInfo.getEndUserName();
                     if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -97,9 +95,6 @@ public class JWTUtil {
                         log.debug("username = " + username + "masked token " + maskedToken);
                     }
                     tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
-                    carbonContext.setTenantDomain(tenantDomain);
-                    carbonContext.setTenantId(tenantId);
-                    carbonContext.setUsername(username);
                     message.put(RestApiConstants.AUTH_TOKEN_INFO, oauthTokenInfo);
                     if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                         APIUtil.loadTenantConfigBlockingMode(tenantDomain);

@@ -24,7 +24,6 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.registry.api.GhostResource;
 import org.wso2.carbon.registry.core.Registry;
@@ -54,10 +53,6 @@ public class RegistryCacheInvalidationService extends AbstractAdmin {
         boolean isTenantFlowStarted = false;
         try {
             int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);            
-            isTenantFlowStarted = true;
-            
             registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(tenantId);
             
             Cache<RegistryCacheKey, GhostResource> cache = 
@@ -100,10 +95,6 @@ public class RegistryCacheInvalidationService extends AbstractAdmin {
         } catch (UserException e) {
             APIUtil.handleException("Error in retrieving Tenant Information while invalidating cache for " 
                                                     + path + "in tenant " + tenantDomain, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
         }
     }
 

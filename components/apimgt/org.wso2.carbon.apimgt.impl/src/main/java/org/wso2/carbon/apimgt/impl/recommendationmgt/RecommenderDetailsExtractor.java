@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -129,7 +128,6 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         if (tenantDomain == null) {
             tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-        startTenantFlow(tenantDomain);
         tenantFlowStarted = true;
         try {
             if (APIUtil.isRecommendationEnabled(tenantDomain)) {
@@ -155,10 +153,6 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             }
         } catch (IOException e) {
             log.error("When extracting data for the recommendation system !", e);
-        } finally {
-            if (tenantFlowStarted) {
-                endTenantFlow();
-            }
         }
     }
 
@@ -314,18 +308,6 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         if (log.isDebugEnabled()) {
             log.debug("Event Published for recommendation server with payload " + payload);
         }
-    }
-
-    private void endTenantFlow() {
-
-        PrivilegedCarbonContext.endTenantFlow();
-    }
-
-    private void startTenantFlow(String tenantDomain) {
-
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                setTenantDomain(tenantDomain, true);
     }
 
     private String getUserId(String userName) {

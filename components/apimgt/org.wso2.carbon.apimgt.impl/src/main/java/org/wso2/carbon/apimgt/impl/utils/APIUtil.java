@@ -198,8 +198,6 @@ import org.wso2.carbon.apimgt.user.mgt.UserConstants;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.commons.stub.loggeduserinfo.ExceptionException;
 import org.wso2.carbon.core.commons.stub.loggeduserinfo.LoggedUserInfo;
 import org.wso2.carbon.core.commons.stub.loggeduserinfo.LoggedUserInfoAdminStub;
@@ -1427,7 +1425,7 @@ public final class APIUtil {
                 log.warn("Couldn't find GovernanceArtifactConfiguration of RXT: " + key +
                         ". Tenant id set in registry : " + ((UserRegistry) registry).getTenantId() +
                         ", Tenant domain set in PrivilegedCarbonContext: " +
-                        PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+                        UserContext.getThreadLocalUserContext().getOrganizationId());
             }
         } catch (RegistryException e) {
             String msg = "Failed to initialize GenericArtifactManager";
@@ -2136,9 +2134,6 @@ public final class APIUtil {
         }
 
         String tenantDomain = MultitenantUtils.getTenantDomain(userNameWithoutChange);
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-
         try {
             int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
             authorized = UserManagerHolder.getUserManager().isUserAuthorized(tenantId,
@@ -2152,8 +2147,6 @@ public final class APIUtil {
         } catch (UserException e) {
             throw new APIManagementException("Error while checking the user:" + userNameWithoutChange
                     + " authorized or not", e, ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
         }
 
         return authorized;
@@ -4133,9 +4126,6 @@ public final class APIUtil {
 
                             Thread.currentThread().setName("APIMHostObjectUtils-loadTenantConfig-thread");
                             try {
-                                PrivilegedCarbonContext.startTenantFlow();
-                                PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                                        .setTenantDomain(finalTenantDomain, true);
                                 ConfigurationContext ctx = ServiceReferenceHolder.getContextService()
                                         .getServerConfigContext();
                                 TenantAxisUtils.getTenantAxisConfiguration(finalTenantDomain, ctx);
@@ -4144,7 +4134,6 @@ public final class APIUtil {
                             } finally {
                                 //only after the tenant is loaded completely, the tenant domain is removed from the set
                                 currentLoadingTenants.remove(finalTenantDomain);
-                                PrivilegedCarbonContext.endTenantFlow();
                             }
                         }
                     });
@@ -4310,11 +4299,7 @@ public final class APIUtil {
         try {
             int tenantId;
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                PrivilegedCarbonContext.startTenantFlow();
-                isTenantFlowStarted = true;
-
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                tenantId = UserContext.getThreadLocalUserContext().getOrganizationId();
             } else {
                 tenantId = MultitenantConstants.SUPER_TENANT_ID;
             }
@@ -4335,10 +4320,6 @@ public final class APIUtil {
             String msg = "Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain;
             log.error(msg, e);
             handleException(msg, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
         }
         return documentMap;
     }
@@ -4351,7 +4332,7 @@ public final class APIUtil {
      */
     public static Set<String> extractEnvironmentsForAPI(String environments) throws APIManagementException {
 
-        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
         Set<String> environmentStringSet = extractEnvironmentsForAPI(environments, tenantDomain);
 
         return environmentStringSet;
@@ -4727,15 +4708,7 @@ public final class APIUtil {
     }
 
     public static void clearTiersCache(String tenantDomain) {
-
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-
-            getTiersCache().removeAll();
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
+        getTiersCache().removeAll();
     }
 
     private static Cache getTiersCache() {
@@ -7498,18 +7471,11 @@ public final class APIUtil {
     public static String getAdminUsername() throws APIMgtInternalException {
         String adminName = "admin";
         try {
-            String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
             int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
-
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
-
             adminName = UserManagerHolder.getUserManager().getAdminUsername(tenantId);
         } catch (UserException e) {
             handleInternalException("Error in getting admin username from user-mgt.xml", e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
         }
         return adminName;
     }
@@ -7523,18 +7489,11 @@ public final class APIUtil {
     public static String getAdminPassword() throws APIMgtInternalException {
         String adminPassword = "admin";
         try {
-            String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
             int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
-
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
-
             adminPassword = UserManagerHolder.getUserManager().getAdminPassword(tenantId);
         } catch (UserException e) {
             handleInternalException("Error in getting admin password from user-mgt.xml", e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
         }
         return adminPassword;
     }
@@ -8310,9 +8269,6 @@ public final class APIUtil {
     public static String getTenantAdminUserName(String tenantDomain) throws APIManagementException {
         try {
             int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
             String adminUserName = UserManagerHolder.getUserManager().getAdminUsername(tenantId);
             if (!tenantDomain.contentEquals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                 return adminUserName.concat("@").concat(tenantDomain);
@@ -8321,8 +8277,6 @@ public final class APIUtil {
         } catch (UserException e) {
             throw new APIManagementException("Error in getting tenant admin username",
                     e, ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -8490,20 +8444,8 @@ public final class APIUtil {
     }
 
     public static void publishEvent(String eventName, Map dynamicProperties, Event event) {
-
-        boolean tenantFlowStarted = false;
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            tenantFlowStarted = true;
-            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
-                    .publish(eventName, dynamicProperties, event);
-        } finally {
-            if (tenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
+        ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
+                .publish(eventName, dynamicProperties, event);
 
     }
 

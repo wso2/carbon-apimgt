@@ -58,12 +58,10 @@ import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.XMLConstants;
@@ -308,57 +306,46 @@ public class SequenceGenerator {
             version = (version != null ? version.trim() : null);
 
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             int tenantId;
             UserRegistry registry;
 
-            try {
-                tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
-                APIUtil.loadTenantRegistry(tenantId);
-                registry = registryService.getGovernanceSystemRegistry(tenantId);
+            tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+            APIUtil.loadTenantRegistry(tenantId);
+            registry = registryService.getGovernanceSystemRegistry(tenantId);
 
-                Pattern pattern = Pattern.compile("[{}]");
-                Matcher hasSpecialCharacters = pattern.matcher(resourcePath);
-                String resourcePathName = resourcePath;
-                if (hasSpecialCharacters.find()) {
-                    resourcePathName = resourcePath.split("[{]")[0];
-                    if (resourcePathName.endsWith("/")) {
-                        resourcePathName = StringUtils.removeEnd(resourcePathName, "/");
-                    }
+            Pattern pattern = Pattern.compile("[{}]");
+            Matcher hasSpecialCharacters = pattern.matcher(resourcePath);
+            String resourcePathName = resourcePath;
+            if (hasSpecialCharacters.find()) {
+                resourcePathName = resourcePath.split("[{]")[0];
+                if (resourcePathName.endsWith("/")) {
+                    resourcePathName = StringUtils.removeEnd(resourcePathName, "/");
                 }
-
-                String resourceInPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                        provider + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
-                        + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_IN_RESOURCE
-                        + resourcePathName + SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method
-                        + SOAPToRESTConstants.SequenceGen.XML_FILE_EXTENSION;
-                String resourceOutPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                        provider + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
-                        + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_OUT_RESOURCE
-                        + resourcePathName + SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method
-                        + SOAPToRESTConstants.SequenceGen.XML_FILE_EXTENSION;
-
-                SequenceUtils.saveRestToSoapConvertedSequence(registry, inSequence, method, resourceInPath,
-                        resourcePath);
-                SequenceUtils.saveRestToSoapConvertedSequence(registry, outSequence, method, resourceOutPath,
-                        resourcePath);
-            } catch (UserException e) {
-                handleException("Error while reading tenant information", e);
-            } catch (RegistryException e) {
-                handleException("Error while creating registry resource", e);
-            } catch (APIManagementException e) {
-                handleException(
-                        "Error while saving the soap to rest converted sequence for resource path: " + resourcePath, e);
             }
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
+
+            String resourceInPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                    provider + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
+                    + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_IN_RESOURCE
+                    + resourcePathName + SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method
+                    + SOAPToRESTConstants.SequenceGen.XML_FILE_EXTENSION;
+            String resourceOutPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                    provider + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
+                    + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_OUT_RESOURCE
+                    + resourcePathName + SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method
+                    + SOAPToRESTConstants.SequenceGen.XML_FILE_EXTENSION;
+
+            SequenceUtils.saveRestToSoapConvertedSequence(registry, inSequence, method, resourceInPath,
+                    resourcePath);
+            SequenceUtils.saveRestToSoapConvertedSequence(registry, outSequence, method, resourceOutPath,
+                    resourcePath);
+        } catch (UserException e) {
+            handleException("Error while reading tenant information", e);
+        } catch (RegistryException e) {
+            handleException("Error while creating registry resource", e);
+        } catch (APIManagementException e) {
+            handleException(
+                    "Error while saving the soap to rest converted sequence for resource path: " + resourcePath, e);
         }
     }
 

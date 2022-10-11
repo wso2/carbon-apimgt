@@ -60,7 +60,6 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.PayloadConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 /**
  * APIStateChangeWSWorkflowExecutor is used to provide approval process to API state change using external BPMN process.
@@ -250,8 +249,6 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         int tenantId = workflowDTO.getTenantId();
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
-            // tenant flow is already started from the rest api service impl. no need to start from here
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(invoker);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(providerName);
             String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);

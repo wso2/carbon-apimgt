@@ -30,9 +30,8 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExi
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -197,7 +196,7 @@ public class CertificateManagerImpl implements CertificateManager {
     @Override
     public boolean addCertificateToGateway(String certificate, String alias) {
         // Check whether the api is invoked via the APIGatewayAdmin service.
-        int loggedInTenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        int loggedInTenantId = UserContext.getThreadLocalUserContext().getOrganizationId();
         if (loggedInTenantId != MultitenantConstants.SUPER_TENANT_ID) {
             alias = alias + "_" + loggedInTenantId;
         }
@@ -207,7 +206,7 @@ public class CertificateManagerImpl implements CertificateManager {
     @Override
     public boolean addClientCertificateToGateway(String certificate, String alias) {
 
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        int tenantId = UserContext.getThreadLocalUserContext().getOrganizationId();
         /*
         Tenant ID is appended with alias to make sure, only the admins from the same tenant, can delete the
         certificates later.
@@ -267,7 +266,7 @@ public class CertificateManagerImpl implements CertificateManager {
     @Override
     public boolean deleteCertificateFromGateway(String alias) {
         // Check whether the api is invoked via the APIGatewayAdmin service.
-        int loggedInTenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        int loggedInTenantId = UserContext.getThreadLocalUserContext().getOrganizationId();
         if (loggedInTenantId != MultitenantConstants.SUPER_TENANT_ID) {
             alias = alias + "_" + loggedInTenantId;
         }
@@ -277,7 +276,7 @@ public class CertificateManagerImpl implements CertificateManager {
     @Override
     public boolean deleteClientCertificateFromGateway(String alias) {
 
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        int tenantId = UserContext.getThreadLocalUserContext().getOrganizationId();
         /*
             Tenant ID is checked to make sure that tenant admins cannot delete the alias that do not belong their
             tenant. Super tenant is special cased, as it is required to delete the certificates from different tenants.

@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.core.bean.context.MessageContext;
 import org.wso2.carbon.identity.core.handler.InitConfig;
@@ -85,12 +84,6 @@ public class UserPostSelfRegistrationHandler extends AbstractEventHandler {
     private void executeUserRegistrationWorkflow(String tenantDomain, String userName)
             throws org.wso2.carbon.identity.recovery.IdentityRecoveryServerException {
         try {
-            //Start a tenant flow
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-            carbonContext.setTenantId(IdentityTenantUtil.getTenantId(tenantDomain));
-            carbonContext.setTenantDomain(tenantDomain);
-
             if (UserManagerHolder.getUserManager().isExistingUser(IdentityTenantUtil.getTenantId(tenantDomain),
                     userName)) {
                 List<String> roleList = asList(UserManagerHolder.getUserManager().getRoleListOfUser(IdentityTenantUtil.getTenantId(tenantDomain), userName));
@@ -118,7 +111,6 @@ public class UserPostSelfRegistrationHandler extends AbstractEventHandler {
                     .handleServerException(IdentityRecoveryConstants.ErrorMessages.ERROR_CODE_UNEXPECTED, userName, e);
         } finally {
             Utils.clearArbitraryProperties();
-            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 

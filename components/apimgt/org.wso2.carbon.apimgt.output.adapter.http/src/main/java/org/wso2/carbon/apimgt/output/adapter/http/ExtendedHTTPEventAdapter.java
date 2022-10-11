@@ -34,7 +34,7 @@ import org.apache.http.conn.params.ConnRoutePNames;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.output.adapter.http.internal.util.ExtendedHTTPEventAdapterConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.event.output.adapter.core.EventAdapterUtil;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapter;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
@@ -83,7 +83,7 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
     @Override
     public void init() throws OutputEventAdapterException {
 
-        tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        tenantId = UserContext.getThreadLocalUserContext().getOrganizationId();
 
         //ExecutorService will be assigned  if it is null
         if (executorService == null) {

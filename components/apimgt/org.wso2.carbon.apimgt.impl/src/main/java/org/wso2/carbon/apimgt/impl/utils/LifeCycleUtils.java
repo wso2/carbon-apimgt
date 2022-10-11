@@ -4,7 +4,6 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
@@ -34,11 +33,8 @@ import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Caching;
@@ -405,33 +401,18 @@ public class LifeCycleUtils {
         Map<String, String> failedGateways = new HashMap<String, String>();
         APIIdentifier identifier = api.getId();
         String providerTenantMode = identifier.getProviderName();
-        boolean isTenantFlowStarted = false;
-        try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerTenantMode));
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
 
-            String currentStatus = api.getStatus();
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerTenantMode));
+        String currentStatus = api.getStatus();
+        if (APIConstants.PUBLISHED.equals(newStatus) || !currentStatus.equals(newStatus)) {
+            api.setStatus(newStatus);
 
-            if (APIConstants.PUBLISHED.equals(newStatus) || !currentStatus.equals(newStatus)) {
-                api.setStatus(newStatus);
+            api.setAsPublishedDefaultVersion(api.getId().getVersion()
+                    .equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
-                api.setAsPublishedDefaultVersion(api.getId().getVersion()
-                        .equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
+            apiProvider.loadMediationPoliciesToAPI(api, tenantDomain);
 
-                apiProvider.loadMediationPoliciesToAPI(api, tenantDomain);
-
-            }
-
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
         }
-
         return failedGateways;
     }
 
@@ -447,40 +428,26 @@ public class LifeCycleUtils {
     private static void updateAPIProductForStateChange(APIProvider apiProvider, APIPersistence apiPersistence,
                                                       APIProduct apiProduct, String currentStatus, String newStatus)
             throws APIManagementException {
-
         String provider = apiProduct.getId().getProviderName();
-        boolean isTenantFlowStarted = false;
-        try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+        if (!currentStatus.equals(newStatus)) {
+            apiProduct.setState(newStatus);
+            // If API status changed to publish we should add it to recently added APIs list
+            // this should happen in store-publisher cluster domain if deployment is distributed
+            // IF new API published we will add it to recently added APIs
+            Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants
+                    .RECENTLY_ADDED_API_CACHE_NAME).removeAll();
+            if (APIConstants.RETIRED.equals(newStatus)) {
+                cleanUpPendingSubscriptionCreationProcessesByAPI(apiProduct.getUuid());
+                apiMgtDAO.removeAllSubscriptions(apiProduct.getUuid());
+                apiProvider.deleteAPIProductRevisions(apiProduct.getUuid(), tenantDomain);
             }
-
-            if (!currentStatus.equals(newStatus)) {
-                apiProduct.setState(newStatus);
-                // If API status changed to publish we should add it to recently added APIs list
-                // this should happen in store-publisher cluster domain if deployment is distributed
-                // IF new API published we will add it to recently added APIs
-                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants
-                        .RECENTLY_ADDED_API_CACHE_NAME).removeAll();
-                if (APIConstants.RETIRED.equals(newStatus)) {
-                    cleanUpPendingSubscriptionCreationProcessesByAPI(apiProduct.getUuid());
-                    apiMgtDAO.removeAllSubscriptions(apiProduct.getUuid());
-                    apiProvider.deleteAPIProductRevisions(apiProduct.getUuid(), tenantDomain);
-                }
-                PublisherAPIProduct publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
-                try {
-                    apiPersistence.updateAPIProduct(new Organization(apiProduct.getOrganization()),
-                            publisherAPIProduct);
-                } catch (APIPersistenceException e) {
-                    handleException("Error while persisting the updated API Product", e);
-                }
-            }
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
+            PublisherAPIProduct publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
+            try {
+                apiPersistence.updateAPIProduct(new Organization(apiProduct.getOrganization()),
+                        publisherAPIProduct);
+            } catch (APIPersistenceException e) {
+                handleException("Error while persisting the updated API Product", e);
             }
         }
     }
@@ -521,52 +488,37 @@ public class LifeCycleUtils {
 
     private static boolean updateAPIforStateChange(APIPersistence apiPersistence, API api, String currentStatus, String newStatus)
             throws APIManagementException {
-
         boolean isSuccess;
         String providerTenantMode = api.getId().getProviderName();
 
-        boolean isTenantFlowStarted = false;
-        try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerTenantMode));
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerTenantMode));
+        if (!currentStatus.equals(newStatus)) {
+            api.setStatus(newStatus);
+
+            // If API status changed to publish we should add it to recently added APIs list
+            // this should happen in store-publisher cluster domain if deployment is distributed
+            // IF new API published we will add it to recently added APIs
+            Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                    .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).removeAll();
+
+
+            api.setAsPublishedDefaultVersion(api.getId().getVersion()
+                    .equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
+            if (APIConstants.RETIRED.equals(newStatus)) {
+                cleanUpPendingSubscriptionCreationProcessesByAPI(api.getUuid());
             }
 
-            if (!currentStatus.equals(newStatus)) {
-                api.setStatus(newStatus);
+            //updateApiArtifactNew(api, false, false);
 
-                // If API status changed to publish we should add it to recently added APIs list
-                // this should happen in store-publisher cluster domain if deployment is distributed
-                // IF new API published we will add it to recently added APIs
-                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                        .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).removeAll();
+            // For Choreo-Connect gateway, gateway vendor type in the DB will be "wso2/choreo-connect".
+            // This value is determined considering the gateway type comes with the request.
+            api.setGatewayVendor(APIUtil.setGatewayVendorBeforeInsertion(
+                    api.getGatewayVendor(), api.getGatewayType()));
+            PublisherAPI publisherAPI = APIMapper.INSTANCE.toPublisherApi(api);
+            apiDaoImpl.updateAPIArtifact(new Organization(api.getOrganization()), publisherAPI);
 
-
-                api.setAsPublishedDefaultVersion(api.getId().getVersion()
-                        .equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
-                if (APIConstants.RETIRED.equals(newStatus)) {
-                    cleanUpPendingSubscriptionCreationProcessesByAPI(api.getUuid());
-                }
-
-                //updateApiArtifactNew(api, false, false);
-
-                // For Choreo-Connect gateway, gateway vendor type in the DB will be "wso2/choreo-connect".
-                // This value is determined considering the gateway type comes with the request.
-                api.setGatewayVendor(APIUtil.setGatewayVendorBeforeInsertion(
-                        api.getGatewayVendor(), api.getGatewayType()));
-                PublisherAPI publisherAPI = APIMapper.INSTANCE.toPublisherApi(api);
-                apiDaoImpl.updateAPIArtifact(new Organization(api.getOrganization()), publisherAPI);
-
-            }
-            isSuccess = true;
-
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
         }
+        isSuccess = true;
         return true;
     }
 
