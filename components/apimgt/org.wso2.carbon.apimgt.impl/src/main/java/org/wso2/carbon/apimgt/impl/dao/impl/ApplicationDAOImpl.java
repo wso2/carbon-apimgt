@@ -9,11 +9,13 @@ import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ApplicationDAOImpl implements ApplicationDAO {
     private static final Log log = LogFactory.getLog(ApplicationDAOImpl.class);
@@ -188,4 +190,137 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
         return subscriptionCount;
     }
+
+    @Override
+    public Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws
+            APIManagementException {
+
+        Connection connection;
+        PreparedStatement prepStmt = null;
+        ResultSet rs;
+        Application[] applications = null;
+        String sqlQuery = SQLConstants.GET_SIMPLE_APPLICATIONS;
+
+        String tenantFilter = "AND SUB.TENANT_ID=?";
+        sqlQuery += tenantFilter;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            int appTenantId = APIUtil.getTenantIdFromTenantDomain(appTenantDomain);
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setInt(1, appTenantId);
+            rs = prepStmt.executeQuery();
+
+            ArrayList<Application> applicationsList = new ArrayList<Application>();
+            Application application;
+            while (rs.next()) {
+                application = new Application(Integer.parseInt(rs.getString("APPLICATION_ID")));
+                application.setName(rs.getString("NAME"));
+                application.setOwner(rs.getString("CREATED_BY"));
+                applicationsList.add(application);
+            }
+            applications = applicationsList.toArray(new Application[applicationsList.size()]);
+        } catch (SQLException e) {
+            handleExceptionWithCode("Error when reading the application information from the persistence store.", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } finally {
+            if (prepStmt != null) {
+                try {
+                    prepStmt.close();
+                } catch (SQLException e) {
+                    log.warn("Database error. Could not close Statement. Continuing with others." + e.getMessage(), e);
+                }
+            }
+        }
+        return applications;
+    }
+
+    @Override
+    public Application[] getApplicationsWithPagination(String user, String owner, int tenantId, int limit,
+                                                       int offset, String sortBy, String sortOrder, String appName)
+            throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        String sqlQuery = null;
+        List<Application> applicationList = new ArrayList<>();
+        sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_BY_TENANT_ID");
+        Application[] applications = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String driverName = connection.getMetaData().getDriverName();
+            if (driverName.contains("Oracle")) {
+                limit = offset + limit;
+            }
+            sqlQuery = sqlQuery.replace("$1", sortBy);
+            sqlQuery = sqlQuery.replace("$2", sortOrder);
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setInt(1, tenantId);
+            prepStmt.setString(2, "%" + owner + "%");
+            prepStmt.setString(3, "%" + appName + "%");
+            prepStmt.setInt(4, offset);
+            prepStmt.setInt(5, limit);
+            rs = prepStmt.executeQuery();
+            Application application;
+            while (rs.next()) {
+                String applicationName = rs.getString("NAME");
+                String subscriberName = rs.getString("CREATED_BY");
+                Subscriber subscriber = new Subscriber(subscriberName);
+                application = new Application(applicationName, subscriber);
+                application.setName(applicationName);
+                application.setId(rs.getInt("APPLICATION_ID"));
+                application.setUUID(rs.getString("UUID"));
+                application.setGroupId(rs.getString("GROUP_ID"));
+                subscriber.setTenantId(rs.getInt("TENANT_ID"));
+                subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+                application.setStatus(rs.getString("APPLICATION_STATUS"));
+                application.setOwner(subscriberName);
+                applicationList.add(application);
+            }
+            applications = applicationList.toArray(new Application[applicationList.size()]);
+        } catch (SQLException e) {
+            handleExceptionWithCode("Error while obtaining details of the Application for tenant id : " + tenantId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return applications;
+    }
+
+    @Override
+    public int getApplicationsCount(int tenantId, String searchOwner, String searchApplication) throws
+            APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet resultSet = null;
+        String sqlQuery = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            sqlQuery = SQLConstants.GET_APPLICATIONS_COUNT;
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setInt(1, tenantId);
+            prepStmt.setString(2, "%" + searchOwner + "%");
+            prepStmt.setString(3, "%" + searchApplication + "%");
+            resultSet = prepStmt.executeQuery();
+            int applicationCount = 0;
+            if (resultSet != null) {
+                while (resultSet.next()) {
+                    applicationCount = resultSet.getInt("count");
+                }
+            }
+            if (applicationCount > 0) {
+                return applicationCount;
+            }
+        } catch (SQLException e) {
+            handleExceptionWithCode("Failed to get application count of tenant id : " + tenantId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+        }
+        return 0;
+    }
+
+
 }
