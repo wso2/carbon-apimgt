@@ -9,14 +9,13 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dao.KeyManagerDAO;
+import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -177,6 +176,193 @@ public class KeyManagerDAOImpl implements KeyManagerDAO {
                     "Error while checking key manager for " + resourceId + " in organization " + organization, e);
         }
         return false;
+    }
+
+    public boolean isKeyManagerConfigurationExistById(String organization, String id) throws APIManagementException {
+
+        final String query = "SELECT 1 FROM AM_KEY_MANAGER WHERE UUID = ? AND ORGANIZATION = ?";
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+            preparedStatement.setString(1, id);
+            preparedStatement.setString(2, organization);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException(
+                    "Error while retrieving key manager configuration for " + id + " in organization " + organization,
+                    e);
+        }
+        return false;
+
+    }
+
+    @Override
+    public boolean isKeyManagerConfigurationExistByName(String organization, String name)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            final String query = "SELECT 1 FROM AM_KEY_MANAGER WHERE NAME = ? AND ORGANIZATION = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setString(1, name);
+                preparedStatement.setString(2, organization);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        return true;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving key manager existence", e);
+        }
+        return false;
+    }
+
+    @Override
+    public void addKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException {
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = conn
+                    .prepareStatement(SQLConstants.KeyManagerSqlConstants.ADD_KEY_MANAGER)) {
+                preparedStatement.setString(1, keyManagerConfigurationDTO.getUuid());
+                preparedStatement.setString(2, keyManagerConfigurationDTO.getName());
+                preparedStatement.setString(3, keyManagerConfigurationDTO.getDescription());
+                preparedStatement.setString(4, keyManagerConfigurationDTO.getType());
+                String configurationJson = new Gson().toJson(keyManagerConfigurationDTO.getAdditionalProperties());
+                preparedStatement.setBinaryStream(5, new ByteArrayInputStream(configurationJson.getBytes()));
+                preparedStatement.setString(6, keyManagerConfigurationDTO.getOrganization());
+                preparedStatement.setBoolean(7, keyManagerConfigurationDTO.isEnabled());
+                preparedStatement.setString(8, keyManagerConfigurationDTO.getDisplayName());
+                preparedStatement.setString(9, keyManagerConfigurationDTO.getTokenType());
+                preparedStatement.setString(10, keyManagerConfigurationDTO.getExternalReferenceId());
+                preparedStatement.executeUpdate();
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                if (e instanceof SQLIntegrityConstraintViolationException) {
+                    if (getKeyManagerConfigurationByName(conn, keyManagerConfigurationDTO.getOrganization(),
+                            keyManagerConfigurationDTO.getName()) != null) {
+                        log.warn(keyManagerConfigurationDTO.getName() + " Key Manager Already Registered in tenant" +
+                                keyManagerConfigurationDTO.getOrganization());
+                    } else {
+                        throw new APIManagementException("Error while Storing key manager configuration with name " +
+                                keyManagerConfigurationDTO.getName() + " in tenant " +
+                                keyManagerConfigurationDTO.getOrganization(), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                    }
+                }
+            }
+        } catch (SQLException | IOException e) {
+            throw new APIManagementException(
+                    "Error while Storing key manager configuration with name " + keyManagerConfigurationDTO.getName() +
+                            " in tenant " + keyManagerConfigurationDTO.getOrganization(),
+                    e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    private KeyManagerConfigurationDTO getKeyManagerConfigurationByName(Connection connection, String organization,
+                                                                        String name)
+            throws SQLException, IOException {
+
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE NAME = ? AND ORGANIZATION = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, organization);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+                    String uuid = resultSet.getString("UUID");
+                    keyManagerConfigurationDTO.setUuid(uuid);
+                    keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
+                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
+                    keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
+                    keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
+                    keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
+                    keyManagerConfigurationDTO.setOrganization(organization);
+                    keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
+                    keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
+                    try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
+                        String configurationContent = IOUtils.toString(configuration);
+                        Map map = new Gson().fromJson(configurationContent, Map.class);
+                        keyManagerConfigurationDTO.setAdditionalProperties(map);
+                    }
+                    return keyManagerConfigurationDTO;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void updateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException {
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = conn
+                    .prepareStatement(SQLConstants.KeyManagerSqlConstants.UPDATE_KEY_MANAGER)) {
+                preparedStatement.setString(1, keyManagerConfigurationDTO.getName());
+                preparedStatement.setString(2, keyManagerConfigurationDTO.getDescription());
+                preparedStatement.setString(3, keyManagerConfigurationDTO.getType());
+                String configurationJson = new Gson().toJson(keyManagerConfigurationDTO.getAdditionalProperties());
+                preparedStatement.setBinaryStream(4, new ByteArrayInputStream(configurationJson.getBytes()));
+                preparedStatement.setString(5, keyManagerConfigurationDTO.getOrganization());
+                preparedStatement.setBoolean(6, keyManagerConfigurationDTO.isEnabled());
+                preparedStatement.setString(7, keyManagerConfigurationDTO.getDisplayName());
+                preparedStatement.setString(8, keyManagerConfigurationDTO.getTokenType());
+                preparedStatement.setString(9, keyManagerConfigurationDTO.getExternalReferenceId());
+                preparedStatement.setString(10, keyManagerConfigurationDTO.getUuid());
+                preparedStatement.executeUpdate();
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException(
+                    "Error while Updating key manager configuration with name " + keyManagerConfigurationDTO.getName() +
+                            " in tenant " + keyManagerConfigurationDTO.getOrganization(), e);
+        }
+    }
+
+    @Override
+    public void deleteKeyManagerConfigurationById(String id, String organization) throws APIManagementException {
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = conn
+                    .prepareStatement(SQLConstants.KeyManagerSqlConstants.DELETE_KEY_MANAGER)) {
+                preparedStatement.setString(1, id);
+                preparedStatement.setString(2, organization);
+                preparedStatement.execute();
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException(
+                    "Error while deleting key manager configuration with id " + id + " in organization " + organization,
+                    e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+    }
+
+    @Override
+    public KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String organization, String name)
+            throws APIManagementException {
+
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE NAME = ? AND ORGANIZATION = ?";
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            return getKeyManagerConfigurationByName(conn, organization, name);
+        } catch (SQLException | IOException e) {
+            throw new APIManagementException(
+                    "Error while retrieving key manager configuration for " + name + " in organization " + organization,
+                    e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
 

@@ -36,6 +36,12 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         throw new APIManagementException(msg, code);
     }
 
+    private void handleException(String msg, Throwable t) throws APIManagementException {
+
+        log.error(msg, t);
+        throw new APIManagementException(msg, t);
+    }
+
     @Override
     public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
 
@@ -321,6 +327,37 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         }
         return 0;
     }
+
+    @Override
+    public ApplicationInfo getLightweightApplicationByConsumerKey(String consumerKey) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String query = SQLConstants.GET_APPLICATION_INFO_BY_CK;
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, consumerKey);
+
+            rs = prepStmt.executeQuery();
+            if (rs.next()) {
+                ApplicationInfo applicationInfo = new ApplicationInfo();
+                applicationInfo.setName(rs.getString("NAME"));
+                applicationInfo.setUuid(rs.getString("UUID"));
+                applicationInfo.setOrganizationId(rs.getString("ORGANIZATION"));
+                applicationInfo.setOwner(rs.getString("OWNER"));
+                return applicationInfo;
+            }
+        } catch (SQLException e) {
+            handleException("Error while obtaining organisation of the application for client id " + consumerKey, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return null;
+    }
+
 
 
 }

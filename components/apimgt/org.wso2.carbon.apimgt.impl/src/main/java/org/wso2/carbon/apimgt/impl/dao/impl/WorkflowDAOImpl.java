@@ -1,10 +1,13 @@
 package org.wso2.carbon.apimgt.impl.dao.impl;
 
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.impl.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -13,10 +16,12 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class WorkflowDAOImpl implements WorkflowDAO {
 
@@ -108,5 +113,148 @@ public class WorkflowDAOImpl implements WorkflowDAO {
         }
         return workflowExtRef;
     }
+
+    @Override
+    public Workflow[] getWorkflows(String workflowType, String status, String tenantDomain) throws APIManagementException {
+
+        ResultSet rs = null;
+        Workflow[] workflows = null;
+        String sqlQuery;
+        if (workflowType != null) {
+            sqlQuery = SQLConstants.GET_ALL_WORKFLOW_DETAILS_BY_WORKFLOW_TYPE;
+        } else {
+            sqlQuery = SQLConstants.GET_ALL_WORKFLOW_DETAILS;
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+            try {
+                if (workflowType != null) {
+                    prepStmt.setString(1, workflowType);
+                    prepStmt.setString(2, status);
+                    prepStmt.setString(3, tenantDomain);
+                } else {
+                    prepStmt.setString(1, status);
+                    prepStmt.setString(2, tenantDomain);
+                }
+                rs = prepStmt.executeQuery();
+
+                ArrayList<Workflow> workflowsList = new ArrayList<Workflow>();
+                Workflow workflow;
+                while (rs.next()) {
+                    workflow = new Workflow();
+                    workflow.setWorkflowId(rs.getInt("WF_ID"));
+                    workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
+                    workflow.setWorkflowType(rs.getString("WF_TYPE"));
+                    String workflowstatus = rs.getString("WF_STATUS");
+                    workflow.setStatus(org.wso2.carbon.apimgt.api.WorkflowStatus.valueOf(workflowstatus));
+                    workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toString());
+                    workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toString());
+                    workflow.setWorkflowStatusDesc(rs.getString("WF_STATUS_DESC"));
+                    workflow.setTenantId(rs.getInt("TENANT_ID"));
+                    workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
+                    workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
+                    workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
+                    InputStream metadataBlob = rs.getBinaryStream("WF_METADATA");
+                    InputStream propertiesBlob = rs.getBinaryStream("WF_PROPERTIES");
+
+                    if (metadataBlob != null) {
+                        String metadata = APIMgtDBUtil.getStringFromInputStream(metadataBlob);
+                        Gson metadataGson = new Gson();
+                        JSONObject metadataJson = metadataGson.fromJson(metadata, JSONObject.class);
+                        workflow.setMetadata(metadataJson);
+                    } else {
+                        JSONObject metadataJson = new JSONObject();
+                        workflow.setMetadata(metadataJson);
+                    }
+
+                    if (propertiesBlob != null) {
+                        String properties = APIMgtDBUtil.getStringFromInputStream(propertiesBlob);
+                        Gson propertiesGson = new Gson();
+                        JSONObject propertiesJson = propertiesGson.fromJson(properties, JSONObject.class);
+                        workflow.setProperties(propertiesJson);
+                    } else {
+                        JSONObject propertiesJson = new JSONObject();
+                        workflow.setProperties(propertiesJson);
+                    }
+                    workflowsList.add(workflow);
+                }
+                workflows = workflowsList.toArray(new Workflow[workflowsList.size()]);
+            } catch (SQLException e) {
+                handleExceptionWithCode("Error when retrieve all the workflow details. ", e,
+                        ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+            }
+        } catch (SQLException e) {
+            handleExceptionWithCode("Error when retrieve all the workflow details. ", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return workflows;
+    }
+
+    @Override
+    public Workflow getWorkflowReferenceByExternalWorkflowReferenceID(String externalWorkflowRef, String status,
+                                                                      String tenantDomain) throws APIManagementException {
+
+        ResultSet rs = null;
+        Workflow workflow = new Workflow();
+        String sqlQuery = SQLConstants.GET_ALL_WORKFLOW_DETAILS_BY_EXTERNAL_WORKFLOW_REFERENCE;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+            try {
+                prepStmt.setString(1, externalWorkflowRef);
+                prepStmt.setString(2, status);
+                prepStmt.setString(3, tenantDomain);
+                rs = prepStmt.executeQuery();
+
+                while (rs.next()) {
+                    workflow.setWorkflowId(rs.getInt("WF_ID"));
+                    workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
+                    workflow.setWorkflowType(rs.getString("WF_TYPE"));
+                    String workflowstatus = rs.getString("WF_STATUS");
+                    workflow.setStatus(org.wso2.carbon.apimgt.api.WorkflowStatus.valueOf(workflowstatus));
+                    workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toString());
+                    workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toString());
+                    workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
+                    workflow.setTenantId(rs.getInt("TENANT_ID"));
+                    workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
+                    workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
+                    InputStream targetStream = rs.getBinaryStream("WF_METADATA");
+                    InputStream propertiesTargetStream = rs.getBinaryStream("WF_PROPERTIES");
+
+                    if (targetStream != null) {
+                        String metadata = APIMgtDBUtil.getStringFromInputStream(targetStream);
+                        Gson metadataGson = new Gson();
+                        JSONObject metadataJson = metadataGson.fromJson(metadata, JSONObject.class);
+                        workflow.setMetadata(metadataJson);
+                    } else {
+                        JSONObject metadataJson = new JSONObject();
+                        workflow.setMetadata(metadataJson);
+                    }
+
+                    if (propertiesTargetStream != null) {
+                        String properties = APIMgtDBUtil.getStringFromInputStream(propertiesTargetStream);
+                        Gson propertiesGson = new Gson();
+                        JSONObject propertiesJson = propertiesGson.fromJson(properties, JSONObject.class);
+                        workflow.setProperties(propertiesJson);
+                    } else {
+                        JSONObject propertiesJson = new JSONObject();
+                        workflow.setProperties(propertiesJson);
+                    }
+                }
+            } catch (SQLException e) {
+                handleExceptionWithCode("Error when retriving the workflow details. ", e,
+                        ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+            }
+        } catch (SQLException e) {
+            handleExceptionWithCode("Error when retriving the workflow details. ", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return workflow;
+    }
+
+
 
 }
