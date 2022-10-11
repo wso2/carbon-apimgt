@@ -272,6 +272,12 @@
           "required" : true,
           "type" : "string"
         }, {
+          "name" : "organizationId",
+          "in" : "query",
+          "description" : "Organization Id\n",
+          "required" : false,
+          "type" : "string"
+        }, {
           "name" : "apiId",
           "in" : "path",
           "description" : "ID of the API",

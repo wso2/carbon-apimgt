@@ -48,8 +48,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "True or False", response = OperationPolicyAttachmentStatusDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response apisApiIdOperationPolicyIsAttachedGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant, @ApiParam(value = "ID of the API",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
-        return delegate.apisApiIdOperationPolicyIsAttachedGet(xWSO2Tenant, apiId, securityContext);
+    public Response apisApiIdOperationPolicyIsAttachedGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant, @ApiParam(value = "ID of the API",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Organization Id ")  @QueryParam("organizationId") String organizationId) throws APIManagementException{
+        return delegate.apisApiIdOperationPolicyIsAttachedGet(xWSO2Tenant, apiId, organizationId, securityContext);
     }
 
     @GET

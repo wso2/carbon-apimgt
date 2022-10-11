@@ -227,6 +227,11 @@ paths:
         - 'Operation Policy'
       parameters:
         - $ref: '#/parameters/requestedTenant'
+        - name: organizationId
+          in: query
+          description: |
+              Organization Id
+          type: string
         - name: apiId
           in: path
           description: ID of the API

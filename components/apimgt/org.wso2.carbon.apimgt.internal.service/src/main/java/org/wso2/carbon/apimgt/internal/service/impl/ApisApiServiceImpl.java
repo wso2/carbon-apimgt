@@ -44,7 +44,6 @@ import org.wso2.carbon.apimgt.internal.service.dto.DeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeployedEnvInfoDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.OperationPolicyAttachmentStatusDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -149,11 +148,17 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdOperationPolicyIsAttachedGet(String xWSO2Tenant, String apiId, MessageContext messageContext)
-            throws APIManagementException {
+    public Response apisApiIdOperationPolicyIsAttachedGet(String xWSO2Tenant, String apiId, String organizationId,
+                                                          MessageContext messageContext) throws APIManagementException {
         try {
+            String organization;
+            if (organizationId != null) {
+                organization = organizationId;
+            } else {
+                organization = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
+            }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPIbyUUID(apiId, xWSO2Tenant);
+            org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPIbyUUID(apiId, organization);
             boolean isAttached = false;
             Set<URITemplate> uriTemplates = api.getUriTemplates();
             for (URITemplate uriTemplate : uriTemplates) {
@@ -165,15 +170,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             OperationPolicyAttachmentStatusDTO result = new OperationPolicyAttachmentStatusDTO();
             result.isAttached(isAttached);
             return Response.ok().entity(result).build();
-        } catch (APIManagementException e) {
-            ErrorDTO errorObject = new ErrorDTO();
-            Response.Status status = Response.Status.BAD_REQUEST;
-            errorObject.setCode(status.getStatusCode());
-            errorObject.setMessage(status.toString());
-            errorObject
-                    .setMessage("An error has occurred while getting API for the given X-WSo2-Tenant and ApiID combination.");
-            return Response.status(status).entity(errorObject).build();
-        }
-    }
 
+        } catch (APIManagementException e) {
+            RestApiUtil.handleBadRequest(
+                    "An error has occurred while getting API for the given organization/tenantDomain and apiId combination.",
+                    e, log);
+        }
+        return Response.ok().build();
+    }
 }
