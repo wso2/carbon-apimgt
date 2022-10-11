@@ -56,10 +56,7 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.dao.impl.AdminDAOImpl;
-import org.wso2.carbon.apimgt.impl.dao.impl.ApplicationDAOImpl;
-import org.wso2.carbon.apimgt.impl.dao.impl.EnvironmentDAOImpl;
-import org.wso2.carbon.apimgt.impl.dao.impl.KeyManagerDAOImpl;
+import org.wso2.carbon.apimgt.impl.dao.impl.*;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -114,18 +111,20 @@ import javax.xml.transform.stream.StreamResult;
 public class APIAdminImpl implements APIAdmin {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
-    protected ApiMgtDAO apiMgtDAO;
     protected EnvironmentDAOImpl environmentDAOImpl;
     protected ApplicationDAOImpl applicationDAOImpl;
     protected AdminDAOImpl adminDAOImpl;
     protected KeyManagerDAOImpl keyManagerDAOImpl;
+    protected WorkflowDAOImpl workflowDAOImpl;
+    protected PolicyDAOImpl policyDAOImpl;
 
     public APIAdminImpl() {
-        apiMgtDAO = ApiMgtDAO.getInstance();
         environmentDAOImpl = EnvironmentDAOImpl.getInstance();
         applicationDAOImpl = ApplicationDAOImpl.getInstance();
         adminDAOImpl = AdminDAOImpl.getInstance();
         keyManagerDAOImpl = KeyManagerDAOImpl.getInstance();
+        workflowDAOImpl = WorkflowDAOImpl.getInstance();
+        policyDAOImpl = PolicyDAOImpl.getInstance();
     }
 
     @Override
@@ -517,21 +516,21 @@ public class APIAdminImpl implements APIAdmin {
 
     @Override
     public ApplicationInfo getLightweightApplicationByConsumerKey(String consumerKey) throws APIManagementException {
-        return apiMgtDAO.getLightweightApplicationByConsumerKey(consumerKey);
+        return applicationDAOImpl.getLightweightApplicationByConsumerKey(consumerKey);
     }
 
     @Override
     public boolean isKeyManagerConfigurationExistById(String organization, String id) throws APIManagementException {
 
-        return apiMgtDAO.isKeyManagerConfigurationExistById(organization, id);
+        return keyManagerDAOImpl.isKeyManagerConfigurationExistById(organization, id);
     }
 
     @Override
     public KeyManagerConfigurationDTO addKeyManagerConfiguration(
             KeyManagerConfigurationDTO keyManagerConfigurationDTO) throws APIManagementException {
 
-        if (apiMgtDAO.isKeyManagerConfigurationExistByName(keyManagerConfigurationDTO.getName(),
-                keyManagerConfigurationDTO.getOrganization())) {
+        if (keyManagerDAOImpl.isKeyManagerConfigurationExistByName(keyManagerConfigurationDTO.getOrganization(),
+                keyManagerConfigurationDTO.getName())) {
             throw new APIManagementException(
                     "Key manager Already Exist by Name " + keyManagerConfigurationDTO.getName() + " in tenant " +
                             keyManagerConfigurationDTO.getOrganization(), ExceptionCodes.KEY_MANAGER_ALREADY_EXIST);
@@ -563,7 +562,7 @@ public class APIAdminImpl implements APIAdmin {
         KeyManagerConfigurationDTO keyManagerConfigurationToStore =
                 new KeyManagerConfigurationDTO(keyManagerConfigurationDTO);
         encryptKeyManagerConfigurationValues(null, keyManagerConfigurationToStore);
-        apiMgtDAO.addKeyManagerConfiguration(keyManagerConfigurationToStore);
+        keyManagerDAOImpl.addKeyManagerConfiguration(keyManagerConfigurationToStore);
         new KeyMgtNotificationSender()
                 .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD);
         return keyManagerConfigurationDTO;
@@ -701,7 +700,7 @@ public class APIAdminImpl implements APIAdmin {
             validateKeyManagerEndpointConfiguration(keyManagerConfigurationDTO);
         }
         KeyManagerConfigurationDTO oldKeyManagerConfiguration =
-                apiMgtDAO.getKeyManagerConfigurationByID(keyManagerConfigurationDTO.getOrganization(),
+                keyManagerDAOImpl.getKeyManagerConfigurationByID(keyManagerConfigurationDTO.getOrganization(),
                         keyManagerConfigurationDTO.getUuid());
         if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
                 keyManagerConfigurationDTO.getTokenType()) ||
@@ -748,7 +747,7 @@ public class APIAdminImpl implements APIAdmin {
             }
         }
         encryptKeyManagerConfigurationValues(oldKeyManagerConfiguration, keyManagerConfigurationDTO);
-        apiMgtDAO.updateKeyManagerConfiguration(keyManagerConfigurationDTO);
+        keyManagerDAOImpl.updateKeyManagerConfiguration(keyManagerConfigurationDTO);
         KeyManagerConfigurationDTO decryptedKeyManagerConfiguration =
                 decryptKeyManagerConfigurationValues(keyManagerConfigurationDTO);
         new KeyMgtNotificationSender()
@@ -843,7 +842,7 @@ public class APIAdminImpl implements APIAdmin {
         if (kmConfig != null) {
             if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(kmConfig.getName())) {
                 deleteIdentityProvider(organization, kmConfig);
-                apiMgtDAO.deleteKeyManagerConfigurationById(kmConfig.getUuid(), organization);
+                keyManagerDAOImpl.deleteKeyManagerConfigurationById(kmConfig.getUuid(), organization);
                 new KeyMgtNotificationSender()
                         .notify(kmConfig, APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE);
             } else {
@@ -858,7 +857,7 @@ public class APIAdminImpl implements APIAdmin {
             throws APIManagementException {
 
         KeyManagerConfigurationDTO keyManagerConfiguration =
-                apiMgtDAO.getKeyManagerConfigurationByName(organization, name);
+                keyManagerDAOImpl.getKeyManagerConfigurationByName(organization, name);
         if (keyManagerConfiguration != null) {
             if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName())) {
                 APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfiguration);
@@ -876,25 +875,25 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public void addBotDetectionAlertSubscription(String email) throws APIManagementException {
 
-        apiMgtDAO.addBotDetectionAlertSubscription(email);
+        adminDAOImpl.addBotDetectionAlertSubscription(email);
     }
 
     @Override
     public List<BotDetectionData> getBotDetectionAlertSubscriptions() throws APIManagementException {
 
-        return apiMgtDAO.getBotDetectionAlertSubscriptions();
+        return adminDAOImpl.getBotDetectionAlertSubscriptions();
     }
 
     @Override
     public void deleteBotDetectionAlertSubscription(String uuid) throws APIManagementException {
 
-        apiMgtDAO.deleteBotDetectionAlertSubscription(uuid);
+        adminDAOImpl.deleteBotDetectionAlertSubscription(uuid);
     }
 
     @Override
     public BotDetectionData getBotDetectionAlertSubscription(String field, String value) throws APIManagementException {
 
-        return apiMgtDAO.getBotDetectionAlertSubscription(field, value);
+        return adminDAOImpl.getBotDetectionAlertSubscription(field, value);
     }
 
     @Override
@@ -962,12 +961,12 @@ public class APIAdminImpl implements APIAdmin {
             APIUtil.handleExceptionWithCode("Category with name '" + category.getName() + "' already exists",
                     ExceptionCodes.from(ExceptionCodes.CATEGORY_ALREADY_EXISTS, category.getName()));
         }
-        return apiMgtDAO.addCategory(category, organization);
+        return adminDAOImpl.addCategory(category, organization);
     }
 
     public void updateCategory(APICategory apiCategory) throws APIManagementException {
 
-        apiMgtDAO.updateCategory(apiCategory);
+        adminDAOImpl.updateCategory(apiCategory);
     }
 
     public void deleteCategory(String categoryID, String username) throws APIManagementException {
@@ -978,11 +977,11 @@ public class APIAdminImpl implements APIAdmin {
             APIUtil.handleExceptionWithCode("Unable to delete the category. It is attached to API(s)",
                     ExceptionCodes.CATEGORY_USED);
         }
-        apiMgtDAO.deleteCategory(categoryID);
+        adminDAOImpl.deleteCategory(categoryID);
     }
 
     public List<APICategory> getAllAPICategoriesOfOrganization(String organization) throws APIManagementException {
-        return apiMgtDAO.getAllCategories(organization);
+        return adminDAOImpl.getAllCategories(organization);
     }
 
     @Override
@@ -1000,12 +999,12 @@ public class APIAdminImpl implements APIAdmin {
 
     public boolean isCategoryNameExists(String categoryName, String uuid, String organization) throws APIManagementException {
 
-        return apiMgtDAO.isAPICategoryNameExists(categoryName, uuid, organization);
+        return adminDAOImpl.isAPICategoryNameExists(categoryName, uuid, organization);
     }
 
     public APICategory getAPICategoryByID(String apiCategoryId) throws APIManagementException {
 
-        APICategory apiCategory = apiMgtDAO.getAPICategoryByID(apiCategoryId);
+        APICategory apiCategory = adminDAOImpl.getAPICategoryByID(apiCategoryId);
         if (apiCategory != null) {
             return apiCategory;
         } else {
@@ -1144,7 +1143,7 @@ public class APIAdminImpl implements APIAdmin {
         WorkflowProperties workflowConfig = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.
                 getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
         if (workflowConfig.isListTasks()) {
-            return apiMgtDAO.getworkflows(workflowType, status, tenantDomain);
+            return workflowDAOImpl.getWorkflows(workflowType, status, tenantDomain);
         } else {
             return new Workflow[0];
         }
@@ -1165,7 +1164,7 @@ public class APIAdminImpl implements APIAdmin {
         WorkflowProperties workflowConfig = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.
                 getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
         if (workflowConfig.isListTasks()) {
-            workflow = apiMgtDAO.getworkflowReferenceByExternalWorkflowReferenceID(externelWorkflowRef,
+            workflow = workflowDAOImpl.getWorkflowReferenceByExternalWorkflowReferenceID(externelWorkflowRef,
                     status, tenantDomain);
         }
 
@@ -1245,31 +1244,31 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
 
-        apiMgtDAO.addTenantTheme(tenantId, themeContent);
+        adminDAOImpl.addTenantTheme(tenantId, themeContent);
     }
 
     @Override
     public void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
 
-        apiMgtDAO.updateTenantTheme(tenantId, themeContent);
+        adminDAOImpl.updateTenantTheme(tenantId, themeContent);
     }
 
     @Override
     public InputStream getTenantTheme(int tenantId) throws APIManagementException {
 
-        return apiMgtDAO.getTenantTheme(tenantId);
+        return adminDAOImpl.getTenantTheme(tenantId);
     }
 
     @Override
     public boolean isTenantThemeExist(int tenantId) throws APIManagementException {
 
-        return apiMgtDAO.isTenantThemeExist(tenantId);
+        return adminDAOImpl.isTenantThemeExist(tenantId);
     }
 
     @Override
     public void deleteTenantTheme(int tenantId) throws APIManagementException {
 
-        apiMgtDAO.deleteTenantTheme(tenantId);
+        adminDAOImpl.deleteTenantTheme(tenantId);
     }
 
     @Override
@@ -1307,13 +1306,13 @@ public class APIAdminImpl implements APIAdmin {
         Policy[] policies = null;
 
         if (PolicyConstants.POLICY_LEVEL_API.equals(level)) {
-            policies = apiMgtDAO.getAPIPolicies(tenantId);
+            policies = policyDAOImpl.getAPIPolicies(tenantId);
         } else if (PolicyConstants.POLICY_LEVEL_APP.equals(level)) {
-            policies = apiMgtDAO.getApplicationPolicies(tenantId);
+            policies = policyDAOImpl.getApplicationPolicies(tenantId);
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(level)) {
-            policies = apiMgtDAO.getSubscriptionPolicies(tenantId);
+            policies = policyDAOImpl.getSubscriptionPolicies(tenantId);
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(level)) {
-            policies = apiMgtDAO.getGlobalPolicies(tenantId);
+            policies = policyDAOImpl.getGlobalPolicies(tenantId);
         }
 
         //Get the API Manager configurations and check whether the unlimited tier is disabled. If disabled, remove
@@ -1353,13 +1352,13 @@ public class APIAdminImpl implements APIAdmin {
         Policy policy = null;
 
         if (PolicyConstants.POLICY_LEVEL_API.equals(level)) {
-            policy = apiMgtDAO.getAPIPolicy(name, tenantId);
+            policy = policyDAOImpl.getAPIPolicy(name, tenantId);
         } else if (PolicyConstants.POLICY_LEVEL_APP.equals(level)) {
-            policy = apiMgtDAO.getApplicationPolicy(name, tenantId);
+            policy = policyDAOImpl.getApplicationPolicy(name, tenantId);
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(level)) {
-            policy = apiMgtDAO.getSubscriptionPolicy(name, tenantId);
+            policy = policyDAOImpl.getSubscriptionPolicy(name, tenantId);
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(level)) {
-            policy = apiMgtDAO.getGlobalPolicy(name);
+            policy = policyDAOImpl.getGlobalPolicy(name);
         }
 
         //Get the API Manager configurations and check whether the unlimited tier is disabled. If disabled, remove

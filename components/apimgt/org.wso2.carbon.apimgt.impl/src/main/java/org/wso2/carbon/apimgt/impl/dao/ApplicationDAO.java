@@ -1,7 +1,9 @@
 package org.wso2.carbon.apimgt.impl.dao;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 
 public interface ApplicationDAO {
@@ -53,4 +55,14 @@ public interface ApplicationDAO {
      */
     int getApplicationsCount(int tenantId, String searchOwner, String searchApplication) throws
             APIManagementException;
+
+    /**
+     * Get Application Details by Consumer Key.
+     *
+     * @param consumerKey Consumer Key of the application
+     * @return ApplicationInfo object
+     * @throws APIManagementException if failed to get application details
+     */
+    ApplicationInfo getLightweightApplicationByConsumerKey(String consumerKey) throws APIManagementException;
+
 }

@@ -45,4 +45,62 @@ public interface KeyManagerDAO {
      * @throws APIManagementException
      */
     boolean isIDPExistInOrg(String organization, String resourceId) throws APIManagementException;
+
+    /**
+     * Checks Key Manager Configuration exists in given organization by UUID.
+     *
+     * @param organization Organization Name
+     * @param resourceId KeyManager UUID
+     * @return boolean
+     * @throws APIManagementException
+     */
+    boolean isKeyManagerConfigurationExistById(String organization, String resourceId) throws APIManagementException;
+
+    /**
+     * Checks Key Manager Configuration exists in given organization by UUID.
+     *
+     * @param organization Organization Name
+     * @param name KeyManager Name
+     * @return boolean
+     * @throws APIManagementException
+     */
+    boolean isKeyManagerConfigurationExistByName(String organization, String name)
+            throws APIManagementException;
+
+    /**
+     * Add Key Manager Configuration
+     *
+     * @param keyManagerConfigurationDTO Key Manager Configuration DTO
+     * @throws APIManagementException if error
+     */
+    void addKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException;
+
+    /**
+     * Update Key Manager Configuration
+     *
+     * @param keyManagerConfigurationDTO Key Manager Configuration DTO
+     * @throws APIManagementException if error
+     */
+    void updateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException;
+
+    /**
+     * Delete Key Manager Configuration
+     *
+     * @param id Key Manager UUID
+     * @param organization Organization Name
+     * @throws APIManagementException if error
+     */
+    void deleteKeyManagerConfigurationById(String id, String organization) throws APIManagementException;
+
+    /**
+     * Retrieve Key Manager Configuration by Name
+     *
+     * @param name Key Manager Name
+     * @param organization Organization Name
+     * @throws APIManagementException if error
+     */
+    KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String organization, String name)
+            throws APIManagementException;
 }

@@ -218,5 +218,40 @@ public interface PolicyDAO {
      */
     GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException;
 
+    /**
+     * Get API level policies. Result only contains basic details of the policy,
+     * it doesn't contain pipeline information.
+     *
+     * @param tenantID policies are selected using tenantID
+     * @return APIPolicy ArrayList
+     * @throws APIManagementException
+     */
+    APIPolicy[] getAPIPolicies(int tenantID) throws APIManagementException;
+
+    /**
+     * Get application level polices
+     *
+     * @param tenantID polices are selected only belong to specific tenantID
+     * @return AppilicationPolicy array list
+     */
+    ApplicationPolicy[] getApplicationPolicies(int tenantID) throws APIManagementException;
+
+    /**
+     * Get all subscription level policies belongs to specific tenant
+     *
+     * @param tenantID tenantID filters the polices belongs to specific tenant
+     * @return subscriptionPolicy array list
+     */
+    SubscriptionPolicy[] getSubscriptionPolicies(int tenantID) throws APIManagementException;
+
+    /**
+     * Get all Global level policeis belongs to specific tenant
+     *
+     * @param tenantID
+     * @return
+     * @throws APIManagementException
+     */
+    GlobalPolicy[] getGlobalPolicies(int tenantID) throws APIManagementException;
+
 
 }
