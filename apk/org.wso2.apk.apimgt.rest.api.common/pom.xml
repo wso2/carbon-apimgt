@@ -56,7 +56,8 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.api</artifactId>
+            <artifactId>org.wso2.apk.apimgt.api</artifactId>
+            <version>9.26.10-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

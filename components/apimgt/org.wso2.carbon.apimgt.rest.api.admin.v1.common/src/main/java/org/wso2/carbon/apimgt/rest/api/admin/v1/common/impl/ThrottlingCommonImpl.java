@@ -44,7 +44,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.throttling
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.File;
 import java.io.FileReader;
@@ -124,11 +123,10 @@ public class ThrottlingCommonImpl {
     public static AdvancedThrottlePolicyDTO getAdvancedPolicyById(String policyId) throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
             APIPolicy apiPolicy = apiProvider.getAPIPolicyByUUID(policyId);
-            if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, apiPolicy)) {
+            if (!RestApiAdminUtils.isPolicyAccessibleToUser(apiPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId));
             }
@@ -151,11 +149,10 @@ public class ThrottlingCommonImpl {
             throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //will give PolicyNotFoundException if there's no policy exists with UUID
             APIPolicy existingPolicy = apiProvider.getAPIPolicyByUUID(policyId);
-            if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
+            if (!RestApiAdminUtils.isPolicyAccessibleToUser(existingPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId));
             }
@@ -195,7 +192,7 @@ public class ThrottlingCommonImpl {
             throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
                     RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId));
         }
-        if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
+        if (!RestApiAdminUtils.isPolicyAccessibleToUser(existingPolicy)) {
             throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                     RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId));
         }
@@ -271,11 +268,10 @@ public class ThrottlingCommonImpl {
             throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
             ApplicationPolicy appPolicy = apiProvider.getApplicationPolicyByUUID(policyId);
-            if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, appPolicy)) {
+            if (!RestApiAdminUtils.isPolicyAccessibleToUser(appPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_APP_POLICY, policyId));
             }
@@ -300,11 +296,10 @@ public class ThrottlingCommonImpl {
             throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //will give PolicyNotFoundException if there's no policy exists with UUID
             ApplicationPolicy existingPolicy = apiProvider.getApplicationPolicyByUUID(policyId);
-            if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
+            if (!RestApiAdminUtils.isPolicyAccessibleToUser(existingPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_APP_POLICY, policyId));
             }
@@ -340,7 +335,7 @@ public class ThrottlingCommonImpl {
             String username = RestApiCommonUtil.getLoggedInUsername();
             //This will give PolicyNotFoundException if there's no policy exists with UUID
             ApplicationPolicy existingPolicy = apiProvider.getApplicationPolicyByUUID(policyId);
-            if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
+            if (!RestApiAdminUtils.isPolicyAccessibleToUser(existingPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_APP_POLICY, policyId));
             }
@@ -486,11 +481,10 @@ public class ThrottlingCommonImpl {
             throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
             SubscriptionPolicy subscriptionPolicy = apiProvider.getSubscriptionPolicyByUUID(policyId);
-            if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, subscriptionPolicy)) {
+            if (!RestApiAdminUtils.isPolicyAccessibleToUser(subscriptionPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY, policyId));
             }
@@ -526,7 +520,7 @@ public class ThrottlingCommonImpl {
 
             //will give PolicyNotFoundException if there's no policy exists with UUID
             SubscriptionPolicy existingPolicy = apiProvider.getSubscriptionPolicyByUUID(policyId);
-            if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
+            if (!RestApiAdminUtils.isPolicyAccessibleToUser(existingPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY, policyId));
             }
@@ -578,7 +572,7 @@ public class ThrottlingCommonImpl {
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
             SubscriptionPolicy existingPolicy = apiProvider.getSubscriptionPolicyByUUID(policyId);
-            if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
+            if (!RestApiAdminUtils.isPolicyAccessibleToUser(existingPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY, policyId));
             }
@@ -663,14 +657,13 @@ public class ThrottlingCommonImpl {
     public static CustomRuleDTO getCustomRuleById(String ruleId) throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //only super tenant is allowed to access global policies/custom rules
             checkTenantDomainForCustomRules();
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
             GlobalPolicy globalPolicy = apiProvider.getGlobalPolicyByUUID(ruleId);
-            if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, globalPolicy)) {
+            if (!RestApiAdminUtils.isPolicyAccessibleToUser(globalPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_CUSTOM_RULE, ruleId));
             }
@@ -692,14 +685,13 @@ public class ThrottlingCommonImpl {
     public static CustomRuleDTO updateCustomRule(String ruleId, CustomRuleDTO body) throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //only super tenant is allowed to access global policies/custom rules
             checkTenantDomainForCustomRules();
 
             //will give PolicyNotFoundException if there's no policy exists with UUID
             GlobalPolicy existingPolicy = apiProvider.getGlobalPolicyByUUID(ruleId);
-            if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
+            if (!RestApiAdminUtils.isPolicyAccessibleToUser(existingPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_CUSTOM_RULE, ruleId));
             }
@@ -738,7 +730,7 @@ public class ThrottlingCommonImpl {
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
             GlobalPolicy existingPolicy = apiProvider.getGlobalPolicyByUUID(ruleId);
-            if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
+            if (!RestApiAdminUtils.isPolicyAccessibleToUser(existingPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_CUSTOM_RULE, ruleId));
             }
@@ -771,7 +763,7 @@ public class ThrottlingCommonImpl {
             ApplicationPolicy appPolicy = apiProvider.getApplicationPolicy(userName, policyName);
             if (appPolicy != null) {
                 String policyId = appPolicy.getUUID();
-                if (!RestApiAdminUtils.isPolicyAccessibleToUser(userName, appPolicy)) {
+                if (!RestApiAdminUtils.isPolicyAccessibleToUser(appPolicy)) {
                     throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                             RestApiConstants.RESOURCE_APP_POLICY, policyId));
                 }
@@ -792,7 +784,7 @@ public class ThrottlingCommonImpl {
                 SubscriptionPolicy subPolicy = apiProvider.getSubscriptionPolicy(userName, policyName);
                 if (subPolicy != null) {
                     String policyId = subPolicy.getUUID();
-                    if (!RestApiAdminUtils.isPolicyAccessibleToUser(userName, subPolicy)) {
+                    if (!RestApiAdminUtils.isPolicyAccessibleToUser(subPolicy)) {
                         throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                                 RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY, policyId));
                     }
@@ -818,7 +810,7 @@ public class ThrottlingCommonImpl {
             APIPolicy apiPolicy = apiProvider.getAPIPolicy(userName, policyName);
             if (apiPolicy != null) {
                 String policyId = apiPolicy.getUUID();
-                if (!RestApiAdminUtils.isPolicyAccessibleToUser(userName, apiPolicy)) {
+                if (!RestApiAdminUtils.isPolicyAccessibleToUser(apiPolicy)) {
                     throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                             RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId));
                 }
@@ -946,12 +938,11 @@ public class ThrottlingCommonImpl {
 
     public static BlockingConditionDTO getDenyPolicyById(String conditionId) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String username = RestApiCommonUtil.getLoggedInUsername();
 
         try {
             //This will give BlockConditionNotFoundException if there's no block condition exists with UUID
             BlockConditionsDTO blockCondition = apiProvider.getBlockConditionByUUID(conditionId);
-            if (!RestApiAdminUtils.isBlockConditionAccessibleToUser(username, blockCondition)) {
+            if (!RestApiAdminUtils.isBlockConditionAccessibleToUser(blockCondition)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId));
             }
@@ -974,12 +965,11 @@ public class ThrottlingCommonImpl {
      */
     public static void removeDenyPolicy(String conditionId) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String username = RestApiCommonUtil.getLoggedInUsername();
 
         try {
             //This will give BlockConditionNotFoundException if there's no block condition exists with UUID
             BlockConditionsDTO existingCondition = apiProvider.getBlockConditionByUUID(conditionId);
-            if (!RestApiAdminUtils.isBlockConditionAccessibleToUser(username, existingCondition)) {
+            if (!RestApiAdminUtils.isBlockConditionAccessibleToUser(existingCondition)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId));
             }
@@ -993,12 +983,11 @@ public class ThrottlingCommonImpl {
     public static BlockingConditionDTO updateDenyPolicy(String conditionId, BlockingConditionStatusDTO body)
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String username = RestApiCommonUtil.getLoggedInUsername();
 
         try {
             //This will give BlockConditionNotFoundException if there's no block condition exists with UUID
             BlockConditionsDTO existingCondition = apiProvider.getBlockConditionByUUID(conditionId);
-            if (!RestApiAdminUtils.isBlockConditionAccessibleToUser(username, existingCondition)) {
+            if (!RestApiAdminUtils.isBlockConditionAccessibleToUser(existingCondition)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId));
             }
@@ -1171,7 +1160,7 @@ public class ThrottlingCommonImpl {
      */
     private static void checkTenantDomainForCustomRules() throws APIManagementException {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+        if (!tenantDomain.equals(RestApiConstants.SUPER_TENANT_DOMAIN_NAME)) {
             throw new APIManagementException("Tenant " + tenantDomain + " is not allowed to access custom rules. " +
                     "Only super tenant is allowed", ExceptionCodes.FORBIDDEN_ERROR);
         }

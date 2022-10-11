@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AlertsSubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +54,7 @@ public class AlertSubscriptionCommonImpl {
      */
     public static AlertsSubscriptionDTO getSubscribedAlertTypes() throws APIManagementException,
             AlertManagementException {
-        String fullyQualifiedUsername = getFullyQualifiedUsername(RestApiCommonUtil.getLoggedInUsername());
+        String fullyQualifiedUsername = RestApiCommonUtil.getLoggedInUsername();
 
         AdminAlertConfigurator adminAlertConfigurator = (AdminAlertConfigurator) AlertConfigManager.getInstance()
                 .getAlertConfigurator(AlertMgtConstants.ADMIN_DASHBOARD_AGENT);
@@ -90,7 +89,7 @@ public class AlertSubscriptionCommonImpl {
     public static AlertsSubscriptionDTO subscribeToAlerts(List<AlertTypeDTO> subscribingAlertDTOs,
                                                           List<String> emailsList)
             throws APIManagementException, AlertManagementException {
-        String fullyQualifiedUsername = getFullyQualifiedUsername(RestApiCommonUtil.getLoggedInUsername());
+        String fullyQualifiedUsername = RestApiCommonUtil.getLoggedInUsername();
 
         AdminAlertConfigurator adminAlertConfigurator = (AdminAlertConfigurator) AlertConfigManager.getInstance()
                 .getAlertConfigurator(AlertMgtConstants.ADMIN_DASHBOARD_AGENT);
@@ -125,7 +124,7 @@ public class AlertSubscriptionCommonImpl {
      * @throws AlertManagementException When an alert related error occurs.
      */
     public static void unsubscribeAllAlerts() throws APIManagementException, AlertManagementException {
-        String fullyQualifiedUsername = getFullyQualifiedUsername(RestApiCommonUtil.getLoggedInUsername());
+        String fullyQualifiedUsername = RestApiCommonUtil.getLoggedInUsername();
         AdminAlertConfigurator adminAlertConfigurator = (AdminAlertConfigurator) AlertConfigManager.getInstance()
                 .getAlertConfigurator(AlertMgtConstants.ADMIN_DASHBOARD_AGENT);
         adminAlertConfigurator.unsubscribe(fullyQualifiedUsername);
@@ -182,16 +181,4 @@ public class AlertSubscriptionCommonImpl {
         apiAdmin.deleteBotDetectionAlertSubscription(uuid);
     }
 
-    /**
-     * Obtain the fully qualified username of the given user
-     *
-     * @param username tenant aware username
-     * @return Fully qualified username
-     */
-    private static String getFullyQualifiedUsername(String username) {
-        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(RestApiCommonUtil.getLoggedInUserTenantDomain())) {
-            return username + "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-        return username;
-    }
 }

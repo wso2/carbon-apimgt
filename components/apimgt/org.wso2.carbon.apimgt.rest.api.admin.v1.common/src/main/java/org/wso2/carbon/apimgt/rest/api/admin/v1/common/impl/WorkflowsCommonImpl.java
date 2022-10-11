@@ -114,7 +114,7 @@ public class WorkflowsCommonImpl {
         boolean isTenantFlowStarted = false;
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomainOfUser = MultitenantUtils.getTenantDomain(username);
+        String tenantDomainOfUser = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
         if (workflowReferenceId == null) {
             throw new APIManagementException("workflowReferenceId is empty", ExceptionCodes.PARAMETER_NOT_PROVIDED);
@@ -132,11 +132,11 @@ public class WorkflowsCommonImpl {
             if (tenantDomain != null && !tenantDomain.equals(tenantDomainOfUser)) {
                 throw new APIManagementException(ExceptionCodes.UNAUTHORIZED);
             }
-            if (tenantDomain != null && !SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
+//            if (tenantDomain != null && !RestApiConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+//                isTenantFlowStarted = true;
+//                PrivilegedCarbonContext.startTenantFlow();
+//                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+//            }
             if (body == null) {
                 throw new APIManagementException("Request payload is missing", ExceptionCodes.PARAMETER_NOT_PROVIDED);
             }
@@ -168,10 +168,6 @@ public class WorkflowsCommonImpl {
         } catch (WorkflowException e) {
             String msg = "Error while resuming workflow " + workflowReferenceId;
             throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC, msg));
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
         }
     }
 }
