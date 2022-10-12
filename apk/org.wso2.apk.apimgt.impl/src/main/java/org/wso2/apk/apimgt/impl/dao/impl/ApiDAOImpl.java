@@ -2951,7 +2951,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     @Override
-    public org.wso2.apk.apimgt.api.model.ResourceFile getThumbnail(Organization organization, String apiId) throws ThumbnailPersistenceException {
+    public ResourceFile getThumbnail(Organization organization, String apiId) throws ThumbnailPersistenceException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;

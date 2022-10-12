@@ -28,7 +28,7 @@ import org.wso2.apk.apimgt.impl.dao.dto.DocumentContent;
 public interface DocumentMapper {
     DocumentMapper INSTANCE = Mappers.getMapper(DocumentMapper.class);
     
-    Documentation toDocumentation(org.wso2.carbon.apimgt.impl.dao.dto.Documentation doc);
+    Documentation toDocumentation(org.wso2.apk.apimgt.impl.dao.dto.Documentation doc);
 
     DocumentationContent toDocumentationContent(DocumentContent content);
 

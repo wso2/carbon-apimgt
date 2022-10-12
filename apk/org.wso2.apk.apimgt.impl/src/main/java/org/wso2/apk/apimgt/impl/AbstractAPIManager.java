@@ -30,14 +30,18 @@ import org.json.simple.parser.ParseException;
 import org.wso2.apk.apimgt.api.model.API;
 import org.wso2.apk.apimgt.api.model.APICategory;
 import org.wso2.apk.apimgt.api.model.APIIdentifier;
+import org.wso2.apk.apimgt.api.model.APIInfo;
 import org.wso2.apk.apimgt.api.model.APIKey;
 import org.wso2.apk.apimgt.api.model.APIProduct;
 import org.wso2.apk.apimgt.api.model.APIProductIdentifier;
 import org.wso2.apk.apimgt.api.model.APIProductResource;
 import org.wso2.apk.apimgt.api.model.AccessTokenInfo;
 import org.wso2.apk.apimgt.api.model.Application;
+import org.wso2.apk.apimgt.api.model.Documentation;
+import org.wso2.apk.apimgt.api.model.ResourceFile;
 import org.wso2.apk.apimgt.api.model.DocumentationContent;
 import org.wso2.apk.apimgt.api.model.KeyManager;
+import org.wso2.apk.apimgt.api.model.Identifier;
 import org.wso2.apk.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.apk.apimgt.api.model.Scope;
 import org.wso2.apk.apimgt.api.model.SubscribedAPI;
@@ -45,7 +49,6 @@ import org.wso2.apk.apimgt.api.model.Subscriber;
 import org.wso2.apk.apimgt.api.model.Tier;
 import org.wso2.apk.apimgt.api.model.URITemplate;
 import org.wso2.apk.apimgt.impl.dao.dto.DocumentContent;
-import org.wso2.apk.apimgt.impl.dao.dto.Documentation;
 import org.wso2.apk.apimgt.impl.dao.dto.DocumentSearchResult;
 import org.wso2.apk.apimgt.impl.dao.dto.Organization;
 import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPI;
@@ -256,7 +259,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public ResourceFile getWSDL(String apiId, String organization) throws APIManagementException {
 
         try {
-            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource =
+            org.wso2.apk.apimgt.impl.dao.dto.ResourceFile resource =
                     apiDAOImpl.getWSDL(new Organization(organization), apiId);
             if (resource != null) {
                 ResourceFile resourceFile = new ResourceFile(resource.getContent(), resource.getContentType());
@@ -324,7 +327,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     apiDAOImpl.searchDocumentation(org, uuid, 0, 0, null, ctx);
             if (list != null) {
                 convertedList = new ArrayList<Documentation>();
-                List<Documentation> docList = list.getDocumentationList();
+                List<org.wso2.apk.apimgt.impl.dao.dto.Documentation> docList = list.getDocumentationList();
                 if (docList != null) {
                     for (int i = 0; i < docList.size(); i++) {
                         convertedList.add(DocumentMapper.INSTANCE.toDocumentation(docList.get(i)));
@@ -354,7 +357,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         Documentation documentation = null;
         try {
-            Documentation doc = apiDAOImpl
+            org.wso2.apk.apimgt.impl.dao.dto.Documentation doc = apiDAOImpl
                     .getDocumentation(new Organization(organization), apiId, docId);
             if (doc != null) {
                 if (log.isDebugEnabled()) {
@@ -1494,7 +1497,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public ResourceFile getIcon(String apiId, String organization) throws APIManagementException {
 
         try {
-            ResourceFile resource = apiDAOImpl.getThumbnail(new Organization(organization), apiId);
+            org.wso2.apk.apimgt.impl.dao.dto.ResourceFile resource = apiDAOImpl.getThumbnail(new Organization(organization), apiId);
             if (resource != null) {
                 ResourceFile thumbnail = new ResourceFile(resource.getContent(), resource.getContentType());
                 return thumbnail;
