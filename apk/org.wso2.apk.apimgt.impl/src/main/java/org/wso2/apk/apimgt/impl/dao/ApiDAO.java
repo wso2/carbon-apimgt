@@ -351,7 +351,7 @@ public interface ApiDAO {
      * @return Thumbnail icon resource file
      * @throws ThumbnailPersistenceException
      */
-    org.wso2.apk.apimgt.api.model.ResourceFile getThumbnail(Organization organization, String apiId) throws ThumbnailPersistenceException;
+    ResourceFile getThumbnail(Organization organization, String apiId) throws ThumbnailPersistenceException;
 
     /**
      * Delete thumbnail icon of the API

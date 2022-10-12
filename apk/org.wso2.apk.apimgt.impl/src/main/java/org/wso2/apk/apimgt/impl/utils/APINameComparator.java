@@ -18,7 +18,7 @@
 
 package org.wso2.apk.apimgt.impl.utils;
 
-import org.wso2.carbon.apimgt.api.model.API;
+import  org.wso2.apk.apimgt.api.model.API;
 
 import java.io.Serializable;
 import java.util.Comparator;
