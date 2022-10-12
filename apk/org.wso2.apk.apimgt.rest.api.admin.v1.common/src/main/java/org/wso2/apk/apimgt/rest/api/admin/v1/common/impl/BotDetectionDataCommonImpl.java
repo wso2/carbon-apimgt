@@ -22,8 +22,8 @@ import org.wso2.apk.apimgt.api.APIAdmin;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.model.botDataAPI.BotDetectionData;
-import org.wso2.carbon.apimgt.impl.APIAdminImpl;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.impl.APIAdminImpl;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings.BotDetectionMappingUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.BotDetectionDataListDTO;
 

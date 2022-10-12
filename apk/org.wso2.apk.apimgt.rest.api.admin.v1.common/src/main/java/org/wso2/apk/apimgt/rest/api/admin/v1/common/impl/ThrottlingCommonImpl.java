@@ -32,7 +32,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.apk.apimgt.api.*;
 import org.wso2.apk.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.apk.apimgt.api.model.policy.*;
-import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.apk.apimgt.impl.APIAdminImpl;
 import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;

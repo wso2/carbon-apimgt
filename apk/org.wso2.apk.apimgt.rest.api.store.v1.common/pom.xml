@@ -36,38 +36,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-yaml</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -77,31 +52,17 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
+            <artifactId>org.wso2.apk.apimgt.rest.api.util</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.rest.api.common</artifactId>
+            <artifactId>org.wso2.apk.apimgt.rest.api.common</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.validation</groupId>
-                    <artifactId>validation-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.jboss.logging</groupId>
-                    <artifactId>jboss-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.identity.framework</groupId>
-            <artifactId>org.wso2.carbon.identity.entitlement.stub</artifactId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.apk.apimgt.impl</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -149,6 +110,22 @@
             <artifactId>org.wso2.carbon.apimgt.solace</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.apk.apimgt.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.apk.apimgt.rest.api.util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.apk.apimgt.user</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.apk.apimgt.rest.api.util</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -177,11 +154,11 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.parent.basedir}/org.wso2.carbon.apimgt.rest.api.store.v1/src/main/resources/devportal-api.yaml</inputSpec>
+                            <inputSpec>../org.wso2.apk.apimgt.rest.api.util/src/main/resources/devportal-api.yaml</inputSpec>
                             <language>jaxrs-cxf-cdi</language>
                             <configOptions>
-                                <apiPackage>org.wso2.carbon.apimgt.rest.api.store.v1</apiPackage>
-                                <modelPackage>org.wso2.carbon.apimgt.rest.api.store.v1.dto</modelPackage>
+                                <apiPackage>org.wso2.apk.apimgt.rest.api.store.v1</apiPackage>
+                                <modelPackage>org.wso2.apk.apimgt.rest.api.store.v1.dto</modelPackage>
                                 <sourceFolder>src/gen/java</sourceFolder>
                                 <hideGenerationTimestamp>true</hideGenerationTimestamp>
                                 <useBeanValidation>true</useBeanValidation>
@@ -190,7 +167,7 @@
                             <generateApis>false</generateApis>
                             <output>.</output>
                             <templateDirectory>
-                                ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/server-templates
+                                ../org.wso2.apk.apimgt.rest.api.util/src/main/resources/server-templates
                             </templateDirectory>
                             <skipOverwrite>true</skipOverwrite>
                             <modelNameSuffix>DTO</modelNameSuffix>
@@ -214,24 +191,6 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>src/gen/java</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
 
@@ -247,8 +206,8 @@
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;version="${carbon.apimgt.version}",
-                            org.wso2.carbon.apimgt.rest.api.store.v1.common.mappings.*;version="${carbon.apimgt.version}"
+                            org.wso2.apk.apimgt.rest.api.store.v1.dto.*;version="${carbon.apimgt.version}",
+                            org.wso2.apk.apimgt.rest.api.store.v1.common.mappings.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>

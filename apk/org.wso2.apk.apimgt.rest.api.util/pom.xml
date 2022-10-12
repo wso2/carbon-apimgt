@@ -70,11 +70,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
             <scope>provided</scope>
@@ -98,18 +93,23 @@
             <artifactId>swagger-codegen</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.rest.api.common</artifactId>
+            <artifactId>org.wso2.apk.apimgt.rest.api.common</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.apk.apimgt.impl</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId> org.wso2.apk.apimgt.rest.api.util</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

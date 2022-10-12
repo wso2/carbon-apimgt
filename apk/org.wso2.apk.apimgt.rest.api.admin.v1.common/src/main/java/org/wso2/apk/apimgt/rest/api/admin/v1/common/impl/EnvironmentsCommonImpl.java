@@ -21,7 +21,7 @@ package org.wso2.apk.apimgt.rest.api.admin.v1.common.impl;
 import org.wso2.apk.apimgt.api.APIAdmin;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.apk.apimgt.impl.APIAdminImpl;
 import org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings.EnvironmentMappingUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;

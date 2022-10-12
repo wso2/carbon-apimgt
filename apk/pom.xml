@@ -49,5 +49,33 @@
         <module>org.wso2.apk.apimgt.rest.api.util</module>
         <module>org.wso2.apk.apimgt.user</module>
     </modules>
-    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.apk.apimgt.api</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.apk.apimgt.impl</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.apk.apimgt.rest.api.common</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId> org.wso2.apk.apimgt.rest.api.util.utils</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.apk.apimgt.user</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

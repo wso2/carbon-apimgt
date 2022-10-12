@@ -24,7 +24,36 @@ import org.wso2.apk.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.apk.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.apk.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.apk.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.apk.apimgt.api.model.*;
+import org.wso2.apk.apimgt.api.model.API;
+import org.wso2.apk.apimgt.api.model.APIIdentifier;
+import org.wso2.apk.apimgt.api.model.APIProduct;
+import org.wso2.apk.apimgt.api.model.APIProductIdentifier;
+import org.wso2.apk.apimgt.api.model.APIProductResource;
+import org.wso2.apk.apimgt.api.model.APIRevision;
+import org.wso2.apk.apimgt.api.model.APIRevisionDeployment;
+import org.wso2.apk.apimgt.api.model.APISearchResult;
+import org.wso2.apk.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.apk.apimgt.api.model.APIStore;
+import org.wso2.apk.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.apk.apimgt.api.model.BlockConditionsDTO;
+import org.wso2.apk.apimgt.api.model.Comment;
+import org.wso2.apk.apimgt.api.model.CommentList;
+import org.wso2.apk.apimgt.api.model.DeployedAPIRevision;
+import org.wso2.apk.apimgt.api.model.Documentation;
+import org.wso2.apk.apimgt.api.model.DocumentationContent;
+import org.wso2.apk.apimgt.api.model.Environment;
+import org.wso2.apk.apimgt.api.model.Identifier;
+import org.wso2.apk.apimgt.api.model.LifeCycleEvent;
+import org.wso2.apk.apimgt.api.model.Monetization;
+import org.wso2.apk.apimgt.api.model.OperationPolicyData;
+import org.wso2.apk.apimgt.api.model.ResourceFile;
+import org.wso2.apk.apimgt.api.model.ResourcePath;
+import org.wso2.apk.apimgt.api.model.Scope;
+import org.wso2.apk.apimgt.api.model.SharedScopeUsage;
+import org.wso2.apk.apimgt.api.model.SubscribedAPI;
+import org.wso2.apk.apimgt.api.model.Subscriber;
+import org.wso2.apk.apimgt.api.model.URITemplate;
+import org.wso2.apk.apimgt.api.model.Usage;
 import org.wso2.apk.apimgt.api.model.policy.APIPolicy;
 import org.wso2.apk.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.apk.apimgt.api.model.policy.GlobalPolicy;
@@ -135,7 +164,7 @@ public interface APIProvider extends APIManager {
      * @param uuid API uuid
      * @param organization
      * @return UserApplicationAPIUsages for given provider
-     * @throws org.wso2.apk.apimgt.api.APIManagementException
+     * @throws APIManagementException
      *          If failed to get UserApplicationAPIUsage
      */
     List<SubscribedAPI> getAPIUsageByAPIId(String uuid, String organization) throws APIManagementException;
@@ -145,7 +174,7 @@ public interface APIProvider extends APIManager {
      *
      * @param apiProductId API Product identifier
      * @return UserApplicationAPIUsages for given provider
-     * @throws org.wso2.apk.apimgt.api.APIManagementException
+     * @throws APIManagementException
      *          If failed to get UserApplicationAPIUsage
      */
     List<SubscribedAPI> getAPIProductUsageByAPIProductId(APIProductIdentifier apiProductId) throws APIManagementException;
@@ -308,8 +337,8 @@ public interface APIProvider extends APIManager {
      *
      * @param api API
      * @param existingAPI existing api
-     * @throws org.wso2.apk.apimgt.api.APIManagementException if failed to update API
-     * @throws org.wso2.apk.apimgt.api.FaultGatewaysException on Gateway Failure
+     * @throws APIManagementException if failed to update API
+     * @throws FaultGatewaysException on Gateway Failure
      * @return updated API
      */
     API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException;
