@@ -21,7 +21,7 @@ package org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings.throttling;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.apk.apimgt.api.model.BlockConditionsDTO;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.BlockingConditionDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.BlockingConditionListDTO;
 

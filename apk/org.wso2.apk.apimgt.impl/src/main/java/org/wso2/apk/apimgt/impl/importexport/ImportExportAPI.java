@@ -19,9 +19,9 @@
 
 package org.wso2.apk.apimgt.impl.importexport;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.model.API;
+import org.wso2.apk.apimgt.api.model.APIProduct;
 
 import java.io.File;
 import java.io.InputStream;

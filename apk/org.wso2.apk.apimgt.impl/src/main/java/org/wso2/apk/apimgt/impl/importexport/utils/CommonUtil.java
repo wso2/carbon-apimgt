@@ -33,21 +33,14 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
-import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
-import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.model.Identifier;
+import org.wso2.apk.apimgt.impl.APIConstants;
+import org.wso2.apk.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.apk.apimgt.impl.importexport.ExportFormat;
+import org.wso2.apk.apimgt.impl.importexport.ImportExportConstants;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -61,6 +54,10 @@ import java.util.zip.ZipOutputStream;
  * This is the util class which consists of all the common functions for importing and exporting API.
  */
 public class CommonUtil {
+
+    private CommonUtil() {
+    }
+
     private static final Log log = LogFactory.getLog(CommonUtil.class);
 
     /**
@@ -162,7 +159,7 @@ public class CommonUtil {
     private static void writeArchiveFile(File directoryToZip, List<File> fileList) throws APIImportExportException {
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(directoryToZip.getPath() + ".zip");
-                ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream)) {
+             ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream)) {
             for (File file : fileList) {
                 if (!file.isDirectory()) {
                     addToArchive(directoryToZip, file, zipOutputStream);
@@ -343,8 +340,8 @@ public class CommonUtil {
                 if (!entry.isDirectory()) {
                     // write the current file to the destination
                     try (InputStream zipInputStream = zip.getInputStream(entry);
-                            BufferedInputStream inputStream = new BufferedInputStream(zipInputStream);
-                            FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
+                         BufferedInputStream inputStream = new BufferedInputStream(zipInputStream);
+                         FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
                         IOUtils.copy(inputStream, outputStream);
                     }
                 }
@@ -432,7 +429,7 @@ public class CommonUtil {
      * @return The artifact object with the type and version added to it
      */
     public static JsonObject addTypeAndVersionToFile(String type, String version, String rootName,
-            JsonElement jsonElement) {
+                                                     JsonElement jsonElement) {
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty(APIConstants.TYPE, type);
@@ -493,7 +490,7 @@ public class CommonUtil {
      * @throws IOException              if an error occurs while converting the file from JSON to YAML
      */
     public static void writeDtoToFile(String filePath, ExportFormat exportFormat, String type, String rootName,
-            Object dtoObject) throws APIImportExportException, IOException {
+                                      Object dtoObject) throws APIImportExportException, IOException {
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonObject jsonObject =

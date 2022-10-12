@@ -27,6 +27,26 @@ import java.util.Map;
  */
 public final class ImportExportConstants {
 
+    public static final String TYPE_API = "api";
+
+    public static final String TYPE_API_PRODUCT = "api_product";
+
+    public static final String TYPE_APPLICATION = "application";
+
+    public static final String TYPE_DOCUMENTS = "document";
+
+    public static final String TYPE_ENDPOINT_CERTIFICATES = "endpoint_certificates";
+
+    public static final String TYPE_CLIENT_CERTIFICATES = "client_certificates";
+
+    public static final String TYPE_DEPLOYMENT_ENVIRONMENTS = "deployment_environments";
+
+    public static final String TYPE_POLICY_SPECIFICATION = "operation_policy_specification";
+
+    public static final String ENDPOINT_CONFIG = "endpointConfig";
+
+    public static final String GRAPHQL_COMPLEXITY = "graphql-complexity";
+
     // System independent file separator for zip files
     public static final char ZIP_FILE_SEPARATOR = '/';
     public static final char WIN_ZIP_FILE_SEPARATOR = '\\';
@@ -38,7 +58,7 @@ public final class ImportExportConstants {
     public static final String API_FILE_LOCATION = File.separator + "api";
 
     // Location of the API definition file
-    public static final String API_PRODUCT_FILE_LOCATION = File.separator + "api_product";
+    public static final String API_PRODUCT_FILE_LOCATION = File.separator + TYPE_API_PRODUCT;
 
     // Location of the definitions such as swagger, graphql schema etc
     public static final String DEFINITIONS_DIRECTORY = "Definitions";
@@ -61,7 +81,7 @@ public final class ImportExportConstants {
 
     // Location of the graphql schema definition file
     public static final String GRAPHQL_COMPLEXITY_INFO_LOCATION =
-            File.separator + DEFINITIONS_DIRECTORY + File.separator + "graphql-complexity";
+            File.separator + DEFINITIONS_DIRECTORY + File.separator + GRAPHQL_COMPLEXITY;
 
     // Location of the wsdl file
     public static final String WSDL_LOCATION = File.separator + "WSDL" + File.separator;
@@ -75,7 +95,7 @@ public final class ImportExportConstants {
     // Custom type
     public static final String CUSTOM_TYPE = "Custom";
 
-    public static final String DOCUMENT_FILE_NAME = File.separator + "document";
+    public static final String DOCUMENT_FILE_NAME = File.separator + TYPE_DOCUMENTS;
 
     public static final String DOCUMENT_DIRECTORY = "Docs";
 
@@ -83,9 +103,9 @@ public final class ImportExportConstants {
 
     public static final String CLIENT_CERTIFICATES_DIRECTORY = "Client-certificates";
 
-    public static final String ENDPOINTS_CERTIFICATE_FILE = File.separator + "endpoint_certificates";
+    public static final String ENDPOINTS_CERTIFICATE_FILE = File.separator + TYPE_ENDPOINT_CERTIFICATES;
 
-    public static final String CLIENT_CERTIFICATE_FILE = File.separator + "client_certificates";
+    public static final String CLIENT_CERTIFICATE_FILE = File.separator +TYPE_CLIENT_CERTIFICATES;
 
     public static final String APIS_DIRECTORY = "APIs";
 
@@ -184,27 +204,7 @@ public final class ImportExportConstants {
         fileExtensionMapping.put("application/json", "json");
     }
 
-    public static final String TYPE_API = "api";
-
-    public static final String TYPE_API_PRODUCT = "api_product";
-
-    public static final String TYPE_APPLICATION = "application";
-
-    public static final String TYPE_DOCUMENTS = "document";
-
-    public static final String TYPE_ENDPOINT_CERTIFICATES = "endpoint_certificates";
-
-    public static final String TYPE_CLIENT_CERTIFICATES = "client_certificates";
-
-    public static final String TYPE_DEPLOYMENT_ENVIRONMENTS = "deployment_environments";
-
-    public static final String TYPE_POLICY_SPECIFICATION = "operation_policy_specification";
-
     public static final String APIM_VERSION = "v4.1.0";
-
-    public static final String ENDPOINT_CONFIG = "endpointConfig";
-
-    public static final String GRAPHQL_COMPLEXITY = "graphql-complexity";
 
     public static final String UPLOAD_APPLICATION_FILE_NAME = "ApplicationArchive.zip";
 
@@ -281,12 +281,12 @@ public final class ImportExportConstants {
     public static final String CERTIFICATE_HOST_NAME_PROPERTY = "hostName";
     public static final String CERTIFICATE_TIER_NAME_PROPERTY = "tierName";
     public static final String CERTIFICATE_DIRECTORY = File.separator + "certificates";
-    public static final String ENDPOINT_CERTIFICATES_DIRECTORY_PATH = File.separator + "Endpoint-certificates";
-    public static final String CLIENT_CERTIFICATES_DIRECTORY_PATH = File.separator + "Client-certificates";
+    public static final String ENDPOINT_CERTIFICATES_DIRECTORY_PATH = File.separator + ENDPOINT_CERTIFICATES_DIRECTORY;
+    public static final String CLIENT_CERTIFICATES_DIRECTORY_PATH = File.separator + CLIENT_CERTIFICATES_DIRECTORY;
     public static final String ENDPOINT_CERTIFICATES_META_DATA_FILE_PATH =
-            ENDPOINT_CERTIFICATES_DIRECTORY_PATH + File.separator + "endpoint_certificates";
+            ENDPOINT_CERTIFICATES_DIRECTORY_PATH + File.separator + TYPE_ENDPOINT_CERTIFICATES;
     public static final String CLIENT_CERTIFICATES_META_DATA_FILE_PATH =
-            CLIENT_CERTIFICATES_DIRECTORY_PATH + File.separator + "client_certificates";
+            CLIENT_CERTIFICATES_DIRECTORY_PATH + File.separator + TYPE_CLIENT_CERTIFICATES;
 
     //Deployment directory related constants
     public static final String DEPLOYMENT_DIRECTORY_NAME= "Deployment";
@@ -294,7 +294,7 @@ public final class ImportExportConstants {
     public static final String SOURCE_ZIP_DIRECTORY_NAME = "SourceArchive.zip";
 
     // Location of the deployments file
-    public static final String DEPLOYMENT_INFO_LOCATION = File.separator + "deployment_environments";
+    public static final String DEPLOYMENT_INFO_LOCATION = File.separator + TYPE_DEPLOYMENT_ENVIRONMENTS;
     public static final String DEPLOYMENT_ENVIRONMENTS = "deploymentEnvironments";
     public static final String DEPLOYMENT_NAME = "deploymentEnvironment";
     public static final String DEPLOYMENT_VHOST = "deploymentVhost";
