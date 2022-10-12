@@ -24,7 +24,6 @@ import org.wso2.apk.apimgt.api.model.SwaggerData;
 import org.wso2.apk.apimgt.api.model.URITemplate;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;

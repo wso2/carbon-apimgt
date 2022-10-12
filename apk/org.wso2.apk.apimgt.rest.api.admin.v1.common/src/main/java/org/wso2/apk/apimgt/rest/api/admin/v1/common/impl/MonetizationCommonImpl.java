@@ -21,11 +21,10 @@ package org.wso2.apk.apimgt.rest.api.admin.v1.common.impl;
 import org.wso2.apk.apimgt.api.APIAdmin;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.model.MonetizationUsagePublishInfo;
-import org.wso2.carbon.apimgt.impl.APIAdminImpl;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.monetization.MonetizationUsagePublishAgent;
+import org.wso2.apk.apimgt.impl.APIAdminImpl;
+import org.wso2.apk.apimgt.impl.APIConstants;
+import org.wso2.apk.apimgt.impl.APIManagerConfiguration;
+import org.wso2.apk.apimgt.impl.monetization.MonetizationUsagePublishAgent;
 import org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings.MonetizationAPIMappinUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.MonetizationUsagePublishInfoDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.PublishStatusDTO;
@@ -63,9 +62,11 @@ public class MonetizationCommonImpl {
             monetizationUsagePublishInfo.setStatus(APIConstants.Monetization.INPROGRESS);
             //read the number of days to reduce from the current time to derive the from / last publish time
             //when there is no record of the last publish time
-            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            String gap = configuration.getMonetizationConfigurationDto().getPublishTimeDurationInDays();
+            // TODO: // read from config
+            String gap = null;
+//            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
+//                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
+//            String gap = configuration.getMonetizationConfigurationDto().getPublishTimeDurationInDays();
             //if the from time / last publish time is not set , set it to default
             if (gap == null) {
                 gap = APIConstants.Monetization.USAGE_PUBLISH_DEFAULT_TIME_GAP_IN_DAYS;

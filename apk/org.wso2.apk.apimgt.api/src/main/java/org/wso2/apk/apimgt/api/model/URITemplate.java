@@ -18,8 +18,8 @@
 package org.wso2.apk.apimgt.api.model;
 
 import org.json.simple.JSONValue;
-import org.wso2.apk.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.apk.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.apk.apimgt.api.dto.ConditionGroupDTO;
 
 import java.io.Serializable;
 import java.util.*;

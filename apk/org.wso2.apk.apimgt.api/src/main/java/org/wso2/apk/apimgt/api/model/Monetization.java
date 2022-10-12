@@ -16,9 +16,9 @@
 
 package org.wso2.apk.apimgt.api.model;
 
+import org.wso2.apk.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.apk.apimgt.api.APIProvider;
 import org.wso2.apk.apimgt.api.MonetizationException;
-import org.wso2.apk.apimgt.api.model.policy.SubscriptionPolicy;
 
 import java.util.Map;
 

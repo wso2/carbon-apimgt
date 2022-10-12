@@ -20,10 +20,10 @@ package org.wso2.apk.apimgt.rest.api.admin.v1.common.impl;
 
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.CustomUrlInfoDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.CustomUrlInfoDevPortalDTO;
-import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.apk.apimgt.user.exceptions.UserException;
 
 import java.util.Map;
 

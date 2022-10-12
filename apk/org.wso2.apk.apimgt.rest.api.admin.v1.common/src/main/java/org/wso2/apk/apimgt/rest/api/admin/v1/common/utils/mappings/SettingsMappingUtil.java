@@ -32,7 +32,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.KeyManagerConfigurationDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.SettingsDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.SettingsKeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.apk.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;
 import java.util.*;

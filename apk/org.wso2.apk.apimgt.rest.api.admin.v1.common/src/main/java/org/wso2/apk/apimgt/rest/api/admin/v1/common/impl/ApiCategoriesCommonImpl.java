@@ -23,7 +23,7 @@ import org.wso2.apk.apimgt.api.APIAdmin;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.apk.apimgt.impl.APIAdminImpl;
 import org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings.APICategoryMappingUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.APICategoryDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.APICategoryListDTO;

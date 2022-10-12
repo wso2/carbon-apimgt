@@ -34,7 +34,7 @@ import org.wso2.apk.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.user.ctx.UserContext;
+import org.wso2.apk.apimgt.user.ctx.UserContext;
 
 import java.io.File;
 import java.io.FileOutputStream;

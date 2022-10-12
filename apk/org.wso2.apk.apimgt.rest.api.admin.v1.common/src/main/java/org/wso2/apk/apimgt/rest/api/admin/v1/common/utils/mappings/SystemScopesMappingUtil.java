@@ -28,7 +28,7 @@ import org.wso2.apk.apimgt.rest.api.admin.v1.dto.RoleAliasDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.RoleAliasListDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.ScopeDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.apk.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;

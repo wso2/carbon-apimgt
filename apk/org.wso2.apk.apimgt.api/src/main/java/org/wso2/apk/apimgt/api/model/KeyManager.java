@@ -229,7 +229,7 @@ public interface KeyManager {
      * Gives details of the Access Token to be displayed on Store.
      *
      * @param consumerKey
-     * @return {@link org.wso2.apk.apimgt.api.model.AccessTokenInfo} populating all the details of the Access Token.
+     * @return {@link AccessTokenInfo} populating all the details of the Access Token.
      * @throws APIManagementException
      */
     AccessTokenInfo getAccessTokenByConsumerKey(String consumerKey) throws APIManagementException;

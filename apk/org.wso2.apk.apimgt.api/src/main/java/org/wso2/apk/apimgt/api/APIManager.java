@@ -259,7 +259,7 @@ public interface APIManager {
      *
      * @param username   Username of the subscriber to be added
      * @param groupingId - the groupId to which the subscriber belongs to
-     * @throws org.wso2.apk.apimgt.api.APIManagementException if failed add subscriber
+     * @throws APIManagementException if failed add subscriber
      */
     void addSubscriber(String username, String groupingId) throws APIManagementException;
 
@@ -336,7 +336,7 @@ public interface APIManager {
     Set<APIIdentifier> getAPIByAccessToken(String accessToken) throws APIManagementException;
 
     /**
-     * Returns a list of pre-defined # {@link org.wso2.apk.apimgt.api.model.Tier} in the system.
+     * Returns a list of pre-defined # {@link Tier} in the system.
      *
      * @return Set<Tier>
      * @throws APIManagementException if failed to get the predefined tiers
@@ -344,7 +344,7 @@ public interface APIManager {
     Set<Tier> getTiers() throws APIManagementException;
 
     /**
-     * Returns a list of pre-defined # {@link org.wso2.apk.apimgt.api.model.Tier} in the system.
+     * Returns a list of pre-defined # {@link Tier} in the system.
      *
      * @return Set<Tier>
      * @throws APIManagementException if failed to get the predefined tiers
@@ -352,7 +352,7 @@ public interface APIManager {
     Set<Tier> getTiers(String tenantDomain) throws APIManagementException;
 
     /**
-     * Returns a list of pre-defined # {@link org.wso2.apk.apimgt.api.model.Tier} in the system.
+     * Returns a list of pre-defined # {@link Tier} in the system.
      *
      * @param tierType     type of the tiers (api,resource ot application)
      * @param tenantDomain tenant domain to get the tiers
@@ -365,7 +365,7 @@ public interface APIManager {
      * Returns a list of domain name mappings store / gateway.
      *
      * @return Set<Tier>
-     * @throws org.wso2.apk.apimgt.api.APIManagementException if failed to get the predefined tiers
+     * @throws APIManagementException if failed to get the predefined tiers
      */
     Map<String, String> getTenantDomainMappings(String tenantDomain, String appType) throws APIManagementException;
 

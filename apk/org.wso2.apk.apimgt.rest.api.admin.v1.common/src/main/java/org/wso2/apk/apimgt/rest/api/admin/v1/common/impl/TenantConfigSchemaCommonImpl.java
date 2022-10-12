@@ -19,7 +19,7 @@
 package org.wso2.apk.apimgt.rest.api.admin.v1.common.impl;
 
 import org.wso2.apk.apimgt.api.APIAdmin;
-import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.apk.apimgt.impl.APIAdminImpl;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 
 public class TenantConfigSchemaCommonImpl {
