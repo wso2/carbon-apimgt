@@ -1,0 +1,100 @@
+name: API Manager Build with UI tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+jobs:
+  build-product:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run hostname
+        run: hostname
+      - name: Fix host entry
+        run: sudo echo "127.0.0.1 $(hostname)" | sudo tee -a /etc/hosts
+      - name: Show hosts
+        run: cat /etc/hosts
+      - name: Checkout master
+        uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: 11
+          distribution: 'adopt'
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '16'
+      - name: Cache maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build carbon-apimgt without tests, skip AspectJ, skip portal builds
+        run: mvn clean install --file pom.xml -Dmaven.test.skip=true -Dskip.aspectj=true -Dnpm.build.skip=true
+      - name: Get carbon.apimgt.version
+        run: mvn help:evaluate -Dexpression=project.version -q -DforceStdout > ../CARBON_APIMGT_VERSION_FILE
+      - name: Checkout apim-apps
+        uses: actions/checkout@v2
+        with:
+          repository: wso2/apim-apps
+          ref: refs/heads/main
+          path: apim-apps
+      - name: Build apim-apps with Test.
+        run: mvn clean install --file apim-apps/pom.xml
+      - name: Get apim.apps.version
+        run: mvn help:evaluate -Dexpression=project.version -q --file apim-apps/pom.xml -DforceStdout > ../APIM_APPS_VERSION_FILE
+      - name: Print apim.apps.version
+        run: |
+          echo $(cat ../APIM_APPS_VERSION_FILE)
+      - name: Print carbon.apimgt.version
+        run: |
+          echo $(cat ../CARBON_APIMGT_VERSION_FILE)
+      - name: Checkout Product-APIM
+        uses: actions/checkout@v2
+        with: 
+          repository: wso2/product-apim
+          ref: refs/heads/master
+          path: product-apim
+      - name: Build Product-Apim with Maven
+        run: mvn clean install -Dcarbon.apimgt.ui.version=$(cat ../APIM_APPS_VERSION_FILE) -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file product-apim/pom.xml -DskipBenchMarkTest=true -DskipIntegrationTests=true
+      - name: Get product.version
+        run: mvn help:evaluate -Dexpression=project.version -q --file product-apim/pom.xml -DforceStdout > ../PRODUCT_APIM_VERSION_FILE
+      - name: Print product.apim.version
+        run: |
+            echo $(cat ../PRODUCT_APIM_VERSION_FILE)
+      - name: start APIM server
+        run: |
+            unzip product-apim/modules/distribution/product/target/wso2am-$(cat ../PRODUCT_APIM_VERSION_FILE).zip
+            printf "\n[apim.devportal]\nenable_application_sharing = true\napplication_sharing_type = \"default\"\n" >> wso2am-$(cat ../PRODUCT_APIM_VERSION_FILE)/repository/conf/deployment.toml
+            sh wso2am-$(cat ../PRODUCT_APIM_VERSION_FILE)/bin/api-manager.sh start
+            sleep 5m # sleep for 5 min to start the server
+            nc -zv localhost 9443
+      - name: Cypress run
+        uses: cypress-io/github-action@v4
+        with:
+          record: false
+          working-directory: 'apim-apps/tests'
+          spec: '**/*.spec.js'
+      - name: Upload ScreenShots
+          uses: actions/upload-artifact@v2
+          if: failure()
+          with:
+            name: cypress-screenshots
+            path: apim-apps/tests/cypress/screenshots
+      - name: Upload videos
+          uses: actions/upload-artifact@v2
+          if: always()
+          with:
+            name: cypress-videos
+            path: apim-apps/tests/cypress/videos
+      - name: Upload Logs
+          uses: actions/upload-artifact@v2
+          if: always()
+          with:
+            name: server-logs
+            path: wso2am-*/repository/logs
