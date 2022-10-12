@@ -225,6 +225,8 @@ import org.wso2.apk.registry.core.utils.RegistryUtils;
 import org.wso2.apk.utils.apkUtils;
 import org.wso2.apk.utils.NetworkUtils;
 import org.wso2.apk.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.apimgt.impl.IDPConfiguration;
+import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;

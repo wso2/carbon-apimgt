@@ -16,16 +16,16 @@
 
 package org.wso2.apk.apimgt.impl.monetization;
 
-import org.wso2.carbon.apimgt.api.APIAdmin;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.MonetizationException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
-import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.impl.APIAdminImpl;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.apk.apimgt.api.APIAdmin;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.APIProvider;
+import org.wso2.apk.apimgt.api.MonetizationException;
+import org.wso2.apk.apimgt.api.model.API;
+import org.wso2.apk.apimgt.api.model.Monetization;
+import org.wso2.apk.apimgt.api.model.MonetizationUsagePublishInfo;
+import org.wso2.apk.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.apk.apimgt.impl.APIAdminImpl;
+import org.wso2.apk.apimgt.impl.APIConstants;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
