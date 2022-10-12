@@ -128,11 +128,6 @@ public class WorkflowsCommonImpl {
             if (tenantDomain != null && !tenantDomain.equals(tenantDomainOfUser)) {
                 throw new APIManagementException(ExceptionCodes.UNAUTHORIZED);
             }
-//            if (tenantDomain != null && !RestApiConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-//                isTenantFlowStarted = true;
-//                PrivilegedCarbonContext.startTenantFlow();
-//                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-//            }
             if (body == null) {
                 throw new APIManagementException("Request payload is missing", ExceptionCodes.PARAMETER_NOT_PROVIDED);
             }

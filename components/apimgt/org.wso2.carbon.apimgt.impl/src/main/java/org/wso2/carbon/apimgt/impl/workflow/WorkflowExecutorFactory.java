@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.user.ctx.UserContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 import javax.cache.Cache;
@@ -52,7 +51,7 @@ public class WorkflowExecutorFactory {
 
         String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
         String cacheName = tenantDomain + "_" + APIConstants.WORKFLOW_CACHE_NAME;
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        int tenantId = UserContext.getThreadLocalUserContext().getOrganizationId();
         //synchronized (cacheName.intern()){
         Cache workflowCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.WORKFLOW_CACHE_NAME);
         TenantWorkflowConfigHolder workflowConfig = (TenantWorkflowConfigHolder) workflowCache.get(cacheName);

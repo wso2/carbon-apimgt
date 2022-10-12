@@ -20,8 +20,6 @@ package org.wso2.carbon.apimgt.impl.notification;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-
 
 public abstract class Notifier implements Runnable {
 
@@ -40,7 +38,6 @@ public abstract class Notifier implements Runnable {
     @Override
     public void run() {
         try {
-            setThreadLocalContxet(tenantDomain);
             sendNotifications(notificationDTO);
         }
         catch (Exception e) {
@@ -55,17 +52,6 @@ public abstract class Notifier implements Runnable {
     public void setTenantDomain(String tenantDomain) {
         this.tenantDomain = tenantDomain;
     }
-
-    /**
-     * Setting Thread local variables
-     * @param tenantDomain
-     */
-    public void setThreadLocalContxet(String tenantDomain){
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain,true);
-
-    }
-
 }
 
 

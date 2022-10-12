@@ -49,12 +49,10 @@ import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.URL;
@@ -269,40 +267,28 @@ public class SOAPOperationBindingUtils {
         name = (name != null ? name.trim() : null);
         version = (version != null ? version.trim() : null);
 
-        boolean isTenantFlowStarted = false;
+
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+        int tenantId;
+        UserRegistry registry;
 
         try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+            APIUtil.loadTenantRegistry(tenantId);
+            registry = registryService.getGovernanceSystemRegistry(tenantId);
+            String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
+                    + APIUtil.replaceEmailDomain(provider) + RegistryConstants.PATH_SEPARATOR + name
+                    + RegistryConstants.PATH_SEPARATOR + version + RegistryConstants.PATH_SEPARATOR
+                    + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE;
+            if (log.isDebugEnabled()) {
+                log.debug("Resource path to the soap to rest converted sequence: " + resourcePath);
             }
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            int tenantId;
-            UserRegistry registry;
-
-            try {
-                tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
-                APIUtil.loadTenantRegistry(tenantId);
-                registry = registryService.getGovernanceSystemRegistry(tenantId);
-                String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
-                        + APIUtil.replaceEmailDomain(provider) + RegistryConstants.PATH_SEPARATOR + name
-                        + RegistryConstants.PATH_SEPARATOR + version + RegistryConstants.PATH_SEPARATOR
-                        + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE;
-                if (log.isDebugEnabled()) {
-                    log.debug("Resource path to the soap to rest converted sequence: " + resourcePath);
-                }
-                return registry.resourceExists(resourcePath);
-            } catch (RegistryException e) {
-                handleException("Error when create registry instance", e);
-            } catch (UserException e) {
-                handleException("Error while reading tenant information", e);
-            }
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
+            return registry.resourceExists(resourcePath);
+        } catch (RegistryException e) {
+            handleException("Error when create registry instance", e);
+        } catch (UserException e) {
+            handleException("Error while reading tenant information", e);
         }
         return false;
     }

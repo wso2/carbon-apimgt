@@ -23,7 +23,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.notifier.events.GoogleAnalyticsConfigEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.user.ctx.UserContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.Handler;
@@ -50,7 +49,7 @@ public class GAConfigMediaTypeHandler extends Handler {
             }
         }
         String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        int tenantId = UserContext.getThreadLocalUserContext().getOrganizationId();
 
         GoogleAnalyticsConfigEvent googleAnalyticsConfigEvent =
                 new GoogleAnalyticsConfigEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),

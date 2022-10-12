@@ -22,8 +22,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.eventing.EventPublisher;
 import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
 import org.wso2.carbon.apimgt.eventing.hub.internal.ServiceReferenceHolder;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 /**
  * EventHubEventStreamServiceEventPublisher class.
@@ -38,17 +36,6 @@ public class EventHubEventStreamServiceEventPublisher implements EventPublisher 
 
     @Override
     public void publish(EventPublisherEvent eventPublisherEvent) {
-        boolean tenantFlowStarted = false;
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            tenantFlowStarted = true;
-            ServiceReferenceHolder.getInstance().getEventStreamService().publish(eventPublisherEvent);
-        } finally {
-            if (tenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
+        ServiceReferenceHolder.getInstance().getEventStreamService().publish(eventPublisherEvent);
     }
 }

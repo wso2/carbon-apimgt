@@ -23,15 +23,12 @@ import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
-import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.uri.template.URITemplate;
 
 import java.util.ArrayList;
@@ -104,10 +101,6 @@ public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
                         } else {
                             message.put(RestApiConstants.AUTHENTICATION_REQUIRED, false);
                         }
-                        PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                        carbonContext.setUsername(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
-                        carbonContext.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-                        carbonContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
                         return;
                     }
                 }

@@ -35,7 +35,6 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -43,7 +42,6 @@ import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
@@ -123,11 +121,6 @@ public class SequenceUtils {
         JSONParser jsonParser = new JSONParser();
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             int tenantId;
             UserRegistry registry;
@@ -163,10 +156,6 @@ public class SequenceUtils {
             handleException("Error when create registry instance", e);
         } catch (org.wso2.carbon.registry.api.RegistryException e) {
             handleException("Error while creating registry resource", e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
         }
     }
 
@@ -185,11 +174,6 @@ public class SequenceUtils {
         try {
             String tenantDomain = MultitenantUtils
                     .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
             APIUtil.loadTenantRegistry(tenantId);
@@ -234,10 +218,6 @@ public class SequenceUtils {
         } catch (org.wso2.carbon.registry.api.RegistryException e) {
             handleExceptionWithCode("Error while setting the resource policy content for the registry resource", e,
                     ExceptionCodes.INTERNAL_ERROR);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
         }
     }
 

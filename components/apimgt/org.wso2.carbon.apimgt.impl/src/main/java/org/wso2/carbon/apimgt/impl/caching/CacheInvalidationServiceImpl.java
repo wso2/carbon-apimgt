@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.BasicAuthValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -239,41 +238,19 @@ public class CacheInvalidationServiceImpl implements CacheInvalidationService {
 
     public void invalidateResourceCache(String context, String version, String organization,
                                         List<URLMapping> urlMappings) {
-
-        boolean isTenantFlowStarted = false;
-        try {
-            isTenantFlowStarted = startTenantFlow(organization);
-            Cache cache = CacheProvider.getResourceCache();
-            String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(context, version);
-            if (cache.containsKey(apiCacheKey)) {
-                cache.remove(apiCacheKey);
-            }
-            for (URLMapping uriTemplate : urlMappings) {
-                String resourceVerbCacheKey =
-                        APIUtil.getResourceInfoDTOCacheKey(context, version, uriTemplate.getUrlPattern(),
-                                uriTemplate.getHttpMethod());
-                if (cache.containsKey(resourceVerbCacheKey)) {
-                    cache.remove(resourceVerbCacheKey);
-                }
-            }
-
-        } finally {
-            if (isTenantFlowStarted) {
-                endTenantFlow();
+        Cache cache = CacheProvider.getResourceCache();
+        String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(context, version);
+        if (cache.containsKey(apiCacheKey)) {
+            cache.remove(apiCacheKey);
+        }
+        for (URLMapping uriTemplate : urlMappings) {
+            String resourceVerbCacheKey =
+                    APIUtil.getResourceInfoDTOCacheKey(context, version, uriTemplate.getUrlPattern(),
+                            uriTemplate.getHttpMethod());
+            if (cache.containsKey(resourceVerbCacheKey)) {
+                cache.remove(resourceVerbCacheKey);
             }
         }
-    }
-
-    protected void endTenantFlow() {
-
-        PrivilegedCarbonContext.endTenantFlow();
-    }
-
-    protected boolean startTenantFlow(String tenantDomain) {
-
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        return true;
     }
 
     protected CacheManager getCacheManager() {

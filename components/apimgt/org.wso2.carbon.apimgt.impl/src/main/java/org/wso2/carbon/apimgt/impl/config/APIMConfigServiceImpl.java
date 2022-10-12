@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -70,8 +69,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
             int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
                 APIUtil.loadTenantRegistry(tenantId);
@@ -95,8 +92,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             String msg = "Error while adding External Stores Configuration from registry";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -108,8 +103,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
             int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
                 APIUtil.loadTenantRegistry(tenantId);
@@ -126,8 +119,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             String msg = "Error while updating External Stores Configuration from registry";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -138,8 +129,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
             int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
                 APIUtil.loadTenantRegistry(tenantId);
@@ -156,8 +145,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         } catch (RegistryException e) {
             throw new APIManagementException(ERROR_WHILE_RETRIEVING_EXTERNAL_STORES_CONFIGURATION, e,
                     ExceptionCodes.ERROR_RETRIEVE_EXTERNAL_STORE_CONFIG);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -198,8 +185,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
             int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
                 APIUtil.loadTenantRegistry(tenantId);
@@ -217,8 +202,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             String msg = "Error while retrieving External Stores Configuration from registry";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -229,8 +212,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
             int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
                 APIUtil.loadTenantRegistry(tenantId);
@@ -248,8 +229,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             String msg = "Error while retrieving External Stores Configuration from registry";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -260,8 +239,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
             int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
                 APIUtil.loadTenantRegistry(tenantId);
@@ -280,8 +257,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             String msg = "Error while retrieving External Stores Configuration from registry";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -292,8 +267,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
             int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
                 APIUtil.loadTenantRegistry(tenantId);
@@ -311,8 +284,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             String msg = "Error while retrieving Google Analytics Configuration from registry";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -323,8 +294,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
             int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
                 APIUtil.loadTenantRegistry(tenantId);
@@ -342,8 +311,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             String msg = "Error while updating Google Analytics Configuration from registry";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -354,8 +321,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
             int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
                 APIUtil.loadTenantRegistry(tenantId);
@@ -380,8 +345,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             String msg = "Error while add Google Analytics Configuration from registry";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -391,17 +354,11 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         if (organization == null) {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
-            JsonObject tenantConfig = (JsonObject) new JsonParser().parse(getTenantConfig(organization));
-            if (tenantConfig.has(APIConstants.SELF_SIGN_UP_NAME)) {
-                return getSignupUserRegistrationConfigDTO((JsonObject) tenantConfig.get(APIConstants.SELF_SIGN_UP_NAME));
-            } else {
-                return null;
-            }
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
+        JsonObject tenantConfig = (JsonObject) new JsonParser().parse(getTenantConfig(organization));
+        if (tenantConfig.has(APIConstants.SELF_SIGN_UP_NAME)) {
+            return getSignupUserRegistrationConfigDTO((JsonObject) tenantConfig.get(APIConstants.SELF_SIGN_UP_NAME));
+        } else {
+            return null;
         }
     }
 

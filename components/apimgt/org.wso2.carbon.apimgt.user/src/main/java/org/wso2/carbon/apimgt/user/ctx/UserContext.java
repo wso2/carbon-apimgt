@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.user.ctx.builder.UserContextBuilder;
 import org.wso2.carbon.apimgt.user.ctx.util.UserContextConstants;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -32,6 +33,7 @@ public class UserContext {
     private static final ThreadLocal<UserContext> currentUserContext = ThreadLocal.withInitial(UserContext::new);
 
     private String username;
+    private int organizationId;
     private String organization;
     private String[] roles;
     private Map<String, String> claims;
@@ -67,6 +69,13 @@ public class UserContext {
                     this.claims = (Map<String, String>) properties.get(UserContextConstants.ATTRIB_CLAIMS);
             }
         }
+        if (this.organization != null) {
+            try {
+                this.organizationId = UserManagerHolder.getUserManager().getTenantId(this.organization);
+            } catch (UserException e) {
+                logger.error("Error while getting the organization Id.", e);
+            }
+        }
     }
 
     public static void initThreadLocalUserContext(UserContextBuilder builder) {
@@ -80,6 +89,10 @@ public class UserContext {
 
     public String getUsername() {
         return username;
+    }
+
+    public int getOrganizationId() {
+        return organizationId;
     }
 
     public String getOrganization() {

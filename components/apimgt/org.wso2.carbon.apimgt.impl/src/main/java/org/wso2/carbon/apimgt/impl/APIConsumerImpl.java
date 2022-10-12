@@ -132,7 +132,6 @@ import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -249,11 +248,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("Failed to get Subscriber", e);
         }
         return subscriber;
-    }
-
-
-    protected void setUsernameToThreadLocalCarbonContext(String username) {
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
     }
 
     protected int getTenantId(String requestedTenantDomain) throws UserException {
@@ -895,9 +889,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             boolean isTenantFlowStarted = false;
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
-            }
 
             String applicationName = application.getName();
 
@@ -1086,10 +1077,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING, requestedThrottlingPolicy);
 
             boolean isTenantFlowStarted = false;
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
-            }
-
 
             try {
                 WorkflowExecutor updateSubscriptionWFExecutor =
@@ -1726,9 +1713,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 APIConstants.AuditLogConstants.CREATED, this.username);
 
         boolean isTenantFlowStarted = false;
-        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
-        }
         try {
 
             WorkflowExecutor appCreationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
@@ -2028,11 +2012,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         try {
             String workflowExtRef;
             ApplicationWorkflowDTO workflowDTO;
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                PrivilegedCarbonContext.startTenantFlow();
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
 
             String deletePendingWorkflowRef = apiMgtDAO.getExternalWorkflowRefByInternalRefWorkflowType(applicationId, WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
             if (deletePendingWorkflowRef != null) {
@@ -2331,10 +2310,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
-            }
-
             //check if there are any existing key mappings set for the application and the key manager.
             if (apiMgtDAO.isKeyMappingExistsForApplication(application.getId(), keyManagerName, keyManagerId,
                     tokenType)) {
@@ -2821,12 +2796,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                  String jsonString, String keyManagerID) throws APIManagementException {
         boolean tenantFlowStarted = false;
         try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                tenantFlowStarted = true;
-            }
-
             final String subscriberName = application.getSubscriber().getName();
 
             boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(getAPIManagerConfiguration().
@@ -3016,10 +2985,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
 
                 String tenantDomain = workflowDTO.getTenantDomain();
-                if (tenantDomain != null && !org.wso2.carbon.utils.multitenancy.MultitenantConstants
-                        .SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
-                }
 
                 workflowDTO.setWorkflowDescription(description);
                 workflowDTO.setStatus(WorkflowStatus.valueOf(status));
@@ -3062,17 +3027,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return row;
-    }
-
-    protected void endTenantFlow() {
-        PrivilegedCarbonContext.endTenantFlow();
-    }
-
-    protected boolean startTenantFlowForTenantDomain(String tenantDomain) {
-        boolean isTenantFlowStarted = true;
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        return isTenantFlowStarted;
     }
 
     /**

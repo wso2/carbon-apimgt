@@ -15,7 +15,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -42,7 +41,6 @@ public class GlobalMediationPolicyImpl {
         String internalOrganizationDomain = APIUtil.getInternalOrganizationDomain(organization);
         try {
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(internalOrganizationDomain)) {
-                startTenantFlow(internalOrganizationDomain);
                 int id = UserManagerHolder.getUserManager().getTenantId(internalOrganizationDomain);
                 registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(id);
             } else {
@@ -54,10 +52,6 @@ public class GlobalMediationPolicyImpl {
         } catch (RegistryException e) {
             throw new APIManagementException("Error while retrieving Registry for organization" + organization,
                     ExceptionCodes.INTERNAL_ERROR);
-        }finally {
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(internalOrganizationDomain)) {
-                endTenantFlow();
-            }
         }
     }
 
@@ -116,16 +110,6 @@ public class GlobalMediationPolicyImpl {
             throw new APIManagementException(msg, e, ExceptionCodes.INTERNAL_ERROR);
         }
         return mediationList;
-    }
-    private void endTenantFlow() {
-
-        PrivilegedCarbonContext.endTenantFlow();
-    }
-
-    private void startTenantFlow(String tenantDomain) {
-
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
     }
 
     protected GlobalMediationPolicyImpl() {

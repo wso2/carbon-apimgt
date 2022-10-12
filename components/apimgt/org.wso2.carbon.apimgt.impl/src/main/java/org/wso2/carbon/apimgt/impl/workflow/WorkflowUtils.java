@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.impl.workflow;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -44,10 +43,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.LifeCycleUtils;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -280,8 +276,6 @@ public class WorkflowUtils {
             String version = workflow.getMetadata("ApiVersion");
             String invoker = workflow.getMetadata("Invoker");
             int tenantId = workflowDTO.getTenantId();
-            //tenant flow is already started from the rest api service impl. no need to start from here
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(invoker);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(providerName);
             String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);

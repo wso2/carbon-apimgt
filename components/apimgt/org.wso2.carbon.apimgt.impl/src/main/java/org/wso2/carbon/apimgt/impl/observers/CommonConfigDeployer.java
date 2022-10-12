@@ -29,10 +29,8 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.loader.KeyManagerConfigurationDataRetriever;
-import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.user.ctx.UserContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
@@ -53,7 +51,7 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
         final String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
-        final int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        final int tenantId = UserContext.getThreadLocalUserContext().getOrganizationId();
 
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();

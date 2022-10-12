@@ -66,7 +66,6 @@ import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -206,17 +205,6 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     public APIInfo getAPIInfoByUUID(String id) throws APIManagementException {
         return apiMgtDAO.getAPIInfoByUUID(id);
-    }
-
-    protected void endTenantFlow() {
-
-        PrivilegedCarbonContext.endTenantFlow();
-    }
-
-    protected void startTenantFlow(String tenantDomain) {
-
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
     }
 
     public boolean isAPIAvailable(APIIdentifier identifier, String organization) throws APIManagementException {
@@ -689,18 +677,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (tenantId == MultitenantConstants.INVALID_TENANT_ID) {
             tierMap = APIUtil.getAllTiers();
         } else {
-            boolean isTenantFlowStarted = false;
-            try {
-                if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    startTenantFlow(tenantDomain);
-                    isTenantFlowStarted = true;
-                }
-                tierMap = APIUtil.getAllTiers(tenantId);
-            } finally {
-                if (isTenantFlowStarted) {
-                    endTenantFlow();
-                }
-            }
+            tierMap = APIUtil.getAllTiers(tenantId);
         }
 
         tiers.addAll(tierMap.values());
@@ -711,25 +688,14 @@ public abstract class AbstractAPIManager implements APIManager {
 
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
         Map<String, Tier> tierMap;
-        boolean isTenantFlowStarted = false;
 
-        try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                startTenantFlow(tenantDomain);
-                isTenantFlowStarted = true;
-            }
-
-            int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            if (requestedTenantId == MultitenantConstants.SUPER_TENANT_ID
-                    || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
-                tierMap = APIUtil.getAllTiers();
-            } else {
-                tierMap = APIUtil.getAllTiers(requestedTenantId);
-            }
-        } finally {
-            if (isTenantFlowStarted) {
-                endTenantFlow();
-            }
+        int requestedTenantId = org.wso2.carbon.apimgt.user.ctx.UserContext.getThreadLocalUserContext()
+                .getOrganizationId();
+        if (requestedTenantId == MultitenantConstants.SUPER_TENANT_ID
+                || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
+            tierMap = APIUtil.getAllTiers();
+        } else {
+            tierMap = APIUtil.getAllTiers(requestedTenantId);
         }
 
         tiers.addAll(tierMap.values());
