@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.util.impl;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
+import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,6 +68,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
     private static final Log log = LogFactory.getLog(OAuthJwtAuthenticatorImpl.class);
     private static final String SUPER_TENANT_SUFFIX =
             APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+    private static final String ORGANIZATION_HANDLE = "organization_handle";
     private boolean isRESTApiTokenCacheEnabled;
     private Map<String, TokenIssuerDto> tokenIssuers;
     private java.util.Map<String, List<String>> audiencesMap;
@@ -164,6 +166,10 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 if (!orgId.equals(orgUuid)) {
                     log.error(String.format("Requested OrgId (%s) and the token's organization claim (%s) mismatch!", orgId, orgUuid));
                     return false;
+                }
+                String orgHandle = getOrgHandleFromJwt(signedJWTInfo);
+                if (orgHandle != null) {
+                    message.put(ORGANIZATION_HANDLE, orgHandle);
                 }
             } else {
                 scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
@@ -363,5 +369,24 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             return jwtID;
         }
         return signedJWTInfo.getSignedJWT().getSignature().toString();
+    }
+
+    public static String getOrgHandleFromJwt(SignedJWTInfo jwtInfo) {
+        try {
+            JSONObject organizationClaim = jwtInfo.getJwtClaimsSet().getJSONObjectClaim("organization");
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieved organization handle claim from jwt: " + organizationClaim);
+            }
+            if (organizationClaim != null && organizationClaim.containsKey("handle")) {
+                return organizationClaim.getAsString("handle");
+            }
+        } catch (ParseException e) {
+            if (log.isDebugEnabled()) {
+                log.error("Failed to parse organization handle claim from JWT claims", e);
+            } else {
+                log.error("Failed to parse organization handle claim from JWT claims: " + e.getMessage());
+            }
+        }
+        return null;
     }
 }
