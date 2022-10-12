@@ -280,14 +280,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             try {
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
                 APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-
-                API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
-                if (api.getUuid() == null) {
-                    api.setUuid(apiId);
-                }
-
-                api.setAsyncApiDefinition(apiConsumer.getAsyncAPIDefinition(apiId, organization));
-                String asyncApiSpecification = api.getAsyncApiDefinition();
+                String asyncApiSpecification = apiConsumer.getAsyncAPIDefinition(apiId, organization);
 
                 return Response.ok().entity(asyncApiSpecification).header("Content-Disposition",
                         "attachment; filename=\"" + "async_api.json" + "\"" ).build();
