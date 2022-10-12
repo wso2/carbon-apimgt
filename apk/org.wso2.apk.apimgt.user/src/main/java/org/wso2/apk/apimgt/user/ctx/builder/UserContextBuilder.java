@@ -18,7 +18,7 @@
 
 package org.wso2.apk.apimgt.user.ctx.builder;
 
-import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.apk.apimgt.user.exceptions.UserException;
 
 import java.util.Map;
 

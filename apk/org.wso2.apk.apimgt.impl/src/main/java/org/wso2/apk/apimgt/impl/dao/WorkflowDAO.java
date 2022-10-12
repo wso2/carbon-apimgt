@@ -1,8 +1,8 @@
 package org.wso2.apk.apimgt.impl.dao;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Workflow;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.model.Workflow;
+import org.wso2.apk.apimgt.impl.dto.WorkflowDTO;
 
 public interface WorkflowDAO {
 
