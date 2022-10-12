@@ -38,7 +38,7 @@ import org.wso2.apk.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.apk.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.apk.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.apk.apimgt.impl.importexport.utils.CommonUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.RestApiAdminUtils;
 import org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings.throttling.*;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.*;

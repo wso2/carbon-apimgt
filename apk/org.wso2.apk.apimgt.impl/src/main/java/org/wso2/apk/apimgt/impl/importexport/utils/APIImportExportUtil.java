@@ -6,8 +6,9 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 public class APIImportExportUtil {
 
     public static ImportExportAPI getImportExportAPI() {
-
-        return ServiceReferenceHolder.getInstance().getImportExportService();
+        // TODO: Change the code to directly call the import/export service
+        //return ServiceReferenceHolder.getInstance().getImportExportService();
+        return null;
     }
 
 }

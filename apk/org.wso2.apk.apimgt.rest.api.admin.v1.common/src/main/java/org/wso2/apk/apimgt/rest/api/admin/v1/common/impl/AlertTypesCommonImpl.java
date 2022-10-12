@@ -19,11 +19,11 @@
 package org.wso2.apk.apimgt.rest.api.admin.v1.common.impl;
 
 import org.wso2.apk.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.alertmgt.AdminAlertConfigurator;
-import org.wso2.carbon.apimgt.impl.alertmgt.AlertConfigManager;
-import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
-import org.wso2.carbon.apimgt.impl.alertmgt.exception.AlertManagementException;
-import org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO;
+import org.wso2.apk.apimgt.impl.alertmgt.AdminAlertConfigurator;
+import org.wso2.apk.apimgt.impl.alertmgt.AlertConfigManager;
+import org.wso2.apk.apimgt.impl.alertmgt.AlertMgtConstants;
+import org.wso2.apk.apimgt.impl.alertmgt.exception.AlertManagementException;
+import org.wso2.apk.apimgt.impl.dto.AlertTypeDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings.AlertsMappingUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.AlertTypesListDTO;
 

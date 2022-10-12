@@ -19,7 +19,7 @@
 package org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings;
 
 import org.wso2.apk.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.APIInfoDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.APIInfoListDTO;
 import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;

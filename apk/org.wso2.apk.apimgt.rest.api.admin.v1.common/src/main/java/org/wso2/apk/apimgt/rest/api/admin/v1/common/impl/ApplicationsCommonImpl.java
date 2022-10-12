@@ -122,22 +122,13 @@ public class ApplicationsCommonImpl {
 
         ApplicationListDTO applicationListDTO;
         Application[] allMatchedApps;
-        boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
         int allApplicationsCount = 0;
-        if (!migrationMode) { // normal non-migration flow
-            // If no user is passed, get the applications for the tenant (not only for the user)
-            APIAdmin apiAdmin = new APIAdminImpl();
-            int tenantId = APIUtil.getTenantId(user);
-            allMatchedApps = apiAdmin.getApplicationsWithPagination(user, givenUser, tenantId, limit, offset,
-                    applicationName, sortBy, sortOrder);
-            allApplicationsCount = apiAdmin.getApplicationsCount(tenantId, givenUser, applicationName);
-        } else { // flow at migration process
-            if (StringUtils.isEmpty(tenantDomain)) {
-                tenantDomain = MultitenantUtils.getTenantDomain(user);
-            }
-            APIAdmin apiAdmin = new APIAdminImpl();
-            allMatchedApps = apiAdmin.getAllApplicationsOfTenantForMigration(tenantDomain);
-        }
+        // If no user is passed, get the applications for the tenant (not only for the user)
+        APIAdmin apiAdmin = new APIAdminImpl();
+        int tenantId = APIUtil.getTenantId(user);
+        allMatchedApps = apiAdmin.getApplicationsWithPagination(user, givenUser, tenantId, limit, offset,
+                applicationName, sortBy, sortOrder);
+        allApplicationsCount = apiAdmin.getApplicationsCount(tenantId, givenUser, applicationName);
         applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps);
         ApplicationMappingUtil.setPaginationParams(applicationListDTO, limit, offset, allApplicationsCount);
         return applicationListDTO;

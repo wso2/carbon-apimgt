@@ -26,7 +26,7 @@ import org.wso2.apk.apimgt.api.UnsupportedThrottleConditionTypeException;
 import org.wso2.apk.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.apk.apimgt.api.model.policy.*;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.*;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.RestApiAdminUtils;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 

@@ -23,7 +23,6 @@ import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.apk.apimgt.impl.APIAdminImpl;
 import org.wso2.apk.apimgt.impl.APIConstants;
-import org.wso2.apk.apimgt.impl.APIManagerConfiguration;
 import org.wso2.apk.apimgt.impl.monetization.MonetizationUsagePublishAgent;
 import org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings.MonetizationAPIMappinUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.MonetizationUsagePublishInfoDTO;
