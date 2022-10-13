@@ -113,6 +113,7 @@ import org.wso2.apk.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.apk.apimgt.impl.dao.ServiceCatalogDAO;
 import org.wso2.apk.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.apk.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.apk.apimgt.impl.dto.CheckListItem;
 import org.wso2.apk.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.apk.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.apk.apimgt.impl.dto.SubscribedApiDTO;
@@ -193,8 +194,7 @@ import org.wso2.apk.apimgt.impl.dao.mapper.DocumentMapper;
 //import org.wso2.apk.apimgt.user.ctx.UserContext;
 import org.wso2.apk.apimgt.user.exceptions.UserException;
 import org.wso2.apk.apimgt.user.mgt.internal.UserManagerHolder;
-import org.wso2.carbon.databridge.commons.Event;
-import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
+//import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Cache;
