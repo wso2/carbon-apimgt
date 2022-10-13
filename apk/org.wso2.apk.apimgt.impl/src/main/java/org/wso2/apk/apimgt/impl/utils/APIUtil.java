@@ -3443,17 +3443,6 @@ public final class APIUtil {
         return -1;
     }
 
-    public static String getTenantDomainFromRequestURL(String requestURI) {
-        String domain = null;
-        if (requestURI.contains("/t/")) {
-            int index = requestURI.indexOf("/t/");
-            int endIndex = requestURI.indexOf("/", index + 3);
-            domain = endIndex != -1 ? requestURI.substring(index + 3, endIndex) : requestURI.substring(index + 3);
-        }
-
-        return domain;
-    }
-
     /**
      * Helper method to get tenantId from organization
      *
@@ -3489,7 +3478,7 @@ public final class APIUtil {
 
     public static int getSuperTenantId() {
 
-        return MultitenantConstants.SUPER_TENANT_ID;;
+        return MultitenantConstants.SUPER_TENANT_ID;
     }
 
     /**
