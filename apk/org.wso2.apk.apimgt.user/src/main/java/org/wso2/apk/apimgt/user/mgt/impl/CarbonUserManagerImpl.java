@@ -432,9 +432,7 @@ public class CarbonUserManagerImpl implements UserManager {
 
     @Override
     public String getTenantDomain(String username) throws UserException {
-        String tenantDomain;
-
-        tenantDomain = "carbon.super";
+        String tenantDomain = "carbon.super";
         if (username.contains("@") && !isEmailUserName()) {
             tenantDomain = username.substring(username.lastIndexOf(64) + 1);
         } else if (isEmailUserName() && username.indexOf("@") != username.lastIndexOf("@")) {
@@ -466,7 +464,7 @@ public class CarbonUserManagerImpl implements UserManager {
 
     private static boolean isEmailUserName() {
         String enableEmailUserName = "false";
-        // TODO: // Read from Config
+        // TODO: Read from Config
         // String enableEmailUserName = ServerConfiguration.getInstance().getFirstProperty("EnableEmailUserName");
         return enableEmailUserName != null && "true".equals(enableEmailUserName.trim());
     }
