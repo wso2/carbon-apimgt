@@ -18,10 +18,6 @@
 
 package org.wso2.apk.apimgt.impl.dto;
 
-import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
-import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,10 +36,10 @@ public class JwtTokenInfoDTO implements Serializable {
     private List<String> audience;
     private String scopes;
     private String keyType;
-    private org.wso2.carbon.apimgt.impl.dto.ApplicationDTO application;
+    private ApplicationDTO application;
     private String consumerKey;
-    private List<org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO> subscribedApiDTOList = new ArrayList<org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO>();
-    private Map<String, org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<String, org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO>();
+    private List<SubscribedApiDTO> subscribedApiDTOList = new ArrayList<SubscribedApiDTO>();
+    private Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<String, SubscriptionPolicyDTO>();
     private String permittedIP;
     private String permittedReferer;
 
@@ -119,7 +115,7 @@ public class JwtTokenInfoDTO implements Serializable {
         this.audience = audience;
     }
 
-    public org.wso2.carbon.apimgt.impl.dto.ApplicationDTO getApplication() {
+    public ApplicationDTO getApplication() {
         return application;
     }
 
@@ -135,7 +131,7 @@ public class JwtTokenInfoDTO implements Serializable {
         this.keyType = keyType;
     }
 
-    public List<org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO> getSubscribedApiDTOList() {
+    public List<SubscribedApiDTO> getSubscribedApiDTOList() {
         return subscribedApiDTOList;
     }
 
@@ -143,7 +139,7 @@ public class JwtTokenInfoDTO implements Serializable {
         this.subscribedApiDTOList = subscribedApiDTOList;
     }
 
-    public Map<String, org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO> getSubscriptionPolicyDTOList() {
+    public Map<String, SubscriptionPolicyDTO> getSubscriptionPolicyDTOList() {
         return subscriptionPolicyDTOList;
     }
 
