@@ -32,7 +32,7 @@ public interface DocumentMapper {
 
     DocumentationContent toDocumentationContent(DocumentContent content);
 
-    Documentation toDocumentation(Documentation documentation);
+    org.wso2.apk.apimgt.impl.dao.dto.Documentation toDocumentation(Documentation documentation);
 
     DocumentContent toDocumentContent(DocumentationContent content);
 }

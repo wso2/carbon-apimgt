@@ -25,10 +25,10 @@ import org.json.simple.parser.ParseException;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.impl.dao.dto.PublisherAPIProduct;
+import org.wso2.apk.apimgt.api.model.APICategory;
+import org.wso2.apk.apimgt.api.model.APIProduct;
+import org.wso2.apk.apimgt.api.model.Tier;
+import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPIProduct;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -22,7 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.wso2.apk.apimgt.api.model.Application;
 import org.wso2.apk.apimgt.api.model.Scope;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.*;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;
 

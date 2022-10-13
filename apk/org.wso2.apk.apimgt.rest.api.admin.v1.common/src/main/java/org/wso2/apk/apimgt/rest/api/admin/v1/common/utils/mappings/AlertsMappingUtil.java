@@ -36,7 +36,7 @@ public class AlertsMappingUtil {
      * @return
      */
     public static AlertTypesListDTO fromAlertTypesListToAlertTypeListDTO(
-            List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> alertTypes) {
+            List<org.wso2.apk.apimgt.impl.dto.AlertTypeDTO> alertTypes) {
 
         AlertTypesListDTO alertTypesListDTO = new AlertTypesListDTO();
         List<AlertTypeDTO> alertTypeDTOList = fromAlertTypesListToAlertTypeDTOList(alertTypes);
@@ -52,10 +52,10 @@ public class AlertsMappingUtil {
      * @return
      */
     public static List<AlertTypeDTO> fromAlertTypesListToAlertTypeDTOList(
-            List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> alertTypes) {
+            List<org.wso2.apk.apimgt.impl.dto.AlertTypeDTO> alertTypes) {
 
         List<AlertTypeDTO> alertTypeDTOList = new ArrayList<>();
-        for (org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO alertType : alertTypes) {
+        for (org.wso2.apk.apimgt.impl.dto.AlertTypeDTO alertType : alertTypes) {
             alertTypeDTOList.add(fromAlertTypeToAlertTypeDTO(alertType));
         }
         return alertTypeDTOList;
@@ -67,7 +67,7 @@ public class AlertsMappingUtil {
      * @param alert
      * @return
      */
-    public static AlertTypeDTO fromAlertTypeToAlertTypeDTO(org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO alert) {
+    public static AlertTypeDTO fromAlertTypeToAlertTypeDTO(org.wso2.apk.apimgt.impl.dto.AlertTypeDTO alert) {
         AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
         alertTypeDTO.setId(alert.getId().toString());
         alertTypeDTO.setName(alert.getName());

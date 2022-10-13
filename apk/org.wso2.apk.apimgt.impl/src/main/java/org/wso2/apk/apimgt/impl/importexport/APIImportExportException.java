@@ -18,7 +18,7 @@
 
 package org.wso2.apk.apimgt.impl.importexport;
 
-import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.apk.apimgt.api.ErrorHandler;
 
 /**
  * This is the class to represent APIImportException. This exception is used to indicate the

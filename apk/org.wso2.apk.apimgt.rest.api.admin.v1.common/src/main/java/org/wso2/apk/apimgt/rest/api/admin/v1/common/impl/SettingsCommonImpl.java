@@ -19,7 +19,7 @@
 package org.wso2.apk.apimgt.rest.api.admin.v1.common.impl;
 
 import org.wso2.apk.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings.SettingsMappingUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.SettingsDTO;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;

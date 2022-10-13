@@ -21,7 +21,7 @@ package org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings;
 import com.google.gson.*;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.apk.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIdConnectConfiguration;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.*;
 

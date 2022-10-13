@@ -19,19 +19,19 @@
 package org.wso2.apk.apimgt.impl.restapi;
 
 import org.apache.commons.lang3.StringUtils;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.ErrorHandler;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIInfo;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.user.ctx.UserContext;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.APIProvider;
+import org.wso2.apk.apimgt.api.ErrorHandler;
+import org.wso2.apk.apimgt.api.ExceptionCodes;
+import org.wso2.apk.apimgt.api.model.API;
+import org.wso2.apk.apimgt.api.model.APIInfo;
+import org.wso2.apk.apimgt.api.model.APIRevision;
+import org.wso2.apk.apimgt.api.model.Scope;
+import org.wso2.apk.apimgt.impl.APIConstants;
+import org.wso2.apk.apimgt.impl.APIManagerFactory;
+import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.user.ctx.UserContext;
 
 import java.util.HashSet;
 import java.util.List;

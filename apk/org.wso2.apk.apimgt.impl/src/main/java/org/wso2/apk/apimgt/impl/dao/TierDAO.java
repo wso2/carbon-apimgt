@@ -1,7 +1,7 @@
 package org.wso2.apk.apimgt.impl.dao;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.impl.dto.TierPermissionDTO;
 
 import java.util.Set;
 

@@ -18,7 +18,7 @@
 package org.wso2.apk.apimgt.impl.alertmgt;
 
 import org.apache.commons.lang3.StringUtils;
-import org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO;
+import org.wso2.apk.apimgt.impl.dto.AlertTypeDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;

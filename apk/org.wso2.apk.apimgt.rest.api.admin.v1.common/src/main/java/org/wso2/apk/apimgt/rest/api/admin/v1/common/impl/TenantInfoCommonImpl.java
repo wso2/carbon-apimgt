@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.TenantInfoDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 

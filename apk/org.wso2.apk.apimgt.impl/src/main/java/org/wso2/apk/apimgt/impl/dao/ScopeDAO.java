@@ -1,8 +1,8 @@
 package org.wso2.apk.apimgt.impl.dao;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.model.Scope;
+import org.wso2.apk.apimgt.api.model.SharedScopeUsage;
 
 import java.util.List;
 import java.util.Set;

@@ -21,8 +21,8 @@ package org.wso2.apk.apimgt.impl.alertmgt;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.apk.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.impl.dto.AlertTypeDTO;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
 
 import java.util.List;
 import java.util.Map;

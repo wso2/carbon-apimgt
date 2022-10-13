@@ -22,13 +22,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ErrorHandler;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.impl.dao.constants.EnvironmentSpecificAPIPropertyConstants;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.ErrorHandler;
+import org.wso2.apk.apimgt.api.ExceptionCodes;
+import org.wso2.apk.apimgt.impl.dao.constants.EnvironmentSpecificAPIPropertyConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.environmentspecificproperty.Environment;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -153,8 +153,8 @@ public class EnvironmentSpecificAPIPropertyDAO {
 
     public Map<String, Map<String, Environment>> getEnvironmentSpecificAPIPropertiesOfAPIs(List<String> apiUuidS)
             throws APIManagementException {
-        Map<String, org.wso2.carbon.apimgt.api.model.Environment> defaultEnvs = APIUtil.getReadOnlyEnvironments();
-        List<String> envIds = defaultEnvs.values().stream().map(org.wso2.carbon.apimgt.api.model.Environment::getUuid)
+        Map<String, org.wso2.apk.apimgt.api.model.Environment> defaultEnvs = APIUtil.getReadOnlyEnvironments();
+        List<String> envIds = defaultEnvs.values().stream().map(org.wso2.apk.apimgt.api.model.Environment::getUuid)
                 .collect(Collectors.toList());
         Map<String, Map<String, Environment>> mgEnvs = getMGEnvironmentSpecificAPIPropertiesOfAPIs(apiUuidS);
         return getDefaultEnvironmentSpecificAPIPropertiesOfAPIs(apiUuidS, envIds, mgEnvs);

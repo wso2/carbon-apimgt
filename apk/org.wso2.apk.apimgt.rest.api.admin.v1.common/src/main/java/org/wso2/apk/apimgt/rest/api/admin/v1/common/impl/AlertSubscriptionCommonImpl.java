@@ -22,11 +22,11 @@ import org.wso2.apk.apimgt.api.APIAdmin;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.model.botDataAPI.BotDetectionData;
-import org.wso2.carbon.apimgt.impl.APIAdminImpl;
-import org.wso2.carbon.apimgt.impl.alertmgt.AdminAlertConfigurator;
-import org.wso2.carbon.apimgt.impl.alertmgt.AlertConfigManager;
-import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
-import org.wso2.carbon.apimgt.impl.alertmgt.exception.AlertManagementException;
+import org.wso2.apk.apimgt.impl.APIAdminImpl;
+import org.wso2.apk.apimgt.impl.alertmgt.AdminAlertConfigurator;
+import org.wso2.apk.apimgt.impl.alertmgt.AlertConfigManager;
+import org.wso2.apk.apimgt.impl.alertmgt.AlertMgtConstants;
+import org.wso2.apk.apimgt.impl.alertmgt.exception.AlertManagementException;
 import org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings.AlertsMappingUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings.BotDetectionMappingUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.AlertTypeDTO;
@@ -59,11 +59,11 @@ public class AlertSubscriptionCommonImpl {
         AdminAlertConfigurator adminAlertConfigurator = (AdminAlertConfigurator) AlertConfigManager.getInstance()
                 .getAlertConfigurator(AlertMgtConstants.ADMIN_DASHBOARD_AGENT);
         List<Integer> subscribedAlertTypes = adminAlertConfigurator.getSubscribedAlerts(fullyQualifiedUsername);
-        List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> supportedAlertTypeDTOS = adminAlertConfigurator
+        List<org.wso2.apk.apimgt.impl.dto.AlertTypeDTO> supportedAlertTypeDTOS = adminAlertConfigurator
                 .getSupportedAlertTypes();
 
         //Filter out the subscribed alerts
-        List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> subscribedAlertsList = supportedAlertTypeDTOS.stream()
+        List<org.wso2.apk.apimgt.impl.dto.AlertTypeDTO> subscribedAlertsList = supportedAlertTypeDTOS.stream()
                 .filter(supportedAlertTypes -> subscribedAlertTypes.stream()
                         .anyMatch(subscribedAlerts -> supportedAlertTypes.getId().equals(subscribedAlerts)))
                 .collect(Collectors.toList());
@@ -94,12 +94,12 @@ public class AlertSubscriptionCommonImpl {
         AdminAlertConfigurator adminAlertConfigurator = (AdminAlertConfigurator) AlertConfigManager.getInstance()
                 .getAlertConfigurator(AlertMgtConstants.ADMIN_DASHBOARD_AGENT);
         //Retrieve the supported alert types
-        List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> supportedAlertTypes = adminAlertConfigurator
+        List<org.wso2.apk.apimgt.impl.dto.AlertTypeDTO> supportedAlertTypes = adminAlertConfigurator
                 .getSupportedAlertTypes();
-        Map<String, org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> supportedAlertTypesMap = supportedAlertTypes
+        Map<String, org.wso2.apk.apimgt.impl.dto.AlertTypeDTO> supportedAlertTypesMap = supportedAlertTypes
                 .stream().collect(Collectors
-                        .toMap(org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO::getName, alertType -> alertType));
-        List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> alertTypesToSubscribe = new ArrayList<>();
+                        .toMap(org.wso2.apk.apimgt.impl.dto.AlertTypeDTO::getName, alertType -> alertType));
+        List<org.wso2.apk.apimgt.impl.dto.AlertTypeDTO> alertTypesToSubscribe = new ArrayList<>();
 
         //Validate the request alerts against supported alert types
         for (AlertTypeDTO subscribingAlertDTO : subscribingAlertDTOs) {
