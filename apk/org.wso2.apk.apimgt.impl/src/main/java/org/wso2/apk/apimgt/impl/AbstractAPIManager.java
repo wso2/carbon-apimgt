@@ -32,7 +32,6 @@ import org.wso2.apk.apimgt.api.model.APICategory;
 import org.wso2.apk.apimgt.api.model.APIIdentifier;
 import org.wso2.apk.apimgt.api.model.APIInfo;
 import org.wso2.apk.apimgt.api.model.APIKey;
-import org.wso2.apk.apimgt.api.model.APIProduct;
 import org.wso2.apk.apimgt.api.model.APIProductIdentifier;
 import org.wso2.apk.apimgt.api.model.APIProductResource;
 import org.wso2.apk.apimgt.api.model.AccessTokenInfo;
@@ -83,22 +82,16 @@ import org.wso2.apk.apimgt.impl.dao.ScopesDAO;
 import org.wso2.apk.apimgt.impl.dao.impl.*;
 import org.wso2.apk.apimgt.impl.dao.mapper.DocumentMapper;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.apk.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.apk.apimgt.impl.utils.APINameComparator;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.impl.utils.TierNameComparator;
-import org.wso2.apk.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.apk.apimgt.user.exceptions.UserException;
 import org.wso2.apk.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.utils.multitenancy.userinfo.UserInfoHandler;
 
 import java.util.*;
-
-import static org.wso2.apk.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE;
-import static org.wso2.apk.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_API_STATE;
 
 /**
  * The basic abstract implementation of the core APIManager interface. This implementation uses
@@ -1063,165 +1056,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.getAPIProductResourceMappings(productIdentifier);
     }
 
-    protected void populateAPIInformation(String uuid, String organization, API api)
-            throws APIManagementException, OASPersistenceException, ParseException, AsyncSpecPersistenceException {
-        Organization org = new Organization(organization);
-        //UUID
-        if (api.getUuid() == null) {
-            api.setUuid(uuid);
-        }
-        api.setOrganization(organization);
-        // environment
-        String environmentString = null;
-        if (api.getEnvironments() != null) {
-            environmentString = String.join(",", api.getEnvironments());
-        }
-        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
-        // workflow status
-        APIIdentifier apiId = api.getId();
-        WorkflowDTO workflow;
-        String currentApiUuid = uuid;
-        if (api.isRevision() && api.getRevisionedApiId() != null) {
-            currentApiUuid = api.getRevisionedApiId();
-        }
-        workflow = APIUtil.getAPIWorkflowStatus(currentApiUuid, WF_TYPE_AM_API_STATE);
-        if (workflow != null) {
-            WorkflowStatus status = workflow.getStatus();
-            api.setWorkflowStatus(status.toString());
-        }
-        // TODO try to use a single query to get info from db
-        int internalId = apiMgtDAO.getAPIID(currentApiUuid);
-        apiId.setId(internalId);
-        apiMgtDAO.setServiceStatusInfoToAPI(api, internalId);
-        // api level tier
-        String apiLevelTier;
-        if (api.isRevision()) {
-            apiLevelTier = apiMgtDAO.getAPILevelTier(api.getRevisionedApiId(), api.getUuid());
-        } else {
-            apiLevelTier = apiMgtDAO.getAPILevelTier(internalId);
-        }
-        api.setApiLevelPolicy(apiLevelTier);
-        // available tier
-        String tiers = null;
-        Set<Tier> tiersSet = api.getAvailableTiers();
-        Set<String> tierNameSet = new HashSet<String>();
-        for (Tier t : tiersSet) {
-            tierNameSet.add(t.getName());
-        }
-        if (api.getAvailableTiers() != null) {
-            tiers = String.join("||", tierNameSet);
-        }
-        Map<String, Tier> definedTiers = APIUtil.getTiers(APIUtil.getInternalOrganizationId(organization));
-        Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
-        api.removeAllTiers();
-        api.setAvailableTiers(availableTier);
-
-        //Scopes
-        Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(currentApiUuid, organization);
-        api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
-
-        //templates
-        String resourceConfigsString;
-        if (api.getSwaggerDefinition() != null) {
-            resourceConfigsString = api.getSwaggerDefinition();
-        } else {
-            resourceConfigsString = apiDAOImpl.getOASDefinition(org, uuid);
-        }
-        api.setSwaggerDefinition(resourceConfigsString);
-
-        if (resourceConfigsString == null) {
-            if (api.getAsyncApiDefinition() != null) {
-                resourceConfigsString = api.getAsyncApiDefinition();
-            } else {
-                resourceConfigsString = apiDAOImpl.getAsyncDefinition(org, uuid);
-            }
-            api.setAsyncApiDefinition(resourceConfigsString);
-        }
-
-        if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
-            api.setGraphQLSchema(getGraphqlSchemaDefinition(uuid, organization));
-        }
-
-        JSONParser jsonParser = new JSONParser();
-        JSONObject paths = null;
-        if (resourceConfigsString != null) {
-            JSONObject resourceConfigsJSON = (JSONObject) jsonParser.parse(resourceConfigsString);
-            paths = (JSONObject) resourceConfigsJSON.get(APIConstants.SWAGGER_PATHS);
-        }
-        Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesOfAPI(api.getUuid());
-        for (URITemplate uriTemplate : uriTemplates) {
-            String uTemplate = uriTemplate.getUriTemplate();
-            String method = uriTemplate.getHTTPVerb();
-            List<Scope> oldTemplateScopes = uriTemplate.retrieveAllScopes();
-            List<Scope> newTemplateScopes = new ArrayList<>();
-            if (!oldTemplateScopes.isEmpty()) {
-                for (Scope templateScope : oldTemplateScopes) {
-                    Scope scope = scopeToKeyMapping.get(templateScope.getKey());
-                    newTemplateScopes.add(scope);
-                }
-            }
-            uriTemplate.addAllScopes(newTemplateScopes);
-            uriTemplate.setResourceURI(api.getUrl());
-            uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
-            // AWS Lambda: set arn & timeout to URI template
-            if (paths != null) {
-                JSONObject path = (JSONObject) paths.get(uTemplate);
-                if (path != null) {
-                    JSONObject operation = (JSONObject) path.get(method.toLowerCase());
-                    if (operation != null) {
-                        if (operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
-                            uriTemplate.setAmznResourceName((String)
-                                    operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
-                        }
-                        if (operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)) {
-                            uriTemplate.setAmznResourceTimeout(((Long)
-                                    operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
-                        }
-                    }
-                }
-            }
-        }
-
-        if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
-            for (URITemplate template : uriTemplates) {
-                template.setMediationScript(template.getAggregatedMediationScript());
-            }
-        }
-        api.setUriTemplates(uriTemplates);
-        //CORS . if null is returned, set default config from the configuration
-        if (api.getCorsConfiguration() == null) {
-            api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
-        }
-
-        // set category
-        List<APICategory> categories = api.getApiCategories();
-        if (categories != null) {
-            List<String> categoriesOfAPI = new ArrayList<String>();
-            for (APICategory apiCategory : categories) {
-                categoriesOfAPI.add(apiCategory.getName());
-            }
-            List<APICategory> categoryList = new ArrayList<>();
-
-            if (!categoriesOfAPI.isEmpty()) {
-                // category array retrieved from artifact has only the category name, therefore we need to fetch
-                // categories
-                // and fill out missing attributes before attaching the list to the api
-                List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfOrganization(organization);
-
-                // todo-category: optimize this loop with breaks
-                for (String categoryName : categoriesOfAPI) {
-                    for (APICategory category : allCategories) {
-                        if (categoryName.equals(category.getName())) {
-                            categoryList.add(category);
-                            break;
-                        }
-                    }
-                }
-            }
-            api.setApiCategories(categoryList);
-        }
-    }
-
     protected void populateDevPortalAPIInformation(String uuid, String organization, API api)
             throws APIManagementException, OASPersistenceException, ParseException {
         Organization org = new Organization(organization);
@@ -1358,138 +1192,6 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
             }
             api.setApiCategories(categoryList);
-        }
-    }
-
-    protected void populateAPIProductInformation(String uuid, String organization, APIProduct apiProduct)
-            throws APIManagementException, OASPersistenceException, ParseException {
-        Organization org = new Organization(organization);
-        apiProduct.setOrganization(organization);
-        ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
-        apiProduct.setRating(Float.toString(APIUtil.getAverageRating(apiProduct.getProductId())));
-
-        List<APIProductResource> resources = ApiMgtDAO.getInstance().
-                getAPIProductResourceMappings(apiProduct.getId());
-
-        Map<String, Scope> uniqueAPIProductScopeKeyMappings = new LinkedHashMap<>();
-        for (APIProductResource resource : resources) {
-            List<Scope> resourceScopes = resource.getUriTemplate().retrieveAllScopes();
-            ListIterator it = resourceScopes.listIterator();
-            while (it.hasNext()) {
-                Scope resourceScope = (Scope) it.next();
-                String scopeKey = resourceScope.getKey();
-                if (!uniqueAPIProductScopeKeyMappings.containsKey(scopeKey)) {
-                    resourceScope = APIUtil.getScopeByName(scopeKey, organization);
-                    uniqueAPIProductScopeKeyMappings.put(scopeKey, resourceScope);
-                } else {
-                    resourceScope = uniqueAPIProductScopeKeyMappings.get(scopeKey);
-                }
-                it.set(resourceScope);
-            }
-        }
-
-        for (APIProductResource resource : resources) {
-            String resourceAPIUUID = resource.getApiIdentifier().getUUID();
-            resource.setApiId(resourceAPIUUID);
-            try {
-                PublisherAPI publisherAPI = apiDAOImpl.getPublisherAPI(org, resourceAPIUUID);
-                API api = APIMapper.INSTANCE.toApi(publisherAPI);
-                if (api.isAdvertiseOnly()) {
-                    resource.setEndpointConfig(APIUtil.generateEndpointConfigForAdvertiseOnlyApi(api));
-                } else {
-                    resource.setEndpointConfig(api.getEndpointConfig());
-                }
-                resource.setEndpointSecurityMap(APIUtil.setEndpointSecurityForAPIProduct(api));
-            } catch (APIManagementException e) {
-                throw new APIManagementException("Error while retrieving the api for api product " + e,
-                        ExceptionCodes.INTERNAL_ERROR);
-            }
-
-        }
-        apiProduct.setProductResources(resources);
-
-        //UUID
-        if (apiProduct.getUuid() == null) {
-            apiProduct.setUuid(uuid);
-        }
-        // environment
-        String environmentString = null;
-        if (apiProduct.getEnvironments() != null) {
-            environmentString = String.join(",", apiProduct.getEnvironments());
-        }
-        apiProduct.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
-
-        // workflow status
-        APIProductIdentifier productIdentifier = apiProduct.getId();
-        WorkflowDTO workflow;
-        String currentApiProductUuid = uuid;
-        if (apiProduct.isRevision() && apiProduct.getRevisionedApiProductId() != null) {
-            currentApiProductUuid = apiProduct.getRevisionedApiProductId();
-        }
-        workflow = APIUtil.getAPIWorkflowStatus(currentApiProductUuid, WF_TYPE_AM_API_PRODUCT_STATE);
-        if (workflow != null) {
-            WorkflowStatus status = workflow.getStatus();
-            apiProduct.setWorkflowStatus(status.toString());
-        }
-
-        // available tier
-        String tiers = null;
-        Set<Tier> tiersSet = apiProduct.getAvailableTiers();
-        Set<String> tierNameSet = new HashSet<String>();
-        for (Tier t : tiersSet) {
-            tierNameSet.add(t.getName());
-        }
-        if (apiProduct.getAvailableTiers() != null) {
-            tiers = String.join("||", tierNameSet);
-        }
-        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
-        Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, apiProduct.getId().getName());
-        apiProduct.setAvailableTiers(availableTier);
-
-        //Scopes
-        /*
-        Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(api.getId(), requestedTenantDomain);
-        apiProduct.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
-        */
-        //templates
-        String resourceConfigsString = null;
-        if (apiProduct.getDefinition() != null) {
-            resourceConfigsString = apiProduct.getDefinition();
-        } else {
-            resourceConfigsString = apiDAOImpl.getOASDefinition(org, uuid);
-            apiProduct.setDefinition(resourceConfigsString);
-        }
-        //CORS . if null is returned, set default config from the configuration
-        if (apiProduct.getCorsConfiguration() == null) {
-            apiProduct.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
-        }
-
-        // set category
-        List<APICategory> categories = apiProduct.getApiCategories();
-        if (categories != null) {
-            List<String> categoriesOfAPI = new ArrayList<String>();
-            for (APICategory apiCategory : categories) {
-                categoriesOfAPI.add(apiCategory.getName());
-            }
-            List<APICategory> categoryList = new ArrayList<>();
-
-            if (!categoriesOfAPI.isEmpty()) {
-                // category array retrieved from artifact has only the category name, therefore we need to fetch
-                // categories
-                // and fill out missing attributes before attaching the list to the api
-                List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfOrganization(organization);
-
-                // todo-category: optimize this loop with breaks
-                for (String categoryName : categoriesOfAPI) {
-                    for (APICategory category : allCategories) {
-                        if (categoryName.equals(category.getName())) {
-                            categoryList.add(category);
-                            break;
-                        }
-                    }
-                }
-            }
-            apiProduct.setApiCategories(categoryList);
         }
     }
 

@@ -412,7 +412,7 @@ public enum ExceptionCodes implements ErrorHandler {
     UNSUPPORTED_TIER_TYPE(901002, "Policy tier error", 400, "Unsupported policy tier"),
     INVALID_THROTTLE_TIER(901003, "Invalid throttle tier", 400, "Invalid x-throttling tier"),
 
-    THROTTLE_TIER_NOT_FOUND(901004, "Throttle tier", 400, "Invalid x-throttling tier"),
+    THROTTLE_TIER_NOT_FOUND(901004, "Throttle tier", 400, "throttling tier cannot be found"),
 
     THROTTLING_POLICY_NOT_FOUND(903005, "Throttling Policy Not Found", 404,
             "Requested throttling policy with name '%s' and type '%s' not found"),
