@@ -20,13 +20,11 @@ package org.wso2.apk.apimgt.impl.dao;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.core.util.CryptoException;
-import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.model.webhooks.Subscription;
+import org.wso2.apk.apimgt.impl.APIConstants;
+import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -182,7 +180,7 @@ public class WebhooksDAO {
             prepareStmt.setLong(9, expiryTime);
             prepareStmt.setInt(10, 0);
             prepareStmt.executeUpdate();
-        } catch (SQLException | CryptoException e) {
+        } catch (SQLException e) {
             throw new APIManagementException("Error while adding subscriptions request for callback" +
                     properties.getProperty(APIConstants.Webhooks.CALLBACK) + " for the API " +
                     properties.getProperty(APIConstants.Webhooks.API_UUID), e);
@@ -206,7 +204,7 @@ public class WebhooksDAO {
             prepareStmt.setLong(4, expiryTime);
             prepareStmt.setInt(5, id);
             prepareStmt.executeUpdate();
-        } catch (SQLException | CryptoException e) {
+        } catch (SQLException e) {
             throw new APIManagementException("Error while deleting existing subscriptions request for callback" +
                     properties.getProperty(APIConstants.Webhooks.CALLBACK) + " for the API " +
                     properties.getProperty(APIConstants.Webhooks.API_UUID), e);
@@ -253,7 +251,7 @@ public class WebhooksDAO {
                         properties.getProperty(APIConstants.Webhooks.CALLBACK) + " for the API " +
                         properties.getProperty(APIConstants.Webhooks.API_UUID), e);
             }
-        } catch (SQLException | CryptoException e) {
+        } catch (SQLException e) {
             throw new APIManagementException("Error while storing webhooks unsubscription request for callback" +
                     properties.getProperty(APIConstants.Webhooks.CALLBACK) + " for the API " +
                     properties.getProperty(APIConstants.Webhooks.API_UUID), e);
@@ -304,7 +302,7 @@ public class WebhooksDAO {
                         subscriptionsList.add(subscription);
                     }
                 }
-            } catch (SQLException | CryptoException e) {
+            } catch (SQLException e) {
                 throw new APIManagementException("Error while retrieving webhooks subscription request", e);
             }
         } catch (SQLException e) {
@@ -363,7 +361,7 @@ public class WebhooksDAO {
         }
     }
 
-    private void addUnsubscription(Connection conn, Properties properties) throws SQLException, CryptoException {
+    private void addUnsubscription(Connection conn, Properties properties) throws SQLException {
         try (PreparedStatement preparedStatement = conn
                 .prepareStatement(SQLConstants.WebhooksSqlConstants.ADD_UNSUBSCRIPTION)) {
             preparedStatement.setString(1, properties.getProperty(APIConstants.Webhooks.API_UUID));
@@ -403,13 +401,15 @@ public class WebhooksDAO {
         }
     }
 
-    private String encryptSecret(String secret) throws CryptoException {
-        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-        return cryptoUtil.encryptAndBase64Encode(secret.getBytes());
+    // TODO encryptSecret and decryptSecret
+    private String encryptSecret(String secret) {
+        // CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        return secret;
     }
 
-    private String decryptSecret(String cipherText) throws CryptoException {
-        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-        return new String(cryptoUtil.base64DecodeAndDecrypt(cipherText));
+    private String decryptSecret(String cipherText) {
+        // CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        // return new String(cryptoUtil.base64DecodeAndDecrypt(cipherText));
+        return cipherText;
     }
 }

@@ -1,7 +1,5 @@
 package org.wso2.apk.apimgt.impl.dto;
 
-import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
-
 public class APIRuntimeArtifactDto extends RuntimeArtifactDto {
     private String name;
     private String version;

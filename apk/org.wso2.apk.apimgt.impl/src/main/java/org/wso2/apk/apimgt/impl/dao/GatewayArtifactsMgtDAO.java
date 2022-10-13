@@ -11,7 +11,7 @@ import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.apk.apimgt.impl.dto.APIArtifactPropertyValues;
 import org.wso2.apk.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
+import org.wso2.apk.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 import org.wso2.apk.apimgt.impl.utils.VHostUtils;
 
 import java.io.ByteArrayInputStream;

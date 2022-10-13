@@ -50,7 +50,6 @@ import org.wso2.apk.apimgt.api.model.URITemplate;
 import org.wso2.apk.apimgt.impl.dao.dto.DocumentContent;
 import org.wso2.apk.apimgt.impl.dao.dto.DocumentSearchResult;
 import org.wso2.apk.apimgt.impl.dao.dto.Organization;
-import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPI;
 import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPIInfo;
 import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPISearchResult;
 import org.wso2.apk.apimgt.impl.dao.dto.UserContext;
@@ -72,12 +71,10 @@ import org.wso2.apk.apimgt.api.ErrorHandler;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.PolicyNotFoundException;
 import org.wso2.apk.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.apk.apimgt.api.model.ResourceFile;
 import org.wso2.apk.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.apk.apimgt.api.model.policy.Policy;
 import org.wso2.apk.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.apk.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 import org.wso2.apk.apimgt.impl.dao.ScopesDAO;
 import org.wso2.apk.apimgt.impl.dao.impl.*;
 import org.wso2.apk.apimgt.impl.dao.mapper.DocumentMapper;
@@ -87,9 +84,7 @@ import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.impl.utils.TierNameComparator;
 import org.wso2.apk.apimgt.user.exceptions.UserException;
 import org.wso2.apk.apimgt.user.mgt.internal.UserManagerHolder;
-import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 
 import java.util.*;
 
@@ -120,6 +115,8 @@ public abstract class AbstractAPIManager implements APIManager {
     // Property to indicate whether access control restriction feature is enabled.
     protected boolean isAccessControlRestrictionEnabled = false;
     private static final String REGISTRY_ANONNYMOUS_USERNAME = "wso2.anonymous.user";
+
+    private static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
 
     public AbstractAPIManager() throws APIManagementException {
 
@@ -197,12 +194,12 @@ public abstract class AbstractAPIManager implements APIManager {
 
     protected String getTenantAwareUsername(String username) {
 
-        return MultitenantUtils.getTenantAwareUsername(username);
+        return APIUtil.getTenantAwareUsername(username);
     }
 
     protected String getTenantDomain(Identifier identifier) {
 
-        return MultitenantUtils.getTenantDomain(
+        return APIUtil.getTenantDomain(
                 APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
     }
 
@@ -415,7 +412,7 @@ public abstract class AbstractAPIManager implements APIManager {
         // Since we don't have tenant in the APIM table, we do the filtering using this hack
         if (context != null && context.startsWith("/t/"))
             context = context.replace("/t/" + getTenantDomainFromUrl(context), ""); //removing prefix
-        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+        if (tenantDomain != null && !SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             context = "/t/" + tenantDomain + context;
         }
         return apiMgtDAO.isContextExist(context, organization);
@@ -423,7 +420,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
     protected String getTenantDomainFromUrl(String url) {
 
-        return MultitenantUtils.getTenantDomainFromUrl(url);
+        return APIUtil.getTenantDomainFromUrl(url);
     }
 
     /**
@@ -481,8 +478,8 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public boolean isApiNameExist(String apiName, String organization) throws APIManagementException {
 
-        String tenantName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+        String tenantName = SUPER_TENANT_DOMAIN_NAME;
+        if (tenantDomain != null && !SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             tenantName = tenantDomain;
         }
         return apiMgtDAO.isApiNameExist(apiName, tenantName, organization);
@@ -490,8 +487,8 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public boolean isApiNameWithDifferentCaseExist(String apiName, String organization) throws APIManagementException {
 
-        String tenantName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+        String tenantName = SUPER_TENANT_DOMAIN_NAME;
+        if (tenantDomain != null && !SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             tenantName = tenantDomain;
         }
         return apiMgtDAO.isApiNameWithDifferentCaseExist(apiName, tenantName, organization);
@@ -520,7 +517,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
     protected String getTenantDomain(String username) {
 
-        return MultitenantUtils.getTenantDomain(username);
+        return APIUtil.getTenantDomain(username);
     }
 
     /**
@@ -548,13 +545,14 @@ public abstract class AbstractAPIManager implements APIManager {
         defaultApp.setDescription(APIConstants.DEFAULT_APPLICATION_DESCRIPTION);
         int applicationId = apiMgtDAO.addApplication(defaultApp, subscriber.getName(), tenantDomain);
 
-        ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
-                tenantDomain, applicationId, defaultApp.getUUID(), defaultApp.getName(),
-                defaultApp.getTokenType(),
-                defaultApp.getTier(), defaultApp.getGroupId(), defaultApp.getApplicationAttributes(),
-                subscriber.getName());
-        APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+        // TODO: send application Event
+//        ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+//                System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
+//                tenantDomain, applicationId, defaultApp.getUUID(), defaultApp.getName(),
+//                defaultApp.getTokenType(),
+//                defaultApp.getTier(), defaultApp.getGroupId(), defaultApp.getApplicationAttributes(),
+//                subscriber.getName());
+//        APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
     }
 
     public void updateSubscriber(Subscriber subscriber)

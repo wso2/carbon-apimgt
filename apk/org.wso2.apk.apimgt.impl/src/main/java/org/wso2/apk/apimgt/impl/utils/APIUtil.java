@@ -3490,7 +3490,7 @@ public final class APIUtil {
     public static String getUserNameWithTenantSuffix(String userName) {
 
         String userNameWithTenantPrefix = userName;
-        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        String tenantDomain = MultitenantConstants.getTenantDomain(userName);
         if (userName != null && !userName.endsWith("@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)
                 && MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             userNameWithTenantPrefix = userName + "@" + tenantDomain;

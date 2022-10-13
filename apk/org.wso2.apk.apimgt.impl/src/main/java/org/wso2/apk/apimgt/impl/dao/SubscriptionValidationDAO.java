@@ -21,34 +21,33 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
-import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
-import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
-import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
-import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
-import org.wso2.carbon.apimgt.api.model.subscription.API;
-import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
-import org.wso2.carbon.apimgt.api.model.subscription.APIPolicyConditionGroup;
-import org.wso2.carbon.apimgt.api.model.subscription.Application;
-import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
-import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
-import org.wso2.carbon.apimgt.api.model.subscription.GlobalPolicy;
-import org.wso2.carbon.apimgt.api.model.subscription.Policy;
-import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
-import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
-import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.dao.constants.SubscriptionValidationSQLConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.user.exceptions.UserException;
-import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.dto.ConditionDTO;
+import org.wso2.apk.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.apk.apimgt.api.model.policy.BandwidthLimit;
+import org.wso2.apk.apimgt.api.model.policy.EventCountLimit;
+import org.wso2.apk.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.apk.apimgt.api.model.policy.QuotaPolicy;
+import org.wso2.apk.apimgt.api.model.policy.RequestCountLimit;
+import org.wso2.apk.apimgt.api.model.subscription.API;
+import org.wso2.apk.apimgt.api.model.subscription.APIPolicy;
+import org.wso2.apk.apimgt.api.model.subscription.APIPolicyConditionGroup;
+import org.wso2.apk.apimgt.api.model.subscription.Application;
+import org.wso2.apk.apimgt.api.model.subscription.ApplicationKeyMapping;
+import org.wso2.apk.apimgt.api.model.subscription.ApplicationPolicy;
+import org.wso2.apk.apimgt.api.model.subscription.GlobalPolicy;
+import org.wso2.apk.apimgt.api.model.subscription.Policy;
+import org.wso2.apk.apimgt.api.model.subscription.Subscription;
+import org.wso2.apk.apimgt.api.model.subscription.SubscriptionPolicy;
+import org.wso2.apk.apimgt.api.model.subscription.URLMapping;
+import org.wso2.apk.apimgt.impl.APIConstants;
+import org.wso2.apk.apimgt.impl.ThrottlePolicyConstants;
+import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.apk.apimgt.impl.dao.constants.SubscriptionValidationSQLConstants;
+import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.user.exceptions.UserException;
+import org.wso2.apk.apimgt.user.mgt.internal.UserManagerHolder;
 
 import java.io.InputStream;
 import java.sql.Connection;
@@ -67,6 +66,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SubscriptionValidationDAO {
 
     private static Log log = LogFactory.getLog(SubscriptionValidationDAO.class);
+    private static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
 
     /*
      * This method can be used to retrieve all the Subscriptions in the database
@@ -386,7 +386,7 @@ public class SubscriptionValidationDAO {
     public List<API> getAllApis(String organization, boolean isExpand) {
 
         String sql = SubscriptionValidationSQLConstants.GET_ALL_APIS_BY_ORGANIZATION_AND_DEPLOYMENT_SQL;
-        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+        if (SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
             sql = sql.concat("WHERE AM_API.CONTEXT NOT LIKE '/t/%'");
         } else {
             sql = sql.concat("WHERE AM_API.CONTEXT LIKE '/t/" + organization + "%'");
@@ -1054,7 +1054,7 @@ public class SubscriptionValidationDAO {
     public List<API> getAllApis(String organization, String deployment, boolean isExpand) {
 
         String sql = SubscriptionValidationSQLConstants.GET_ALL_APIS_BY_ORGANIZATION_AND_DEPLOYMENT_SQL;
-        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+        if (SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
             sql = sql.concat("WHERE AM_API.CONTEXT NOT LIKE '/t/%'");
         } else {
             sql = sql.concat("WHERE AM_API.CONTEXT LIKE '/t/" + organization + "%'");
@@ -1233,7 +1233,7 @@ public class SubscriptionValidationDAO {
     public API getApiByUUID(String apiId, String deployment, String organization, boolean isExpand) {
 
         String sql = SubscriptionValidationSQLConstants.GET_API_BY_UUID_SQL;
-        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+        if (SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
             sql = sql.concat("AND AM_API.CONTEXT NOT LIKE '/t/%'");
         } else {
             sql = sql.concat("AND AM_API.CONTEXT LIKE '/t/" + organization + "%'");
