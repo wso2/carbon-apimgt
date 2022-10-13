@@ -3462,7 +3462,7 @@ public final class APIUtil {
      */
     public static int getInternalIdFromTenantDomainOrOrganization(String organization) {
         if (organization == null) {
-            return SUPER_TENANT_ID;
+            return MultitenantConstants.SUPER_TENANT_ID;
         }
         try {
             return getInternalOrganizationId(organization);
@@ -3487,27 +3487,9 @@ public final class APIUtil {
         return null;
     }
 
-    public static String getTenantDomain(String username) {
-        try {
-            return UserManagerHolder.getUserManager().getTenantDomain(username);
-        } catch (UserException e) {
-            log.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    public static String getTenantAwareUsername(String username) {
-        try {
-            return UserManagerHolder.getUserManager().getTenantAwareUsername(username);
-        } catch (UserException e) {
-            log.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
     public static int getSuperTenantId() {
 
-        return -1234;
+        return MultitenantConstants.SUPER_TENANT_ID;;
     }
 
     /**
@@ -3519,9 +3501,9 @@ public final class APIUtil {
     public static String getUserNameWithTenantSuffix(String userName) {
 
         String userNameWithTenantPrefix = userName;
-        String tenantDomain = getTenantDomain(userName);
-        if (userName != null && !userName.endsWith("@" + SUPER_TENANT_DOMAIN_NAME)
-                && SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+        String tenantDomain = MultitenantConstants.getTenantDomain(userName);
+        if (userName != null && !userName.endsWith("@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)
+                && MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             userNameWithTenantPrefix = userName + "@" + tenantDomain;
         }
 
