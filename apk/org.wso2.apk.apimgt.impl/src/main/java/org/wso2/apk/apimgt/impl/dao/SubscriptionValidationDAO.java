@@ -66,7 +66,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SubscriptionValidationDAO {
 
     private static Log log = LogFactory.getLog(SubscriptionValidationDAO.class);
-    private static String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
+    private static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
 
     /*
      * This method can be used to retrieve all the Subscriptions in the database
