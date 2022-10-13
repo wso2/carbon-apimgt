@@ -25,7 +25,7 @@ import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.model.Workflow;
 import org.wso2.apk.apimgt.impl.APIAdminImpl;
 import org.wso2.apk.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.apk.apimgt.impl.workflow.*;
 import org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.mappings.WorkflowMappingUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.WorkflowDTO;
