@@ -24,7 +24,7 @@ import java.util.Set;
 /**
  * This class represent the API info DTO.
  */
-public class APIInfoDTO implements Serializable{
+public class APIInfoDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

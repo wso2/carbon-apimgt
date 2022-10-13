@@ -29,7 +29,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.APIMgtResourceNotFoundException;
-import org.wso2.apk.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.apk.apimgt.api.ErrorHandler;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.SubscriptionAlreadyExistingException;
@@ -63,7 +62,6 @@ import org.wso2.apk.apimgt.api.model.Identifier;
 import org.wso2.apk.apimgt.api.model.KeyManager;
 import org.wso2.apk.apimgt.api.model.LifeCycleEvent;
 import org.wso2.apk.apimgt.api.model.MonetizationUsagePublishInfo;
-import org.wso2.apk.apimgt.api.model.OAuthAppRequest;
 import org.wso2.apk.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.apk.apimgt.api.model.OperationPolicy;
 import org.wso2.apk.apimgt.api.model.OperationPolicyData;
@@ -79,7 +77,6 @@ import org.wso2.apk.apimgt.api.model.Subscriber;
 import org.wso2.apk.apimgt.api.model.Tier;
 import org.wso2.apk.apimgt.api.model.URITemplate;
 import org.wso2.apk.apimgt.api.model.VHost;
-import org.wso2.apk.apimgt.api.model.Workflow;
 import org.wso2.apk.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.apk.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.apk.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -102,32 +99,23 @@ import org.wso2.apk.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.apk.apimgt.api.model.webhooks.Subscription;
 import org.wso2.apk.apimgt.api.model.webhooks.Topic;
 import org.wso2.apk.apimgt.impl.APIConstants;
-import org.wso2.apk.apimgt.impl.APIManagerConfiguration;
 import org.wso2.apk.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.apk.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
-import org.wso2.apk.apimgt.impl.dto.*;
-import org.wso2.apk.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.apk.apimgt.impl.dao.util.DBUtils;
+import org.wso2.apk.apimgt.impl.dto.APIInfoDTO;
+import org.wso2.apk.apimgt.impl.dto.APIKeyInfoDTO;
+import org.wso2.apk.apimgt.impl.dto.APISubscriptionInfoDTO;
+import org.wso2.apk.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.apk.apimgt.impl.factory.SQLConstantManagerFactory;
-import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
-import org.wso2.apk.apimgt.impl.utils.ApplicationUtils;
-import org.wso2.apk.apimgt.impl.utils.RemoteUserManagerClient;
 import org.wso2.apk.apimgt.impl.utils.VHostUtils;
-import org.wso2.apk.apimgt.impl.workflow.WorkflowConstants;
-import org.wso2.apk.apimgt.impl.workflow.WorkflowExecutorFactory;
-import org.wso2.apk.apimgt.impl.workflow.WorkflowStatus;
-import org.wso2.apk.identity.core.util.IdentityTenantUtil;
-import org.wso2.apk.utils.DBUtils;
-import org.wso2.apk.utils.multitenancy.MultitenantConstants;
-import org.wso2.apk.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -167,13 +155,20 @@ public class ApiMgtDAO {
     private boolean forceCaseInsensitiveComparisons = false;
     private boolean multiGroupAppSharingEnabled = false;
 
+    private static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
+
     private ApiMgtDAO() {
 
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String caseSensitiveComparison = "false";
 
-        String caseSensitiveComparison = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS);
+        // TODO:Read from Config
+//        ServiceReferenceHolder.getInstance()
+//                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+//        String caseSensitiveComparison = ServiceReferenceHolder.getInstance().
+//                getAPIManagerConfigurationService().getAPIManagerConfiguration()
+//                .getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS);
+
+
         if (caseSensitiveComparison != null) {
             forceCaseInsensitiveComparisons = Boolean.parseBoolean(caseSensitiveComparison);
         }
@@ -193,90 +188,6 @@ public class ApiMgtDAO {
         }
 
         return INSTANCE;
-    }
-
-    /**
-     * Persist the details of the token generation request (allowed domains & validity period) to be used back
-     * when approval has been granted.
-     *
-     * @param dto                 DTO related to Application Registration.
-     * @param onlyKeyMappingEntry When this flag is enabled, only AM_APPLICATION_KEY_MAPPING will get affected.
-     * @throws APIManagementException if failed to create entries in  AM_APPLICATION_REGISTRATION and
-     *                                AM_APPLICATION_KEY_MAPPING tables.
-     */
-    public void createApplicationRegistrationEntry(ApplicationRegistrationWorkflowDTO dto, boolean onlyKeyMappingEntry)
-            throws APIManagementException {
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-        PreparedStatement queryPs = null;
-        PreparedStatement appRegPs = null;
-        ResultSet resultSet = null;
-
-        Application application = dto.getApplication();
-        Subscriber subscriber = application.getSubscriber();
-        String jsonString = dto.getAppInfoDTO().getOAuthApplicationInfo().getJsonString();
-
-        String registrationQuery = SQLConstants.GET_APPLICATION_REGISTRATION_SQL;
-        String registrationEntry = SQLConstants.ADD_APPLICATION_REGISTRATION_SQL;
-        String keyMappingEntry = SQLConstants.ADD_APPLICATION_KEY_MAPPING_SQL;
-
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-
-            queryPs = conn.prepareStatement(registrationQuery);
-            queryPs.setInt(1, subscriber.getId());
-            queryPs.setInt(2, application.getId());
-            queryPs.setString(3, dto.getKeyType());
-            queryPs.setString(4, dto.getKeyManager());
-            resultSet = queryPs.executeQuery();
-
-            if (resultSet.next()) {
-                throw new APIManagementException("Application '" + application.getName() + "' is already registered."
-                        , ExceptionCodes.APPLICATION_ALREADY_REGISTERED);
-            }
-
-            if (!onlyKeyMappingEntry) {
-                appRegPs = conn.prepareStatement(registrationEntry);
-                appRegPs.setInt(1, subscriber.getId());
-                appRegPs.setString(2, dto.getWorkflowReference());
-                appRegPs.setInt(3, application.getId());
-                appRegPs.setString(4, dto.getKeyType());
-                appRegPs.setString(5, dto.getDomainList());
-                appRegPs.setLong(6, dto.getValidityTime());
-                appRegPs.setString(7, (String) dto.getAppInfoDTO().getOAuthApplicationInfo().getParameter("tokenScope"
-                ));
-                appRegPs.setString(8, jsonString);
-                appRegPs.setString(9, dto.getKeyManager());
-                appRegPs.execute();
-            }
-
-            ps = conn.prepareStatement(keyMappingEntry);
-            ps.setInt(1, application.getId());
-            ps.setString(2, dto.getKeyType());
-            ps.setString(3, dto.getStatus().toString());
-            ps.setString(4, dto.getKeyManager());
-            ps.setString(5, UUID.randomUUID().toString());
-            ps.setString(6, APIConstants.OAuthAppMode.CREATED.name());
-            ps.execute();
-
-            conn.commit();
-        } catch (SQLException e) {
-            try {
-                if (conn != null) {
-                    conn.rollback();
-                }
-            } catch (SQLException e1) {
-                handleException("Error occurred while Rolling back changes done on Application Registration", e1);
-            }
-            handleException("Error occurred while creating an " +
-                    "Application Registration Entry for Application : " + application.getName(), e);
-        } finally {
-            APIMgtDBUtil.closeStatement(queryPs);
-            APIMgtDBUtil.closeStatement(appRegPs);
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
-        }
     }
 
     /**
@@ -318,7 +229,8 @@ public class ApiMgtDAO {
     }
 
     private boolean isAnyPolicyContentAware(Connection conn, String apiPolicy, String appPolicy,
-                                            String subPolicy, int subscriptionTenantId, int appTenantId, int apiId) throws APIManagementException {
+                                            String subPolicy, int subscriptionTenantId, int appTenantId, int apiId)
+            throws APIManagementException {
 
         boolean isAnyContentAware = false;
         // only check if using CEP based throttling.
@@ -1243,7 +1155,7 @@ public class ApiMgtDAO {
                     } else {
                         sqlQuery += whereClauseWithMultiGroupId;
                     }
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                    String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
                     String groupIdArr[] = groupingId.split(",");
 
                     ps = fillQueryParams(connection, sqlQuery, groupIdArr, 3);
@@ -1391,7 +1303,7 @@ public class ApiMgtDAO {
             boolean hasGrouping = false;
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
                 if (multiGroupAppSharingEnabled) {
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                    String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
                     sqlQuery += whereClauseWithMultiGroupId;
                     String[] groupIdArr = groupingId.split(",");
 
@@ -1513,7 +1425,7 @@ public class ApiMgtDAO {
 
         if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
             if (multiGroupAppSharingEnabled) {
-                String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
 
                 String[] groupIDArray = groupingId.split(",");
 
@@ -1614,7 +1526,7 @@ public class ApiMgtDAO {
 
         if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
             if (multiGroupAppSharingEnabled) {
-                String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
                 String[] groupIDArray = groupingId.split(",");
 
                 statement.setInt(++paramIndex, tenantId);
@@ -1701,7 +1613,9 @@ public class ApiMgtDAO {
                 String consumerKey = rs.getString("CONSUMER_KEY");
                 String keyManagerName = rs.getString("KEY_MANAGER");
                 if (consumerKey != null) {
-                    KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenntDomain, keyManagerName);
+                    KeyManager keyManager = null;
+                    // TODO: getKM instance
+                            // KeyManagerHolder.getKeyManagerInstance(tenntDomain, keyManagerName);
                     if (keyManager != null) {
                         OAuthApplicationInfo oAuthApplication = keyManager.retrieveApplication(consumerKey);
                         keyTypeWiseOAuthApps.put(keyManagerName, oAuthApplication);
@@ -2776,7 +2690,7 @@ public class ApiMgtDAO {
             conn.setAutoCommit(false);
             applicationId = addApplication(application, loginUserName, conn, organization);
             Subscriber subscriber = getSubscriber(userId);
-            String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+            String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
 
             if (multiGroupAppSharingEnabled) {
                 updateGroupIDMappings(conn, applicationId, application.getGroupId(), tenantDomain);
@@ -3491,13 +3405,13 @@ public class ApiMgtDAO {
 
             if (multiGroupAppSharingEnabled) {
                 Subscriber subscriber = application.getSubscriber();
-                String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
                 updateGroupIDMappings(conn, application.getId(), application.getGroupId(),
                         tenantDomain);
             }
             Subscriber subscriber = application.getSubscriber();
-            String domain = MultitenantUtils.getTenantDomain(subscriber.getName());
-            int tenantId = IdentityTenantUtil.getTenantId(domain);
+            String domain = APIUtil.getTenantDomain(subscriber.getName());
+            int tenantId = APIUtil.getTenantIdFromTenantDomain(domain);
 
             preparedStatement = conn.prepareStatement(SQLConstants.REMOVE_APPLICATION_ATTRIBUTES_SQL);
             preparedStatement.setInt(1, application.getId());
@@ -3672,7 +3586,7 @@ public class ApiMgtDAO {
                     } else {
                         sqlQuery += whereClauseWithMultiGroupId;
                     }
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                    String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
                     String[] grpIdArray = groupId.split(",");
                     int noOfParams = grpIdArray.length;
                     preparedStatement = fillQueryParams(connection, sqlQuery, grpIdArray, 3);
@@ -3751,7 +3665,7 @@ public class ApiMgtDAO {
             if (!StringUtils.isEmpty(groupId)) {
                 if (multiGroupAppSharingEnabled) {
                     sqlQuery += whereClauseWithMultiGroupId;
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                    String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
                     String[] grpIdArray = groupId.split(",");
 
                     int noOfParams = grpIdArray.length;
@@ -3960,7 +3874,7 @@ public class ApiMgtDAO {
                     } else {
                         sqlQuery = SQLConstants.GET_APPLICATIONS_COUNNT_NONE_CASESENSITVE_WITH_MULTIGROUPID;
                     }
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                    String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
                     String[] grpIdArray = groupingId.split(",");
                     int noOfParams = grpIdArray.length;
                     prepStmt = fillQueryParams(connection, sqlQuery, grpIdArray, 1);
@@ -4125,7 +4039,7 @@ public class ApiMgtDAO {
 
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
                 if (multiGroupAppSharingEnabled) {
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                    String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
                     String[] grpIdArray = groupingId.split(",");
                     int noOfParams = grpIdArray.length;
                     prepStmt = fillQueryParams(connection, sqlQuery, grpIdArray, 1);
@@ -4272,7 +4186,7 @@ public class ApiMgtDAO {
 
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
                 if (multiGroupAppSharingEnabled) {
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                    String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
                     String groupIDArray[] = groupingId.split(",");
                     int paramIndex = groupIDArray.length;
                     prepStmt = fillQueryParams(connection, blockingFilerSql, groupIDArray, 1);
@@ -4575,8 +4489,9 @@ public class ApiMgtDAO {
                 if (consumerKey != null) {
                     deleteDomainApp.setString(1, consumerKey);
                     deleteDomainApp.addBatch();
-                    KeyManager keyManager =
-                            KeyManagerHolder.getKeyManagerInstance(keyManagerOrganization, keyManagerName);
+                    KeyManager keyManager = null;
+                    // TODO: get km instance
+                           // KeyManagerHolder.getKeyManagerInstance(keyManagerOrganization, keyManagerName);
                     if (keyManager != null) {
                         try {
                             keyManager.deleteMappedApplication(consumerKey);
@@ -5382,7 +5297,7 @@ public class ApiMgtDAO {
 
             connection.commit();
 
-            String tenantUserName = MultitenantUtils
+            String tenantUserName = APIUtil
                     .getTenantAwareUsername(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             recordAPILifeCycleEvent(apiId, null, APIStatus.CREATED.toString(), tenantUserName, tenantId,
                     connection);
@@ -5438,179 +5353,6 @@ public class ApiMgtDAO {
             }
         }
         return null;
-    }
-
-    /**
-     * Persists WorkflowDTO to Database
-     *
-     * @param workflow
-     * @throws APIManagementException
-     */
-    public void addWorkflowEntry(WorkflowDTO workflow) throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-
-        String query = SQLConstants.ADD_WORKFLOW_ENTRY_SQL;
-        try {
-            Timestamp cratedDateStamp = new Timestamp(workflow.getCreatedTime());
-
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-
-            prepStmt = connection.prepareStatement(query);
-            prepStmt.setString(1, workflow.getWorkflowReference());
-            prepStmt.setString(2, workflow.getWorkflowType());
-            prepStmt.setString(3, workflow.getStatus().toString());
-            prepStmt.setTimestamp(4, cratedDateStamp);
-            prepStmt.setString(5, workflow.getWorkflowDescription());
-            prepStmt.setInt(6, workflow.getTenantId());
-            prepStmt.setString(7, workflow.getTenantDomain());
-            prepStmt.setString(8, workflow.getExternalWorkflowReference());
-
-            if (workflow.getMetadata() != null) {
-                byte[] metadataByte = workflow.getMetadata().toJSONString().getBytes("UTF-8");
-                prepStmt.setBinaryStream(9, new ByteArrayInputStream(metadataByte));
-            } else {
-                prepStmt.setNull(9, Types.BLOB);
-            }
-
-            if (workflow.getProperties() != null) {
-                byte[] propertiesByte = workflow.getProperties().toJSONString().getBytes("UTF-8");
-                prepStmt.setBinaryStream(10, new ByteArrayInputStream(propertiesByte));
-            } else {
-                prepStmt.setNull(10, Types.BLOB);
-            }
-            prepStmt.execute();
-            connection.commit();
-        } catch (SQLException | UnsupportedEncodingException e) {
-            handleException("Error while adding Workflow : " + workflow.getExternalWorkflowReference() + " to the " +
-                    "database", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
-        }
-    }
-
-    public void updateWorkflowStatus(WorkflowDTO workflowDTO) throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-
-        String query = SQLConstants.UPDATE_WORKFLOW_ENTRY_SQL;
-        try {
-            Timestamp updatedTimeStamp = new Timestamp(workflowDTO.getUpdatedTime());
-
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-
-            prepStmt = connection.prepareStatement(query);
-            prepStmt.setString(1, workflowDTO.getStatus().toString());
-            prepStmt.setString(2, workflowDTO.getWorkflowDescription());
-            prepStmt.setString(3, workflowDTO.getExternalWorkflowReference());
-
-            prepStmt.execute();
-
-            connection.commit();
-        } catch (SQLException e) {
-            handleExceptionWithCode("Error while updating Workflow Status of workflow " + workflowDTO
-                    .getExternalWorkflowReference(), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
-        }
-    }
-
-    /**
-     * Returns a workflow object for a given external workflow reference.
-     *
-     * @param workflowReference
-     * @return
-     * @throws APIManagementException
-     */
-    public WorkflowDTO retrieveWorkflow(String workflowReference) throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        WorkflowDTO workflowDTO = null;
-
-        String query = SQLConstants.GET_ALL_WORKFLOW_ENTRY_SQL;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(query);
-            prepStmt.setString(1, workflowReference);
-
-            rs = prepStmt.executeQuery();
-            while (rs.next()) {
-                workflowDTO = WorkflowExecutorFactory.getInstance().createWorkflowDTO(rs.getString("WF_TYPE"));
-                workflowDTO.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
-                workflowDTO.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-                workflowDTO.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").getTime());
-                workflowDTO.setWorkflowReference(rs.getString("WF_REFERENCE"));
-                workflowDTO.setTenantDomain(rs.getString("TENANT_DOMAIN"));
-                workflowDTO.setTenantId(rs.getInt("TENANT_ID"));
-                workflowDTO.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
-                InputStream metadataBlob = rs.getBinaryStream("WF_METADATA");
-
-                if (metadataBlob != null) {
-                    String metadata = APIMgtDBUtil.getStringFromInputStream(metadataBlob);
-                    Gson metadataGson = new Gson();
-                    JSONObject metadataJson = metadataGson.fromJson(metadata, JSONObject.class);
-                    workflowDTO.setMetadata(metadataJson);
-                } else {
-                    JSONObject metadataJson = new JSONObject();
-                    workflowDTO.setMetadata(metadataJson);
-                }
-            }
-        } catch (SQLException e) {
-            handleExceptionWithCode("Error while retrieving workflow details for " + workflowReference, e,
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-        }
-        return workflowDTO;
-    }
-
-    /**
-     * Returns a workflow object for a given internal workflow reference and the workflow type.
-     *
-     * @param workflowReference
-     * @param workflowType
-     * @return
-     * @throws APIManagementException
-     */
-    public WorkflowDTO retrieveWorkflowFromInternalReference(String workflowReference, String workflowType)
-            throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        WorkflowDTO workflowDTO = null;
-
-        String query = SQLConstants.GET_ALL_WORKFLOW_ENTRY_FROM_INTERNAL_REF_SQL;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(query);
-            prepStmt.setString(1, workflowReference);
-            prepStmt.setString(2, workflowType);
-
-            rs = prepStmt.executeQuery();
-            while (rs.next()) {
-                workflowDTO = WorkflowExecutorFactory.getInstance().createWorkflowDTO(rs.getString("WF_TYPE"));
-                workflowDTO.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
-                workflowDTO.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-                workflowDTO.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").getTime());
-                workflowDTO.setWorkflowReference(rs.getString("WF_REFERENCE"));
-                workflowDTO.setTenantDomain(rs.getString("TENANT_DOMAIN"));
-                workflowDTO.setTenantId(rs.getInt("TENANT_ID"));
-                workflowDTO.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
-            }
-        } catch (SQLException e) {
-            handleExceptionWithCode("Error while retrieving workflow details for " + workflowReference, e,
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-        }
-        return workflowDTO;
     }
 
     private void setPublishedDefVersion(APIIdentifier apiId, Connection connection, String value)
@@ -5918,7 +5660,7 @@ public class ApiMgtDAO {
             if (!StringUtils.isEmpty(groupId) && !APIConstants.NULL_GROUPID_LIST.equals(groupId)) {
                 if (multiGroupAppSharingEnabled) {
                     Subscriber subscriber = getSubscriber(userId);
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                    String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
                     query += whereClauseWithMultiGroupId;
                     String[] groupIds = groupId.split(",");
                     int parameterIndex = groupIds.length;
@@ -6008,7 +5750,7 @@ public class ApiMgtDAO {
             if (groupId != null && !"null".equals(groupId) && !groupId.isEmpty()) {
                 if (multiGroupAppSharingEnabled) {
                     Subscriber subscriber = getSubscriber(userId);
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                    String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
                     if (forceCaseInsensitiveComparisons) {
                         query = query + whereClauseWithMultiGroupIdCaseInSensitive;
                     } else {
@@ -6139,7 +5881,7 @@ public class ApiMgtDAO {
                 application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
                 application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
 
-                String tenantDomain = MultitenantUtils.getTenantDomain(subscriberName);
+                String tenantDomain = APIUtil.getTenantDomain(subscriberName);
                 Map<String, Map<String, OAuthApplicationInfo>>
                         keyMap = getOAuthApplications(tenantDomain, application.getId());
                 application.getKeyManagerWiseOAuthApp().putAll(keyMap);
@@ -6238,7 +5980,7 @@ public class ApiMgtDAO {
             if (groupId != null && !"null".equals(groupId) && !groupId.isEmpty()) {
                 if (multiGroupAppSharingEnabled) {
                     Subscriber subscriber = getSubscriber(userId);
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                    String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
                     if (forceCaseInsensitiveComparisons) {
                         query = query + whereClauseWithMultiGroupIdCaseInSensitive;
                     } else {
@@ -6294,7 +6036,7 @@ public class ApiMgtDAO {
                 application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
                 application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
 
-                String tenantDomain = MultitenantUtils.getTenantDomain(subscriberName);
+                String tenantDomain = APIUtil.getTenantDomain(subscriberName);
                 Map<String, Map<String, OAuthApplicationInfo>>
                         keyMap = getOAuthApplications(tenantDomain, application.getId());
                 application.getKeyManagerWiseOAuthApp().putAll(keyMap);
@@ -6397,37 +6139,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Update URI templates define for an API.
-     *
-     * @param api      API to update
-     * @param tenantId tenant Id
-     * @throws APIManagementException if fails to update URI template of the API.
-     */
-    public void updateURITemplates(API api, int tenantId) throws APIManagementException {
-
-        int apiId;
-        String deleteOldMappingsQuery = SQLConstants.REMOVE_FROM_URI_TEMPLATES_SQL;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(deleteOldMappingsQuery)) {
-            connection.setAutoCommit(false);
-            apiId = getAPIID(api.getUuid(), connection);
-            prepStmt.setInt(1, apiId);
-            try {
-                prepStmt.execute();
-                addURITemplates(apiId, api, tenantId, connection);
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleExceptionWithCode("Error while deleting URL template(s) for API : " + api.getId(), e,
-                        ExceptionCodes.APIMGT_DAO_EXCEPTION);
-            }
-        } catch (SQLException e) {
-            handleExceptionWithCode("Error while deleting URL template(s) for API : " + api.getId(), e,
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        }
-    }
-
-    /**
      * Get resource (URI Template) to scope mappings of the given API.
      *
      * @param uuid API uuid
@@ -6474,215 +6185,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * returns all URL templates define for all active(PUBLISHED) APIs.
-     */
-    public ArrayList<URITemplate> getAllURITemplates(String apiContext, String version) throws APIManagementException {
-
-        return getAllURITemplatesAdvancedThrottle(apiContext, version);
-
-    }
-
-    public ArrayList<URITemplate> getAPIProductURITemplates(String apiContext, String version)
-            throws APIManagementException {
-
-        return getAPIProductURITemplatesAdvancedThrottle(apiContext, version);
-    }
-
-    public ArrayList<URITemplate> getAllURITemplatesOldThrottle(String apiContext, String version) throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        ArrayList<URITemplate> uriTemplates = new ArrayList<URITemplate>();
-
-        //TODO : FILTER RESULTS ONLY FOR ACTIVE APIs
-        String query = SQLConstants.GET_ALL_URL_TEMPLATES_SQL;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(query);
-            prepStmt.setString(1, apiContext);
-            prepStmt.setString(2, version);
-
-            rs = prepStmt.executeQuery();
-
-            URITemplate uriTemplate;
-            while (rs.next()) {
-                uriTemplate = new URITemplate();
-                String script = null;
-                uriTemplate.setId(rs.getInt("URL_MAPPING_ID"));
-                uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
-                uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
-                uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
-                uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
-                InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
-                if (mediationScriptBlob != null) {
-                    script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
-                }
-                uriTemplate.setMediationScript(script);
-                uriTemplate.getThrottlingConditions().add("_default");
-                uriTemplates.add(uriTemplate);
-            }
-        } catch (SQLException e) {
-            handleException("Error while fetching all URL Templates", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-        }
-        return uriTemplates;
-    }
-
-    public ArrayList<URITemplate> getAllURITemplatesAdvancedThrottle(String apiContext, String version) throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        int tenantId;
-        ArrayList<URITemplate> uriTemplates = new ArrayList<>();
-
-        String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(apiContext);
-        if (apiTenantDomain != null) {
-            tenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
-        } else {
-            tenantId = MultitenantConstants.SUPER_TENANT_ID;
-        }
-
-        // TODO : FILTER RESULTS ONLY FOR ACTIVE APIs
-        String query = ThrottleSQLConstants.GET_CONDITION_GROUPS_FOR_POLICIES_SQL;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(query);
-            prepStmt.setString(1, apiContext);
-            prepStmt.setString(2, version);
-            prepStmt.setInt(3, tenantId);
-
-            rs = prepStmt.executeQuery();
-
-            uriTemplates = extractURITemplates(rs);
-        } catch (SQLException e) {
-            handleException("Error while fetching all URL Templates", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-        }
-
-        return uriTemplates;
-    }
-
-    public ArrayList<URITemplate> getAPIProductURITemplatesAdvancedThrottle(String apiContext, String version)
-            throws APIManagementException {
-
-        int tenantId;
-        ArrayList<URITemplate> uriTemplates = new ArrayList<>();
-
-        String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(apiContext);
-        if (apiTenantDomain != null) {
-            tenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
-        } else {
-            tenantId = MultitenantConstants.SUPER_TENANT_ID;
-        }
-
-        // TODO : FILTER RESULTS ONLY FOR ACTIVE APIs
-        String query = ThrottleSQLConstants.GET_CONDITION_GROUPS_FOR_POLICIES_IN_PRODUCTS_SQL;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(query)) {
-            prepStmt.setString(1, apiContext);
-            prepStmt.setString(2, version);
-            prepStmt.setInt(3, tenantId);
-
-            try (ResultSet rs = prepStmt.executeQuery()) {
-                uriTemplates = extractURITemplates(rs);
-            }
-        } catch (SQLException e) {
-            handleException("Error while fetching all URL Templates", e);
-        }
-
-        return uriTemplates;
-    }
-
-    private ArrayList<URITemplate> extractURITemplates(ResultSet rs) throws SQLException, APIManagementException {
-
-        Map<String, Set<ConditionGroupDTO>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<ConditionGroupDTO>>();
-        ArrayList<URITemplate> uriTemplates = new ArrayList<URITemplate>();
-
-        while (rs != null && rs.next()) {
-            int uriTemplateId = rs.getInt("URL_MAPPING_ID");
-            String httpVerb = rs.getString("HTTP_METHOD");
-            String authType = rs.getString("AUTH_SCHEME");
-            String urlPattern = rs.getString("URL_PATTERN");
-            String policyName = rs.getString("THROTTLING_TIER");
-            String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
-            String applicableLevel = rs.getString("APPLICABLE_LEVEL");
-            String policyConditionGroupId = "_condition_" + conditionGroupId;
-            boolean isContentAware = PolicyConstants.BANDWIDTH_TYPE.equals(
-                    rs.getString(ThrottlePolicyConstants.COLUMN_DEFAULT_QUOTA_POLICY_TYPE));
-
-            String key = httpVerb + ":" + urlPattern;
-            if (mapByHttpVerbURLPatternToId.containsKey(key)) {
-
-                if (StringUtils.isEmpty(conditionGroupId)) {
-                    continue;
-                }
-
-                // Converting ConditionGroup to a lightweight ConditionGroupDTO.
-                ConditionGroupDTO groupDTO = createConditionGroupDTO(Integer.parseInt(conditionGroupId));
-                groupDTO.setConditionGroupId(policyConditionGroupId);
-                mapByHttpVerbURLPatternToId.get(key).add(groupDTO);
-            } else {
-                String script = null;
-                URITemplate uriTemplate = new URITemplate();
-                uriTemplate.setId(uriTemplateId);
-                uriTemplate.setThrottlingTier(policyName);
-                uriTemplate.setThrottlingTiers(
-                        policyName + PolicyConstants.THROTTLING_TIER_CONTENT_AWARE_SEPERATOR + isContentAware);
-                uriTemplate.setAuthType(authType);
-                uriTemplate.setHTTPVerb(httpVerb);
-                uriTemplate.setUriTemplate(urlPattern);
-                uriTemplate.setApplicableLevel(applicableLevel);
-                InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
-
-                if (mediationScriptBlob != null) {
-                    script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
-                }
-
-                uriTemplate.setMediationScript(script);
-                Set<ConditionGroupDTO> conditionGroupIdSet = new HashSet<ConditionGroupDTO>();
-                mapByHttpVerbURLPatternToId.put(key, conditionGroupIdSet);
-                uriTemplates.add(uriTemplate);
-
-                if (StringUtils.isEmpty(conditionGroupId)) {
-                    continue;
-                }
-
-                ConditionGroupDTO groupDTO = createConditionGroupDTO(Integer.parseInt(conditionGroupId));
-                groupDTO.setConditionGroupId(policyConditionGroupId);
-                conditionGroupIdSet.add(groupDTO);
-            }
-        }
-
-        for (URITemplate uriTemplate : uriTemplates) {
-            String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
-            if (mapByHttpVerbURLPatternToId.containsKey(key)) {
-                if (!mapByHttpVerbURLPatternToId.get(key).isEmpty()) {
-                    Set<ConditionGroupDTO> conditionGroupDTOs = mapByHttpVerbURLPatternToId.get(key);
-                    ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
-                    defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
-                    conditionGroupDTOs.add(defaultGroup);
-                    uriTemplate.getThrottlingConditions().add(APIConstants.THROTTLE_POLICY_DEFAULT);
-                    uriTemplate.setConditionGroups(conditionGroupDTOs.toArray(new ConditionGroupDTO[]{}));
-                }
-            }
-
-            if (uriTemplate.getThrottlingConditions().isEmpty()) {
-                uriTemplate.getThrottlingConditions().add(APIConstants.THROTTLE_POLICY_DEFAULT);
-                ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
-                defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
-                uriTemplate.setConditionGroups(new ConditionGroupDTO[]{defaultGroup});
-            }
-
-        }
-
-        return uriTemplates;
-    }
-
-    /**
      * This method is used to get the API provider by giving API name, API version and tenant domain
      *
      * @param apiName    API name
@@ -6706,7 +6208,7 @@ public class ApiMgtDAO {
         String getAPIProviderQuery = null;
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(tenant)) {
+            if (SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(tenant)) {
                 //in this case, the API should be fetched from super tenant
                 getAPIProviderQuery = SQLConstants.GET_API_PROVIDER_WITH_NAME_VERSION_FOR_SUPER_TENANT;
                 prepStmt = connection.prepareStatement(getAPIProviderQuery);
@@ -8320,66 +7822,6 @@ public class ApiMgtDAO {
         return contexts;
     }
 
-    public void populateAppRegistrationWorkflowDTO(ApplicationRegistrationWorkflowDTO workflowDTO)
-            throws APIManagementException {
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        Application application = null;
-        Subscriber subscriber = null;
-
-        String registrationEntry = SQLConstants.GET_APPLICATION_REGISTRATION_ENTRY_BY_SUBSCRIBER_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(registrationEntry);
-            ps.setString(1, workflowDTO.getExternalWorkflowReference());
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                subscriber = new Subscriber(rs.getString("USER_ID"));
-                subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
-                application = new Application(rs.getString("NAME"), subscriber);
-                application.setId(rs.getInt("APPLICATION_ID"));
-                application.setUUID(rs.getString("UUID"));
-                application.setTokenType(rs.getString("APP_TYPE"));
-                application.setApplicationWorkFlowStatus(rs.getString("APPLICATION_STATUS"));
-                application.setCallbackUrl(rs.getString("CALLBACK_URL"));
-                application.setDescription(rs.getString("DESCRIPTION"));
-                application.setTier(rs.getString("APPLICATION_TIER"));
-                workflowDTO.setApplication(application);
-                workflowDTO.setKeyType(rs.getString("TOKEN_TYPE"));
-                workflowDTO.setUserName(subscriber.getName());
-                workflowDTO.setDomainList(rs.getString("ALLOWED_DOMAINS"));
-                workflowDTO.setValidityTime(rs.getLong("VALIDITY_PERIOD"));
-                String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                String keyManagerUUID = rs.getString("KEY_MANAGER");
-                workflowDTO.setKeyManager(keyManagerUUID);
-                KeyManagerConfigurationDTO keyManagerConfigurationByUUID = getKeyManagerConfigurationByUUID(conn,
-                        keyManagerUUID);
-                if (keyManagerConfigurationByUUID != null) {
-                    OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(), null,
-                            application.getCallbackUrl(), rs
-                                    .getString("TOKEN_SCOPE"),
-                            rs.getString("INPUTS"), application.getTokenType(),
-                            keyManagerConfigurationByUUID.getOrganization(), keyManagerConfigurationByUUID.getName());
-                    request.setMappingId(workflowDTO.getWorkflowReference());
-                    request.getOAuthApplicationInfo().setApplicationUUID(application.getUUID());
-                    workflowDTO.setAppInfoDTO(request);
-                } else {
-                    throw new APIManagementException("Error occured while finding the KeyManager from uuid "
-                            + keyManagerUUID + ".", ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
-                }
-            }
-        } catch (SQLException | IOException e) {
-            handleException("Error occurred while retrieving an " +
-                    "Application Registration Entry for Workflow : " + workflowDTO
-                    .getExternalWorkflowReference(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-    }
-
     public int getApplicationIdForAppRegistration(String workflowReference) throws APIManagementException {
 
         Connection conn = null;
@@ -8439,294 +7881,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return workflowReference;
-    }
-
-    /**
-     * Fetches WorkflowReference when given Application Name and UserId.
-     *
-     * @param applicationId
-     * @param userId
-     * @return WorkflowReference
-     * @throws APIManagementException
-     */
-    public String getWorkflowReferenceByApplicationId(int applicationId, String userId) throws APIManagementException {
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String workflowReference = null;
-        String sqlQuery = SQLConstants.GET_WORKFLOW_ENTRY_BY_APP_ID_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, applicationId);
-            ps.setString(2, userId);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                workflowReference = rs.getString("WF_REF");
-            }
-        } catch (SQLException e) {
-            handleException("Error occurred while getting workflow entry for " +
-                    "Application : " + applicationId + " created by " + userId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return workflowReference;
-    }
-
-    /**
-     * Retries the WorkflowExternalReference for a application.
-     *
-     * @param appID ID of the application
-     * @return External workflow reference for the application identified
-     * @throws APIManagementException
-     */
-    public String getExternalWorkflowReferenceByApplicationID(int appID) throws APIManagementException {
-
-        String workflowExtRef = null;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String sqlQuery = SQLConstants.GET_EXTERNAL_WORKFLOW_REFERENCE_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-            ps.setString(2, String.valueOf(appID));
-            rs = ps.executeQuery();
-
-            // returns only one row
-            while (rs.next()) {
-                workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
-            }
-        } catch (SQLException e) {
-            handleException("Error occurred while getting workflow entry for " +
-                    "Application ID : " + appID, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-
-        return workflowExtRef;
-    }
-
-    /**
-     * Get external workflow reference by internal workflow reference and workflow type
-     * @param internalRef Internal reference of the workflow
-     * @param workflowType Workflow type of the workflow
-     * @return External workflow reference for the given internal reference and workflow type if present. Null otherwise
-     * @throws APIManagementException If an SQL exception occurs in database interactions
-     */
-    public String getExternalWorkflowRefByInternalRefWorkflowType(int internalRef, String workflowType) throws APIManagementException {
-
-        String workflowExtRef = null;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String sqlQuery = SQLConstants.GET_EXTERNAL_WORKFLOW_REFERENCE_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, workflowType);
-            ps.setString(2, String.valueOf(internalRef));
-            rs = ps.executeQuery();
-
-            // returns only one row
-            while (rs.next()) {
-                workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
-            }
-        } catch (SQLException e) {
-            handleExceptionWithCode("Error occurred while getting workflow entry for " +
-                    "Internal Ref : " + internalRef, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-
-        return workflowExtRef;
-    }
-
-    /**
-     * Remove workflow entry
-     *
-     * @param workflowReference
-     * @param workflowType
-     * @throws APIManagementException
-     */
-    public void removeWorkflowEntry(String workflowReference, String workflowType) throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-
-        String queryWorkflowDelete = SQLConstants.REMOVE_WORKFLOW_ENTRY_SQL;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            prepStmt = connection.prepareStatement(queryWorkflowDelete);
-            prepStmt.setString(1, workflowType);
-            prepStmt.setString(2, workflowReference);
-            prepStmt.execute();
-            connection.commit();
-        } catch (SQLException e) {
-            handleException("Error while deleting workflow entry " + workflowReference + " from the database", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
-        }
-    }
-
-    /**
-     * Retries the WorkflowExternalReference for a subscription.
-     *
-     * @param identifier Identifier to find the subscribed api
-     * @param appID      ID of the application which has the subscription
-     * @param organization organization
-     * @return External workflow reference for the subscription identified
-     * @throws APIManagementException
-     */
-    public String getExternalWorkflowReferenceForSubscription(Identifier identifier, int appID, String organization)
-            throws APIManagementException {
-
-        String workflowExtRef = null;
-        int id = -1;
-        int subscriptionID = -1;
-
-        String sqlQuery = SQLConstants.GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_SQL;
-        String postgreSQL = SQLConstants.GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_POSTGRE_SQL;
-        try (Connection conn = APIMgtDBUtil.getConnection()) {
-            if (identifier instanceof APIIdentifier) {
-                String apiUuid;
-                if (identifier.getUUID() != null) {
-                    apiUuid = identifier.getUUID();
-                } else {
-                    apiUuid = getUUIDFromIdentifier((APIIdentifier) identifier, organization);
-                }
-                id = getAPIID(apiUuid, conn);
-
-            } else if (identifier instanceof APIProductIdentifier) {
-                id = ((APIProductIdentifier) identifier).getProductId();
-            }
-            if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
-                sqlQuery = postgreSQL;
-            }
-            try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
-                ps.setInt(1, id);
-                ps.setInt(2, appID);
-                ps.setString(3, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-                try (ResultSet rs = ps.executeQuery()) {
-                    // returns only one row
-                    if (rs.next()) {
-                        workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
-                    }
-                }
-
-            }
-        } catch (SQLException e) {
-            handleException("Error occurred while getting workflow entry for " +
-                    "Subscription : " + subscriptionID, e);
-        }
-        return workflowExtRef;
-    }
-
-    /**
-     * Retries the WorkflowExternalReference for a subscription.
-     *
-     * @param subscriptionId ID of the subscription
-     * @return External workflow reference for the subscription <code>subscriptionId</code>
-     * @throws APIManagementException
-     */
-    public String getExternalWorkflowReferenceForSubscription(int subscriptionId) throws APIManagementException {
-
-        String workflowExtRef = null;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String sqlQuery = SQLConstants.GET_EXTERNAL_WORKFLOW_FOR_SUBSCRIPTION_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            // setting subscriptionId as string to prevent error when db finds string type IDs for
-            // ApplicationRegistration workflows
-            ps.setString(1, String.valueOf(subscriptionId));
-            ps.setString(2, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-            rs = ps.executeQuery();
-
-            // returns only one row
-            while (rs.next()) {
-                workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
-            }
-        } catch (SQLException e) {
-            handleException("Error occurred while getting workflow entry for " +
-                    "Subscription : " + subscriptionId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return workflowExtRef;
-    }
-
-    public String getExternalWorkflowReferenceForSubscriptionAndWFType(int subscriptionId, String wfType) throws APIManagementException {
-
-        String workflowExtRef = null;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String sqlQuery = SQLConstants.GET_EXTERNAL_WORKFLOW_FOR_SUBSCRIPTION_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            // setting subscriptionId as string to prevent error when db finds string type IDs for
-            // ApplicationRegistration workflows
-            ps.setString(1, String.valueOf(subscriptionId));
-            ps.setString(2, wfType);
-            rs = ps.executeQuery();
-
-            // returns only one row
-            while (rs.next()) {
-                workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
-            }
-        } catch (SQLException e) {
-            handleException("Error occurred while getting workflow entry for " +
-                    "Subscription : " + subscriptionId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return workflowExtRef;
-    }
-
-    /**
-     * Retries the WorkflowExternalReference for an user signup by DOMAIN/username.
-     *
-     * @param usernameWithDomain username of the signed up user inthe format of DOMAIN/username
-     * @return External workflow reference for the signup workflow entry
-     * @throws APIManagementException
-     */
-    public String getExternalWorkflowReferenceForUserSignup(String usernameWithDomain) throws APIManagementException {
-
-        String workflowExtRef = null;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String sqlQuery = SQLConstants.GET_EXTERNAL_WORKFLOW_FOR_SIGNUP_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, usernameWithDomain);
-            ps.setString(2, WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
-            rs = ps.executeQuery();
-
-            // returns only one row
-            while (rs.next()) {
-                workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
-            }
-        } catch (SQLException e) {
-            handleException("Error occurred while getting workflow entry for " +
-                    "User signup : " + usernameWithDomain, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return workflowExtRef;
     }
 
     /**
@@ -8802,107 +7956,6 @@ public class ApiMgtDAO {
         map.put(APIConstants.SubscriptionStatus.DELETE_PENDING, pendingDeleteSubscriptionIds);
         map.put(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING, pendingUpdateSubscriptionIds);
         return map;
-    }
-
-    /**
-     * Retrieves the IDs of pending subscriptions of a given API
-     *
-     * @param uuid API uuid
-     * @return set of subscriptions ids
-     * @throws APIManagementException
-     */
-    public Set<Integer> getPendingSubscriptionsByAPIId(String uuid) throws APIManagementException {
-
-        Set<Integer> pendingSubscriptions = new HashSet<Integer>();
-        String sqlQuery = SQLConstants.GET_SUBSCRIPTIONS_BY_API_SQL;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = connection.prepareStatement(sqlQuery);) {
-
-            ps.setString(1, uuid);
-            ps.setString(2, APIConstants.SubscriptionStatus.ON_HOLD);
-            try (ResultSet rs = ps.executeQuery();) {
-                while (rs.next()) {
-                    pendingSubscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
-                }
-            }
-
-        } catch (SQLException e) {
-            handleExceptionWithCode("Error occurred while retrieving subscription entries for API with UUID: " + uuid, e,
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        }
-        return pendingSubscriptions;
-    }
-
-    /**
-     * Retrieves registration workflow reference for applicationId and key type
-     *
-     * @param applicationId  id of the application with registration
-     * @param keyType        key type of the registration
-     * @param keyManagerName
-     * @return workflow reference of the registration
-     * @throws APIManagementException
-     */
-    public String getRegistrationWFReference(int applicationId, String keyType, String keyManagerName)
-            throws APIManagementException {
-
-        String reference = null;
-
-        String sqlQuery = SQLConstants.GET_REGISTRATION_WORKFLOW_SQL;
-        try (Connection conn = APIMgtDBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
-            ps.setInt(1, applicationId);
-            ps.setString(2, keyType);
-            ps.setString(3, keyManagerName);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                // returns only one row
-                if (rs.next()) {
-                    reference = rs.getString("WF_REF");
-                }
-            }
-
-        } catch (SQLException e) {
-            handleException("Error occurred while getting registration entry for " + "Application : " + applicationId,
-                    e);
-        }
-        return reference;
-    }
-
-    /**
-     * Retrives subscription status for APIIdentifier and applicationId
-     *
-     * @param uuid    API subscribed
-     * @param applicationId application with subscription
-     * @return subscription status
-     * @throws APIManagementException
-     */
-    public String getSubscriptionStatus(String uuid, int applicationId) throws APIManagementException {
-
-        String status = null;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        int id = -1;
-
-        String sqlQuery = SQLConstants.GET_SUBSCRIPTION_STATUS_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            id = getAPIID(uuid, conn);
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, id);
-            ps.setInt(2, applicationId);
-            rs = ps.executeQuery();
-
-            // returns only one row
-            while (rs.next()) {
-                status = rs.getString("SUB_STATUS");
-            }
-        } catch (SQLException e) {
-            handleException("Error occurred while getting subscription entry for " +
-                    "Application : " + applicationId + ", API with UUID: " + uuid, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return status;
     }
 
     /**
@@ -9656,8 +8709,10 @@ public class ApiMgtDAO {
      */
     private boolean isSecondaryLogin(String userId) {
 
-        Map<String, Map<String, String>> loginConfiguration = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getLoginConfiguration();
+        Map<String, Map<String, String>> loginConfiguration = null;
+        // TODO: Read from LoginConfiguration
+//                ServiceReferenceHolder.getInstance()
+//                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getLoginConfiguration();
         if (loginConfiguration.get(APIConstants.EMAIL_LOGIN) != null) {
             Map<String, String> emailConf = loginConfiguration.get(APIConstants.EMAIL_LOGIN);
             if ("true".equalsIgnoreCase(emailConf.get(APIConstants.PRIMARY_LOGIN))) {
@@ -9692,8 +8747,10 @@ public class ApiMgtDAO {
      */
     private String getPrimaryLoginFromSecondary(String login) throws APIManagementException {
 
-        Map<String, Map<String, String>> loginConfiguration = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getLoginConfiguration();
+        Map<String, Map<String, String>> loginConfiguration = null;
+          // TODO:  read from LoginConfiguration
+//        ServiceReferenceHolder.getInstance()
+//                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getLoginConfiguration();
         String claimURI, username = null;
         if (isUserLoggedInEmail(login)) {
             Map<String, String> emailConf = loginConfiguration.get(APIConstants.EMAIL_LOGIN);
@@ -9704,7 +8761,9 @@ public class ApiMgtDAO {
         }
 
         try {
-            String[] user = RemoteUserManagerClient.getInstance().getUserList(claimURI, login);
+            // TODO:  read from RemoteUserManagerClient
+            String[] user = new String[0];
+                    // RemoteUserManagerClient.getInstance().getUserList(claimURI, login);
             if (user.length > 0) {
                 username = user[0];
             }
@@ -10212,7 +9271,7 @@ public class ApiMgtDAO {
         String contextParam = "/t/";
 
         String query = SQLConstants.GET_API_NAME_NOT_MATCHING_CONTEXT_SQL;
-        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+        if (!SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             query = SQLConstants.GET_API_NAME_MATCHING_CONTEXT_SQL;
             contextParam += tenantDomain + '/';
         }
@@ -10262,7 +9321,7 @@ public class ApiMgtDAO {
         String contextParam = "/t/";
 
         String query = SQLConstants.GET_API_NAME_DIFF_CASE_NOT_MATCHING_CONTEXT_SQL;
-        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+        if (!SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             query = SQLConstants.GET_API_NAME_DIFF_CASE_MATCHING_CONTEXT_SQL;
             contextParam += tenantDomain + '/';
         }
@@ -12915,7 +11974,7 @@ public class ApiMgtDAO {
         policy.setDisplayName(resultSet.getString(ThrottlePolicyConstants.COLUMN_DISPLAY_NAME));
         policy.setPolicyId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
         policy.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
-        policy.setTenantDomain(IdentityTenantUtil.getTenantDomain(policy.getTenantId()));
+        policy.setTenantDomain(APIUtil.getTenantDomainFromTenantId(policy.getTenantId()));
         policy.setDefaultQuotaPolicy(quotaPolicy);
         policy.setDeployed(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
     }
@@ -13002,431 +12061,6 @@ public class ApiMgtDAO {
         return isDeployed;
     }
 
-    /**
-     * Add a block condition
-     *
-     * @return uuid of the block condition if successfully added
-     * @throws APIManagementException
-     */
-    public BlockConditionsDTO addBlockConditions(BlockConditionsDTO blockConditionsDTO) throws
-            APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement insertPreparedStatement = null;
-        boolean status = false;
-        boolean valid = false;
-        ResultSet rs = null;
-        String uuid = blockConditionsDTO.getUUID();
-        String conditionType = blockConditionsDTO.getConditionType();
-        String conditionValue = blockConditionsDTO.getConditionValue();
-        String tenantDomain = blockConditionsDTO.getTenantDomain();
-        String conditionStatus = String.valueOf(blockConditionsDTO.isEnabled());
-        try {
-            String query = ThrottleSQLConstants.ADD_BLOCK_CONDITIONS_SQL;
-            if (APIConstants.BLOCKING_CONDITIONS_API.equals(conditionType)) {
-                String extractedTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(conditionValue);
-                if (extractedTenantDomain == null) {
-                    extractedTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-                }
-                if (tenantDomain.equals(extractedTenantDomain) && isValidContext(conditionValue)) {
-                    valid = true;
-                } else {
-                    throw new APIManagementException("Couldn't Save Block Condition Due to Invalid API Context " +
-                            conditionValue, ExceptionCodes.BLOCK_CONDITION_UNSUPPORTED_API_CONTEXT);
-                }
-            } else if (APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(conditionType)) {
-                String appArray[] = conditionValue.split(":");
-                if (appArray.length > 1) {
-                    String appOwner = appArray[0];
-                    String appName = appArray[1];
-
-                    if ((MultitenantUtils.getTenantDomain(appOwner).equals(tenantDomain)) &&
-                            isValidApplication(appOwner, appName)) {
-                        valid = true;
-                    } else {
-                        throw new APIManagementException("Couldn't Save Block Condition Due to Invalid Application " +
-                                "name " + appName + " from Application " +
-                                "Owner " + appOwner, ExceptionCodes.BLOCK_CONDITION_UNSUPPORTED_APP_ID_NAME);
-                    }
-                }
-            } else if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
-                if (MultitenantUtils.getTenantDomain(conditionValue).equals(tenantDomain)) {
-                    valid = true;
-                } else {
-                    throw new APIManagementException("Invalid User in Tenant Domain " + tenantDomain,
-                            ExceptionCodes.INTERNAL_ERROR);
-                }
-            } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType) ||
-                    APIConstants.BLOCK_CONDITION_IP_RANGE.equals(conditionType)) {
-                valid = true;
-            } else if (APIConstants.BLOCKING_CONDITIONS_SUBSCRIPTION.equals(conditionType)) {
-                /* ATM this condition type will be used internally to handle subscription blockings for JWT type access
-                   tokens.
-                */
-                String[] conditionsArray = conditionValue.split(":");
-                if (conditionsArray.length > 0) {
-                    String apiContext = conditionsArray[0];
-                    String applicationIdentifier = conditionsArray[2];
-
-                    String[] app = applicationIdentifier.split("-", 2);
-                    String appOwner = app[0];
-                    String appName = app[1];
-
-                    // Check whether the given api context exists in tenant
-                    String extractedTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(apiContext);
-                    if (extractedTenantDomain == null) {
-                        extractedTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-                    }
-                    if (tenantDomain.equals(extractedTenantDomain) && isValidContext(apiContext)) {
-                        valid = true;
-                    } else {
-                        throw new APIManagementException(
-                                "Couldn't Save Subscription Block Condition Due to Invalid API Context "
-                                        + apiContext, ExceptionCodes.BLOCK_CONDITION_UNSUPPORTED_API_CONTEXT);
-                    }
-
-                    // Check whether the given application is valid
-                    if ((MultitenantUtils.getTenantDomain(appOwner).equals(tenantDomain)) &&
-                            isValidApplication(appOwner, appName)) {
-                        valid = true;
-                    } else {
-                        throw new APIManagementException(
-                                "Couldn't Save Subscription Block Condition Due to Invalid Application " + "name "
-                                        + appName + " from Application " + "Owner " + appOwner,
-                                ExceptionCodes.BLOCK_CONDITION_UNSUPPORTED_APP_ID_NAME);
-                    }
-                } else {
-                    throw new APIManagementException(
-                            "Invalid subscription block condition with insufficient data : " + conditionValue,
-                            ExceptionCodes.INTERNAL_ERROR);
-                }
-            }
-            if (valid) {
-                connection = APIMgtDBUtil.getConnection();
-                connection.setAutoCommit(false);
-                if (!isBlockConditionExist(conditionType, conditionValue, tenantDomain, connection)) {
-                    String dbProductName = connection.getMetaData().getDatabaseProductName();
-                    insertPreparedStatement = connection.prepareStatement(query,
-                            new String[]{DBUtils.getConvertedAutoGeneratedColumnName(dbProductName, "CONDITION_ID")});
-                    insertPreparedStatement.setString(1, conditionType);
-                    insertPreparedStatement.setString(2, conditionValue);
-                    insertPreparedStatement.setString(3, conditionStatus);
-                    insertPreparedStatement.setString(4, tenantDomain);
-                    insertPreparedStatement.setString(5, uuid);
-                    insertPreparedStatement.execute();
-                    ResultSet generatedKeys = insertPreparedStatement.getGeneratedKeys();
-                    if (generatedKeys != null && generatedKeys.next()) {
-                        blockConditionsDTO.setConditionId(generatedKeys.getInt(1));
-                    }
-                    connection.commit();
-                    status = true;
-                } else {
-                    throw new BlockConditionAlreadyExistsException(
-                            "Condition with type: " + conditionType + ", value: " + conditionValue + " already exists");
-                }
-            }
-        } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    handleExceptionWithCode(
-                            "Failed to rollback adding Block condition : " + conditionType + " and " + conditionValue,
-                            ex, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-                }
-            }
-            handleExceptionWithCode("Failed to add Block condition : " + conditionType + " and " + conditionValue, e,
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(insertPreparedStatement, connection, null);
-        }
-        if (status) {
-            return blockConditionsDTO;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Get details of a block condition by Id
-     *
-     * @param conditionId id of the condition
-     * @return Block conditoin represented by the UUID
-     * @throws APIManagementException
-     */
-    public BlockConditionsDTO getBlockCondition(int conditionId) throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement selectPreparedStatement = null;
-        ResultSet resultSet = null;
-        BlockConditionsDTO blockCondition = null;
-        try {
-            String query = ThrottleSQLConstants.GET_BLOCK_CONDITION_SQL;
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(true);
-            selectPreparedStatement = connection.prepareStatement(query);
-            selectPreparedStatement.setInt(1, conditionId);
-            resultSet = selectPreparedStatement.executeQuery();
-            if (resultSet.next()) {
-                blockCondition = new BlockConditionsDTO();
-                blockCondition.setEnabled(resultSet.getBoolean("ENABLED"));
-                blockCondition.setConditionType(resultSet.getString("TYPE"));
-                blockCondition.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
-                blockCondition.setConditionId(conditionId);
-                blockCondition.setTenantDomain(resultSet.getString("DOMAIN"));
-                blockCondition.setUUID(resultSet.getString("UUID"));
-            }
-        } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    handleException("Failed to rollback getting Block condition with id " + conditionId, ex);
-                }
-            }
-            handleException("Failed to get Block condition with id " + conditionId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
-        }
-        return blockCondition;
-    }
-
-    /**
-     * Get details of a block condition by UUID
-     *
-     * @param uuid uuid of the block condition
-     * @return Block condition represented by the UUID
-     * @throws APIManagementException
-     */
-    public BlockConditionsDTO getBlockConditionByUUID(String uuid) throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement selectPreparedStatement = null;
-        ResultSet resultSet = null;
-        BlockConditionsDTO blockCondition = null;
-        try {
-            String query = ThrottleSQLConstants.GET_BLOCK_CONDITION_BY_UUID_SQL;
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(true);
-            selectPreparedStatement = connection.prepareStatement(query);
-            selectPreparedStatement.setString(1, uuid);
-            resultSet = selectPreparedStatement.executeQuery();
-            if (resultSet.next()) {
-                blockCondition = new BlockConditionsDTO();
-                blockCondition.setEnabled(resultSet.getBoolean("ENABLED"));
-                blockCondition.setConditionType(resultSet.getString("TYPE"));
-                blockCondition.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
-                blockCondition.setConditionId(resultSet.getInt("CONDITION_ID"));
-                blockCondition.setTenantDomain(resultSet.getString("DOMAIN"));
-                blockCondition.setUUID(resultSet.getString("UUID"));
-            }
-        } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    handleExceptionWithCode("Failed to rollback getting Block condition by uuid " + uuid, ex,
-                            ExceptionCodes.APIMGT_DAO_EXCEPTION);
-                }
-            }
-            handleExceptionWithCode("Failed to get Block condition by uuid " + uuid, e,
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
-        }
-        return blockCondition;
-    }
-
-    public List<BlockConditionsDTO> getBlockConditions(String tenantDomain) throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement selectPreparedStatement = null;
-        ResultSet resultSet = null;
-        List<BlockConditionsDTO> blockConditionsDTOList = new ArrayList<BlockConditionsDTO>();
-        try {
-            String query = ThrottleSQLConstants.GET_BLOCK_CONDITIONS_SQL;
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(true);
-            selectPreparedStatement = connection.prepareStatement(query);
-            selectPreparedStatement.setString(1, tenantDomain);
-            resultSet = selectPreparedStatement.executeQuery();
-            while (resultSet.next()) {
-                BlockConditionsDTO blockConditionsDTO = new BlockConditionsDTO();
-                blockConditionsDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                blockConditionsDTO.setConditionType(resultSet.getString("TYPE"));
-                blockConditionsDTO.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
-                blockConditionsDTO.setConditionId(resultSet.getInt("CONDITION_ID"));
-                blockConditionsDTO.setUUID(resultSet.getString("UUID"));
-                blockConditionsDTO.setTenantDomain(resultSet.getString("DOMAIN"));
-                blockConditionsDTOList.add(blockConditionsDTO);
-            }
-        } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    handleExceptionWithCode("Failed to rollback getting Block conditions ", ex,
-                            ExceptionCodes.APIMGT_DAO_EXCEPTION);
-                }
-            }
-            handleExceptionWithCode("Failed to get Block conditions", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
-        }
-        return blockConditionsDTOList;
-    }
-
-    /**
-     * Update the block condition state true (Enabled) /false (Disabled) given the UUID
-     *
-     * @param conditionId id of the block condition
-     * @param state       blocking state
-     * @return true if the operation was success
-     * @throws APIManagementException
-     */
-    public boolean updateBlockConditionState(int conditionId, String state) throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement updateBlockConditionPreparedStatement = null;
-        boolean status = false;
-        try {
-            String query = ThrottleSQLConstants.UPDATE_BLOCK_CONDITION_STATE_SQL;
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            updateBlockConditionPreparedStatement = connection.prepareStatement(query);
-            updateBlockConditionPreparedStatement.setString(1, state.toUpperCase());
-            updateBlockConditionPreparedStatement.setInt(2, conditionId);
-            updateBlockConditionPreparedStatement.executeUpdate();
-            connection.commit();
-            status = true;
-        } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    handleException("Failed to rollback updating Block condition with condition id " + conditionId, ex);
-                }
-            }
-            handleException("Failed to update Block condition with condition id " + conditionId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(updateBlockConditionPreparedStatement, connection, null);
-        }
-        return status;
-    }
-
-    /**
-     * Update the block condition state true (Enabled) /false (Disabled) given the UUID
-     *
-     * @param uuid  UUID of the block condition
-     * @param state blocking state
-     * @return true if the operation was success
-     * @throws APIManagementException
-     */
-    public boolean updateBlockConditionStateByUUID(String uuid, String state) throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement updateBlockConditionPreparedStatement = null;
-        boolean status = false;
-        try {
-            String query = ThrottleSQLConstants.UPDATE_BLOCK_CONDITION_STATE_BY_UUID_SQL;
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            updateBlockConditionPreparedStatement = connection.prepareStatement(query);
-            updateBlockConditionPreparedStatement.setString(1, state.toUpperCase());
-            updateBlockConditionPreparedStatement.setString(2, uuid);
-            updateBlockConditionPreparedStatement.executeUpdate();
-            connection.commit();
-            status = true;
-        } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    handleExceptionWithCode("Failed to rollback updating Block condition with condition UUID " + uuid,
-                            ex, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-                }
-            }
-            handleExceptionWithCode("Failed to update Block condition with condition UUID " + uuid, e,
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(updateBlockConditionPreparedStatement, connection, null);
-        }
-        return status;
-    }
-
-    /**
-     * Delete the block condition given the id
-     *
-     * @param conditionId id of the condition
-     * @return true if successfully deleted
-     * @throws APIManagementException
-     */
-    public boolean deleteBlockCondition(int conditionId) throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement deleteBlockConditionPreparedStatement = null;
-        boolean status = false;
-        try {
-            String query = ThrottleSQLConstants.DELETE_BLOCK_CONDITION_SQL;
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            deleteBlockConditionPreparedStatement = connection.prepareStatement(query);
-            deleteBlockConditionPreparedStatement.setInt(1, conditionId);
-            status = deleteBlockConditionPreparedStatement.execute();
-            connection.commit();
-            status = true;
-        } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    handleExceptionWithCode("Failed to rollback deleting Block condition with condition id "
-                            + conditionId, ex, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-                }
-            }
-            handleExceptionWithCode("Failed to delete Block condition with condition id " + conditionId, e,
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(deleteBlockConditionPreparedStatement, connection, null);
-        }
-        return status;
-    }
-
-    /**
-     * Delete the block condition given the id
-     *
-     * @param uuid UUID of the block condition
-     * @return true if successfully deleted
-     * @throws APIManagementException
-     */
-    public boolean deleteBlockConditionByUUID(String uuid) throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement deleteBlockConditionPreparedStatement = null;
-        boolean status = false;
-        try {
-            String query = ThrottleSQLConstants.DELETE_BLOCK_CONDITION_BY_UUID_SQL;
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            deleteBlockConditionPreparedStatement = connection.prepareStatement(query);
-            deleteBlockConditionPreparedStatement.setString(1, uuid);
-            status = deleteBlockConditionPreparedStatement.execute();
-            connection.commit();
-            status = true;
-        } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    handleException("Failed to rollback deleting Block condition with condition UUID " + uuid, ex);
-                }
-            }
-            handleException("Failed to delete Block condition with condition UUID " + uuid, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(deleteBlockConditionPreparedStatement, connection, null);
-        }
-        return status;
-    }
 
     private boolean isValidContext(String context) throws APIManagementException {
 
@@ -14414,7 +13048,7 @@ public class ApiMgtDAO {
             }
 
             addAPIProductResourceMappings(apiProduct.getProductResources(), apiProduct.getOrganization(), connection);
-            String tenantUserName = MultitenantUtils
+            String tenantUserName = APIUtil
                     .getTenantAwareUsername(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             recordAPILifeCycleEvent(productId, null, APIStatus.CREATED.toString(), tenantUserName, tenantId,
@@ -15530,242 +14164,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
         return list;
-    }
-
-    /**
-     * Remove the Pending workflow Requests using ExternalWorkflowReference
-     *
-     * @param workflowExtRef External Workflow Reference of Workflow Pending Request
-     * @throws APIManagementException
-     */
-    public void deleteWorkflowRequest(String workflowExtRef) throws APIManagementException {
-
-        String query = SQLConstants.DELETE_WORKFLOW_REQUEST_SQL;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(query)) {
-            try {
-                connection.setAutoCommit(false);
-                prepStmt.setString(1, workflowExtRef);
-                prepStmt.executeUpdate();
-                connection.commit();
-            } catch (SQLException e) {
-                handleException("Failed to delete the workflow request. ", e);
-            } finally {
-                APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
-            }
-        } catch (SQLException e) {
-            handleException("Failed to delete the workflow request. ", e);
-        }
-    }
-
-    /**
-     * Get the Pending workflow Request using ExternalWorkflowReference
-     *
-     * @param externalWorkflowRef
-     * @return workflow pending request
-     * @throws APIManagementException
-     */
-    public Workflow getworkflowReferenceByExternalWorkflowReference(String externalWorkflowRef) throws APIManagementException {
-
-        ResultSet rs = null;
-        Workflow workflow = new Workflow();
-        String sqlQuery = SQLConstants.GET_ALL_WORKFLOW_DETAILS_BY_EXTERNALWORKFLOWREF;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
-            try {
-                prepStmt.setString(1, externalWorkflowRef);
-                rs = prepStmt.executeQuery();
-
-                while (rs.next()) {
-                    workflow.setWorkflowId(rs.getInt("WF_ID"));
-                    workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
-                    workflow.setWorkflowType(rs.getString("WF_TYPE"));
-                    String workflowstatus = rs.getString("WF_STATUS");
-                    workflow.setStatus(org.wso2.carbon.apimgt.api.WorkflowStatus.valueOf(workflowstatus));
-                    workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toString());
-                    workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toString());
-                    workflow.setWorkflowStatusDesc(rs.getString("WF_STATUS_DESC"));
-                    workflow.setTenantId(rs.getInt("TENANT_ID"));
-                    workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
-                    workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-                    InputStream metadatablob = rs.getBinaryStream("WF_METADATA");
-
-                    byte[] metadataByte;
-                    if (metadatablob != null) {
-                        String metadata = APIMgtDBUtil.getStringFromInputStream(metadatablob);
-                        Gson metadataGson = new Gson();
-                        JSONObject metadataJson = metadataGson.fromJson(metadata, JSONObject.class);
-                        workflow.setMetadata(metadataJson);
-                    } else {
-                        JSONObject metadataJson = new JSONObject();
-                        workflow.setMetadata(metadataJson);
-                    }
-                }
-            } catch (SQLException e) {
-                handleException("Error when retriving the workflow details. ", e);
-            } finally {
-                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-            }
-        } catch (SQLException e) {
-            handleException("Error when retriving the workflow details. ", e);
-        }
-        return workflow;
-    }
-
-    /**
-     * Get the Pending workflow Requests using WorkflowType for a particular tenant
-     *
-     * @param workflowType Type of the workflow pending request
-     * @param status       workflow status of workflow pending request
-     * @param tenantDomain tenantDomain of the user
-     * @return List of workflow pending request
-     * @throws APIManagementException
-     */
-    public Workflow[] getworkflows(String workflowType, String status, String tenantDomain) throws APIManagementException {
-
-        ResultSet rs = null;
-        Workflow[] workflows = null;
-        String sqlQuery;
-        if (workflowType != null) {
-            sqlQuery = SQLConstants.GET_ALL_WORKFLOW_DETAILS_BY_WORKFLOW_TYPE;
-        } else {
-            sqlQuery = SQLConstants.GET_ALL_WORKFLOW_DETAILS;
-        }
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
-            try {
-                if (workflowType != null) {
-                    prepStmt.setString(1, workflowType);
-                    prepStmt.setString(2, status);
-                    prepStmt.setString(3, tenantDomain);
-                } else {
-                    prepStmt.setString(1, status);
-                    prepStmt.setString(2, tenantDomain);
-                }
-                rs = prepStmt.executeQuery();
-
-                ArrayList<Workflow> workflowsList = new ArrayList<Workflow>();
-                Workflow workflow;
-                while (rs.next()) {
-                    workflow = new Workflow();
-                    workflow.setWorkflowId(rs.getInt("WF_ID"));
-                    workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
-                    workflow.setWorkflowType(rs.getString("WF_TYPE"));
-                    String workflowstatus = rs.getString("WF_STATUS");
-                    workflow.setStatus(org.wso2.carbon.apimgt.api.WorkflowStatus.valueOf(workflowstatus));
-                    workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toString());
-                    workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toString());
-                    workflow.setWorkflowStatusDesc(rs.getString("WF_STATUS_DESC"));
-                    workflow.setTenantId(rs.getInt("TENANT_ID"));
-                    workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
-                    workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-                    workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
-                    InputStream metadataBlob = rs.getBinaryStream("WF_METADATA");
-                    InputStream propertiesBlob = rs.getBinaryStream("WF_PROPERTIES");
-
-                    if (metadataBlob != null) {
-                        String metadata = APIMgtDBUtil.getStringFromInputStream(metadataBlob);
-                        Gson metadataGson = new Gson();
-                        JSONObject metadataJson = metadataGson.fromJson(metadata, JSONObject.class);
-                        workflow.setMetadata(metadataJson);
-                    } else {
-                        JSONObject metadataJson = new JSONObject();
-                        workflow.setMetadata(metadataJson);
-                    }
-
-                    if (propertiesBlob != null) {
-                        String properties = APIMgtDBUtil.getStringFromInputStream(propertiesBlob);
-                        Gson propertiesGson = new Gson();
-                        JSONObject propertiesJson = propertiesGson.fromJson(properties, JSONObject.class);
-                        workflow.setProperties(propertiesJson);
-                    } else {
-                        JSONObject propertiesJson = new JSONObject();
-                        workflow.setProperties(propertiesJson);
-                    }
-                    workflowsList.add(workflow);
-                }
-                workflows = workflowsList.toArray(new Workflow[workflowsList.size()]);
-            } catch (SQLException e) {
-                handleExceptionWithCode("Error when retrieve all the workflow details. ", e,
-                        ExceptionCodes.APIMGT_DAO_EXCEPTION);
-            } finally {
-                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-            }
-        } catch (SQLException e) {
-            handleExceptionWithCode("Error when retrieve all the workflow details. ", e,
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        }
-        return workflows;
-    }
-
-    /**
-     * Get the Pending workflow Request using ExternalWorkflowReference for a particular tenant
-     *
-     * @param externelWorkflowRef of pending workflow request
-     * @param status              workflow status of workflow pending process
-     * @param tenantDomain        tenant domain of user
-     * @return workflow pending request
-     */
-    public Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status,
-                                                                      String tenantDomain) throws APIManagementException {
-
-        ResultSet rs = null;
-        Workflow workflow = new Workflow();
-        String sqlQuery = SQLConstants.GET_ALL_WORKFLOW_DETAILS_BY_EXTERNAL_WORKFLOW_REFERENCE;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
-            try {
-                prepStmt.setString(1, externelWorkflowRef);
-                prepStmt.setString(2, status);
-                prepStmt.setString(3, tenantDomain);
-                rs = prepStmt.executeQuery();
-
-                while (rs.next()) {
-                    workflow.setWorkflowId(rs.getInt("WF_ID"));
-                    workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
-                    workflow.setWorkflowType(rs.getString("WF_TYPE"));
-                    String workflowstatus = rs.getString("WF_STATUS");
-                    workflow.setStatus(org.wso2.carbon.apimgt.api.WorkflowStatus.valueOf(workflowstatus));
-                    workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toString());
-                    workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toString());
-                    workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
-                    workflow.setTenantId(rs.getInt("TENANT_ID"));
-                    workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
-                    workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-                    InputStream targetStream = rs.getBinaryStream("WF_METADATA");
-                    InputStream propertiesTargetStream = rs.getBinaryStream("WF_PROPERTIES");
-
-                    if (targetStream != null) {
-                        String metadata = APIMgtDBUtil.getStringFromInputStream(targetStream);
-                        Gson metadataGson = new Gson();
-                        JSONObject metadataJson = metadataGson.fromJson(metadata, JSONObject.class);
-                        workflow.setMetadata(metadataJson);
-                    } else {
-                        JSONObject metadataJson = new JSONObject();
-                        workflow.setMetadata(metadataJson);
-                    }
-
-                    if (propertiesTargetStream != null) {
-                        String properties = APIMgtDBUtil.getStringFromInputStream(propertiesTargetStream);
-                        Gson propertiesGson = new Gson();
-                        JSONObject propertiesJson = propertiesGson.fromJson(properties, JSONObject.class);
-                        workflow.setProperties(propertiesJson);
-                    } else {
-                        JSONObject propertiesJson = new JSONObject();
-                        workflow.setProperties(propertiesJson);
-                    }
-                }
-            } catch (SQLException e) {
-                handleExceptionWithCode("Error when retriving the workflow details. ", e,
-                        ExceptionCodes.APIMGT_DAO_EXCEPTION);
-            } finally {
-                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-            }
-        } catch (SQLException e) {
-            handleExceptionWithCode("Error when retriving the workflow details. ", e,
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        }
-        return workflow;
     }
 
     /**

@@ -20,12 +20,12 @@ package org.wso2.apk.apimgt.impl.dao;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtDAOException;
-import org.wso2.carbon.apimgt.api.ErrorHandler;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.APIMgtDAOException;
+import org.wso2.apk.apimgt.api.ErrorHandler;
+import org.wso2.apk.apimgt.api.ExceptionCodes;
+import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

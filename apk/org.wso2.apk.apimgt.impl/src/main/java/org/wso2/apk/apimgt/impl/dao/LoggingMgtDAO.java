@@ -19,13 +19,13 @@ package org.wso2.apk.apimgt.impl.dao;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.ApiLoggingMgtException;
-import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.dto.APILogInfoDTO;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.ExceptionCodes;
+import org.wso2.apk.apimgt.impl.APIConstants;
+import org.wso2.apk.apimgt.impl.ApiLoggingMgtException;
+import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.apk.apimgt.impl.dto.APILogInfoDTO;
+import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

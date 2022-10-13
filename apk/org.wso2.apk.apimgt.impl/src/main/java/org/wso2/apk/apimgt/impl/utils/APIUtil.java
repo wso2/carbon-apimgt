@@ -3443,6 +3443,17 @@ public final class APIUtil {
         return -1;
     }
 
+    public static String getTenantDomainFromRequestURL(String requestURI) {
+        String domain = null;
+        if (requestURI.contains("/t/")) {
+            int index = requestURI.indexOf("/t/");
+            int endIndex = requestURI.indexOf("/", index + 3);
+            domain = endIndex != -1 ? requestURI.substring(index + 3, endIndex) : requestURI.substring(index + 3);
+        }
+
+        return domain;
+    }
+
     /**
      * Helper method to get tenantId from organization
      *
@@ -3451,7 +3462,7 @@ public final class APIUtil {
      */
     public static int getInternalIdFromTenantDomainOrOrganization(String organization) {
         if (organization == null) {
-            return MultitenantConstants.SUPER_TENANT_ID;
+            return SUPER_TENANT_ID;
         }
         try {
             return getInternalOrganizationId(organization);
@@ -3476,9 +3487,27 @@ public final class APIUtil {
         return null;
     }
 
+    public static String getTenantDomain(String username) {
+        try {
+            return UserManagerHolder.getUserManager().getTenantDomain(username);
+        } catch (UserException e) {
+            log.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public static String getTenantAwareUsername(String username) {
+        try {
+            return UserManagerHolder.getUserManager().getTenantAwareUsername(username);
+        } catch (UserException e) {
+            log.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
     public static int getSuperTenantId() {
 
-        return MultitenantConstants.SUPER_TENANT_ID;
+        return -1234;
     }
 
     /**
@@ -3490,9 +3519,9 @@ public final class APIUtil {
     public static String getUserNameWithTenantSuffix(String userName) {
 
         String userNameWithTenantPrefix = userName;
-        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
-        if (userName != null && !userName.endsWith("@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)
-                && MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+        String tenantDomain = getTenantDomain(userName);
+        if (userName != null && !userName.endsWith("@" + SUPER_TENANT_DOMAIN_NAME)
+                && SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             userNameWithTenantPrefix = userName + "@" + tenantDomain;
         }
 
