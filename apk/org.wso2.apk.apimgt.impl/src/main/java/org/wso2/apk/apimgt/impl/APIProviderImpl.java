@@ -157,19 +157,40 @@ import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.apk.apimgt.impl.utils.ContentSearchResultNameComparator;
 //import org.wso2.apk.apimgt.impl.utils.LifeCycleUtils;
-import org.wso2.apk.apimgt.impl.workflow.APIStateWorkflowDTO;
-import org.wso2.apk.apimgt.impl.workflow.WorkflowConstants;
-import org.wso2.apk.apimgt.impl.workflow.WorkflowException;
-import org.wso2.apk.apimgt.impl.workflow.WorkflowExecutor;
-import org.wso2.apk.apimgt.impl.workflow.WorkflowExecutorFactory;
-import org.wso2.apk.apimgt.impl.workflow.WorkflowStatus;
+//import org.wso2.apk.apimgt.impl.workflow.APIStateWorkflowDTO;
+//import org.wso2.apk.apimgt.impl.workflow.WorkflowConstants;
+//import org.wso2.apk.apimgt.impl.workflow.WorkflowException;
+//import org.wso2.apk.apimgt.impl.workflow.WorkflowExecutor;
+//import org.wso2.apk.apimgt.impl.workflow.WorkflowExecutorFactory;
+//import org.wso2.apk.apimgt.impl.workflow.WorkflowStatus;
 //import org.wso2.apk.apimgt.impl.wsdl.WSDLProcessor;
-import org.wso2.carbon.apimgt.persistence.dto.*;
-import org.wso2.carbon.apimgt.persistence.exceptions.*;
-import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
-import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
-import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
-import org.wso2.apk.apimgt.user.ctx.UserContext;
+import org.wso2.apk.apimgt.impl.dao.dto.DocumentContent;
+import org.wso2.apk.apimgt.impl.dao.dto.DocumentSearchContent;
+import org.wso2.apk.apimgt.impl.dao.dto.DocumentSearchResult;
+import org.wso2.apk.apimgt.impl.dao.dto.MediationInfo;
+import org.wso2.apk.apimgt.impl.dao.dto.Organization;
+import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPI;
+import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPIInfo;
+import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPIProduct;
+import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPIProductInfo;
+import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPIProductSearchResult;
+import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPISearchResult;
+import org.wso2.apk.apimgt.impl.dao.dto.PublisherContentSearchResult;
+import org.wso2.apk.apimgt.impl.dao.dto.PublisherSearchContent;
+import org.wso2.apk.apimgt.impl.dao.dto.SearchContent;
+import org.wso2.apk.apimgt.impl.dao.dto.UserContext;
+import org.wso2.apk.apimgt.impl.dao.exceptions.APIPersistenceException;
+import org.wso2.apk.apimgt.impl.dao.exceptions.AsyncSpecPersistenceException;
+import org.wso2.apk.apimgt.impl.dao.exceptions.DocumentationPersistenceException;
+import org.wso2.apk.apimgt.impl.dao.exceptions.GraphQLPersistenceException;
+import org.wso2.apk.apimgt.impl.dao.exceptions.MediationPolicyPersistenceException;
+import org.wso2.apk.apimgt.impl.dao.exceptions.OASPersistenceException;
+import org.wso2.apk.apimgt.impl.dao.exceptions.ThumbnailPersistenceException;
+import org.wso2.apk.apimgt.impl.dao.exceptions.WSDLPersistenceException;
+import org.wso2.apk.apimgt.impl.dao.mapper.APIMapper;
+import org.wso2.apk.apimgt.impl.dao.mapper.APIProductMapper;
+import org.wso2.apk.apimgt.impl.dao.mapper.DocumentMapper;
+//import org.wso2.apk.apimgt.user.ctx.UserContext;
 import org.wso2.apk.apimgt.user.exceptions.UserException;
 import org.wso2.apk.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.databridge.commons.Event;
@@ -212,7 +233,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected ImportExportAPI importExportAPI;
     protected GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
 //    private RecommendationEnvironment recommendationEnvironment;
-//    private GlobalMediationPolicyImpl globalMediationPolicyImpl;
+    private GlobalMediationPolicyImpl globalMediationPolicyImpl;
     private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig:";
 
     public APIProviderImpl(String username) throws APIManagementException {
@@ -224,7 +245,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 //        this.gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
 //        this.recommendationEnvironment = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
 //                .getAPIManagerConfiguration().getApiRecommendationEnvironment();
-//        globalMediationPolicyImpl = new GlobalMediationPolicyImpl(organization);
+        globalMediationPolicyImpl = new GlobalMediationPolicyImpl(organization);
     }
 
     protected String getUserNameWithoutChange() {
@@ -409,7 +430,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private OMElement createThrottlePolicy(Tier tier) throws APIManagementException {
         OMElement throttlePolicy = null;
-        String policy = org.wso2.carbon.apimgt.impl.APIConstants.THROTTLE_POLICY_TEMPLATE;
+        String policy = APIConstants.THROTTLE_POLICY_TEMPLATE;
 
         StringBuilder attributeBuilder = new StringBuilder();
         Map<String, Object> tierAttributes = tier.getTierAttributes();
@@ -422,7 +443,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                     // We see whether the attribute name is empty.
                     if (!attributeName.isEmpty()) {
-                        attributeBuilder.append(String.format(org.wso2.carbon.apimgt.impl.APIConstants.THROTTLE_POLICY_ATTRIBUTE_TEMPLATE,
+                        attributeBuilder.append(String.format(APIConstants.THROTTLE_POLICY_ATTRIBUTE_TEMPLATE,
                                 attributeName, attributeValue, attributeName));
                     }
                 } else {
@@ -435,20 +456,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         // We add the "description", "billing plan" and "stop on quota reach" as custom attributes
-        attributeBuilder.append(String.format(org.wso2.carbon.apimgt.impl.APIConstants.THROTTLE_POLICY_ATTRIBUTE_TEMPLATE,
-                org.wso2.carbon.apimgt.impl.APIConstants.THROTTLE_TIER_DESCRIPTION_ATTRIBUTE,
+        attributeBuilder.append(String.format(APIConstants.THROTTLE_POLICY_ATTRIBUTE_TEMPLATE,
+                APIConstants.THROTTLE_TIER_DESCRIPTION_ATTRIBUTE,
                 tier.getDescription().trim(),
-                org.wso2.carbon.apimgt.impl.APIConstants.THROTTLE_TIER_DESCRIPTION_ATTRIBUTE));
+                APIConstants.THROTTLE_TIER_DESCRIPTION_ATTRIBUTE));
 
-        attributeBuilder.append(String.format(org.wso2.carbon.apimgt.impl.APIConstants.THROTTLE_POLICY_ATTRIBUTE_TEMPLATE,
-                org.wso2.carbon.apimgt.impl.APIConstants.THROTTLE_TIER_PLAN_ATTRIBUTE,
+        attributeBuilder.append(String.format(APIConstants.THROTTLE_POLICY_ATTRIBUTE_TEMPLATE,
+                APIConstants.THROTTLE_TIER_PLAN_ATTRIBUTE,
                 tier.getTierPlan().trim(),
-                org.wso2.carbon.apimgt.impl.APIConstants.THROTTLE_TIER_PLAN_ATTRIBUTE));
+                APIConstants.THROTTLE_TIER_PLAN_ATTRIBUTE));
 
-        attributeBuilder.append(String.format(org.wso2.carbon.apimgt.impl.APIConstants.THROTTLE_POLICY_ATTRIBUTE_TEMPLATE,
-                org.wso2.carbon.apimgt.impl.APIConstants.THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE,
+        attributeBuilder.append(String.format(APIConstants.THROTTLE_POLICY_ATTRIBUTE_TEMPLATE,
+                APIConstants.THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE,
                 String.valueOf(tier.isStopOnQuotaReached()),
-                org.wso2.carbon.apimgt.impl.APIConstants.THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE));
+                APIConstants.THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE));
 
         // Note: We assume that the unit time is in milliseconds.
         policy = String.format(policy, tier.getName(), tier.getRequestCount(), tier.getUnitTime(),
@@ -505,13 +526,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         addAPI(api, tenantId);
 
         JSONObject apiLogObject = new JSONObject();
-        apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
-        apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.CONTEXT, api.getContext());
-        apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
-        apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+        apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+        apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
+        apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+        apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
 
-        APIUtil.logAuditMessage(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.API, apiLogObject.toString(),
-                org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.CREATED, this.username);
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                APIConstants.AuditLogConstants.CREATED, this.username);
 
         if (log.isDebugEnabled()) {
             log.debug("API details successfully added to the API Manager Database. API Name: " + api.getId()
@@ -561,10 +582,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 //        addURITemplates(apiId, api, tenantId);
         //TODO:APK
 //        APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-//                org.wso2.carbon.apimgt.impl.APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
+//                APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
 //                apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
 //                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus());
-//        APIUtil.sendNotification(apiEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.API.name());
+//        APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
     //TODO:APK
@@ -743,7 +764,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, message));
         } else if (containsIllegals(apiName)) {
             String message = "API Name contains one or more illegal characters  " +
-                    "( " + org.wso2.carbon.apimgt.impl.APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )";
+                    "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )";
             throw new APIManagementException(message,
                     ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, message));
         }
@@ -753,14 +774,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, message));
         } else if (containsIllegals(apiVersion)) {
             String message = "API Version contains one or more illegal characters  " +
-                    "( " + org.wso2.carbon.apimgt.impl.APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )";
+                    "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )";
             throw new APIManagementException(message,
                     ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, message));
         }
-        if (!hasValidLength(apiName, org.wso2.carbon.apimgt.impl.APIConstants.MAX_LENGTH_API_NAME)
-                || !hasValidLength(apiVersion, org.wso2.carbon.apimgt.impl.APIConstants.MAX_LENGTH_VERSION)
-                || !hasValidLength(api.getId().getProviderName(), org.wso2.carbon.apimgt.impl.APIConstants.MAX_LENGTH_PROVIDER)
-                || !hasValidLength(api.getContext(), org.wso2.carbon.apimgt.impl.APIConstants.MAX_LENGTH_CONTEXT)
+        if (!hasValidLength(apiName, APIConstants.MAX_LENGTH_API_NAME)
+                || !hasValidLength(apiVersion, APIConstants.MAX_LENGTH_VERSION)
+                || !hasValidLength(api.getId().getProviderName(), APIConstants.MAX_LENGTH_PROVIDER)
+                || !hasValidLength(api.getContext(), APIConstants.MAX_LENGTH_CONTEXT)
                 ) {
             throw new APIManagementException("Character length exceeds the allowable limit",
                     ExceptionCodes.LENGTH_EXCEEDS);
@@ -793,7 +814,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return true if found illegal characters, else false
      */
     public boolean containsIllegals(String toExamine) {
-        Pattern pattern = Pattern.compile(org.wso2.carbon.apimgt.impl.APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA);
+        Pattern pattern = Pattern.compile(APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA);
         Matcher matcher = pattern.matcher(toExamine);
         return matcher.find();
     }
@@ -841,11 +862,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 //    private void sendUpdateEventToPreviousDefaultVersion(APIIdentifier apiIdentifier, String organization) throws APIManagementException {
 //        API api = apiDAOImpl.getLightWeightAPIInfoByAPIIdentifier(organization,apiIdentifier);
 //        APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-//                org.wso2.carbon.apimgt.impl.APIConstants.EventType.API_UPDATE.name(), tenantId, organization, apiIdentifier.getApiName(),
+//                APIConstants.EventType.API_UPDATE.name(), tenantId, organization, apiIdentifier.getApiName(),
 //                api.getId().getId(), api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
 //                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
-//                api.getStatus(), org.wso2.carbon.apimgt.impl.APIConstants.EventAction.DEFAULT_VERSION);
-//        APIUtil.sendNotification(apiEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.API.name());
+//                api.getStatus(), APIConstants.EventAction.DEFAULT_VERSION);
+//        APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 //    }
 
     public API updateAPI(API api, API existingAPI) throws APIManagementException {
@@ -915,16 +936,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         JSONObject apiLogObject = new JSONObject();
-        apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
-        apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.CONTEXT, api.getContext());
-        apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
-        apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+        apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+        apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
+        apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+        apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
 
         api.setCreatedTime(existingAPI.getCreatedTime());
         apiDAOImpl.updateAPIArtifact(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
 
-        APIUtil.logAuditMessage(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.API, apiLogObject.toString(),
-                org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.UPDATED, this.username);
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                APIConstants.AuditLogConstants.UPDATED, this.username);
 
         //Validate Transports
         validateAndSetTransports(api);
@@ -955,15 +976,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         //TODO: APK
 //        APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-//                org.wso2.carbon.apimgt.impl.APIConstants.EventType.API_UPDATE.name(), tenantId, organization, api.getId().getApiName(), apiId,
+//                APIConstants.EventType.API_UPDATE.name(), tenantId, organization, api.getId().getApiName(), apiId,
 //                api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
 //                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), action);
-//        APIUtil.sendNotification(apiEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.API.name());
+//        APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 //
 //        // Extracting API details for the recommendation system
 //        if (recommendationEnvironment != null) {
 //            RecommenderEventPublisher
-//                    extractor = new RecommenderDetailsExtractor(api, organization, org.wso2.carbon.apimgt.impl.APIConstants.ADD_API);
+//                    extractor = new RecommenderDetailsExtractor(api, organization, APIConstants.ADD_API);
 //            Thread recommendationThread = new Thread(extractor);
 //            recommendationThread.start();
 //        }
@@ -977,7 +998,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiDAOImpl.getKeyManagerConfigurationsByOrganization(tenantDomain);
         List<String> configuredMissingKeyManagers = new ArrayList<>();
         for (String keyManager : api.getKeyManagers()) {
-            if (!org.wso2.carbon.apimgt.impl.APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManager)) {
+            if (!APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManager)) {
                 KeyManagerConfigurationDTO selectedKeyManager = null;
                 for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
                     if (keyManager.equals(keyManagerConfigurationDTO.getName())) {
@@ -1097,25 +1118,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (StringUtils.isNotEmpty(endpointConfig) && StringUtils.isNotEmpty(oldEndpointConfig)) {
                     JSONObject endpointConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);
                     JSONObject oldEndpointConfigJson = (JSONObject) new JSONParser().parse(oldEndpointConfig);
-                    if ((endpointConfigJson.get(org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY) != null) &&
-                            (oldEndpointConfigJson.get(org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY) != null)) {
+                    if ((endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null) &&
+                            (oldEndpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null)) {
                         JSONObject endpointSecurityJson =
-                                (JSONObject) endpointConfigJson.get(org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY);
+                                (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY);
                         JSONObject oldEndpointSecurityJson =
-                                (JSONObject) oldEndpointConfigJson.get(org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY);
-                        if (endpointSecurityJson.get(org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
-                            if (oldEndpointSecurityJson.get(org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                                (JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_SECURITY);
+                        if (endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                            if (oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
                                 EndpointSecurity endpointSecurity = new ObjectMapper().convertValue(
-                                        endpointSecurityJson.get(org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY_PRODUCTION),
+                                        endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION),
                                         EndpointSecurity.class);
                                 EndpointSecurity oldEndpointSecurity = new ObjectMapper().convertValue(
-                                        oldEndpointSecurityJson.get(org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY_PRODUCTION),
+                                        oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION),
                                         EndpointSecurity.class);
                                 if (endpointSecurity.isEnabled() && oldEndpointSecurity.isEnabled() &&
                                         StringUtils.isBlank(endpointSecurity.getPassword())) {
                                     endpointSecurity.setUsername(oldEndpointSecurity.getUsername());
                                     endpointSecurity.setPassword(oldEndpointSecurity.getPassword());
-                                    if (endpointSecurity.getType().equals(org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
+                                    if (endpointSecurity.getType().equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
                                         endpointSecurity.setUniqueIdentifier(oldEndpointSecurity.getUniqueIdentifier());
                                         endpointSecurity.setGrantType(oldEndpointSecurity.getGrantType());
                                         endpointSecurity.setTokenUrl(oldEndpointSecurity.getTokenUrl());
@@ -1124,23 +1145,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         endpointSecurity.setCustomParameters(oldEndpointSecurity.getCustomParameters());
                                     }
                                 }
-                                endpointSecurityJson.replace(org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY_PRODUCTION, new JSONParser()
+                                endpointSecurityJson.replace(APIConstants.ENDPOINT_SECURITY_PRODUCTION, new JSONParser()
                                         .parse(new ObjectMapper().writeValueAsString(endpointSecurity)));
                             }
                         }
-                        if (endpointSecurityJson.get(org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
-                            if (oldEndpointSecurityJson.get(org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                        if (endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                            if (oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
                                 EndpointSecurity endpointSecurity = new ObjectMapper()
-                                        .convertValue(endpointSecurityJson.get(org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY_SANDBOX),
+                                        .convertValue(endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX),
                                                 EndpointSecurity.class);
                                 EndpointSecurity oldEndpointSecurity = new ObjectMapper()
-                                        .convertValue(oldEndpointSecurityJson.get(org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY_SANDBOX),
+                                        .convertValue(oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX),
                                                 EndpointSecurity.class);
                                 if (endpointSecurity.isEnabled() && oldEndpointSecurity.isEnabled() &&
                                         StringUtils.isBlank(endpointSecurity.getPassword())) {
                                     endpointSecurity.setUsername(oldEndpointSecurity.getUsername());
                                     endpointSecurity.setPassword(oldEndpointSecurity.getPassword());
-                                    if (endpointSecurity.getType().equals(org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
+                                    if (endpointSecurity.getType().equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
                                         endpointSecurity.setUniqueIdentifier(oldEndpointSecurity.getUniqueIdentifier());
                                         endpointSecurity.setGrantType(oldEndpointSecurity.getGrantType());
                                         endpointSecurity.setTokenUrl(oldEndpointSecurity.getTokenUrl());
@@ -1149,11 +1170,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         endpointSecurity.setCustomParameters(oldEndpointSecurity.getCustomParameters());
                                     }
                                 }
-                                endpointSecurityJson.replace(org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY_SANDBOX,
+                                endpointSecurityJson.replace(APIConstants.ENDPOINT_SECURITY_SANDBOX,
                                         new JSONParser()
                                                 .parse(new ObjectMapper().writeValueAsString(endpointSecurity)));
                             }
-                            endpointConfigJson.replace(org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY,endpointSecurityJson);
+                            endpointConfigJson.replace(APIConstants.ENDPOINT_SECURITY,endpointSecurityJson);
                         }
                     }
                     api.setEndpointConfig(endpointConfigJson.toJSONString());
@@ -1174,21 +1195,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String apiUUID = api.getUuid();
             // get all policies
             try {
-                List<MediationInfo> localPolicies = apiPersistenceInstance.getAllMediationPolicies(org, apiUUID);
+                //TODO:APK
+//                List<MediationInfo> localPolicies = apiPersistenceInstance.getAllMediationPolicies(org, apiUUID);
+                List<MediationInfo> localPolicies = new ArrayList<>();
                 List<Mediation> globalPolicies = null;
                 if (APIUtil.isSequenceDefined(api.getInSequence())) {
                     boolean found = false;
                     for (MediationInfo mediationInfo : localPolicies) {
                         if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(mediationInfo.getType())
                                 && api.getInSequence().equals(mediationInfo.getName())) {
-                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
-                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                            //TODO:APK
+//                            org.wso2.apk.apimgt.impl.dao.dto.Mediation mediationPolicy = apiPersistenceInstance
+//                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
                             Mediation mediation = new Mediation();
-                            mediation.setConfig(mediationPolicy.getConfig());
-                            mediation.setName(mediationPolicy.getName());
-                            mediation.setUuid(mediationPolicy.getId());
-                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
-                            mediation.setGlobal(false);
+//                            mediation.setConfig(mediationPolicy.getConfig());
+//                            mediation.setName(mediationPolicy.getName());
+//                            mediation.setUuid(mediationPolicy.getId());
+//                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+//                            mediation.setGlobal(false);
                             api.setInSequenceMediation(mediation);
                             found = true;
                             break;
@@ -1215,14 +1239,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     for (MediationInfo mediationInfo : localPolicies) {
                         if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(mediationInfo.getType())
                                 && api.getOutSequence().equals(mediationInfo.getName())) {
-                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
-                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                            //TODO:APK
+//                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+//                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
                             Mediation mediation = new Mediation();
-                            mediation.setConfig(mediationPolicy.getConfig());
-                            mediation.setName(mediationPolicy.getName());
-                            mediation.setUuid(mediationPolicy.getId());
-                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
-                            mediation.setGlobal(false);
+//                            mediation.setConfig(mediationPolicy.getConfig());
+//                            mediation.setName(mediationPolicy.getName());
+//                            mediation.setUuid(mediationPolicy.getId());
+//                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+//                            mediation.setGlobal(false);
                             api.setOutSequenceMediation(mediation);
                             found = true;
                             break;
@@ -1249,14 +1274,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     for (MediationInfo mediationInfo : localPolicies) {
                         if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(mediationInfo.getType())
                                 && api.getFaultSequence().equals(mediationInfo.getName())) {
-                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
-                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                            //TODO:APK
+//                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+//                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
                             Mediation mediation = new Mediation();
-                            mediation.setConfig(mediationPolicy.getConfig());
-                            mediation.setName(mediationPolicy.getName());
-                            mediation.setUuid(mediationPolicy.getId());
-                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
-                            mediation.setGlobal(false);
+//                            mediation.setConfig(mediationPolicy.getConfig());
+//                            mediation.setName(mediationPolicy.getName());
+//                            mediation.setUuid(mediationPolicy.getId());
+//                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
+//                            mediation.setGlobal(false);
                             api.setFaultSequenceMediation(mediation);
                             found = true;
                             break;
@@ -1278,7 +1304,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                     }
                 }
-            } catch (MediationPolicyPersistenceException e) {
+                //TODO:APK
+//            } catch (MediationPolicyPersistenceException e) {
+//                String errorMessage = "Error while loading medation policies";
+//                throw new APIManagementException(errorMessage, e,
+//                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR, errorMessage));
+            } catch (Exception e) {
                 String errorMessage = "Error while loading medation policies";
                 throw new APIManagementException(errorMessage, e,
                         ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR, errorMessage));
@@ -1303,7 +1334,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
             inFlowPolicy = new OperationPolicy();
             inFlowPolicy.setPolicyName(api.getInSequence());
-            inFlowPolicy.setDirection(org.wso2.carbon.apimgt.impl.APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+            inFlowPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
             inFlowPolicy.setOrder(1);
             if (existingPolicy != null) {
                 inFlowPolicy.setPolicyId(existingPolicy.getPolicyId());
@@ -1315,7 +1346,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
             outFlowPolicy = new OperationPolicy();
             outFlowPolicy.setPolicyName(api.getOutSequence());
-            outFlowPolicy.setDirection(org.wso2.carbon.apimgt.impl.APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
+            outFlowPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
             outFlowPolicy.setOrder(1);
             if (existingPolicy != null) {
                 outFlowPolicy.setPolicyId(existingPolicy.getPolicyId());
@@ -1327,7 +1358,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
             faultFlowPolicy = new OperationPolicy();
             faultFlowPolicy.setPolicyName(api.getFaultSequence());
-            faultFlowPolicy.setDirection(org.wso2.carbon.apimgt.impl.APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
+            faultFlowPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
             faultFlowPolicy.setOrder(1);
             if (existingPolicy != null) {
                 faultFlowPolicy.setPolicyId(existingPolicy.getPolicyId());
@@ -1379,11 +1410,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             Mediation inSequenceMediation = api.getInSequenceMediation();
             OperationPolicyData existingPolicy =
                     getAPISpecificOperationPolicyByPolicyName(inSequenceMediation.getName(),
-                            org.wso2.carbon.apimgt.impl.APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
+                            APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
             String inFlowPolicyId;
             if (existingPolicy == null) {
                 OperationPolicyData inSeqPolicyData =
-                        APIUtil.getPolicyDataForMediationFlow(api, org.wso2.carbon.apimgt.impl.APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST,
+                        APIUtil.getPolicyDataForMediationFlow(api, APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST,
                                 organization);
                 inFlowPolicyId = addAPISpecificOperationPolicy(apiUUID, inSeqPolicyData, organization);
             } else {
@@ -1398,11 +1429,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             Mediation outSequenceMediation = api.getOutSequenceMediation();
             OperationPolicyData existingPolicy =
                     getAPISpecificOperationPolicyByPolicyName(outSequenceMediation.getName(),
-                            org.wso2.carbon.apimgt.impl.APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
+                            APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
             String outFlowPolicyId;
             if (existingPolicy == null) {
                 OperationPolicyData outSeqPolicyData =
-                        APIUtil.getPolicyDataForMediationFlow(api, org.wso2.carbon.apimgt.impl.APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE,
+                        APIUtil.getPolicyDataForMediationFlow(api, APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE,
                                 organization);
                 outFlowPolicyId = addAPISpecificOperationPolicy(apiUUID, outSeqPolicyData, organization);
             } else {
@@ -1519,7 +1550,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         for (APIProductResource productResource : productResources) {
             API api = getAPIbyUUID(productResource.getApiId(),
-                    UserContext.getThreadLocalUserContext().getOrganization());
+                    org.wso2.apk.apimgt.user.ctx.UserContext.getThreadLocalUserContext().getOrganization());
             apis.add(api);
         }
 
@@ -1574,8 +1605,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         boolean isOperationPoliciesAllowedForAPIType = true;
         Set<URITemplate> uriTemplates = api.getUriTemplates();
 
-        if (org.wso2.carbon.apimgt.impl.APIConstants.API_TYPE_WS.equals(api.getType()) || org.wso2.carbon.apimgt.impl.APIConstants.API_TYPE_SSE.equals(api.getType())
-                || org.wso2.carbon.apimgt.impl.APIConstants.API_TYPE_WEBSUB.equals(api.getType())) {
+        if (APIConstants.API_TYPE_WS.equals(api.getType()) || APIConstants.API_TYPE_SSE.equals(api.getType())
+                || APIConstants.API_TYPE_WEBSUB.equals(api.getType())) {
             if (log.isDebugEnabled()) {
                 log.debug("Operation policies are not allowed for " + api.getType() + " APIs");
             }
@@ -1761,53 +1792,53 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         boolean securitySchemeFound = false;
 
         for (String apiSecurityLevel : apiSecurityLevels) {
-            if (apiSecurityLevel.trim().equalsIgnoreCase(org.wso2.carbon.apimgt.impl.APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
                 isOauth2 = true;
-                securityLevels.add(org.wso2.carbon.apimgt.impl.APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+                securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
                 securitySchemeFound = true;
             }
-            if (apiSecurityLevel.trim().equalsIgnoreCase(org.wso2.carbon.apimgt.impl.APIConstants.API_SECURITY_MUTUAL_SSL)) {
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
                 isMutualSSL = true;
-                securityLevels.add(org.wso2.carbon.apimgt.impl.APIConstants.API_SECURITY_MUTUAL_SSL);
+                securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL);
                 securitySchemeFound = true;
             }
-            if (apiSecurityLevel.trim().equalsIgnoreCase(org.wso2.carbon.apimgt.impl.APIConstants.API_SECURITY_BASIC_AUTH)) {
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_BASIC_AUTH)) {
                 isBasicAuth = true;
-                securityLevels.add(org.wso2.carbon.apimgt.impl.APIConstants.API_SECURITY_BASIC_AUTH);
+                securityLevels.add(APIConstants.API_SECURITY_BASIC_AUTH);
                 securitySchemeFound = true;
             }
-            if (apiSecurityLevel.trim().equalsIgnoreCase(org.wso2.carbon.apimgt.impl.APIConstants.API_SECURITY_API_KEY)){
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY)){
                 isApiKey = true;
-                securityLevels.add(org.wso2.carbon.apimgt.impl.APIConstants.API_SECURITY_API_KEY);
+                securityLevels.add(APIConstants.API_SECURITY_API_KEY);
                 securitySchemeFound = true;
             }
-            if (apiSecurityLevel.trim().equalsIgnoreCase(org.wso2.carbon.apimgt.impl.APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
                 isMutualSSLMandatory = true;
-                securityLevels.add(org.wso2.carbon.apimgt.impl.APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
+                securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
             }
-            if (apiSecurityLevel.trim().equalsIgnoreCase(org.wso2.carbon.apimgt.impl.APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
                 isOauthBasicAuthMandatory = true;
-                securityLevels.add(org.wso2.carbon.apimgt.impl.APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
+                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
             }
         }
 
         // If no security schema found, set OAuth2 as default
         if (!securitySchemeFound) {
             isOauth2 = true;
-            securityLevels.add(org.wso2.carbon.apimgt.impl.APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+            securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
         }
         // If Only OAuth2/Basic-Auth specified, set it as mandatory
         if (!isMutualSSL && !isOauthBasicAuthMandatory) {
-            securityLevels.add(org.wso2.carbon.apimgt.impl.APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
+            securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
         }
         // If Only Mutual SSL specified, set it as mandatory
         if (!isBasicAuth && !isOauth2 && !isApiKey && !isMutualSSLMandatory) {
-            securityLevels.add(org.wso2.carbon.apimgt.impl.APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
+            securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
         }
         // If OAuth2/Basic-Auth and Mutual SSL protected and not specified the mandatory scheme,
         // set OAuth2/Basic-Auth as mandatory
         if ((isOauth2 || isBasicAuth || isApiKey) && isMutualSSL && !isOauthBasicAuthMandatory && !isMutualSSLMandatory) {
-            securityLevels.add(org.wso2.carbon.apimgt.impl.APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
+            securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
         }
         return securityLevels;
     }
@@ -1818,7 +1849,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param api Relevant API that need to be validated.
      */
     private void validateAndSetAPISecurity(API api) {
-        String apiSecurity = org.wso2.carbon.apimgt.impl.APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+        String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
         String security = api.getApiSecurity();
         if (security!= null) {
             apiSecurity = security;
@@ -1838,7 +1869,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param apiProduct Relevant APIProduct that need to be validated.
      */
     private void validateAndSetAPISecurity(APIProduct apiProduct) {
-        String apiSecurity = org.wso2.carbon.apimgt.impl.APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+        String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
         String security = apiProduct.getApiSecurity();
         if (security!= null) {
             apiSecurity = security;
@@ -1853,7 +1884,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void checkIfValidTransport(String transport) throws APIManagementException {
         if (!Constants.TRANSPORT_HTTP.equalsIgnoreCase(transport) && !Constants.TRANSPORT_HTTPS.equalsIgnoreCase(transport)
-                && !org.wso2.carbon.apimgt.impl.APIConstants.WS_PROTOCOL.equalsIgnoreCase(transport) && !org.wso2.carbon.apimgt.impl.APIConstants.WSS_PROTOCOL.equalsIgnoreCase(transport)) {
+                && !APIConstants.WS_PROTOCOL.equalsIgnoreCase(transport) && !APIConstants.WSS_PROTOCOL.equalsIgnoreCase(transport)) {
             throw new APIManagementException("Unsupported Transport [" + transport + ']',
                     ExceptionCodes.from(ExceptionCodes.UNSUPPORTED_TRANSPORT_TYPE, transport));
         }
@@ -1904,7 +1935,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 existingAPI.getId().getApiName(), newVersion);
         existingAPI.setUuid(null);
         existingAPI.setId(newApiId);
-        existingAPI.setStatus(org.wso2.carbon.apimgt.impl.APIConstants.CREATED);
+        existingAPI.setStatus(APIConstants.CREATED);
         existingAPI.setDefaultVersion(isDefaultVersion);
         existingAPI.setVersionTimestamp("");
 
@@ -1940,7 +1971,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         // copy wsdl
-        if (!org.wso2.carbon.apimgt.impl.APIConstants.API_TYPE_SOAPTOREST.equals(existingAPI.getType()) && existingAPI.getWsdlUrl() != null) {
+        if (!APIConstants.API_TYPE_SOAPTOREST.equals(existingAPI.getType()) && existingAPI.getWsdlUrl() != null) {
             ResourceFile wsdl = getWSDL(existingApiId, organization);
             if (wsdl != null) {
                 addWSDLResource(newAPIId, wsdl, null, organization);
@@ -2031,10 +2062,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public Documentation updateDocumentation(String apiId, Documentation documentation, String organization) throws APIManagementException {
 
         if (documentation != null) {
-            org.wso2.carbon.apimgt.persistence.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
+            org.wso2.apk.apimgt.impl.dao.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
                     .toDocumentation(documentation);
             try {
-                org.wso2.carbon.apimgt.persistence.dto.Documentation updatedDoc = apiDAOImpl
+                org.wso2.apk.apimgt.impl.dao.dto.Documentation updatedDoc = apiDAOImpl
                         .updateDocumentation(new Organization(organization), apiId, mappedDoc);
                 if (updatedDoc != null) {
                     return DocumentMapper.INSTANCE.toDocumentation(updatedDoc);
@@ -2050,10 +2081,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public Documentation addDocumentation(String uuid, Documentation documentation, String organization) throws APIManagementException {
         if (documentation != null) {
-            org.wso2.carbon.apimgt.persistence.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
+            org.wso2.apk.apimgt.impl.dao.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
                     .toDocumentation(documentation);
             try {
-                org.wso2.carbon.apimgt.persistence.dto.Documentation addedDoc = apiDAOImpl.addDocumentation(
+                org.wso2.apk.apimgt.impl.dao.dto.Documentation addedDoc = apiDAOImpl.addDocumentation(
                         new Organization(organization), uuid, mappedDoc);
                 if (addedDoc != null) {
                     return DocumentMapper.INSTANCE.toDocumentation(addedDoc);
@@ -2127,11 +2158,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String orgId = subscribedAPI.getOrganization();
         //TODO:APK
 //        SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-//                System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId, orgId,
+//                System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId, orgId,
 //                subscribedAPI.getSubscriptionId(), subscribedAPI.getUUID(), identifier.getId(), identifier.getUUID(),
 //                subscribedAPI.getApplication().getId(), subscribedAPI.getApplication().getUUID(),
 //                subscribedAPI.getTier().getName(), subscribedAPI.getSubStatus());
-//        APIUtil.sendNotification(subscriptionEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.SUBSCRIPTIONS.name());
+//        APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
     }
 
     public void deleteAPI(String apiUuid, String organization) throws APIManagementException {
@@ -2247,24 +2278,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         if (apiId != -1) {
-            try {
-                cleanUpPendingAPIStateChangeTask(apiId, false);
-            } catch (WorkflowException | APIManagementException e) {
-                log.error("Error while executing API delete operation on cleanup workflow tasks for API "
-                        + apiUuid + " on organization " + organization, e);
-                isError = true;
-            }
+            //TODO:APK
+//            try {
+//                cleanUpPendingAPIStateChangeTask(apiId, false);
+//            } catch (WorkflowException | APIManagementException e) {
+//                log.error("Error while executing API delete operation on cleanup workflow tasks for API "
+//                        + apiUuid + " on organization " + organization, e);
+//                isError = true;
+//            }
         }
 
         // Delete event publishing to gateways
         if (api != null && apiId != -1) {
             //TODO:APK
 //            APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-//                    org.wso2.carbon.apimgt.impl.APIConstants.EventType.API_DELETE.name(), tenantId, organization, api.getId().getApiName(), apiId,
+//                    APIConstants.EventType.API_DELETE.name(), tenantId, organization, api.getId().getApiName(), apiId,
 //                    api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
 //                    APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
 //                    api.getStatus());
-//            APIUtil.sendNotification(apiEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.API.name());
+//            APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
         } else {
             log.debug("Event has not published to gateways due to API id has failed to retrieve from DB for API "
                     + apiUuid + " on organization " + organization);
@@ -2273,19 +2305,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Logging audit message for API delete
         if (api != null) {
             JSONObject apiLogObject = new JSONObject();
-            apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
-            apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
-            apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
 
-            APIUtil.logAuditMessage(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.API, apiLogObject.toString(),
-                    org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.DELETED, this.username);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.DELETED, this.username);
         }
 
         // Extracting API details for the recommendation system
         //TODO:APK
 //        if (api != null && recommendationEnvironment != null) {
 //            RecommenderEventPublisher
-//                    extractor = new RecommenderDetailsExtractor(api, organization, org.wso2.carbon.apimgt.impl.APIConstants.DELETE_API);
+//                    extractor = new RecommenderDetailsExtractor(api, organization, APIConstants.DELETE_API);
 //            Thread recommendationThread = new Thread(extractor);
 //            recommendationThread.start();
 //        }
@@ -2709,7 +2741,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public boolean isSynapseGateway() throws APIManagementException {
         //TODO:APK
 //        org.wso2.carbon.apimgt.impl.APIManagerConfiguration config = getAPIManagerConfiguration();
-//        String gatewayType = config.getFirstProperty(org.wso2.carbon.apimgt.impl.APIConstants.API_GATEWAY_TYPE);
+//        String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 //        return APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType);
         return false;
     }
@@ -2738,7 +2770,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (log.isDebugEnabled()) {
             log.debug("Validating apiLevelPolicy defined in the API");
         }
-        Map<String, Tier> tierMap = APIUtil.getTiers(org.wso2.carbon.apimgt.impl.APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+        Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
         if (tierMap != null) {
             String apiLevelPolicy = api.getApiLevelPolicy();
             if (apiLevelPolicy != null && !tierMap.containsKey(apiLevelPolicy)) {
@@ -2753,7 +2785,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (log.isDebugEnabled()) {
             log.debug("Validating productLevelPolicy defined in the API Product");
         }
-        Map<String, Tier> tierMap = APIUtil.getTiers(org.wso2.carbon.apimgt.impl.APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+        Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
         if (tierMap != null) {
             String apiLevelPolicy = apiProduct.getProductLevelPolicy();
             if (apiLevelPolicy != null && !tierMap.containsKey(apiLevelPolicy)) {
@@ -2765,7 +2797,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void checkResourceThrottlingTiersInURITemplates(Set<URITemplate> uriTemplates, String tenantDomain)
             throws APIManagementException {
-        Map<String, Tier> tierMap = APIUtil.getTiers(org.wso2.carbon.apimgt.impl.APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+        Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
         if (tierMap != null) {
             for (URITemplate template : uriTemplates) {
                 if (template.getThrottlingTier() != null && !tierMap.containsKey(template.getThrottlingTier())) {
@@ -2842,82 +2874,83 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public APIStateChangeResponse changeLifeCycleStatus(String orgId, ApiTypeWrapper apiTypeWrapper, String action,
                                                         Map<String, Boolean> checklist) throws APIManagementException{
         APIStateChangeResponse response = new APIStateChangeResponse();
-        try {
-            String targetStatus;
-            String providerName;
-            String apiName;
-            String apiContext;
-            String apiType;
-            String apiVersion;
-            String currentStatus;
-            String uuid;
-            int apiOrApiProductId;
-            boolean isApiProduct = apiTypeWrapper.isAPIProduct();
-            String workflowType;
-
-            if (isApiProduct) {
-                APIProduct apiProduct = apiTypeWrapper.getApiProduct();
-                providerName = apiProduct.getId().getProviderName();
-                apiName = apiProduct.getId().getName();
-                apiContext = apiProduct.getContext();
-                apiType = apiProduct.getType();
-                apiVersion = apiProduct.getId().getVersion();
-                currentStatus = apiProduct.getState();
-                uuid = apiProduct.getUuid();
-                apiOrApiProductId = apiDAOImpl.getAPIProductId(apiTypeWrapper.getApiProduct().getId());
-                workflowType = WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE;
-            } else {
-                API api = apiTypeWrapper.getApi();
-                providerName = api.getId().getProviderName();
-                apiName = api.getId().getApiName();
-                apiContext = api.getContext();
-                apiType = api.getType();
-                apiVersion = api.getId().getVersion();
-                currentStatus = api.getStatus();
-                uuid = api.getUuid();
-                apiOrApiProductId = apiDAOImpl.getAPIID(uuid);
-                workflowType = WorkflowConstants.WF_TYPE_AM_API_STATE;
-            }
-            String gatewayVendor = apiDAOImpl.getGatewayVendorByAPIUUID(uuid);
-
-            WorkflowStatus apiWFState = null;
-            WorkflowDTO wfDTO = workflowDAOImpl.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
-                    workflowType);
-            if (wfDTO != null) {
-                apiWFState = wfDTO.getStatus();
-            }
-
-            // if the workflow has started, then executor should not fire again
-            if (!WorkflowStatus.CREATED.equals(apiWFState)) {
-                response = executeStateChangeWorkflow(currentStatus, action, apiName, apiContext, apiType,
-                        apiVersion, providerName, apiOrApiProductId, uuid, gatewayVendor, workflowType);
-                // get the workflow state once the executor is executed.
-                wfDTO = workflowDAOImpl.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
-                        workflowType);
-                if (wfDTO != null) {
-                    apiWFState = wfDTO.getStatus();
-                    response.setStateChangeStatus(apiWFState.toString());
-                } else {
-                    response.setStateChangeStatus(WorkflowStatus.APPROVED.toString());
-                }
-            }
-
-            // only change the lifecycle if approved
-            // apiWFState is null when simple wf executor is used because wf state is not stored in the db.
-            if (WorkflowStatus.APPROVED.equals(apiWFState) || apiWFState == null) {
-                //TODO:APK
-//                LifeCycleUtils.changeLifecycle(this.username, this, orgId, apiTypeWrapper, action, checklist);
-                JSONObject apiLogObject = new JSONObject();
-                apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.NAME, apiName);
-                apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.CONTEXT, apiContext);
-                apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.VERSION, apiVersion);
-                apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.PROVIDER, providerName);
-                APIUtil.logAuditMessage(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.API, apiLogObject.toString(),
-                        org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.LIFECYCLE_CHANGED, this.username);
-            }
-        } catch (APIPersistenceException e) {
-            handleExceptionWithCode("Error while accessing persistence layer", e, ExceptionCodes.INTERNAL_ERROR);
-        }
+        //TODO:APK
+//        try {
+//            String targetStatus;
+//            String providerName;
+//            String apiName;
+//            String apiContext;
+//            String apiType;
+//            String apiVersion;
+//            String currentStatus;
+//            String uuid;
+//            int apiOrApiProductId;
+//            boolean isApiProduct = apiTypeWrapper.isAPIProduct();
+//            String workflowType;
+//
+//            if (isApiProduct) {
+//                APIProduct apiProduct = apiTypeWrapper.getApiProduct();
+//                providerName = apiProduct.getId().getProviderName();
+//                apiName = apiProduct.getId().getName();
+//                apiContext = apiProduct.getContext();
+//                apiType = apiProduct.getType();
+//                apiVersion = apiProduct.getId().getVersion();
+//                currentStatus = apiProduct.getState();
+//                uuid = apiProduct.getUuid();
+//                apiOrApiProductId = apiDAOImpl.getAPIProductId(apiTypeWrapper.getApiProduct().getId());
+//                workflowType = WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE;
+//            } else {
+//                API api = apiTypeWrapper.getApi();
+//                providerName = api.getId().getProviderName();
+//                apiName = api.getId().getApiName();
+//                apiContext = api.getContext();
+//                apiType = api.getType();
+//                apiVersion = api.getId().getVersion();
+//                currentStatus = api.getStatus();
+//                uuid = api.getUuid();
+//                apiOrApiProductId = apiDAOImpl.getAPIID(uuid);
+//                workflowType = WorkflowConstants.WF_TYPE_AM_API_STATE;
+//            }
+//            String gatewayVendor = apiDAOImpl.getGatewayVendorByAPIUUID(uuid);
+//
+//            WorkflowStatus apiWFState = null;
+//            WorkflowDTO wfDTO = workflowDAOImpl.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
+//                    workflowType);
+//            if (wfDTO != null) {
+//                apiWFState = wfDTO.getStatus();
+//            }
+//
+//            // if the workflow has started, then executor should not fire again
+//            if (!WorkflowStatus.CREATED.equals(apiWFState)) {
+//                response = executeStateChangeWorkflow(currentStatus, action, apiName, apiContext, apiType,
+//                        apiVersion, providerName, apiOrApiProductId, uuid, gatewayVendor, workflowType);
+//                // get the workflow state once the executor is executed.
+//                wfDTO = workflowDAOImpl.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
+//                        workflowType);
+//                if (wfDTO != null) {
+//                    apiWFState = wfDTO.getStatus();
+//                    response.setStateChangeStatus(apiWFState.toString());
+//                } else {
+//                    response.setStateChangeStatus(WorkflowStatus.APPROVED.toString());
+//                }
+//            }
+//
+//            // only change the lifecycle if approved
+//            // apiWFState is null when simple wf executor is used because wf state is not stored in the db.
+//            if (WorkflowStatus.APPROVED.equals(apiWFState) || apiWFState == null) {
+//                //TODO:APK
+////                LifeCycleUtils.changeLifecycle(this.username, this, orgId, apiTypeWrapper, action, checklist);
+//                JSONObject apiLogObject = new JSONObject();
+//                apiLogObject.put(APIConstants.AuditLogConstants.NAME, apiName);
+//                apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, apiContext);
+//                apiLogObject.put(APIConstants.AuditLogConstants.VERSION, apiVersion);
+//                apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, providerName);
+//                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+//                        APIConstants.AuditLogConstants.LIFECYCLE_CHANGED, this.username);
+//            }
+//        } catch (APIPersistenceException e) {
+//            handleExceptionWithCode("Error while accessing persistence layer", e, ExceptionCodes.INTERNAL_ERROR);
+//        }
         return response;
     }
     /**
@@ -2944,19 +2977,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
 
         APIStateChangeResponse response = new APIStateChangeResponse();
-        try {
-            WorkflowExecutor apiStateWFExecutor =
-             WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
-            //TODO:APK
+        //TODO:APK
+//        try {
+//            WorkflowExecutor apiStateWFExecutor =
+//                    WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
 //            APIStateWorkflowDTO apiStateWorkflow = setAPIStateWorkflowDTOParameters(currentStatus, action, apiName,
 //             apiContext, apiType, apiVersion, providerName, apiOrApiProductId, uuid, gatewayVendor, workflowType,
 //                    apiStateWFExecutor);
 //            WorkflowResponse workflowResponse = apiStateWFExecutor.execute(apiStateWorkflow);
 //            response.setWorkflowResponse(workflowResponse);
-        } catch (WorkflowException e) {
-            handleExceptionWithCode("Failed to execute workflow for life cycle status change : " + e.getMessage(),
-                    e, ExceptionCodes.INTERNAL_ERROR);
-        }
+//        } catch (WorkflowException e) {
+//            handleExceptionWithCode("Failed to execute workflow for life cycle status change : " + e.getMessage(),
+//                    e, ExceptionCodes.INTERNAL_ERROR);
+//        }
         return response;
     }
 
@@ -3036,7 +3069,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (actionsList != null) {
             String[] actionsArray = new String[actionsList.size()];
             actionsArray = actionsList.toArray(actionsArray);
-            lcData.put(org.wso2.carbon.apimgt.impl.APIConstants.LC_NEXT_STATES, actionsArray);
+            lcData.put(APIConstants.LC_NEXT_STATES, actionsArray);
         }
         ArrayList<CheckListItem> checkListItems = new ArrayList<CheckListItem>();
         List<String> checklistItemsList =
@@ -3051,7 +3084,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         lcData.put("items", checkListItems);
         status = status.substring(0, 1).toUpperCase() + status.substring(1).toLowerCase(); // First letter capital
-        lcData.put(org.wso2.carbon.apimgt.impl.APIConstants.LC_STATUS, status);
+        lcData.put(APIConstants.LC_STATUS, status);
         return lcData;
     }
 
@@ -3086,10 +3119,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             //TODO:APK
 //            APIPolicyEvent apiPolicyEvent = new APIPolicyEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.POLICY_CREATE.name(), tenantId,
+//                    System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
 //                    apiPolicy.getTenantDomain(), apiPolicy.getPolicyId(), apiPolicy.getPolicyName(),
 //                    apiPolicy.getDefaultQuotaPolicy().getType(), addedConditionGroupIds, null);
-//            APIUtil.sendNotification(apiPolicyEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.POLICY.name());
+//            APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof ApplicationPolicy) {
             ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
             //Check if there's a policy exists before adding the new policy
@@ -3104,10 +3137,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             ApplicationPolicy retrievedPolicy = policyDAOImpl.getApplicationPolicy(appPolicy.getPolicyName(), tenantId);
             //TODO:APK
 //            ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.POLICY_CREATE.name(), tenantId,
+//                    System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
 //                    appPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(), appPolicy.getPolicyName(),
 //                    appPolicy.getDefaultQuotaPolicy().getType());
-//            APIUtil.sendNotification(applicationPolicyEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.POLICY.name());
+//            APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof SubscriptionPolicy) {
             SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
             //Check if there's a policy exists before adding the new policy
@@ -3127,11 +3160,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             SubscriptionPolicy retrievedPolicy = policyDAOImpl.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
             //TODO:APK
 //            SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.POLICY_CREATE.name(), tenantId, subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
+//                    System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId, subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
 //                    subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
 //                    subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),
 //                    subPolicy.getGraphQLMaxDepth(),subPolicy.getGraphQLMaxComplexity(),subPolicy.getSubscriberCount());
-//            APIUtil.sendNotification(subscriptionPolicyEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.POLICY.name());
+//            APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof GlobalPolicy) {
             GlobalPolicy globalPolicy = (GlobalPolicy) policy;
 
@@ -3149,10 +3182,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GlobalPolicy retrievedPolicy = policyDAOImpl.getGlobalPolicy(globalPolicy.getPolicyName());
             //TODO:APK
 //            GlobalPolicyEvent globalPolicyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.POLICY_CREATE.name(), tenantId,
+//                    System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
 //                    globalPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
 //                    globalPolicy.getPolicyName());
-//            APIUtil.sendNotification(globalPolicyEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.POLICY.name());
+//            APIUtil.sendNotification(globalPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else {
             String msg = "Policy type " + policy.getClass().getName() + " is not supported";
             log.error(msg);
@@ -3323,10 +3356,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             //TODO:APK
 //            APIPolicyEvent apiPolicyEvent = new APIPolicyEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
+//                    System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
 //                    apiPolicy.getTenantDomain(), apiPolicy.getPolicyId(), apiPolicy.getPolicyName(),
 //                    apiPolicy.getDefaultQuotaPolicy().getType(), addedConditionGroupIds, deletedConditionGroupIds);
-//            APIUtil.sendNotification(apiPolicyEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.POLICY.name());
+//            APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof ApplicationPolicy) {
             ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
             policyDAOImpl.updateApplicationPolicy(appPolicy);
@@ -3334,10 +3367,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             ApplicationPolicy retrievedPolicy = policyDAOImpl.getApplicationPolicy(appPolicy.getPolicyName(), tenantId);
             //TODO:APK
 //            ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
+//                    System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
 //                    appPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(), appPolicy.getPolicyName(),
 //                    appPolicy.getDefaultQuotaPolicy().getType());
-//            APIUtil.sendNotification(applicationPolicyEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.POLICY.name());
+//            APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof SubscriptionPolicy) {
             SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
             policyDAOImpl.updateSubscriptionPolicy(subPolicy);
@@ -3351,11 +3384,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             SubscriptionPolicy retrievedPolicy = policyDAOImpl.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
             //TODO:APK
 //            SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.POLICY_UPDATE.name(), tenantId,subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
+//                    System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
 //                    subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
 //                    subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),subPolicy.getGraphQLMaxDepth(),
 //                    subPolicy.getGraphQLMaxComplexity(), subPolicy.getSubscriberCount());
-//            APIUtil.sendNotification(subscriptionPolicyEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.POLICY.name());
+//            APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof GlobalPolicy) {
             GlobalPolicy globalPolicy = (GlobalPolicy) policy;
 
@@ -3369,10 +3402,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GlobalPolicy retrievedPolicy = policyDAOImpl.getGlobalPolicy(globalPolicy.getPolicyName());
             //TODO:APK
 //            GlobalPolicyEvent globalPolicyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
+//                    System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
 //                    globalPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
 //                    globalPolicy.getPolicyName());
-//            APIUtil.sendNotification(globalPolicyEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.POLICY.name());
+//            APIUtil.sendNotification(globalPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else {
             String msg = "Policy type " + policy.getClass().getName() + " is not supported";
             log.error(msg);
@@ -3415,39 +3448,39 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             //TODO:APK
 //            APIPolicyEvent apiPolicyEvent = new APIPolicyEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-//                    org.wso2.carbon.apimgt.impl.APIConstants.EventType.POLICY_DELETE.name(), tenantId, policy.getTenantDomain(),
+//                    APIConstants.EventType.POLICY_DELETE.name(), tenantId, policy.getTenantDomain(),
 //                    policy.getPolicyId(), policy.getPolicyName(), policy.getDefaultQuotaPolicy().getType(),
 //                    null, deletedConditionGroupIds);
-//            APIUtil.sendNotification(apiPolicyEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.POLICY.name());
+//            APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
 
         } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
             ApplicationPolicy appPolicy = policyDAOImpl.getApplicationPolicy(policyName, tenantID);
             //TODO:APK
 //            ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.POLICY_DELETE.name(), tenantId,
+//                    System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,
 //                    appPolicy.getTenantDomain(), appPolicy.getPolicyId(), appPolicy.getPolicyName(),
 //                    appPolicy.getDefaultQuotaPolicy().getType());
-//            APIUtil.sendNotification(applicationPolicyEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.POLICY.name());
+//            APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
             SubscriptionPolicy subscriptionPolicy = policyDAOImpl.getSubscriptionPolicy(policyName, tenantID);
             //call the monetization extension point to delete plans if any
             deleteMonetizationPlan(subscriptionPolicy);
             //TODO:APK
 //            SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.POLICY_DELETE.name(), tenantId,
+//                    System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,
 //                    subscriptionPolicy.getTenantDomain(), subscriptionPolicy.getPolicyId(),
 //                    subscriptionPolicy.getPolicyName(), subscriptionPolicy.getDefaultQuotaPolicy().getType(),
 //                    subscriptionPolicy.getRateLimitCount(), subscriptionPolicy.getRateLimitTimeUnit(),
 //                    subscriptionPolicy.isStopOnQuotaReach(), subscriptionPolicy.getGraphQLMaxDepth(),
 //                    subscriptionPolicy.getGraphQLMaxComplexity(), subscriptionPolicy.getSubscriberCount());
-//            APIUtil.sendNotification(subscriptionPolicyEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.POLICY.name());
+//            APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
             GlobalPolicy globalPolicy = policyDAOImpl.getGlobalPolicy(policyName);
             //TODO:APK
 //            GlobalPolicyEvent globalPolicyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.POLICY_DELETE.name(), tenantId,
+//                    System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,
 //                    globalPolicy.getTenantDomain(), globalPolicy.getPolicyId(), globalPolicy.getPolicyName());
-//            APIUtil.sendNotification(globalPolicyEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.POLICY.name());
+//            APIUtil.sendNotification(globalPolicyEvent, APIConstants.NotifierType.POLICY.name());
         }
 
         GlobalPolicy globalPolicy = null;
@@ -3529,7 +3562,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public String addBlockCondition(String conditionType, String conditionValue) throws APIManagementException {
 
-        if (org.wso2.carbon.apimgt.impl.APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
+        if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
             conditionValue = MultitenantUtils.getTenantAwareUsername(conditionValue);
             conditionValue = conditionValue + "@" + tenantDomain;
         }
@@ -3553,7 +3586,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public String addBlockCondition(String conditionType, String conditionValue, boolean conditionStatus)
             throws APIManagementException {
 
-        if (org.wso2.carbon.apimgt.impl.APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
+        if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
             conditionValue = MultitenantUtils.getTenantAwareUsername(conditionValue);
             conditionValue = conditionValue + "@" + tenantDomain;
         }
@@ -3605,7 +3638,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void unpublishBlockCondition(BlockConditionsDTO blockCondition) {
         String blockingConditionType = blockCondition.getConditionType();
         String blockingConditionValue = blockCondition.getConditionValue();
-        if (org.wso2.carbon.apimgt.impl.APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
+        if (APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
             blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
             blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
             blockCondition.setConditionValue(blockingConditionValue);
@@ -3680,7 +3713,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (blockCondition != null) {
             String blockingConditionType = blockCondition.getConditionType();
             String blockingConditionValue = blockCondition.getConditionValue();
-            if (org.wso2.carbon.apimgt.impl.APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
+            if (APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
                 blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
                 blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
                 blockCondition.setConditionValue(blockingConditionValue);
@@ -3699,15 +3732,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 //    private void publishBlockingEvent(BlockConditionsDTO blockConditionsDTO, String state) {
 //        String conditionType = blockConditionsDTO.getConditionType();
 //        String conditionValue = blockConditionsDTO.getConditionValue();
-//        if (org.wso2.carbon.apimgt.impl.APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType) ||
-//                org.wso2.carbon.apimgt.impl.APIConstants.BLOCK_CONDITION_IP_RANGE.equals(conditionType)) {
+//        if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType) ||
+//                APIConstants.BLOCK_CONDITION_IP_RANGE.equals(conditionType)) {
 //            conditionValue = StringEscapeUtils.escapeJava(conditionValue);
 //        }
 //        Object[] objects = new Object[]{blockConditionsDTO.getConditionId(), blockConditionsDTO.getConditionType(),
 //                conditionValue, state, tenantDomain};
-//        Event blockingMessage = new Event(org.wso2.carbon.apimgt.impl.APIConstants.BLOCKING_CONDITIONS_STREAM_ID, System.currentTimeMillis(),
+//        Event blockingMessage = new Event(APIConstants.BLOCKING_CONDITIONS_STREAM_ID, System.currentTimeMillis(),
 //                null, null, objects);
-//        EventPublisherEvent blockingEvent = new EventPublisherEvent(org.wso2.carbon.apimgt.impl.APIConstants.BLOCKING_CONDITIONS_STREAM_ID,
+//        EventPublisherEvent blockingEvent = new EventPublisherEvent(APIConstants.BLOCKING_CONDITIONS_STREAM_ID,
 //                System.currentTimeMillis(), objects, blockingMessage.toString());
 //        APIUtil.publishEvent(EventPublisherType.BLOCKING_EVENT, blockingEvent, blockingMessage.toString());
 //    }
@@ -3715,12 +3748,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     //TODO:APK
 //    private void publishKeyTemplateEvent(String templateValue, String state) {
 //        Object[] objects = new Object[]{templateValue, state};
-//        Event keyTemplateMessage = new Event(org.wso2.carbon.apimgt.impl.APIConstants.KEY_TEMPLATE_STREM_ID, System.currentTimeMillis(),
+//        Event keyTemplateMessage = new Event(APIConstants.KEY_TEMPLATE_STREM_ID, System.currentTimeMillis(),
 //                null, null, objects);
 //
 //        ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();
 //
-//        EventPublisherEvent keyTemplateEvent = new EventPublisherEvent(org.wso2.carbon.apimgt.impl.APIConstants.KEY_TEMPLATE_STREM_ID,
+//        EventPublisherEvent keyTemplateEvent = new EventPublisherEvent(APIConstants.KEY_TEMPLATE_STREM_ID,
 //                System.currentTimeMillis(), objects, keyTemplateMessage.toString());
 //        APIUtil.publishEvent(EventPublisherType.KEY_TEMPLATE, keyTemplateEvent, keyTemplateMessage.toString());
 //    }
@@ -3754,9 +3787,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 //                        "Error while adding the certificate. Certificate Expired."));
 //            }
 //            CertificateEvent certificateEvent = new CertificateEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.ENDPOINT_CERTIFICATE_ADD.toString(),
+//                    System.currentTimeMillis(), APIConstants.EventType.ENDPOINT_CERTIFICATE_ADD.toString(),
 //                    tenantDomain,alias,endpoint);
-//            APIUtil.sendNotification(certificateEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.CERTIFICATE.name());
+//            APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
 //        } catch (UserException e) {
 //            handleExceptionWithCode("Error while reading tenant information", e,
 //                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
@@ -3807,9 +3840,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 //            int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
 //            responseCode = certificateManager.deleteCertificateFromParentNode(alias, endpoint, tenantId);
 //            CertificateEvent certificateEvent = new CertificateEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.ENDPOINT_CERTIFICATE_REMOVE.toString(),
+//                    System.currentTimeMillis(), APIConstants.EventType.ENDPOINT_CERTIFICATE_REMOVE.toString(),
 //                    tenantDomain, alias, endpoint);
-//            APIUtil.sendNotification(certificateEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.CERTIFICATE.name());
+//            APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
 //        } catch (UserException e) {
 //            handleExceptionWithCode("Error while reading tenant information",
 //                    e, ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
@@ -3939,9 +3972,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 //        ResponseCode responseCode = certificateManager.updateCertificate(certificateString, alias);
 //        if (responseCode != null && responseCode.getResponseCode() == ResponseCode.SUCCESS.getResponseCode()) {
 //            CertificateEvent certificateEvent = new CertificateEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.ENDPOINT_CERTIFICATE_UPDATE.toString(),
+//                    System.currentTimeMillis(), APIConstants.EventType.ENDPOINT_CERTIFICATE_UPDATE.toString(),
 //                    tenantDomain, alias);
-//            APIUtil.sendNotification(certificateEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.CERTIFICATE.name());
+//            APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
 //        }
 //        int code = responseCode != null ? responseCode.getResponseCode() :
 //                ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode();
@@ -4035,49 +4068,55 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int apiId;
         try {
             apiId = apiDAOImpl.getAPIID(identifier.getUUID());
-            cleanUpPendingAPIStateChangeTask(apiId, identifier instanceof APIProductIdentifier);
-        } catch (APIManagementException | WorkflowException e) {
+            //TODO:APK
+//            cleanUpPendingAPIStateChangeTask(apiId, identifier instanceof APIProductIdentifier);
+//        } catch (APIManagementException | WorkflowException e) {
+//            handleExceptionWithCode("Error while deleting the workflow task.", e, ExceptionCodes.INTERNAL_ERROR);
+//        }
+        } catch (APIManagementException e) {
             handleExceptionWithCode("Error while deleting the workflow task.", e, ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
-    private void cleanUpPendingAPIStateChangeTask(int apiId, boolean isAPIProduct) throws WorkflowException,
-            APIManagementException {
-        //Run cleanup task for workflow
-        WorkflowExecutor apiStateChangeWFExecutor;
-        WorkflowDTO wfDTO;
+    //TODO:APK
+//    private void cleanUpPendingAPIStateChangeTask(int apiId, boolean isAPIProduct) throws WorkflowException,
+//            APIManagementException {
+//        //Run cleanup task for workflow
+//        WorkflowExecutor apiStateChangeWFExecutor;
+//        WorkflowDTO wfDTO;
+//
+//        if (isAPIProduct) {
+//            apiStateChangeWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE);
+//            wfDTO = workflowDAOImpl.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
+//                    WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE);
+//        } else {
+//            apiStateChangeWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
+//            wfDTO = workflowDAOImpl.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
+//                    WorkflowConstants.WF_TYPE_AM_API_STATE);
+//        }
+//        if (wfDTO != null && WorkflowStatus.CREATED == wfDTO.getStatus()) {
+//            apiStateChangeWFExecutor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
+//        }
+//    }
 
-        if (isAPIProduct) {
-            apiStateChangeWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE);
-            wfDTO = workflowDAOImpl.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
-                    WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE);
-        } else {
-            apiStateChangeWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
-            wfDTO = workflowDAOImpl.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
-                    WorkflowConstants.WF_TYPE_AM_API_STATE);
-        }
-        if (wfDTO != null && WorkflowStatus.CREATED == wfDTO.getStatus()) {
-            apiStateChangeWFExecutor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
-        }
-    }
-
-    /**
-     * Returns the given workflow executor
-     *
-     * @param workflowType Workflow executor type
-     * @return WorkflowExecutor of given type
-     * @throws WorkflowException if an error occurred while getting WorkflowExecutor
-     */
-    protected WorkflowExecutor getWorkflowExecutor(String workflowType) throws APIManagementException {
-        try {
-            return WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
-        } catch (WorkflowException e) {
-            String errorMessage = "Error while obtaining WorkflowExecutor instance for workflow type :" + workflowType;
-            handleExceptionWithCode(errorMessage, e,
-                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
-        }
-        return null;
-    }
+    //TODO:APK
+//    /**
+//     * Returns the given workflow executor
+//     *
+//     * @param workflowType Workflow executor type
+//     * @return WorkflowExecutor of given type
+//     * @throws WorkflowException if an error occurred while getting WorkflowExecutor
+//     */
+//    protected WorkflowExecutor getWorkflowExecutor(String workflowType) throws APIManagementException {
+//        try {
+//            return WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
+//        } catch (WorkflowException e) {
+//            String errorMessage = "Error while obtaining WorkflowExecutor instance for workflow type :" + workflowType;
+//            handleExceptionWithCode(errorMessage, e,
+//                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
+//        }
+//        return null;
+//    }
 
     //TODO:APK
     protected void removeFromGateway(APIProduct apiProduct, String tenantDomain, Set<APIRevisionDeployment> gatewaysToRemove,
@@ -4117,7 +4156,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private String getUserRoleListQuery() throws APIManagementException {
         StringBuilder rolesQuery = new StringBuilder();
         rolesQuery.append('(');
-        rolesQuery.append(org.wso2.carbon.apimgt.impl.APIConstants.NULL_USER_ROLE_LIST);
+        rolesQuery.append(APIConstants.NULL_USER_ROLE_LIST);
         String[] userRoles = APIUtil.getListOfRoles(userNameWithoutChange);
         String skipRolesByRegex = APIUtil.getSkipRolesByRegex();
         if (StringUtils.isNotEmpty(skipRolesByRegex)) {
@@ -4144,14 +4183,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         rolesQuery.append(")");
         if(log.isDebugEnabled()) {
-        	log.debug("User role list solr query " + org.wso2.carbon.apimgt.impl.APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString());
+        	log.debug("User role list solr query " + APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString());
         }
-        return org.wso2.carbon.apimgt.impl.APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString();
+        return APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString();
     }
 
     @Override
     protected String getSearchQuery(String searchQuery) throws APIManagementException {
-        if (!isAccessControlRestrictionEnabled || APIUtil.hasPermission(userNameWithoutChange, org.wso2.carbon.apimgt.impl.APIConstants.Permissions
+        if (!isAccessControlRestrictionEnabled || APIUtil.hasPermission(userNameWithoutChange, APIConstants.Permissions
                 .APIM_ADMIN)) {
             return searchQuery;
         }
@@ -4306,44 +4345,47 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         APIProductIdentifier identifier = apiProduct.getId();
 
-        try {
-            long subsCount = apiDAOImpl.getAPISubscriptionCountByAPI(identifier);
-            if (subsCount > 0) {
-                //Logging as a WARN since this isn't an error scenario.
-                String message = "Cannot remove the API Product as active subscriptions exist.";
-                log.warn(message);
-                throw new APIManagementException(message);
-            }
-
-            // gatewayType check is required when API Management is deployed on
-            // other servers to avoid synapse
-            deleteAPIProductRevisions(apiProduct.getUuid(), apiProduct.getOrganization());
-
-            apiPersistenceInstance.deleteAPIProduct(new Organization(apiProduct.getOrganization()), apiProduct.getUuid());
-            apiDAOImpl.deleteAPIProduct(identifier);
-            cleanUpPendingAPIStateChangeTask(apiProduct.getProductId(), true);
-            if (log.isDebugEnabled()) {
-                String logMessage =
-                        "API Product Name: " + identifier.getName() + ", API Product Version " + identifier.getVersion()
-                                + " successfully removed from the database.";
-                log.debug(logMessage);
-            }
-
-            JSONObject apiLogObject = new JSONObject();
-            apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.NAME, identifier.getName());
-            apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.VERSION, identifier.getVersion());
-            apiLogObject.put(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
-
-            APIUtil.logAuditMessage(org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.API_PRODUCT, apiLogObject.toString(),
-                    org.wso2.carbon.apimgt.impl.APIConstants.AuditLogConstants.DELETED, this.username);
-
-            GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifacts(apiProduct.getUuid());
-
-        } catch (APIPersistenceException e) {
-            handleException("Failed to remove the API product", e);
-        } catch (WorkflowException e) {
-            handleException("Error while removing the pending workflows of API Product", e);
-        }
+        //TODO:APK
+//        try {
+//            long subsCount = apiDAOImpl.getAPISubscriptionCountByAPI(identifier);
+//            if (subsCount > 0) {
+//                //Logging as a WARN since this isn't an error scenario.
+//                String message = "Cannot remove the API Product as active subscriptions exist.";
+//                log.warn(message);
+//                throw new APIManagementException(message);
+//            }
+//
+//            // gatewayType check is required when API Management is deployed on
+//            // other servers to avoid synapse
+//            deleteAPIProductRevisions(apiProduct.getUuid(), apiProduct.getOrganization());
+//
+//            apiPersistenceInstance.deleteAPIProduct(new Organization(apiProduct.getOrganization()), apiProduct.getUuid());
+//            apiDAOImpl.deleteAPIProduct(identifier);
+//            cleanUpPendingAPIStateChangeTask(apiProduct.getProductId(), true);
+//            if (log.isDebugEnabled()) {
+//                String logMessage =
+//                        "API Product Name: " + identifier.getName() + ", API Product Version " + identifier.getVersion()
+//                                + " successfully removed from the database.";
+//                log.debug(logMessage);
+//            }
+//
+//            JSONObject apiLogObject = new JSONObject();
+//            apiLogObject.put(APIConstants.AuditLogConstants.NAME, identifier.getName());
+//            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, identifier.getVersion());
+//            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
+//
+//            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API_PRODUCT, apiLogObject.toString(),
+//                    APIConstants.AuditLogConstants.DELETED, this.username);
+//
+//            GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifacts(apiProduct.getUuid());
+//
+//        } catch (APIPersistenceException e) {
+//            handleException("Failed to remove the API product", e);
+//        }
+        //TODO:APK
+//        } catch (WorkflowException e) {
+//            handleException("Error while removing the pending workflows of API Product", e);
+//        }
     }
 
     @Override
@@ -4464,10 +4506,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         //TODO:APK
 //        APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-//                org.wso2.carbon.apimgt.impl.APIConstants.EventType.API_UPDATE.name(), tenantId, organization, product.getId().getName(), productId,
+//                APIConstants.EventType.API_UPDATE.name(), tenantId, organization, product.getId().getName(), productId,
 //                product.getId().getUUID(), product.getId().getVersion(), product.getType(), product.getContext(),
-//                product.getId().getProviderName(), org.wso2.carbon.apimgt.impl.APIConstants.LC_PUBLISH_LC_STATE);
-//        APIUtil.sendNotification(apiEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.API.name());
+//                product.getId().getProviderName(), APIConstants.LC_PUBLISH_LC_STATE);
+//        APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
         return apiToProductResourceMapping;
     }
@@ -4480,10 +4522,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void validateApiLifeCycleForApiProducts(API api) throws APIManagementException {
         String status = api.getStatus();
 
-        if (org.wso2.carbon.apimgt.impl.APIConstants.BLOCKED.equals(status) ||
-            org.wso2.carbon.apimgt.impl.APIConstants.PROTOTYPED.equals(status) ||
-            org.wso2.carbon.apimgt.impl.APIConstants.DEPRECATED.equals(status) ||
-            org.wso2.carbon.apimgt.impl.APIConstants.RETIRED.equals(status)) {
+        if (APIConstants.BLOCKED.equals(status) ||
+            APIConstants.PROTOTYPED.equals(status) ||
+            APIConstants.DEPRECATED.equals(status) ||
+            APIConstants.RETIRED.equals(status)) {
             throw new APIManagementException("Cannot create API Product using API with following status: " + status,
                     ExceptionCodes.from(ExceptionCodes.API_PRODUCT_WITH_UNSUPPORTED_LIFECYCLE_API, status));
         }
@@ -4501,13 +4543,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("API Name is required.");
         } else if (containsIllegals(apiName)) {
             handleException("API Name contains one or more illegal characters  " +
-                    "( " + org.wso2.carbon.apimgt.impl.APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )");
+                    "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )");
         }
         //version is not a mandatory field for now
-        if (!hasValidLength(apiName, org.wso2.carbon.apimgt.impl.APIConstants.MAX_LENGTH_API_NAME)
-                || !hasValidLength(product.getId().getVersion(), org.wso2.carbon.apimgt.impl.APIConstants.MAX_LENGTH_VERSION)
-                || !hasValidLength(product.getId().getProviderName(), org.wso2.carbon.apimgt.impl.APIConstants.MAX_LENGTH_PROVIDER)
-                || !hasValidLength(product.getContext(), org.wso2.carbon.apimgt.impl.APIConstants.MAX_LENGTH_CONTEXT)) {
+        if (!hasValidLength(apiName, APIConstants.MAX_LENGTH_API_NAME)
+                || !hasValidLength(product.getId().getVersion(), APIConstants.MAX_LENGTH_VERSION)
+                || !hasValidLength(product.getId().getProviderName(), APIConstants.MAX_LENGTH_PROVIDER)
+                || !hasValidLength(product.getContext(), APIConstants.MAX_LENGTH_CONTEXT)) {
             throw new APIManagementException("Character length exceeds the allowable limit",
                     ExceptionCodes.LENGTH_EXCEEDS);
         }
@@ -4526,20 +4568,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         PublisherAPIProduct publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
         PublisherAPIProduct addedAPIProduct;
-        try {
-            publisherAPIProduct.setApiProductName(apiProduct.getId().getName());
-            publisherAPIProduct.setProviderName(apiProduct.getId().getProviderName());
-            publisherAPIProduct.setVersion(apiProduct.getId().getVersion());
-            addedAPIProduct = apiPersistenceInstance.addAPIProduct(
-                    new Organization(org.wso2.carbon.apimgt.user.ctx.UserContext.getThreadLocalUserContext()
-                            .getOrganization()),
-                    publisherAPIProduct);
-
-            apiProductUUID = addedAPIProduct.getId();
-        } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while creating API product ", e);
-        }
-
+        //TODO:APK
+//        try {
+//            publisherAPIProduct.setApiProductName(apiProduct.getId().getName());
+//            publisherAPIProduct.setProviderName(apiProduct.getId().getProviderName());
+//            publisherAPIProduct.setVersion(apiProduct.getId().getVersion());
+//            addedAPIProduct = apiPersistenceInstance.addAPIProduct(
+//                    new Organization(org.wso2.carbon.apimgt.user.ctx.UserContext.getThreadLocalUserContext()
+//                            .getOrganization()),
+//                    publisherAPIProduct);
+//
+//            apiProductUUID = addedAPIProduct.getId();
+//        } catch (APIPersistenceException e) {
+//            throw new APIManagementException("Error while creating API product ", e);
+//        }
 
         return apiProductUUID;
     }
@@ -4562,17 +4604,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         PublisherAPIProduct publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
         PublisherAPIProduct addedAPIProduct;
-        try {
-            publisherAPIProduct.setApiProductName(apiProduct.getId().getName());
-            publisherAPIProduct.setProviderName(apiProduct.getId().getProviderName());
-            publisherAPIProduct.setVersion(apiProduct.getId().getVersion());
-            addedAPIProduct = apiPersistenceInstance.updateAPIProduct(
-                    new Organization(org.wso2.carbon.apimgt.user.ctx.UserContext.getThreadLocalUserContext()
-                            .getOrganization()),
-                    publisherAPIProduct);
-        } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while creating API product ");
-        }
+        //TODO:APK
+//        try {
+//            publisherAPIProduct.setApiProductName(apiProduct.getId().getName());
+//            publisherAPIProduct.setProviderName(apiProduct.getId().getProviderName());
+//            publisherAPIProduct.setVersion(apiProduct.getId().getVersion());
+//            addedAPIProduct = apiPersistenceInstance.updateAPIProduct(
+//                    new Organization(org.wso2.carbon.apimgt.user.ctx.UserContext.getThreadLocalUserContext()
+//                            .getOrganization()),
+//                    publisherAPIProduct);
+//        } catch (APIPersistenceException e) {
+//            throw new APIManagementException("Error while creating API product ");
+//        }
     }
 
     public void updateProductResourceMappings(API api, String organization, List<APIProductResource> productResources)
@@ -4813,16 +4856,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = MultitenantUtils.getTenantDomain(userId);
         JSONObject securityAuditConfig = APIUtil.getSecurityAuditAttributesFromRegistry(tenantDomain);
         if (securityAuditConfig != null) {
-            if ((securityAuditConfig.get(org.wso2.carbon.apimgt.impl.APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL) != null) &&
-                    securityAuditConfig.get(org.wso2.carbon.apimgt.impl.APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL) instanceof Boolean &&
-                    (Boolean) securityAuditConfig.get(org.wso2.carbon.apimgt.impl.APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL)) {
-                String apiToken = (String) securityAuditConfig.get(org.wso2.carbon.apimgt.impl.APIConstants.SECURITY_AUDIT_API_TOKEN);
-                String collectionId = (String) securityAuditConfig.get(org.wso2.carbon.apimgt.impl.APIConstants.SECURITY_AUDIT_COLLECTION_ID);
+            if ((securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL) != null) &&
+                    securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL) instanceof Boolean &&
+                    (Boolean) securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL)) {
+                String apiToken = (String) securityAuditConfig.get(APIConstants.SECURITY_AUDIT_API_TOKEN);
+                String collectionId = (String) securityAuditConfig.get(APIConstants.SECURITY_AUDIT_COLLECTION_ID);
                 JSONObject tenantProperties = new JSONObject();
 
                 if (StringUtils.isNotEmpty(apiToken) && StringUtils.isNotEmpty(collectionId)) {
-                    tenantProperties.put(org.wso2.carbon.apimgt.impl.APIConstants.SECURITY_AUDIT_API_TOKEN, apiToken);
-                    tenantProperties.put(org.wso2.carbon.apimgt.impl.APIConstants.SECURITY_AUDIT_COLLECTION_ID, collectionId);
+                    tenantProperties.put(APIConstants.SECURITY_AUDIT_API_TOKEN, apiToken);
+                    tenantProperties.put(APIConstants.SECURITY_AUDIT_COLLECTION_ID, collectionId);
                     return tenantProperties;
                 }
             } else {
@@ -4925,12 +4968,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             for (Scope scope : scopes) {
                 //TODO:APK
 //                ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(),
-//                        System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.SCOPE_CREATE.name(), tenantId,
+//                        System.currentTimeMillis(), APIConstants.EventType.SCOPE_CREATE.name(), tenantId,
 //                        tenantDomain, scope.getKey(), scope.getName(), scope.getDescription());
 //                if (StringUtils.isNotEmpty(scope.getRoles()) && scope.getRoles().trim().length() > 0) {
 //                    scopeEvent.setRoles(Arrays.asList(scope.getRoles().split(",")));
 //                }
-//                APIUtil.sendNotification(scopeEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.SCOPE.name());
+//                APIUtil.sendNotification(scopeEvent, APIConstants.NotifierType.SCOPE.name());
             }
         }
 
@@ -4942,12 +4985,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             scopesDAO.updateScope(scope, tenantId);
             //TODO:APK
 //            ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.SCOPE_UPDATE.name(), tenantId,
+//                    System.currentTimeMillis(), APIConstants.EventType.SCOPE_UPDATE.name(), tenantId,
 //                    tenantDomain, scope.getKey(), scope.getName(), scope.getDescription());
 //            if (StringUtils.isNotEmpty(scope.getRoles()) && scope.getRoles().trim().length() > 0) {
 //                scopeEvent.setRoles(Arrays.asList(scope.getRoles().split(",")));
 //            }
-//            APIUtil.sendNotification(scopeEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.SCOPE.name());
+//            APIUtil.sendNotification(scopeEvent, APIConstants.NotifierType.SCOPE.name());
         }
     }
 
@@ -4957,9 +5000,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             scopesDAO.deleteScope(scopeKey, tenantId);
             //TODO:APK
 //            ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), org.wso2.carbon.apimgt.impl.APIConstants.EventType.SCOPE_DELETE.name(), tenantId,
+//                    System.currentTimeMillis(), APIConstants.EventType.SCOPE_DELETE.name(), tenantId,
 //                    tenantDomain, scopeKey, null, null);
-//            APIUtil.sendNotification(scopeEvent, org.wso2.carbon.apimgt.impl.APIConstants.NotifierType.SCOPE.name());
+//            APIUtil.sendNotification(scopeEvent, APIConstants.NotifierType.SCOPE.name());
         }
     }
 
@@ -4989,7 +5032,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
                 /////////////////// Do processing on the data object//////////
                 populateRevisionInformation(api, uuid);
-                populateAPIInformation(uuid, organization, api);
+                //TODO:APK
+//                populateAPIInformation(uuid, organization, api);
                 if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                         || APIUtil.isSequenceDefined(api.getFaultSequence())) {
                     loadMediationPoliciesAsOperationPoliciesToAPI(api, organization);
@@ -5005,18 +5049,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             msg = "Failed to get API";
             throw new APIManagementException(msg, e,
                     ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, msg));
-        } catch (OASPersistenceException e) {
-            msg = "Error while retrieving the OAS definition";
-            throw new APIManagementException(msg, e,
-                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, msg));
-        } catch (ParseException e) {
-            throw new APIManagementException("Error while parsing the OAS definition", e,
-                    ExceptionCodes.OPENAPI_PARSE_EXCEPTION);
-        } catch (AsyncSpecPersistenceException e) {
-            msg = "Error while retrieving the Async API definition";
-            throw new APIManagementException(msg, e,
-                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, msg));
         }
+        //TODO:APK
+//        } catch (OASPersistenceException e) {
+//            msg = "Error while retrieving the OAS definition";
+//            throw new APIManagementException(msg, e,
+//                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, msg));
+//        } catch (ParseException e) {
+//            throw new APIManagementException("Error while parsing the OAS definition", e,
+//                    ExceptionCodes.OPENAPI_PARSE_EXCEPTION);
+//        } catch (AsyncSpecPersistenceException e) {
+//            msg = "Error while retrieving the Async API definition";
+//            throw new APIManagementException(msg, e,
+//                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, msg));
+//        }
     }
 
     @Override
@@ -5112,29 +5158,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public APIProduct getAPIProductbyUUID(String uuid, String organization) throws APIManagementException {
-        try {
-            Organization org = new Organization(organization);
-            PublisherAPIProduct publisherAPIProduct = apiPersistenceInstance.getPublisherAPIProduct(org, uuid);
-            if (publisherAPIProduct != null) {
-                APIProduct product = APIProductMapper.INSTANCE.toApiProduct(publisherAPIProduct);
-                product.setID(new APIProductIdentifier(publisherAPIProduct.getProviderName(),
-                        publisherAPIProduct.getApiProductName(), publisherAPIProduct.getVersion(), uuid));
-                checkAccessControlPermission(userNameWithoutChange, product.getAccessControl(),
-                        product.getAccessControlRoles());
-                populateRevisionInformation(product, uuid);
-                populateAPIProductInformation(uuid, organization, product);
-                populateAPIStatus(product);
-                populateAPITier(product);
-                return product;
-            } else {
-                String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid
-                        + " does not exist";
-                throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.API_PRODUCT_NOT_FOUND, uuid));
-            }
-        } catch (APIPersistenceException | OASPersistenceException | ParseException e) {
-            String msg = "Failed to get API Product";
-            throw new APIManagementException(msg, e, ExceptionCodes.INTERNAL_ERROR);
-        }
+        //TODO:APK
+        return null;
+//        try {
+//            Organization org = new Organization(organization);
+//            PublisherAPIProduct publisherAPIProduct = apiPersistenceInstance.getPublisherAPIProduct(org, uuid);
+//            if (publisherAPIProduct != null) {
+//                APIProduct product = APIProductMapper.INSTANCE.toApiProduct(publisherAPIProduct);
+//                product.setID(new APIProductIdentifier(publisherAPIProduct.getProviderName(),
+//                        publisherAPIProduct.getApiProductName(), publisherAPIProduct.getVersion(), uuid));
+//                checkAccessControlPermission(userNameWithoutChange, product.getAccessControl(),
+//                        product.getAccessControlRoles());
+//                populateRevisionInformation(product, uuid);
+//                populateAPIProductInformation(uuid, organization, product);
+//                populateAPIStatus(product);
+//                populateAPITier(product);
+//                return product;
+//            } else {
+//                String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid
+//                        + " does not exist";
+//                throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.API_PRODUCT_NOT_FOUND, uuid));
+//            }
+//        } catch (APIPersistenceException | OASPersistenceException | ParseException e) {
+//            String msg = "Failed to get API Product";
+//            throw new APIManagementException(msg, e, ExceptionCodes.INTERNAL_ERROR);
+//        }
     }
 
     @Override
@@ -5419,7 +5467,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void setThumbnailToAPI(String apiId, ResourceFile resource, String organization) throws APIManagementException {
 
         try {
-            org.wso2.carbon.apimgt.persistence.dto.ResourceFile iconResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
+            org.wso2.apk.apimgt.impl.dao.dto.ResourceFile iconResourceFile = new org.wso2.apk.apimgt.impl.dao.dto.ResourceFile(
                     resource.getContent(), resource.getContentType());
             apiDAOImpl.saveThumbnail(new Organization(organization), apiId, iconResourceFile);
         } catch (ThumbnailPersistenceException e) {
@@ -5439,13 +5487,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // String userNameWithTenantDomain = (userNameWithoutChange != null) ? userNameWithoutChange : username;
 
         if (accessControlProperty == null || accessControlProperty.trim().isEmpty()
-                || accessControlProperty.equalsIgnoreCase(org.wso2.carbon.apimgt.impl.APIConstants.NO_ACCESS_CONTROL)) {
+                || accessControlProperty.equalsIgnoreCase(APIConstants.NO_ACCESS_CONTROL)) {
             if (log.isDebugEnabled()) {
                 log.debug("API does not have any access control restriction");
             }
             return;
         }
-        if (APIUtil.hasPermission(userNameWithTenantDomain, org.wso2.carbon.apimgt.impl.APIConstants.Permissions.APIM_ADMIN)) {
+        if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.APIM_ADMIN)) {
             return;
         }
 
@@ -5460,13 +5508,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 log.debug("User " + username + " has roles " + Arrays.toString(userRoleList));
             }
             for (String role : accessControlRoleList) {
-                if (!role.equalsIgnoreCase(org.wso2.carbon.apimgt.impl.APIConstants.NULL_USER_ROLE_LIST)
+                if (!role.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST)
                         && APIUtil.compareRoleList(userRoleList, role)) {
                     return;
                 }
             }
 
-            throw new APIManagementException(org.wso2.carbon.apimgt.impl.APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the api",
+            throw new APIManagementException(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the api",
                     ExceptionCodes.NO_VIEW_UPDATE_PERMISSIONS);
         }
 
@@ -5510,39 +5558,40 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String[] roles = APIUtil.getFilteredUserRoles(userNameWithoutChange);
         Map<String, Object> properties = APIUtil.getUserProperties(userNameWithoutChange);
         UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
-        try {
-            PublisherAPIProductSearchResult searchAPIs = apiPersistenceInstance.searchAPIProductsForPublisher(org,
-                    searchQuery, start, end, userCtx);
-            if (log.isDebugEnabled()) {
-                log.debug("searched API products for query : " + searchQuery + " :-->: " + searchAPIs.toString());
-            }
-
-            if (searchAPIs != null) {
-                List<PublisherAPIProductInfo> list = searchAPIs.getPublisherAPIProductInfoList();
-                List<Object> apiList = new ArrayList<>();
-                for (PublisherAPIProductInfo publisherAPIInfo : list) {
-                    APIProduct mappedAPI = new APIProduct(new APIProductIdentifier(publisherAPIInfo.getProviderName(),
-                            publisherAPIInfo.getApiProductName(), publisherAPIInfo.getVersion()));
-                    mappedAPI.setUuid(publisherAPIInfo.getId());
-                    mappedAPI.setState(publisherAPIInfo.getState());
-                    mappedAPI.setContext(publisherAPIInfo.getContext());
-                    mappedAPI.setApiSecurity(publisherAPIInfo.getApiSecurity());
-                    mappedAPI.setThumbnailUrl(publisherAPIInfo.getThumbnail());
-                    populateAPIStatus(mappedAPI);
-                    productList.add(mappedAPI);
-                }
-                productSet.addAll(productList);
-                result.put("products", productSet);
-                result.put("length", searchAPIs.getTotalAPIsCount());
-                result.put("isMore", true);
-            } else {
-                result.put("products", productSet);
-                result.put("length", 0);
-                result.put("isMore", false);
-            }
-        } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while searching the api ", e);
-        }
+        //TODO:APK
+//        try {
+//            PublisherAPIProductSearchResult searchAPIs = apiPersistenceInstance.searchAPIProductsForPublisher(org,
+//                    searchQuery, start, end, userCtx);
+//            if (log.isDebugEnabled()) {
+//                log.debug("searched API products for query : " + searchQuery + " :-->: " + searchAPIs.toString());
+//            }
+//
+//            if (searchAPIs != null) {
+//                List<PublisherAPIProductInfo> list = searchAPIs.getPublisherAPIProductInfoList();
+//                List<Object> apiList = new ArrayList<>();
+//                for (PublisherAPIProductInfo publisherAPIInfo : list) {
+//                    APIProduct mappedAPI = new APIProduct(new APIProductIdentifier(publisherAPIInfo.getProviderName(),
+//                            publisherAPIInfo.getApiProductName(), publisherAPIInfo.getVersion()));
+//                    mappedAPI.setUuid(publisherAPIInfo.getId());
+//                    mappedAPI.setState(publisherAPIInfo.getState());
+//                    mappedAPI.setContext(publisherAPIInfo.getContext());
+//                    mappedAPI.setApiSecurity(publisherAPIInfo.getApiSecurity());
+//                    mappedAPI.setThumbnailUrl(publisherAPIInfo.getThumbnail());
+//                    populateAPIStatus(mappedAPI);
+//                    productList.add(mappedAPI);
+//                }
+//                productSet.addAll(productList);
+//                result.put("products", productSet);
+//                result.put("length", searchAPIs.getTotalAPIsCount());
+//                result.put("isMore", true);
+//            } else {
+//                result.put("products", productSet);
+//                result.put("length", 0);
+//                result.put("isMore", false);
+//            }
+//        } catch (APIPersistenceException e) {
+//            throw new APIManagementException("Error while searching the api ", e);
+//        }
         return result ;
     }
 
@@ -5585,7 +5634,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 //                // Keeping the organization as tenant domain since MG does not support organization-wise deployment
 //                // Artifacts will be deployed in ST for all organizations
 //                gatewayArtifactsMgtDAO.addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(), apiId.getApiName(),
-//                        apiId.getVersion(), apiRevision.getRevisionUUID(), organization, org.wso2.carbon.apimgt.impl.APIConstants.HTTP_PROTOCOL,
+//                        apiId.getVersion(), apiRevision.getRevisionUUID(), organization, APIConstants.HTTP_PROTOCOL,
 //                         artifact);
 //                if (artifactSaver != null) {
 //                    // Keeping the organization as tenant domain since MG does not support organization-wise deployment
@@ -5998,29 +6047,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiProductIdentifier.setUuid(apiRevision.getApiUUID());
         String revisionUUID;
-        try {
-            revisionUUID = apiPersistenceInstance.addAPIRevision(new Organization(tenantDomain),
-                    apiProductIdentifier.getUUID(), revisionId);
-        } catch (APIPersistenceException e) {
-            String errorMessage = "Failed to add revision registry artifacts";
-            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
-                    ERROR_CREATING_API_REVISION, apiRevision.getApiUUID()));
-        }
-        if (StringUtils.isEmpty(revisionUUID)) {
-            String errorMessage = "Failed to retrieve revision uuid";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
-        }
-        apiRevision.setRevisionUUID(revisionUUID);
-        apiDAOImpl.addAPIProductRevision(apiRevision);
-        try {
-            File artifact = importExportAPI
-                    .exportAPIProduct(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON,
-                            false, true, organization);
-            gatewayArtifactsMgtDAO
-                    .addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(),apiProductIdentifier.getName(),
-                    apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(), tenantDomain,
-                            APIConstants.API_PRODUCT, artifact);
-            //TODO:APK
+        //TODO:APK
+//        try {
+//            revisionUUID = apiPersistenceInstance.addAPIRevision(new Organization(tenantDomain),
+//                    apiProductIdentifier.getUUID(), revisionId);
+//        } catch (APIPersistenceException e) {
+//            String errorMessage = "Failed to add revision registry artifacts";
+//            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
+//                    ERROR_CREATING_API_REVISION, apiRevision.getApiUUID()));
+//        }
+//        if (StringUtils.isEmpty(revisionUUID)) {
+//            String errorMessage = "Failed to retrieve revision uuid";
+//            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
+//        }
+//        apiRevision.setRevisionUUID(revisionUUID);
+//        apiDAOImpl.addAPIProductRevision(apiRevision);
+//        try {
+//            File artifact = importExportAPI
+//                    .exportAPIProduct(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON,
+//                            false, true, organization);
+//            gatewayArtifactsMgtDAO
+//                    .addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(),apiProductIdentifier.getName(),
+//                    apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(), tenantDomain,
+//                            APIConstants.API_PRODUCT, artifact);
 //            if (artifactSaver != null) {
 //                artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiProductIdentifier.getName(),
 //                        apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(), tenantDomain, artifact);
@@ -6029,11 +6078,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 //            throw new APIManagementException("Error while Store the Revision Artifact",
 //                    ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
 //        }
-        } catch (APIImportExportException e) {
-            throw new APIManagementException("Error while Store the Revision Artifact",
-                    ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
-        }
-        return revisionUUID;
+//        return revisionUUID;
+        return null;
     }
 
     @Override
@@ -6160,14 +6206,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
         apiProductIdentifier.setUuid(apiProductId);
-        try {
-            apiPersistenceInstance.restoreAPIRevision(new Organization(organization),
-                    apiProductIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
-        } catch (APIPersistenceException e) {
-            String errorMessage = "Failed to restore registry artifacts";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                    ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
-        }
+        //TODO:APK
+//        try {
+//            apiPersistenceInstance.restoreAPIRevision(new Organization(organization),
+//                    apiProductIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
+//        } catch (APIPersistenceException e) {
+//            String errorMessage = "Failed to restore registry artifacts";
+//            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
+//                    ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
+//        }
         apiDAOImpl.restoreAPIProductRevision(apiRevision);
     }
 
@@ -6193,14 +6240,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     EXISTING_API_REVISION_DEPLOYMENT_FOUND, apiRevisionId));
         }
         apiProductIdentifier.setUuid(apiProductId);
-        try {
-            apiPersistenceInstance.deleteAPIRevision(new Organization(organization),
-                    apiProductIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
-        } catch (APIPersistenceException e) {
-            String errorMessage = "Failed to delete registry artifacts";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                    ERROR_DELETING_API_REVISION,apiRevision.getApiUUID()));
-        }
+        //TODO:APK
+//        try {
+//            apiPersistenceInstance.deleteAPIRevision(new Organization(organization),
+//                    apiProductIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
+//        } catch (APIPersistenceException e) {
+//            String errorMessage = "Failed to delete registry artifacts";
+//            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
+//                    ERROR_DELETING_API_REVISION,apiRevision.getApiUUID()));
+//        }
         apiDAOImpl.deleteAPIProductRevision(apiRevision);
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         //TODO:APK
@@ -6228,7 +6276,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         subscribedApiInfo.setVersion(apiInfo.getVersion());
         JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
         jwtTokenInfoDTO.setEndUserName(username);
-        jwtTokenInfoDTO.setKeyType(org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE_PRODUCTION);
+        jwtTokenInfoDTO.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
         jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(subscribedApiInfo));
         jwtTokenInfoDTO.setExpirationTime(60000l);
         //TODO:APK
