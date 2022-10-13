@@ -87,4 +87,8 @@ public interface UserManager {
     SortedMap<String, String> getClaims(String username, int tenantId, String dialectURI) throws UserException;
 
     String getClaimDisplayName(String claimURI, String username, int tenantId) throws UserException;
+
+    String getTenantDomain(String username) throws UserException;
+
+    String getTenantAwareUsername(String username) throws UserException;
 }

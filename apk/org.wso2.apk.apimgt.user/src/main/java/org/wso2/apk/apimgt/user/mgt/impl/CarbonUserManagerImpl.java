@@ -429,4 +429,45 @@ public class CarbonUserManagerImpl implements UserManager {
             throw new UserException(e.getMessage(), e);
         }
     }
+
+    @Override
+    public String getTenantDomain(String username) throws UserException {
+        String tenantDomain;
+
+        tenantDomain = "carbon.super";
+        if (username.contains("@") && !isEmailUserName()) {
+            tenantDomain = username.substring(username.lastIndexOf(64) + 1);
+        } else if (isEmailUserName() && username.indexOf("@") != username.lastIndexOf("@")) {
+            tenantDomain = username.substring(username.lastIndexOf(64) + 1);
+        }
+
+        if (tenantDomain == null || tenantDomain.trim().length() == 0) {
+            tenantDomain = "carbon.super";
+        }
+
+        return tenantDomain.toLowerCase();
+    }
+
+    @Override
+    public String getTenantAwareUsername(String username) throws UserException {
+        if (username.contains("@") && !isEmailUserName()) {
+            username = username.substring(0, username.lastIndexOf(64));
+        } else if (isEmailUserName()) {
+            if (username.indexOf("@") == username.lastIndexOf("@")) {
+                if ("carbon.super".equalsIgnoreCase(username.substring(username.lastIndexOf(64) + 1))) {
+                    username = username.substring(0, username.lastIndexOf(64));
+                }
+            } else {
+                username = username.substring(0, username.lastIndexOf(64));
+            }
+        }
+        return username;
+    }
+
+    private static boolean isEmailUserName() {
+        String enableEmailUserName = "false";
+        // TODO: // Read from Config
+        // String enableEmailUserName = ServerConfiguration.getInstance().getFirstProperty("EnableEmailUserName");
+        return enableEmailUserName != null && "true".equals(enableEmailUserName.trim());
+    }
 }
