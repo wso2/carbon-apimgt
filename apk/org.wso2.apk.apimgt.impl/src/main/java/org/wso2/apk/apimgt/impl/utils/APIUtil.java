@@ -118,6 +118,7 @@ import org.wso2.apk.apimgt.impl.APIAdminImpl;
 import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.apk.apimgt.impl.APIManagerConfiguration;
+import org.wso2.apk.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.apk.apimgt.impl.ExternalEnvironment;
 import org.wso2.apk.apimgt.impl.PasswordResolverFactory;
 import org.wso2.apk.apimgt.impl.config.APIMConfigService;
@@ -1402,6 +1403,37 @@ public final class APIUtil {
     }
 
     /**
+     * Read the REST API group id extractor class reference from api-manager.xml.
+     *
+     * @return REST API group id extractor class reference.
+     */
+    public static String getRESTApiGroupingExtractorImplementation() {
+
+        //TODO config setup flow
+        APIManagerConfiguration config = new APIManagerConfigurationServiceImpl(new APIManagerConfiguration())
+                .getAPIManagerConfiguration();
+        String restApiGroupingExtractor = config
+                .getFirstProperty(APIConstants.API_STORE_REST_API_GROUP_EXTRACTOR_IMPLEMENTATION);
+        if (StringUtils.isEmpty(restApiGroupingExtractor)) {
+            restApiGroupingExtractor = getGroupingExtractorImplementation();
+        }
+        return restApiGroupingExtractor;
+    }
+
+    /**
+     * Read the group id extractor class reference from api-manager.xml.
+     *
+     * @return group id extractor class reference.
+     */
+    public static String getGroupingExtractorImplementation() {
+
+        //TODO config setup flow
+        APIManagerConfiguration config = new APIManagerConfigurationServiceImpl(new APIManagerConfiguration())
+                .getAPIManagerConfiguration();
+        return config.getFirstProperty(APIConstants.API_STORE_GROUP_EXTRACTOR_IMPLEMENTATION);
+    }
+
+    /**
      * Check whether given application name is available under current subscriber or group
      *
      * @param subscriber      subscriber name
@@ -2517,6 +2549,51 @@ public final class APIUtil {
 
     }
 
+    /**
+     * This method is used to extact group ids from Extractor.
+     *
+     * @param response               login response String.
+     * @param groupingExtractorClass extractor class.
+     * @return group ids
+     * @throws APIManagementException Throws is an error occured when stractoing group Ids
+     */
+    public static String[] getGroupIdsFromExtractor(String response, String groupingExtractorClass)
+            throws APIManagementException {
+
+        if (groupingExtractorClass != null) {
+            try {
+                LoginPostExecutor groupingExtractor = (LoginPostExecutor) APIUtil.getClassInstance
+                        (groupingExtractorClass);
+                //switching 2.1.0 and 2.2.0
+                if (APIUtil.isMultiGroupAppSharingEnabled()) {
+                    NewPostLoginExecutor newGroupIdListExtractor = (NewPostLoginExecutor) groupingExtractor;
+                    return newGroupIdListExtractor.getGroupingIdentifierList(response);
+                } else {
+                    String groupId = groupingExtractor.getGroupingIdentifiers(response);
+                    return new String[]{groupId};
+                }
+
+            } catch (ClassNotFoundException e) {
+                String msg = groupingExtractorClass + " is not found in runtime";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            } catch (ClassCastException e) {
+                String msg = "Cannot cast " + groupingExtractorClass + " NewPostLoginExecutor";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            } catch (IllegalAccessException e) {
+                String msg = "Error occurred while invocation of getGroupingIdentifier method";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            } catch (InstantiationException e) {
+                String msg = "Error occurred while instantiating " + groupingExtractorClass + " class";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+        }
+        return new String[0];
+    }
+
     public static String getStoreUrl() {
 
         //TODO handle configs
@@ -2678,6 +2755,18 @@ public final class APIUtil {
         properties.put(APIConstants.USER_CTX_PROPERTY_SKIP_ROLES, APIUtil.getSkipRolesByRegex());
 
         return properties;
+    }
+
+    public static boolean isDevPortalAnonymous() {
+
+        //TODO config setup flow
+        APIManagerConfiguration config = new APIManagerConfigurationServiceImpl(new APIManagerConfiguration())
+                .getAPIManagerConfiguration();
+        String anonymousMode = config.getFirstProperty(APIConstants.API_DEVPORTAL_ANONYMOUS_MODE);
+        if (anonymousMode == null) {
+            return true;
+        }
+        return Boolean.parseBoolean(anonymousMode);
     }
 
     /**
