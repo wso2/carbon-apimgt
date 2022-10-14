@@ -15,8 +15,8 @@
  */
 package org.wso2.apk.apimgt.impl;
 
-import org.wso2.carbon.apimgt.api.model.AsyncProtocolEndpoint;
-import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.apk.apimgt.api.model.AsyncProtocolEndpoint;
+import org.wso2.apk.apimgt.api.model.Environment;
 
 import java.util.List;
 

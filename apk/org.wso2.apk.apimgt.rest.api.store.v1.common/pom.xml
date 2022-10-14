@@ -126,6 +126,8 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.apk.apimgt.rest.api.util</artifactId>
+            <version>9.26.10-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>

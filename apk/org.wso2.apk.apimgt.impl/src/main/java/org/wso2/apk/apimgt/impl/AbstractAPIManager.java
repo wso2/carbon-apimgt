@@ -125,8 +125,8 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public AbstractAPIManager(String username) throws APIManagementException {
-        this(username, StringUtils.isNoneBlank(username) ? MultitenantUtils.getTenantDomain(username)
-                : MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        this(username, StringUtils.isNoneBlank(username) ? getTenantDomain(username)
+                : APIConstants.SUPER_TENANT_DOMAIN);
     }
 
     public AbstractAPIManager(String username, String organization) throws APIManagementException {
@@ -196,12 +196,12 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiSortedList;
     }
 
-    protected String getTenantAwareUsername(String username) {
+    protected String getTenantAwareUsername(String username) throws UserException {
 
         return APIUtil.getTenantAwareUsername(username);
     }
 
-    protected String getTenantDomain(Identifier identifier) {
+    protected String getTenantDomain(Identifier identifier) throws UserException {
 
         return APIUtil.getTenantDomain(
                 APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
@@ -519,9 +519,14 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
-    protected String getTenantDomain(String username) {
+    protected static String getTenantDomain(String username) throws APIManagementException {
 
-        return APIUtil.getTenantDomain(username);
+        try {
+            return APIUtil.getTenantDomain(username);
+        } catch (UserException e) {
+            throw new APIManagementException("Error while retrieving tenant values from user store", e,
+                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
+        }
     }
 
     /**
@@ -530,7 +535,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @param subscriber Subscriber
      * @throws APIManagementException if an error occurs while adding default application
      */
-    private void addDefaultApplicationForSubscriber(Subscriber subscriber) throws APIManagementException {
+    private void addDefaultApplicationForSubscriber(Subscriber subscriber) throws APIManagementException, UserException {
 
         Application defaultApp = new Application(APIConstants.DEFAULT_APPLICATION_NAME, subscriber);
         if (APIUtil.isEnabledUnlimitedTier()) {
@@ -760,8 +765,6 @@ public abstract class AbstractAPIManager implements APIManager {
     public Set<Tier> getTiers(int tierType, String username) throws APIManagementException {
 
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
-
-        String tenantDomain = getTenantDomain(username);
         Map<String, Tier> tierMap;
 
         int tenantIdFromUsername = APIUtil.getTenantId(username);
