@@ -103,4 +103,13 @@ public interface KeyManagerDAO {
      */
     KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String organization, String name)
             throws APIManagementException;
+
+    /**
+     * Get Key Manager Configuration By UUID.
+     *
+     * @param uuid KeyManager UUID
+     * @return Key Manager Configurations DTO
+     * @throws APIManagementException if failed to retrieve Configuration
+     */
+    KeyManagerConfigurationDTO getKeyManagerConfigurationByUUID(String uuid) throws APIManagementException;
 }

@@ -7,6 +7,9 @@ import org.json.simple.JSONObject;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.ErrorHandler;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
+import org.wso2.apk.apimgt.api.model.APIIdentifier;
+import org.wso2.apk.apimgt.api.model.APIProductIdentifier;
+import org.wso2.apk.apimgt.api.model.Identifier;
 import org.wso2.apk.apimgt.api.model.Workflow;
 import org.wso2.apk.apimgt.impl.dao.WorkflowDAO;
 import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
@@ -255,6 +258,145 @@ public class WorkflowDAOImpl implements WorkflowDAO {
         return workflow;
     }
 
+    @Override
+    public String getExternalWorkflowReferenceForSubscription(Identifier identifier, int appID, String organization)
+            throws APIManagementException {
+
+        String workflowExtRef = null;
+        int id = -1;
+        int subscriptionID = -1;
+
+        String sqlQuery = SQLConstants.GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_SQL;
+        String postgreSQL = SQLConstants.GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_POSTGRE_SQL;
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            if (identifier instanceof APIIdentifier) {
+                String apiUuid;
+                if (identifier.getUUID() != null) {
+                    apiUuid = identifier.getUUID();
+                } else {
+                    apiUuid = getUUIDFromIdentifier((APIIdentifier) identifier, organization);
+                }
+                id = getAPIID(apiUuid, conn);
+
+            } else if (identifier instanceof APIProductIdentifier) {
+                id = ((APIProductIdentifier) identifier).getProductId();
+            }
+            if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
+                sqlQuery = postgreSQL;
+            }
+            try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+                ps.setInt(1, id);
+                ps.setInt(2, appID);
+                ps.setString(3, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+                try (ResultSet rs = ps.executeQuery()) {
+                    // returns only one row
+                    if (rs.next()) {
+                        workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
+                    }
+                }
+
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while getting workflow entry for " +
+                    "Subscription : " + subscriptionID, e);
+        }
+        return workflowExtRef;
+    }
+
+    /**
+     * Get API UUID by the API Identifier.
+     *
+     * @param identifier API Identifier
+     * @param organization identifier of the organization
+     * @return String UUID
+     * @throws APIManagementException if an error occurs
+     */
+    private String getUUIDFromIdentifier(APIIdentifier identifier, String organization) throws APIManagementException {
+
+        String uuid = null;
+        String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_AND_ORGANIZATION_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection.prepareStatement(sql)) {
+            prepStmt.setString(1, identifier.getApiName());
+            prepStmt.setString(2, identifier.getVersion());
+            prepStmt.setString(3, organization);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    uuid = resultSet.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException(
+                    "Failed to get the UUID for API : " + identifier.getApiName() + '-' + identifier.getVersion(), e);
+        }
+        return uuid;
+    }
+
+    private int getAPIID(String uuid, Connection connection) throws APIManagementException, SQLException {
+
+        int id = -1;
+        String getAPIQuery = SQLConstants.GET_API_ID_SQL_BY_UUID;
+
+        try (PreparedStatement prepStmt = connection.prepareStatement(getAPIQuery)) {
+            prepStmt.setString(1, uuid);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    id = rs.getInt("API_ID");
+                }
+                if (id == -1) {
+                    String msg = "Unable to find the API with UUID : " + uuid + " in the database";
+                    log.error(msg);
+                    throw new APIManagementException(msg, ExceptionCodes.API_NOT_FOUND);
+                }
+            }
+        }
+        return id;
+    }
+
+    @Override
+    public WorkflowDTO retrieveWorkflow(String workflowReference) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        WorkflowDTO workflowDTO = null;
+
+        String query = SQLConstants.GET_ALL_WORKFLOW_ENTRY_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, workflowReference);
+
+            rs = prepStmt.executeQuery();
+            while (rs.next()) {
+                workflowDTO = WorkflowExecutorFactory.getInstance().createWorkflowDTO(rs.getString("WF_TYPE"));
+                workflowDTO.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
+                workflowDTO.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
+                workflowDTO.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").getTime());
+                workflowDTO.setWorkflowReference(rs.getString("WF_REFERENCE"));
+                workflowDTO.setTenantDomain(rs.getString("TENANT_DOMAIN"));
+                workflowDTO.setTenantId(rs.getInt("TENANT_ID"));
+                workflowDTO.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
+                InputStream metadataBlob = rs.getBinaryStream("WF_METADATA");
+
+                if (metadataBlob != null) {
+                    String metadata = APIMgtDBUtil.getStringFromInputStream(metadataBlob);
+                    Gson metadataGson = new Gson();
+                    JSONObject metadataJson = metadataGson.fromJson(metadata, JSONObject.class);
+                    workflowDTO.setMetadata(metadataJson);
+                } else {
+                    JSONObject metadataJson = new JSONObject();
+                    workflowDTO.setMetadata(metadataJson);
+                }
+            }
+        } catch (SQLException e) {
+            handleExceptionWithCode("Error while retrieving workflow details for " + workflowReference, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return workflowDTO;
+    }
 
 
 }
