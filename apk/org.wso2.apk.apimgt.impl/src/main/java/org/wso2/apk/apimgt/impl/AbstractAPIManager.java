@@ -196,12 +196,12 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiSortedList;
     }
 
-    protected String getTenantAwareUsername(String username) throws UserException {
+    protected String getTenantAwareUsername(String username) throws APIManagementException {
 
         return APIUtil.getTenantAwareUsername(username);
     }
 
-    protected String getTenantDomain(Identifier identifier) throws UserException {
+    protected String getTenantDomain(Identifier identifier) throws APIManagementException {
 
         return APIUtil.getTenantDomain(
                 APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
@@ -521,12 +521,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
     protected static String getTenantDomain(String username) throws APIManagementException {
 
-        try {
-            return APIUtil.getTenantDomain(username);
-        } catch (UserException e) {
-            throw new APIManagementException("Error while retrieving tenant values from user store", e,
-                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
-        }
+        return APIUtil.getTenantDomain(username);
     }
 
     /**
@@ -913,7 +908,7 @@ public abstract class AbstractAPIManager implements APIManager {
             int tenantId = APIUtil.getInternalOrganizationId(xWso2Tenant);
             // To handle choreo scenario. due to keymanagers are not per organization atm. using ST
             if (tenantId == -1234) {
-                xWso2Tenant = "carbon.super";
+                xWso2Tenant = APIConstants.SUPER_TENANT_DOMAIN;
             }
         }
         Set<APIKey> resultantApiKeyList = new HashSet<>();
