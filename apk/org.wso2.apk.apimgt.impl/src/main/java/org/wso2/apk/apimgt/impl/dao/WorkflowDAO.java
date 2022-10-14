@@ -1,6 +1,7 @@
 package org.wso2.apk.apimgt.impl.dao;
 
 import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.model.Identifier;
 import org.wso2.apk.apimgt.api.model.Workflow;
 import org.wso2.apk.apimgt.impl.dto.WorkflowDTO;
 
@@ -47,4 +48,27 @@ public interface WorkflowDAO {
      */
     Workflow getWorkflowReferenceByExternalWorkflowReferenceID(String externalWorkflowRef, String status,
                                                                String tenantDomain) throws APIManagementException;
+
+    /**
+     * Retries the WorkflowExternalReference for a subscription.
+     *
+     * @param identifier Identifier to find the subscribed api
+     * @param appID      ID of the application which has the subscription
+     * @param organization organization
+     * @return External workflow reference for the subscription identified
+     * @throws APIManagementException
+     */
+    String getExternalWorkflowReferenceForSubscription(Identifier identifier, int appID, String organization)
+            throws APIManagementException;
+
+    /**
+     * Returns a workflow object for a given external workflow reference.
+     *
+     * @param workflowReference
+     * @return
+     * @throws APIManagementException
+     */
+    WorkflowDTO retrieveWorkflow(String workflowReference) throws APIManagementException;
+
+
 }

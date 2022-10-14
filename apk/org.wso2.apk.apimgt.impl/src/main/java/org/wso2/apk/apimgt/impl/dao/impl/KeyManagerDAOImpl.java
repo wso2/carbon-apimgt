@@ -370,6 +370,47 @@ public class KeyManagerDAOImpl implements KeyManagerDAO {
         }
     }
 
+    public KeyManagerConfigurationDTO getKeyManagerConfigurationByUUID(String uuid)
+            throws APIManagementException {
+
+        try (Connection conn = org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil.getConnection()) {
+            return getKeyManagerConfigurationByUUID(conn, uuid);
+        } catch (SQLException | IOException e) {
+            throw new APIManagementException(
+                    "Error while retrieving key manager configuration for key manager uuid: " + uuid, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    private KeyManagerConfigurationDTO getKeyManagerConfigurationByUUID(Connection connection, String uuid)
+            throws SQLException, IOException {
+
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE UUID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, uuid);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+                    keyManagerConfigurationDTO.setUuid(resultSet.getString("UUID"));
+                    keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
+                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
+                    keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
+                    keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
+                    keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
+                    keyManagerConfigurationDTO.setOrganization(resultSet.getString("ORGANIZATION"));
+                    keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
+                    keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
+                    try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
+                        String configurationContent = IOUtils.toString(configuration);
+                        Map map = new Gson().fromJson(configurationContent, Map.class);
+                        keyManagerConfigurationDTO.setAdditionalProperties(map);
+                    }
+                    return keyManagerConfigurationDTO;
+                }
+            }
+        }
+        return null;
+    }
 
 
 }

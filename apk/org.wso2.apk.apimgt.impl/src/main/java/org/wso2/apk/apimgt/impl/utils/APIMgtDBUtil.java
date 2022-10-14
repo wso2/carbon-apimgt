@@ -19,6 +19,8 @@
 package org.wso2.apk.apimgt.impl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -48,10 +50,10 @@ public final class APIMgtDBUtil {
 
     private static final Log log = LogFactory.getLog(APIMgtDBUtil.class);
 
-    private static volatile DataSource dataSource = null;
     private static final String DB_CHECK_SQL = "SELECT * FROM AM_SUBSCRIBER";
     
     private static final String DATA_SOURCE_NAME = "DataSourceName";
+    private static volatile HikariDataSource dataSource = null;
 
     /**
      * Initializes the data source
@@ -64,6 +66,7 @@ public final class APIMgtDBUtil {
         }
 
         synchronized (APIMgtDBUtil.class) {
+
             if (dataSource == null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Initializing data source");
@@ -77,13 +80,30 @@ public final class APIMgtDBUtil {
                 if (dataSourceName != null) {
                     try {
                         Context ctx = new InitialContext();
-                        dataSource = (DataSource) ctx.lookup(dataSourceName);
+                        dataSource = (HikariDataSource)ctx.lookup(dataSourceName);
                     } catch (NamingException e) {
                         throw new APIManagerDatabaseException("Error while looking up the data " +
                                 "source: " + dataSourceName, e);
                     }
                 } else {
                     log.error(DATA_SOURCE_NAME + " not defined in api-manager.xml.");
+                }
+                if (dataSource == null) {
+                    // TODO: // Read datasource Configs and set it here
+                    HikariConfig hikariConfig = new HikariConfig();
+                    hikariConfig.setJdbcUrl("jdbc:postgresql://localhost:5432/am_db");
+                    hikariConfig.setUsername("wso2Carbon");
+                    hikariConfig.setPassword("wso2Carbon");
+                    hikariConfig.setMaximumPoolSize(50);
+                    hikariConfig.setMinimumIdle(10);
+                    hikariConfig.setMaxLifetime(60000);
+                    hikariConfig.setAutoCommit(true);
+                    hikariConfig.setConnectionTestQuery("SELECT 1");
+                    hikariConfig.setValidationTimeout(30000);
+                    hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
+                    hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
+                    hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+                    dataSource = new HikariDataSource(hikariConfig);
                 }
             }
         }
