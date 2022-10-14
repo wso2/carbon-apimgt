@@ -81,6 +81,9 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     private static final Log log = LogFactory.getLog(RegistrationServiceImpl.class);
     private static final String APP_DISPLAY_NAME = "DisplayName";
+    public static final String APP_ORG_HANDLE_DISPLAY = "Organization Handle";
+    public static final String APP_ORG_HANDLE_NAME = "orgHandle";
+    private static final String ORGANIZATION_HANDLE = "organization_handle";
 
     @Context
     MessageContext securityContext;
@@ -338,6 +341,15 @@ public class RegistrationServiceImpl implements RegistrationService {
                 orgIdProperty.setName(APIConstants.APP_ORG_ID_NAME);
                 orgIdProperty.setValue(orgId);
                 serviceProviderProperties.add(orgIdProperty);
+
+                String orgHandle = getOrganizationHandle(securityContext);
+                if (StringUtils.isNotBlank(orgHandle)) {
+                    ServiceProviderProperty orgHandleProperty = new ServiceProviderProperty();
+                    orgHandleProperty.setDisplayName(APP_ORG_HANDLE_DISPLAY);
+                    orgHandleProperty.setName(APP_ORG_HANDLE_NAME);
+                    orgHandleProperty.setValue(orgHandle);
+                    serviceProviderProperties.add(orgHandleProperty);
+                }
             }
             ServiceProviderProperty[] spPropertyArr = serviceProviderProperties.toArray(new ServiceProviderProperty[0]);
             serviceProvider.setSpProperties(spPropertyArr);
@@ -495,4 +507,9 @@ public class RegistrationServiceImpl implements RegistrationService {
             return false;
         }
     }
+
+    public static String getOrganizationHandle(MessageContext ctx) {
+        return (String) ctx.get(ORGANIZATION_HANDLE);
+    }
+
 }
