@@ -23,6 +23,4 @@ public interface APIManagerConfigurationService {
 
     APIManagerConfiguration getAPIManagerConfiguration();
 
-    APIManagerAnalyticsConfiguration getAPIAnalyticsConfiguration();
-
 }
