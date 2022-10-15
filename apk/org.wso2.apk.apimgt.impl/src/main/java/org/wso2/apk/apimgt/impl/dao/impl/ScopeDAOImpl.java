@@ -333,7 +333,63 @@ public class ScopeDAOImpl implements ScopeDAO {
         return null;
     }
 
+    @Override
+    public Set<String> getScopesBySubscribedAPIs(List<String> identifiers) throws APIManagementException {
 
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        List<Integer> apiIds = new ArrayList<Integer>();
+        Set<String> scopes = new HashSet<>();
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            for (String identifier : identifiers) {
+                apiIds.add(getAPIID(identifier, conn));
+            }
+
+            String commaSeparatedIds = StringUtils.join(apiIds.iterator(), ',');
+            String sqlQuery = SQLConstants.GET_SCOPE_BY_SUBSCRIBED_API_PREFIX + commaSeparatedIds + SQLConstants
+                    .GET_SCOPE_BY_SUBSCRIBED_ID_SUFFIX;
+
+            if (conn.getMetaData().getDriverName().contains("Oracle")) {
+                sqlQuery = SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_ORACLE_SQL + commaSeparatedIds +
+                        SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_SUFFIX;
+            }
+
+            ps = conn.prepareStatement(sqlQuery);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                scopes.add(resultSet.getString(1));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve api scope keys ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return scopes;
+    }
+
+    public int getAPIID(String uuid, Connection connection) throws APIManagementException, SQLException {
+
+        int id = -1;
+        String getAPIQuery = SQLConstants.GET_API_ID_SQL_BY_UUID;
+
+        try (PreparedStatement prepStmt = connection.prepareStatement(getAPIQuery)) {
+            prepStmt.setString(1, uuid);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    id = rs.getInt("API_ID");
+                }
+                if (id == -1) {
+                    String msg = "Unable to find the API with UUID : " + uuid + " in the database";
+                    log.error(msg);
+                    throw new APIManagementException(msg, ExceptionCodes.API_NOT_FOUND);
+                }
+            }
+        }
+        return id;
+    }
 
 
 

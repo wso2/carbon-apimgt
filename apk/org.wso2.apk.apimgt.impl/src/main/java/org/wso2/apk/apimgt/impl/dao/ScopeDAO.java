@@ -93,4 +93,13 @@ public interface ScopeDAO {
      */
     SharedScopeUsage getSharedScopeUsage(String uuid, int tenantId) throws APIManagementException;
 
+    /**
+     * Get all scopes by Subscribed APIs
+     *
+     * @param identifiers Subscribed APIs
+     * @return scope list
+     * @throws APIManagementException if an error occurs while getting all scopes
+     */
+    Set<String> getScopesBySubscribedAPIs(List<String> identifiers) throws APIManagementException;
+
 }

@@ -398,5 +398,92 @@ public class WorkflowDAOImpl implements WorkflowDAO {
         return workflowDTO;
     }
 
+    @Override
+    public String getExternalWorkflowRefByInternalRefWorkflowType(int internalRef, String workflowType) throws APIManagementException {
+
+        String workflowExtRef = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_EXTERNAL_WORKFLOW_REFERENCE_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, workflowType);
+            ps.setString(2, String.valueOf(internalRef));
+            rs = ps.executeQuery();
+
+            // returns only one row
+            while (rs.next()) {
+                workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
+            }
+        } catch (SQLException e) {
+            handleExceptionWithCode("Error occurred while getting workflow entry for " +
+                    "Internal Ref : " + internalRef, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+
+        return workflowExtRef;
+    }
+
+    @Override
+    public String getExternalWorkflowReferenceForSubscriptionAndWFType(int subscriptionId, String wfType) throws APIManagementException {
+
+        String workflowExtRef = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_EXTERNAL_WORKFLOW_FOR_SUBSCRIPTION_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            // setting subscriptionId as string to prevent error when db finds string type IDs for
+            // ApplicationRegistration workflows
+            ps.setString(1, String.valueOf(subscriptionId));
+            ps.setString(2, wfType);
+            rs = ps.executeQuery();
+
+            // returns only one row
+            while (rs.next()) {
+                workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while getting workflow entry for " +
+                    "Subscription : " + subscriptionId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return workflowExtRef;
+    }
+
+    @Override
+    public String getRegistrationWFReference(int applicationId, String keyType, String keyManagerName)
+            throws APIManagementException {
+
+        String reference = null;
+
+        String sqlQuery = SQLConstants.GET_REGISTRATION_WORKFLOW_SQL;
+        try (Connection conn = APIMgtDBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+            ps.setInt(1, applicationId);
+            ps.setString(2, keyType);
+            ps.setString(3, keyManagerName);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                // returns only one row
+                if (rs.next()) {
+                    reference = rs.getString("WF_REF");
+                }
+            }
+
+        } catch (SQLException e) {
+            handleException("Error occurred while getting registration entry for " + "Application : " + applicationId,
+                    e);
+        }
+        return reference;
+    }
+
 
 }

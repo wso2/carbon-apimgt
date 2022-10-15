@@ -19,6 +19,8 @@
 
 package org.wso2.apk.apimgt.impl.dao;
 
+import org.wso2.apk.apimgt.api.model.webhooks.Subscription;
+import org.wso2.apk.apimgt.api.model.webhooks.Topic;
 import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPI;
 import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPISearchResult;
 import org.wso2.apk.apimgt.impl.dao.dto.DevPortalContentSearchResult;
@@ -1185,6 +1187,25 @@ public interface ApiDAO {
      * @throws APIManagementException if an error occurs when restoring an API revision
      */
     void deleteAPIProductRevision(APIRevision apiRevision) throws APIManagementException;
+
+    /**
+     * Retrieves the Topic for a specified async API.
+     *
+     * @param apiId API UUID
+     * @return Set of Topic objects
+     * @throws APIManagementException if failed to retrieve topics of the web hook API
+     */
+    Set<Topic> getAPITopics(String apiId) throws APIManagementException;
+
+    /**
+     * Retrieves the web hook topc subscriptions from an application to a given api.
+     *
+     * @param applicationId application uuid
+     * @param apiId         api uuid
+     * @return set of web hook topic subscriptions
+     * @throws APIManagementException
+     */
+    Set<Subscription> getTopicSubscriptionsByApiUUID(String applicationId, String apiId) throws APIManagementException;
 
 
 

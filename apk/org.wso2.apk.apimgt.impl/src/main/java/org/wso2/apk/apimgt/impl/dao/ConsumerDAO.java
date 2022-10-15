@@ -156,9 +156,8 @@ public interface ConsumerDAO {
     int updateSubscription(ApiTypeWrapper apiTypeWrapper, String inputSubscriptionUUId, String status,
                                   String requestedThrottlingTier) throws APIManagementException;
 
-
     /**
-     * Retrives subscription status for APIIdentifier and applicationId
+     * Retrieves subscription status for APIIdentifier and applicationId
      *
      * @param uuid    API subscribed
      * @param applicationId application with subscription
@@ -176,6 +175,28 @@ public interface ConsumerDAO {
      * @throws APIManagementException
      */
     String getSubscriptionId(String uuid, int applicationId) throws APIManagementException;
+
+    /**
+     * Update subscription status for provided subscription ID
+     *
+     * @param subscriptionId    Subscription ID
+     * @param status new status
+     * @throws APIManagementException
+     */
+    void updateSubscriptionStatus(int subscriptionId, String status) throws APIManagementException;
+
+    /**
+     * Persist revoked jwt signatures to database.
+     *
+     * @param eventId
+     * @param jwtSignature signature of jwt token.
+     * @param expiryTime   expiry time of the token.
+     * @param tenantId     tenant id of the jwt subject.
+     */
+    void addRevokedJWTSignature(String eventId, String jwtSignature, String type,
+                                       Long expiryTime, int tenantId) throws APIManagementException;
+
+
 
 
 }
