@@ -1496,5 +1496,89 @@ public class ConsumerDAOImpl implements ConsumerDAO {
         return subId;
     }
 
+    @Override
+    public void updateSubscriptionStatus(int subscriptionId, String status) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            //This query is to update the AM_SUBSCRIPTION table
+            String sqlQuery = SQLConstants.UPDATE_SUBSCRIPTION_STATUS_SQL;
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, status);
+            ps.setInt(2, subscriptionId);
+            ps.execute();
+
+            //Commit transaction
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback subscription status update ", e1);
+                }
+            }
+            handleException("Failed to update subscription status ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
+    @Override
+    public void addRevokedJWTSignature(String eventId, String jwtSignature, String type,
+                                       Long expiryTime, int tenantId) throws APIManagementException {
+
+        if (StringUtils.isEmpty(type)) {
+            type = APIConstants.DEFAULT;
+        }
+        String addJwtSignature = SQLConstants.RevokedJWTConstants.ADD_JWT_SIGNATURE;
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(addJwtSignature)) {
+                ps.setString(1, eventId);
+                ps.setString(2, jwtSignature);
+                ps.setLong(3, expiryTime);
+                ps.setInt(4, tenantId);
+                ps.setString(5, type);
+                ps.execute();
+                conn.commit();
+            } catch (SQLIntegrityConstraintViolationException e) {
+                boolean isRevokedTokenExist = isRevokedJWTSignatureExist(conn, eventId);
+
+                if (isRevokedTokenExist) {
+                    log.warn("Revoked Token already persisted");
+                } else {
+                    handleException("Failed to add Revoked Token Event" + APIUtil.getMaskedToken(jwtSignature), e);
+                }
+            } catch (SQLException e) {
+                conn.rollback();
+            }
+        } catch (SQLException e) {
+            handleException("Error in adding revoked jwt signature to database : " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Check revoked Token Identifier exist
+     *
+     * @param eventId
+     */
+    private boolean isRevokedJWTSignatureExist(Connection conn, String eventId) throws SQLException {
+
+        String checkRevokedTokenExist = SQLConstants.RevokedJWTConstants.CHECK_REVOKED_TOKEN_EXIST;
+        try (PreparedStatement ps = conn.prepareStatement(checkRevokedTokenExist)) {
+            ps.setString(1, eventId);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                return resultSet.next();
+            }
+        }
+    }
+
 
 }

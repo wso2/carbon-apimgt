@@ -70,5 +70,35 @@ public interface WorkflowDAO {
      */
     WorkflowDTO retrieveWorkflow(String workflowReference) throws APIManagementException;
 
+    /**
+     * Get external workflow reference by internal workflow reference and workflow type
+     * @param internalRef Internal reference of the workflow
+     * @param workflowType Workflow type of the workflow
+     * @return External workflow reference for the given internal reference and workflow type if present. Null otherwise
+     * @throws APIManagementException If an SQL exception occurs in database interactions
+     */
+    String getExternalWorkflowRefByInternalRefWorkflowType(int internalRef, String workflowType) throws APIManagementException;
+
+    /**
+     * Get external workflow reference by Subscription and workflow type
+     * @param subscriptionId Subscription ID
+     * @param wfType Workflow type of the workflow
+     * @return External workflow reference for the given Subscription and workflow type if present. Null otherwise
+     * @throws APIManagementException If an SQL exception occurs in database interactions
+     */
+    String getExternalWorkflowReferenceForSubscriptionAndWFType(int subscriptionId, String wfType) throws APIManagementException;
+
+    /**
+     * Retrieves registration workflow reference for applicationId and key type
+     *
+     * @param applicationId  id of the application with registration
+     * @param keyType        key type of the registration
+     * @param keyManagerName
+     * @return workflow reference of the registration
+     * @throws APIManagementException
+     */
+    String getRegistrationWFReference(int applicationId, String keyType, String keyManagerName)
+            throws APIManagementException ;
+
 
 }

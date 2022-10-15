@@ -5,17 +5,13 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.ErrorHandler;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
-import org.wso2.apk.apimgt.api.model.APIRevision;
-import org.wso2.apk.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.apk.apimgt.api.model.Comment;
-import org.wso2.apk.apimgt.api.model.CommentList;
-import org.wso2.apk.apimgt.api.model.Identifier;
-import org.wso2.apk.apimgt.api.model.Pagination;
+import org.wso2.apk.apimgt.api.model.*;
 import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.impl.dao.CommentDAO;
 import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.apk.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -412,4 +408,144 @@ public class CommentDAOImpl implements CommentDAO {
         }
         return false;
     }
+
+    @Override
+    public int addComment(APIIdentifier identifier, String commentText, String user) throws APIManagementException {
+
+        Connection connection = null;
+        ResultSet resultSet = null;
+        ResultSet insertSet = null;
+        PreparedStatement getPrepStmt = null;
+        PreparedStatement insertPrepStmt = null;
+        int commentId = -1;
+        int apiId = -1;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            String getApiQuery = SQLConstants.GET_API_ID_SQL;
+            getPrepStmt = connection.prepareStatement(getApiQuery);
+            getPrepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            getPrepStmt.setString(2, identifier.getApiName());
+            getPrepStmt.setString(3, identifier.getVersion());
+            resultSet = getPrepStmt.executeQuery();
+            if (resultSet.next()) {
+                apiId = resultSet.getInt("API_ID");
+            }
+            if (apiId == -1) {
+                String msg = "Unable to get the API ID for: " + identifier;
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+            /*This query to update the AM_API_COMMENTS table */
+            String addCommentQuery = SQLConstants.ADD_COMMENT_SQL;
+            /*Adding data to the AM_API_COMMENTS table*/
+            String dbProductName = connection.getMetaData().getDatabaseProductName();
+            insertPrepStmt = connection.prepareStatement(addCommentQuery, new String[]{"comment_id"});
+            insertPrepStmt.setString(1, commentText);
+            insertPrepStmt.setString(2, user);
+            insertPrepStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()), Calendar.getInstance());
+            insertPrepStmt.setInt(4, apiId);
+            insertPrepStmt.executeUpdate();
+            insertSet = insertPrepStmt.getGeneratedKeys();
+            while (insertSet.next()) {
+                commentId = Integer.parseInt(insertSet.getString(1));
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the add comment ", e1);
+                }
+            }
+            handleException("Failed to add comment data, for  " + identifier.getApiName() + '-' + identifier
+                    .getVersion(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(getPrepStmt, connection, resultSet);
+            APIMgtDBUtil.closeAllConnections(insertPrepStmt, null, insertSet);
+        }
+        return commentId;
+    }
+
+    @Override
+    public Comment[] getComments(String uuid, String parentCommentID) throws APIManagementException {
+
+        List<Comment> commentList = new ArrayList<Comment>();
+        Connection connection = null;
+        ResultSet resultSet = null;
+        PreparedStatement prepStmt = null;
+        int id = -1;
+        String sqlQuery;
+        if (parentCommentID == null) {
+            sqlQuery = SQLConstantManagerFactory.getSQlString("GET_ROOT_COMMENTS_SQL");
+        } else {
+            sqlQuery = SQLConstantManagerFactory.getSQlString("GET_REPLIES_SQL");
+        }
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            id = getAPIID(uuid, connection);
+            if (id == -1) {
+                String msg = "Could not load API record for API with UUID: " + uuid;
+                throw new APIManagementException(msg);
+            }
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setString(1, uuid);
+            if (parentCommentID != null) {
+                prepStmt.setString(2, parentCommentID);
+            }
+            resultSet = prepStmt.executeQuery();
+            while (resultSet.next()) {
+                Comment comment = new Comment();
+                comment.setId(resultSet.getString("COMMENT_ID"));
+                comment.setText(resultSet.getString("COMMENT_TEXT"));
+                comment.setUser(resultSet.getString("CREATED_BY"));
+                comment.setCreatedTime(resultSet.getTimestamp("CREATED_TIME"));
+                comment.setUpdatedTime(resultSet.getTimestamp("UPDATED_TIME"));
+                comment.setApiId(resultSet.getString("API_ID"));
+                comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
+                comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
+                comment.setCategory(resultSet.getString("CATEGORY"));
+                commentList.add(comment);
+            }
+        } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException e1) {
+                log.error("Failed to retrieve comments ", e1);
+            }
+            handleException("Failed to retrieve comments for API with UUID " + uuid, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+        }
+        return commentList.toArray(new Comment[commentList.size()]);
+    }
+
+    @Override
+    public void deleteComment(String uuid, String commentId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            int id = -1;
+            id = getAPIID(uuid, connection);
+            if (id == -1) {
+                String msg = "Could not load API record for API with UUID: " + uuid;
+                throw new APIManagementException(msg);
+            }
+            String deleteCommentQuery = SQLConstants.DELETE_COMMENT_SQL;
+            connection.setAutoCommit(false);
+            try (PreparedStatement prepStmt = connection.prepareStatement(deleteCommentQuery)) {
+                prepStmt.setInt(1, id);
+                prepStmt.setString(2, commentId);
+                prepStmt.execute();
+                connection.commit();
+            }
+        } catch (SQLException e) {
+            handleException("Error while deleting comment " + commentId + " from the database", e);
+        }
+    }
+
+
+
 }

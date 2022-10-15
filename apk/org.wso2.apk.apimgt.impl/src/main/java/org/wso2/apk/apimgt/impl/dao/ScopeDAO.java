@@ -1,8 +1,8 @@
 package org.wso2.apk.apimgt.impl.dao;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.model.Scope;
+import org.wso2.apk.apimgt.api.model.SharedScopeUsage;
 
 import java.util.List;
 import java.util.Set;
@@ -92,5 +92,14 @@ public interface ScopeDAO {
      * @throws APIManagementException If an error occurs while getting the usage details
      */
     SharedScopeUsage getSharedScopeUsage(String uuid, int tenantId) throws APIManagementException;
+
+    /**
+     * Get all scopes by Subscribed APIs
+     *
+     * @param identifiers Subscribed APIs
+     * @return scope list
+     * @throws APIManagementException if an error occurs while getting all scopes
+     */
+    Set<String> getScopesBySubscribedAPIs(List<String> identifiers) throws APIManagementException;
 
 }
