@@ -34,7 +34,7 @@ public class CacheProvider<T> {
         if (apimGWCacheExpiry.isEmpty()) {
             expiryDuration = getDefaultCacheTimeout();
         }
-        return new CacheStore<String>(Long.parseLong(apimGWCacheExpiry), TimeUnit.SECONDS);
+        return new CacheStore<String>(expiryDuration, TimeUnit.SECONDS);
     }
 
 
