@@ -1281,12 +1281,24 @@ public class APIMappingUtil {
         if (corsConfiguration == null) {
             corsConfiguration = APIUtil.getDefaultCorsConfiguration();
         }
-        apiCorsConfigurationDTO
-                .setAccessControlAllowOrigins(corsConfiguration.getAccessControlAllowOrigins());
-        apiCorsConfigurationDTO
-                .setAccessControlAllowHeaders(corsConfiguration.getAccessControlAllowHeaders());
-        apiCorsConfigurationDTO
-                .setAccessControlAllowMethods(corsConfiguration.getAccessControlAllowMethods());
+        List<String> accessControlAllowOrigins = corsConfiguration.getAccessControlAllowOrigins();
+        List<String> accessControlAllowHeaders = corsConfiguration.getAccessControlAllowHeaders();
+        List<String> accessControlAllowMethods = corsConfiguration.getAccessControlAllowMethods();
+        if (accessControlAllowOrigins == null) {
+            apiCorsConfigurationDTO.setAccessControlAllowOrigins(Collections.emptyList());
+        } else {
+            apiCorsConfigurationDTO.setAccessControlAllowOrigins(accessControlAllowOrigins);
+        }
+        if (accessControlAllowHeaders == null) {
+            apiCorsConfigurationDTO.setAccessControlAllowHeaders(Collections.emptyList());
+        } else {
+            apiCorsConfigurationDTO.setAccessControlAllowHeaders(accessControlAllowHeaders);
+        }
+        if (accessControlAllowMethods == null) {
+            apiCorsConfigurationDTO.setAccessControlAllowMethods(Collections.emptyList());
+        } else {
+            apiCorsConfigurationDTO.setAccessControlAllowMethods(accessControlAllowMethods);
+        }
         apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isCorsConfigurationEnabled());
         apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAccessControlAllowCredentials());
         dto.setCorsConfiguration(apiCorsConfigurationDTO);
@@ -2432,7 +2444,7 @@ public class APIMappingUtil {
         if (null != product.getCreatedTime()) {
             Date createdTime = product.getCreatedTime();
             Timestamp timeStamp = new Timestamp(createdTime.getTime());
-            productDto.setCreatedTime(String.valueOf(timeStamp));
+            productDto.setCreatedTime(String.valueOf(timeStamp.getTime()));
         }
 
         return productDto;

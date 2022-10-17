@@ -44,7 +44,6 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketAnalyticsMetricsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
@@ -289,6 +288,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             return;
         }
         String requestOrigin = req.headers().get(HttpHeaderNames.ORIGIN);
+        // Don't validate the 'origin' header if it's not present in the request
+        if (requestOrigin == null) {
+            return;
+        }
         String allowedOrigin = assessAndGetAllowedOrigin(requestOrigin);
         if (allowedOrigin == null) {
             FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN);
