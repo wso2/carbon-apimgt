@@ -162,13 +162,13 @@ public abstract class APIDefinition {
      *
      * @param api            API
      * @param oasDefinition  OAS definition
-     * @param tenantDomainOrOrganization The tenant domain or the organization
+     * @param organization The name of the organization
      * @param environmentName The name of the environment
      * @return updated OAS definition
      * @throws APIManagementException throws if an error occurred
      */
     public abstract String getOASDefinitionForStore(API api, String oasDefinition,
-                                                    String tenantDomainOrOrganization, String environmentName)
+                                                    String organization, String environmentName)
             throws APIManagementException;
 
     /**
@@ -176,13 +176,13 @@ public abstract class APIDefinition {
      *
      * @param product        APIProduct
      * @param oasDefinition  OAS definition
-     * @param tenantDomainOrOrganization The tenant domain or the organization
+     * @param organization The name of the organization
      * @param environmentName The name of the environment
      * @return updated OAS definition
      * @throws APIManagementException throws if an error occurred
      */
     public abstract String getOASDefinitionForStore(APIProduct product, String oasDefinition,
-                                                    String tenantDomainOrOrganization, String environmentName)
+                                                    String organization, String environmentName)
             throws APIManagementException;
 
     /**

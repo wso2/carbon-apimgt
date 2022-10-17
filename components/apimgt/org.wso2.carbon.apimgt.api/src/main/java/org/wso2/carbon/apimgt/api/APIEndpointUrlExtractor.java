@@ -35,11 +35,11 @@ public interface APIEndpointUrlExtractor {
      * Get the API endpoint URLs specific to the given tenantDomain/organization and environment.
      *
      * @param apiTypeWrapper The API or APIProduct wrapper
-     * @param tenantDomainOrOrganization The tenant domain or the organization
+     * @param organization The name of the organization
      * @param environmentName The name of the environment
      * @return List of endpoint URLs specific to the given tenantDomain/organization and environment
      * @throws APIManagementException
      */
-    List<EndpointUrl> getApiEndpointUrlsForEnv(ApiTypeWrapper apiTypeWrapper, String tenantDomainOrOrganization,
+    List<EndpointUrl> getApiEndpointUrlsForEnv(ApiTypeWrapper apiTypeWrapper, String organization,
                                                String environmentName) throws APIManagementException;
 }
