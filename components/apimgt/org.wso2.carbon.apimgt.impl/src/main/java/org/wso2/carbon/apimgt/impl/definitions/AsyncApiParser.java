@@ -1867,13 +1867,13 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     @Override
-    public String getOASDefinitionForStore(API api, String oasDefinition, String tenantDomainOrOrganization,
+    public String getOASDefinitionForStore(API api, String oasDefinition, String organization,
                                            String environmentName) throws APIManagementException {
         return null;
     }
 
     @Override
-    public String getOASDefinitionForStore(APIProduct product, String oasDefinition, String tenantDomainOrOrganization,
+    public String getOASDefinitionForStore(APIProduct product, String oasDefinition, String organization,
                                            String environmentName) throws APIManagementException {
         return null;
     }
