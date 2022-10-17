@@ -53,15 +53,15 @@ public class APIEndpointUrlExtractorImpl implements APIEndpointUrlExtractor {
     }
 
     @Override
-    public List<EndpointUrl> getApiEndpointUrlsForEnv(ApiTypeWrapper apiTypeWrapper, String tenantDomainOrOrganization,
+    public List<EndpointUrl> getApiEndpointUrlsForEnv(ApiTypeWrapper apiTypeWrapper, String organization,
                                                       String environmentName) throws APIManagementException {
         List<EndpointUrl> endpointUrls = new ArrayList<>();
 
         List<HostInfo> hostInfos = new ArrayList<>(
-                getHostInfoForEnv(apiTypeWrapper, tenantDomainOrOrganization, environmentName));
+                getHostInfoForEnv(apiTypeWrapper, organization, environmentName));
 
         for (HostInfo hostInfo : hostInfos) {
-            endpointUrls.addAll(getEndpointUrlsForHost(apiTypeWrapper, tenantDomainOrOrganization, hostInfo));
+            endpointUrls.addAll(getEndpointUrlsForHost(apiTypeWrapper, organization, hostInfo));
         }
         return endpointUrls;
     }
@@ -70,20 +70,20 @@ public class APIEndpointUrlExtractorImpl implements APIEndpointUrlExtractor {
      * Get the list of host information specific to the given tenantDomain/organization and environment.
      *
      * @param apiTypeWrapper The API or APIProduct wrapper
-     * @param tenantDomainOrOrganization The tenant domain or the organization
+     * @param organization The name of the organization
      * @param environmentName The name of the environment
      * @return List of host information specific to the given tenantDomain/organization and environment
      * @throws APIManagementException
      */
-    protected List<HostInfo> getHostInfoForEnv(ApiTypeWrapper apiTypeWrapper, String tenantDomainOrOrganization,
+    protected List<HostInfo> getHostInfoForEnv(ApiTypeWrapper apiTypeWrapper, String organization,
                                                String environmentName) throws APIManagementException {
         List<HostInfo> hostInfos = new ArrayList<>();
 
         APIConsumer apiConsumer = getLoggedInUserConsumer();
 
         Map<String, String> domains = new HashMap<>();
-        if (tenantDomainOrOrganization != null) {
-            domains = APIUtil.getDomainMappings(tenantDomainOrOrganization,
+        if (organization != null) {
+            domains = APIUtil.getDomainMappings(organization,
                     APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
         }
 
@@ -98,7 +98,7 @@ public class APIEndpointUrlExtractorImpl implements APIEndpointUrlExtractor {
             VHost vHostFromCustomDomain = VHost.fromEndpointUrls(new String[]{customUrl});
             hostInfos.add(new HostInfo(vHostFromCustomDomain.getHost(), true));
         } else {
-            Map<String, Environment> allEnvironments = APIUtil.getEnvironments(tenantDomainOrOrganization);
+            Map<String, Environment> allEnvironments = APIUtil.getEnvironments(organization);
             Environment environment = allEnvironments.get(environmentName);
 
             if (environment == null) {
@@ -129,12 +129,12 @@ public class APIEndpointUrlExtractorImpl implements APIEndpointUrlExtractor {
      * Get the API endpoint URLs specific to the given tenantDomain/organization and host information.
      *
      * @param apiTypeWrapper The API or APIProduct wrapper
-     * @param tenantDomainOrOrganization The tenant domain or the organization
+     * @param organization The name of the organization
      * @param hostInfo The host information
      * @return List of endpoint URLs specific to the given tenantDomain/organization and host information
      * @throws APIManagementException
      */
-    protected List<EndpointUrl> getEndpointUrlsForHost(ApiTypeWrapper apiTypeWrapper, String tenantDomainOrOrganization,
+    protected List<EndpointUrl> getEndpointUrlsForHost(ApiTypeWrapper apiTypeWrapper, String organization,
                                                        HostInfo hostInfo) throws APIManagementException {
         List<EndpointUrl> endpointUrls = new ArrayList<>();
 
@@ -151,7 +151,7 @@ public class APIEndpointUrlExtractorImpl implements APIEndpointUrlExtractor {
                 && apiTypeWrapper.isGraphQLSubscriptionsAvailable();
 
         if (hostInfo.getIsCustomDomain()) {
-            context = context.replace("/t/" + tenantDomainOrOrganization, "");
+            context = context.replace("/t/" + organization, "");
         }
         if (!isWs && !isGQLSubscription) {
             if (apiTypeWrapper.getTransports().contains(APIConstants.HTTP_PROTOCOL)) {

@@ -61,7 +61,14 @@ import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.endpointurlextractor.EndpointUrl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIEndpointUrlExtractorImpl;
@@ -829,21 +836,21 @@ public class OAS3Parser extends APIDefinition {
      *
      * @param api            API
      * @param oasDefinition  OAS definition
-     * @param tenantDomainOrOrganization The tenant domain or the organization
+     * @param organization The name of the organization
      * @param environmentName The name of the environment
      * @return OAS definition
      */
     @Override
-    public String getOASDefinitionForStore(API api, String oasDefinition, String tenantDomainOrOrganization,
+    public String getOASDefinitionForStore(API api, String oasDefinition, String organization,
                                            String environmentName)
             throws APIManagementException {
 
         OpenAPI openAPI = getOpenAPI(oasDefinition);
         updateOperations(openAPI);
-        updateEndpoints(api, tenantDomainOrOrganization, environmentName, openAPI);
+        updateEndpoints(api, organization, environmentName, openAPI);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(api), apiTypeWrapper,
-                tenantDomainOrOrganization, environmentName);
+                organization, environmentName);
     }
 
     /**
@@ -851,21 +858,21 @@ public class OAS3Parser extends APIDefinition {
      *
      * @param product        APIProduct
      * @param oasDefinition  OAS definition
-     * @param tenantDomainOrOrganization The tenant domain or the organization
+     * @param organization The name of the organization
      * @param environmentName The name of the environment
      * @return OAS definition
      */
     @Override
-    public String getOASDefinitionForStore(APIProduct product, String oasDefinition, String tenantDomainOrOrganization,
+    public String getOASDefinitionForStore(APIProduct product, String oasDefinition, String organization,
                                            String environmentName)
             throws APIManagementException {
 
         OpenAPI openAPI = getOpenAPI(oasDefinition);
         updateOperations(openAPI);
-        updateEndpoints(product, tenantDomainOrOrganization, environmentName, openAPI);
+        updateEndpoints(product, organization, environmentName, openAPI);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(product);
         return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(product), apiTypeWrapper,
-                tenantDomainOrOrganization, environmentName);
+                organization, environmentName);
     }
 
     /**
@@ -1245,19 +1252,19 @@ public class OAS3Parser extends APIDefinition {
      * @param openAPI        OpenAPI
      * @param swaggerData    SwaggerData
      * @param apiTypeWrapper The API or APIProduct wrapper
-     * @param tenantDomainOrOrganization The tenant domain or the organization
+     * @param organization The name of the organization
      * @param environmentName The name of the environment
      * @return updated OAS definition
      */
     private String updateSwaggerSecurityDefinitionForStore(OpenAPI openAPI, SwaggerData swaggerData,
                                                            ApiTypeWrapper apiTypeWrapper,
-                                                           String tenantDomainOrOrganization, String environmentName)
+                                                           String organization, String environmentName)
             throws APIManagementException {
 
         String authUrl = "";
         APIEndpointUrlExtractorImpl apiEndpointUrlExtractor = new APIEndpointUrlExtractorImpl();
         List<EndpointUrl> endpointUrls = apiEndpointUrlExtractor.getApiEndpointUrlsForEnv(apiTypeWrapper,
-                tenantDomainOrOrganization, environmentName);
+                organization, environmentName);
         for (EndpointUrl endpointUrl : endpointUrls) {
             // By Default, add the GW host with HTTPS protocol if present.
             if (endpointUrl.getProtocol().equals(APIConstants.HTTPS_PROTOCOL)) {
@@ -1277,16 +1284,16 @@ public class OAS3Parser extends APIDefinition {
      * Update OAS definition with GW endpoints
      *
      * @param product                    APIProduct
-     * @param tenantDomainOrOrganization The tenant domain or the organization
+     * @param organization               The name of the organization
      * @param environmentName            The name of the environment
      * @param openAPI                    OpenAPI
      */
-    private void updateEndpoints(APIProduct product, String tenantDomainOrOrganization, String environmentName,
+    private void updateEndpoints(APIProduct product, String organization, String environmentName,
                                  OpenAPI openAPI) throws APIManagementException {
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(product);
         APIEndpointUrlExtractorImpl apiEndpointUrlExtractor = new APIEndpointUrlExtractorImpl();
         List<EndpointUrl> endpointUrls = apiEndpointUrlExtractor.getApiEndpointUrlsForEnv(apiTypeWrapper,
-                tenantDomainOrOrganization, environmentName);
+                organization, environmentName);
         updateEndpoints(openAPI, endpointUrls);
     }
 
@@ -1294,16 +1301,16 @@ public class OAS3Parser extends APIDefinition {
      * Update OAS definition with GW endpoints
      *
      * @param api                        API
-     * @param tenantDomainOrOrganization The tenant domain or the organization
+     * @param organization               The name of the organization
      * @param environmentName            The name of the environment
      * @param openAPI                    OpenAPI
      */
-    private void updateEndpoints(API api, String tenantDomainOrOrganization, String environmentName, OpenAPI openAPI)
+    private void updateEndpoints(API api, String organization, String environmentName, OpenAPI openAPI)
             throws APIManagementException {
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         APIEndpointUrlExtractorImpl apiEndpointUrlExtractor = new APIEndpointUrlExtractorImpl();
         List<EndpointUrl> endpointUrls = apiEndpointUrlExtractor.getApiEndpointUrlsForEnv(apiTypeWrapper,
-                tenantDomainOrOrganization, environmentName);
+                organization, environmentName);
         updateEndpoints(openAPI, endpointUrls);
     }
 
