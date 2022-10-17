@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.EventType;
 import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.WebhooksDTO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
@@ -69,6 +70,8 @@ public class GatewayJMSMessageListener implements MessageListener {
     private static final Log log = LogFactory.getLog(GatewayJMSMessageListener.class);
     private boolean debugEnabled = log.isDebugEnabled();
     private InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
+    private EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
+            .getAPIManagerConfiguration().getEventHubConfigurationDto();
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
             .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
     ExecutorService executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "DeploymentThread"));
@@ -76,6 +79,16 @@ public class GatewayJMSMessageListener implements MessageListener {
     public void onMessage(Message message) {
 
         try {
+            if (eventHubConfigurationDto.hasEventWaitingTime()) {
+                long timeLeft = message.getJMSTimestamp() + eventHubConfigurationDto.getEventWaitingTime()
+                        - System.currentTimeMillis();
+                if (log.isDebugEnabled()) {
+                    log.debug("Event Hub waiting time: " + timeLeft);
+                }
+                if (timeLeft > 0) {
+                    Thread.sleep(timeLeft);
+                }
+            }
             if (message != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Event received in JMS Event Receiver - " + message);
@@ -119,6 +132,8 @@ public class GatewayJMSMessageListener implements MessageListener {
             }
         } catch (JMSException | JsonProcessingException e) {
             log.error("JMSException occurred when processing the received message ", e);
+        } catch (InterruptedException e) {
+            log.error("Error occurred while waiting to retrieve artifacts from event hub", e);
         }
     }
 

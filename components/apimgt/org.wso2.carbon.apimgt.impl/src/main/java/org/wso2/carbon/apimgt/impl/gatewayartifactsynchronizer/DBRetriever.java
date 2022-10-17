@@ -68,10 +68,12 @@ public class DBRetriever implements ArtifactRetriever {
             throws ArtifactSynchronizerException {
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        try {
-            Thread.sleep(gatewayArtifactSynchronizerProperties.getEventWaitingTime());
-        } catch (InterruptedException e) {
-            log.error("Error occurred while waiting to retrieve artifacts from event hub");
+        if (gatewayArtifactSynchronizerProperties.hasEventWaitingTime()) {
+            try {
+                Thread.sleep(gatewayArtifactSynchronizerProperties.getEventWaitingTime());
+            } catch (InterruptedException e) {
+                log.error("Error occurred while waiting to retrieve artifacts from event hub");
+            }
         }
         try {
             String encodedGatewayLabel = URLEncoder.encode(gatewayLabel, APIConstants.DigestAuthConstants.CHARSET);

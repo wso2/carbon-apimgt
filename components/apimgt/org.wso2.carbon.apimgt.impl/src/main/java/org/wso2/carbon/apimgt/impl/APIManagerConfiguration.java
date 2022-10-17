@@ -1857,6 +1857,16 @@ public class APIManagerConfiguration {
                 String password = MiscellaneousUtil.resolve(passwordElement, secretResolver);
                 eventHubConfigurationDto.setPassword(APIUtil.replaceSystemProperty(password).toCharArray());
             }
+            OMElement eventWaitingTimeElement = omElement
+                    .getFirstChildWithName(new QName(APIConstants.EVENT_WAITING_TIME_CONFIG));
+            if (eventWaitingTimeElement != null) {
+                long eventWaitingTime = Long.valueOf(eventWaitingTimeElement.getText());
+                eventHubConfigurationDto.setEventWaitingTime(eventWaitingTime);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Event hub event waiting time not set.");
+                }
+            }
 
             OMElement configurationRetrieverElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.EVENT_RECEIVER_CONFIGURATION));
@@ -2026,12 +2036,12 @@ public class APIManagerConfiguration {
         }
 
         OMElement eventWaitingTimeElement = omElement
-                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.EVENT_WAITING_TIME_CONFIG));
+                .getFirstChildWithName(new QName(APIConstants.EVENT_WAITING_TIME_CONFIG));
         if (eventWaitingTimeElement != null) {
             long eventWaitingTime = Long.valueOf(eventWaitingTimeElement.getText());
             gatewayArtifactSynchronizerProperties.setEventWaitingTime(eventWaitingTime);
         } else {
-            log.debug("Gateway Startup mode is not set. Set to Sync Mode");
+            log.debug("Gateway artifact synchronizer Event waiting time not set.");
         }
     }
 
