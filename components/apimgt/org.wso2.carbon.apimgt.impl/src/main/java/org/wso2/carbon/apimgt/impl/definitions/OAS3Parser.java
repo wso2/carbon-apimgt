@@ -134,7 +134,7 @@ public class OAS3Parser extends APIDefinition {
                 APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
                 //setting path for apiResourceMediationPolicyObject
                 apiResourceMediationPolicyObject.setPath(path);
-                ArrayList<Integer> responseCodes = new ArrayList<Integer>();
+                ArrayList<Integer> responseCodes = new ArrayList<>();
                 //for each HTTP method get the verb
                 StringBuilder genCode = new StringBuilder();
                 boolean hasJsonPayload = false;
@@ -152,35 +152,50 @@ public class OAS3Parser extends APIDefinition {
                 }
                 for (String responseEntry : op.getResponses().keySet()) {
                     if (!responseEntry.equals("default")) {
-                        responseCode = Integer.parseInt(responseEntry);
-                        responseCodes.add(responseCode);
-                        minResponseCode = Collections.min(responseCodes);
-                    }
-                    Content content = op.getResponses().get(responseEntry).getContent();
-                    if (content != null) {
-                        MediaType applicationJson = content.get(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-                        MediaType applicationXml = content.get(APIConstants.APPLICATION_XML_MEDIA_TYPE);
-                        if (applicationJson != null) {
-                            Schema jsonSchema = applicationJson.getSchema();
-                            if (jsonSchema != null) {
-                                String jsonExample = getJsonExample(jsonSchema, definitions);
-                                genCode.append(getGeneratedResponsePayloads(responseEntry, jsonExample, "json", false));
-                                respCodeInitialized = true;
-                                hasJsonPayload = true;
-                            }
+                        int minimumResponseCode;
+                        int maximumResponseCode;
+                        if (!responseEntry.contains("X")) {
+                            minimumResponseCode = Integer.parseInt(responseEntry);
+                            maximumResponseCode = Integer.parseInt(responseEntry);
+                        } else {
+                            minimumResponseCode = Integer.parseInt(responseEntry.replace("X","0"));
+                            maximumResponseCode = Integer.parseInt(responseEntry.replace("X","9"));
                         }
-                        if (applicationXml != null) {
-                            Schema xmlSchema = applicationXml.getSchema();
-                            if (xmlSchema != null) {
-                                String xmlExample = getXmlExample(xmlSchema, definitions);
-                                genCode.append(getGeneratedResponsePayloads(responseEntry, xmlExample, "xml", respCodeInitialized));
+
+                        for (responseCode = minimumResponseCode; responseCode <= maximumResponseCode; responseCode++ ) {
+                            if ((op.getResponses().keySet().contains(Integer.toString(responseCode))) && (minimumResponseCode != maximumResponseCode)) {
+                                continue;
+                            }
+                            responseCodes.add(responseCode);
+                            minResponseCode = Collections.min(responseCodes);
+
+                            Content content = op.getResponses().get(responseEntry).getContent();
+                            if (content != null) {
+                                MediaType applicationJson = content.get(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                                MediaType applicationXml = content.get(APIConstants.APPLICATION_XML_MEDIA_TYPE);
+                                if (applicationJson != null) {
+                                    Schema jsonSchema = applicationJson.getSchema();
+                                    if (jsonSchema != null) {
+                                        String jsonExample = getJsonExample(jsonSchema, definitions);
+                                        genCode.append(getGeneratedResponsePayloads(Integer.toString(responseCode), jsonExample, "json", false));
+                                        respCodeInitialized = true;
+                                        hasJsonPayload = true;
+                                    }
+                                }
+                                if (applicationXml != null) {
+                                    Schema xmlSchema = applicationXml.getSchema();
+                                    if (xmlSchema != null) {
+                                        String xmlExample = getXmlExample(xmlSchema, definitions);
+                                        genCode.append(getGeneratedResponsePayloads(Integer.toString(responseCode), xmlExample, "xml", respCodeInitialized));
+                                        hasXmlPayload = true;
+                                    }
+                                }
+                            } else {
+                                setDefaultGeneratedResponse(genCode, Integer.toString(responseCode));
+                                hasJsonPayload = true;
                                 hasXmlPayload = true;
                             }
                         }
-                    } else {
-                        setDefaultGeneratedResponse(genCode, responseEntry);
-                        hasJsonPayload = true;
-                        hasXmlPayload = true;
                     }
                 }
                 //inserts minimum response code and mock payload variables to static script

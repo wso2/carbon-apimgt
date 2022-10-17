@@ -14,6 +14,7 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -23,7 +24,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class OAS3ParserTest extends OASTestBase {
@@ -138,6 +141,70 @@ public class OAS3ParserTest extends OASTestBase {
         APIDefinitionValidationResponse response = oas3Parser.validateAPIDefinition(openApi, false);
         Assert.assertTrue(response.isValid());
         Assert.assertTrue(response.getParser().getClass().equals(oas3Parser.getClass()));
+    }
+
+    @Test
+    public void testGenerateExample() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas3" + File.separator + "oas3_mock_response.yaml";
+        String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        Map<String, Object> responseMap = oas3Parser.generateExample(openApi);
+        Assert.assertNotNull(responseMap);
+        Assert.assertTrue(responseMap.containsKey(APIConstants.SWAGGER) && responseMap.containsKey(APIConstants.MOCK_GEN_POLICY_LIST));
+
+        String swaggerString = (String) responseMap.get(APIConstants.SWAGGER);
+        Assert.assertTrue(Objects.nonNull(swaggerString) && !swaggerString.isEmpty());
+
+        Assert.assertTrue(Objects.nonNull(responseMap.get(APIConstants.MOCK_GEN_POLICY_LIST)));
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = (List<APIResourceMediationPolicy>) responseMap.get(APIConstants.MOCK_GEN_POLICY_LIST);
+        Assert.assertFalse(apiResourceMediationPolicyList.isEmpty());
+
+        APIResourceMediationPolicy apiResourceMediationPolicy = apiResourceMediationPolicyList.get(0);
+        Assert.assertEquals("/samplePath", apiResourceMediationPolicy.getPath());
+
+        String content = apiResourceMediationPolicy.getContent();
+        String expectedGeneratedCode200 = "if (!responses[200]) {\n"
+                + " responses [200] = [];\n"
+                + "}\n"
+                + "responses[200][\"application/json\"] = [ {\n"
+                + "  \"id\" : 200,\n"
+                + "  \"mockResponse\" : \"mockResponse200\"\n"
+                + "} ];";
+        String expectedGeneratedCode4XX = "if (!responses[%1$d]) {\n"
+                + " responses [%1$d] = [];\n"
+                + "}\n"
+                + "responses[%1$d][\"application/json\"] = [ {\n"
+                + "  \"id\" : \"4XX\",\n"
+                + "  \"mockResponse\" : \"mockResponse4XX\"\n"
+                + "} ];\n";
+        String expectedGeneratedCode404 = "if (!responses[404]) {\n"
+                + " responses [404] = [];\n"
+                + "}\n"
+                + "responses[404][\"application/json\"] = [ {\n"
+                + "  \"id\" : 404,\n"
+                + "  \"mockResponse\" : \"mockResponse404\"\n"
+                + "} ];";
+        String expectedGeneratedCode501= "responses[501] = [];\n"
+                + "responses[501][\"application/json\"] = {\n"
+                + "\"code\" : 501,\n"
+                + "\"description\" : \"Not Implemented\"}";
+
+        String expectedGeneratedCodeDefault = "responses[500][\"application/json\"] = \"\";\n"
+                + "responses[500][\"application/xml\"] = \"\";";
+
+        Assert.assertTrue(content.contains(expectedGeneratedCode200));
+        Assert.assertTrue(content.contains(expectedGeneratedCode404));
+        Assert.assertTrue(content.contains(expectedGeneratedCode501));
+        Assert.assertTrue(content.contains(expectedGeneratedCodeDefault));
+
+        for (int responseCode = 400 ; responseCode < 500; responseCode++) {
+            String expectedGeneratedCode = String.format(expectedGeneratedCode4XX, responseCode);
+
+            if (responseCode == 404) {
+                Assert.assertFalse(content.contains(expectedGeneratedCode));
+            } else {
+                Assert.assertTrue(content.contains(expectedGeneratedCode));
+            }
+        }
     }
 
 }
