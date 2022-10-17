@@ -153,6 +153,15 @@ public interface APIConsumer extends APIManager {
     void cleanUpApplicationRegistrationByApplicationId(int applicationId, String tokenType) throws APIManagementException;
 
     /**
+     * This method will delete pending subscription tasks
+     * @param applicationId
+     * @throws APIManagementException
+     */
+    default void cleanupPendingTasksForApplicationDeletion(int applicationId) throws APIManagementException {
+        //no default implementation
+    }
+
+    /**
      * Returns true if a given user has subscribed to the API
      *
      * @param apiIdentifier APIIdentifier
@@ -676,7 +685,7 @@ public interface APIConsumer extends APIManager {
      * @param username Name of the user typing the search query
      * @throws APIManagementException If an error occurs while updating the application
      */
-    void publishSearchQuery(String query, String username) throws APIManagementException;
+    void publishSearchQuery(String query, String username, String organization) throws APIManagementException;
 
     /**
      * Publish the clicked APIs for the use of API recommendation system.
@@ -685,7 +694,7 @@ public interface APIConsumer extends APIManager {
      * @param username Name of the user who clicked the API
      * @throws APIManagementException If an error occurs while publishing clicked API
      */
-    void publishClickedAPI(ApiTypeWrapper api, String username) throws APIManagementException;
+    void publishClickedAPI(ApiTypeWrapper api, String username, String organization) throws APIManagementException;
 
     /**
      * Checks whether the API recommendation feature is enabled.

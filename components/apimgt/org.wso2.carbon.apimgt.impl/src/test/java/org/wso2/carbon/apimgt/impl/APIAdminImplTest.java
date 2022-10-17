@@ -19,30 +19,30 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.reflect.FieldUtils;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.testng.annotations.BeforeTest;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import sun.reflect.Reflection;
 
 import java.io.File;
-import java.io.IOException;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class})
@@ -51,12 +51,14 @@ public class APIAdminImplTest {
     ServiceReferenceHolder serviceReferenceHolder;
     APIMConfigService apimConfigService;
 
+    ApiMgtDAO apiMgtDAO;
+
     @Before
     public void setup() {
 
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.mockStatic(ApiMgtDAO.class);
-        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
         PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
         apimConfigService = Mockito.mock(APIMConfigService.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
@@ -171,15 +173,23 @@ public class APIAdminImplTest {
     }
 
     @Test
-    public void getTenantConfigSchemaException() throws Exception {
-
+    public void getPolicyByNameAndType() throws Exception {
+        APIPolicy apiPolicy = Mockito.mock(APIPolicy.class);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        ThrottleProperties throttleProperties = Mockito.mock(ThrottleProperties.class);
         APIAdmin apiAdmin = new APIAdminImpl();
-        PowerMockito.when(APIUtil.class, "retrieveTenantConfigJsonSchema").thenThrow(APIManagementException.class);
+        Mockito.when(apiMgtDAO.getAPIPolicy(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt())).thenReturn(apiPolicy);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
+        Mockito.when(throttleProperties.isEnableUnlimitedTier()).thenReturn(true);
+
         try {
-            apiAdmin.getTenantConfigSchema("abc.com");
-            Assert.fail("Method successfully invoked");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(true);
+            Policy policy = apiAdmin.getPolicyByNameAndType(ArgumentMatchers.anyInt(), "api", ArgumentMatchers.anyString());
+            Assert.assertNotNull(policy);
+        } catch (APIManagementException ex) {
+            Assert.fail(ex.getMessage());
         }
     }
 }

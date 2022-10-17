@@ -595,6 +595,10 @@
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/async-api-specification</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/devportal/{version}/apis/{apiId}/wsdl</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
@@ -1049,6 +1053,24 @@
     </APIRecommendations>
     {% endif %}
 
+    <OpenTelemetry>
+        <RemoteTracer>
+            <Enabled>{{apim.open_telemetry.remote_tracer.enable}}</Enabled>
+            <Name>{{apim.open_telemetry.remote_tracer.name}}</Name>
+            <Url>{{apim.open_telemetry.remote_tracer.url}}</Url>
+            <HostName>{{apim.open_telemetry.remote_tracer.hostname}}</HostName>
+            <Port>{{apim.open_telemetry.remote_tracer.port}}</Port>
+            <Properties>
+                {% for property in apim.open_telemetry.remote_tracer.properties %}
+                <{{property.name}}>{{property.value}}</{{property.name}}>
+                {% endfor %}
+            </Properties>
+        </RemoteTracer>
+        <LogTracer>
+            <Enabled>{{apim.open_telemetry.log_tracer.enable}}</Enabled>
+        </LogTracer>
+    </OpenTelemetry>
+
     <OpenTracer>
         <RemoteTracer>
             <Enabled>{{apim.open_tracer.remote_tracer.enable}}</Enabled>
@@ -1061,7 +1083,6 @@
         <LogTracer>
             <Enabled>{{apim.open_tracer.log_tracer.enable}}</Enabled>
         </LogTracer>
-        <Legacy>{{apim.open_tracer.legacy}}</Legacy>
     </OpenTracer>
 
     {% if security_audit is defined %}
@@ -1239,6 +1260,9 @@
         {% else %}
          <ServiceURL>{{apim.throttling.service_url}}</ServiceURL>
         {% endif %}
+        {% if apim.event_hub.event_waiting_time is defined %}
+        <EventWaitingTime>{{apim.event_hub.event_waiting_time}}</EventWaitingTime>
+        {% endif %}
          {% if apim.event_hub.init_delay is defined %}
         <InitDelay>{{apim.event_hub.init_delay}}</InitDelay>
           {% endif %}
@@ -1350,7 +1374,7 @@
         {% if apim.sync_runtime_artifacts.gateway.data_retrieval_mode is defined %}
         <DataRetrievalMode>{{apim.sync_runtime_artifacts.gateway.data_retrieval_mode}}</DataRetrievalMode>
         {% endif %}
-        {% if apim.sync_runtime_artifacts.gateway.event_waiting_time is defined %}
+        {% if  apim.event_hub.event_waiting_time is not defined and apim.sync_runtime_artifacts.gateway.event_waiting_time is defined %}
         <EventWaitingTime>{{apim.sync_runtime_artifacts.gateway.event_waiting_time}}</EventWaitingTime>
         {% endif %}
         <SkipList>

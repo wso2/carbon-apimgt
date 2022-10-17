@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.message.Message;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
@@ -35,19 +34,14 @@ import org.wso2.carbon.apimgt.api.ApplicationNameWhiteSpaceValidationException;
 import org.wso2.carbon.apimgt.api.ApplicationNameWithInvalidCharactersException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -62,9 +56,7 @@ import org.wso2.carbon.apimgt.rest.api.util.exception.MethodNotAllowedException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 
@@ -78,7 +70,6 @@ import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -92,10 +83,6 @@ import javax.ws.rs.core.Response;
 public class RestApiUtil {
 
     public static final Log log = LogFactory.getLog(RestApiUtil.class);
-    private static Set<URITemplate> storeResourceMappings;
-    private static Set<URITemplate> publisherResourceMappings;
-    private static Set<URITemplate> adminAPIResourceMappings;
-    private static Set<URITemplate> serviceCatalogAPIResourceMappings;
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> uriToHttpMethodsMap;
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> ETagSkipListURIToHttpMethodsMap;
 
@@ -114,6 +101,17 @@ public class RestApiUtil {
         }
         errorDTO.setError(errorListItemDTOs);
         return errorDTO;
+    }
+
+    /**
+     * To getting a message properties as a Map
+     * @param message - current inbound message
+     * @return Map object that contains all properties of cxf inbound message
+     */
+    public static Map<String,Object> addToJWTAuthenticationContext(Message message) {
+        HashMap<String,Object> hashMap = new HashMap<>();
+        message.forEach(hashMap::put);
+        return hashMap;
     }
 
     /**
@@ -960,144 +958,6 @@ public class RestApiUtil {
         return returnedAPP;
     }
 
-    /**
-     * This is static method to return URI Templates map of API Store REST API.
-     * This content need to load only one time and keep it in memory as content will not change
-     * during runtime.
-     *
-     * @return URITemplate set associated with API Manager Store REST API
-     */
-    public static Set<URITemplate> getStoreAppResourceMapping(String version) {
-
-        API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER,
-                RestApiConstants.REST_API_STORE_CONTEXT,
-                RestApiConstants.REST_API_STORE_VERSION_0));
-
-        if (storeResourceMappings != null) {
-            return storeResourceMappings;
-        } else {
-            try {
-                String definition;
-                if (RestApiConstants.REST_API_STORE_VERSION_0.equals(version)) {
-                    definition = IOUtils
-                            .toString(RestApiUtil.class.getResourceAsStream("/store-api.json"), "UTF-8");
-                } else {
-                    definition = IOUtils
-                            .toString(RestApiUtil.class.getResourceAsStream("/devportal-api.yaml"), "UTF-8");
-                }
-                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
-                //Get URL templates from swagger content w created
-                storeResourceMappings = oasParser.getURITemplates(definition);
-            } catch (APIManagementException e) {
-                log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
-            } catch (IOException e) {
-                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
-            }
-            return storeResourceMappings;
-        }
-    }
-
-
-    /**
-     * This is static method to return URI Templates map of API Publisher REST API.
-     * This content need to load only one time and keep it in memory as content will not change
-     * during runtime.
-     *
-     * @return URITemplate set associated with API Manager publisher REST API
-     */
-    public static Set<URITemplate> getPublisherAppResourceMapping(String version) {
-        API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER, RestApiConstants.REST_API_STORE_CONTEXT,
-                RestApiConstants.REST_API_STORE_VERSION_0));
-
-        if (publisherResourceMappings != null) {
-            return publisherResourceMappings;
-        } else {
-            try {
-                String definition;
-                if (RestApiConstants.REST_API_PUBLISHER_VERSION_0.equals(version)) {
-                    definition = IOUtils
-                            .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.json"), "UTF-8");
-                } else {
-                    definition = IOUtils
-                            .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.yaml"), "UTF-8");
-                }
-                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
-                //Get URL templates from swagger content we created
-                publisherResourceMappings = oasParser.getURITemplates(definition);
-            } catch (APIManagementException e) {
-                log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
-            } catch (IOException e) {
-                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
-            }
-            return publisherResourceMappings;
-        }
-    }
-
-    /**
-     * This is static method to return URI Templates map of Service Catalog REST API.
-     * This content need to load only one time and keep it in memory as content will not change
-     * during runtime.
-     *
-     * @return URITemplate set associated with Service Catalog REST API
-     */
-    public static Set<URITemplate> getServiceCatalogAPIResourceMapping() {
-        API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER,
-                RestApiConstants.REST_API_SERVICE_CATALOG_CONTEXT_FULL, "v0"));
-
-        if (serviceCatalogAPIResourceMappings != null) {
-            return serviceCatalogAPIResourceMappings;
-        } else {
-            try {
-                String definition;
-                definition = IOUtils
-                            .toString(RestApiUtil.class.getResourceAsStream("/service-catalog-api.yaml"), "UTF-8");
-                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
-                //Get URL templates from swagger content we created
-                serviceCatalogAPIResourceMappings = oasParser.getURITemplates(definition);
-            } catch (APIManagementException e) {
-                log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
-            } catch (IOException e) {
-                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
-            }
-            return serviceCatalogAPIResourceMappings;
-        }
-    }
-
-    /**
-     * This is static method to return URI Templates map of API Admin REST API.
-     * This content need to load only one time and keep it in memory as content will not change
-     * during runtime.
-     *
-     * @return URITemplate set associated with API Manager Admin REST API
-     */
-    public static Set<URITemplate> getAdminAPIAppResourceMapping(String version) {
-
-        API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER, RestApiConstants.REST_API_ADMIN_CONTEXT,
-                RestApiConstants.REST_API_ADMIN_VERSION_0));
-
-        if (adminAPIResourceMappings != null) {
-            return adminAPIResourceMappings;
-        } else {
-            try {
-                String definition;
-                if (RestApiConstants.REST_API_ADMIN_VERSION_0.equals(version)) {
-                    definition = IOUtils
-                            .toString(RestApiUtil.class.getResourceAsStream("/admin-api.json"), "UTF-8");
-                } else {
-                    definition = IOUtils
-                            .toString(RestApiUtil.class.getResourceAsStream("/admin-api.yaml"), "UTF-8");
-                }
-                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
-                //Get URL templates from swagger content we created
-                adminAPIResourceMappings = oasParser.getURITemplates(definition);
-            } catch (APIManagementException e) {
-                log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
-            } catch (IOException e) {
-                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
-            }
-            return adminAPIResourceMappings;
-        }
-    }
 
     /**
      * Returns the white-listed URIs and associated HTTP methods for REST API by reading api-manager.xml configuration
@@ -1245,65 +1105,6 @@ public class RestApiUtil {
     }
 
     /**
-     * Handle if any cross tenant access permission violations detected. Cross tenant resources (apis/apps) can be
-     * retrieved only by super tenant admin user, only while a migration process(2.6.0 to 3.0.0). APIM server has to be
-     * started with the system property 'migrationMode=true' if a migration related exports are to be done.
-     *
-     * @param targetTenantDomain Tenant domain of which resources are requested
-     * @param username           Logged in user name
-     * @throws ForbiddenException
-     */
-    public static void handleMigrationSpecificPermissionViolations(String targetTenantDomain, String username) throws
-            ForbiddenException {
-        boolean isCrossTenantAccess = !targetTenantDomain.equals(MultitenantUtils.getTenantDomain(username));
-        if (!isCrossTenantAccess) {
-            return;
-        }
-        String superAdminRole = null;
-        try {
-            superAdminRole = ServiceReferenceHolder.getInstance().getRealmService().
-                    getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).getRealmConfiguration().getAdminRoleName();
-        } catch (UserStoreException e) {
-            RestApiUtil.handleInternalServerError("Error in getting super admin role name", e, log);
-        }
-
-        //check whether logged in user is a super tenant user
-        String superTenantDomain = null;
-        try {
-            superTenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                    getSuperTenantDomain();
-        } catch (UserStoreException e) {
-            RestApiUtil.handleInternalServerError("Error in getting the super tenant domain", e, log);
-        }
-        boolean isSuperTenantUser = RestApiCommonUtil.getLoggedInUserTenantDomain().equals(superTenantDomain);
-        if (!isSuperTenantUser) {
-            String errorMsg = "Cross Tenant resource access is not allowed for this request. User " + username +
-                    " is not allowed to access resources in " + targetTenantDomain + " as the requester is not a super " +
-                    "tenant user";
-            log.error(errorMsg);
-            ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l, errorMsg);
-            throw new ForbiddenException(errorDTO);
-        }
-
-        //check whether the user has super tenant admin role
-        boolean isSuperAdminRoleNameExist = false;
-        try {
-            isSuperAdminRoleNameExist = APIUtil.isUserInRole(username, superAdminRole);
-        } catch (UserStoreException | APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error in checking whether the user has admin role", e, log);
-        }
-
-        if (!isSuperAdminRoleNameExist) {
-            String errorMsg = "Cross Tenant resource access is not allowed for this request. User " + username +
-                    " is not allowed to access resources in " + targetTenantDomain + " as the requester is not a " +
-                    "super tenant admin";
-            log.error(errorMsg);
-            ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l, errorMsg);
-            throw new ForbiddenException(errorDTO);
-        }
-    }
-
-    /**
      * Check if user calls an anonymous REST API.
      *
      * @param inMessage cxf message
@@ -1312,69 +1113,6 @@ public class RestApiUtil {
     public static boolean checkIfAnonymousAPI(Message inMessage) {
         return (inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED) != null &&
                 !((Boolean) inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED)));
-    }
-
-    /**
-     * This method is used to get the URI template set for the relevant REST API using the given base path.
-     *
-     * @param basePath Base path of the REST API
-     * @return Set of URI templates for the REST API
-     */
-    public static Set<URITemplate> getURITemplatesForBasePath(String basePath) {
-        Set<URITemplate> uriTemplates = new HashSet<>();
-        //get URI templates using the base path in the request
-        if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_0)) {
-            uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_0);
-        } else if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL)) {
-            uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION);
-        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_0)) {
-            uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_0);
-        } else if (basePath.contains(RestApiConstants.REST_API_DEVELOPER_PORTAL_CONTEXT_FULL)) {
-            uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_DEVELOPER_PORTAL_VERSION);
-        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT_FULL_0)) {
-            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION_0);
-        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT_FULL)) {
-            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION);
-        } else if (basePath.contains(RestApiConstants.REST_API_SERVICE_CATALOG_CONTEXT_FULL)) {
-            uriTemplates = RestApiUtil.getServiceCatalogAPIResourceMapping();
-        }
-        return uriTemplates;
-    }
-
-    /**
-     * This method is used to get the scope list from the yaml file
-     *
-     * @return MAP of scope list for all portal
-     */
-    public static  Map<String, List<String>> getScopesInfoFromAPIYamlDefinitions() throws APIManagementException {
-
-        Map<String, List<String>>   portalScopeList = new HashMap<>();
-        String [] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/devportal-api.yaml", "/service-catalog-api.yaml"};
-        for (String fileName : fileNameArray) {
-            String definition = null;
-            try {
-                definition = IOUtils
-                        .toString(RestApiUtil.class.getResourceAsStream(fileName), "UTF-8");
-            } catch (IOException  e) {
-                throw new APIManagementException("Error while reading the swagger definition ,",
-                        ExceptionCodes.DEFINITION_EXCEPTION);
-            }
-            APIDefinition oasParser = OASParserUtil.getOASParser(definition);
-            Set<Scope> scopeSet = oasParser.getScopes(definition);
-            for (Scope entry : scopeSet) {
-                List<String> list = new ArrayList<>();
-                list.add(entry.getDescription());
-                list.add((fileName.replaceAll("-api.yaml", "").replace("/", "")));
-                if (("/service-catalog-api.yaml".equals(fileName))) {
-                    if (!entry.getKey().contains("apim:api_view")) {
-                        portalScopeList.put(entry.getName(), list);
-                    }
-                } else {
-                    portalScopeList.put(entry.getName(), list);
-                }
-            }
-        }
-        return portalScopeList;
     }
 
     /**

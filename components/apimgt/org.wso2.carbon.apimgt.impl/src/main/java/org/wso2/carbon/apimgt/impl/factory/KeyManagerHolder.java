@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
 import org.wso2.carbon.apimgt.impl.loader.KeyManagerConfigurationDataRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -55,8 +56,8 @@ import javax.security.cert.X509Certificate;
 public class KeyManagerHolder {
 
     private static Log log = LogFactory.getLog(KeyManagerHolder.class);
-    private static Map<String, OrganizationKeyManagerDto> organizationWiseMap = new HashMap<>();
-    private static Map<String, KeyManagerDto> globalJWTValidatorMap = new HashMap<>();
+    private static final Map<String, OrganizationKeyManagerDto> organizationWiseMap = new HashMap<>();
+    private static final Map<String, KeyManagerDto> globalJWTValidatorMap = new HashMap<>();
     public static void addKeyManagerConfiguration(String organization, String name, String type,
                                                   KeyManagerConfiguration keyManagerConfiguration)
             throws APIManagementException {
@@ -84,7 +85,7 @@ public class KeyManagerHolder {
                 if (StringUtils.isNotEmpty(keyManagerConnectorConfiguration.getImplementation())) {
                     try {
                         keyManager = (KeyManager) Class.forName(keyManagerConnectorConfiguration.getImplementation())
-                                .newInstance();
+                                .getDeclaredConstructor().newInstance();
                         keyManager.setTenantDomain(organization);
                         if (StringUtils.isNotEmpty(defaultKeyManagerType) && defaultKeyManagerType.equals(type)) {
                             keyManagerConfiguration.addParameter(APIConstants.KEY_MANAGER_USERNAME,
@@ -93,7 +94,8 @@ public class KeyManagerHolder {
                                     apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD));
                         }
                         keyManager.loadConfiguration(keyManagerConfiguration);
-                    } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+                    } catch (ClassNotFoundException | IllegalAccessException | InstantiationException
+                            | NoSuchMethodException | InvocationTargetException e) {
                         throw new APIManagementException("Error while loading keyManager configuration", e);
                     }
                 }
@@ -208,8 +210,10 @@ public class KeyManagerHolder {
                     jwtValidator = new JWTValidatorImpl();
                 } else {
                     try {
-                        jwtValidator = (JWTValidator) Class.forName(jwtValidatorImplementation).newInstance();
-                    } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                        jwtValidator = (JWTValidator) Class.forName(jwtValidatorImplementation)
+                                .getDeclaredConstructor().newInstance();
+                    } catch (InstantiationException | IllegalAccessException | ClassNotFoundException
+                            | NoSuchMethodException | InvocationTargetException e) {
                         log.error("Error while initializing JWT Validator", e);
                         throw new APIManagementException("Error while initializing JWT Validator", e);
                     }
@@ -250,7 +254,8 @@ public class KeyManagerHolder {
 
         OrganizationKeyManagerDto organizationKeyManagerDto = organizationWiseMap.get(tenantDomain);
         if (organizationKeyManagerDto == null) {
-            synchronized ("KeyManagerHolder".concat(tenantDomain)) {
+            synchronized ("KeyManagerHolder".concat(tenantDomain).intern()) {
+                organizationKeyManagerDto = organizationWiseMap.get(tenantDomain);
                 if (organizationKeyManagerDto == null) {
                     new KeyManagerConfigurationDataRetriever(tenantDomain).run();
                     organizationKeyManagerDto = organizationWiseMap.get(tenantDomain);

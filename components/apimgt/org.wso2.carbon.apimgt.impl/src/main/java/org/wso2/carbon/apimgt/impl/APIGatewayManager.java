@@ -24,7 +24,6 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
-import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -84,7 +83,7 @@ public class APIGatewayManager {
         APIProductIdentifier apiIdentifier = api.getId();
         DeployAPIInGatewayEvent
                 deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantDomain,
+                System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), api.getOrganization(),
                 api.getProductId(),api.getUuid(), publishedGateways, apiIdentifier.getName(), apiIdentifier.getVersion(),
                 PRODUCT_PREFIX, api.getType(),api.getContext());
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
@@ -112,12 +111,11 @@ public class APIGatewayManager {
 
         APIProductIdentifier apiProductIdentifier = apiProduct.getId();
         Set<APIEvent> apiEvents = transformAPIToAPIEvent(associatedAPIs);
-        DeployAPIInGatewayEvent
-                deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain,
-                apiProduct.getProductId(),apiProduct.getUuid(), removedGateways, apiProductIdentifier.getName(),
-                apiProductIdentifier.getVersion(), PRODUCT_PREFIX, APIConstants.API_PRODUCT, apiProduct.getContext(),
-                apiEvents);
+        DeployAPIInGatewayEvent deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
+                System.currentTimeMillis(), APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(),
+                apiProduct.getOrganization(), apiProduct.getProductId(), apiProduct.getUuid(), removedGateways,
+                apiProductIdentifier.getName(), apiProductIdentifier.getVersion(), PRODUCT_PREFIX,
+                APIConstants.API_PRODUCT, apiProduct.getContext(), apiEvents);
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
     }
 

@@ -142,6 +142,31 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             applications = apiConsumer
                     .getApplicationsWithPagination(new Subscriber(username), groupId, offset, limit, query, sortBy,
                             sortOrder, organization);
+            if (applications != null) {
+                JSONArray applicationAttributesFromConfig = apiConsumer.getAppAttributesFromConfig(username);
+                for (Application application : applications) {
+                    // Remove hidden attributes and set the rest of the attributes from config
+                    Map<String, String> existingApplicationAttributes = application.getApplicationAttributes();
+                    Map<String, String> applicationAttributes = new HashMap<>();
+                    if (existingApplicationAttributes != null && applicationAttributesFromConfig != null) {
+                        for (Object object : applicationAttributesFromConfig) {
+                            JSONObject attribute = (JSONObject) object;
+                            Boolean hidden = (Boolean) attribute.get(APIConstants.ApplicationAttributes.HIDDEN);
+                            String attributeName = (String) attribute.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
+
+                            if (!BooleanUtils.isTrue(hidden)) {
+                                String attributeVal = existingApplicationAttributes.get(attributeName);
+                                if (attributeVal != null) {
+                                    applicationAttributes.put(attributeName, attributeVal);
+                                } else {
+                                    applicationAttributes.put(attributeName, "");
+                                }
+                            }
+                        }
+                    }
+                    application.setApplicationAttributes(applicationAttributes);
+                }
+            }
             ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             int applicationCount = apiMgtDAO.getAllApplicationCount(subscriber, groupId, query);
 
@@ -675,6 +700,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (application != null) {
                 if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
                     apiConsumer.removeApplication(application, username);
+                    if (APIConstants.ApplicationStatus.DELETE_PENDING.equals(application.getStatus())) {
+                        if (application.getId() == -1) {
+                            return Response.status(Response.Status.BAD_REQUEST).build();
+                        }
+                        return Response.status(Response.Status.CREATED).build();
+                    }
                     return Response.ok().build();
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);

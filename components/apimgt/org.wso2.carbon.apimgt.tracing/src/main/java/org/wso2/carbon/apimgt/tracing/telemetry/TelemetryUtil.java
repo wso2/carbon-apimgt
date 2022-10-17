@@ -141,19 +141,16 @@ public class TelemetryUtil {
     public static void inject(TelemetrySpan span, Map<String, String> tracerSpecificCarrier) {
 
         OpenTelemetry openTelemetry = TelemetryServiceImpl.getInstance().getOpenTelemetry();
-        TextMapSetter<Map<String, String>> setter = new TextMapSetter<Map<String, String>>() {
-            @Override
-            public void set(Map<String, String> tracerSpecificCarrier, String key, String value) {
+        TextMapSetter<Map<String, String>> setter = (tracerSpecificCarrier1, key, value) -> {
 
-                if (tracerSpecificCarrier != null) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("value: " + value + " was set for key: " + key + " in tracer specific carrier");
-                    }
-
-                    tracerSpecificCarrier.put(key, value);
+            if (tracerSpecificCarrier1 != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("value: " + value + " was set for key: " + key + " in tracer specific carrier");
                 }
 
+                tracerSpecificCarrier1.put(key, value);
             }
+
         };
 
         Object sp = span.getSpan();
@@ -230,5 +227,8 @@ public class TelemetryUtil {
             }
         }
         return false;
+    }
+
+    private TelemetryUtil() {
     }
 }

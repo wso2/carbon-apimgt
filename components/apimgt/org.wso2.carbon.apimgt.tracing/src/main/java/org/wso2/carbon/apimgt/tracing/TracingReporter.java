@@ -34,6 +34,8 @@ import java.util.Map;
 
 /**
  * This class used to generate log tracer related logs.
+ *
+ * @deprecated <p> Use {@link org.wso2.carbon.apimgt.tracing.telemetry.LogExporter} instead</p>
  */
 @Deprecated
 public class TracingReporter implements Reporter {
@@ -56,11 +58,11 @@ public class TracingReporter implements Reporter {
 
     public void log(Instant timeStamp, SpanData span, Map<String, ?> fields) {
         LogLevel level = LogLevel.INFO;
-            LogLevel logLevel = (LogLevel) fields.get(LogLevel.FIELD_NAME);
-            if (logLevel != null) {
-                level = logLevel;
-                fields.remove(LogLevel.FIELD_NAME);
-            }
+        LogLevel logLevel = (LogLevel) fields.get(LogLevel.FIELD_NAME);
+        if (logLevel != null) {
+            level = logLevel;
+            fields.remove(LogLevel.FIELD_NAME);
+        }
         switch (level) {
             case TRACE:
                 if (log.isTraceEnabled()) {
@@ -95,36 +97,33 @@ public class TracingReporter implements Reporter {
      * @param timeStamp timeStamp Instant
      * @param span      opentracing SpanData
      * @return structured log message format String
-     * */
+     */
     private String toStructuredMessage(Instant timeStamp, SpanData span) {
-        try {
-            StringWriter writer = new StringWriter();
-            JsonGenerator generator = this.jsonFactory.createGenerator(writer);
+        try (StringWriter writer = new StringWriter();
+             JsonGenerator generator = this.jsonFactory.createGenerator(writer)) {
             generator.writeStartObject();
             generator.writeNumberField(TracingConstants.LATENCY, Duration.between(span.startAt, timeStamp).toMillis());
             generator.writeStringField(TracingConstants.OPERATION_NAME, span.operationName);
             generator.writeObjectFieldStart(TracingConstants.TAGS);
-            Iterator itr = span.tags.entrySet().iterator();
+            Iterator<Map.Entry<String, Object>> itr = span.tags.entrySet().iterator();
 
-            Map.Entry map;
+            Map.Entry<String, Object> map;
             Object value;
             while (itr.hasNext()) {
-                map = (Map.Entry) itr.next();
+                map = itr.next();
                 value = map.getValue();
                 if (value instanceof String) {
-                    generator.writeStringField((String) map.getKey(), (String) value);
+                    generator.writeStringField(map.getKey(), (String) value);
                 } else if (value instanceof Number) {
-                    generator.writeNumberField((String) map.getKey(), ((Number) value).doubleValue());
+                    generator.writeNumberField(map.getKey(), ((Number) value).doubleValue());
                 } else if (value instanceof Boolean) {
-                    generator.writeBooleanField((String) map.getKey(), (Boolean) value);
+                    generator.writeBooleanField(map.getKey(), (Boolean) value);
                 }
             }
             generator.writeEndObject();
-            generator.close();
-            writer.close();
             return writer.toString();
         } catch (IOException e) {
-            log.error("Error in structured message" , e);
+            log.error("Error in structured message", e);
             return null;
         }
     }

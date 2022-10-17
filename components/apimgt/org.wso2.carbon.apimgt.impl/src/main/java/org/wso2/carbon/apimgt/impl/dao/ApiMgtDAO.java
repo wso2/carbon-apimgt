@@ -110,7 +110,6 @@ import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
@@ -918,7 +917,7 @@ public class ApiMgtDAO {
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
                     apiProductIdentifier.setProductId(resultSet.getInt("API_ID"));
-                    apiProductIdentifier.setUUID(resultSet.getString("API_UUID"));
+                    apiProductIdentifier.setUuid(resultSet.getString("API_UUID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiProductIdentifier);
                 } else {
                     APIIdentifier apiIdentifier = new APIIdentifier(
@@ -1004,6 +1003,7 @@ public class ApiMgtDAO {
                     subscribedAPI.setUpdatedTime(subscribedAPI.getCreatedTime());
                 }
                 subscribedAPI.setApplication(application);
+                subscribedAPI.setOrganization(resultSet.getString("ORGANIZATION"));
             }
             return subscribedAPI;
         } catch (SQLException e) {
@@ -1558,7 +1558,7 @@ public class ApiMgtDAO {
                     APIProductIdentifier identifier =
                             new APIProductIdentifier(APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
                                     result.getString("API_NAME"), result.getString("API_VERSION"));
-                    identifier.setUUID(result.getString("API_UUID"));
+                    identifier.setUuid(result.getString("API_UUID"));
                     SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
 
                     initSubscribedAPIDetailed(connection, subscribedAPI, subscriber, result);
@@ -4150,6 +4150,10 @@ public class ApiMgtDAO {
                 int subscriptionCount = getSubscriptionCountByApplicationId(connection,application, organization);
                 application.setSubscriptionCount(subscriptionCount);
 
+                // Get custom attributes of application
+                Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
+                application.setApplicationAttributes(applicationAttributes);
+
                 applicationsList.add(application);
             }
 
@@ -6085,6 +6089,7 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
+                application.setOrganization(rs.getString("ORGANIZATION"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
                 application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
                 application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
@@ -8441,6 +8446,42 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Get external workflow reference by internal workflow reference and workflow type
+     * @param internalRef Internal reference of the workflow
+     * @param workflowType Workflow type of the workflow
+     * @return External workflow reference for the given internal reference and workflow type if present. Null otherwise
+     * @throws APIManagementException If an SQL exception occurs in database interactions
+     */
+    public String getExternalWorkflowRefByInternalRefWorkflowType(int internalRef, String workflowType) throws APIManagementException {
+
+        String workflowExtRef = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_EXTERNAL_WORKFLOW_REFERENCE_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, workflowType);
+            ps.setString(2, String.valueOf(internalRef));
+            rs = ps.executeQuery();
+
+            // returns only one row
+            while (rs.next()) {
+                workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while getting workflow entry for " +
+                    "Internal Ref : " + internalRef, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+
+        return workflowExtRef;
+    }
+
+    /**
      * Remove workflow entry
      *
      * @param workflowReference
@@ -8558,6 +8599,36 @@ public class ApiMgtDAO {
         return workflowExtRef;
     }
 
+    public String getExternalWorkflowReferenceForSubscriptionAndWFType(int subscriptionId, String wfType) throws APIManagementException {
+
+        String workflowExtRef = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_EXTERNAL_WORKFLOW_FOR_SUBSCRIPTION_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            // setting subscriptionId as string to prevent error when db finds string type IDs for
+            // ApplicationRegistration workflows
+            ps.setString(1, String.valueOf(subscriptionId));
+            ps.setString(2, wfType);
+            rs = ps.executeQuery();
+
+            // returns only one row
+            while (rs.next()) {
+                workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while getting workflow entry for " +
+                    "Subscription : " + subscriptionId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return workflowExtRef;
+    }
+
     /**
      * Retries the WorkflowExternalReference for an user signup by DOMAIN/username.
      *
@@ -8625,6 +8696,47 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return pendingSubscriptions;
+    }
+
+    public Map<String, Set<Integer>> getPendingSubscriptionsByAppId(int applicationId) throws APIManagementException {
+
+        Set<Integer> pendingCreateSubscriptionIds = new HashSet<>();
+        Set<Integer> pendingDeleteSubscriptionIds = new HashSet<>();
+        Set<Integer> pendingUpdateSubscriptionIds = new HashSet<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_SUBSCRIPTION_ID_STATUS_BY_APPLICATION_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, applicationId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                String subStatus = rs.getString("SUB_STATUS");
+                if(APIConstants.SubscriptionStatus.ON_HOLD.equals(subStatus)) {
+                    pendingCreateSubscriptionIds.add(rs.getInt("SUBSCRIPTION_ID"));
+                }
+                else if(APIConstants.SubscriptionStatus.DELETE_PENDING.equals(subStatus)){
+                    pendingDeleteSubscriptionIds.add(rs.getInt("SUBSCRIPTION_ID"));
+                }
+                else if(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING.equals(subStatus)){
+                    pendingUpdateSubscriptionIds.add(rs.getInt("SUBSCRIPTION_ID"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while getting subscription entries for " +
+                    "Application : " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        Map<String,Set<Integer>> map = new HashMap<>();
+        map.put(APIConstants.SubscriptionStatus.ON_HOLD, pendingCreateSubscriptionIds);
+        map.put(APIConstants.SubscriptionStatus.DELETE_PENDING, pendingDeleteSubscriptionIds);
+        map.put(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING, pendingUpdateSubscriptionIds);
+        return map;
     }
 
     /**
@@ -9345,6 +9457,7 @@ public class ApiMgtDAO {
                                 .updatedBy(resultSet.getString("UPDATED_BY"))
                                 .updatedTime(resultSet.getString("UPDATED_TIME"))
                                 .revisionsCreated(resultSet.getInt("REVISIONS_CREATED"))
+                                .organization(resultSet.getString("ORGANIZATION"))
                                 .isRevision(apiRevision != null).organization(resultSet.getString("ORGANIZATION"));
                         if (apiRevision != null) {
                             apiInfoBuilder = apiInfoBuilder.apiTier(getAPILevelTier(connection,
@@ -13359,38 +13472,6 @@ public class ApiMgtDAO {
         return status;
     }
 
-    public String[] getAPIDetailsByContext(String context) {
-
-        String apiName = "";
-        String apiProvider = "";
-        String sql = SQLConstants.GET_API_FOR_CONTEXT_TEMPLATE_SQL;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(true);
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, context);
-
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                apiName = rs.getString("API_NAME");
-                apiProvider = rs.getString("API_PROVIDER");
-            }
-        } catch (SQLException e) {
-            log.error("Error occurred while fetching data: " + e.getMessage(), e);
-        } finally {
-            try {
-                conn.setAutoCommit(false);
-            } catch (SQLException e) {
-                log.error("Error occurred while fetching data: " + e.getMessage(), e);
-            }
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return new String[]{apiName, apiProvider};
-    }
-
     /**
      * Returns a Prepared statement after setting all the dynamic parameters. Dynamic parameters will be added in
      * the place of $params in query string
@@ -13623,6 +13704,7 @@ public class ApiMgtDAO {
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
                 application.setKeyType(rs.getString("KEY_TYPE"));
+                application.setOrganization(rs.getString("ORGANIZATION"));
                 application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
                 application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
 
@@ -16551,9 +16633,12 @@ public class ApiMgtDAO {
                     connection.rollback();
                     // handle concurrent db entry update. Fix duplicate primary key issue.
                     if (e.getMessage().toLowerCase().contains("primary key violation") ||
-                            e.getMessage().toLowerCase().contains("duplicate entry")) {
-                        log.debug("Duplicate entries detected for Revision UUID " + apiRevisionId +
+                            e.getMessage().toLowerCase().contains("duplicate entry") ||
+                            e.getMessage().contains("Violation of PRIMARY KEY constraint")) {
+                        log.warn("Duplicate entries detected for Revision UUID " + apiRevisionId +
                                 " while adding deployed API revisions", e);
+                        throw new APIManagementException("Failed to add deployed API Revision for Revision UUID "
+                                + apiRevisionId,  e, ExceptionCodes.REVISION_ALREADY_DEPLOYED);
                     } else {
                         handleException("Failed to add deployed API Revision for Revision UUID "
                                 + apiRevisionId, e);
@@ -16766,14 +16851,15 @@ public class ApiMgtDAO {
             try {
                 connection.setAutoCommit(false);
                 // Remove an entry from AM_DEPLOYMENT_REVISION_MAPPING table
-                PreparedStatement statement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.REMOVE_API_REVISION_DEPLOYMENT_MAPPING);
-                for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
-                    statement.setString(1, apiRevisionDeployment.getDeployment());
-                    statement.setString(2, apiRevisionId);
-                    statement.addBatch();
+                try (PreparedStatement statement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.REMOVE_API_REVISION_DEPLOYMENT_MAPPING)) {
+                    for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
+                        statement.setString(1, apiRevisionDeployment.getDeployment());
+                        statement.setString(2, apiRevisionId);
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
                 }
-                statement.executeBatch();
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -18030,7 +18116,7 @@ public class ApiMgtDAO {
                             APIProductIdentifier identifier = new APIProductIdentifier(
                                     APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
                                     result.getString("API_NAME"), result.getString("API_VERSION"));
-                            identifier.setUUID(result.getString("API_UUID"));
+                            identifier.setUuid(result.getString("API_UUID"));
                             SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
                             subscribedAPI.setApplication(application);
                             initSubscribedAPI(subscribedAPI, result);
@@ -19157,9 +19243,7 @@ public class ApiMgtDAO {
         statement.close();
 
         if (isWithPolicyDefinition && policyData != null) {
-            if (isWithPolicyDefinition && policyData != null) {
-                populatePolicyDefinitions(connection, policyData.getPolicyId(), policyData);
-            }
+            populatePolicyDefinitions(connection, policyData.getPolicyId(), policyData);
         }
         return policyData;
     }

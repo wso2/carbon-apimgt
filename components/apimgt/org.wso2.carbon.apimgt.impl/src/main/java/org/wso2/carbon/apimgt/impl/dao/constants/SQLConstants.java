@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.dao.constants;
 
-import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -1573,6 +1572,7 @@ public class SQLConstants {
             "   APP.GROUP_ID," +
             "   APP.CREATED_BY," +
             "   APP.UUID, " +
+            "   APP.ORGANIZATION, " +
             "   APP.TOKEN_TYPE " +
             " FROM " +
             "   AM_SUBSCRIBER SUB," +
@@ -1622,6 +1622,7 @@ public class SQLConstants {
                     "   APP.UUID," +
                     "   APP.CREATED_BY," +
                     "   APP.TOKEN_TYPE," +
+                    "   APP.ORGANIZATION," +
                     "   AM_APP_MAP.KEY_TYPE" +
                     " FROM " +
                     "   AM_APPLICATION_KEY_MAPPING AM_APP_MAP," +
@@ -2072,6 +2073,14 @@ public class SQLConstants {
             "   APPLICATION_ID=? " +
             "   AND SUB_STATUS=?";
 
+    public static final String GET_SUBSCRIPTION_ID_STATUS_BY_APPLICATION_SQL =
+            "SELECT" +
+                    "   SUBSCRIPTION_ID, SUB_STATUS" +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION " +
+                    " WHERE " +
+                    "   APPLICATION_ID=? ";
+
     public static final String GET_SUBSCRIPTIONS_BY_API_SQL =
             "SELECT" +
                     "   SUBSCRIPTION_ID" +
@@ -2156,7 +2165,8 @@ public class SQLConstants {
             "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND ORGANIZATION = ? AND CONTEXT NOT LIKE ?";
 
     public static final String GET_API_NAME_MATCHING_CONTEXT_SQL =
-            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND AND ORGANIZATION = ? CONTEXT LIKE ?";
+            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND ORGANIZATION = ? AND "
+                    + "CONTEXT LIKE ?";
 
     public static final String GET_API_NAME_DIFF_CASE_NOT_MATCHING_CONTEXT_SQL =
             "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT NOT LIKE ? "
@@ -2825,7 +2835,12 @@ public class SQLConstants {
             "DELETE FROM AM_GW_API_DEPLOYMENTS WHERE API_ID = ?";
     public static final String DELETE_GW_PUBLISHED_API_DETAILS = "DELETE FROM AM_GW_PUBLISHED_API_DETAILS WHERE " +
             "API_ID = ?";
-    public static final String RETRIEVE_ORGANIZATION = "SELECT ORGANIZATION FROM AM_API WHERE API_UUID =?";
+    public static final String RETRIEVE_API_ARTIFACT_PROPERTY_VALUES =
+            "SELECT AM_API.ORGANIZATION AS ORGANIZATION, " +
+                    "AM_DEPLOYMENT_REVISION_MAPPING.DEPLOYED_TIME AS DEPLOYED_TIME " +
+                    "FROM AM_API, AM_DEPLOYMENT_REVISION_MAPPING " +
+                    "WHERE AM_API.API_UUID = ? AND AM_DEPLOYMENT_REVISION_MAPPING.NAME = ? " +
+                    "AND AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID = ?";
     public static final String RETRIEVE_ARTIFACTS_BY_APIID_AND_LABEL =
             "SELECT AM_GW_API_DEPLOYMENTS.REVISION_ID AS REVISION_ID,AM_GW_PUBLISHED_API_DETAILS" +
                     ".TENANT_DOMAIN AS TENANT_DOMAIN," +
@@ -2868,6 +2883,22 @@ public class SQLConstants {
                     "AM_API.CONTEXT AS CONTEXT FROM " +
                     "AM_GW_PUBLISHED_API_DETAILS,AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS,AM_API WHERE " +
                     "AM_GW_API_DEPLOYMENTS.API_ID IN (_API_IDS_) AND AM_GW_API_DEPLOYMENTS.LABEL IN (_GATEWAY_LABELS_) AND " +
+                    "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ? " +
+                    "AND AM_GW_PUBLISHED_API_DETAILS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND " +
+                    "AM_GW_API_ARTIFACTS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND " +
+                    "AM_API.API_UUID=AM_GW_API_DEPLOYMENTS.API_ID AND" +
+                    " AM_GW_API_ARTIFACTS.REVISION_ID=AM_GW_API_DEPLOYMENTS.REVISION_ID";
+    public static final String RETRIEVE_ARTIFACTS_ONLY_BY_MULTIPLE_APIIDS =
+            "SELECT AM_GW_API_DEPLOYMENTS.API_ID AS API_ID," +
+                    "AM_GW_API_DEPLOYMENTS.REVISION_ID AS REVISION_ID," +
+                    "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN AS TENANT_DOMAIN," +
+                    "AM_GW_PUBLISHED_API_DETAILS.API_PROVIDER AS API_PROVIDER," +
+                    "AM_GW_PUBLISHED_API_DETAILS.API_NAME AS API_NAME,AM_GW_PUBLISHED_API_DETAILS.API_VERSION AS API_VERSION," +
+                    "AM_GW_PUBLISHED_API_DETAILS.API_TYPE AS API_TYPE,AM_GW_API_ARTIFACTS.ARTIFACT AS ARTIFACT," +
+                    "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL,AM_GW_API_DEPLOYMENTS.VHOST AS VHOST, " +
+                    "AM_API.CONTEXT AS CONTEXT FROM " +
+                    "AM_GW_PUBLISHED_API_DETAILS,AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS,AM_API WHERE " +
+                    "AM_GW_API_DEPLOYMENTS.API_ID IN (_API_IDS_) AND " +
                     "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ? " +
                     "AND AM_GW_PUBLISHED_API_DETAILS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND " +
                     "AM_GW_API_ARTIFACTS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND " +
@@ -3191,6 +3222,9 @@ public class SQLConstants {
                 "AND (ALIAS=? OR END_POINT=?)";
         public static final String GET_CERTIFICATE_TENANT_ALIAS_ENDPOINT = "SELECT * FROM AM_CERTIFICATE_METADATA " +
                        "WHERE TENANT_ID=? AND ALIAS=? AND END_POINT=?";
+
+        public static final String GET_CERTIFICATE_TENANT_ALIAS = "SELECT * FROM AM_CERTIFICATE_METADATA " +
+                "WHERE TENANT_ID=? AND ALIAS=?";
 
         public static final String DELETE_CERTIFICATES = "DELETE FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=? " +
                 "AND ALIAS=?";

@@ -40,7 +40,7 @@ import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 public class ZipkinTelemetry implements APIMOpenTelemetry {
 
     private static final String NAME = "zipkin";
-    private static final Log log = LogFactory.getLog(JaegerTelemetry.class);
+    private static final Log log = LogFactory.getLog(ZipkinTelemetry.class);
     private static final APIManagerConfiguration configuration =
             ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
     private SdkTracerProvider sdkTracerProvider;

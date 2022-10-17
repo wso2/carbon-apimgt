@@ -44,7 +44,7 @@ public class GlobalMediationPolicyImplTest {
         GlobalMediationPolicyImpl globalMediationPolicyImplWrapper = new GlobalMediationPolicyImplWrapper(registry);
         Collection parentCollection = new CollectionImpl();
         String mediationResourcePath = APIConstants.API_CUSTOM_SEQUENCE_LOCATION;
-        String childCollectionPath = mediationResourcePath + "/testMediation";
+        String childCollectionPath = mediationResourcePath + "/in";
         parentCollection.setChildren(new String[] { childCollectionPath });
         Mockito.when(registry.get(mediationResourcePath)).thenReturn(parentCollection);
         Collection childCollection = new CollectionImpl();

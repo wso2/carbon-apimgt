@@ -362,25 +362,23 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         TracingSpan keyTracingSpan = null;
         TelemetrySpan keySpan = null;
         if (TelemetryUtil.telemetryEnabled()) {
-            if (Util.legacy()) {
-                TracingSpan responseLatencySpan =
-                        (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
-                TracingTracer tracer = Util.getGlobalTracer();
-                keyTracingSpan = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
-                messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keyTracingSpan);
-                org.apache.axis2.context.MessageContext axis2MC =
-                        ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-                axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keyTracingSpan);
-            } else {
-                TelemetrySpan responseLatencySpan =
-                        (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
-                TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
-                keySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
-                messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
-                org.apache.axis2.context.MessageContext axis2MC =
-                        ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-                axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
-            }
+            TelemetrySpan responseLatencySpan =
+                    (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+            TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
+            keySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
+            messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
+            org.apache.axis2.context.MessageContext axis2MC =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
+        } else if (Util.tracingEnabled()) {
+            TracingSpan responseLatencySpan =
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+            TracingTracer tracer = Util.getGlobalTracer();
+            keyTracingSpan = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
+            messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keyTracingSpan);
+            org.apache.axis2.context.MessageContext axis2MC =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keyTracingSpan);
         }
 
         Timer.Context context = startMetricTimer();
@@ -434,11 +432,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         } catch (APISecurityException e) {
 
             if (TelemetryUtil.telemetryEnabled()) {
-                if (Util.legacy() && keySpan != null) {
-                    Util.setTag(keyTracingSpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
-                } else if (keySpan != null) {
-                    TelemetryUtil.setTag(keySpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
-                }
+                TelemetryUtil.setTag(keySpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
+            } else if (Util.tracingEnabled()) {
+                Util.setTag(keyTracingSpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
             }
             if (log.isDebugEnabled()) {
                     // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
@@ -467,11 +463,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 handleAuthFailure(messageContext, e);
         } finally {
             if (TelemetryUtil.telemetryEnabled()) {
-                if (Util.legacy()) {
-                    Util.finishSpan(keyTracingSpan);
-                } else {
-                    TelemetryUtil.finishSpan(keySpan);
-                }
+                TelemetryUtil.finishSpan(keySpan);
+            } else if (Util.tracingEnabled()) {
+                Util.finishSpan(keyTracingSpan);
             }
             messageContext.setProperty(APIMgtGatewayConstants.SECURITY_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));

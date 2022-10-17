@@ -207,6 +207,6 @@ public class Tier implements Serializable, Comparable<Tier>{
         else if(this.getRequestsPerMin() == Long.MAX_VALUE || this.getRequestsPerMin() == Integer.MAX_VALUE){
             return -1;
         }
-        return new Long(tier.getRequestsPerMin() - this.getRequestsPerMin()).intValue();
+        return (int)(tier.getRequestsPerMin() - this.getRequestsPerMin());
     }
 }

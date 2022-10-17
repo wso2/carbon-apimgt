@@ -52,9 +52,6 @@ import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
-import org.wso2.carbon.apimgt.tracing.TracingSpan;
-import org.wso2.carbon.apimgt.tracing.TracingTracer;
-import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -629,7 +626,11 @@ public class APIKeyValidator {
             }
 
             resourceString = selectedResource.getDispatcherHelper().getString();
+            resourceArray = new ArrayList<>(Arrays.asList(resourceString));
             resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion, resourceString, httpMethod);
+            synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
+            synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
+            synCtx.setProperty(APIConstants.REST_METHOD, httpMethod);
 
             if (log.isDebugEnabled()) {
                 log.debug("Selected Resource: " + resourceString);

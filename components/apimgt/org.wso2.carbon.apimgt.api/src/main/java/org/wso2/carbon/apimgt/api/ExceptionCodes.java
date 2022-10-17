@@ -161,6 +161,8 @@ public enum ExceptionCodes implements ErrorHandler {
             400, "A Gateway Environment cannot exists with duplicate virtual hosts"),
     READONLY_GATEWAY_ENVIRONMENT_NAME(900510, "Names of Gateway Environment cannot be changed",
             400, "Name of the gateway is read only"),
+    GATEWAY_ENVIRONMENT_VHOST_NOT_PROVIDED(900511, "Gateway Environment virtual hosts name not provided",
+            400, "Gateway Environment VHOST name not provided"),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
@@ -206,6 +208,8 @@ public enum ExceptionCodes implements ErrorHandler {
     IDP_DELETION_FAILED(900613, "Unable to delete the identity provider", 400, "Error while deleting the "
             + "identity provider"),
     INVALID_IDP_TYPE(900614, "Unsupported identity provider type", 400, "Invalid identity provider type. %s"),
+    USERSTORE_INITIALIZATION_FAILED(900615, "Unable to get the user store manager", 500,
+            "Error while getting the user store manager from the realm"),
 
 
     // Labels related codes
@@ -251,6 +255,11 @@ public enum ExceptionCodes implements ErrorHandler {
     NO_RESOURCES_FOUND(900763, "No resources found", 404, "API must have at least one resource defined"),
     ERROR_REMOVING_EXAMPLES(900764, "Internal Error While Processing Swagger Definition", 500, "Couldn't remove one or more examples from the swagger definition"),
 
+    //AsyncApi related error codes
+    ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),
+    ASYNCAPI_URL_NO_200(900757, "AsyncAPI specification retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
+
+    ERROR_READING_ASYNCAPI_SPECIFICATION(900765, "AsyncAPI specification read error", 500, "Exception occurred while reading the AsyncAPI Specification file"),
 
     // REST API related codes
     PARAMETER_NOT_PROVIDED(900700, "Parameter value missing", 400,
@@ -309,8 +318,13 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_TOKEN_REQUEST(900965, "Key Management Error", 400, "Invalid access token request."),
     ACCESS_TOKEN_REVOKE_FAILED(900966, "Key Management Error", 500, "Error while revoking the access token."),
     INTERNAL_ERROR(900967, "General Error", 500, "Server Error Occurred"),
+    INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE(903006, "%s", 500, "Server Error Occurred"),
+
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
             + "valid"),
+
+    THROTTLING_POLICY_NOT_FOUND(903005, "Throttling Policy Not Found", 404,
+            "Requested throttling policy with name '%s' and type '%s' not found"),
     INVALID_APPLICATION_ADDITIONAL_PROPERTIES(900970, "Invalid application additional properties", 400,
             "Invalid additional properties. %s"),
     JWT_PARSING_FAILED(900986, "Key Management Error", 500, "Error while parsing JWT. Invalid Jwt."),
@@ -466,11 +480,6 @@ public enum ExceptionCodes implements ErrorHandler {
     APICTL_OPENAPI_PARSE_EXCEPTION(
             OPENAPI_PARSE_EXCEPTION.getErrorCode(), OPENAPI_PARSE_EXCEPTION.getErrorMessage(),
             OPENAPI_PARSE_EXCEPTION.getHttpStatusCode(), "%s"),
-
-    //AsyncApi related error codes
-    ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),
-    ASYNCAPI_URL_NO_200(900757, "AsyncAPI specification retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
-
     GATEWAY_TYPE_NOT_FOUND(900903, "Gateway type not found", 404,
             "Gateway type not found available Gateway types : " + "%s"),
 
@@ -507,10 +516,22 @@ public enum ExceptionCodes implements ErrorHandler {
     OPERATION_POLICY_NOT_FOUND(902010, "Operation Policy Not Found", 404,
             "Requested operation policy with id '%s' not found"),
 
+    OPERATION_POLICY_ALREADY_EXISTS(903001, "The Operation Policy already exists.", 409, "An Operation Policy with name '%s' and version '%s' already exists"),
+
+    OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION(903004, "Operation Policy Not Found with given name and version", 404,
+            "Requested operation policy with name '%s' and version '%s not found"),
+
+    OPERATION_POLICY_GATEWAY_ERROR(903008,
+            "Either Synapse or Choreo Gateway Definition files or both should be present", 400,
+            "Operation Policy cannot be imported due to the missing Gateway files."),
+
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
             " not allowed for user %s ", false),
     INVALID_KEY_MANAGER_REQUEST(902003, "Invalid Request sent to Key Manager.", 400, "Invalid Request sent to Key Manager.Error from Backend : %s", false),
-    INTERNAL_SERVER_ERROR_FROM_KEY_MANAGER(902004, "Internal Server Error from Key Manager", 500, "Internal Server Error from Key Manager.Error from Backend : %s", true);
+    INTERNAL_SERVER_ERROR_FROM_KEY_MANAGER(902004, "Internal Server Error from Key Manager", 500, "Internal Server Error from Key Manager.Error from Backend : %s", true),
+    REVISION_ALREADY_DEPLOYED(902005, "Revision deployment state conflicted", 409,
+            "Revision deployment request conflicted with the current deployment state of the revision %s. Please try again later", false),
+    INVALID_API_ID(902006, "Invalid API ID", 404, "The provided API ID is not found %s", false);
 
     private final long errorCode;
     private final String errorMessage;

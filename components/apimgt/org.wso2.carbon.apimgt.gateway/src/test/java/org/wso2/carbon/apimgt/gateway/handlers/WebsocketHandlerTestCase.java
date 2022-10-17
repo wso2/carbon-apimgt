@@ -34,8 +34,9 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.dto.GraphQLOperationDTO;
-import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContextDataHolder;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
@@ -111,6 +112,7 @@ public class WebsocketHandlerTestCase {
         InboundMessageContextDataHolder.getInstance().addInboundMessageContextForConnection(channelIdString,
                 inboundMessageContext);
         InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(Mockito.anyObject())).thenReturn(responseDTO);
         PowerMockito.when(InboundWebsocketProcessorUtil.doThrottle(Mockito.anyInt(), Mockito.anyObject(),
                 Mockito.anyObject(), Mockito.anyObject())).thenReturn(responseDTO);
         websocketHandler.write(channelHandlerContext, msg, channelPromise);
@@ -131,6 +133,8 @@ public class WebsocketHandlerTestCase {
         InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
         responseDTO.setError(true);
         responseDTO.setCloseConnection(true);
+        responseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.INTERNAL_SERVER_ERROR);
+        PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(Mockito.anyObject())).thenReturn(responseDTO);
         PowerMockito.when(InboundWebsocketProcessorUtil.doThrottle(Mockito.anyInt(), Mockito.anyObject(),
                 Mockito.anyObject(), Mockito.anyObject())).thenReturn(responseDTO);
         websocketHandler.write(channelHandlerContext, msg, channelPromise);
@@ -178,7 +182,8 @@ public class WebsocketHandlerTestCase {
         //close connection error
         responseDTO.setError(true);
         responseDTO.setCloseConnection(true);
-        websocketHandler.write(channelHandlerContext, msg, channelPromise);
+        responseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.INTERNAL_SERVER_ERROR);
+        websocketHandler.write(channelHandlerContext, msg.retain(), channelPromise);
         Assert.assertFalse(InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap()
                 .containsKey(channelIdString));  // Closing connection error has occurred
 

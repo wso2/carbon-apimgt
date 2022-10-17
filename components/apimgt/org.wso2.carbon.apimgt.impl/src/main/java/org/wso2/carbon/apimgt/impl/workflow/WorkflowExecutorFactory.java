@@ -98,25 +98,26 @@ public class WorkflowExecutorFactory {
      * @param wfType Type of the workflow.
      */
     public WorkflowDTO createWorkflowDTO(String wfType) {
+
         WorkflowDTO workflowDTO = null;
-        if(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equals(wfType)){
+        if (WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equals(wfType) ||
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(wfType)) {
             workflowDTO = new ApplicationWorkflowDTO();
             workflowDTO.setWorkflowType(wfType);
-        }else if(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION.equals(wfType)){
+        } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION.equals(wfType)) {
             workflowDTO = new ApplicationRegistrationWorkflowDTO();
-            ((ApplicationRegistrationWorkflowDTO)workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+            ((ApplicationRegistrationWorkflowDTO) workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
             workflowDTO.setWorkflowType(wfType);
-        }else if(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX.equals(wfType)){
+        } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX.equals(wfType)) {
             workflowDTO = new ApplicationRegistrationWorkflowDTO();
-            ((ApplicationRegistrationWorkflowDTO)workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
+            ((ApplicationRegistrationWorkflowDTO) workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
             workflowDTO.setWorkflowType(wfType);
-        }else if(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(wfType)){
+        } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(wfType) ||
+                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE.equals(wfType) ||
+                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION.equals(wfType)) {
             workflowDTO = new SubscriptionWorkflowDTO();
             workflowDTO.setWorkflowType(wfType);
-        } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE.equals(wfType)) {
-            workflowDTO = new SubscriptionWorkflowDTO();
-            workflowDTO.setWorkflowType(wfType);
-        }else if(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP.equals(wfType)){
+        } else if (WorkflowConstants.WF_TYPE_AM_USER_SIGNUP.equals(wfType)) {
             workflowDTO = new WorkflowDTO();
             workflowDTO.setWorkflowType(wfType);
         } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equals(wfType) ||
@@ -124,7 +125,6 @@ public class WorkflowExecutorFactory {
             workflowDTO = new APIStateWorkflowDTO();
             workflowDTO.setWorkflowType(wfType);
         }
-        
         return workflowDTO;
     }
 }

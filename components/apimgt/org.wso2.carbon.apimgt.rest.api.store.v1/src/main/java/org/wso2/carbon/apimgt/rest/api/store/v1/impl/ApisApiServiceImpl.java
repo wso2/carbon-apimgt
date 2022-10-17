@@ -265,6 +265,39 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    /**
+     * Retrieves the async api specification document of an API
+     *
+     * @param apiId API identifier
+     * @param environmentName name of the gateway environment
+     * @param ifNoneMatch If-None-Match header value
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @param messageContext CXF message context
+     * @return Async API Specification document of the API for the given cluster or gateway environment
+     */
+    @Override
+    public Response apisApiIdAsyncApiSpecificationGet(String apiId, String environmentName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+            try {
+                String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+                String asyncApiSpecification = apiConsumer.getAsyncAPIDefinition(apiId, organization);
+
+                return Response.ok().entity(asyncApiSpecification).header("Content-Disposition",
+                        "attachment; filename=\"" + "async_api.json" + "\"" ).build();
+
+            } catch (APIManagementException e) {
+                if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
+                } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                } else {
+                    String errorMessage = "Error while retrieving Async API Specification of API : " + apiId;
+                    RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                }
+            }
+            return null;
+    }
+
     @Override
     public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset,
                                         Boolean includeCommenterInfo, MessageContext messageContext)
@@ -991,7 +1024,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // Extracting clicked API name by the user, for the recommendation system
             String userName = RestApiCommonUtil.getLoggedInUsername();
-            apiConsumer.publishClickedAPI(api, userName);
+            apiConsumer.publishClickedAPI(api, userName, organization);
 
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
                             || APIConstants.DEPRECATED.equals(status)) {

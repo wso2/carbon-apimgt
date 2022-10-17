@@ -11,19 +11,15 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ExportThrottlePolicyDTO;
-import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDetailsListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.ThrottlingApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.impl.ThrottlingApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.inject.Inject;
 
 import io.swagger.annotations.*;
 import java.io.InputStream;
@@ -32,8 +28,6 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
-import java.util.Map;
-import java.util.List;
 import javax.validation.constraints.*;
 @Path("/throttling")
 
@@ -201,7 +195,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Delete an Advanced Throttling Policy", notes = "Deletes an advanced throttling policy. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
     }, tags={ "Advanced Policy (Individual)",  })
     @ApiResponses(value = { 
@@ -289,7 +284,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Delete an Application Throttling policy", notes = "Deletes an application level throttling policy. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
     }, tags={ "Application Policy (Individual)",  })
     @ApiResponses(value = { 
@@ -395,7 +391,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Delete a Custom Rule", notes = "Delete a custom rule. We need to provide the Id of the policy as a path parameter.  **NOTE:** * Only super tenant users are allowed for this operation. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
     }, tags={ "Custom Rules (Individual)",  })
     @ApiResponses(value = { 
@@ -465,7 +462,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Delete a Subscription Policy", notes = "This operation can be used to delete a subscription level throttling policy by specifying the Id of the policy as a path paramter. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
     }, tags={ "Subscription Policy (Individual)",  })
     @ApiResponses(value = { 
@@ -533,15 +531,16 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/search")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve/Search Throttling Polcies ", notes = "This operation provides you a list of available Throttling Policies qualifying the given keyword match. ", response = ThrottlePolicyDetailsListDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve/Search Throttling Policies ", notes = "This operation provides you a list of available Throttling Policies qualifying the given keyword match. ", response = ThrottlePolicyDetailsListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies")
+            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies"),
+            @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
     }, tags={ "Unified Search" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of qualifying Throttling Policies is returned. ", response = ThrottlePolicyDetailsListDTO.class) })
-    public Response throttlingPolicySearch( @ApiParam(value = "**Search**. You can search by providing a keyword. Allowed to search by type only. ")  @QueryParam("query") String query) throws APIManagementException{
+    public Response throttlingPolicySearch( @ApiParam(value = "**Search**. You can search by providing a keyword. Allowed to search by type and name only. ")  @QueryParam("query") String query) throws APIManagementException{
         return delegate.throttlingPolicySearch(query, securityContext);
     }
 }

@@ -88,25 +88,25 @@ public interface KeyManagerConnectorConfiguration {
         List<ConfigurationDto> configurationDtos = new ArrayList<>();
         configurationDtos.add(new ConfigurationDto("client_registration_endpoint", "Client Registration Endpoint",
                 "input", String.format("E.g.,%s/client-registration/v0.17/register",
-                APIConstants.DEFAULT_KEY_MANAGER_HOST), "", true, false, Collections.EMPTY_LIST, false));
+                APIConstants.DEFAULT_KEY_MANAGER_HOST), "", true, false, Collections.emptyList(), false));
         configurationDtos.add(new ConfigurationDto("introspection_endpoint", "Introspection Endpoint", "input",
-                String.format("E.g., %s/oauth2/introspect", APIConstants.DEFAULT_KEY_MANAGER_HOST), "", true, false, Collections.EMPTY_LIST, false));
+                String.format("E.g., %s/oauth2/introspect", APIConstants.DEFAULT_KEY_MANAGER_HOST), "", true, false, Collections.emptyList(), false));
         configurationDtos.add(new ConfigurationDto("token_endpoint", "Token Endpoint", "input",
                 String.format("E.g., %s/oauth2/token", APIConstants.DEFAULT_KEY_MANAGER_HOST), ""
-                , true, false, Collections.EMPTY_LIST, false));
+                , true, false, Collections.emptyList(), false));
         configurationDtos.add(new ConfigurationDto("revoke_endpoint", "Revoke Endpoint", "input",
                 String.format("E.g., %s/oauth2/revoke", APIConstants.DEFAULT_KEY_MANAGER_HOST), "", true, false,
-                Collections.EMPTY_LIST, false));
+                Collections.emptyList(), false));
         configurationDtos.add(new ConfigurationDto("userinfo_endpoint", "UserInfo Endpoint", "input",
                 String.format("E.g., %s/oauth2/userinfo", APIConstants.DEFAULT_KEY_MANAGER_HOST), "", false, false,
-                Collections.EMPTY_LIST, false));
+                Collections.emptyList(), false));
         configurationDtos.add(new ConfigurationDto("authorize_endpoint", "Authorize Endpoint", "input",
-                String.format("E.g., %s/oauth2/authorize",APIConstants.DEFAULT_KEY_MANAGER_HOST), "", false, false, Collections.EMPTY_LIST, false));
+                String.format("E.g., %s/oauth2/authorize",APIConstants.DEFAULT_KEY_MANAGER_HOST), "", false, false, Collections.emptyList(), false));
         configurationDtos.add(new ConfigurationDto("display_token_endpoint", "Display Token Endpoint", "input",
-                String.format("E.g., %s/oauth2/token",APIConstants.DEFAULT_KEY_MANAGER_HOST), "", false, false, Collections.EMPTY_LIST, false));
+                String.format("E.g., %s/oauth2/token",APIConstants.DEFAULT_KEY_MANAGER_HOST), "", false, false, Collections.emptyList(), false));
         configurationDtos.add(new ConfigurationDto("display_revoke_endpoint", "Display Revoke Endpoint", "input",
                 String.format("E.g., %s/oauth2/authorize", APIConstants.DEFAULT_KEY_MANAGER_HOST), "", false, false,
-                Collections.EMPTY_LIST, false));
+                Collections.emptyList(), false));
         return configurationDtos;
     }
 }

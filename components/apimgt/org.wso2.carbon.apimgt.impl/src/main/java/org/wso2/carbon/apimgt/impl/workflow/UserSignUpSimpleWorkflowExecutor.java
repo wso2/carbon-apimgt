@@ -22,11 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -71,9 +68,7 @@ public class UserSignUpSimpleWorkflowExecutor extends UserSignUpWorkflowExecutor
 
 			String tenantAwareUserName =
 					MultitenantUtils.getTenantAwareUsername(workflowDTO.getWorkflowReference());
-			updateRolesOfUser(
-					tenantAwareUserName,
-			                  SelfSignUpUtil.getRoleNames(signupConfig), tenantDomain);
+			updateRolesOfUser(tenantAwareUserName, signupConfig.getRoles(), tenantDomain);
 		} catch (APIManagementException e) {
 			throw new WorkflowException("Error while accessing signup configuration", e);
 		} catch (Exception e) {

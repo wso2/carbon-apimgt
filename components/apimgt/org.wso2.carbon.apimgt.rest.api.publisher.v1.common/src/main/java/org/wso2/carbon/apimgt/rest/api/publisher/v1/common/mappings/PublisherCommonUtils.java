@@ -80,6 +80,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
@@ -913,6 +914,9 @@ public class PublisherCommonUtils {
         // extract production endpoint URL(s)
         extractURLsFromEndpointConfig(endpointConfiguration, APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpoints);
 
+        //extract external endpoint URL(s) from advertised info
+        extractExternalEndpoints(apiDto, endpoints);
+
         return APIUtil.validateEndpointURLs(endpoints);
     }
 
@@ -934,6 +938,32 @@ public class PublisherCommonUtils {
                 for (int i = 0; i < endpointArray.length(); i++) {
                     endpoints.add((String) endpointArray.getJSONObject(i).get(APIConstants.API_DATA_URL));
                 }
+            }
+        }
+    }
+
+    /**
+     * Extract sandbox and production external endpoint URLs and external dev portal URL.
+     *
+     * @param apiDto        API DTO of the API
+     * @param endpoints     List of URLs. Extracted URL(s), if any, are added to this list.
+     */
+    private static void extractExternalEndpoints(APIDTO apiDto, ArrayList<String> endpoints) {
+
+        if (apiDto != null && apiDto.getAdvertiseInfo() != null &&
+                Boolean.TRUE.equals(apiDto.getAdvertiseInfo().isAdvertised())) {
+            AdvertiseInfoDTO advertiseInfoDto = apiDto.getAdvertiseInfo();
+            String externalProductionEndpoint = advertiseInfoDto.getApiExternalProductionEndpoint();
+            if (externalProductionEndpoint != null && !externalProductionEndpoint.isEmpty()) {
+                endpoints.add(externalProductionEndpoint);
+            }
+            String externalSandboxEndpoint = advertiseInfoDto.getApiExternalSandboxEndpoint();
+            if (externalSandboxEndpoint != null && !externalSandboxEndpoint.isEmpty()) {
+                endpoints.add(externalSandboxEndpoint);
+            }
+            String originalDevPortalUrl = advertiseInfoDto.getOriginalDevPortalUrl();
+            if (originalDevPortalUrl != null && !originalDevPortalUrl.isEmpty()) {
+                endpoints.add(originalDevPortalUrl);
             }
         }
     }
@@ -1075,6 +1105,13 @@ public class PublisherCommonUtils {
                                 + context + " in the organization" + " : " + organization, ExceptionCodes
                         .from(ExceptionCodes.API_CONTEXT_ALREADY_EXISTS, context));
             }
+        }
+
+        if (!apiProvider.isValidContext(body.getProvider(), body.getName(),
+                                        body.getContext() + "/" + APIConstants.VERSION_PLACEHOLDER, username,
+                                        organization)) {
+            throw new APIManagementException(
+                    ExceptionCodes.from(ExceptionCodes.BLOCK_CONDITION_UNSUPPORTED_API_CONTEXT));
         }
 
         //Check if the user has admin permission before applying a different provider than the current user
@@ -1839,7 +1876,7 @@ public class PublisherCommonUtils {
         API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDto, apiProvider,
                 RestApiCommonUtil.getLoggedInUsername(), organization);
         if (isServiceAPI) {
-            apiToAdd.setServiceInfo("key", service.getKey());
+            apiToAdd.setServiceInfo("key", service.getServiceKey());
             apiToAdd.setServiceInfo("md5", service.getMd5());
             if (!APIConstants.API_TYPE_WEBSUB.equals(protocol.toUpperCase())) {
                 apiToAdd.setEndpointConfig(

@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -41,6 +42,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.apimgt.api.OAuthTokenInfo;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This OAuthOpaqueAuthenticatorImpl class specifically implemented for API Manager store and publisher rest APIs'
@@ -105,11 +109,17 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 //put the token info into token cache
                 getRESTAPITokenCache().put(accessToken, tokenInfo);
             }
+            Map<String, Object> authContext = RestApiUtil.addToJWTAuthenticationContext(message);
+            String basePath = (String) message.get(RestApiConstants.BASE_PATH);
+            String version = (String) message.get(RestApiConstants.API_VERSION);
+            authContext.put(RestApiConstants.URI_TEMPLATES, RestApiCommonUtil.getURITemplatesForBasePath(basePath
+                    + version));
+
 
             // If token is valid then we have to do other validations and set user and tenant to carbon context.
             // Scope validation should come here.
             // If access token is valid then we will perform scope check for given resource.
-            if (validateScopes(message, tokenInfo)) {
+            if (RestApiCommonUtil.validateScopes(authContext, tokenInfo)) {
                 //Add the user scopes list extracted from token to the cxf message
                 message.getExchange().put(RestApiConstants.USER_REST_API_SCOPES, tokenInfo.getScopes());
                 //If scope validation successful then set tenant name and user name to current context
@@ -136,6 +146,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     carbonContext.setTenantDomain(tenantDomain);
                     carbonContext.setTenantId(tenantId);
                     carbonContext.setUsername(username);
+                    message.put(RestApiConstants.AUTH_TOKEN_INFO, tokenInfo);
                     message.put(RestApiConstants.SUB_ORGANIZATION, tenantDomain);
                     if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                         APIUtil.loadTenantConfigBlockingMode(tenantDomain);

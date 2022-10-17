@@ -108,6 +108,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
+import org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionApprovalWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -188,6 +189,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public static final String API_VERSION = "apiVersion";
     public static final String API_PROVIDER = "apiProvider";
     private static final String PRESERVED_CASE_SENSITIVE_VARIABLE = "preservedCaseSensitive";
+
+    private static final String GET_SUB_WORKFLOW_REF_FAILED = "Failed to get external workflow reference for subscription ";
+    public static final String CLEAN_PENDING_SUB_APPROVAL_TASK_FAILED = "Failed to clean pending subscription approval task: ";
 
     /* Map to Store APIs against Tag */
     private ConcurrentMap<String, Set<API>> taggedAPIs = new ConcurrentHashMap<String, Set<API>>();
@@ -386,11 +390,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         jwtTokenInfoDTO.setPermittedReferer(permittedReferer);
 
         ApiKeyGenerator apiKeyGenerator = loadApiKeyGenerator();
-        return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+        if (apiKeyGenerator != null) {
+            return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+        } else {
+            throw new APIManagementException("Failed to generate the API key");
+        }
     }
 
-    private ApiKeyGenerator loadApiKeyGenerator() {
-        ApiKeyGenerator apiKeyGenerator = null;
+    private ApiKeyGenerator loadApiKeyGenerator() throws APIManagementException {
+        ApiKeyGenerator apiKeyGenerator;
         String keyGeneratorClassName = APIUtil.getApiKeyGeneratorImpl();
 
         try {
@@ -399,7 +407,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiKeyGenerator = (ApiKeyGenerator) constructor.newInstance();
         } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |
                 InvocationTargetException e) {
-            log.error("Error while loading the api key generator class: " + keyGeneratorClassName, e);
+            throw new APIManagementException("Error while loading the api key generator class: "
+                    + keyGeneratorClassName, e);
         }
         return apiKeyGenerator;
     }
@@ -775,6 +784,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         final boolean isApiProduct = apiTypeWrapper.isAPIProduct();
         String state;
         String apiContext;
+        String apiOrgId;
 
         if (isApiProduct) {
             product = apiTypeWrapper.getApiProduct();
@@ -783,6 +793,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiId = product.getProductId();
             apiUUID = product.getUuid();
             apiContext = product.getContext();
+            apiOrgId = product.getOrganization();
         } else {
             api = apiTypeWrapper.getApi();
             state = api.getStatus();
@@ -790,6 +801,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiId = api.getId().getId();
             apiUUID = api.getUuid();
             apiContext = api.getContext();
+            apiOrgId = api.getOrganization();
         }
 
         WorkflowResponse workflowResponse = null;
@@ -926,14 +938,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                             System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId,
-                            tenantDomain, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
+                            apiOrgId, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
                             application.getId(), application.getUUID(), identifier.getTier(), subscriptionStatus);
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                 }
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId,
-                        tenantDomain, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
+                        apiOrgId, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
                         application.getId(), application.getUUID(), identifier.getTier(), subscriptionStatus);
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
@@ -965,6 +977,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         final boolean isApiProduct = apiTypeWrapper.isAPIProduct();
         String state;
         String apiContext;
+        String apiOrgId;
 
         if (isApiProduct) {
             product = apiTypeWrapper.getApiProduct();
@@ -973,6 +986,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiUUId = product.getUuid();
             identifier = product.getId();
             apiContext = product.getContext();
+            apiOrgId = product.getOrganization();
         } else {
             api = apiTypeWrapper.getApi();
             state = api.getStatus();
@@ -980,6 +994,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiId = identifier.getId();
             apiUUId = api.getUuid();
             apiContext = api.getContext();
+            apiOrgId = api.getOrganization();
         }
         checkSubscriptionAllowed(apiTypeWrapper);
         WorkflowResponse workflowResponse = null;
@@ -1109,14 +1124,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                             System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
-                            tenantDomain, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId,
+                            apiOrgId, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId,
                             application.getId(), application.getUUID(), requestedThrottlingPolicy, subscriptionStatus);
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                 }
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
-                        tenantDomain, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId, application.getId(),
+                        apiOrgId, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId, application.getId(),
                         application.getUUID(), requestedThrottlingPolicy, subscriptionStatus);
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
@@ -1222,6 +1237,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 status = apiMgtDAO.getSubscriptionStatus(apiProdIdentifier.getUUID(), applicationId);
             }
 
+            String subId = null;
             if (APIConstants.SubscriptionStatus.ON_HOLD.equals(status)) {
                 try {
                     createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
@@ -1232,7 +1248,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
             } else if (APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING.equals(status)) {
                 try {
-                    String subId = null;
                     if (apiIdentifier != null) {
                         subId = apiMgtDAO.getSubscriptionId(apiIdentifier.getUUID(), applicationId);
                     } else if (apiProdIdentifier != null) {
@@ -1250,6 +1265,22 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     // failed cleanup processes are ignored to prevent failing the deletion process
                     log.warn("Failed to clean pending subscription update approval task");
                 }
+            } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(status)){
+                try {
+                    if (apiIdentifier != null) {
+                        subId = apiMgtDAO.getSubscriptionId(apiIdentifier.getUUID(), applicationId);
+                    } else if (apiProdIdentifier != null) {
+                        subId = apiMgtDAO.getSubscriptionId(apiProdIdentifier.getUUID(), applicationId);
+                    }
+
+                } catch (APIManagementException ex) {
+                    // failed cleanup processes are ignored to prevent failing the deletion process
+                    log.warn("Failed to retrive subscription id");
+                }
+            }
+            if (subId != null) {
+                apiMgtDAO.updateSubscriptionStatus(Integer.parseInt(subId), APIConstants.SubscriptionStatus.DELETE_PENDING);
+                workflowDTO.setWorkflowReference(subId);
             }
 
             // update attributes of the new remove workflow to be created
@@ -1338,14 +1369,30 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     @Override
     public void removeSubscription(SubscribedAPI subscription, String organization) throws APIManagementException {
-        String uuid = subscription.getUUID();
         if (subscription != null) {
+            String uuid = subscription.getUUID();
+            String deleteWorkflowExtRef = apiMgtDAO
+                    .getExternalWorkflowReferenceForSubscriptionAndWFType(subscription.getSubscriptionId(),
+                            WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+            if (deleteWorkflowExtRef != null) {
+                WorkflowDTO deleteWorkflow = apiMgtDAO.retrieveWorkflow(deleteWorkflowExtRef);
+                if (deleteWorkflow != null && WorkflowStatus.CREATED.equals(deleteWorkflow.getStatus())) {
+                    subscription.setSubscriptionId(-1);
+                    subscription.setSubStatus(APIConstants.SubscriptionStatus.DELETE_PENDING);
+                    return;
+                }
+            }
             Application application = subscription.getApplication();
-            Identifier identifier = subscription.getApiId() != null ? subscription.getApiId()
+            Identifier identifier = subscription.getAPIIdentifier() != null ? subscription.getAPIIdentifier()
                     : subscription.getProductId();
             String userId = application.getSubscriber().getName();
             removeSubscription(identifier, userId, application.getId(), organization);
-            if (log.isDebugEnabled()) {
+            SubscribedAPI subscriptionAfterDeletion = apiMgtDAO.getSubscriptionById(subscription.getSubscriptionId());
+            if (subscriptionAfterDeletion != null
+                    && APIConstants.SubscriptionStatus.DELETE_PENDING.equals(subscriptionAfterDeletion.getSubStatus())) {
+                subscription.setSubStatus(APIConstants.SubscriptionStatus.DELETE_PENDING);
+            }
+            else if (log.isDebugEnabled()) {
                 String appName = application.getName();
                 String logMessage = "Identifier:  " + identifier.toString() + " subscription (uuid : " + uuid
                         + ") removed from app " + appName;
@@ -1364,7 +1411,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                             System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId,
-                            tenantDomain, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
+                            organization, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
                             identifier.getUUID(), application.getId(), application.getUUID(), identifier.getTier(),
                             subscription.getSubStatus());
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
@@ -1372,14 +1419,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId,
-                        tenantDomain, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
+                        organization, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
                         identifier.getUUID(), application.getId(), application.getUUID(), identifier.getTier(),
                         subscription.getSubStatus());
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
         } else {
-            throw new APIManagementException(String.format("Subscription for UUID:%s does not exist.",
-                    subscription.getUUID()));
+            throw new APIManagementException("Subscription does not exists.");
         }
     }
 
@@ -1586,7 +1632,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
             RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application, userId, applicationId,
-                    requestedTenant);
+                    organization);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -1855,105 +1901,44 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
 
-            WorkflowExecutor createApplicationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-            WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-            WorkflowExecutor createProductionRegistrationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
-            WorkflowExecutor createSandboxRegistrationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+            String deletePendingWorkflowRef = apiMgtDAO.getExternalWorkflowRefByInternalRefWorkflowType(applicationId, WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
+            if (deletePendingWorkflowRef != null) {
+                WorkflowDTO deletePendingWorkflow = apiMgtDAO.retrieveWorkflow(deletePendingWorkflowRef);
+                if (deletePendingWorkflow != null && WorkflowStatus.CREATED.equals(deletePendingWorkflow.getStatus())) {
+                    application.setId(-1);
+                    return;
+                }
+            }
+
             WorkflowExecutor removeApplicationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
 
-            workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceByApplicationID(application.getId());
+            apiMgtDAO.updateApplicationStatus(applicationId, APIConstants.ApplicationStatus.DELETE_PENDING);
 
-            // in a normal flow workflowExtRef is null when workflows are not enabled
-            if (workflowExtRef == null) {
-                workflowDTO = new ApplicationWorkflowDTO();
-            } else {
-                workflowDTO = (ApplicationWorkflowDTO) apiMgtDAO.retrieveWorkflow(workflowExtRef);
-            }
+            workflowDTO = new ApplicationWorkflowDTO();
             workflowDTO.setApplication(application);
+            workflowDTO.setWorkflowReference(String.valueOf(applicationId));
+            workflowDTO.setExternalWorkflowReference(removeApplicationWFExecutor.generateUUID());
             workflowDTO.setCallbackUrl(removeApplicationWFExecutor.getCallbackURL());
             workflowDTO.setUserName(this.username);
             workflowDTO.setTenantDomain(tenantDomain);
             workflowDTO.setTenantId(tenantId);
-
-
-            // clean up pending subscription tasks
-            Set<Integer> pendingSubscriptions = apiMgtDAO.getPendingSubscriptionsByApplicationId(applicationId);
-            for (int subscription : pendingSubscriptions) {
-                try {
-                    workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(subscription);
-                    createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
-                } catch (APIManagementException ex) {
-
-                    // failed cleanup processes are ignored to prevent failing the application removal process
-                    log.warn("Failed to get external workflow reference for subscription " + subscription);
-                } catch (WorkflowException ex) {
-
-                    // failed cleanup processes are ignored to prevent failing the application removal process
-                    log.warn("Failed to clean pending subscription approval task: " + subscription);
-                }
-            }
-
-            // cleanup pending application registration tasks
-            Map<String, String> keyManagerWiseProductionKeyStatus = apiMgtDAO
-                    .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
-            Map<String, String> keyManagerWiseSandboxKeyStatus = apiMgtDAO
-                    .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
-            keyManagerWiseProductionKeyStatus.forEach((keyManagerName, state) -> {
-                if (WorkflowStatus.CREATED.toString().equals(state)) {
-                    try {
-                        String applicationRegistrationExternalRef = apiMgtDAO
-                                .getRegistrationWFReference(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION,
-                                        keyManagerName);
-                        createProductionRegistrationWFExecutor.cleanUpPendingTask(applicationRegistrationExternalRef);
-                    } catch (APIManagementException ex) {
-
-                        // failed cleanup processes are ignored to prevent failing the application removal process
-                        log.warn("Failed to get external workflow reference for production key of application "
-                                + applicationId);
-                    } catch (WorkflowException ex) {
-
-                        // failed cleanup processes are ignored to prevent failing the application removal process
-                        log.warn("Failed to clean pending production key approval task of " + applicationId);
-                    }
-                }
-
-            });
-            keyManagerWiseSandboxKeyStatus.forEach((keyManagerName, state) -> {
-                if (WorkflowStatus.CREATED.toString().equals(state)) {
-                    try {
-                        String applicationRegistrationExternalRef = apiMgtDAO
-                                .getRegistrationWFReference(applicationId, APIConstants.API_KEY_TYPE_SANDBOX,
-                                        keyManagerName);
-                        createSandboxRegistrationWFExecutor.cleanUpPendingTask(applicationRegistrationExternalRef);
-                    } catch (APIManagementException ex) {
-
-                        // failed cleanup processes are ignored to prevent failing the application removal process
-                        log.warn("Failed to get external workflow reference for sandbox key of application "
-                                + applicationId);
-                    } catch (WorkflowException ex) {
-
-                        // failed cleanup processes are ignored to prevent failing the application removal process
-                        log.warn("Failed to clean pending sandbox key approval task of " + applicationId);
-                    }
-                }
-            });
-
-            if (workflowExtRef != null) {
-                try {
-                    createApplicationWFExecutor.cleanUpPendingTask(workflowExtRef);
-                } catch (WorkflowException ex) {
-
-                    // failed cleanup processes are ignored to prevent failing the application removal process
-                    log.warn("Failed to clean pending application approval task of " + applicationId);
-                }
-            }
 
             // update attributes of the new remove workflow to be created
             workflowDTO.setStatus(WorkflowStatus.CREATED);
             workflowDTO.setCreatedTime(System.currentTimeMillis());
             workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
             workflowDTO.setExternalWorkflowReference(removeApplicationWFExecutor.generateUUID());
+
+            if (!(removeApplicationWFExecutor instanceof ApplicationDeletionApprovalWorkflowExecutor)) {
+                cleanupPendingTasksForApplicationDeletion(applicationId);
+            }
+
             removeApplicationWFExecutor.execute(workflowDTO);
+
+            Application applicationAfterDeletion = apiMgtDAO.getApplicationById(applicationId);
+            if (applicationAfterDeletion != null) {
+                application.setStatus(applicationAfterDeletion.getStatus());
+            }
 
             JSONObject appLogObject = new JSONObject();
             appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
@@ -2017,11 +2002,120 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 ApplicationRegistrationEvent removeEntryTrigger = new ApplicationRegistrationEvent(
                         UUID.randomUUID().toString(), System.currentTimeMillis(),
                         APIConstants.EventType.REMOVE_APPLICATION_KEYMAPPING.name(),
-                        APIUtil.getTenantIdFromTenantDomain(keyManagerTenantDomain), keyManagerTenantDomain,
+                        APIUtil.getTenantIdFromTenantDomain(keyManagerTenantDomain), application.getOrganization(),
                         application.getId(), application.getUUID(), consumerKey, application.getKeyType(),
                         keyManagerName);
                 APIUtil.sendNotification(removeEntryTrigger, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
             }
+        }
+    }
+
+    /**
+     * Cleans the pending approval tasks associated with the given application subjected to be deleted
+     * Pending approvals for Application creation, Subscription Creation, Subscription Deletion, Subscription Update will be deleted
+     * @param applicationId ID of the application which the associated pending tasks should be removed
+     * @throws APIManagementException IF any issue occurred in retrieving workflow references for the given applicationId
+     */
+    @Override
+    public void cleanupPendingTasksForApplicationDeletion(int applicationId) throws APIManagementException {
+
+        try {
+            WorkflowExecutor createApplicationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+            WorkflowExecutor deleteSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+            WorkflowExecutor updateSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+            WorkflowExecutor createProductionRegistrationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+            WorkflowExecutor createSandboxRegistrationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+
+            // clean up pending subscription tasks
+            Map<String, Set<Integer>> pendingSubscriptionsByStatus = apiMgtDAO
+                    .getPendingSubscriptionsByAppId(applicationId);
+            for (int subscription : pendingSubscriptionsByStatus.get(APIConstants.SubscriptionStatus.ON_HOLD)) {
+                cleanupPendingSubscriptionTask(subscription, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION,
+                        createSubscriptionWFExecutor);
+            }
+
+            for (int subscription : pendingSubscriptionsByStatus.get(APIConstants.SubscriptionStatus.DELETE_PENDING)) {
+                cleanupPendingSubscriptionTask(subscription, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION,
+                        deleteSubscriptionWFExecutor);
+            }
+
+            for (int subscription : pendingSubscriptionsByStatus.get(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING)) {
+                cleanupPendingSubscriptionTask(subscription, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE,
+                        updateSubscriptionWFExecutor);
+            }
+
+            // cleanup pending application registration tasks
+            Map<String, String> keyManagerWiseProductionKeyStatus = apiMgtDAO
+                    .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
+            Map<String, String> keyManagerWiseSandboxKeyStatus = apiMgtDAO
+                    .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
+            keyManagerWiseProductionKeyStatus.forEach((keyManagerName, state) ->
+                    cleanupPendingApplicationRegistrationTask(state, applicationId, APIConstants.API_KEY_TYPE_PRODUCTION,
+                            keyManagerName, createProductionRegistrationWFExecutor));
+
+            keyManagerWiseSandboxKeyStatus.forEach((keyManagerName, state) ->
+                    cleanupPendingApplicationRegistrationTask(state, applicationId, APIConstants.API_KEY_TYPE_SANDBOX,
+                            keyManagerName, createSandboxRegistrationWFExecutor));
+
+            //cleanup pending application creation task
+            String appCreationWorkflowExtRef = apiMgtDAO.getExternalWorkflowRefByInternalRefWorkflowType(applicationId,
+                    WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            if (appCreationWorkflowExtRef != null) {
+                cleanupAppCreationPendingTask(applicationId, createApplicationWFExecutor, appCreationWorkflowExtRef);
+            }
+        } catch (WorkflowException ex) {
+            log.warn("Failed to load workflow executors");
+        }
+    }
+
+    private void cleanupAppCreationPendingTask(int applicationId, WorkflowExecutor workflowExecutor, String workflowRef) {
+
+        try {
+            workflowExecutor.cleanUpPendingTask(workflowRef);
+        } catch (WorkflowException ex) {
+
+            // failed cleanup processes are ignored to prevent failing the application removal process
+            log.warn("Failed to clean pending application approval task of " + applicationId);
+        }
+    }
+
+    private void cleanupPendingApplicationRegistrationTask(String state, int applicationId, String apiKeyType,
+                                                           String keyManagerName,
+                                                           WorkflowExecutor applicationRegistrationWFExecutor) {
+
+        final String keyType = apiKeyType.toLowerCase();
+        if (WorkflowStatus.CREATED.toString().equals(state)) {
+            try {
+                String applicationRegistrationExternalRef = apiMgtDAO
+                        .getRegistrationWFReference(applicationId, apiKeyType,
+                                keyManagerName);
+                applicationRegistrationWFExecutor.cleanUpPendingTask(applicationRegistrationExternalRef);
+            } catch (APIManagementException ex) {
+
+                // failed cleanup processes are ignored to prevent failing the application removal process
+                log.warn("Failed to get external workflow reference for " + keyType + " key of application "
+                        + applicationId);
+            } catch (WorkflowException ex) {
+
+                // failed cleanup processes are ignored to prevent failing the application removal process
+                log.warn("Failed to clean pending " + keyType + " key approval task of " + applicationId);
+            }
+        }
+    }
+
+    private void cleanupPendingSubscriptionTask(int subscriptionId, String wfType, WorkflowExecutor subscriptionWFExecutor) {
+
+        try {
+            String workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscriptionAndWFType(subscriptionId,
+                    wfType);
+            subscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
+        } catch (APIManagementException ex) {
+            // failed cleanup processes are ignored to prevent failing the application removal process
+            log.warn(GET_SUB_WORKFLOW_REF_FAILED + subscriptionId);
+        } catch (WorkflowException ex) {
+            // failed cleanup processes are ignored to prevent failing the application removal process
+            log.warn(CLEAN_PENDING_SUB_APPROVAL_TASK_FAILED + subscriptionId);
         }
     }
 
@@ -2231,6 +2325,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
                     APIConstants.AuditLogConstants.UPDATED, this.username);
 
+            String orgId = application.getOrganization();
             // if its a PRODUCTION application.
             if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
                 // get the workflow state once the executor is executed.
@@ -2242,7 +2337,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                         ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                                 UUID.randomUUID().toString(), System.currentTimeMillis(),
-                                APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
+                                APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, orgId,
                                 application.getId(), application.getUUID(), applicationInfo.getClientId(), tokenType,
                                 keyManagerName);
                         APIUtil.sendNotification(applicationRegistrationEvent,
@@ -2251,7 +2346,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 } else {
                     ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                             UUID.randomUUID().toString(), System.currentTimeMillis(),
-                            APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
+                            APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, orgId,
                             application.getId(), application.getUUID(), applicationInfo.getClientId(), tokenType,
                             keyManagerName);
                     APIUtil.sendNotification(applicationRegistrationEvent,
@@ -2267,7 +2362,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                         ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                                 UUID.randomUUID().toString(), System.currentTimeMillis(),
-                                APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
+                                APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, orgId,
                                 application.getId(), application.getUUID(), applicationInfo.getClientId(), tokenType,
                                 keyManagerName);
                         APIUtil.sendNotification(applicationRegistrationEvent,
@@ -2276,7 +2371,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 } else {
                     ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                             UUID.randomUUID().toString(), System.currentTimeMillis(),
-                            APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
+                            APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, orgId,
                             application.getId(), application.getUUID(), applicationInfo.getClientId(), tokenType,
                             keyManagerName);
                     APIUtil.sendNotification(applicationRegistrationEvent,
@@ -2396,7 +2491,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Set<SubscribedAPI> subscribedAPISet = new HashSet<>();
         Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(organization, subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
-            if (identifier instanceof APIIdentifier && identifier.equals(api.getApiId())) {
+            if (identifier instanceof APIIdentifier && identifier.equals(api.getAPIIdentifier())) {
                 Set<APIKey> keys = getApplicationKeys(api.getApplication().getId());
                 for (APIKey key : keys) {
                     api.addKey(key);
@@ -2974,7 +3069,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Set<SubscribedAPI> subscribedAPISet = new HashSet<SubscribedAPI>();
         Set<SubscribedAPI> subscribedAPIs = getLightWeightSubscribedAPIs(organization, subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
-            if (api.getApiId().equals(apiIdentifier)) {
+            if (api.getAPIIdentifier().equals(apiIdentifier)) {
                 subscribedAPISet.add(api);
             }
         }
@@ -3302,17 +3397,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return basePath;
     }
 
-    public void publishSearchQuery(String query, String username) {
+    public void publishSearchQuery(String query, String username, String organization) {
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(query, username, requestedTenant);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(query, username, organization);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
     }
 
-    public void publishClickedAPI(ApiTypeWrapper clickedApi, String username) {
+    public void publishClickedAPI(ApiTypeWrapper clickedApi, String username, String organization) {
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(clickedApi, username, requestedTenant);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(clickedApi, username, organization);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }

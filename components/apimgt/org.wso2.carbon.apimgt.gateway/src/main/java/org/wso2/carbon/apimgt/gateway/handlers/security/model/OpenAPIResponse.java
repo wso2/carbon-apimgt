@@ -21,7 +21,6 @@ import com.atlassian.oai.validator.model.Request.Method;
 import com.atlassian.oai.validator.model.Response;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.jetbrains.annotations.NotNull;

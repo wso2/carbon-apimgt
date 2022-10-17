@@ -59,6 +59,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -534,17 +535,41 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             throws APIManagementException {
         ThrottlePolicyDetailsListDTO resultListDTO = new ThrottlePolicyDetailsListDTO();
         String policyType;
-        Map<String, String> filters;
+        String policyName;
+        Map<String, String> filters = new HashMap<>();
+
+        /**
+         * TODO: Add support to filter by name
+         */
         if (query == null) {
             query = "type:" + ALL_TYPES;
-        } else if (query.toLowerCase().indexOf("type:") != 0) {
+        } else if (query.toLowerCase().indexOf("type:") < 0) {
             String errorMessage = "Invalid query format";
             RestApiUtil.handleInternalServerError(errorMessage, log);
         }
+
         log.debug("Extracting query info...");
-        filters = Splitter.on(" ").withKeyValueSeparator(":").split(query);
+
+        try{
+            filters = Splitter.on(" ").withKeyValueSeparator(":").split(query);
+        } catch (IllegalArgumentException ex) {
+            throw new APIManagementException(
+                    "Illegal format of query parameter" + query,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR));
+        }
         policyType = filters.get("type");
-        List<ThrottlePolicyDetailsDTO> result = getThrottlingPolicies(policyType);
+        policyName = filters.get("name");
+
+        List<ThrottlePolicyDetailsDTO> result = null;
+
+        // In current implementation policy filtering by either type or name and type both.
+
+        if (policyName != null && !policyType.equalsIgnoreCase("all")) {
+            result = getThrottlingPolicyByTypeAndName(policyType, policyName);
+        } else {
+            result = getThrottlingPoliciesByType(policyType);
+        }
+
         resultListDTO.setCount(result.size());
         resultListDTO.setList(result);
         return Response.ok().entity(resultListDTO).build();
@@ -556,7 +581,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @param policyLevel   type of the throttling policy list to be returned
      * @return              throttling policy list filtered by policy type
      */
-    private List<ThrottlePolicyDetailsDTO> getThrottlingPolicies(String policyLevel) throws APIManagementException {
+    private List<ThrottlePolicyDetailsDTO> getThrottlingPoliciesByType(String policyLevel) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
@@ -596,6 +621,40 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 policies.add(policyDetails);
             }
         }
+        return policies;
+    }
+
+    /**
+     * Returns throttle policy details as a list
+     *
+     * @param policyLevel type of the throttling policy to be returned as list
+     * @param policyName  name of the throttling policy to be returned as a list
+     * @return throttling policy list filtered by policy type and policy name
+     * @throws APIManagementException
+     */
+    private List<ThrottlePolicyDetailsDTO> getThrottlingPolicyByTypeAndName(String policyLevel, String policyName)
+            throws APIManagementException {
+        APIAdmin apiAdmin = new APIAdminImpl();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        int tenantId = APIUtil.getTenantId(userName);
+        Policy policy;
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        List<ThrottlePolicyDetailsDTO> policies = new ArrayList<>();
+
+        policy = apiAdmin.getPolicyByNameAndType(tenantId, policyLevel, policyName);
+
+        if (policy == null) {
+            throw new APIManagementException(
+                    "Couldn't retrieve an existing throttling policy with Name: " + policyName + " and type: "
+                            + policyLevel,
+                    ExceptionCodes.from(ExceptionCodes.THROTTLING_POLICY_NOT_FOUND, policyName, policyLevel));
+        }
+
+        ThrottlePolicyDetailsDTO policyDetails = mapper.convertValue(policy, ThrottlePolicyDetailsDTO.class);
+        policyDetails.setType(policyLevel);
+        policies.add(policyDetails);
+
         return policies;
     }
 
@@ -995,7 +1054,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      */
     @Override
     public Response exportThrottlingPolicy(String policyId, String policyName, String type, String format,
-            MessageContext messageContext) throws APIManagementException {
+            MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String userName = RestApiCommonUtil.getLoggedInUsername();
@@ -1077,11 +1136,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             }
             if (StringUtils.EMPTY.equals(type) || PolicyConstants.POLICY_LEVEL_GLOBAL.equals(type)) {
                 try {
-                    //only super tenant is allowed to access global policies/custom rules
-                    checkTenantDomainForCustomRules();
-                    //This will give PolicyNotFoundException if there's no policy exists with UUID
                     GlobalPolicy globalPolicy = apiProvider.getGlobalPolicy(policyName);
                     if (globalPolicy != null) {
+                        //only super tenant is allowed to access global policies/custom rules
+                        checkTenantDomainForCustomRules();
                         CustomRuleDTO policyDTO = GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyToDTO(
                                 globalPolicy);
                         exportPolicy.data(policyDTO);
@@ -1223,12 +1281,12 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                     String uuid = policyIfExists.getUUID();
                     Response resp = throttlingPoliciesApplicationPolicyIdPut(uuid, RestApiConstants.APPLICATION_JSON,
                             applicationPolicy, messageContext);
-                    String message = "Successfully updated Subscription Throttling Policy : "
+                    String message = "Successfully updated Application Throttling Policy : "
                             + applicationPolicy.getPolicyName();
                     return Response.fromResponse(resp).entity(message).build();
                 } else {
                     RestApiUtil.handleResourceAlreadyExistsError(
-                            "Subscription Policy with name " + applicationPolicy.getPolicyName() + " already exists",
+                            "Application Policy with name " + applicationPolicy.getPolicyName() + " already exists",
                             log);
                 }
             } else {

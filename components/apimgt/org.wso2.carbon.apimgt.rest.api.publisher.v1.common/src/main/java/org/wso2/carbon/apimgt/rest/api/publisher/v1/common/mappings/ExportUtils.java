@@ -776,7 +776,8 @@ public class ExportUtils {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonArray certificatesList = new JsonArray();
         certificateMetadataDTOS.forEach(metadataDTO -> {
-            try (ByteArrayInputStream certificate = certificateManager.getCertificateContent(metadataDTO.getAlias())) {
+            try (ByteArrayInputStream certificate = certificateManager.getCertificateContent(tenantId,
+                    metadataDTO.getAlias())) {
                 byte[] certificateContent = IOUtils.toByteArray(certificate);
                 String certificateContentEncoded = APIConstants.BEGIN_CERTIFICATE_STRING.concat(System.lineSeparator())
                         .concat(new String(Base64.encodeBase64(certificateContent))).concat(System.lineSeparator())
@@ -894,9 +895,14 @@ public class ExportUtils {
                 if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                     String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(currentApiUuid, api,
                             apiProvider);
-                    CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION,
-                            exportFormat,
-                            formattedSwaggerJson);
+                    if (formattedSwaggerJson != null) {
+                        CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION,
+                                exportFormat, formattedSwaggerJson);
+                    } else {
+                        throw new APIImportExportException("Error while retrieving Swagger definition for API: "
+                                + apiDtoToReturn.getName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
+                                + apiDtoToReturn.getVersion());
+                    }
                 }
                 if (log.isDebugEnabled()) {
                     log.debug("Meta information retrieved successfully for API: " + apiDtoToReturn.getName()
@@ -933,8 +939,14 @@ public class ExportUtils {
                         apiDtoToReturn.setEndpointConfig(endpointConfig);
                     }
                 }
-                CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.ASYNCAPI_DEFINITION_LOCATION,
-                        exportFormat, asyncApiJson);
+                if (asyncApiJson != null) {
+                    CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.ASYNCAPI_DEFINITION_LOCATION,
+                            exportFormat, asyncApiJson);
+                } else {
+                    throw new APIImportExportException("Error while retrieving AsyncAPI definition for API: "
+                            + apiDtoToReturn.getName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
+                            + apiDtoToReturn.getVersion());
+                }
             }
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             JsonElement apiObj = gson.toJsonTree(apiDtoToReturn);
@@ -1050,8 +1062,13 @@ public class ExportUtils {
 
         try {
             String formattedSwaggerJson = apiProvider.getOpenAPIDefinition(apiProductDtoToReturn.getId(), organization);
-            CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION, exportFormat,
-                    formattedSwaggerJson);
+            if (formattedSwaggerJson != null) {
+                CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION,
+                        exportFormat, formattedSwaggerJson);
+            } else {
+                throw new APIImportExportException("Error while retrieving Swagger definition for API Product: "
+                        + apiProductDtoToReturn.getName());
+            }
 
             if (log.isDebugEnabled()) {
                 log.debug(

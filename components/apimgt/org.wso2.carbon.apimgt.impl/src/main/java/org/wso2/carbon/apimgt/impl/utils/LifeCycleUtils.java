@@ -25,12 +25,11 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
-import org.wso2.carbon.apimgt.persistence.LCManagerFactory;
+import org.wso2.carbon.apimgt.impl.lifecycle.LCManagerFactory;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -55,7 +54,7 @@ public class LifeCycleUtils {
 
     public static void changeLifecycle(String user, APIProvider apiProvider, String orgId,
                                        ApiTypeWrapper apiTypeWrapper, String action, Map<String,
-            Boolean> checklist) throws PersistenceException, APIPersistenceException, APIManagementException {
+            Boolean> checklist) throws  APIPersistenceException, APIManagementException {
         String targetStatus;
         String apiName = apiTypeWrapper.getName();
         String apiType = apiTypeWrapper.geType();
@@ -98,7 +97,9 @@ public class LifeCycleUtils {
                     + ", version " + apiTypeWrapper.getId().getVersion() + ", New Status : " + targetStatus;
             log.debug(logMessage);
         }
-        extractRecommendationDetails(apiTypeWrapper);
+        if (!apiTypeWrapper.isAPIProduct()) {
+            extractRecommendationDetails(apiTypeWrapper.getApi(), orgId);
+        }
     }
 
     /**
@@ -319,14 +320,14 @@ public class LifeCycleUtils {
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
-    private static void extractRecommendationDetails(ApiTypeWrapper apiTypeWrapper) {
+    private static void extractRecommendationDetails(API api, String organization) {
         RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiRecommendationEnvironment();
 
         // Extracting API or API Product details for the recommendation system
         if (recommendationEnvironment != null) {
             RecommenderEventPublisher
-                    extractor = new RecommenderDetailsExtractor(apiTypeWrapper, apiTypeWrapper.getOrganization(), APIConstants.ADD_API);
+                    extractor = new RecommenderDetailsExtractor(api, organization, APIConstants.ADD_API);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }

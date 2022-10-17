@@ -38,7 +38,6 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
-import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.DigestAuthConstants;
 
@@ -94,8 +93,12 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
         }
 
         //remove front and end double quotes.serverNonce and realm will not be null.
-        serverNonce = serverNonce.substring(1, serverNonce.length() - 1);
-        realm = realm.substring(1, realm.length() - 1);
+        if (serverNonce != null) {
+            serverNonce = serverNonce.substring(1, serverNonce.length() - 1);
+        }
+        if (realm != null) {
+            realm = realm.substring(1, realm.length() - 1);
+        }
 
         //qop can be null
         if (qop != null) {

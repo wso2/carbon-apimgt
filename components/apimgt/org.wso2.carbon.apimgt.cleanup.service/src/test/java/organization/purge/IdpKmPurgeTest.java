@@ -22,7 +22,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -89,7 +89,7 @@ public class IdpKmPurgeTest {
         }
 
         Mockito.verify(organizationPurgeDAO, Mockito.times(1)).
-                deleteKeyManagerConfigurationList(Matchers.anyListOf(KeyManagerConfigurationDTO.class),
+                deleteKeyManagerConfigurationList(ArgumentMatchers.anyListOf(KeyManagerConfigurationDTO.class),
                         Mockito.any());
     }
 }

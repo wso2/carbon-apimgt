@@ -189,7 +189,7 @@ public class KeyManagerMappingUtil {
             jsonObject.remove(APIConstants.KeyManager.SCOPES_CLAIM);
         }
         JsonElement consumerKeyClaim = jsonObject.get(APIConstants.KeyManager.CONSUMER_KEY_CLAIM);
-        if (scopeClaimKey != null) {
+        if (consumerKeyClaim != null) {
             keyManagerDTO.setConsumerKeyClaim(consumerKeyClaim.getAsString());
             jsonObject.remove(APIConstants.KeyManager.CONSUMER_KEY_CLAIM);
         }

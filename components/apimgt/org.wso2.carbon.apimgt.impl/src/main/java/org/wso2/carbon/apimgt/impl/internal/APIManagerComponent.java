@@ -178,6 +178,7 @@ public class APIManagerComponent {
             addApplicationsPermissionsToRegistry();
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             configuration.load(filePath);
             CommonConfigDeployer configDeployer = new CommonConfigDeployer();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
@@ -207,8 +208,6 @@ public class APIManagerComponent {
             APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             APIUtil.loadTenantWorkFlowExtensions(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            // load self sigup configuration to the registry
-            APIUtil.loadTenantSelfSignUpConfigurations(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             APIUtil.loadCommonOperationPolicies(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
             analyticsConfiguration.setAPIManagerConfiguration(configuration);
@@ -257,7 +256,7 @@ public class APIManagerComponent {
                 log.error("Exception when creating default roles for tenant " + MultitenantConstants.SUPER_TENANT_ID, e);
             }
             // Adding default throttle policies
-            addDefaultAdvancedThrottlePolicies();
+            addDefaultAdvancedThrottlePolicies(tenantDomain,tenantId);
             // Update all NULL THROTTLING_TIER values to Unlimited
             boolean isNullThrottlingTierConversionEnabled = APIUtil.updateNullThrottlingTierAtStartup();
             try {
@@ -555,8 +554,8 @@ public class APIManagerComponent {
         }
     }
 
-    private void addDefaultAdvancedThrottlePolicies() throws APIManagementException {
-        APIUtil.addDefaultSuperTenantAdvancedThrottlePolicies();
+    private void addDefaultAdvancedThrottlePolicies(String tenantDomain, int tenantId) throws APIManagementException {
+        APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
     }
 
     @Reference(

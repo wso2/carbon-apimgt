@@ -48,6 +48,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -267,7 +268,9 @@ public class ImportUtils {
         if (!StringUtils.isEmpty(applicationKeyDTO.getConsumerKey())) {
             jsonParamObj.put(APIConstants.JSON_CLIENT_ID, applicationKeyDTO.getConsumerKey());
             if (!StringUtils.isEmpty(applicationKeyDTO.getConsumerSecret())) {
-                jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, applicationKeyDTO.getConsumerSecret());
+                byte[] bytes = Base64.decodeBase64(applicationKeyDTO.getConsumerSecret());
+                String consumerSecret = new String(bytes, StandardCharsets.UTF_8);
+                jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, consumerSecret);
             }
         }
         if (!StringUtils.isEmpty(applicationKeyDTO.getCallbackUrl())) {

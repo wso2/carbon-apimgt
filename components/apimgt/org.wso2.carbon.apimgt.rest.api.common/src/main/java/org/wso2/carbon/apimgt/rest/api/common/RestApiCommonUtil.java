@@ -1,7 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.common;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.swagger.annotations.Extension;
 import io.swagger.v3.core.util.Json;
 
 import io.swagger.v3.oas.models.OpenAPI;
@@ -12,26 +11,27 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.wso2.carbon.apimgt.api.APIConsumer;
-import org.wso2.carbon.apimgt.api.APIDefinition;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
-import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.uri.template.URITemplateException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -39,10 +39,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.wso2.carbon.apimgt.impl.APIConstants.WebHookProperties.DEFAULT_SUBSCRIPTION_RESOURCE_PATH;
 import static org.wso2.carbon.apimgt.impl.APIConstants.X_WSO2_AUTH_HEADER;
 import static org.wso2.carbon.apimgt.impl.APIConstants.X_WSO2_BASEPATH;
 import static org.wso2.carbon.apimgt.impl.APIConstants.X_WSO2_DISABLE_SECURITY;
@@ -53,6 +54,10 @@ public class RestApiCommonUtil {
 
     public static final ThreadLocal userThreadLocal = new ThreadLocal();
     private static final Log log = LogFactory.getLog(RestApiCommonUtil.class);
+    private static Set<URITemplate> storeResourceMappings;
+    private static Set<URITemplate> publisherResourceMappings;
+    private static Set<URITemplate> adminAPIResourceMappings;
+    private static Set<URITemplate> serviceCatalogAPIResourceMappings;
 
     public static void unsetThreadLocalRequestedTenant() {
 
@@ -72,6 +77,286 @@ public class RestApiCommonUtil {
     public static APIProvider getLoggedInUserProvider() throws APIManagementException {
 
         return APIManagerFactory.getInstance().getAPIProvider(getLoggedInUsername());
+    }
+
+    /**
+     * @param message   CXF message to be validate
+     * @param tokenInfo Token information associated with incoming request
+     * @return return true if we found matching scope in resource and token information
+     * else false(means scope validation failed).
+     */
+    public static boolean validateScopes(Map<String, Object> message, OAuthTokenInfo tokenInfo) {
+        String basePath = (String) message.get("org.apache.cxf.message.Message.BASE_PATH");
+        // path is obtained from Message.REQUEST_URI instead of Message.PATH_INFO, as Message.PATH_INFO contains
+        // decoded values of request parameters
+        String path = (String) message.get("org.apache.cxf.request.uri");
+        String verb = (String) message.get("org.apache.cxf.request.method");
+        String resource = path.substring(basePath.length() - 1);
+        String[] scopes = tokenInfo.getScopes();
+
+        String version = (String) message.get(RestApiConstants.API_VERSION);
+
+        //get all the URI templates of the REST API from the base path
+        Set<URITemplate> uriTemplates = RestApiCommonUtil.getURITemplatesForBasePath(basePath + version);
+        if (uriTemplates.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("No matching scopes found for request with path: " + basePath
+                        + ". Skipping scope validation.");
+            }
+            return true;
+        }
+
+        for (Object template : uriTemplates.toArray()) {
+            org.wso2.uri.template.URITemplate templateToValidate = null;
+            Map<String, String> var = new HashMap<>();
+            //check scopes with what we have
+            String templateString = ((URITemplate) template).getUriTemplate();
+            try {
+                templateToValidate = new org.wso2.uri.template.URITemplate(templateString);
+            } catch (URITemplateException e) {
+                log.error("Error while creating URI Template object to validate request. Template pattern: " +
+                        templateString, e);
+            }
+            if (templateToValidate != null && templateToValidate.matches(resource, var) && scopes != null
+                    && verb != null && verb.equalsIgnoreCase(((URITemplate) template).getHTTPVerb())) {
+                for (String scope : scopes) {
+                    Scope scp = ((URITemplate) template).getScope();
+                    if (scp != null) {
+                        if (scope.equalsIgnoreCase(scp.getKey())) {
+                            //we found scopes matches
+                            if (log.isDebugEnabled()) {
+                                log.debug("Scope validation successful for access token: " +
+                                        message.get(RestApiConstants.MASKED_TOKEN) + " with scope: " + scp.getKey() +
+                                        " for resource path: " + path + " and verb " + verb);
+                            }
+                            return true;
+                        }
+                    } else if (!((URITemplate) template).retrieveAllScopes().isEmpty()) {
+                        List<Scope> scopesList = ((URITemplate) template).retrieveAllScopes();
+                        for (Scope scpObj : scopesList) {
+                            if (scope.equalsIgnoreCase(scpObj.getKey())) {
+                                //we found scopes matches
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Scope validation successful for access token: " +
+                                            message.get(RestApiConstants.MASKED_TOKEN) + " with scope: " + scpObj.getKey() +
+                                            " for resource path: " + path + " and verb " + verb);
+                                }
+                                return true;
+                            }
+                        }
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Scope not defined in swagger for matching resource " + resource + " and verb "
+                                    + verb + " . So consider as anonymous permission and let request to continue.");
+                        }
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * This method is used to get the URI template set for the relevant REST API using the given base path.
+     *
+     * @param basePath Base path of the REST API
+     * @return Set of URI templates for the REST API
+     */
+    public static Set<URITemplate> getURITemplatesForBasePath(String basePath) {
+        Set<URITemplate> uriTemplates = new HashSet<>();
+        //get URI templates using the base path in the request
+        if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_0)) {
+            uriTemplates = RestApiCommonUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_0);
+        } else if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL)) {
+            uriTemplates = RestApiCommonUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION);
+        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_0)) {
+            uriTemplates = RestApiCommonUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_0);
+        } else if (basePath.contains(RestApiConstants.REST_API_DEVELOPER_PORTAL_CONTEXT_FULL)) {
+            uriTemplates = RestApiCommonUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_DEVELOPER_PORTAL_VERSION);
+        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT_FULL_0)) {
+            uriTemplates = RestApiCommonUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION_0);
+        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT_FULL)) {
+            uriTemplates = RestApiCommonUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION);
+        } else if (basePath.contains(RestApiConstants.REST_API_SERVICE_CATALOG_CONTEXT_FULL)) {
+            uriTemplates = RestApiCommonUtil.getServiceCatalogAPIResourceMapping();
+        }
+        return uriTemplates;
+    }
+
+    /**
+     * This is static method to return URI Templates map of API Store REST API.
+     * This content need to load only one time and keep it in memory as content will not change
+     * during runtime.
+     *
+     * @return URITemplate set associated with API Manager Store REST API
+     */
+    public static Set<URITemplate> getStoreAppResourceMapping(String version) {
+
+        API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER,
+                RestApiConstants.REST_API_STORE_CONTEXT,
+                RestApiConstants.REST_API_STORE_VERSION_0));
+
+        if (storeResourceMappings != null) {
+            return storeResourceMappings;
+        } else {
+            try {
+                String definition;
+                if (RestApiConstants.REST_API_STORE_VERSION_0.equals(version)) {
+                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/store-api.json"),
+                                    RestApiConstants.CHARSET);
+                } else {
+                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/devportal-api.yaml"),
+                                    RestApiConstants.CHARSET);
+                }
+                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+                //Get URL templates from swagger content w created
+                storeResourceMappings = oasParser.getURITemplates(definition);
+            } catch (APIManagementException e) {
+                log.error("Error while reading resource mappings for Store API: " + api.getId().getApiName(), e);
+            } catch (IOException e) {
+                log.error("Error while reading the swagger definition for Store API: " + api.getId().getApiName(), e);
+            }
+            return storeResourceMappings;
+        }
+    }
+
+    /**
+     * This is static method to return URI Templates map of API Admin REST API.
+     * This content need to load only one time and keep it in memory as content will not change
+     * during runtime.
+     *
+     * @return URITemplate set associated with API Manager Admin REST API
+     */
+    public static Set<URITemplate> getAdminAPIAppResourceMapping(String version) {
+
+        API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER, RestApiConstants.REST_API_ADMIN_CONTEXT,
+                RestApiConstants.REST_API_ADMIN_VERSION_0));
+
+        if (adminAPIResourceMappings != null) {
+            return adminAPIResourceMappings;
+        } else {
+            try {
+                String definition;
+                if (RestApiConstants.REST_API_ADMIN_VERSION_0.equals(version)) {
+                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/admin-api.json"),
+                                    RestApiConstants.CHARSET);
+                } else {
+                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/admin-api.yaml"),
+                                    RestApiConstants.CHARSET);
+                }
+                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+                //Get URL templates from swagger content we created
+                adminAPIResourceMappings = oasParser.getURITemplates(definition);
+            } catch (APIManagementException e) {
+                log.error("Error while reading resource mappings for Admin API: " + api.getId().getApiName(), e);
+            } catch (IOException e) {
+                log.error("Error while reading the swagger definition for Admin API: " + api.getId().getApiName(), e);
+            }
+            return adminAPIResourceMappings;
+        }
+    }
+
+    /**
+     * This is static method to return URI Templates map of API Publisher REST API.
+     * This content need to load only one time and keep it in memory as content will not change
+     * during runtime.
+     *
+     * @return URITemplate set associated with API Manager publisher REST API
+     */
+    public static Set<URITemplate> getPublisherAppResourceMapping(String version) {
+        API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER, RestApiConstants.REST_API_STORE_CONTEXT,
+                RestApiConstants.REST_API_STORE_VERSION_0));
+
+        if (publisherResourceMappings != null) {
+            return publisherResourceMappings;
+        } else {
+            try {
+                String definition;
+                if (RestApiConstants.REST_API_PUBLISHER_VERSION_0.equals(version)) {
+                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/publisher-api.json"),
+                                    RestApiConstants.CHARSET);
+                } else {
+                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/publisher-api.yaml"),
+                                    RestApiConstants.CHARSET);
+                }
+                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+                //Get URL templates from swagger content we created
+                publisherResourceMappings = oasParser.getURITemplates(definition);
+            } catch (APIManagementException e) {
+                log.error("Error while reading resource mappings for Publisher API: " + api.getId().getApiName(), e);
+            } catch (IOException e) {
+                log.error("Error while reading the swagger definition for Publisher API: " + api.getId().getApiName(), e);
+            }
+            return publisherResourceMappings;
+        }
+    }
+
+    /**
+     * This is static method to return URI Templates map of Service Catalog REST API.
+     * This content need to load only one time and keep it in memory as content will not change
+     * during runtime.
+     *
+     * @return URITemplate set associated with Service Catalog REST API
+     */
+    public static Set<URITemplate> getServiceCatalogAPIResourceMapping() {
+        API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER,
+                RestApiConstants.REST_API_SERVICE_CATALOG_CONTEXT_FULL, "v0"));
+
+        if (serviceCatalogAPIResourceMappings != null) {
+            return serviceCatalogAPIResourceMappings;
+        } else {
+            try {
+                String definition;
+                definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/service-catalog-api.yaml"),
+                                RestApiConstants.CHARSET);
+                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+                //Get URL templates from swagger content we created
+                serviceCatalogAPIResourceMappings = oasParser.getURITemplates(definition);
+            } catch (APIManagementException e) {
+                log.error("Error while reading resource mappings for Service catalog API: " + api.getId().getApiName(), e);
+            } catch (IOException e) {
+                log.error("Error while reading the swagger definition for Service catalog API: " + api.getId().getApiName(), e);
+            }
+            return serviceCatalogAPIResourceMappings;
+        }
+    }
+
+    /**
+     * This method is used to get the scope list from the yaml file.
+     *
+     * @return MAP of scope list for all portal
+     */
+    public static  Map<String, List<String>> getScopesInfoFromAPIYamlDefinitions() throws APIManagementException {
+
+        Map<String, List<String>>   portalScopeList = new HashMap<>();
+        String [] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/devportal-api.yaml",
+                "/service-catalog-api.yaml"};
+        for (String fileName : fileNameArray) {
+            String definition = null;
+            try {
+                definition = IOUtils
+                        .toString(RestApiCommonUtil.class.getResourceAsStream(fileName), "UTF-8");
+            } catch (IOException  e) {
+                throw new APIManagementException("Error while reading the swagger definition ,",
+                        ExceptionCodes.DEFINITION_EXCEPTION);
+            }
+            APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+            Set<Scope> scopeSet = oasParser.getScopes(definition);
+            for (Scope entry : scopeSet) {
+                List<String> list = new ArrayList<>();
+                list.add(entry.getDescription());
+                list.add((fileName.replaceAll("-api.yaml", "").replace("/", "")));
+                if (("/service-catalog-api.yaml".equals(fileName))) {
+                    if (!entry.getKey().contains("apim:api_view")) {
+                        portalScopeList.put(entry.getName(), list);
+                    }
+                } else {
+                    portalScopeList.put(entry.getName(), list);
+                }
+            }
+        }
+        return portalScopeList;
     }
 
     /**
@@ -162,6 +447,23 @@ public class RestApiCommonUtil {
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         paginatedURL = paginatedURL.replace(RestApiConstants.QUERY_PARAM, query);
+        return paginatedURL;
+    }
+
+    /**
+     * Returns the paginated url for Endpoint Certificate Usage API
+     *
+     * @param alias  alias of certificate
+     * @param offset starting index
+     * @param limit  max number of objects returned
+     * @return constructed paginated url
+     */
+    public static String getCertificateUsagePaginatedURL(String alias, Integer offset, Integer limit) {
+
+        String paginatedURL = RestApiConstants.ENDPOINT_CERTIFICATE_USAGE_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.ALIAS_PARAM, alias);
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         return paginatedURL;
     }
 

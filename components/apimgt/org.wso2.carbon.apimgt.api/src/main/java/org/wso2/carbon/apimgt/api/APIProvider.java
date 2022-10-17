@@ -820,6 +820,13 @@ public interface APIProvider extends APIManager {
      */
     boolean isConfigured();
 
+    /**
+     * Method to retrieve certificate metadata uploaded for the tenant represent by the user.
+     * @param alias : The alias of the certificate.
+     * @return : CertificateMetadata
+     * @throws APIManagementException
+     */
+    CertificateMetadataDTO getCertificate(String alias) throws APIManagementException;
 
     /**
      * Method to retrieve all the certificates uploaded for the tenant represent by the user.
@@ -912,11 +919,12 @@ public interface APIProvider extends APIManager {
      * Method to get the status of the certificate which matches the given alias.
      * This method can me modified to get other necessary information as well. Such as CN etc.
      *
+     * @param tenantDomain tenant domain
      * @param alias : The alias of the certificate.
      * @return : The status and the expiry date as a parameter map.
      * @throws APIManagementException :
      */
-    CertificateInformationDTO getCertificateStatus(String alias) throws APIManagementException;
+    CertificateInformationDTO getCertificateStatus(String tenantDomain, String alias) throws APIManagementException;
 
     /**
      * Method to update an existing certificate.
@@ -949,11 +957,12 @@ public interface APIProvider extends APIManager {
     /**
      * Retrieve the certificate which matches the given alias.
      *
+     * @param tenantDomain tenant domain
      * @param alias : The alias of the certificate.
      * @return : The certificate input stream.
      * @throws APIManagementException :
      */
-    ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException;
+    ByteArrayInputStream getCertificateContent(String tenantDomain, String alias) throws APIManagementException;
 
     /**
      * Create API product
@@ -1625,6 +1634,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed get APIProduct from APIProductIdentifier
      */
     APIProduct getAPIProduct(APIProductIdentifier identifier) throws APIManagementException;
+
     /**
      * Returns APIProduct Search result based on the provided query.
      *
@@ -1647,4 +1657,31 @@ public interface APIProvider extends APIManager {
      */
     API getAPIbyUUID(String uuid, String organization) throws APIManagementException;
 
+    /**
+     * Returns API Search result based on fqdn of the provided endpoint.
+     * Returns empty API Search result if endpoint is invalid.
+     *
+     * @param endpoint        endpoint Ex: https://api.wso2.com
+     * @param tenantDomain    tenant domain
+     * @param start           starting number
+     * @param end             ending number
+     * @return APIProduct result
+     * @throws APIManagementException if search is failed
+     */
+    APISearchResult searchPaginatedAPIsByFQDN(String endpoint, String tenantDomain, int start, int end) throws
+            APIManagementException;
+
+    /**
+     * This method checks if the contextTemplate of the API matches its previous versions.
+     *
+     * @param providerName    Name of the provider
+     * @param apiName         Name of the API
+     * @param contextTemplate Context template of the API
+     * @param userName        Logged in user
+     * @param organization    Organization
+     * @return true if the contextTemplate of the API matches its previous versions. Otherwise, return false.
+     * @throws APIManagementException if an exception occurs while querying the APIs.
+     */
+    boolean isValidContext(String providerName, String apiName, String contextTemplate, String userName,
+                           String organization) throws APIManagementException;
 }

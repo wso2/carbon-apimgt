@@ -452,7 +452,7 @@ public interface APIAdmin  {
 
     void updateTenantConfig(String organization, String config) throws APIManagementException;
 
-    String getTenantConfigSchema(String organization) throws APIManagementException;
+    String getTenantConfigSchema(String organization);
 
     /**
      * Get policy list for given level
@@ -463,4 +463,6 @@ public interface APIAdmin  {
      * @throws APIManagementException
      */
     Policy[] getPolicies(int tenantId, String level) throws APIManagementException;
+
+    Policy getPolicyByNameAndType(int tenantId, String level, String name) throws APIManagementException;
 }

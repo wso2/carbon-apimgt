@@ -22,8 +22,6 @@ package org.wso2.carbon.apimgt.api.model;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 /*
 * Captures common attributes used in an OAuth Application.
