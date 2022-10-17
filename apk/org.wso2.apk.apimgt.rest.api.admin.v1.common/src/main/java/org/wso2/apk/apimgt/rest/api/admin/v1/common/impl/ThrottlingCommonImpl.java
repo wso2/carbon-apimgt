@@ -96,12 +96,13 @@ public class ThrottlingCommonImpl {
             throws APIManagementException {
 
         RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
-
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        APIAdmin apiAdmin = new APIAdminImpl();
+
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIPolicy apiPolicy = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(body);
 
-        Policy policyIfExists = apiProvider.getAPIPolicy(userName, apiPolicy.getPolicyName());
+        Policy policyIfExists = apiAdmin.getAPIPolicy(userName, apiPolicy.getPolicyName());
         if (policyIfExists != null) {
             String error = "Advanced Policy with name " + apiPolicy.getPolicyName() + EXISTS_CONSTANT;
             throw new APIManagementException(error,
@@ -109,7 +110,7 @@ public class ThrottlingCommonImpl {
         }
 
         apiProvider.addPolicy(apiPolicy);
-        APIPolicy newApiPolicy = apiProvider.getAPIPolicy(userName, body.getPolicyName());
+        APIPolicy newApiPolicy = apiAdmin.getAPIPolicy(userName, body.getPolicyName());
         return AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyToDTO(newApiPolicy);
     }
 
@@ -122,10 +123,10 @@ public class ThrottlingCommonImpl {
      */
     public static AdvancedThrottlePolicyDTO getAdvancedPolicyById(String policyId) throws APIManagementException {
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIAdmin apiAdmin = new APIAdminImpl();
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
-            APIPolicy apiPolicy = apiProvider.getAPIPolicyByUUID(policyId);
+            APIPolicy apiPolicy = apiAdmin.getAPIPolicyByUUID(policyId);
             if (!RestApiAdminUtils.isPolicyAccessibleToUser(apiPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId));
@@ -149,9 +150,10 @@ public class ThrottlingCommonImpl {
             throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIAdmin apiAdmin = new APIAdminImpl();
 
             //will give PolicyNotFoundException if there's no policy exists with UUID
-            APIPolicy existingPolicy = apiProvider.getAPIPolicyByUUID(policyId);
+            APIPolicy existingPolicy = apiAdmin.getAPIPolicyByUUID(policyId);
             if (!RestApiAdminUtils.isPolicyAccessibleToUser(existingPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId));
@@ -166,7 +168,7 @@ public class ThrottlingCommonImpl {
             apiProvider.updatePolicy(apiPolicy);
 
             //retrieve the new policy and send back as the response
-            APIPolicy newApiPolicy = apiProvider.getAPIPolicyByUUID(policyId);
+            APIPolicy newApiPolicy = apiAdmin.getAPIPolicyByUUID(policyId);
             return AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyToDTO(newApiPolicy);
         } catch (PolicyNotFoundException e) {
             throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
@@ -184,10 +186,11 @@ public class ThrottlingCommonImpl {
     public static void removeAdvancedPolicy(String policyId, String organization) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String username = RestApiCommonUtil.getLoggedInUsername();
+        APIAdmin apiAdmin = new APIAdminImpl();
 
         APIPolicy existingPolicy = null;
         try {
-            existingPolicy = apiProvider.getAPIPolicyByUUID(policyId);
+            existingPolicy = apiAdmin.getAPIPolicyByUUID(policyId);
         } catch (APIManagementException e) {
             throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
                     RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId));
@@ -197,7 +200,7 @@ public class ThrottlingCommonImpl {
                     RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId));
         }
 
-        if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(), PolicyConstants.POLICY_LEVEL_API,
+        if (apiAdmin.hasAttachments(username, existingPolicy.getPolicyName(), PolicyConstants.POLICY_LEVEL_API,
                 organization)) {
             String message = "Advanced Throttling Policy " + existingPolicy.getPolicyName() + ": " + policyId
                     + " already attached to API/Resource";
@@ -237,6 +240,7 @@ public class ThrottlingCommonImpl {
     public static ApplicationThrottlePolicyDTO addApplicationThrottlePolicy(ApplicationThrottlePolicyDTO body)
             throws APIManagementException {
         RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
+        APIAdmin apiAdmin = new APIAdminImpl();
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String username = RestApiCommonUtil.getLoggedInUsername();
@@ -244,7 +248,7 @@ public class ThrottlingCommonImpl {
                 ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyDTOToModel(body);
 
         //Check if there's a policy exists before adding the new policy
-        Policy policyIfExists = apiProvider.getApplicationPolicy(username, appPolicy.getPolicyName());
+        Policy policyIfExists = apiAdmin.getApplicationPolicy(username, appPolicy.getPolicyName());
         if (policyIfExists != null) {
             throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.APPLICATION_POLICY_EXISTS,
                     appPolicy.getPolicyName()));
@@ -253,7 +257,7 @@ public class ThrottlingCommonImpl {
         apiProvider.addPolicy(appPolicy);
 
         //retrieve the new policy and send back as the response
-        ApplicationPolicy newAppPolicy = apiProvider.getApplicationPolicy(username, body.getPolicyName());
+        ApplicationPolicy newAppPolicy = apiAdmin.getApplicationPolicy(username, body.getPolicyName());
         return ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyToDTO(newAppPolicy);
     }
 
@@ -267,10 +271,10 @@ public class ThrottlingCommonImpl {
     public static ApplicationThrottlePolicyDTO getApplicationThrottlePolicyById(String policyId)
             throws APIManagementException {
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIAdmin apiAdmin = new APIAdminImpl();
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
-            ApplicationPolicy appPolicy = apiProvider.getApplicationPolicyByUUID(policyId);
+            ApplicationPolicy appPolicy = apiAdmin.getApplicationPolicyByUUID(policyId);
             if (!RestApiAdminUtils.isPolicyAccessibleToUser(appPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_APP_POLICY, policyId));
@@ -296,9 +300,10 @@ public class ThrottlingCommonImpl {
             throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIAdmin apiAdmin = new APIAdminImpl();
 
             //will give PolicyNotFoundException if there's no policy exists with UUID
-            ApplicationPolicy existingPolicy = apiProvider.getApplicationPolicyByUUID(policyId);
+            ApplicationPolicy existingPolicy = apiAdmin.getApplicationPolicyByUUID(policyId);
             if (!RestApiAdminUtils.isPolicyAccessibleToUser(existingPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_APP_POLICY, policyId));
@@ -313,7 +318,7 @@ public class ThrottlingCommonImpl {
             apiProvider.updatePolicy(appPolicy);
 
             //retrieve the new policy and send back as the response
-            ApplicationPolicy newAppPolicy = apiProvider.getApplicationPolicyByUUID(policyId);
+            ApplicationPolicy newAppPolicy = apiAdmin.getApplicationPolicyByUUID(policyId);
             return ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyToDTO(newAppPolicy);
         } catch (PolicyNotFoundException e) {
             throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
@@ -332,14 +337,15 @@ public class ThrottlingCommonImpl {
             throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIAdmin apiAdmin = new APIAdminImpl();
             String username = RestApiCommonUtil.getLoggedInUsername();
             //This will give PolicyNotFoundException if there's no policy exists with UUID
-            ApplicationPolicy existingPolicy = apiProvider.getApplicationPolicyByUUID(policyId);
+            ApplicationPolicy existingPolicy = apiAdmin.getApplicationPolicyByUUID(policyId);
             if (!RestApiAdminUtils.isPolicyAccessibleToUser(existingPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_APP_POLICY, policyId));
             }
-            if (apiProvider.hasAttachments(organization, existingPolicy.getPolicyName(),
+            if (apiAdmin.hasAttachments(organization, existingPolicy.getPolicyName(),
                     PolicyConstants.POLICY_LEVEL_APP, organization)) {
                 String message = "Policy " + policyId + " already attached to an application";
                 throw new APIManagementException(message,
@@ -387,6 +393,7 @@ public class ThrottlingCommonImpl {
             throws APIManagementException {
         try {
             RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
+            APIAdmin apiAdmin = new APIAdminImpl();
 
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -394,7 +401,7 @@ public class ThrottlingCommonImpl {
                     SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyDTOToModel(body);
 
             //Check if there's a policy exists before adding the new policy
-            Policy policyIfExists = apiProvider.getSubscriptionPolicy(username, subscriptionPolicy.getPolicyName());
+            Policy policyIfExists = apiAdmin.getSubscriptionPolicy(username, subscriptionPolicy.getPolicyName());
             if (policyIfExists != null) {
                 String errorMessage = "Subscription Policy with name "
                         + subscriptionPolicy.getPolicyName() + EXISTS_CONSTANT;
@@ -412,7 +419,7 @@ public class ThrottlingCommonImpl {
             updatePolicyPermissions(body);
 
             //retrieve the new policy and send back as the response
-            SubscriptionPolicy newSubscriptionPolicy = apiProvider.getSubscriptionPolicy(username,
+            SubscriptionPolicy newSubscriptionPolicy = apiAdmin.getSubscriptionPolicy(username,
                     body.getPolicyName());
             SubscriptionThrottlePolicyDTO policyDTO =
                     SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyToDTO(newSubscriptionPolicy);
@@ -480,10 +487,10 @@ public class ThrottlingCommonImpl {
     public static SubscriptionThrottlePolicyDTO getSubscriptionThrottlePolicyById(String policyId)
             throws APIManagementException {
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIAdmin apiAdmin = new APIAdminImpl();
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
-            SubscriptionPolicy subscriptionPolicy = apiProvider.getSubscriptionPolicyByUUID(policyId);
+            SubscriptionPolicy subscriptionPolicy = apiAdmin.getSubscriptionPolicyByUUID(policyId);
             if (!RestApiAdminUtils.isPolicyAccessibleToUser(subscriptionPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY, policyId));
@@ -517,9 +524,10 @@ public class ThrottlingCommonImpl {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
+            APIAdmin apiAdmin = new APIAdminImpl();
 
             //will give PolicyNotFoundException if there's no policy exists with UUID
-            SubscriptionPolicy existingPolicy = apiProvider.getSubscriptionPolicyByUUID(policyId);
+            SubscriptionPolicy existingPolicy = apiAdmin.getSubscriptionPolicyByUUID(policyId);
             if (!RestApiAdminUtils.isPolicyAccessibleToUser(existingPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY, policyId));
@@ -541,7 +549,7 @@ public class ThrottlingCommonImpl {
             updatePolicyPermissions(body);
 
             //retrieve the new policy and send back as the response
-            SubscriptionPolicy newSubscriptionPolicy = apiProvider.getSubscriptionPolicy(username,
+            SubscriptionPolicy newSubscriptionPolicy = apiAdmin.getSubscriptionPolicy(username,
                     body.getPolicyName());
             SubscriptionThrottlePolicyDTO policyDTO =
                     SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyToDTO(newSubscriptionPolicy);
@@ -569,14 +577,15 @@ public class ThrottlingCommonImpl {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
+            APIAdmin apiAdmin = new APIAdminImpl();
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
-            SubscriptionPolicy existingPolicy = apiProvider.getSubscriptionPolicyByUUID(policyId);
+            SubscriptionPolicy existingPolicy = apiAdmin.getSubscriptionPolicyByUUID(policyId);
             if (!RestApiAdminUtils.isPolicyAccessibleToUser(existingPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY, policyId));
             }
-            if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(),
+            if (apiAdmin.hasAttachments(username, existingPolicy.getPolicyName(),
                     PolicyConstants.POLICY_LEVEL_SUB, organization)) {
                 String message = "Policy " + policyId + " already has subscriptions";
                 log.error(message);
@@ -623,6 +632,7 @@ public class ThrottlingCommonImpl {
         RestApiAdminUtils
                 .validateCustomRuleRequiredProperties(body, httpMethod);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        APIAdmin apiAdmin = new APIAdminImpl();
 
         //only super tenant is allowed to access global policies/custom rules
         checkTenantDomainForCustomRules();
@@ -630,7 +640,7 @@ public class ThrottlingCommonImpl {
         GlobalPolicy globalPolicy = GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyDTOToModel(body);
         //Check if there's a policy exists before adding the new policy
         try {
-            Policy policyIfExists = apiProvider.getGlobalPolicy(globalPolicy.getPolicyName());
+            Policy policyIfExists = apiAdmin.getGlobalPolicy(globalPolicy.getPolicyName());
             if (policyIfExists != null) {
                 String errorMessage = "Custom rule with name " + globalPolicy.getPolicyName() + EXISTS_CONSTANT;
                 throw new APIManagementException(errorMessage,
@@ -643,7 +653,7 @@ public class ThrottlingCommonImpl {
         apiProvider.addPolicy(globalPolicy);
 
         //retrieve the new policy and send back as the response
-        GlobalPolicy newGlobalPolicy = apiProvider.getGlobalPolicy(body.getPolicyName());
+        GlobalPolicy newGlobalPolicy = apiAdmin.getGlobalPolicy(body.getPolicyName());
         return GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyToDTO(newGlobalPolicy);
     }
 
@@ -656,13 +666,13 @@ public class ThrottlingCommonImpl {
      */
     public static CustomRuleDTO getCustomRuleById(String ruleId) throws APIManagementException {
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIAdmin apiAdmin = new APIAdminImpl();
 
             //only super tenant is allowed to access global policies/custom rules
             checkTenantDomainForCustomRules();
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
-            GlobalPolicy globalPolicy = apiProvider.getGlobalPolicyByUUID(ruleId);
+            GlobalPolicy globalPolicy = apiAdmin.getGlobalPolicyByUUID(ruleId);
             if (!RestApiAdminUtils.isPolicyAccessibleToUser(globalPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_CUSTOM_RULE, ruleId));
@@ -685,12 +695,13 @@ public class ThrottlingCommonImpl {
     public static CustomRuleDTO updateCustomRule(String ruleId, CustomRuleDTO body) throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIAdmin apiAdmin = new APIAdminImpl();
 
             //only super tenant is allowed to access global policies/custom rules
             checkTenantDomainForCustomRules();
 
             //will give PolicyNotFoundException if there's no policy exists with UUID
-            GlobalPolicy existingPolicy = apiProvider.getGlobalPolicyByUUID(ruleId);
+            GlobalPolicy existingPolicy = apiAdmin.getGlobalPolicyByUUID(ruleId);
             if (!RestApiAdminUtils.isPolicyAccessibleToUser(existingPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_CUSTOM_RULE, ruleId));
@@ -705,7 +716,7 @@ public class ThrottlingCommonImpl {
             apiProvider.updatePolicy(globalPolicy);
 
             //retrieve the new policy and send back as the response
-            GlobalPolicy newGlobalPolicy = apiProvider.getGlobalPolicyByUUID(ruleId);
+            GlobalPolicy newGlobalPolicy = apiAdmin.getGlobalPolicyByUUID(ruleId);
             return GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyToDTO(newGlobalPolicy);
         } catch (PolicyNotFoundException e) {
             throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
@@ -722,6 +733,7 @@ public class ThrottlingCommonImpl {
     public static void removeCustomRule(String ruleId) throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIAdmin apiAdmin = new APIAdminImpl();
 
             //only super tenant is allowed to access global policies/custom rules
             checkTenantDomainForCustomRules();
@@ -729,7 +741,7 @@ public class ThrottlingCommonImpl {
             String username = RestApiCommonUtil.getLoggedInUsername();
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
-            GlobalPolicy existingPolicy = apiProvider.getGlobalPolicyByUUID(ruleId);
+            GlobalPolicy existingPolicy = apiAdmin.getGlobalPolicyByUUID(ruleId);
             if (!RestApiAdminUtils.isPolicyAccessibleToUser(existingPolicy)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_CUSTOM_RULE, ruleId));
@@ -752,6 +764,7 @@ public class ThrottlingCommonImpl {
      */
     public static ExportThrottlePolicyDTO exportThrottlingPolicy(String policyName, String type)
             throws APIManagementException {
+        APIAdmin apiAdmin = new APIAdminImpl();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String userName = RestApiCommonUtil.getLoggedInUsername();
         ExportThrottlePolicyDTO exportPolicy = new ExportThrottlePolicyDTO();
@@ -760,7 +773,7 @@ public class ThrottlingCommonImpl {
         type = (type == null) ? StringUtils.EMPTY : type;
 
         if (StringUtils.EMPTY.equals(type) || PolicyConstants.POLICY_LEVEL_APP.equals(type)) {
-            ApplicationPolicy appPolicy = apiProvider.getApplicationPolicy(userName, policyName);
+            ApplicationPolicy appPolicy = apiAdmin.getApplicationPolicy(userName, policyName);
             if (appPolicy != null) {
                 String policyId = appPolicy.getUUID();
                 if (!RestApiAdminUtils.isPolicyAccessibleToUser(appPolicy)) {
@@ -781,7 +794,7 @@ public class ThrottlingCommonImpl {
 
         if (StringUtils.EMPTY.equals(type) || PolicyConstants.POLICY_LEVEL_SUB.equals(type)) {
             try {
-                SubscriptionPolicy subPolicy = apiProvider.getSubscriptionPolicy(userName, policyName);
+                SubscriptionPolicy subPolicy = apiAdmin.getSubscriptionPolicy(userName, policyName);
                 if (subPolicy != null) {
                     String policyId = subPolicy.getUUID();
                     if (!RestApiAdminUtils.isPolicyAccessibleToUser(subPolicy)) {
@@ -807,7 +820,7 @@ public class ThrottlingCommonImpl {
 
         if (StringUtils.EMPTY.equals(type) || PolicyConstants.POLICY_LEVEL_API.equals(type)) {
             exportPolicy.subtype(RestApiConstants.RESOURCE_ADVANCED_POLICY);
-            APIPolicy apiPolicy = apiProvider.getAPIPolicy(userName, policyName);
+            APIPolicy apiPolicy = apiAdmin.getAPIPolicy(userName, policyName);
             if (apiPolicy != null) {
                 String policyId = apiPolicy.getUUID();
                 if (!RestApiAdminUtils.isPolicyAccessibleToUser(apiPolicy)) {
@@ -825,7 +838,7 @@ public class ThrottlingCommonImpl {
         }
 
         if (StringUtils.EMPTY.equals(type) || PolicyConstants.POLICY_LEVEL_GLOBAL.equals(type)) {
-            GlobalPolicy globalPolicy = apiProvider.getGlobalPolicy(policyName);
+            GlobalPolicy globalPolicy = apiAdmin.getGlobalPolicy(policyName);
             if (globalPolicy != null) {
                 //only super tenant is allowed to access global policies/custom rules
                 checkTenantDomainForCustomRules();
@@ -894,6 +907,7 @@ public class ThrottlingCommonImpl {
      */
     public static BlockingConditionDTO addDenyPolicy(BlockingConditionDTO body) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        APIAdmin apiAdmin = new APIAdminImpl();
         //Add the block condition. It will throw BlockConditionAlreadyExistsException if the condition already
         //  exists in the system
         String uuid = null;
@@ -926,7 +940,7 @@ public class ThrottlingCommonImpl {
 
         try {
             //retrieve the new blocking condition and send back as the response
-            BlockConditionsDTO newBlockingCondition = apiProvider.getBlockConditionByUUID(uuid);
+            BlockConditionsDTO newBlockingCondition = apiAdmin.getBlockConditionByUUID(uuid);
             return BlockingConditionMappingUtil.fromBlockingConditionToDTO(newBlockingCondition);
         } catch (ParseException e) {
             String errorMessage = "Error while adding Blocking Condition. Condition type: "
@@ -938,10 +952,11 @@ public class ThrottlingCommonImpl {
 
     public static BlockingConditionDTO getDenyPolicyById(String conditionId) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        APIAdmin apiAdmin = new APIAdminImpl();
 
         try {
             //This will give BlockConditionNotFoundException if there's no block condition exists with UUID
-            BlockConditionsDTO blockCondition = apiProvider.getBlockConditionByUUID(conditionId);
+            BlockConditionsDTO blockCondition = apiAdmin.getBlockConditionByUUID(conditionId);
             if (!RestApiAdminUtils.isBlockConditionAccessibleToUser(blockCondition)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId));
@@ -965,10 +980,11 @@ public class ThrottlingCommonImpl {
      */
     public static void removeDenyPolicy(String conditionId) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        APIAdmin apiAdmin = new APIAdminImpl();
 
         try {
             //This will give BlockConditionNotFoundException if there's no block condition exists with UUID
-            BlockConditionsDTO existingCondition = apiProvider.getBlockConditionByUUID(conditionId);
+            BlockConditionsDTO existingCondition = apiAdmin.getBlockConditionByUUID(conditionId);
             if (!RestApiAdminUtils.isBlockConditionAccessibleToUser(existingCondition)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId));
@@ -983,10 +999,11 @@ public class ThrottlingCommonImpl {
     public static BlockingConditionDTO updateDenyPolicy(String conditionId, BlockingConditionStatusDTO body)
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        APIAdmin apiAdmin = new APIAdminImpl();
 
         try {
             //This will give BlockConditionNotFoundException if there's no block condition exists with UUID
-            BlockConditionsDTO existingCondition = apiProvider.getBlockConditionByUUID(conditionId);
+            BlockConditionsDTO existingCondition = apiAdmin.getBlockConditionByUUID(conditionId);
             if (!RestApiAdminUtils.isBlockConditionAccessibleToUser(existingCondition)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId));
@@ -996,7 +1013,7 @@ public class ThrottlingCommonImpl {
             apiProvider.updateBlockConditionByUUID(conditionId, String.valueOf(body.isConditionStatus()));
 
             //retrieve the new blocking condition and send back as the response
-            BlockConditionsDTO newBlockingCondition = apiProvider.getBlockConditionByUUID(conditionId);
+            BlockConditionsDTO newBlockingCondition = apiAdmin.getBlockConditionByUUID(conditionId);
             return BlockingConditionMappingUtil.fromBlockingConditionToDTO(newBlockingCondition);
         } catch (BlockConditionNotFoundException e) {
             throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
@@ -1223,21 +1240,21 @@ public class ThrottlingCommonImpl {
                                                                      String httpMethod)
             throws APIManagementException {
         ObjectMapper mapper = new ObjectMapper();
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        APIAdmin apiAdmin = new APIAdminImpl();
         String username = RestApiCommonUtil.getLoggedInUsername();
         Map<String, Object> responseObject;
 
         if (RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY.equals(policyType)) {
-            responseObject = resolveUpdateSubscriptionPolicy(mapper, apiProvider, overwrite, username,
+            responseObject = resolveUpdateSubscriptionPolicy(mapper, apiAdmin, overwrite, username,
                     exportThrottlePolicyDTO);
         } else if (RestApiConstants.RESOURCE_APP_POLICY.equals(policyType)) {
-            responseObject = resolveUpdateApplicationPolicy(mapper, apiProvider, overwrite, username,
+            responseObject = resolveUpdateApplicationPolicy(mapper, apiAdmin, overwrite, username,
                     exportThrottlePolicyDTO);
         } else if (RestApiConstants.RESOURCE_CUSTOM_RULE.equals(policyType)) {
-            responseObject = resolveUpdateCustomRule(mapper, apiProvider, overwrite, exportThrottlePolicyDTO,
+            responseObject = resolveUpdateCustomRule(mapper, apiAdmin, overwrite, exportThrottlePolicyDTO,
                     httpMethod);
         } else if (RestApiConstants.RESOURCE_ADVANCED_POLICY.equals(policyType)) {
-            responseObject = resolveUpdateAdvancedPolicy(mapper, apiProvider, overwrite, username,
+            responseObject = resolveUpdateAdvancedPolicy(mapper, apiAdmin, overwrite, username,
                     exportThrottlePolicyDTO);
         } else {
             String errorMessage = "Error with Throttling Policy Type : " + policyType;
@@ -1251,21 +1268,21 @@ public class ThrottlingCommonImpl {
      * Checks if the policy exists to either update the policy or indicate the conflict or import a new policy
      *
      * @param mapper                  Object mapper
-     * @param apiProvider             API Provider
+     * @param apiAdmin                API Admin
      * @param overwrite               Override the existing policy
      * @param username                Username
      * @param exportThrottlePolicyDTO Throttle policy DTO
      * @return Map of policy DTO and message
      * @throws APIManagementException When an internal error occurs
      */
-    private static Map<String, Object> resolveUpdateSubscriptionPolicy(ObjectMapper mapper, APIProvider apiProvider,
+    private static Map<String, Object> resolveUpdateSubscriptionPolicy(ObjectMapper mapper, APIAdmin apiAdmin,
                                                                        boolean overwrite, String username,
                                                                        ExportThrottlePolicyDTO exportThrottlePolicyDTO)
             throws APIManagementException {
         Map<String, Object> responseObject = new HashMap<>();
         SubscriptionThrottlePolicyDTO subscriptionPolicy = mapper.convertValue(exportThrottlePolicyDTO.getData(),
                 SubscriptionThrottlePolicyDTO.class);
-        Policy policyIfExists = apiProvider.getSubscriptionPolicy(username, subscriptionPolicy.getPolicyName());
+        Policy policyIfExists = apiAdmin.getSubscriptionPolicy(username, subscriptionPolicy.getPolicyName());
         if (policyIfExists != null) {
             if (overwrite) {
                 String uuid = policyIfExists.getUUID();
@@ -1298,21 +1315,21 @@ public class ThrottlingCommonImpl {
      * Checks if the policy exists to either update the policy or indicate the conflict or import a new policy
      *
      * @param mapper                  Object mapper
-     * @param apiProvider             API Provider
+     * @param apiAdmin                API Admin
      * @param overwrite               Override the existing policy
      * @param username                Username
      * @param exportThrottlePolicyDTO Throttle policy DTO
      * @return Map of policy DTO and message
      * @throws APIManagementException When an internal error occurs
      */
-    private static Map<String, Object> resolveUpdateApplicationPolicy(ObjectMapper mapper, APIProvider apiProvider,
+    private static Map<String, Object> resolveUpdateApplicationPolicy(ObjectMapper mapper, APIAdmin apiAdmin,
                                                                       boolean overwrite, String username,
                                                                       ExportThrottlePolicyDTO exportThrottlePolicyDTO)
             throws APIManagementException {
         Map<String, Object> responseObject = new HashMap<>();
         ApplicationThrottlePolicyDTO applicationPolicy = mapper.convertValue(exportThrottlePolicyDTO.getData(),
                 ApplicationThrottlePolicyDTO.class);
-        Policy policyIfExists = apiProvider.getApplicationPolicy(username, applicationPolicy.getPolicyName());
+        Policy policyIfExists = apiAdmin.getApplicationPolicy(username, applicationPolicy.getPolicyName());
         if (policyIfExists != null) {
             if (overwrite) {
                 String uuid = policyIfExists.getUUID();
@@ -1343,21 +1360,21 @@ public class ThrottlingCommonImpl {
      * Checks if the policy exists to either update the policy or indicate the conflict or import a new policy
      *
      * @param mapper                  Object mapper
-     * @param apiProvider             API Provider
+     * @param apiAdmin                API Admin
      * @param overwrite               Override the existing policy
      * @param exportThrottlePolicyDTO Throttle policy DTO
      * @param httpMethod              HTTP Method
      * @return Map of policy DTO and message
      * @throws APIManagementException When an internal error occurs
      */
-    private static Map<String, Object> resolveUpdateCustomRule(ObjectMapper mapper, APIProvider apiProvider,
+    private static Map<String, Object> resolveUpdateCustomRule(ObjectMapper mapper, APIAdmin apiAdmin,
                                                                boolean overwrite,
                                                                ExportThrottlePolicyDTO exportThrottlePolicyDTO,
                                                                String httpMethod)
             throws APIManagementException {
         Map<String, Object> responseObject = new HashMap<>();
         CustomRuleDTO customPolicy = mapper.convertValue(exportThrottlePolicyDTO.getData(), CustomRuleDTO.class);
-        Policy policyIfExists = apiProvider.getGlobalPolicy(customPolicy.getPolicyName());
+        Policy policyIfExists = apiAdmin.getGlobalPolicy(customPolicy.getPolicyName());
         if (policyIfExists != null) {
             if (overwrite) {
                 String uuid = policyIfExists.getUUID();
@@ -1383,21 +1400,21 @@ public class ThrottlingCommonImpl {
      * Checks if the policy exists to either update the policy or indicate the conflict or import a new policy
      *
      * @param mapper                  Object mapper
-     * @param apiProvider             API Provider
+     * @param apiAdmin                API Admin
      * @param overwrite               Override the existing policy
      * @param username                Username
      * @param exportThrottlePolicyDTO Throttle policy DTO
      * @return Map of policy DTO and message
      * @throws APIManagementException When an internal error occurs
      */
-    private static Map<String, Object> resolveUpdateAdvancedPolicy(ObjectMapper mapper, APIProvider apiProvider,
+    private static Map<String, Object> resolveUpdateAdvancedPolicy(ObjectMapper mapper, APIAdmin apiAdmin,
                                                                    boolean overwrite, String username,
                                                                    ExportThrottlePolicyDTO exportThrottlePolicyDTO)
             throws APIManagementException {
         Map<String, Object> responseObject = new HashMap<>();
         AdvancedThrottlePolicyDTO advancedPolicy = mapper.convertValue(exportThrottlePolicyDTO.getData(),
                 AdvancedThrottlePolicyDTO.class);
-        Policy policyIfExists = apiProvider.getAPIPolicy(username, advancedPolicy.getPolicyName());
+        Policy policyIfExists = apiAdmin.getAPIPolicy(username, advancedPolicy.getPolicyName());
         if (policyIfExists != null) {
             if (overwrite) {
                 String uuid = policyIfExists.getUUID();

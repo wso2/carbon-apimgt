@@ -246,13 +246,6 @@ public interface APIProvider extends APIManager {
      */
     APIPolicy getAPIPolicy(String username, String policyName) throws APIManagementException;
 
-    /**
-     * Get api throttling policy by uuid
-     * @param uuid UUID of the policy
-     * @throws APIManagementException
-     */
-    APIPolicy getAPIPolicyByUUID(String uuid) throws APIManagementException;
-
 
     /**
      * Get application throttling policy by name
@@ -263,13 +256,6 @@ public interface APIProvider extends APIManager {
     ApplicationPolicy getApplicationPolicy(String username, String policyName) throws APIManagementException;
 
     /**
-     * Get application throttling policy by uuid
-     * @param uuid UUID of the policy
-     * @throws APIManagementException
-     */
-    ApplicationPolicy getApplicationPolicyByUUID(String uuid) throws APIManagementException;
-
-    /**
      * Get subscription throttling policy by name
      * @param username name of the user
      * @param policyName name of the policy
@@ -278,25 +264,11 @@ public interface APIProvider extends APIManager {
     SubscriptionPolicy getSubscriptionPolicy(String username, String policyName) throws APIManagementException;
 
     /**
-     * Get subscription throttling policy by uuid
-     * @param uuid UUID of the policy
-     * @throws APIManagementException
-     */
-    SubscriptionPolicy getSubscriptionPolicyByUUID(String uuid) throws APIManagementException;
-
-    /**
      * Get global throttling policy by name
      * @param policyName name of the policy
      * @throws APIManagementException
      */
     GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException;
-
-    /**
-     * Get global throttling policy by uuid
-     * @param uuid UUID of the policy
-     * @throws APIManagementException
-     */
-    GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException;
 
 
     /**
