@@ -17,15 +17,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.authenticators;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.message.Message;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 
-
 import javax.cache.Cache;
-
 
 /**
  * This class implemented for common methods of JWT and Opaque Authentications

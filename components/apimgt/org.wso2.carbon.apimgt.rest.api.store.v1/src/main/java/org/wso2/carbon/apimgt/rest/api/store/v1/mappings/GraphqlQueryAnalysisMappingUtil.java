@@ -5,7 +5,6 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
