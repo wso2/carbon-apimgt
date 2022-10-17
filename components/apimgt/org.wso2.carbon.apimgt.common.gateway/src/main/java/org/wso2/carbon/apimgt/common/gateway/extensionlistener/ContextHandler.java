@@ -18,8 +18,6 @@
 package org.wso2.carbon.apimgt.common.gateway.extensionlistener;
 
 
-import java.io.UnsupportedEncodingException;
-
 /**
  * This Interface is provides specific extension points to consume the payload from the related message context.
  */

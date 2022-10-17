@@ -199,7 +199,7 @@ public class WebsocketAuthenticator {
         APIRequestInfoDTO apiRequestInfoDTO = generateAPIInfoDTO(inboundMessageContext);
         requestContextDTO.setApiRequestInfo(apiRequestInfoDTO);
         requestContextDTO.setMsgInfo(msgInfoDTO);
-        requestContextDTO.setDomainAddress(inboundMessageContext.getTenantDomain());
+        requestContextDTO.setOrganizationAddress(inboundMessageContext.getTenantDomain());
         requestContextDTO.setRemoteIPAddress(inboundMessageContext.getUserIP());
 
         InboundContextHandler inboundContextHandler = new InboundContextHandler(inboundMessageContext);

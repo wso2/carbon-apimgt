@@ -28,6 +28,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -116,7 +117,7 @@ public class OAuthAuthenticator implements Authenticator {
         String remainingAuthHeader = "";
         boolean defaultVersionInvoked = false;
         Map headers = requestContext.getMsgInfo().getHeaders();
-        String tenantDomain = requestContext.getDomainAddress();
+        String tenantDomain = requestContext.getOrganiztionAddress();
         keyManagerList = GatewayUtils.getKeyManagers(requestContext);
         if (keyValidator == null) {
             this.keyValidator = new APIKeyValidator();
@@ -225,6 +226,12 @@ public class OAuthAuthenticator implements Authenticator {
             //Initial guess of a JWT token using the presence of a DOT.
             if (StringUtils.isNotEmpty(accessToken) && accessToken.contains(APIConstants.DOT)) {
                 try {
+                    String[] JWTElements = accessToken.split("\\.");
+                    if (JWTElements.length != 3){
+                        log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
+                        throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                "Invalid JWT token");
+                    }
                     if (StringUtils.countMatches(accessToken, APIConstants.DOT) != 2) {
                         log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
                         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
@@ -380,9 +387,9 @@ public class OAuthAuthenticator implements Authenticator {
 
             /* GraphQL Query Analysis Information */
             if (APIConstants.GRAPHQL_API.equals(requestContext.getApiRequestInfo().getApiType())) {
-                requestContext.getContextHandler().setProperty(APIConstants.MAXIMUM_QUERY_DEPTH,
+                requestContext.getContextHandler().setProperty(GraphQLConstants.MAXIMUM_QUERY_DEPTH,
                         info.getGraphQLMaxDepth());
-                requestContext.getContextHandler().setProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY,
+                requestContext.getContextHandler().setProperty(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY,
                         info.getGraphQLMaxComplexity());
             }
             if(log.isDebugEnabled()){
@@ -516,6 +523,12 @@ public class OAuthAuthenticator implements Authenticator {
             //Initial guess of a JWT token using the presence of a DOT.
             if (StringUtils.isNotEmpty(accessToken) && accessToken.contains(APIConstants.DOT)) {
                 try {
+                    String[] JWTElements = accessToken.split("\\.");
+                    if (JWTElements.length != 3){
+                        log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
+                        throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                "Invalid JWT token");
+                    }
                     if (StringUtils.countMatches(accessToken, APIConstants.DOT) != 2) {
                         log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
                         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
@@ -663,8 +676,8 @@ public class OAuthAuthenticator implements Authenticator {
 
             /* GraphQL Query Analysis Information */
             if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
-                synCtx.setProperty(APIConstants.MAXIMUM_QUERY_DEPTH, info.getGraphQLMaxDepth());
-                synCtx.setProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY, info.getGraphQLMaxComplexity());
+                synCtx.setProperty(GraphQLConstants.MAXIMUM_QUERY_DEPTH, info.getGraphQLMaxDepth());
+                synCtx.setProperty(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY, info.getGraphQLMaxComplexity());
             }
             if(log.isDebugEnabled()){
                 log.debug("User is authorized to access the Resource");

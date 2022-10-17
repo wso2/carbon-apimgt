@@ -40,7 +40,7 @@ public class RequestContextDTO {
 
     String remoteIPAddress;
 
-    String domainAddress;
+    String organizationAddress;
 
     ContextHandler contextHandler;
 
@@ -53,12 +53,12 @@ public class RequestContextDTO {
         this.contextHandler = contextHandler;
     }
 
-    public String getDomainAddress() {
-        return domainAddress;
+    public String getOrganiztionAddress() {
+        return organizationAddress;
     }
 
-    public void setDomainAddress(String domainAddress) {
-        this.domainAddress = domainAddress;
+    public void setOrganizationAddress(String organizationAddress) {
+        this.organizationAddress = organizationAddress;
     }
 
     public String getRemoteIPAddress() {

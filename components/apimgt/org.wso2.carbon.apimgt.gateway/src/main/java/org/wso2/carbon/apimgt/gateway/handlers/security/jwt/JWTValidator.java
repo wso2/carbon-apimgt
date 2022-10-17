@@ -309,9 +309,9 @@ public class JWTValidator {
                     requestContext.getContextHandler().setProperty("API_NAME", apiKeyValidationInfoDTO.getApiName());
                     /* GraphQL Query Analysis Information */
                     if (APIConstants.GRAPHQL_API.equals(requestContext.getApiRequestInfo().getApiType())) {
-                        requestContext.getContextHandler().setProperty(APIConstants.MAXIMUM_QUERY_DEPTH,
+                        requestContext.getContextHandler().setProperty(GraphQLConstants.MAXIMUM_QUERY_DEPTH,
                                 apiKeyValidationInfoDTO.getGraphQLMaxDepth());
-                        requestContext.getContextHandler().setProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY,
+                        requestContext.getContextHandler().setProperty(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY,
                                 apiKeyValidationInfoDTO.getGraphQLMaxComplexity());
                     }
                     log.debug("JWT authentication successful.");

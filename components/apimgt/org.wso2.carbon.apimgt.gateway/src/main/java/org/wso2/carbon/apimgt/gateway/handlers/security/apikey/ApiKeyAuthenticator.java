@@ -60,9 +60,11 @@ import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.SigningUtil;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
@@ -87,10 +89,11 @@ public class ApiKeyAuthenticator implements Authenticator {
 
     private Boolean jwtGenerationEnabled = null;
     private AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator = null;
-    private JWTConfigurationDto jwtConfigurationDto = null;
+    private ExtendedJWTConfigurationDto jwtConfigurationDto = null;
     private Boolean isGatewayTokenCacheEnabled = null;
     private static boolean gatewayApiKeyKeyCacheInit = false;
     private static boolean gatewayInvalidApiKeyCacheInit = false;
+    private static volatile long ttl = -1L;
     private String contextHeader = null;
     private String securityParam;
     private String apiLevelPolicy;
@@ -136,6 +139,25 @@ public class ApiKeyAuthenticator implements Authenticator {
             if (apiMgtGatewayJWTGenerator == null) {
                 apiMgtGatewayJWTGenerator = ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
                         .get(jwtConfigurationDto.getGatewayJWTGeneratorImpl());
+            }
+
+            String tenantDomain = GatewayUtils.getTenantDomain();
+            int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+
+            if (jwtGenerationEnabled) {
+                // Set certificate to jwtConfigurationDto
+                if (jwtConfigurationDto.isTenantBasedSigningEnabled()) {
+                    this.jwtConfigurationDto.setPublicCert(SigningUtil.getPublicCertificate(tenantId));
+                    this.jwtConfigurationDto.setPrivateKey(SigningUtil.getSigningKey(tenantId));
+                } else {
+                    this.jwtConfigurationDto.setPublicCert(ServiceReferenceHolder.getInstance().getPublicCert());
+                    this.jwtConfigurationDto.setPrivateKey(ServiceReferenceHolder.getInstance().getPrivateKey());
+                }
+                // Set ttl to jwtConfigurationDto
+                this.jwtConfigurationDto.setTtl(org.wso2.carbon.apimgt.impl.utils.GatewayUtils.getTtl());
+
+                //setting the jwt configuration dto
+                apiMgtGatewayJWTGenerator.setJWTConfigurationDto(this.jwtConfigurationDto);
             }
 
             String splitToken[] = apiKey.split("\\.");
@@ -185,7 +207,7 @@ public class ApiKeyAuthenticator implements Authenticator {
             String matchingResource = requestContext.getMsgInfo().getElectedResource();
 
             SubscriptionDataStore tenantSubscriptionStore =
-                    SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(requestContext.getDomainAddress());
+                    SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(requestContext.getOrganiztionAddress());
             API apiObj = tenantSubscriptionStore.getApiByContextAndVersion(apiContext, apiVersion);
 
             String resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
@@ -203,7 +225,6 @@ public class ApiKeyAuthenticator implements Authenticator {
 
             String cacheKey = GatewayUtils.getAccessTokenCacheKey(tokenIdentifier, apiContext, apiVersion,
                     matchingResource, httpMethod);
-            String tenantDomain = GatewayUtils.getTenantDomain();
             boolean isVerified = false;
 
             // Validate from cache
@@ -402,6 +423,10 @@ public class ApiKeyAuthenticator implements Authenticator {
             log.error("Error while parsing API Key", e);
             return new AuthenticationResponse(false, isMandatory, true, APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+        } catch (APIManagementException e) {
+        log.error("Error while setting public cert/private key for backend jwt generation", e);
+        return new AuthenticationResponse(false, isMandatory, true,
+                APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
     }
 
@@ -429,6 +454,25 @@ public class ApiKeyAuthenticator implements Authenticator {
             if (apiMgtGatewayJWTGenerator == null) {
                 apiMgtGatewayJWTGenerator = ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
                         .get(jwtConfigurationDto.getGatewayJWTGeneratorImpl());
+            }
+
+            String tenantDomain = GatewayUtils.getTenantDomain();
+            int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+
+            if (jwtGenerationEnabled) {
+                // Set certificate to jwtConfigurationDto
+                if (jwtConfigurationDto.isTenantBasedSigningEnabled()) {
+                    this.jwtConfigurationDto.setPublicCert(SigningUtil.getPublicCertificate(tenantId));
+                    this.jwtConfigurationDto.setPrivateKey(SigningUtil.getSigningKey(tenantId));
+                } else {
+                    this.jwtConfigurationDto.setPublicCert(ServiceReferenceHolder.getInstance().getPublicCert());
+                    this.jwtConfigurationDto.setPrivateKey(ServiceReferenceHolder.getInstance().getPrivateKey());
+                }
+                // Set ttl to jwtConfigurationDto
+                this.jwtConfigurationDto.setTtl(org.wso2.carbon.apimgt.impl.utils.GatewayUtils.getTtl());
+
+                //setting the jwt configuration dto
+                apiMgtGatewayJWTGenerator.setJWTConfigurationDto(this.jwtConfigurationDto);
             }
 
             String splitToken[] = apiKey.split("\\.");
@@ -500,7 +544,6 @@ public class ApiKeyAuthenticator implements Authenticator {
 
             String cacheKey = GatewayUtils.getAccessTokenCacheKey(tokenIdentifier, apiContext, apiVersion,
                     matchingResource, httpMethod);
-            String tenantDomain = GatewayUtils.getTenantDomain();
             boolean isVerified = false;
 
             // Validate from cache
@@ -698,6 +741,10 @@ public class ApiKeyAuthenticator implements Authenticator {
             log.error("Error while parsing API Key", e);
             return new AuthenticationResponse(false, isMandatory, true, APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+        } catch (APIManagementException e) {
+            log.error("Error while setting public cert/private key for backend jwt generation", e);
+            return new AuthenticationResponse(false, isMandatory, true,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
     }
 

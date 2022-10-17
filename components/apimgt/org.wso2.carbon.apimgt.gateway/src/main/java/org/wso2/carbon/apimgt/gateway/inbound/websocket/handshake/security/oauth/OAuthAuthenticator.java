@@ -63,7 +63,7 @@ public class OAuthAuthenticator implements Authenticator {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
-                    requestContext.getDomainAddress(), true);
+                    requestContext.getOrganiztionAddress(), true);
             APIKeyValidationInfoDTO info;
             String authorizationHeader = requestContext.getMsgInfo().getHeaders().get(securityHeader);
             String[] auth = authorizationHeader.split(StringUtils.SPACE);
@@ -157,7 +157,7 @@ public class OAuthAuthenticator implements Authenticator {
                                     0, null);
                         }
                     }
-                    info = getApiKeyDataForWSClient(apiKey, requestContext.getDomainAddress(),
+                    info = getApiKeyDataForWSClient(apiKey, requestContext.getOrganiztionAddress(),
                             requestContext.getApiRequestInfo().getContext(),
                             requestContext.getApiRequestInfo().getVersion(), keyManagerList);
                     if (info == null || !info.isAuthorized()) {
@@ -376,9 +376,9 @@ public class OAuthAuthenticator implements Authenticator {
 
         AuthenticationContext authenticationContext;
         PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestContext.getDomainAddress(),
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestContext.getOrganiztionAddress(),
                 true);
-        JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), requestContext.getDomainAddress());
+        JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), requestContext.getOrganiztionAddress());
         authenticationContext = jwtValidator.
                 authenticateForGraphQLSubscription((SignedJWTInfo) requestContext.getContextHandler().getProperty(
                         APIConstants.JwtTokenConstants.SIGNED_JWT_INFO),
@@ -504,7 +504,7 @@ public class OAuthAuthenticator implements Authenticator {
             throws APIManagementException, APISecurityException {
 
         AuthenticationContext authenticationContext;
-        JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), requestContext.getDomainAddress());
+        JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), requestContext.getOrganiztionAddress());
         authenticationContext = jwtValidator.
                 authenticateForWebSocket((SignedJWTInfo) requestContext.getContextHandler().getProperty(
                         APIConstants.JwtTokenConstants.SIGNED_JWT_INFO),

@@ -843,7 +843,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         APIRequestInfoDTO apiRequestInfoDTO = generateAPIInfoDTO(messageContext);
         requestContextDTO.setApiRequestInfo(apiRequestInfoDTO);
         requestContextDTO.setMsgInfo(msgInfoDTO);
-        requestContextDTO.setDomainAddress((String) messageContext.getProperty(PUBLISHER_TENANT_DOMAIN));
+        requestContextDTO.setOrganizationAddress((String) messageContext.getProperty(PUBLISHER_TENANT_DOMAIN));
         requestContextDTO.setRemoteIPAddress((String) messageContext.getProperty(
                 org.apache.axis2.context.MessageContext.REMOTE_ADDR));
 

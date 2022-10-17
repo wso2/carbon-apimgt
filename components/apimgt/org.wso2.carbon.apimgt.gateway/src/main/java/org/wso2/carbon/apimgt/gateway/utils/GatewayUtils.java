@@ -834,12 +834,14 @@ public class GatewayUtils {
                     ;
                 }
                 if (APIConstants.GRAPHQL_API.equals(requestContext.getApiRequestInfo().getApiType())) {
-                    Integer graphQLMaxDepth = (int) (long) subscriptionTierObj.get(APIConstants.GRAPHQL_MAX_DEPTH);
+                    Integer graphQLMaxDepth = (int) (long) subscriptionTierObj.get(
+                            GraphQLConstants.MAXIMUM_QUERY_DEPTH);
                     Integer graphQLMaxComplexity =
-                            (int) (long) subscriptionTierObj.get(APIConstants.GRAPHQL_MAX_COMPLEXITY);
-                    requestContext.getContextHandler().setProperty(APIConstants.MAXIMUM_QUERY_DEPTH, graphQLMaxDepth);
+                            (int) (long) subscriptionTierObj.get(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY);
+                    requestContext.getContextHandler().setProperty(GraphQLConstants.MAXIMUM_QUERY_DEPTH,
+                            graphQLMaxDepth);
 
-                    requestContext.getContextHandler().setProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY,
+                    requestContext.getContextHandler().setProperty(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY,
                             graphQLMaxComplexity);
                 }
             }

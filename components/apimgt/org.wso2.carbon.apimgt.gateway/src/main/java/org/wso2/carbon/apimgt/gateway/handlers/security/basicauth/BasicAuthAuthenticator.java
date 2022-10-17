@@ -44,7 +44,11 @@ import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * An API consumer authenticator which authenticates user requests using
@@ -120,7 +124,7 @@ public class BasicAuthAuthenticator implements Authenticator {
         String matchingResource = requestContext.getMsgInfo().getElectedResource();
 
 
-        String tenantDomain = requestContext.getDomainAddress();
+        String tenantDomain = requestContext.getOrganiztionAddress();
 
         URLMapping apiResource = APISecurityUtils.GetInMemoryAPIResource(requestContext);
 
