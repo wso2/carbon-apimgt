@@ -17,6 +17,8 @@
  */
 package org.wso2.apk.apimgt.impl;
 
+import org.apache.axis2.util.JavaUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,30 +29,14 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.wso2.apk.apimgt.api.APIAdmin;
-import org.wso2.apk.apimgt.api.APIManagementException;
-import org.wso2.apk.apimgt.api.APIMgtResourceNotFoundException;
-import org.wso2.apk.apimgt.api.ExceptionCodes;
+import org.wso2.apk.apimgt.api.*;
 import org.wso2.apk.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.apk.apimgt.api.model.APICategory;
-import org.wso2.apk.apimgt.api.model.Application;
-import org.wso2.apk.apimgt.api.model.ApplicationInfo;
-import org.wso2.apk.apimgt.api.model.Environment;
-import org.wso2.apk.apimgt.api.model.Monetization;
-import org.wso2.apk.apimgt.api.model.MonetizationUsagePublishInfo;
-import org.wso2.apk.apimgt.api.model.VHost;
-import org.wso2.apk.apimgt.api.model.Workflow;
+import org.wso2.apk.apimgt.api.model.*;
 import org.wso2.apk.apimgt.api.model.botDataAPI.BotDetectionData;
-import org.wso2.apk.apimgt.api.model.policy.Policy;
-import org.wso2.apk.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.apk.apimgt.api.model.policy.*;
 import org.wso2.apk.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.apk.apimgt.impl.dao.impl.AdminDAOImpl;
-import org.wso2.apk.apimgt.impl.dao.impl.ApplicationDAOImpl;
-import org.wso2.apk.apimgt.impl.dao.impl.EnvironmentDAOImpl;
-import org.wso2.apk.apimgt.impl.dao.impl.KeyManagerDAOImpl;
-import org.wso2.apk.apimgt.impl.dao.impl.PolicyDAOImpl;
-import org.wso2.apk.apimgt.impl.dao.impl.WorkflowDAOImpl;
+import org.wso2.apk.apimgt.impl.dao.impl.*;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.apk.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.apk.apimgt.impl.monetization.DefaultMonetizationImpl;
@@ -93,6 +79,7 @@ public class APIAdminImpl implements APIAdmin {
     protected KeyManagerDAOImpl keyManagerDAOImpl;
     protected WorkflowDAOImpl workflowDAOImpl;
     protected PolicyDAOImpl policyDAOImpl;
+    protected BlockConditionDAOImpl blockConditionDAOImpl;
 
     public APIAdminImpl() {
         environmentDAOImpl = EnvironmentDAOImpl.getInstance();
@@ -101,6 +88,7 @@ public class APIAdminImpl implements APIAdmin {
         keyManagerDAOImpl = KeyManagerDAOImpl.getInstance();
         workflowDAOImpl = WorkflowDAOImpl.getInstance();
         policyDAOImpl = PolicyDAOImpl.getInstance();
+        blockConditionDAOImpl = BlockConditionDAOImpl.getInstance();
     }
 
     @Override
@@ -776,6 +764,136 @@ public class APIAdminImpl implements APIAdmin {
 
     private String getSubstringOfTen(String inputString) {
         return inputString.length() < 10 ? inputString : inputString.substring(0, 10);
+    }
+
+    @Override
+    public APIPolicy getAPIPolicy(String username, String policyName) throws APIManagementException {
+        return policyDAOImpl.getAPIPolicy(policyName, APIUtil.getTenantId(username));
+    }
+
+    @Override
+    public ApplicationPolicy getApplicationPolicy(String username, String policyName) throws APIManagementException {
+        return policyDAOImpl.getApplicationPolicy(policyName, APIUtil.getTenantId(username));
+    }
+
+    @Override
+    public SubscriptionPolicy getSubscriptionPolicy(String username, String policyName) throws APIManagementException {
+        return policyDAOImpl.getSubscriptionPolicy(policyName, APIUtil.getTenantId(username));
+    }
+
+    @Override
+    public GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException {
+        return policyDAOImpl.getGlobalPolicy(policyName);
+    }
+
+    @Override
+    public APIPolicy getAPIPolicyByUUID(String uuid) throws APIManagementException {
+        APIPolicy policy = policyDAOImpl.getAPIPolicyByUUID(uuid);
+        if (policy == null) {
+            handlePolicyNotFoundException("Advanced Policy: " + uuid + " was not found.");
+        }
+        return policy;
+    }
+
+    @Override
+    public ApplicationPolicy getApplicationPolicyByUUID(String uuid) throws APIManagementException {
+        ApplicationPolicy policy = policyDAOImpl.getApplicationPolicyByUUID(uuid);
+        if (policy == null) {
+            handlePolicyNotFoundException("Application Policy: " + uuid + " was not found.");
+        }
+        return policy;
+    }
+
+    @Override
+    public SubscriptionPolicy getSubscriptionPolicyByUUID(String uuid) throws APIManagementException {
+        SubscriptionPolicy policy = policyDAOImpl.getSubscriptionPolicyByUUID(uuid);
+        if (policy == null) {
+            handlePolicyNotFoundException("Subscription Policy: " + uuid + " was not found.");
+        }
+        return policy;
+    }
+
+    @Override
+    public GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException {
+        GlobalPolicy policy = policyDAOImpl.getGlobalPolicyByUUID(uuid);
+        if (policy == null) {
+            handlePolicyNotFoundException("Global Policy: " + uuid + " was not found.");
+        }
+        return policy;
+    }
+
+    @Override
+    public BlockConditionsDTO getBlockConditionByUUID(String uuid) throws APIManagementException {
+        BlockConditionsDTO blockCondition = blockConditionDAOImpl.getBlockConditionByUUID(uuid);
+        if (blockCondition == null) {
+            handleBlockConditionNotFoundException("Block condition: " + uuid + " was not found.");
+        }
+        return blockCondition;
+    }
+
+    @Override
+    public boolean hasAttachments(String username, String policyName, String policyType, String organization) throws APIManagementException {
+        if (PolicyConstants.POLICY_LEVEL_APP.equals(policyType)) {
+            return policyDAOImpl.hasApplicationPolicyAttachedToApplication(policyName, organization);
+        } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyType)) {
+            return policyDAOImpl.hasSubscriptionPolicyAttached(policyName, organization);
+        } else {
+            return policyDAOImpl.hasAPIPolicyAttached(policyName, organization);
+        }
+    }
+
+    /**
+     * This method creates a monetization plan for a given subscription policy
+     *
+     * @param subPolicy subscription policy
+     * @return true if successful, false otherwise
+     * @throws APIManagementException if failed to create a monetization plan
+     */
+    private boolean createMonetizationPlan(SubscriptionPolicy subPolicy) throws APIManagementException {
+
+        Monetization monetizationImplementation = getMonetizationImplClass();
+        if (monetizationImplementation != null) {
+            try {
+                return monetizationImplementation.createBillingPlan(subPolicy);
+            } catch (MonetizationException e) {
+                String error = "Failed to create monetization plan for : " + subPolicy.getPolicyName();
+                APIUtil.handleExceptionWithCode(error, e,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, error));
+            }
+        }
+        return false;
+    }
+
+    /**
+     * This method updates the monetization plan for a given subscription policy
+     *
+     * @param subPolicy subscription policy
+     * @return true if successful, false otherwise
+     * @throws APIManagementException if failed to update the plan
+     */
+    private boolean updateMonetizationPlan(SubscriptionPolicy subPolicy) throws APIManagementException {
+
+        Monetization monetizationImplementation = getMonetizationImplClass();
+        if (monetizationImplementation != null) {
+            try {
+                return monetizationImplementation.updateBillingPlan(subPolicy);
+            } catch (MonetizationException e) {
+                String error = "Failed to update monetization plan for : " + subPolicy.getPolicyName();
+                APIUtil.handleExceptionWithCode(error, e,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, error));
+            }
+        }
+        return false;
+    }
+
+    protected final void handlePolicyNotFoundException(String msg) throws PolicyNotFoundException {
+
+        throw new PolicyNotFoundException(msg);
+    }
+
+    protected final void handleBlockConditionNotFoundException(String msg) throws BlockConditionNotFoundException {
+
+        throw new BlockConditionNotFoundException(msg);
     }
 
 }

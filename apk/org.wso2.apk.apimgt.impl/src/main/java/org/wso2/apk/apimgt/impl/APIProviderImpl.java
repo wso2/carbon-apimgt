@@ -3653,26 +3653,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public APIPolicy getAPIPolicyByUUID(String uuid) throws APIManagementException {
-        APIPolicy policy = policyDAOImpl.getAPIPolicyByUUID(uuid);
-        if (policy == null) {
-            handlePolicyNotFoundException("Advanced Policy: " + uuid + " was not found.");
-        }
-        return policy;
-    }
-
-    @Override
     public ApplicationPolicy getApplicationPolicy(String username, String policyName) throws APIManagementException {
         return policyDAOImpl.getApplicationPolicy(policyName, APIUtil.getTenantId(username));
-    }
-
-    @Override
-    public ApplicationPolicy getApplicationPolicyByUUID(String uuid) throws APIManagementException {
-        ApplicationPolicy policy = policyDAOImpl.getApplicationPolicyByUUID(uuid);
-        if (policy == null) {
-            handlePolicyNotFoundException("Application Policy: " + uuid + " was not found.");
-        }
-        return policy;
     }
 
     @Override
@@ -3681,26 +3663,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public SubscriptionPolicy getSubscriptionPolicyByUUID(String uuid) throws APIManagementException {
-        SubscriptionPolicy policy = policyDAOImpl.getSubscriptionPolicyByUUID(uuid);
-        if (policy == null) {
-            handlePolicyNotFoundException("Subscription Policy: " + uuid + " was not found.");
-        }
-        return policy;
-    }
-
-    @Override
     public GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException {
         return policyDAOImpl.getGlobalPolicy(policyName);
-    }
-
-    @Override
-    public GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException {
-        GlobalPolicy policy = policyDAOImpl.getGlobalPolicyByUUID(uuid);
-        if (policy == null) {
-            handlePolicyNotFoundException("Global Policy: " + uuid + " was not found.");
-        }
-        return policy;
     }
 
     /**

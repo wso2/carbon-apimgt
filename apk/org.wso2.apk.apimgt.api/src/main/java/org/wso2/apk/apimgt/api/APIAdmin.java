@@ -18,15 +18,9 @@
 package org.wso2.apk.apimgt.api;
 
 import org.wso2.apk.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.apk.apimgt.api.model.APICategory;
-import org.wso2.apk.apimgt.api.model.Application;
-import org.wso2.apk.apimgt.api.model.ApplicationInfo;
-import org.wso2.apk.apimgt.api.model.Environment;
-import org.wso2.apk.apimgt.api.model.Monetization;
-import org.wso2.apk.apimgt.api.model.MonetizationUsagePublishInfo;
-import org.wso2.apk.apimgt.api.model.Workflow;
+import org.wso2.apk.apimgt.api.model.*;
 import org.wso2.apk.apimgt.api.model.botDataAPI.BotDetectionData;
-import org.wso2.apk.apimgt.api.model.policy.Policy;
+import org.wso2.apk.apimgt.api.model.policy.*;
 
 import java.io.InputStream;
 import java.util.List;
@@ -465,4 +459,75 @@ public interface APIAdmin  {
     Policy[] getPolicies(int tenantId, String level) throws APIManagementException;
 
     Policy getPolicyByNameAndType(int tenantId, String level, String name) throws APIManagementException;
+
+    /**
+     * Get api throttling policy by name
+     * @param username name of the user
+     * @param policyName name of the policy
+     * @throws APIManagementException
+     */
+    APIPolicy getAPIPolicy(String username, String policyName) throws APIManagementException;
+
+    /**
+     * Get application throttling policy by name
+     * @param username name of the user
+     * @param policyName name of the policy
+     * @throws APIManagementException
+     */
+    ApplicationPolicy getApplicationPolicy(String username, String policyName) throws APIManagementException;
+
+    /**
+     * Get subscription throttling policy by name
+     * @param username name of the user
+     * @param policyName name of the policy
+     * @throws APIManagementException
+     */
+    SubscriptionPolicy getSubscriptionPolicy(String username, String policyName) throws APIManagementException;
+
+    /**
+     * Get global throttling policy by name
+     * @param policyName name of the policy
+     * @throws APIManagementException
+     */
+    GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException;
+
+    /**
+     * Get api throttling policy by uuid
+     * @param uuid UUID of the policy
+     * @throws APIManagementException
+     */
+    APIPolicy getAPIPolicyByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Get application throttling policy by uuid
+     * @param uuid UUID of the policy
+     * @throws APIManagementException
+     */
+    ApplicationPolicy getApplicationPolicyByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Get subscription throttling policy by uuid
+     * @param uuid UUID of the policy
+     * @throws APIManagementException
+     */
+    SubscriptionPolicy getSubscriptionPolicyByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Get global throttling policy by uuid
+     * @param uuid UUID of the policy
+     * @throws APIManagementException
+     */
+    GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Retrieves a block condition by its UUID
+     *
+     * @param uuid uuid of the block condition
+     * @return Retrieve a block Condition
+     * @throws APIManagementException
+     */
+    BlockConditionsDTO getBlockConditionByUUID(String uuid) throws APIManagementException;
+
+    boolean hasAttachments(String username, String policyName, String policyLevel, String organization) throws APIManagementException;
+
 }
