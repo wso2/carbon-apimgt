@@ -337,7 +337,6 @@ public final class RestApiConstants {
     public static final String ERROR_SCOPE_VALIDATION_FAILED = "You cannot access API as scope validation failed";
 
     public static final String TENANT_DOMAIN = "LoggedInUserTenantDomain";
-    public static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
 
     public static final String AUTHENTICATION_ADMIN_SERVICE_ENDPOINT = "AuthenticationAdmin";
 

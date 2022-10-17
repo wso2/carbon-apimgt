@@ -155,8 +155,6 @@ public class ApiMgtDAO {
     private boolean forceCaseInsensitiveComparisons = false;
     private boolean multiGroupAppSharingEnabled = false;
 
-    private static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
-
     private ApiMgtDAO() {
 
         String caseSensitiveComparison = "false";
@@ -1418,7 +1416,8 @@ public class ApiMgtDAO {
     }
 
     private ResultSet getSubscriptionResultSet(String groupingId, Subscriber subscriber, String applicationName,
-                                               String organization, PreparedStatement statement) throws SQLException {
+                                               String organization, PreparedStatement statement)
+            throws SQLException, APIManagementException {
 
         int tenantId = APIUtil.getTenantId(subscriber.getName());
         int paramIndex = 0;
@@ -1519,7 +1518,8 @@ public class ApiMgtDAO {
     }
 
     private ResultSet getSubscriptionResultSet(String groupingId, Subscriber subscriber,
-                                               PreparedStatement statement, String organization) throws SQLException {
+                                               PreparedStatement statement, String organization)
+            throws SQLException, APIManagementException {
 
         int tenantId = APIUtil.getTenantId(subscriber.getName());
         int paramIndex = 0;
@@ -1552,7 +1552,7 @@ public class ApiMgtDAO {
     }
 
     private void initSubscribedAPIDetailed(Connection connection, SubscribedAPI subscribedAPI, Subscriber subscriber, ResultSet result)
-            throws SQLException, APIManagementException {
+            throws SQLException {
 
         subscribedAPI.setSubscriptionId(result.getInt("SUBS_ID"));
         subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
@@ -6208,7 +6208,7 @@ public class ApiMgtDAO {
         String getAPIProviderQuery = null;
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            if (SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(tenant)) {
+            if (APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenant)) {
                 //in this case, the API should be fetched from super tenant
                 getAPIProviderQuery = SQLConstants.GET_API_PROVIDER_WITH_NAME_VERSION_FOR_SUPER_TENANT;
                 prepStmt = connection.prepareStatement(getAPIProviderQuery);
@@ -9271,7 +9271,7 @@ public class ApiMgtDAO {
         String contextParam = "/t/";
 
         String query = SQLConstants.GET_API_NAME_NOT_MATCHING_CONTEXT_SQL;
-        if (!SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+        if (!APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
             query = SQLConstants.GET_API_NAME_MATCHING_CONTEXT_SQL;
             contextParam += tenantDomain + '/';
         }
@@ -9321,7 +9321,7 @@ public class ApiMgtDAO {
         String contextParam = "/t/";
 
         String query = SQLConstants.GET_API_NAME_DIFF_CASE_NOT_MATCHING_CONTEXT_SQL;
-        if (!SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+        if (!APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
             query = SQLConstants.GET_API_NAME_DIFF_CASE_MATCHING_CONTEXT_SQL;
             contextParam += tenantDomain + '/';
         }

@@ -222,8 +222,6 @@ public final class APIUtil {
     private static final int IPV4_ADDRESS_BIT_LENGTH = 32;
     private static final int IPV6_ADDRESS_BIT_LENGTH = 128;
 
-    private static final int SUPER_TENANT_ID = -1234;
-    private static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
     public static final String TENANT_IDLE_TIME = "tenant.idle.time";
     public static final String UI_PERMISSION_ACTION = "ui.execute";
 
@@ -541,7 +539,7 @@ public final class APIUtil {
      */
     public static Map<String, Tier> getAllTiers() throws APIManagementException {
 
-        return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, SUPER_TENANT_ID);
+        return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, APIConstants.SUPER_TENANT_ID);
     }
 
     /**
@@ -566,7 +564,7 @@ public final class APIUtil {
      */
     public static Map<String, Tier> getTiers() throws APIManagementException {
 
-        return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, SUPER_TENANT_ID);
+        return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, APIConstants.SUPER_TENANT_ID);
     }
 
     /**
@@ -578,7 +576,7 @@ public final class APIUtil {
      */
     public static Map<String, Tier> getAdvancedSubsriptionTiers() throws APIManagementException {
 
-        return getAdvancedSubsriptionTiers(SUPER_TENANT_ID);
+        return getAdvancedSubsriptionTiers(APIConstants.SUPER_TENANT_ID);
     }
 
     /**
@@ -1051,7 +1049,7 @@ public final class APIUtil {
                     return false;
                 }
             }
-        } catch (UserException e) {
+        } catch (UserException | APIManagementException e) {
             log.error("Error when getting the list of roles", e);
             return false;
         }
@@ -1180,13 +1178,8 @@ public final class APIUtil {
     public static int getTenantId(String userName) throws APIManagementException {
 
         String tenantDomain = null;
-        try {
-            //get tenant domain from user name
-            tenantDomain = getTenantDomain(userName);
-        } catch (UserException e) {
-            throw new APIManagementException(ERROR_WHILE_RETRIEVING_TENANT_DOMAIN, e,
-                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
-        }
+        //get tenant domain from user name
+        tenantDomain = getTenantDomain(userName);
         return getTenantIdFromTenantDomain(tenantDomain);
     }
 
@@ -1199,7 +1192,7 @@ public final class APIUtil {
     public static int getTenantIdFromTenantDomain(String tenantDomain) {
 
         if (tenantDomain == null) {
-            return SUPER_TENANT_ID;
+            return APIConstants.SUPER_TENANT_ID;
         }
         try {
             return getInternalOrganizationId(tenantDomain);
@@ -1218,7 +1211,7 @@ public final class APIUtil {
     public static int getInternalIdFromTenantDomainOrOrganization(String organization) {
 
         if (organization == null) {
-            return SUPER_TENANT_ID;
+            return APIConstants.SUPER_TENANT_ID;
         }
         try {
             return getInternalOrganizationId(organization);
@@ -2670,21 +2663,6 @@ public final class APIUtil {
         return endpointConfig.toJSONString();
     }
 
-    /**
-     * Check whether the user has the given role
-     *
-     * @param username Logged-in username
-     * @param roleName role that needs to be checked
-     * @throws UserException
-     */
-    public static boolean checkIfUserInRole(String username, String roleName) throws UserException {
-
-        String tenantDomain = getTenantDomain(APIUtil.replaceEmailDomainBack(username));
-        String tenantAwareUserName = getTenantAwareUsername(username);
-        int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
-        return UserManagerHolder.getUserManager().isUserInRole(tenantId, tenantAwareUserName, roleName);
-    }
-
     public static JSONArray getMonetizationAttributes() {
 
         //TODO handle configs
@@ -2845,7 +2823,7 @@ public final class APIUtil {
         try {
             int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
             String adminUserName = UserManagerHolder.getUserManager().getAdminUsername(tenantId);
-            if (!tenantDomain.contentEquals(SUPER_TENANT_DOMAIN_NAME)) {
+            if (!tenantDomain.contentEquals(APIConstants.SUPER_TENANT_DOMAIN)) {
                 return adminUserName.concat("@").concat(tenantDomain);
             }
             return adminUserName;
@@ -3021,12 +2999,7 @@ public final class APIUtil {
             throws APIManagementException {
 
         String tenantDomain;
-        try {
-            tenantDomain = getTenantDomain(username);
-        } catch (UserException e) {
-            throw new APIManagementException(ERROR_WHILE_RETRIEVING_TENANT_DOMAIN, e,
-                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
-        }
+        tenantDomain = getTenantDomain(username);
         //read from tenant-conf.json
         JSONObject tenantConfig = getTenantConfig(tenantDomain);
         JsonObject existingTenantConfObject = (JsonObject) new JsonParser().parse(tenantConfig.toJSONString());
@@ -3102,13 +3075,7 @@ public final class APIUtil {
     public static void updateTenantConfRoleAliasMapping(JSONObject newRoleMappingJson, String username)
             throws APIManagementException {
 
-        String tenantDomain;
-        try {
-            tenantDomain = getTenantDomain(username);
-        } catch (UserException e) {
-            throw new APIManagementException(ERROR_WHILE_RETRIEVING_TENANT_DOMAIN, e,
-                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
-        }
+        String tenantDomain = getTenantDomain(username);
 
         //read from tenant-conf.json
         JsonObject existingTenantConfObject = new JsonObject();
@@ -3648,14 +3615,28 @@ public final class APIUtil {
         }
     }
 
-    public static String getTenantDomain(String userName) throws UserException {
-
-        return UserManagerHolder.getUserManager().getTenantDomain(userName);
+    public static String getTenantDomain(String userName) throws APIManagementException {
+        String tenantDomain;
+        try {
+            tenantDomain = UserManagerHolder.getUserManager().getTenantDomain(userName);
+            if (tenantDomain.isEmpty()) {
+                tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
+            }
+        } catch (UserException e) {
+            throw new APIManagementException(ERROR_WHILE_RETRIEVING_TENANT_DOMAIN, e,
+                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
+        }
+        return tenantDomain;
     }
 
-    public static String getTenantAwareUsername(String userName) throws UserException {
-
-        return UserManagerHolder.getUserManager().getTenantAwareUsername(userName);
+    public static String getTenantAwareUsername(String userName) throws APIManagementException {
+        try {
+            userName = UserManagerHolder.getUserManager().getTenantAwareUsername(userName);
+        } catch (UserException e) {
+            throw new APIManagementException("Error while getting tenant Aware Username of the user:" + userName,
+                    e, ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
+        }
+        return userName;
     }
 
     private static APIMConfigService getAPIMConfigService() {
