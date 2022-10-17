@@ -48,17 +48,17 @@ public class RetrieveApiArtifactsApiServiceImpl implements RetrieveApiArtifactsA
                                              MessageContext messageContext)
             throws APIManagementException {
         RuntimeArtifactDto runtimeArtifactDto;
-        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
+        String xWSO2TenantOrOrganization = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         String organization = RestApiUtil.getOrganization(messageContext);
         if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
-            xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
+            xWSO2TenantOrOrganization = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
         }
         if (StringUtils.isNotEmpty(organization) && organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) &&
-                xWSO2Tenant.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                xWSO2TenantOrOrganization.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
             runtimeArtifactDto = APIArtifactGeneratorUtil.generateAllAPIArtifact(uuidList.getUuids(), "", "", gatewayLabel, type);
         } else {
             runtimeArtifactDto =  APIArtifactGeneratorUtil.generateAPIArtifact(uuidList.getUuids(), "", "", gatewayLabel, type,
-                    xWSO2Tenant);
+                    xWSO2TenantOrOrganization);
         }
         if (runtimeArtifactDto != null) {
             if (runtimeArtifactDto.isFile()) {
