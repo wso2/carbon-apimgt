@@ -17,8 +17,6 @@
  */
 package org.wso2.apk.apimgt.impl;
 
-import org.apache.axis2.util.JavaUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,25 +37,14 @@ import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.apk.apimgt.impl.dao.impl.*;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.apk.apimgt.impl.dto.WorkflowProperties;
+import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.apk.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -66,6 +53,13 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This class provides the core API admin functionality.
@@ -359,7 +353,7 @@ public class APIAdminImpl implements APIAdmin {
 
     @Override
     public void deleteKeyManagerConfigurationById(String organization,
-            KeyManagerConfigurationDTO keyManagerConfigurationDTO) throws APIManagementException {
+                                                  KeyManagerConfigurationDTO keyManagerConfigurationDTO) throws APIManagementException {
 
     }
 
@@ -695,10 +689,8 @@ public class APIAdminImpl implements APIAdmin {
 
         //Get the API Manager configurations and check whether the unlimited tier is disabled. If disabled, remove
         // the tier from the array.
-        // TODO:// read from apim configuration
-        APIManagerConfiguration apiManagerConfiguration = null;
-//                = ServiceReferenceHolder.getInstance()
-//                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        ConfigurationHolder apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         ThrottleProperties throttleProperties = apiManagerConfiguration.getThrottleProperties();
         List<Policy> policiesWithoutUnlimitedTier = new ArrayList<Policy>();
 
@@ -726,7 +718,8 @@ public class APIAdminImpl implements APIAdmin {
      * @return Policy with corresponding name and type
      * @throws APIManagementException
      */
-    @Override public Policy getPolicyByNameAndType(int tenantId, String level, String name)
+    @Override
+    public Policy getPolicyByNameAndType(int tenantId, String level, String name)
             throws APIManagementException {
 
         Policy policy = null;
@@ -743,10 +736,8 @@ public class APIAdminImpl implements APIAdmin {
 
         //Get the API Manager configurations and check whether the unlimited tier is disabled. If disabled, remove
         // the tier from the array.
-        // TODO:// read from apim configuration
-        APIManagerConfiguration apiManagerConfiguration = null;
-//                ServiceReferenceHolder.getInstance()
-//                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        ConfigurationHolder apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         ThrottleProperties throttleProperties = apiManagerConfiguration.getThrottleProperties();
 
         if (policy != null && APIConstants.UNLIMITED_TIER.equals(policy.getPolicyName())

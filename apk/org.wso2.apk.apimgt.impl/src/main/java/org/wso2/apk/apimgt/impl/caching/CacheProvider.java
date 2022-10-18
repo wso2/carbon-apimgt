@@ -26,6 +26,7 @@ import com.google.gson.JsonParser;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.impl.APIManagerConfiguration;
+import org.wso2.apk.apimgt.impl.ConfigurationHolder;
 import org.wso2.apk.apimgt.impl.config.APIMConfigService;
 import org.wso2.apk.apimgt.impl.config.APIMConfigServiceImpl;
 import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
@@ -99,7 +100,7 @@ public class CacheProvider {
         return APIConstants.DEFAULT_TIMEOUT;
     }
 
-    private static APIManagerConfiguration getApiManagerConfiguration() {
+    private static ConfigurationHolder getApiManagerConfiguration() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
     }
 }

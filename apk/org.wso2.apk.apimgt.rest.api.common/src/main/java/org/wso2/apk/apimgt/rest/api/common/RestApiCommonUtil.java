@@ -799,7 +799,7 @@ public class RestApiCommonUtil {
         if (xWSO2Tenant == null) {
             return tenantDomain;
         } else {
-            if (RestApiConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
                 return xWSO2Tenant;
             } else {
                 return tenantDomain;

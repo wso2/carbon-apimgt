@@ -84,7 +84,7 @@ import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.impl.utils.TierNameComparator;
 import org.wso2.apk.apimgt.user.exceptions.UserException;
 import org.wso2.apk.apimgt.user.mgt.internal.UserManagerHolder;
-import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
+import org.wso2.apk.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 
 import java.util.*;
 

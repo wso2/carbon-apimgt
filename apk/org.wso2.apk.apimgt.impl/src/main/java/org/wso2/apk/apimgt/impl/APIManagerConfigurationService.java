@@ -21,6 +21,6 @@ package org.wso2.apk.apimgt.impl;
  */
 public interface APIManagerConfigurationService {
 
-    APIManagerConfiguration getAPIManagerConfiguration();
+    ConfigurationHolder getAPIManagerConfiguration();
 
 }

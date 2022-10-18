@@ -29,23 +29,19 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import org.wso2.apk.apimgt.impl.*;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.apk.apimgt.api.APIConsumer;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.model.API;
 import org.wso2.apk.apimgt.api.model.Application;
 import org.wso2.apk.apimgt.api.model.Subscriber;
-import org.wso2.apk.apimgt.impl.APIConstants;
-import org.wso2.apk.apimgt.impl.APIManagerConfiguration;
-import org.wso2.apk.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.apk.apimgt.impl.APIManagerFactory;
 import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.apk.utils.multitenancy.MultitenantUtils;
 
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ RestApiCommonUtil.class, Application.class, Subscriber.class, ServiceReferenceHolder.class,
-        RestApiUtil.class, LogFactory.class, RestAPIStoreUtils.class, APIManagerFactory.class, MultitenantUtils.class})
+        RestApiUtil.class, LogFactory.class, RestAPIStoreUtils.class, APIManagerFactory.class})
 public class RestAPIStoreUtilsTest {
 
     private static Log mocklog;
@@ -58,7 +54,7 @@ public class RestAPIStoreUtilsTest {
         Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
-        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        ConfigurationHolder apiManagerConfiguration = Mockito.mock(ConfigurationHolder.class);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
         Mockito.when(apiManagerConfiguration.getFirstProperty(Mockito.anyString())).thenReturn("true");
         mocklog = Mockito.mock(Log.class);
@@ -115,7 +111,7 @@ public class RestAPIStoreUtilsTest {
         Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
-        APIManagerConfiguration configuration = Mockito.mock(APIManagerConfiguration.class);
+        ConfigurationHolder configuration = Mockito.mock(ConfigurationHolder.class);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(configuration);
         Mockito.when(configuration.getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS)).thenReturn("true");
         Assert.assertEquals(true, RestAPIStoreUtils.isUserOwnerOfApplication(mockApplication));

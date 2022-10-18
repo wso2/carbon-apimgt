@@ -3337,8 +3337,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiPolicy = policyDAOImpl.updateAPIPolicy(apiPolicy);
             //TODO rename level to  resource or appropriate name
 
-            //TODO:APK
-//            org.wso2.carbon.apimgt.impl.APIManagerConfiguration config = getAPIManagerConfiguration();
             if (log.isDebugEnabled()) {
                 log.debug("Calling invalidation cache for API Policy for tenant ");
             }
