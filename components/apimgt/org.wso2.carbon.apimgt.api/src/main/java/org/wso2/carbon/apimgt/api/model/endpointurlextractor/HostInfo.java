@@ -24,11 +24,11 @@ package org.wso2.carbon.apimgt.api.model.endpointurlextractor;
  */
 public class HostInfo {
     private String host = "";
-    private Boolean isCustomDomain = false;
+    private Boolean customDomain = false;
 
-    public HostInfo(String host, Boolean isCustomDomain) {
+    public HostInfo(String host, Boolean customDomain) {
         this.host = host;
-        this.isCustomDomain = isCustomDomain;
+        this.customDomain = customDomain;
     }
 
     public String getHost() {
@@ -39,11 +39,11 @@ public class HostInfo {
         this.host = host;
     }
 
-    public Boolean getIsCustomDomain() {
-        return isCustomDomain;
+    public Boolean isCustomDomain() {
+        return customDomain;
     }
 
-    public void setIsCustomDomain(Boolean customDomain) {
-        isCustomDomain = customDomain;
+    public void setCustomDomain(Boolean customDomain) {
+        this.customDomain = customDomain;
     }
 }

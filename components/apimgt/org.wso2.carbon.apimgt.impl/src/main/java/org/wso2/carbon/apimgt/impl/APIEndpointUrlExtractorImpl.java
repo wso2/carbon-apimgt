@@ -40,8 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.wso2.carbon.apimgt.impl.utils.APIEndpointUrlExtractorUtils.getLoggedInUserConsumer;
-
 /**
  * This class implements the API endpoint URLs extractor functionality.
  */
@@ -79,7 +77,7 @@ public class APIEndpointUrlExtractorImpl implements APIEndpointUrlExtractor {
                                                String environmentName) throws APIManagementException {
         List<HostInfo> hostInfos = new ArrayList<>();
 
-        APIConsumer apiConsumer = getLoggedInUserConsumer();
+        APIConsumer apiConsumer = APIManagerFactory.getInstance().getLoggedInUserConsumer();
 
         Map<String, String> domains = new HashMap<>();
         if (organization != null) {
@@ -150,7 +148,7 @@ public class APIEndpointUrlExtractorImpl implements APIEndpointUrlExtractor {
         boolean isGQLSubscription = StringUtils.equalsIgnoreCase("GRAPHQL", apiTypeWrapper.getType())
                 && apiTypeWrapper.isGraphQLSubscriptionsAvailable();
 
-        if (hostInfo.getIsCustomDomain()) {
+        if (hostInfo.isCustomDomain()) {
             context = context.replace("/t/" + organization, "");
         }
         if (!isWs && !isGQLSubscription) {
