@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManager;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.impl.utils.LRUCache;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.user.core.UserCoreConstants;
 
 public class APIManagerFactory {
@@ -148,5 +149,24 @@ public class APIManagerFactory {
                 log.warn("Error while cleaning up APIManager instance", e);
             }
         }
+    }
+
+    /**
+     * Gets the APIConsumer which is corresponding to the current logged in user taken from the carbon context
+     *
+     * @return an APIConsumer which is corresponding to the current logged in user
+     * @throws APIManagementException
+     */
+    public APIConsumer getLoggedInUserConsumer() throws APIManagementException {
+        return getAPIConsumer(getLoggedInUsername());
+    }
+
+    /**
+     * Gets the current logged in user taken from the carbon context
+     *
+     * @return the current logged in user taken from the carbon context
+     */
+    private String getLoggedInUsername() {
+        return CarbonContext.getThreadLocalCarbonContext().getUsername();
     }
 }
