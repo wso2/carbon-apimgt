@@ -1057,7 +1057,8 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Parameter: \"context\" cannot be null",
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
         } else if (body.getContext().endsWith("/")) {
-            throw new APIManagementException("Context cannot end with '/' character", ExceptionCodes.INVALID_CONTEXT);
+            throw new APIManagementException("Context cannot end with '/' character",
+                    ExceptionCodes.from(ExceptionCodes.INVALID_CONTEXT , body.getName(), body.getVersion()));
         }
         if (apiProvider.isApiNameWithDifferentCaseExist(body.getName(), organization)) {
             throw new APIManagementException(
