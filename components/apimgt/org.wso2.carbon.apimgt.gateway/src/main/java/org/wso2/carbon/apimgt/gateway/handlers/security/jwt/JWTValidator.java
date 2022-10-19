@@ -60,6 +60,7 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
+import java.security.cert.Certificate;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -67,7 +68,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.cache.Cache;
-import javax.security.cert.X509Certificate;
 
 /**
  * A Validator class to validate JWT tokens in an API request.
@@ -154,8 +154,8 @@ public class JWTValidator {
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
 
         try {
-            X509Certificate clientCertificate = Utils.getClientCertificate(axis2MsgContext);
-            signedJWTInfo.setX509ClientCertificate(clientCertificate);
+            Certificate clientCertificate = Utils.getClientCertificate(axis2MsgContext);
+            signedJWTInfo.setClientCertificate(clientCertificate);
         } catch (APIManagementException e) {
             log.error("Error while obtaining client certificate. " + GatewayUtils.getMaskedToken(jwtHeader));
         }

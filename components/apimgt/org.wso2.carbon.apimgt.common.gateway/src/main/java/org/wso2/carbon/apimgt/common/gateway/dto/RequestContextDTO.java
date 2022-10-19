@@ -18,24 +18,32 @@
 package org.wso2.carbon.apimgt.common.gateway.dto;
 
 import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import java.io.ByteArrayInputStream;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateFactory;
 import java.util.Map;
 
+import javax.security.cert.CertificateException;
 import javax.security.cert.X509Certificate;
 
 /**
  * Representation of Request Information.
  */
 public class RequestContextDTO {
+    private static final Log log = LogFactory.getLog(RequestContextDTO.class);
 
     // request message information
-    MsgInfoDTO msgInfo;
+    private MsgInfoDTO msgInfo;
     // invoked API request information
-    APIRequestInfoDTO apiRequestInfo;
+    private APIRequestInfoDTO apiRequestInfo;
     // client certificate from transport level
-    javax.security.cert.X509Certificate[] clientCerts;
+    private Certificate[] clientCerts;
     // custom property map used to populate customProperty key template value
-    Map<String, Object> customProperty;
+    private Map<String, Object> customProperty;
 
     public MsgInfoDTO getMsgInfo() {
 
@@ -57,14 +65,40 @@ public class RequestContextDTO {
         this.apiRequestInfo = apiRequestInfo;
     }
 
+    @Deprecated
     public X509Certificate[] getClientCerts() {
-
-        return (X509Certificate[]) SerializationUtils.clone(clientCerts);
+        X509Certificate[] x509Certificates = new X509Certificate[clientCerts.length];
+        for (int i = 0; i < clientCerts.length; i++) {
+            try {
+                x509Certificates[i] = X509Certificate.getInstance(clientCerts[i].getEncoded());
+            } catch (CertificateException | CertificateEncodingException e) {
+                log.error("Error while converting client certificate", e);
+            }
+        }
+        return (X509Certificate[]) SerializationUtils.clone(x509Certificates);
     }
 
-    public void setClientCerts(javax.security.cert.X509Certificate[] clientCerts) {
+    @Deprecated
+    public void setClientCerts(X509Certificate[] x509ClientCerts) {
+        Certificate[] certificates = new Certificate[x509ClientCerts.length];
+        for (int i = 0; i < x509ClientCerts.length; i++) {
+            try {
+                ByteArrayInputStream inputStream = new ByteArrayInputStream(x509ClientCerts[i].getEncoded());
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                certificates[i] = cf.generateCertificate(inputStream);
+            } catch (CertificateException | java.security.cert.CertificateException e) {
+                log.error("Error while converting client certificate", e);
+            }
+        }
+        this.clientCerts = (Certificate[]) SerializationUtils.clone(certificates);
+    }
 
-        this.clientCerts = (X509Certificate[]) SerializationUtils.clone(clientCerts);
+    public Certificate[] getClientCertsLatest() {
+        return (Certificate[]) SerializationUtils.clone(clientCerts);
+    }
+
+    public void setClientCertsLatest(Certificate[] clientCerts) {
+        this.clientCerts = (Certificate[]) SerializationUtils.clone(clientCerts);
     }
 
     public Map<String, Object> getCustomProperty() {

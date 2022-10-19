@@ -907,7 +907,7 @@ public class CertificateMgtUtils {
      * @param cert the certificate to be converted
      * @return java.security.cert.X509Certificate type certificate
      */
-    public static Optional<X509Certificate> convert(javax.security.cert.X509Certificate cert) {
+    public static Optional<X509Certificate> convert(Certificate cert) {
 
         if (cert != null) {
             try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(cert.getEncoded())) {
@@ -916,8 +916,6 @@ public class CertificateMgtUtils {
                         = java.security.cert.CertificateFactory.getInstance("X.509");
                 return Optional.of((java.security.cert.X509Certificate) certificateFactory.generateCertificate(
                         byteArrayInputStream));
-            } catch (javax.security.cert.CertificateEncodingException e) {
-                log.error("Error while decoding the certificate ", e);
             } catch (java.security.cert.CertificateException e) {
                 log.error("Error while generating the certificate", e);
             } catch (IOException e) {
