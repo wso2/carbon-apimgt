@@ -187,6 +187,11 @@ public class API implements Serializable {
      */
     private boolean enableSchemaValidation = false;
 
+    /**
+     * Property to enable/disable WebSub intent verification
+     */
+    private boolean enableSubscriberVerification = false;
+
     private List<APICategory> apiCategories;
 
     /**
@@ -1081,6 +1086,24 @@ public class API implements Serializable {
      */
     public void setEnableSchemaValidation(boolean enableSchemaValidation) {
         this.enableSchemaValidation = enableSchemaValidation;
+    }
+
+    /**
+     * Check the status of the enableSubscriberVerification property
+     *
+     * @return status of the property
+     */
+    public boolean isEnableSubscriberVerification() {
+        return enableSubscriberVerification;
+    }
+
+    /**
+     * To set enableSubscriberVerification property
+     *
+     * @param enableSubscriberVerification Given status
+     */
+    public void setEnableSubscriberVerification(boolean enableSubscriberVerification) {
+        this.enableSubscriberVerification = enableSubscriberVerification;
     }
 
     /**

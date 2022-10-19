@@ -66,7 +66,9 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String sandboxMaxTps;
     private String authorizationHeader;
     private String apiSecurity; // ?check whether same to private List<String> securityScheme = new ArrayList<>();
+
     private boolean enableSchemaValidation;
+    private boolean enableSubscriberVerification;
     private boolean enableStore;
     private String testKey;
     private String contextTemplate;
@@ -363,6 +365,14 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.enableSchemaValidation = enableSchemaValidation;
     }
 
+    public boolean isEnableSubscriberVerification() {
+        return enableSubscriberVerification;
+    }
+
+    public void setEnableSubscriberVerification(boolean enableSubscriberVerification) {
+        this.enableSubscriberVerification = enableSubscriberVerification;
+    }
+
     public boolean isEnableStore() {
         return enableStore;
     }
@@ -613,8 +623,9 @@ public class PublisherAPI extends PublisherAPIInfo {
                 + subscriptionAvailableOrgs + ", implementation=" + implementation + ", productionMaxTps="
                 + productionMaxTps + ", sandboxMaxTps=" + sandboxMaxTps + ", authorizationHeader=" + authorizationHeader
                 + ", apiSecurity=" + apiSecurity + ", enableSchemaValidation=" + enableSchemaValidation
-                + ", enableStore=" + enableStore + ", testKey=" + testKey + ", contextTemplate=" + contextTemplate
-                + ", availableTierNames=" + availableTierNames + ", environments=" + environments
+                + ", enableSubscriberVerification=" + enableSubscriberVerification + ", enableStore=" + enableStore
+                + ", testKey=" + testKey + ", contextTemplate=" + contextTemplate + ", availableTierNames="
+                + availableTierNames + ", environments=" + environments
                 + ", corsConfiguration=" + corsConfiguration + ", websubSubscriptionConfiguration="
                 + websubSubscriptionConfiguration + ", apiCategories="
                 + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled + ", monetizationProperties="
