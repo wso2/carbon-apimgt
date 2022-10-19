@@ -3625,4 +3625,14 @@ public final class APIUtil {
         }
         return apimConfigService;
     }
+
+    public static boolean isFalseExplicitly(String value) {
+        return value == null || value.equalsIgnoreCase("false")
+                || value.equals("0") || value.equalsIgnoreCase("no");
+    }
+
+    public static boolean isRoleExistForUser(String userName, String roleName) {
+        //TODO: APK
+        return true;
+    }
 }

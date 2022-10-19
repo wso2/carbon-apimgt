@@ -17,7 +17,6 @@
  */
 package org.wso2.apk.apimgt.impl;
 
-import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -43,7 +42,6 @@ import org.wso2.apk.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.apk.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -553,7 +551,7 @@ public class APIAdminImpl implements APIAdmin {
     public boolean isScopeExistsForUser(String username, String scopeName) throws APIManagementException {
         if (APIUtil.isUserExist(username)) {
             Map<String, String> scopeRoleMapping =
-                    APIUtil.getRESTAPIScopesForTenant(MultitenantUtils.getTenantDomain(username));
+                    APIUtil.getRESTAPIScopesForTenant(APIUtil.getTenantDomain(username));
             if (scopeRoleMapping.containsKey(scopeName)) {
                 String[] userRoles = APIUtil.getListOfRoles(username);
                 return getRoleScopeList(userRoles, scopeRoleMapping).contains(scopeName);
@@ -574,9 +572,8 @@ public class APIAdminImpl implements APIAdmin {
      * @param scopeName scope to be validated
      * @throws APIManagementException
      */
-    public boolean isScopeExists(String username, String scopeName) {
-        Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
-                .getTenantDomain(username));
+    public boolean isScopeExists(String username, String scopeName) throws APIManagementException {
+        Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(APIUtil.getTenantDomain(username));
         return scopeRoleMapping.containsKey(scopeName);
     }
 
@@ -975,18 +972,18 @@ public class APIAdminImpl implements APIAdmin {
             //TODO this has done due to update policy method not deleting the second level entries when delete on cascade
             //TODO Need to fix appropriately
             List<Pipeline> pipelineList = apiPolicy.getPipelines();
-            if (pipelineList != null && pipelineList.size() != 0) {
+            if (pipelineList != null && !pipelineList.isEmpty()) {
                 Iterator<Pipeline> pipelineIterator = pipelineList.iterator();
                 while (pipelineIterator.hasNext()) {
                     Pipeline pipeline = pipelineIterator.next();
                     if (!pipeline.isEnabled()) {
                         pipelineIterator.remove();
                     } else {
-                        if (pipeline.getConditions() != null && pipeline.getConditions().size() != 0) {
+                        if (pipeline.getConditions() != null && !pipeline.getConditions().isEmpty()) {
                             Iterator<Condition> conditionIterator = pipeline.getConditions().iterator();
                             while (conditionIterator.hasNext()) {
                                 Condition condition = conditionIterator.next();
-                                if (JavaUtils.isFalseExplicitly(condition.getConditionEnabled())) {
+                                if (APIUtil.isFalseExplicitly(condition.getConditionEnabled())) {
                                     conditionIterator.remove();
                                 }
                             }
