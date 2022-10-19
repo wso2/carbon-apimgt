@@ -114,13 +114,7 @@ import org.wso2.apk.apimgt.api.model.policy.Policy;
 import org.wso2.apk.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.apk.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.apk.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.apk.apimgt.impl.APIAdminImpl;
-import org.wso2.apk.apimgt.impl.APIConstants;
-import org.wso2.apk.apimgt.impl.APIManagerAnalyticsConfiguration;
-import org.wso2.apk.apimgt.impl.APIManagerConfiguration;
-import org.wso2.apk.apimgt.impl.APIManagerConfigurationServiceImpl;
-import org.wso2.apk.apimgt.impl.ExternalEnvironment;
-import org.wso2.apk.apimgt.impl.PasswordResolverFactory;
+import org.wso2.apk.apimgt.impl.*;
 import org.wso2.apk.apimgt.impl.config.APIMConfigService;
 import org.wso2.apk.apimgt.impl.config.APIMConfigServiceImpl;
 import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
@@ -1403,7 +1397,7 @@ public final class APIUtil {
     public static String getRESTApiGroupingExtractorImplementation() {
 
         //TODO config setup flow
-        APIManagerConfiguration config = new APIManagerConfigurationServiceImpl(new APIManagerConfiguration())
+        ConfigurationHolder config = new APIManagerConfigurationServiceImpl(new ConfigurationHolder())
                 .getAPIManagerConfiguration();
         String restApiGroupingExtractor = config
                 .getFirstProperty(APIConstants.API_STORE_REST_API_GROUP_EXTRACTOR_IMPLEMENTATION);
@@ -1421,7 +1415,7 @@ public final class APIUtil {
     public static String getGroupingExtractorImplementation() {
 
         //TODO config setup flow
-        APIManagerConfiguration config = new APIManagerConfigurationServiceImpl(new APIManagerConfiguration())
+        ConfigurationHolder config = new APIManagerConfigurationServiceImpl(new ConfigurationHolder())
                 .getAPIManagerConfiguration();
         return config.getFirstProperty(APIConstants.API_STORE_GROUP_EXTRACTOR_IMPLEMENTATION);
     }
@@ -2738,7 +2732,7 @@ public final class APIUtil {
     public static boolean isDevPortalAnonymous() {
 
         //TODO config setup flow
-        APIManagerConfiguration config = new APIManagerConfigurationServiceImpl(new APIManagerConfiguration())
+        ConfigurationHolder config = new APIManagerConfigurationServiceImpl(new ConfigurationHolder())
                 .getAPIManagerConfiguration();
         String anonymousMode = config.getFirstProperty(APIConstants.API_DEVPORTAL_ANONYMOUS_MODE);
         if (anonymousMode == null) {

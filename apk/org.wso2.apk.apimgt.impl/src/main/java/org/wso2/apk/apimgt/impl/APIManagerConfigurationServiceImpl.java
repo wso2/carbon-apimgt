@@ -18,13 +18,13 @@ package org.wso2.apk.apimgt.impl;
 
 public class APIManagerConfigurationServiceImpl implements APIManagerConfigurationService {
 
-    private APIManagerConfiguration configuration;
+    private ConfigurationHolder configuration;
 
-    public APIManagerConfigurationServiceImpl(APIManagerConfiguration configuration) {
+    public APIManagerConfigurationServiceImpl(ConfigurationHolder configuration) {
         this.configuration = configuration;
     }
 
-    public APIManagerConfiguration getAPIManagerConfiguration() {
+    public ConfigurationHolder getAPIManagerConfiguration() {
         return configuration;
     }
 

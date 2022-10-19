@@ -1,20 +1,20 @@
 /*
-*  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package org.wso2.apk.apimgt.impl.utils;
 
@@ -29,10 +29,16 @@ import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.APIManagerDatabaseException;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.apk.apimgt.impl.APIManagerConfiguration;
+import org.wso2.apk.apimgt.impl.ConfigurationHolder;
+import org.wso2.apk.apimgt.impl.dto.DatasourceProperties;
+import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -41,25 +47,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 
 public final class APIMgtDBUtil {
 
-    private static final Log log = LogFactory.getLog(APIMgtDBUtil.class);
+    private APIMgtDBUtil() {
+    }
 
-    private static final String DB_CHECK_SQL = "SELECT * FROM AM_SUBSCRIBER";
-    
+    private static final Log log = LogFactory.getLog(APIMgtDBUtil.class);
     private static final String DATA_SOURCE_NAME = "DataSourceName";
     private static volatile HikariDataSource dataSource = null;
 
     /**
      * Initializes the data source
      *
-     * @throws APIManagementException if an error occurs while loading DB configuration
+     * @throws APIManagerDatabaseException if an error occurs while loading DB configuration
      */
+    //TODO: add this to init
     public static void initialize() throws APIManagerDatabaseException {
         if (dataSource != null) {
             return;
@@ -71,35 +74,34 @@ public final class APIMgtDBUtil {
                 if (log.isDebugEnabled()) {
                     log.debug("Initializing data source");
                 }
-                APIManagerConfiguration config = null;
-                // TODO: // Read Configs
-//                ServiceReferenceHolder.getInstance().
-//                        getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                String dataSourceName = config.getFirstProperty(DATA_SOURCE_NAME);
+                ConfigurationHolder config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                        .getAPIManagerConfiguration();
+                DatasourceProperties datasourceProperties = config.getDatasourceProperties();
+//                String dataSourceName = config.getFirstProperty(DATA_SOURCE_NAME);
+                String dataSourceName = datasourceProperties.getName();
 
                 if (dataSourceName != null) {
                     try {
                         Context ctx = new InitialContext();
-                        dataSource = (HikariDataSource)ctx.lookup(dataSourceName);
+                        dataSource = (HikariDataSource) ctx.lookup(dataSourceName);
                     } catch (NamingException e) {
                         throw new APIManagerDatabaseException("Error while looking up the data " +
                                 "source: " + dataSourceName, e);
                     }
                 } else {
-                    log.error(DATA_SOURCE_NAME + " not defined in api-manager.xml.");
+                    log.error(DATA_SOURCE_NAME + " not defined in Config");
                 }
                 if (dataSource == null) {
-                    // TODO: // Read datasource Configs and set it here
                     HikariConfig hikariConfig = new HikariConfig();
-                    hikariConfig.setJdbcUrl("jdbc:postgresql://localhost:5432/am_db");
-                    hikariConfig.setUsername("wso2Carbon");
-                    hikariConfig.setPassword("wso2Carbon");
-                    hikariConfig.setMaximumPoolSize(50);
-                    hikariConfig.setMinimumIdle(10);
-                    hikariConfig.setMaxLifetime(60000);
-                    hikariConfig.setAutoCommit(true);
-                    hikariConfig.setConnectionTestQuery("SELECT 1");
-                    hikariConfig.setValidationTimeout(30000);
+                    hikariConfig.setJdbcUrl(datasourceProperties.getUrl());
+                    hikariConfig.setUsername(datasourceProperties.getUsername());
+                    hikariConfig.setPassword(datasourceProperties.getPassword());
+                    hikariConfig.setMaximumPoolSize(datasourceProperties.getMaxPoolSize());
+                    hikariConfig.setMinimumIdle(datasourceProperties.getMinIdleTime());
+                    hikariConfig.setMaxLifetime(datasourceProperties.getMaxLifeTime());
+                    hikariConfig.setAutoCommit(datasourceProperties.isSetAutocommit());
+                    hikariConfig.setConnectionTestQuery(datasourceProperties.getTestQuery());
+                    hikariConfig.setValidationTimeout(datasourceProperties.getValidationTimeout());
                     hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
                     hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
                     hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
@@ -124,9 +126,10 @@ public final class APIMgtDBUtil {
 
     /**
      * Utility method to close the connection streams.
+     *
      * @param preparedStatement PreparedStatement
-     * @param connection Connection
-     * @param resultSet ResultSet
+     * @param connection        Connection
+     * @param resultSet         ResultSet
      */
     public static void closeAllConnections(PreparedStatement preparedStatement, Connection connection,
                                            ResultSet resultSet) {
@@ -137,6 +140,7 @@ public final class APIMgtDBUtil {
 
     /**
      * Close Connection
+     *
      * @param dbConnection Connection
      */
     private static void closeConnection(Connection dbConnection) {
@@ -152,6 +156,7 @@ public final class APIMgtDBUtil {
 
     /**
      * Close ResultSet
+     *
      * @param resultSet ResultSet
      */
     private static void closeResultSet(ResultSet resultSet) {
@@ -167,6 +172,7 @@ public final class APIMgtDBUtil {
 
     /**
      * Close PreparedStatement
+     *
      * @param preparedStatement PreparedStatement
      */
     public static void closeStatement(PreparedStatement preparedStatement) {
@@ -184,13 +190,14 @@ public final class APIMgtDBUtil {
     /**
      * Function converts IS to String
      * Used for handling blobs
+     *
      * @param is - The Input Stream
      * @return - The inputStream as a String
      */
     public static String getStringFromInputStream(InputStream is) {
         String str = null;
         try {
-            str = IOUtils.toString(is, "UTF-8");
+            str = IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (IOException e) {
             log.error("Error occurred while converting input stream to string.", e);
         }
@@ -199,7 +206,8 @@ public final class APIMgtDBUtil {
 
     /**
      * Function converts IS to byte[]
-     * Used for handling inputstreams
+     * Used for handling input streams
+     *
      * @param is - The Input Stream
      * @return - The inputStream as a byte array
      */
@@ -215,8 +223,9 @@ public final class APIMgtDBUtil {
 
     /**
      * Set autocommit state of the connection
+     *
      * @param dbConnection Connection
-     * @param autoCommit autoCommitState
+     * @param autoCommit   autoCommitState
      */
     public static void setAutoCommit(Connection dbConnection, boolean autoCommit) {
         if (dbConnection != null) {
@@ -230,10 +239,11 @@ public final class APIMgtDBUtil {
 
     /**
      * Handle connection rollback logic. Rethrow original exception so that it can be handled centrally.
+     *
      * @param connection Connection
-     * @param error Error message to be logged
-     * @param e Original SQLException
-     * @throws SQLException
+     * @param error      Error message to be logged
+     * @param e          Original SQLException
+     * @throws SQLException When an SQL error occurs
      */
     public static void rollbackConnection(Connection connection, String error, SQLException e) throws SQLException {
         if (connection != null) {
@@ -250,8 +260,9 @@ public final class APIMgtDBUtil {
 
     /**
      * Handle connection rollback logic. Rethrow original exception so that it can be handled centrally.
+     *
      * @param connection Connection
-     * @param error Error message to be logged
+     * @param error      Error message to be logged
      */
     public static void rollbackConnection(Connection connection, String error) {
         if (connection != null) {
@@ -266,8 +277,9 @@ public final class APIMgtDBUtil {
 
     /**
      * Handle connection rollback logic. Rethrow original exception so that it can be handled centrally.
+     *
      * @param rs result set
-     * @throws SQLException sql exception
+     * @throws SQLException           sql exception
      * @throws APIManagementException api management exception
      */
     public static List<APIRevisionDeployment> mergeRevisionDeploymentDTOs(ResultSet rs) throws APIManagementException,
@@ -305,14 +317,14 @@ public final class APIMgtDBUtil {
                 }
             }
         }
-        return  apiRevisionDeploymentList;
+        return apiRevisionDeploymentList;
     }
 
     /**
      * Converts a JSON Object String to a String Map
      *
-     * @param jsonString    JSON String
-     * @return              String Map
+     * @param jsonString JSON String
+     * @return String Map
      * @throws APIManagementException if errors occur during parsing the json string
      */
     public static Map<String, Object> convertJSONStringToMap(String jsonString) throws APIManagementException {

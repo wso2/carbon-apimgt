@@ -18,24 +18,33 @@
 
 package org.wso2.apk.service.init;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.wso2.apk.apimgt.impl.APIManagerConfiguration;
 import org.wso2.apk.apimgt.impl.APIManagerConfigurationServiceImpl;
+import org.wso2.apk.apimgt.impl.ConfigurationHolder;
 import org.wso2.apk.apimgt.impl.caching.CacheProvider;
 import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 
 public class APKComponent {
 
-    public void activate(String configuration) {
+    public void activate(String configuration) throws APIManagementException {
 
         // Set configurations
-        APIManagerConfiguration config = null;
+        ConfigurationHolder config = new ConfigurationHolder();
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         // TODO: Read configuration object and use object mapper to load APIManager Configuration
-        //  APIManagerConfiguration config = objectMapper.readValue(configuration, APIManagerConfiguration.class);
-        APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(config);
-        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
+        try {
+            config = objectMapper.readValue(configuration, ConfigurationHolder.class);
+            APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(config);
+            ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error while reading configurations");
+        }
+
 
         // initialize API-M Caches
         CacheProvider.createTenantConfigCache();

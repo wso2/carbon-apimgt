@@ -26,7 +26,7 @@ import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.ErrorHandler;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.impl.dao.constants.EnvironmentSpecificAPIPropertyConstants;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.environmentspecificproperty.Environment;
+import org.wso2.apk.apimgt.impl.gatewayartifactsynchronizer.environmentspecificproperty.Environment;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 

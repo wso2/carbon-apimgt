@@ -221,7 +221,7 @@ public class PolicyDAOImpl implements PolicyDAO {
         } else {
             policyStatement.setString(2, policy.getPolicyName());
         }
-        policyStatement.setInt(3, policy.getTenantId());
+        policyStatement.setString(3, policy.getTenantDomain());
         policyStatement.setString(4, policy.getDescription());
         policyStatement.setString(5, policy.getDefaultQuotaPolicy().getType());
 
@@ -491,7 +491,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     @Override
-    public ApplicationPolicy getApplicationPolicy(String policyName, int tenantId) throws APIManagementException {
+    public ApplicationPolicy getApplicationPolicy(String policyName, String organization) throws APIManagementException {
 
         ApplicationPolicy policy = null;
         Connection connection = null;
@@ -507,7 +507,7 @@ public class PolicyDAOImpl implements PolicyDAO {
             connection = APIMgtDBUtil.getConnection();
             selectStatement = connection.prepareStatement(sqlQuery);
             selectStatement.setString(1, policyName);
-            selectStatement.setInt(2, tenantId);
+            selectStatement.setString(2, organization);
 
             // Should return only single row
             resultSet = selectStatement.executeQuery();
@@ -516,7 +516,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                 setCommonPolicyDetails(policy, resultSet);
             }
         } catch (SQLException e) {
-            handleExceptionWithCode("Failed to get application policy: " + policyName + '-' + tenantId, e,
+            handleExceptionWithCode("Failed to get application policy: " + policyName + '-' + organization, e,
                     ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
@@ -671,7 +671,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     @Override
-    public SubscriptionPolicy getSubscriptionPolicy(String policyName, int tenantId) throws APIManagementException {
+    public SubscriptionPolicy getSubscriptionPolicy(String policyName, String organization) throws APIManagementException {
 
         SubscriptionPolicy policy = null;
         Connection connection = null;
@@ -687,7 +687,7 @@ public class PolicyDAOImpl implements PolicyDAO {
             connection = APIMgtDBUtil.getConnection();
             selectStatement = connection.prepareStatement(sqlQuery);
             selectStatement.setString(1, policyName);
-            selectStatement.setInt(2, tenantId);
+            selectStatement.setString(2, organization);
 
             // Should return only single row
             resultSet = selectStatement.executeQuery();
@@ -708,7 +708,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                 }
             }
         } catch (SQLException e) {
-            handleExceptionWithCode("Failed to get subscription policy: " + policyName + '-' + tenantId, e,
+            handleExceptionWithCode("Failed to get subscription policy: " + policyName + '-' + organization, e,
                     ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } catch (IOException e) {
             String error = "Error while converting input stream to byte array";
@@ -800,7 +800,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     @Override
-    public APIPolicy getAPIPolicy(String policyName, int tenantId) throws APIManagementException {
+    public APIPolicy getAPIPolicy(String policyName, String organization) throws APIManagementException {
 
         APIPolicy policy = null;
         Connection connection = null;
@@ -816,7 +816,7 @@ public class PolicyDAOImpl implements PolicyDAO {
             connection = APIMgtDBUtil.getConnection();
             selectStatement = connection.prepareStatement(sqlQuery);
             selectStatement.setString(1, policyName);
-            selectStatement.setInt(2, tenantId);
+            selectStatement.setString(2, organization);
 
             // Should return only single result
             resultSet = selectStatement.executeQuery();
@@ -827,7 +827,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                 policy.setPipelines(getPipelines(policy.getPolicyId()));
             }
         } catch (SQLException e) {
-            handleExceptionWithCode("Failed to get api policy: " + policyName + '-' + tenantId, e,
+            handleExceptionWithCode("Failed to get api policy: " + policyName + '-' + organization, e,
                     ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
@@ -1239,16 +1239,16 @@ public class PolicyDAOImpl implements PolicyDAO {
 
             if (hasCustomAttrib) {
                 updateStatement.setBlob(8, new ByteArrayInputStream(policy.getCustomAttributes()));
-                if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
+                if (!StringUtils.isBlank(policy.getPolicyName()) && StringUtils.isNotBlank(policy.getTenantDomain())) {
                     updateStatement.setString(9, policy.getPolicyName());
-                    updateStatement.setInt(10, policy.getTenantId());
+                    updateStatement.setString(10, policy.getTenantDomain());
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
                     updateStatement.setString(9, policy.getUUID());
                 }
             } else {
-                if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
+                if (!StringUtils.isBlank(policy.getPolicyName()) && StringUtils.isNotBlank(policy.getTenantDomain())) {
                     updateStatement.setString(8, policy.getPolicyName());
-                    updateStatement.setInt(9, policy.getTenantId());
+                    updateStatement.setString(9, policy.getTenantDomain());
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
                     updateStatement.setString(8, policy.getUUID());
                 }
@@ -1341,7 +1341,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                 long lengthOfStream = policy.getCustomAttributes().length;
                 updateStatement.setBinaryStream(14, new ByteArrayInputStream(policy.getCustomAttributes()),
                         lengthOfStream);
-                if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
+                if (!StringUtils.isBlank(policy.getPolicyName()) && StringUtils.isNotBlank(policy.getTenantDomain())) {
                     updateStatement.setString(15, policy.getMonetizationPlan());
                     updateStatement.setString(16,
                             policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
@@ -1353,7 +1353,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                             policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
                     updateStatement.setInt(20, policy.getSubscriberCount());
                     updateStatement.setString(21, policy.getPolicyName());
-                    updateStatement.setInt(22, policy.getTenantId());
+                    updateStatement.setString(22, policy.getTenantDomain());
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
                     updateStatement.setString(15, policy.getMonetizationPlan());
                     updateStatement.setString(16,
@@ -1368,7 +1368,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                     updateStatement.setString(21, policy.getUUID());
                 }
             } else {
-                if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
+                if (!StringUtils.isBlank(policy.getPolicyName()) && StringUtils.isNotBlank(policy.getTenantDomain())) {
                     updateStatement.setString(14, policy.getMonetizationPlan());
                     updateStatement.setString(15,
                             policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
@@ -1380,7 +1380,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                             policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
                     updateStatement.setInt(19, policy.getSubscriberCount());
                     updateStatement.setString(20, policy.getPolicyName());
-                    updateStatement.setInt(21, policy.getTenantId());
+                    updateStatement.setString(21, policy.getTenantDomain());
 
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
                     updateStatement.setString(14, policy.getMonetizationPlan());
@@ -1445,9 +1445,9 @@ public class PolicyDAOImpl implements PolicyDAO {
             updateStatement.setString(1, policy.getDescription());
             updateStatement.setBinaryStream(2, siddhiQueryInputStream, lengthOfBytes);
             updateStatement.setString(3, policy.getKeyTemplate());
-            if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
+            if (!StringUtils.isBlank(policy.getPolicyName()) && StringUtils.isNotBlank(policy.getTenantDomain())) {
                 updateStatement.setString(4, policy.getPolicyName());
-                updateStatement.setInt(5, policy.getTenantId());
+                updateStatement.setString(5, policy.getTenantDomain());
             } else if (!StringUtils.isBlank(policy.getUUID())) {
                 updateStatement.setString(4, policy.getUUID());
             }
@@ -1480,7 +1480,7 @@ public class PolicyDAOImpl implements PolicyDAO {
         ResultSet rs = null;
         String sqlQuery = null;
 
-        int tenantID = APIUtil.getTenantId(username);
+        String tenantDomain = APIUtil.getTenantDomain(username);
 
         try {
             conn = APIMgtDBUtil.getConnection();
@@ -1494,7 +1494,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                 sqlQuery = SQLConstants.GET_GLOBAL_POLICY_NAMES;
             }
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, tenantID);
+            ps.setString(1, tenantDomain);
             rs = ps.executeQuery();
             while (rs.next()) {
                 names.add(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
@@ -1565,7 +1565,7 @@ public class PolicyDAOImpl implements PolicyDAO {
             sqlQuery = SQLConstants.GET_GLOBAL_POLICY_KEY_TEMPLATE;
 
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, policy.getTenantId());
+            ps.setString(1, policy.getTenantDomain());
             ps.setString(2, policy.getKeyTemplate());
             ps.setString(3, policy.getPolicyName());
             rs = ps.executeQuery();
@@ -1847,7 +1847,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     @Override
-    public ApplicationPolicy[] getApplicationPolicies(int tenantID) throws APIManagementException {
+    public ApplicationPolicy[] getApplicationPolicies(String organization) throws APIManagementException {
 
         List<ApplicationPolicy> policies = new ArrayList<ApplicationPolicy>();
         Connection conn = null;
@@ -1862,7 +1862,7 @@ public class PolicyDAOImpl implements PolicyDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, tenantID);
+            ps.setString(1, organization);
             rs = ps.executeQuery();
             while (rs.next()) {
                 ApplicationPolicy appPolicy = new ApplicationPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
@@ -1878,7 +1878,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     @Override
-    public SubscriptionPolicy[] getSubscriptionPolicies(int tenantID) throws APIManagementException {
+    public SubscriptionPolicy[] getSubscriptionPolicies(String organization) throws APIManagementException {
 
         List<SubscriptionPolicy> policies = new ArrayList<SubscriptionPolicy>();
         Connection conn = null;
@@ -1893,7 +1893,7 @@ public class PolicyDAOImpl implements PolicyDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, tenantID);
+            ps.setString(1, organization);
             rs = ps.executeQuery();
             while (rs.next()) {
                 SubscriptionPolicy subPolicy = new SubscriptionPolicy(
@@ -1935,7 +1935,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     @Override
-    public GlobalPolicy[] getGlobalPolicies(int tenantID) throws APIManagementException {
+    public GlobalPolicy[] getGlobalPolicies(String organization) throws APIManagementException {
 
         List<GlobalPolicy> policies = new ArrayList<GlobalPolicy>();
         Connection conn = null;
@@ -1950,7 +1950,7 @@ public class PolicyDAOImpl implements PolicyDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, tenantID);
+            ps.setString(1, organization);
             rs = ps.executeQuery();
             while (rs.next()) {
                 String siddhiQuery = null;

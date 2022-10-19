@@ -765,7 +765,6 @@ public class ThrottlingCommonImpl {
     public static ExportThrottlePolicyDTO exportThrottlingPolicy(String policyName, String type)
             throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String userName = RestApiCommonUtil.getLoggedInUsername();
         ExportThrottlePolicyDTO exportPolicy = new ExportThrottlePolicyDTO();
         exportPolicy.type(RestApiConstants.RESOURCE_THROTTLING_POLICY);
@@ -1096,13 +1095,13 @@ public class ThrottlingCommonImpl {
             throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        int tenantId = APIUtil.getTenantId(userName);
+        String organization = APIUtil.getTenantDomain(userName);
         Policy policy;
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         List<ThrottlePolicyDetailsDTO> policies = new ArrayList<>();
 
-        policy = apiAdmin.getPolicyByNameAndType(tenantId, policyLevel, policyName);
+        policy = apiAdmin.getPolicyByNameAndType(organization, policyLevel, policyName);
 
         if (policy == null) {
             throw new APIManagementException(
@@ -1177,7 +1176,7 @@ public class ThrottlingCommonImpl {
      */
     private static void checkTenantDomainForCustomRules() throws APIManagementException {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        if (!tenantDomain.equals(RestApiConstants.SUPER_TENANT_DOMAIN_NAME)) {
+        if (!tenantDomain.equals(APIConstants.SUPER_TENANT_DOMAIN)) {
             throw new APIManagementException("Tenant " + tenantDomain + " is not allowed to access custom rules. " +
                     "Only super tenant is allowed", ExceptionCodes.FORBIDDEN_ERROR);
         }
