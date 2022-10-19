@@ -10,59 +10,59 @@ public interface TierDAO {
     /**
      * Update Tier Permissions.
      *
-     * @param tierName Tier Name
+     * @param tierName       Tier Name
      * @param permissionType Permission Type
-     * @param roles Roles
-     * @param tenantId
+     * @param roles          Roles
+     * @param organization   Organization
      * @throws APIManagementException if fails to update Tier permissions
      */
-    void updateTierPermissions(String tierName, String permissionType, String roles, int tenantId)
+    void updateTierPermissions(String tierName, String permissionType, String roles, String organization)
             throws APIManagementException;
 
     /**
      * Delete Tier Permissions.
      *
-     * @param tierName Tier Name
-     * @param tenantId
+     * @param tierName     Tier Name
+     * @param organization Organization
      * @throws APIManagementException if fails to delete Tier permissions
      */
-    void deleteThrottlingPermissions(String tierName, int tenantId) throws APIManagementException;
+    void deleteThrottlingPermissions(String tierName, String organization) throws APIManagementException;
 
     /**
      * Retrieve Tier Permissions.
      *
-     * @param tenantId
+     * @param organization Organization
      * @throws APIManagementException if fails to retrieve Tier permissions
      */
-    Set<TierPermissionDTO> getTierPermissions(int tenantId) throws APIManagementException;
+    Set<TierPermissionDTO> getTierPermissions(String organization) throws APIManagementException;
 
     /**
      * Retrieve Tier Permission by Tier Name.
      *
-     * @param tierName Tier Name
-     * @param tenantId Organization
+     * @param tierName     Tier Name
+     * @param organization Organization
      * @throws APIManagementException if fails to retrieve Tier permission
      */
-    TierPermissionDTO getThrottleTierPermission(String tierName, int tenantId) throws APIManagementException;
+    TierPermissionDTO getThrottleTierPermission(String tierName, String organization) throws APIManagementException;
 
     /**
      * Update Tier Permissions.
      *
-     * @param tierName Tier Name
+     * @param tierName       Tier Name
      * @param permissionType Permission Type
-     * @param roles Roles
-     * @param tenantId Organization
+     * @param roles          Roles
+     * @param organization   Organization
      * @throws APIManagementException if fails to update Tier permissions
      */
-    void updateThrottleTierPermissions(String tierName, String permissionType, String roles, int tenantId)
+    void updateThrottleTierPermissions(String tierName, String permissionType, String roles, String organization)
             throws APIManagementException;
 
     /**
      * Retrieve Tier Permissions by Organization.
      *
-     * @param tenantId Organization
+     * @param organization Organization
      * @throws APIManagementException if fails to retrieve Tier permissions
      */
-    Set<TierPermissionDTO> getThrottleTierPermissions(int tenantId) throws APIManagementException;
+    Set<TierPermissionDTO> getThrottleTierPermissions(String organization) throws APIManagementException;
 
 }

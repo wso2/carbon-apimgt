@@ -80,6 +80,8 @@ public class ThrottlePolicyConstants {
 
     public static final String COLUMN_HTTP_VERB = "HTTP_VERB";
 
+    public static final String COLUMN_BLOCK_CONDITION_ID = "CONDITION_ID";
+
     public static final String COLUMN_CONDITION_ID = "CONDITION_GROUP_ID";
 
     public static final String COLUMN_PARAMETER_NAME = "PARAMETER_NAME";

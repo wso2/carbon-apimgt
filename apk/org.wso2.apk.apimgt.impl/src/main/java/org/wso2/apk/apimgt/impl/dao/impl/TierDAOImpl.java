@@ -43,7 +43,7 @@ public class TierDAOImpl implements TierDAO {
 
 
     @Override
-    public void updateTierPermissions(String tierName, String permissionType, String roles, int tenantId)
+    public void updateTierPermissions(String tierName, String permissionType, String roles, String organization)
             throws APIManagementException {
 
         Connection conn = null;
@@ -59,7 +59,7 @@ public class TierDAOImpl implements TierDAO {
             String getTierPermissionQuery = SQLConstants.GET_TIER_PERMISSION_ID_SQL;
             ps = conn.prepareStatement(getTierPermissionQuery);
             ps.setString(1, tierName);
-            ps.setInt(2, tenantId);
+            ps.setString(2, organization);
             resultSet = ps.executeQuery();
             if (resultSet.next()) {
                 tierPermissionId = resultSet.getInt("TIER_PERMISSIONS_ID");
@@ -71,7 +71,7 @@ public class TierDAOImpl implements TierDAO {
                 insertOrUpdatePS.setString(1, tierName);
                 insertOrUpdatePS.setString(2, permissionType);
                 insertOrUpdatePS.setString(3, roles);
-                insertOrUpdatePS.setInt(4, tenantId);
+                insertOrUpdatePS.setString(4, organization);
                 insertOrUpdatePS.execute();
             } else {
                 String query = SQLConstants.UPDATE_TIER_PERMISSION_SQL;
@@ -80,7 +80,7 @@ public class TierDAOImpl implements TierDAO {
                 insertOrUpdatePS.setString(2, permissionType);
                 insertOrUpdatePS.setString(3, roles);
                 insertOrUpdatePS.setInt(4, tierPermissionId);
-                insertOrUpdatePS.setInt(5, tenantId);
+                insertOrUpdatePS.setString(5, organization);
                 insertOrUpdatePS.executeUpdate();
             }
             conn.commit();
@@ -93,12 +93,12 @@ public class TierDAOImpl implements TierDAO {
     }
 
     @Override
-    public void deleteThrottlingPermissions(String tierName, int tenantId) throws APIManagementException {
+    public void deleteThrottlingPermissions(String tierName, String organization) throws APIManagementException {
         int tierPermissionId = -1;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_THROTTLE_TIER_PERMISSION_ID_SQL)) {
             ps.setString(1, tierName);
-            ps.setInt(2, tenantId);
+            ps.setString(2, organization);
             try (ResultSet resultSet = ps.executeQuery()) {
                 if (resultSet.next()) {
                     tierPermissionId = resultSet.getInt("THROTTLE_TIER_PERMISSIONS_ID");
@@ -108,7 +108,7 @@ public class TierDAOImpl implements TierDAO {
                 try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants
                         .DELETE_THROTTLE_TIER_PERMISSION_SQL)) {
                     preparedStatement.setInt(1, tierPermissionId);
-                    preparedStatement.setInt(2, tenantId);
+                    preparedStatement.setString(2, organization);
                     preparedStatement.executeUpdate();
                 }
             }
@@ -119,7 +119,7 @@ public class TierDAOImpl implements TierDAO {
     }
 
     @Override
-    public Set<TierPermissionDTO> getTierPermissions(int tenantId) throws APIManagementException {
+    public Set<TierPermissionDTO> getTierPermissions(String organization) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -132,7 +132,7 @@ public class TierDAOImpl implements TierDAO {
 
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(getTierPermissionQuery);
-            ps.setInt(1, tenantId);
+            ps.setString(1, organization);
 
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
@@ -155,7 +155,7 @@ public class TierDAOImpl implements TierDAO {
     }
 
     @Override
-    public TierPermissionDTO getThrottleTierPermission(String tierName, int tenantId) throws APIManagementException {
+    public TierPermissionDTO getThrottleTierPermission(String tierName, String organization) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -168,7 +168,7 @@ public class TierDAOImpl implements TierDAO {
             ps = conn.prepareStatement(getTierPermissionQuery);
 
             ps.setString(1, tierName);
-            ps.setInt(2, tenantId);
+            ps.setString(2, organization);
 
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
@@ -191,7 +191,7 @@ public class TierDAOImpl implements TierDAO {
     }
 
     @Override
-    public void updateThrottleTierPermissions(String tierName, String permissionType, String roles, int tenantId)
+    public void updateThrottleTierPermissions(String tierName, String permissionType, String roles, String organization)
             throws APIManagementException {
 
         Connection conn = null;
@@ -207,7 +207,7 @@ public class TierDAOImpl implements TierDAO {
             String getTierPermissionQuery = SQLConstants.GET_THROTTLE_TIER_PERMISSION_ID_SQL;
             ps = conn.prepareStatement(getTierPermissionQuery);
             ps.setString(1, tierName);
-            ps.setInt(2, tenantId);
+            ps.setString(2, organization);
             resultSet = ps.executeQuery();
             if (resultSet.next()) {
                 tierPermissionId = resultSet.getInt("THROTTLE_TIER_PERMISSIONS_ID");
@@ -219,7 +219,7 @@ public class TierDAOImpl implements TierDAO {
                 insertOrUpdatePS.setString(1, tierName);
                 insertOrUpdatePS.setString(2, permissionType);
                 insertOrUpdatePS.setString(3, roles);
-                insertOrUpdatePS.setInt(4, tenantId);
+                insertOrUpdatePS.setString(4, organization);
                 insertOrUpdatePS.execute();
             } else {
                 String query = SQLConstants.UPDATE_THROTTLE_TIER_PERMISSION_SQL;
@@ -228,7 +228,7 @@ public class TierDAOImpl implements TierDAO {
                 insertOrUpdatePS.setString(2, permissionType);
                 insertOrUpdatePS.setString(3, roles);
                 insertOrUpdatePS.setInt(4, tierPermissionId);
-                insertOrUpdatePS.setInt(5, tenantId);
+                insertOrUpdatePS.setString(5, organization);
                 insertOrUpdatePS.executeUpdate();
             }
             conn.commit();
@@ -242,7 +242,7 @@ public class TierDAOImpl implements TierDAO {
     }
 
     @Override
-    public Set<TierPermissionDTO> getThrottleTierPermissions(int tenantId) throws APIManagementException {
+    public Set<TierPermissionDTO> getThrottleTierPermissions(String organization) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -255,7 +255,7 @@ public class TierDAOImpl implements TierDAO {
 
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(getTierPermissionQuery);
-            ps.setInt(1, tenantId);
+            ps.setString(1, organization);
 
             resultSet = ps.executeQuery();
             while (resultSet.next()) {

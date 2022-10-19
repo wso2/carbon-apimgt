@@ -218,8 +218,6 @@ public interface APIProvider extends APIManager {
      */
     Map getSubscriberClaims(String subscriber) throws APIManagementException;
 
-    void addPolicy(Policy policy) throws APIManagementException;
-
     /**
      * Deletes a subscription block condition when the condition key is given
      *
@@ -279,19 +277,6 @@ public interface APIProvider extends APIManager {
      * @return true if Global policy key template already exists
      */
     boolean isGlobalPolicyKeyTemplateExists (GlobalPolicy policy) throws APIManagementException;
-
-    /**
-     * Updates throttle policy in global CEP, gateway and database.
-     * <p>
-     * Database transactions and deployements are not rolledback on failiure.
-     * A flag will be inserted into the database whether the operation was
-     * successfull or not.
-     * </p>
-     *
-     * @param policy updated {@link Policy} object
-     * @throws APIManagementException
-     */
-    void updatePolicy(Policy policy) throws APIManagementException;
 
     /**
      * Adds a new API to the Store
@@ -427,13 +412,6 @@ public interface APIProvider extends APIManager {
     void updateTierPermissions(String tierName, String permissionType, String roles) throws APIManagementException;
 
     /**
-     * Delete the Tier Permissions
-     * @param tierName  Tier Name
-     * @throws APIManagementException
-     */
-    void deleteTierPermissions(String tierName) throws APIManagementException;
-
-    /**
      * Get the list of Tier Permissions
      *
      * @return Tier Permission Set
@@ -441,33 +419,6 @@ public interface APIProvider extends APIManager {
      *          If failed to update subscription status
      */
     Set getTierPermissions() throws APIManagementException;
-
-    /**
-     * Get the given Subscription Throttle Policy Permission
-     *
-     * @return Subscription Throttle Policy
-     * @throws APIManagementException If failed to retrieve Subscription Throttle Policy Permission
-     */
-    Object getThrottleTierPermission(String tierName) throws APIManagementException;
-
-    /**
-     * Get the list of Custom InSequences.
-     * @return List of available sequences
-     * @throws APIManagementException
-     */
-
-
-    /**
-     * Update Throttle Tier Permissions
-     *
-     * @param tierName Tier Name
-     * @param permissionType Permission Type
-     * @param roles Roles
-     * @throws APIManagementException
-     *          If failed to update subscription status
-     */
-    void updateThrottleTierPermissions(String tierName, String permissionType, String roles) throws
-            APIManagementException;
 
     /**
      * Get the list of Throttle Tier Permissions
@@ -661,24 +612,6 @@ public interface APIProvider extends APIManager {
     String[] getPolicyNames(String username, String level) throws APIManagementException;
 
     /**
-     * Delete throttling policy
-     * @param username
-     * @param policyLevel
-     * @param policyName
-     * @throws APIManagementException
-     */
-    void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException;
-
-    boolean hasAttachments(String username, String policyName, String policyLevel, String organization) throws APIManagementException;
-
-    /**
-     *
-     * @return List of block Conditions
-     * @throws APIManagementException
-     */
-    List<BlockConditionsDTO> getBlockConditions() throws APIManagementException;
-
-    /**
      *
      * @return Retrieve a block Condition
      * @throws APIManagementException
@@ -705,16 +638,6 @@ public interface APIProvider extends APIManager {
     boolean updateBlockCondition(int conditionId,String state) throws APIManagementException;
 
     /**
-     * Updates a block condition given its UUID
-     *
-     * @param uuid uuid of the block condition
-     * @param state state of condition
-     * @return state change success or not
-     * @throws APIManagementException
-     */
-    boolean updateBlockConditionByUUID(String uuid,String state) throws APIManagementException;
-
-    /**
      *  Add a block condition
      *
      * @param conditionType type of the condition (IP, Context .. )
@@ -723,18 +646,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     String addBlockCondition(String conditionType, String conditionValue) throws APIManagementException;
-
-    /**
-     *  Add a block condition with condition status
-     *
-     * @param conditionType type of the condition (IP, Context .. )
-     * @param conditionValue value of the condition
-     * @param conditionStatus status of the condition
-     * @return UUID of the new Block Condition
-     * @throws APIManagementException
-     */
-    String addBlockCondition(String conditionType, String conditionValue, boolean conditionStatus)
-            throws APIManagementException;
 
     /**
      * Deletes a block condition given its Id

@@ -509,6 +509,12 @@ public interface APIAdmin {
     GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException;
 
     /**
+     * @return List of block Conditions
+     * @throws APIManagementException
+     */
+    List<BlockConditionsDTO> getBlockConditions(String organization) throws APIManagementException;
+
+    /**
      * Get api throttling policy by uuid
      *
      * @param uuid UUID of the policy
@@ -549,6 +555,92 @@ public interface APIAdmin {
      */
     BlockConditionsDTO getBlockConditionByUUID(String uuid) throws APIManagementException;
 
-    boolean hasAttachments(String username, String policyName, String policyLevel, String organization) throws APIManagementException;
+    /**
+     * Add a block condition with condition status
+     *
+     * @param conditionType   type of the condition (IP, Context .. )
+     * @param conditionValue  value of the condition
+     * @param conditionStatus status of the condition
+     * @param organization    organization
+     * @return UUID of the new Block Condition
+     * @throws APIManagementException
+     */
+    String addBlockCondition(String conditionType, String conditionValue, boolean conditionStatus, String organization)
+            throws APIManagementException;
+
+    void addPolicy(Policy policy, String username) throws APIManagementException;
+
+    /**
+     * Updates a block condition given its UUID
+     *
+     * @param uuid  uuid of the block condition
+     * @param state state of condition
+     * @return state change success or not
+     * @throws APIManagementException
+     */
+    boolean updateBlockConditionByUUID(String uuid, String state) throws APIManagementException;
+
+    /**
+     * Updates throttle policy in global CEP, gateway and database.
+     * <p>
+     * Database transactions and deployements are not rolledback on failiure.
+     * A flag will be inserted into the database whether the operation was
+     * successfull or not.
+     * </p>
+     *
+     * @param policy updated {@link Policy} object
+     * @throws APIManagementException
+     */
+    void updatePolicy(Policy policy) throws APIManagementException;
+
+    /**
+     * Deletes a block condition given its UUID
+     *
+     * @param uuid uuid of the block condition
+     * @return true if successfully deleted
+     * @throws APIManagementException
+     */
+    boolean deleteBlockConditionByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Delete throttling policy
+     *
+     * @param username    username
+     * @param policyLevel policy type
+     * @param policyName  policy name
+     * @throws APIManagementException
+     */
+    void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException;
+
+    boolean hasAttachments(String username, String policyName, String policyLevel, String organization)
+            throws APIManagementException;
+
+    /**
+     * Get the given Subscription Throttle Policy Permission
+     *
+     * @return Subscription Throttle Policy
+     * @throws APIManagementException If failed to retrieve Subscription Throttle Policy Permission
+     */
+    Object getThrottleTierPermission(String tierName, String organization) throws APIManagementException;
+
+    /**
+     * Update Throttle Tier Permissions
+     *
+     * @param tierName       Tier Name
+     * @param permissionType Permission Type
+     * @param roles          Roles
+     * @throws APIManagementException If failed to update subscription status
+     */
+    void updateThrottleTierPermissions(String tierName, String permissionType, String roles, String organization)
+            throws APIManagementException;
+
+    /**
+     * Delete the Tier Permissions
+     *
+     * @param tierName     Tier Name
+     * @param organization Organization
+     * @throws APIManagementException
+     */
+    void deleteTierPermissions(String tierName, String organization) throws APIManagementException;
 
 }

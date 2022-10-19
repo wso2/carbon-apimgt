@@ -2,6 +2,7 @@ package org.wso2.apk.apimgt.impl.dao.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.apk.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.apk.apimgt.impl.dao.BlockConditionDAO;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.BlockConditionAlreadyExistsException;
@@ -64,9 +65,9 @@ public class BlockConditionDAOImpl implements BlockConditionDAO {
                 blockConditionsDTO.setEnabled(resultSet.getBoolean("ENABLED"));
                 blockConditionsDTO.setConditionType(resultSet.getString("TYPE"));
                 blockConditionsDTO.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
-                blockConditionsDTO.setConditionId(resultSet.getInt("CONDITION_ID"));
-                blockConditionsDTO.setUUID(resultSet.getString("UUID"));
-                blockConditionsDTO.setTenantDomain(resultSet.getString("DOMAIN"));
+                blockConditionsDTO.setConditionId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_BLOCK_CONDITION_ID));
+                blockConditionsDTO.setUUID(resultSet.getString(ThrottlePolicyConstants.COLUMN_UUID));
+                blockConditionsDTO.setTenantDomain(resultSet.getString(ThrottlePolicyConstants.COLUMN_ORGANIZATION));
                 blockConditionsDTOList.add(blockConditionsDTO);
             }
         } catch (SQLException e) {
