@@ -132,12 +132,12 @@ public interface PolicyDAO {
     /**
      * Removes a throttling policy from the database
      *
-     * @param policyLevel level of the policy to be deleted
-     * @param policyName  name of the policy
-     * @param tenantId    used to get the tenant id
+     * @param policyLevel  level of the policy to be deleted
+     * @param policyName   name of the policy
+     * @param organization used to get the organization
      * @throws APIManagementException
      */
-    void removeThrottlePolicy(String policyLevel, String policyName, int tenantId)
+    void removeThrottlePolicy(String policyLevel, String policyName, String organization)
             throws APIManagementException;
 
     /**
@@ -220,11 +220,11 @@ public interface PolicyDAO {
      * Get API level policies. Result only contains basic details of the policy,
      * it doesn't contain pipeline information.
      *
-     * @param tenantID policies are selected using tenantID
+     * @param organization policies are selected using organization
      * @return APIPolicy ArrayList
      * @throws APIManagementException
      */
-    APIPolicy[] getAPIPolicies(int tenantID) throws APIManagementException;
+    APIPolicy[] getAPIPolicies(String organization) throws APIManagementException;
 
     /**
      * Get application level polices

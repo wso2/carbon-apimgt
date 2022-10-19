@@ -667,18 +667,18 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public Policy[] getPolicies(int tenantId, String level) throws APIManagementException {
+    public Policy[] getPolicies(String organization, String level) throws APIManagementException {
 
         Policy[] policies = null;
 
         if (PolicyConstants.POLICY_LEVEL_API.equals(level)) {
-            policies = policyDAOImpl.getAPIPolicies(tenantId);
+            policies = policyDAOImpl.getAPIPolicies(organization);
         } else if (PolicyConstants.POLICY_LEVEL_APP.equals(level)) {
-            policies = policyDAOImpl.getApplicationPolicies(tenantId);
+            policies = policyDAOImpl.getApplicationPolicies(organization);
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(level)) {
-            policies = policyDAOImpl.getSubscriptionPolicies(tenantId);
+            policies = policyDAOImpl.getSubscriptionPolicies(organization);
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(level)) {
-            policies = policyDAOImpl.getGlobalPolicies(tenantId);
+            policies = policyDAOImpl.getGlobalPolicies(organization);
         }
 
         //Get the API Manager configurations and check whether the unlimited tier is disabled. If disabled, remove

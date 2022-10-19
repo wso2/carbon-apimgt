@@ -3435,7 +3435,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     public void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException {
-        int tenantID = APIUtil.getTenantId(username);
+        String tenantDomain = APIUtil.getTenantDomain(username);
 
         if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
             //need to load whole policy object to get the pipelines
@@ -3486,7 +3486,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             globalPolicy = policyDAOImpl.getGlobalPolicy(policyName);
         }
         //remove from database
-        policyDAOImpl.removeThrottlePolicy(policyLevel, policyName, tenantID);
+        policyDAOImpl.removeThrottlePolicy(policyLevel, policyName, tenantDomain);
 
         if (globalPolicy != null) {
             //TODO:APK
