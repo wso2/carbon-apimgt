@@ -458,7 +458,7 @@ public interface APIAdmin  {
      */
     Policy[] getPolicies(int tenantId, String level) throws APIManagementException;
 
-    Policy getPolicyByNameAndType(int tenantId, String level, String name) throws APIManagementException;
+    Policy getPolicyByNameAndType(String organization, String level, String name) throws APIManagementException;
 
     /**
      * Get api throttling policy by name

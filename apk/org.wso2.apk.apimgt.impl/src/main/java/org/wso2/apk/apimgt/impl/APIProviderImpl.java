@@ -3134,7 +3134,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             policyDAOImpl.addApplicationPolicy(appPolicy);
             //policy id is not set. retrieving policy to get the id.
-            ApplicationPolicy retrievedPolicy = policyDAOImpl.getApplicationPolicy(appPolicy.getPolicyName(), tenantId);
+            ApplicationPolicy retrievedPolicy = policyDAOImpl.getApplicationPolicy(appPolicy.getPolicyName(), appPolicy.getTenantDomain());
             //TODO:APK
 //            ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
 //                    System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
@@ -3157,7 +3157,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 createMonetizationPlan(subPolicy);
             }
             //policy id is not set. retrieving policy to get the id.
-            SubscriptionPolicy retrievedPolicy = policyDAOImpl.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
+            SubscriptionPolicy retrievedPolicy = policyDAOImpl.getSubscriptionPolicy(subPolicy.getPolicyName(), subPolicy.getTenantDomain());
             //TODO:APK
 //            SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
 //                    System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId, subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
@@ -3333,7 +3333,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
             }
-            APIPolicy existingPolicy = policyDAOImpl.getAPIPolicy(policy.getPolicyName(), policy.getTenantId());
+            APIPolicy existingPolicy = policyDAOImpl.getAPIPolicy(policy.getPolicyName(), policy.getTenantDomain());
             apiPolicy = policyDAOImpl.updateAPIPolicy(apiPolicy);
             //TODO rename level to  resource or appropriate name
 
@@ -3362,7 +3362,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
             policyDAOImpl.updateApplicationPolicy(appPolicy);
             //policy id is not set. retrieving policy to get the id.
-            ApplicationPolicy retrievedPolicy = policyDAOImpl.getApplicationPolicy(appPolicy.getPolicyName(), tenantId);
+            ApplicationPolicy retrievedPolicy = policyDAOImpl.getApplicationPolicy(appPolicy.getPolicyName(), policy.getTenantDomain());
             //TODO:APK
 //            ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
 //                    System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
@@ -3379,7 +3379,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 updateMonetizationPlan(subPolicy);
             }
             //policy id is not set. retrieving policy to get the id.
-            SubscriptionPolicy retrievedPolicy = policyDAOImpl.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
+            SubscriptionPolicy retrievedPolicy = policyDAOImpl.getSubscriptionPolicy(subPolicy.getPolicyName(), subPolicy.getTenantDomain());
             //TODO:APK
 //            SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
 //                    System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
@@ -3439,7 +3439,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
             //need to load whole policy object to get the pipelines
-            APIPolicy policy = policyDAOImpl.getAPIPolicy(policyName, APIUtil.getTenantId(username));
+            APIPolicy policy = policyDAOImpl.getAPIPolicy(policyName, APIUtil.getTenantDomain(username));
             List<Integer> deletedConditionGroupIds = new ArrayList<>();
             for (Pipeline pipeline : policy.getPipelines()) {
                 deletedConditionGroupIds.add(pipeline.getId());
@@ -3452,7 +3452,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 //            APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
 
         } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
-            ApplicationPolicy appPolicy = policyDAOImpl.getApplicationPolicy(policyName, tenantID);
+            ApplicationPolicy appPolicy = policyDAOImpl.getApplicationPolicy(policyName, APIUtil.getTenantDomain(username));
             //TODO:APK
 //            ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
 //                    System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,
@@ -3460,7 +3460,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 //                    appPolicy.getDefaultQuotaPolicy().getType());
 //            APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
-            SubscriptionPolicy subscriptionPolicy = policyDAOImpl.getSubscriptionPolicy(policyName, tenantID);
+            SubscriptionPolicy subscriptionPolicy = policyDAOImpl.getSubscriptionPolicy(policyName, APIUtil.getTenantDomain(username));
             //call the monetization extension point to delete plans if any
             deleteMonetizationPlan(subscriptionPolicy);
             //TODO:APK
@@ -3647,17 +3647,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public APIPolicy getAPIPolicy(String username, String policyName) throws APIManagementException {
-        return policyDAOImpl.getAPIPolicy(policyName, APIUtil.getTenantId(username));
+        return policyDAOImpl.getAPIPolicy(policyName, APIUtil.getTenantDomain(username));
     }
 
     @Override
     public ApplicationPolicy getApplicationPolicy(String username, String policyName) throws APIManagementException {
-        return policyDAOImpl.getApplicationPolicy(policyName, APIUtil.getTenantId(username));
+        return policyDAOImpl.getApplicationPolicy(policyName, APIUtil.getTenantDomain(username));
     }
 
     @Override
     public SubscriptionPolicy getSubscriptionPolicy(String username, String policyName) throws APIManagementException {
-        return policyDAOImpl.getSubscriptionPolicy(policyName, APIUtil.getTenantId(username));
+        return policyDAOImpl.getSubscriptionPolicy(policyName, APIUtil.getTenantDomain(username));
     }
 
     @Override

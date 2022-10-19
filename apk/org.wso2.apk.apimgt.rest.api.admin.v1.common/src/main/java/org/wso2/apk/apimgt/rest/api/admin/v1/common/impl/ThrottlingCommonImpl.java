@@ -1095,13 +1095,13 @@ public class ThrottlingCommonImpl {
             throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        int tenantId = APIUtil.getTenantId(userName);
+        String organization = APIUtil.getTenantDomain(userName);
         Policy policy;
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         List<ThrottlePolicyDetailsDTO> policies = new ArrayList<>();
 
-        policy = apiAdmin.getPolicyByNameAndType(tenantId, policyLevel, policyName);
+        policy = apiAdmin.getPolicyByNameAndType(organization, policyLevel, policyName);
 
         if (policy == null) {
             throw new APIManagementException(

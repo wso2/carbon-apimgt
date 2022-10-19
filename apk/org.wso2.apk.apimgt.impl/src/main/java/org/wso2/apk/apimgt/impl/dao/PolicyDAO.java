@@ -20,12 +20,12 @@ public interface PolicyDAO {
      * Retrieves {@link APIPolicy} with name <code>policyName</code> and tenant Id <code>tenantNId</code>
      * <p>This will retrieve complete details about the APIPolicy with all pipelins and conditions.</p>
      *
-     * @param policyName name of the policy to retrieve from the database
-     * @param tenantId   tenantId of the policy
+     * @param policyName   name of the policy to retrieve from the database
+     * @param organization Organization
      * @return {@link APIPolicy}
      * @throws APIManagementException
      */
-    APIPolicy getAPIPolicy(String policyName, int tenantId) throws APIManagementException;
+    APIPolicy getAPIPolicy(String policyName, String organization) throws APIManagementException;
 
     /**
      * Add a Application level throttling policy to database
@@ -38,12 +38,12 @@ public interface PolicyDAO {
     /**
      * Retrieves {@link ApplicationPolicy} with name <code>policyName</code> and tenant Id <code>tenantNId</code>
      *
-     * @param policyName name of the policy to retrieve from the database
-     * @param tenantId   tenantId of the policy
+     * @param policyName   name of the policy to retrieve from the database
+     * @param organization Organization of the policy
      * @return {@link ApplicationPolicy}
      * @throws APIManagementException
      */
-    ApplicationPolicy getApplicationPolicy(String policyName, int tenantId) throws APIManagementException;
+    ApplicationPolicy getApplicationPolicy(String policyName, String organization) throws APIManagementException;
 
     /**
      * Add a Subscription level throttling policy to database
@@ -56,12 +56,12 @@ public interface PolicyDAO {
     /**
      * Retrieves {@link SubscriptionPolicy} with name <code>policyName</code> and tenant Id <code>tenantNId</code>
      *
-     * @param policyName name of the policy to retrieve from the database
-     * @param tenantId   tenantId of the policy
+     * @param policyName   name of the policy to retrieve from the database
+     * @param organization organization of the policy
      * @return {@link SubscriptionPolicy}
      * @throws APIManagementException
      */
-    SubscriptionPolicy getSubscriptionPolicy(String policyName, int tenantId) throws APIManagementException;
+    SubscriptionPolicy getSubscriptionPolicy(String policyName, String organization) throws APIManagementException;
 
     /**
      * Add a Global level throttling policy to database
@@ -152,7 +152,7 @@ public interface PolicyDAO {
     /**
      * Returns true if Application Policy is attached to Application
      *
-     * @param policyName Policy Name
+     * @param policyName   Policy Name
      * @param organization Organization
      * @return true if key template already exists
      * @throws APIManagementException
@@ -162,7 +162,7 @@ public interface PolicyDAO {
     /**
      * Returns true if Subscription Policy is attached
      *
-     * @param policyName Policy Name
+     * @param policyName   Policy Name
      * @param organization Organization
      * @return true if key template already exists
      * @throws APIManagementException
@@ -172,7 +172,7 @@ public interface PolicyDAO {
     /**
      * Returns true if API Policy is attached
      *
-     * @param policyName Policy Name
+     * @param policyName   Policy Name
      * @param organization Organization
      * @return true if key template already exists
      * @throws APIManagementException
@@ -229,27 +229,27 @@ public interface PolicyDAO {
     /**
      * Get application level polices
      *
-     * @param tenantID polices are selected only belong to specific tenantID
+     * @param organization polices are selected only belong to specific organization
      * @return AppilicationPolicy array list
      */
-    ApplicationPolicy[] getApplicationPolicies(int tenantID) throws APIManagementException;
+    ApplicationPolicy[] getApplicationPolicies(String organization) throws APIManagementException;
 
     /**
      * Get all subscription level policies belongs to specific tenant
      *
-     * @param tenantID tenantID filters the polices belongs to specific tenant
+     * @param organization tenantID filters the polices belongs to specific tenant
      * @return subscriptionPolicy array list
      */
-    SubscriptionPolicy[] getSubscriptionPolicies(int tenantID) throws APIManagementException;
+    SubscriptionPolicy[] getSubscriptionPolicies(String organization) throws APIManagementException;
 
     /**
      * Get all Global level policeis belongs to specific tenant
      *
-     * @param tenantID
+     * @param organization Policy organization
      * @return
      * @throws APIManagementException
      */
-    GlobalPolicy[] getGlobalPolicies(int tenantID) throws APIManagementException;
+    GlobalPolicy[] getGlobalPolicies(String organization) throws APIManagementException;
 
 
 }

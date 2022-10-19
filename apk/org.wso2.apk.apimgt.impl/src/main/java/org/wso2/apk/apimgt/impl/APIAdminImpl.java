@@ -40,7 +40,6 @@ import org.wso2.apk.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.apk.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
-import org.wso2.apk.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -712,24 +711,24 @@ public class APIAdminImpl implements APIAdmin {
     /**
      * Get Policy with corresponding name and type.
      *
-     * @param tenantId tenantId
-     * @param level    policy type
-     * @param name     policy name
+     * @param organization Organization
+     * @param level        policy type
+     * @param name         policy name
      * @return Policy with corresponding name and type
      * @throws APIManagementException
      */
     @Override
-    public Policy getPolicyByNameAndType(int tenantId, String level, String name)
+    public Policy getPolicyByNameAndType(String organization, String level, String name)
             throws APIManagementException {
 
         Policy policy = null;
 
         if (PolicyConstants.POLICY_LEVEL_API.equals(level)) {
-            policy = policyDAOImpl.getAPIPolicy(name, tenantId);
+            policy = policyDAOImpl.getAPIPolicy(name, organization);
         } else if (PolicyConstants.POLICY_LEVEL_APP.equals(level)) {
-            policy = policyDAOImpl.getApplicationPolicy(name, tenantId);
+            policy = policyDAOImpl.getApplicationPolicy(name, organization);
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(level)) {
-            policy = policyDAOImpl.getSubscriptionPolicy(name, tenantId);
+            policy = policyDAOImpl.getSubscriptionPolicy(name, organization);
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(level)) {
             policy = policyDAOImpl.getGlobalPolicy(name);
         }
@@ -759,17 +758,17 @@ public class APIAdminImpl implements APIAdmin {
 
     @Override
     public APIPolicy getAPIPolicy(String username, String policyName) throws APIManagementException {
-        return policyDAOImpl.getAPIPolicy(policyName, APIUtil.getTenantId(username));
+        return policyDAOImpl.getAPIPolicy(policyName, APIUtil.getTenantDomain(username));
     }
 
     @Override
     public ApplicationPolicy getApplicationPolicy(String username, String policyName) throws APIManagementException {
-        return policyDAOImpl.getApplicationPolicy(policyName, APIUtil.getTenantId(username));
+        return policyDAOImpl.getApplicationPolicy(policyName, APIUtil.getTenantDomain(username));
     }
 
     @Override
     public SubscriptionPolicy getSubscriptionPolicy(String username, String policyName) throws APIManagementException {
-        return policyDAOImpl.getSubscriptionPolicy(policyName, APIUtil.getTenantId(username));
+        return policyDAOImpl.getSubscriptionPolicy(policyName, APIUtil.getTenantDomain(username));
     }
 
     @Override
