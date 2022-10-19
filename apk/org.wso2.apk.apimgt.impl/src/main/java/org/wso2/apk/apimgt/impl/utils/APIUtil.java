@@ -114,14 +114,22 @@ import org.wso2.apk.apimgt.api.model.policy.Policy;
 import org.wso2.apk.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.apk.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.apk.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.apk.apimgt.impl.*;
+import org.wso2.apk.apimgt.impl.APIAdminImpl;
+import org.wso2.apk.apimgt.impl.APIConstants;
+import org.wso2.apk.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.apk.apimgt.impl.APIManagerConfigurationServiceImpl;
+import org.wso2.apk.apimgt.impl.ConfigurationHolder;
+import org.wso2.apk.apimgt.impl.ExternalEnvironment;
+import org.wso2.apk.apimgt.impl.PasswordResolverFactory;
 import org.wso2.apk.apimgt.impl.config.APIMConfigService;
 import org.wso2.apk.apimgt.impl.config.APIMConfigServiceImpl;
 import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.apk.apimgt.impl.dao.ScopesDAO;
 import org.wso2.apk.apimgt.impl.dao.WorkflowDAO;
 import org.wso2.apk.apimgt.impl.dao.impl.WorkflowDAOImpl;
+import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.apk.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.apk.apimgt.impl.proxy.ExtendedProxyRoutePlanner;
 import org.wso2.apk.apimgt.user.exceptions.UserException;
 import org.wso2.apk.apimgt.user.mgt.internal.UserManagerHolder;
@@ -265,12 +273,12 @@ public final class APIUtil {
      */
     public static void init() throws APIManagementException {
 
-//        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
-//                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-//        String isPublisherRoleCacheEnabledConfiguration = apiManagerConfiguration
-//                .getFirstProperty(APIConstants.PUBLISHER_ROLE_CACHE_ENABLED);
-//        isPublisherRoleCacheEnabled = isPublisherRoleCacheEnabledConfiguration == null || Boolean
-//                .parseBoolean(isPublisherRoleCacheEnabledConfiguration);
+        ConfigurationHolder apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String isPublisherRoleCacheEnabledConfiguration = apiManagerConfiguration
+                .getFirstProperty(APIConstants.PUBLISHER_ROLE_CACHE_ENABLED);
+        isPublisherRoleCacheEnabled = isPublisherRoleCacheEnabledConfiguration == null || Boolean
+                .parseBoolean(isPublisherRoleCacheEnabledConfiguration);
 //        try {
 //            eventPublisherFactory = ServiceReferenceHolder.getInstance().getEventPublisherFactory();
 //            eventPublishers.putIfAbsent(EventPublisherType.ASYNC_WEBHOOKS,
@@ -483,12 +491,10 @@ public final class APIUtil {
      * @return Globally configured external store set
      */
     public static Set<APIStore> getGlobalExternalStores() {
+
         // First checking if ExternalStores are defined in api-manager.xml
-        //TODO handle configs
-//        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
-//                .getExternalAPIStores();
-        //This is a dummy return value
-        return new APIManagerConfiguration().getExternalAPIStores();
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getExternalAPIStores();
     }
 
     /**
@@ -497,13 +503,12 @@ public final class APIUtil {
      * @return True if document visibility levels are enabled
      */
     public static boolean isDocVisibilityLevelsEnabled() {
+
         // checking if Doc visibility levels enabled in api-manager.xml
-        //TODO handle configs
-//        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-//                getAPIManagerConfiguration().getFirstProperty(
-//                        APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS).equals("true");
-        //This is a dummy return value
-        return true;
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(
+                        APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS).equals("true");
+
     }
 
     /**
@@ -679,15 +684,12 @@ public final class APIUtil {
      */
     public static boolean isPermissionCheckDisabled() {
 
-        APIManagerConfiguration config =
-                //TODO handle configs
-//                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                new APIManagerConfiguration();
-        String disablePermissionCheck = config.getFirstProperty(APIConstants.API_STORE_DISABLE_PERMISSION_CHECK);
+
+        String disablePermissionCheck = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_DISABLE_PERMISSION_CHECK);
         if (disablePermissionCheck == null) {
             return false;
         }
-
         return Boolean.parseBoolean(disablePermissionCheck);
     }
 
@@ -1396,7 +1398,6 @@ public final class APIUtil {
      */
     public static String getRESTApiGroupingExtractorImplementation() {
 
-        //TODO config setup flow
         ConfigurationHolder config = new APIManagerConfigurationServiceImpl(new ConfigurationHolder())
                 .getAPIManagerConfiguration();
         String restApiGroupingExtractor = config
@@ -1414,7 +1415,6 @@ public final class APIUtil {
      */
     public static String getGroupingExtractorImplementation() {
 
-        //TODO config setup flow
         ConfigurationHolder config = new APIManagerConfigurationServiceImpl(new ConfigurationHolder())
                 .getAPIManagerConfiguration();
         return config.getFirstProperty(APIConstants.API_STORE_GROUP_EXTRACTOR_IMPLEMENTATION);
@@ -1568,10 +1568,8 @@ public final class APIUtil {
      */
     public static HttpClient getHttpClient(int port, String protocol) {
 
-        APIManagerConfiguration configuration =
-                //TODO handle configs
-//                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                new APIManagerConfiguration(); //Dummy instantiation
+        ConfigurationHolder configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
 
         String maxTotal = configuration
                 .getFirstProperty(APIConstants.HTTP_CLIENT_MAX_TOTAL);
@@ -1850,10 +1848,8 @@ public final class APIUtil {
     public static boolean isAllowedScope(String scope) {
 
         if (allowedScopes == null) {
-            APIManagerConfiguration configuration =
-                    //TODO handle configs
-//ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                    new APIManagerConfiguration(); //Dummy instantiation
+            ConfigurationHolder configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
 
             // Read scope whitelist from Configuration.
             List<String> whitelist = configuration.getProperty(APIConstants.ALLOWED_SCOPES);
@@ -1883,10 +1879,8 @@ public final class APIUtil {
      */
     public static String getAllowedHeaders() {
 
-        //TODO handle configs
-//        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-//                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS);
-        return ""; //Dummy return value
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS);
     }
 
     /**
@@ -1896,10 +1890,8 @@ public final class APIUtil {
      */
     public static String getAllowedMethods() {
 
-        //TODO handle configs
-//       return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-//                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS);
-        return ""; //Dummy return value
+       return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS);
     }
 
     /**
@@ -1909,11 +1901,8 @@ public final class APIUtil {
      */
     public static String getAllowedOrigins() {
 
-        //TODO handle configs
-//        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-//                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN);
-        return ""; //Dummy return value
-
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN);
     }
 
     /**
@@ -1942,7 +1931,8 @@ public final class APIUtil {
      * @return map of saved values of alert types.
      * @throws APIManagementException
      */
-    public static List<Integer> getSavedAlertTypesIdsByUserNameAndStakeHolder(String userName, String stakeHolder) throws APIManagementException {
+    public static List<Integer> getSavedAlertTypesIdsByUserNameAndStakeHolder(String userName, String stakeHolder)
+            throws APIManagementException {
 
         List<Integer> list;
         list = ApiMgtDAO.getInstance().getSavedAlertTypesIdsByUserNameAndStakeHolder(userName, stakeHolder);
@@ -1958,7 +1948,8 @@ public final class APIUtil {
      * @return List of eamil list.
      * @throws APIManagementException
      */
-    public static List<String> retrieveSavedEmailList(String userName, String stakeHolder) throws APIManagementException {
+    public static List<String> retrieveSavedEmailList(String userName, String stakeHolder)
+            throws APIManagementException {
 
         List<String> list;
         list = ApiMgtDAO.getInstance().retrieveSavedEmailList(userName, stakeHolder);
@@ -1973,12 +1964,10 @@ public final class APIUtil {
      */
     public static boolean isEnabledUnlimitedTier() {
 
-        //TODO handle configs
-//        ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
-//                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
-//                .getThrottleProperties();
-//        return throttleProperties.isEnableUnlimitedTier();
-        return false; //Dummy return value
+        ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getThrottleProperties();
+        return throttleProperties.isEnableUnlimitedTier();
     }
 
     /**
@@ -2304,11 +2293,8 @@ public final class APIUtil {
 
         if (multiGrpAppSharing == null) {
 
-            APIManagerConfiguration config =
-                    //TODO handle configs
-//                    ServiceReferenceHolder.getInstance().
-//                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                    new APIManagerConfiguration(); //Dummy instantiation
+            ConfigurationHolder config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                    getAPIManagerConfiguration();
 
             String groupIdExtractorClass = config.getFirstProperty(
                     APIConstants.API_STORE_GROUP_EXTRACTOR_IMPLEMENTATION);
@@ -2325,11 +2311,7 @@ public final class APIUtil {
                         multiGrpAppSharing = "false";
                     }
                     // if there is a exception the default flow will work hence ingnoring the applications
-                } catch (InstantiationException e) {
-                    multiGrpAppSharing = "false";
-                } catch (IllegalAccessException e) {
-                    multiGrpAppSharing = "false";
-                } catch (ClassNotFoundException e) {
+                } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                     multiGrpAppSharing = "false";
                 }
             } else {
@@ -2393,19 +2375,12 @@ public final class APIUtil {
      *
      * @param property The configuration to get from api-manager.xml
      * @return The configuration read from api-manager.xml or else null
-     * @throws APIManagementException Throws if the registry resource doesn't exist
-     *                                or the content cannot be parsed to JSON
      */
-    public static String getOAuthConfigurationFromAPIMConfig(String property)
-            throws APIManagementException {
+    public static String getOAuthConfigurationFromAPIMConfig(String property) {
 
         //If tenant registry doesn't have the configuration, then read it from api-manager.xml
-        APIManagerConfiguration apimConfig =
-                //TODO handle configs
-//                ServiceReferenceHolder.getInstance()
-//                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                new APIManagerConfiguration();
-        String oAuthConfiguration = apimConfig.getFirstProperty(APIConstants.OAUTH_CONFIGS + property);
+        String oAuthConfiguration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getFirstProperty(APIConstants.OAUTH_CONFIGS + property);
 
         if (!StringUtils.isBlank(oAuthConfiguration)) {
             return oAuthConfiguration;
@@ -2583,10 +2558,8 @@ public final class APIUtil {
 
     public static String getStoreUrl() {
 
-        //TODO handle configs
-//        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-//                getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_URL);
-        return "";
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getFirstProperty(APIConstants.API_STORE_URL);
     }
 
     // Take organization as a parameter
@@ -2608,10 +2581,8 @@ public final class APIUtil {
      */
     public static Map<String, Environment> getReadOnlyEnvironments() {
 
-        //TODO handle configs
-//        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-//                .getAPIManagerConfiguration().getApiGatewayEnvironments();
-        return new HashMap<>(); //Dummy return
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getApiGatewayEnvironments();
     }
 
     /**
@@ -2659,10 +2630,8 @@ public final class APIUtil {
 
     public static JSONArray getMonetizationAttributes() {
 
-        //TODO handle configs
-//        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
-//                .getMonetizationConfigurationDto().getMonetizationAttributes();
-        return new JSONArray(); //Dummy return
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getMonetizationConfigurationDto().getMonetizationAttributes();
     }
 
     /**
@@ -2710,12 +2679,9 @@ public final class APIUtil {
      */
     public static String getSkipRolesByRegex() {
 
-        //TODO handle configs
-//        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-//                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-//        String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
-//        return skipRolesByRegex;
-        return ""; //Dummy return value
+        ConfigurationHolder config = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        return config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
     }
 
     public static Map<String, Object> getUserProperties(String userNameWithoutChange) throws APIManagementException {
@@ -2731,8 +2697,7 @@ public final class APIUtil {
 
     public static boolean isDevPortalAnonymous() {
 
-        //TODO config setup flow
-        ConfigurationHolder config = new APIManagerConfigurationServiceImpl(new ConfigurationHolder())
+        ConfigurationHolder config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         String anonymousMode = config.getFirstProperty(APIConstants.API_DEVPORTAL_ANONYMOUS_MODE);
         if (anonymousMode == null) {
@@ -3116,10 +3081,8 @@ public final class APIUtil {
 
     public static boolean isCrossTenantSubscriptionsEnabled() {
 
-        APIManagerConfiguration apiManagerConfiguration =
-                //TODO handle configs
-//               ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                new APIManagerConfiguration();
+        ConfigurationHolder apiManagerConfiguration =
+               ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String crossTenantSubscriptionProperty =
                 apiManagerConfiguration.getFirstProperty(APIConstants.API_DEVPORTAL_ENABLE_CROSS_TENANT_SUBSCRIPTION);
         if (StringUtils.isNotEmpty(crossTenantSubscriptionProperty)) {
@@ -3130,16 +3093,42 @@ public final class APIUtil {
 
     public static boolean isDefaultApplicationCreationEnabled() {
 
-        APIManagerConfiguration apiManagerConfiguration =
-                //TODO handle configs
-//               ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                new APIManagerConfiguration();
+        ConfigurationHolder apiManagerConfiguration =
+               ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String createDefaultApp = apiManagerConfiguration
                 .getFirstProperty(APIConstants.API_STORE_CREATE_DEFAULT_APPLICATION);
         if (StringUtils.isNotEmpty(createDefaultApp)) {
             return Boolean.parseBoolean(createDefaultApp);
         }
         return true;
+    }
+
+    /**
+     * Check whether roles exist for the user.
+     *
+     * @param userName
+     * @param roleName
+     * @return
+     * @throws APIManagementException
+     */
+    public static boolean isRoleExistForUser(String userName, String roleName) throws APIManagementException {
+
+        boolean foundUserRole = false;
+        String[] userRoleList = getListOfRoles(userName);
+        String[] inputRoles = roleName.split(",");
+        if (log.isDebugEnabled()) {
+            log.debug("isRoleExistForUser(): User Roles " + Arrays.toString(userRoleList));
+            log.debug("isRoleExistForUser(): InputRoles Roles " + Arrays.toString(inputRoles));
+        }
+        if (inputRoles != null) {
+            for (String inputRole : inputRoles) {
+                if (org.wso2.carbon.apimgt.impl.utils.APIUtil.compareRoleList(userRoleList, inputRole)) {
+                    foundUserRole = true;
+                    break;
+                }
+            }
+        }
+        return foundUserRole;
     }
 
     /**
@@ -3269,10 +3258,8 @@ public final class APIUtil {
         }
         String fileType = FilenameUtils.getExtension(filename);
         List<String> list = null;
-        APIManagerConfiguration apiManagerConfiguration =
-                //TODO handle configs
-//                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                new APIManagerConfiguration();
+        ConfigurationHolder apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String supportedTypes = apiManagerConfiguration
                 .getFirstProperty(APIConstants.API_PUBLISHER_SUPPORTED_DOC_TYPES);
         if (!StringUtils.isEmpty(supportedTypes)) {
@@ -3339,10 +3326,8 @@ public final class APIUtil {
      */
     public static Map<String, Environment> getReadOnlyGatewayEnvironments() {
 
-        //TODO handle configs
-//        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-//                .getAPIManagerConfiguration().getApiGatewayEnvironments();
-        return new HashMap<>(); //This is a dummy return value
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getApiGatewayEnvironments();
     }
 
     /**

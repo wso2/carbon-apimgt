@@ -69,7 +69,7 @@ public class APIManagerAnalyticsConfiguration {
         return APIManagerAnalyticsConfigurationHolder.INSTANCE;
     }
 
-    public void setAPIManagerConfiguration(APIManagerConfiguration config){
+    public void setAPIManagerConfiguration(ConfigurationHolder config){
         String usageEnabled = config.getFirstProperty(APIConstants.API_USAGE_ENABLED);
         this.analyticsEnabled = JavaUtils.isTrueExplicitly(usageEnabled);
         if (this.analyticsEnabled) {

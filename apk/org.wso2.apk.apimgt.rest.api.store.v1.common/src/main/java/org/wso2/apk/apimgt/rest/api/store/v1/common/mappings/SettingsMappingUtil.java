@@ -17,12 +17,10 @@
  */
 package org.wso2.apk.apimgt.rest.api.store.v1.common.mappings;
 
-import org.wso2.apk.apimgt.rest.api.store.v1.dto.SettingsDTO;
-import org.wso2.apk.apimgt.rest.api.store.v1.dto.SettingsIdentityProviderDTO;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.model.Environment;
 import org.wso2.apk.apimgt.impl.APIConstants;
-import org.wso2.apk.apimgt.impl.APIManagerConfiguration;
+import org.wso2.apk.apimgt.impl.ConfigurationHolder;
 import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
@@ -56,7 +54,7 @@ public class SettingsMappingUtil {
         identityProviderDTO.setExternal(APIUtil.getIdentityProviderConfig() != null);
         settingsDTO.setIdentityProvider(identityProviderDTO);
         settingsDTO.setIsAnonymousModeEnabled(anonymousEnabled);
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+        ConfigurationHolder config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         boolean enableChangePassword =
                 Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENABLE_CHANGE_PASSWORD));

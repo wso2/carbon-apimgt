@@ -19,8 +19,8 @@
 package org.wso2.apk.apimgt.rest.api.publisher.v1.common.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.APIProvider;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.model.Scope;
 import org.wso2.apk.apimgt.api.model.SharedScopeUsage;

@@ -37,8 +37,9 @@ import org.wso2.apk.apimgt.api.model.ResourceFile;
 import org.wso2.apk.apimgt.api.model.Scope;
 import org.wso2.apk.apimgt.api.model.Tier;
 import org.wso2.apk.apimgt.impl.APIConstants;
-import org.wso2.apk.apimgt.impl.APIManagerConfiguration;
+import org.wso2.apk.apimgt.impl.ConfigurationHolder;
 import org.wso2.apk.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.apk.apimgt.rest.api.util.dto.ErrorDTO;
@@ -384,12 +385,11 @@ public class RestApiUtil {
      */
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> getAllowedURIsToMethodsMapFromConfig()
             throws APIManagementException {
+
         Hashtable<org.wso2.uri.template.URITemplate, List<String>> uriToMethodsMap = new Hashtable<>();
 
-        // TODO :// read configs
-        APIManagerConfiguration apiManagerConfiguration = null;
-//                ServiceReferenceHolder.getInstance()
-//                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        ConfigurationHolder apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         List<String> uriList = apiManagerConfiguration
                 .getProperty(APIConstants.API_RESTAPI_ALLOWED_URI_URI);
         List<String> methodsList = apiManagerConfiguration
@@ -448,10 +448,8 @@ public class RestApiUtil {
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> getETagSkipListToMethodsMapFromConfig()
             throws APIManagementException {
         Hashtable<org.wso2.uri.template.URITemplate, List<String>> uriToMethodsMap = new Hashtable<>();
-        APIManagerConfiguration apiManagerConfiguration = null;
-        // TODO: // Read Configs
-//                ServiceReferenceHolder.getInstance()
-//                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        ConfigurationHolder apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         List<String> uriList = apiManagerConfiguration
                 .getProperty(APIConstants.API_RESTAPI_ETAG_SKIP_URI_URI);
         List<String> methodsList = apiManagerConfiguration

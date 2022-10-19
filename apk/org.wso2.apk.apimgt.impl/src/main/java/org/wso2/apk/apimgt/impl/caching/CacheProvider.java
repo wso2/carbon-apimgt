@@ -25,7 +25,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.apk.apimgt.impl.APIConstants;
-import org.wso2.apk.apimgt.impl.APIManagerConfiguration;
 import org.wso2.apk.apimgt.impl.ConfigurationHolder;
 import org.wso2.apk.apimgt.impl.config.APIMConfigService;
 import org.wso2.apk.apimgt.impl.config.APIMConfigServiceImpl;
