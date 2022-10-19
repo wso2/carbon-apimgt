@@ -47,6 +47,7 @@
         <module>org.wso2.apk.apimgt.rest.api.store.v1.common</module>
         <module>org.wso2.apk.apimgt.rest.api.common</module>
         <module>org.wso2.apk.apimgt.rest.api.util</module>
+        <module>org.wso2.apk.apimgt.service.init</module>
         <module>org.wso2.apk.apimgt.user</module>
     </modules>
     <dependencyManagement>
