@@ -2704,6 +2704,8 @@ public final class APIConstants {
         public static final String SUBSCRIBER_TOPIC_PROPERTY = "SUBSCRIBER_TOPIC";
         public static final String SUBSCRIBER_APPLICATION_ID_PROPERTY = "SUBSCRIBER_APPLICATION_ID";
         public static final String PAYLOAD_PROPERTY = "ORIGINAL_PAYLOAD";
+
+        public static final String SUBSCRIPTION_PARAMETER_PROPERTY = "SUBSCRIPTION_PARAMETERS";
     }
 
     public enum PolicyType {
