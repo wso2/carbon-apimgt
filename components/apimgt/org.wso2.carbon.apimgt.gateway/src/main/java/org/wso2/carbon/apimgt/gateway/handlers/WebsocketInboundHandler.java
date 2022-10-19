@@ -169,6 +169,19 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 if (responseDTO.isCloseConnection()) {
                     //remove inbound message context from data holder
                     InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().remove(channelId);
+                    Attribute<Object> attributes = ctx.channel().attr(AttributeKey.valueOf(API_PROPERTIES));
+                    if (attributes != null) {
+                        try {
+                            HashMap apiProperties = (HashMap) attributes.get();
+                            if (apiProperties != null && !apiProperties.containsKey(WEB_SC_API_UT)) {
+                                apiProperties.put(WEB_SC_API_UT, responseDTO.getErrorCode());
+                            }
+                        } catch (ClassCastException e) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Unable to cast attributes to a map", e);
+                            }
+                        }
+                    }
                     if (log.isDebugEnabled()) {
                         log.debug("Error while handling Outbound Websocket frame. Closing connection for "
                                 + ctx.channel().toString());
