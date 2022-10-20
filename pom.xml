@@ -1348,7 +1348,7 @@
                 <version>${reflection.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.hibernate</groupId>
+                <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
                 <version>${hibernate-validator.version}</version>
             </dependency>
@@ -2081,7 +2081,7 @@
         <slf4j.api.version>1.7.29</slf4j.api.version>
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
         <spring-web.version>5.1.13.RELEASE</spring-web.version>
-        <hibernate-validator.version>5.4.3.Final</hibernate-validator.version>
+        <hibernate-validator.version>6.0.23.Final</hibernate-validator.version>
         <swagger-jaxrs.version>1.6.1</swagger-jaxrs.version>
         <junit.version>4.13.1</junit.version>
         <opensaml3.version>3.3.1</opensaml3.version>
@@ -2129,7 +2129,7 @@
         <fasterxml.jackson.version>2.13.1</fasterxml.jackson.version>
         <fasterxml.jackson.databind.version>2.13.1</fasterxml.jackson.databind.version>
         <fasterxml.jackson.core.version>2.13.1</fasterxml.jackson.core.version>
-        <javax.validation-api>1.1.0.Final</javax.validation-api>
+        <javax.validation-api>2.0.1.Final</javax.validation-api>
         <carbon.broker.version>3.3.26</carbon.broker.version>
         <andes.version>3.3.24</andes.version>
         <waffle-jna.version>1.6.wso2v7</waffle-jna.version>
