@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -389,7 +390,7 @@ public class APIManagerConfiguration {
                     redisConfig.setConnectionTimeout(Integer.parseInt(redisConnectionTimeout.getText()));
                     redisConfig.setSslEnabled(Boolean.parseBoolean(redisIsSslEnabled.getText()));
                 }
-                if (propertiesElement !=null){
+                if (propertiesElement != null) {
                     Iterator<OMElement> properties = propertiesElement.getChildElements();
                     if (properties != null) {
                         while (properties.hasNext()) {
@@ -1582,49 +1583,88 @@ public class APIManagerConfiguration {
         OMElement usagePublisherElement =
                 element.getFirstChildWithName(new QName(APIConstants.Monetization.USAGE_PUBLISHER_CONFIG));
         if (usagePublisherElement != null) {
-            OMElement choreoInsightAPIEndpointElement = usagePublisherElement.getFirstChildWithName(
-                    new QName(APIConstants.Monetization.INSIGHT_API_ENDPOINT_CONFIG));
-            if (choreoInsightAPIEndpointElement != null) {
-                monetizationConfigurationDto.setInsightAPIEndpoint(choreoInsightAPIEndpointElement.getText());
-            }
+            if (analyticsProperties.get("type") != null && !analyticsProperties.get("type").trim().equals("")) {
+                OMElement analyticsHost = usagePublisherElement.getFirstChildWithName(
+                        new QName(APIConstants.Monetization.ANALYTICS_HOST));
 
-            OMElement analyticsAccessTokenElement = usagePublisherElement.getFirstChildWithName(
-                    new QName(APIConstants.Monetization.ANALYTICS_ACCESS_TOKEN_CONFIG));
-            if (analyticsAccessTokenElement != null) {
-                String analyticsAccessToken = MiscellaneousUtil.resolve(analyticsAccessTokenElement, secretResolver);
-                monetizationConfigurationDto.setAnalyticsAccessToken(analyticsAccessToken);
-            }
+                if (analyticsHost != null) {
+                    monetizationConfigurationDto.setAnalyticsHost(analyticsHost.getText());
+                }
 
-            OMElement choreoTokenEndpointElement = usagePublisherElement.getFirstChildWithName(
-                    new QName(APIConstants.Monetization.CHOREO_TOKEN_URL_CONFIG));
-            if (choreoTokenEndpointElement != null) {
-                monetizationConfigurationDto.setChoreoTokenEndpoint(choreoTokenEndpointElement.getText());
-            }
+                OMElement analyticsPort = usagePublisherElement.getFirstChildWithName(
+                        new QName(APIConstants.Monetization.ANALYTICS_PORT));
 
-            OMElement consumerKeyElement = usagePublisherElement.getFirstChildWithName(
-                    new QName(APIConstants.Monetization.CHOREO_INSIGHT_APP_CONSUMER_KEY_CONFIG));
-            if (consumerKeyElement != null) {
-                String consumerKeyToken = MiscellaneousUtil.resolve(consumerKeyElement, secretResolver);
-                monetizationConfigurationDto.setInsightAppConsumerKey(consumerKeyToken);
-            }
+                if (analyticsPort != null) {
+                    monetizationConfigurationDto.setAnalyticsPort(Integer.parseInt(analyticsPort.getText()));
+                }
 
-            OMElement consumerSecretElement = usagePublisherElement.getFirstChildWithName(
-                    new QName(APIConstants.Monetization.CHOREO_INSIGHT_APP_CONSUMER_SECRET_CONFIG));
-            if (consumerSecretElement != null) {
-                String consumerSecretToken = MiscellaneousUtil.resolve(consumerSecretElement, secretResolver);
-                monetizationConfigurationDto.setInsightAppConsumerSecret(consumerSecretToken);
-            }
+                OMElement analyticsUsername = usagePublisherElement.getFirstChildWithName(
+                        new QName(APIConstants.Monetization.ANALYTICS_USERNAME));
 
-            OMElement granularityElement = usagePublisherElement.getFirstChildWithName(
-                    new QName(APIConstants.Monetization.USAGE_PUBLISHER_GRANULARITY_CONFIG));
-            if (granularityElement != null) {
-                monetizationConfigurationDto.setGranularity(granularityElement.getText());
-            }
+                if (analyticsUsername != null) {
+                    monetizationConfigurationDto.setAnalyticsUserName(analyticsUsername.getText());
+                }
 
-            OMElement publishTimeDurationElement = usagePublisherElement.getFirstChildWithName(
-                    new QName(APIConstants.Monetization.FROM_TIME_CONFIGURATION_PROPERTY));
-            if (publishTimeDurationElement != null) {
-                monetizationConfigurationDto.setPublishTimeDurationInDays(publishTimeDurationElement.getText());
+                OMElement analyticsPassword = usagePublisherElement.getFirstChildWithName(
+                        new QName(APIConstants.Monetization.ANALYTICS_PASSWORD));
+
+                if (analyticsPassword != null) {
+                    monetizationConfigurationDto.setAnalyticsPassword(
+                            analyticsPassword.getText().getBytes(StandardCharsets.UTF_8));
+                }
+
+                OMElement analyticsIndexName = usagePublisherElement.getFirstChildWithName(
+                        new QName(APIConstants.Monetization.ANALYTICS_INDEX_NAME));
+
+                if (analyticsIndexName != null) {
+                    monetizationConfigurationDto.setAnalyticsIndexName(analyticsIndexName.getText());
+                }
+            } else {
+                OMElement choreoInsightAPIEndpointElement = usagePublisherElement.getFirstChildWithName(
+                        new QName(APIConstants.Monetization.INSIGHT_API_ENDPOINT_CONFIG));
+                if (choreoInsightAPIEndpointElement != null) {
+                    monetizationConfigurationDto.setInsightAPIEndpoint(choreoInsightAPIEndpointElement.getText());
+                }
+
+                OMElement analyticsAccessTokenElement = usagePublisherElement.getFirstChildWithName(
+                        new QName(APIConstants.Monetization.ANALYTICS_ACCESS_TOKEN_CONFIG));
+                if (analyticsAccessTokenElement != null) {
+                    String analyticsAccessToken = MiscellaneousUtil.resolve(analyticsAccessTokenElement,
+                            secretResolver);
+                    monetizationConfigurationDto.setAnalyticsAccessToken(analyticsAccessToken);
+                }
+
+                OMElement choreoTokenEndpointElement = usagePublisherElement.getFirstChildWithName(
+                        new QName(APIConstants.Monetization.CHOREO_TOKEN_URL_CONFIG));
+                if (choreoTokenEndpointElement != null) {
+                    monetizationConfigurationDto.setChoreoTokenEndpoint(choreoTokenEndpointElement.getText());
+                }
+
+                OMElement consumerKeyElement = usagePublisherElement.getFirstChildWithName(
+                        new QName(APIConstants.Monetization.CHOREO_INSIGHT_APP_CONSUMER_KEY_CONFIG));
+                if (consumerKeyElement != null) {
+                    String consumerKeyToken = MiscellaneousUtil.resolve(consumerKeyElement, secretResolver);
+                    monetizationConfigurationDto.setInsightAppConsumerKey(consumerKeyToken);
+                }
+
+                OMElement consumerSecretElement = usagePublisherElement.getFirstChildWithName(
+                        new QName(APIConstants.Monetization.CHOREO_INSIGHT_APP_CONSUMER_SECRET_CONFIG));
+                if (consumerSecretElement != null) {
+                    String consumerSecretToken = MiscellaneousUtil.resolve(consumerSecretElement, secretResolver);
+                    monetizationConfigurationDto.setInsightAppConsumerSecret(consumerSecretToken);
+                }
+
+                OMElement granularityElement = usagePublisherElement.getFirstChildWithName(
+                        new QName(APIConstants.Monetization.USAGE_PUBLISHER_GRANULARITY_CONFIG));
+                if (granularityElement != null) {
+                    monetizationConfigurationDto.setGranularity(granularityElement.getText());
+                }
+
+                OMElement publishTimeDurationElement = usagePublisherElement.getFirstChildWithName(
+                        new QName(APIConstants.Monetization.FROM_TIME_CONFIGURATION_PROPERTY));
+                if (publishTimeDurationElement != null) {
+                    monetizationConfigurationDto.setPublishTimeDurationInDays(publishTimeDurationElement.getText());
+                }
             }
         }
 
