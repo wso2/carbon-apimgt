@@ -66,7 +66,6 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String sandboxMaxTps;
     private String authorizationHeader;
     private String apiSecurity; // ?check whether same to private List<String> securityScheme = new ArrayList<>();
-
     private boolean enableSchemaValidation;
     private boolean enableSubscriberVerification;
     private boolean enableStore;
