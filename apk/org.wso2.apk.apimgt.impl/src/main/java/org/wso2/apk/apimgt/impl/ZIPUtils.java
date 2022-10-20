@@ -18,8 +18,7 @@
 
 package org.wso2.apk.apimgt.impl;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.apk.apimgt.api.APIManagementException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,6 +29,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class ZIPUtils {
+
+    private ZIPUtils() {
+        //To hide the default constructor
+    }
 
     /**
      * Creates a zip archive from the provided folder
