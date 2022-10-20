@@ -27,8 +27,9 @@ import org.wso2.apk.apimgt.api.model.APIIdentifier;
 import org.wso2.apk.apimgt.api.model.APIProduct;
 import org.wso2.apk.apimgt.api.model.Application;
 import org.wso2.apk.apimgt.impl.APIConstants;
-import org.wso2.apk.apimgt.impl.APIManagerConfiguration;
+import org.wso2.apk.apimgt.impl.ConfigurationHolder;
 import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 
@@ -44,10 +45,9 @@ public class RestAPIStoreUtils {
     private static boolean isStoreCacheEnabled;
 
     static {
-        // TODO: Read configs
-        APIManagerConfiguration apiManagerConfiguration = null;
-//        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
-//                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+        ConfigurationHolder apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String isStoreCacheEnabledConfiguration = apiManagerConfiguration
                 .getFirstProperty(APIConstants.SCOPE_CACHE_ENABLED);
         isStoreCacheEnabled =
@@ -101,11 +101,9 @@ public class RestAPIStoreUtils {
 
         if (application.getSubscriber().getName().equals(username)) {
             return true;
-        } else if (application.getSubscriber().getName().toLowerCase().equals(username.toLowerCase())) {
-            APIManagerConfiguration configuration = null;
-            // TODO: // Read Configs
-//            ServiceReferenceHolder.getInstance()
-//                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        } else if (application.getSubscriber().getName().equalsIgnoreCase(username.toLowerCase())) {
+            ConfigurationHolder configuration = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
             String comparisonConfig = configuration
                     .getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS);
             return (StringUtils.isNotEmpty(comparisonConfig) && Boolean.valueOf(comparisonConfig));

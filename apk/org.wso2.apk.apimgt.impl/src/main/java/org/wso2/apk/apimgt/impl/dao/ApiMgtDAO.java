@@ -109,6 +109,7 @@ import org.wso2.apk.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.apk.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.apk.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.apk.apimgt.impl.factory.SQLConstantManagerFactory;
+import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.impl.utils.VHostUtils;
@@ -157,20 +158,11 @@ public class ApiMgtDAO {
 
     private ApiMgtDAO() {
 
-        String caseSensitiveComparison = "false";
+        String caseSensitiveComparison = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS);
 
-        // TODO:Read from Config
-//        ServiceReferenceHolder.getInstance()
-//                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-//        String caseSensitiveComparison = ServiceReferenceHolder.getInstance().
-//                getAPIManagerConfigurationService().getAPIManagerConfiguration()
-//                .getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS);
-
-
-        if (caseSensitiveComparison != null) {
-            forceCaseInsensitiveComparisons = Boolean.parseBoolean(caseSensitiveComparison);
-        }
-
+        forceCaseInsensitiveComparisons = Boolean.parseBoolean(caseSensitiveComparison);
         multiGroupAppSharingEnabled = APIUtil.isMultiGroupAppSharingEnabled();
     }
 

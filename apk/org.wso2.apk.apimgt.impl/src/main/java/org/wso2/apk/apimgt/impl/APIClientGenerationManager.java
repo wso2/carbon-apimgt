@@ -26,11 +26,9 @@ import org.apache.commons.logging.LogFactory;
 import org.openapitools.codegen.ClientOptInput;
 import org.openapitools.codegen.DefaultGenerator;
 import org.openapitools.codegen.config.CodegenConfigurator;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.user.exceptions.UserException;
-import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.apk.apimgt.user.exceptions.UserException;
+import org.wso2.apk.apimgt.user.mgt.internal.UserManagerHolder;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -163,7 +161,7 @@ public class APIClientGenerationManager {
      * @return supported languages for SDK generation
      */
     public String getSupportedSDKLanguages() {
-        APIManagerConfiguration config = getAPIManagerConfiguration();
+        ConfigurationHolder config = getAPIManagerConfiguration();
         String supportedLanguages = config.getFirstProperty(APIConstants.CLIENT_CODEGEN_SUPPORTED_LANGUAGES);
         return supportedLanguages;
 
@@ -179,7 +177,7 @@ public class APIClientGenerationManager {
      */
     private void generateClient(String apiName, String specLocation, String sdkLanguage, String temporaryOutputPath) {
 
-        APIManagerConfiguration config = getAPIManagerConfiguration();
+        ConfigurationHolder config = getAPIManagerConfiguration();
         CodegenConfigurator codegenConfigurator = new CodegenConfigurator();
         codegenConfigurator.setGroupId(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_GROUPID));
         codegenConfigurator.setArtifactId(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_ARTIFACTID) + apiName);
@@ -229,26 +227,26 @@ public class APIClientGenerationManager {
         return UserManagerHolder.getUserManager().getTenantId(requestedTenant);
     }
 
-    /**
-     * Get governance user registry
-     *
-     * @param apiProvider API Provider name
-     * @param tenantId Tenant ID
-     * @return User Registry
-     * @throws RegistryException if an error occurs when getting UserRegistry
-     */
-    protected UserRegistry getGovernanceUserRegistry(String apiProvider, int tenantId) throws RegistryException {
-        return ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(apiProvider,
-                tenantId);
-
-    }
+//    /**
+//     * Get governance user registry
+//     *
+//     * @param apiProvider API Provider name
+//     * @param tenantId Tenant ID
+//     * @return User Registry
+//     * @throws RegistryException if an error occurs when getting UserRegistry
+//     */
+//    protected UserRegistry getGovernanceUserRegistry(String apiProvider, int tenantId) throws RegistryException {
+//        return ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(apiProvider,
+//                tenantId);
+//
+//    }
 
     /**
      * Returns API manager configurations.
      *
      * @return APIManagerConfiguration object
      */
-    protected APIManagerConfiguration getAPIManagerConfiguration() {
+    protected ConfigurationHolder getAPIManagerConfiguration() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
     }

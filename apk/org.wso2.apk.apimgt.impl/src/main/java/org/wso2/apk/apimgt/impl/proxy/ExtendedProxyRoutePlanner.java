@@ -27,20 +27,20 @@ import org.apache.http.HttpRequest;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.protocol.HttpContext;
 import org.wso2.apk.apimgt.impl.APIConstants;
-import org.wso2.apk.apimgt.impl.APIManagerConfiguration;
+import org.wso2.apk.apimgt.impl.ConfigurationHolder;
 
 /**
  * Extended ProxyRoutePlanner class to handle non proxy hosts implementation
  */
 public class ExtendedProxyRoutePlanner extends DefaultProxyRoutePlanner {
     private static final Log log = LogFactory.getLog(ExtendedProxyRoutePlanner.class);
-    APIManagerConfiguration configuration;
+    ConfigurationHolder configuration;
     String nonProxyHosts;
     String proxyHost;
     String proxyPort;
     String protocol;
 
-    public ExtendedProxyRoutePlanner(HttpHost host, APIManagerConfiguration configuration) {
+    public ExtendedProxyRoutePlanner(HttpHost host, ConfigurationHolder configuration) {
         super(host);
         this.configuration = configuration;
         this.nonProxyHosts = configuration.getFirstProperty(APIConstants.NON_PROXY_HOSTS);

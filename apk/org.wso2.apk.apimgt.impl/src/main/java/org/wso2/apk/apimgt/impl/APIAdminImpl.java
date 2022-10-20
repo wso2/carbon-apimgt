@@ -222,10 +222,8 @@ public class APIAdminImpl implements APIAdmin {
      */
     public Monetization getMonetizationImplClass() throws APIManagementException {
 
-        // ToDO:// read configs
-        APIManagerConfiguration configuration = null;
-//        configuration= org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder.
-//                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        ConfigurationHolder configuration = ServiceReferenceHolder.
+                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
         Monetization monetizationImpl = null;
         if (configuration == null) {
             log.error("API Manager configuration is not initialized.");
@@ -504,10 +502,9 @@ public class APIAdminImpl implements APIAdmin {
      */
     public Workflow[] getworkflows(String workflowType, String status, String tenantDomain)
             throws APIManagementException {
-        // TODO: // read from Config
-        WorkflowProperties workflowConfig = null;
-//        WorkflowProperties workflowConfig = org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder.
-//                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
+
+        WorkflowProperties workflowConfig = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getWorkflowProperties();
         if (workflowConfig.isListTasks()) {
             return workflowDAOImpl.getWorkflows(workflowType, status, tenantDomain);
         } else {
@@ -527,10 +524,8 @@ public class APIAdminImpl implements APIAdmin {
     public Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status,
                                                                       String tenantDomain) throws APIManagementException {
         Workflow workflow = null;
-        WorkflowProperties workflowConfig = null;
-        // TODO: // read from Config
-//        WorkflowProperties workflowConfig = org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder.
-//                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
+        WorkflowProperties workflowConfig = ServiceReferenceHolder.
+                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
         if (workflowConfig.isListTasks()) {
             workflow = workflowDAOImpl.getWorkflowReferenceByExternalWorkflowReferenceID(externelWorkflowRef,
                     status, tenantDomain);

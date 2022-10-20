@@ -18,11 +18,18 @@
 
 package org.wso2.apk.apimgt.impl;
 
+import org.wso2.apk.apimgt.api.model.APIStore;
 import org.wso2.apk.apimgt.impl.dto.DatasourceProperties;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.apk.apimgt.impl.dto.WorkflowProperties;
+import org.wso2.apk.apimgt.impl.monetization.MonetizationConfigurationDto;
+import org.wso2.apk.apimgt.api.model.Environment;
 
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConfigurationHolder {
@@ -32,6 +39,16 @@ public class ConfigurationHolder {
     private ThrottleProperties throttleProperties = new ThrottleProperties();
 
     private DatasourceProperties datasourceProperties = new DatasourceProperties();
+
+    private WorkflowProperties workflowProperties = new WorkflowProperties();
+
+    private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<>();
+
+    private static Map<String, String> analyticsProperties;
+
+    private MonetizationConfigurationDto monetizationConfigurationDto = new MonetizationConfigurationDto();
+
+    private Set<APIStore> externalAPIStores = new HashSet<>();
 
     public ThrottleProperties getThrottleProperties() {
         return throttleProperties;
@@ -58,5 +75,50 @@ public class ConfigurationHolder {
             return null;
         }
         return value.get(0);
+    }
+
+    public List<String> getProperty(String key) {
+
+        return configuration.get(key);
+    }
+
+    public MonetizationConfigurationDto getMonetizationConfigurationDto() {
+
+        return monetizationConfigurationDto;
+    }
+
+    public void setMonetizationConfigurationDto(MonetizationConfigurationDto monetizationConfigurationDto) {
+
+        this.monetizationConfigurationDto = monetizationConfigurationDto;
+    }
+
+    public WorkflowProperties getWorkflowProperties() {
+
+        return workflowProperties;
+    }
+
+    public void setWorkflowProperties(WorkflowProperties workflowProperties) {
+
+        this.workflowProperties = workflowProperties;
+    }
+
+    public Map<String, Environment> getApiGatewayEnvironments() {
+
+        return apiGatewayEnvironments;
+    }
+
+    public void setApiGatewayEnvironments(Map<String, Environment> apiGatewayEnvironments) {
+
+        this.apiGatewayEnvironments = apiGatewayEnvironments;
+    }
+
+    public Set<APIStore> getExternalAPIStores() {
+
+        return externalAPIStores;
+    }
+
+    public static Map<String, String> getAnalyticsProperties() {
+
+        return analyticsProperties;
     }
 }
