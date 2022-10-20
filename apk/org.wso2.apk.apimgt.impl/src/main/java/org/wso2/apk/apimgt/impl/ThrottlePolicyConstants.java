@@ -36,6 +36,8 @@ public class ThrottlePolicyConstants {
 
     public static final String COLUMN_TENANT_ID = "TENANT_ID";
 
+    public static final String COLUMN_ORGANIZATION = "ORGANIZATION";
+
     public static final String COLUMN_RATE_LIMIT_COUNT = "RATE_LIMIT_COUNT";
 
     public static final String COLUMN_RATE_LIMIT_TIME_UNIT = "RATE_LIMIT_TIME_UNIT";
@@ -77,6 +79,8 @@ public class ThrottlePolicyConstants {
     public static final String COLUMN_ENDING_IP = "ENDING_IP";
 
     public static final String COLUMN_HTTP_VERB = "HTTP_VERB";
+
+    public static final String COLUMN_BLOCK_CONDITION_ID = "CONDITION_ID";
 
     public static final String COLUMN_CONDITION_ID = "CONDITION_GROUP_ID";
 

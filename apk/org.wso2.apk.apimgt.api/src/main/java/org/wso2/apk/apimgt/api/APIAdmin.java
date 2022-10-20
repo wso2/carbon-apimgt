@@ -1,20 +1,20 @@
 /*
-*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.apk.apimgt.api;
 
 import org.wso2.apk.apimgt.api.dto.KeyManagerConfigurationDTO;
@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * APIAdmin responsible for providing helper functionality
  */
-public interface APIAdmin  {
+public interface APIAdmin {
     /**
      * Returns environments of a given tenant
      *
@@ -76,32 +76,32 @@ public interface APIAdmin  {
     Environment updateEnvironment(String tenantDomain, Environment environment) throws APIManagementException;
 
 
-
     Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws APIManagementException;
 
     /**
      * Returns List of Applications
-     * @param user              Logged-in user
-     * @param owner             Owner of the application
-     * @param tenantId          Logged-in user tenant-id
-     * @param limit             The limit
-     * @param offset            The offset
-     * @param applicationName   The application name
-     * @param sortBy            The sortBy column
-     * @param sortOrder         The sort order
-     * @return          List of applications match to the search conditions
+     *
+     * @param user            Logged-in user
+     * @param owner           Owner of the application
+     * @param tenantId        Logged-in user tenant-id
+     * @param limit           The limit
+     * @param offset          The offset
+     * @param applicationName The application name
+     * @param sortBy          The sortBy column
+     * @param sortOrder       The sort order
+     * @return List of applications match to the search conditions
      * @throws APIManagementException
      */
-    Application[] getApplicationsWithPagination(String user, String owner, int tenantId, int limit , int offset,
+    Application[] getApplicationsWithPagination(String user, String owner, int tenantId, int limit, int offset,
                                                 String applicationName, String sortBy, String sortOrder)
             throws APIManagementException;
 
     /**
      * Get count of the applications for the tenantId.
      *
-     * @param tenantId             content to get application count based on tenant_id
-     * @param searchOwner          content to search applications based on owners
-     * @param searchApplication    content to search applications based on application
+     * @param tenantId          content to get application count based on tenant_id
+     * @param searchOwner       content to search applications based on owners
+     * @param searchApplication content to search applications based on application
      * @throws APIManagementException if failed to get application
      */
 
@@ -183,9 +183,9 @@ public interface APIAdmin  {
     /**
      * Adds a new category for the tenant
      *
-     * @param userName      logged in user name
-     * @param category      category to add
-     * @param organization  organization
+     * @param userName     logged in user name
+     * @param category     category to add
+     * @param organization organization
      * @throws APIManagementException if failed add category
      */
     APICategory addCategory(APICategory category, String userName, String organization) throws APIManagementException;
@@ -193,7 +193,7 @@ public interface APIAdmin  {
     /**
      * Updates an API Category
      *
-     * @param   apiCategory
+     * @param apiCategory
      * @throws APIManagementException
      */
     void updateCategory(APICategory apiCategory) throws APIManagementException;
@@ -209,11 +209,11 @@ public interface APIAdmin  {
 
     /**
      * Checks whether an api category exists by the given name
-     *
+     * <p>
      * 1. in case uuid is null : checks whether the categoryName is already taken in the tenantDomain (this
-     *                           flow is used when adding a new api category)
+     * flow is used when adding a new api category)
      * 2. in case uuid is not null: checks whether the categoryName is already taken by any category other than the one
-     *                              defined by the passed uuid in the given tenant
+     * defined by the passed uuid in the given tenant
      *
      * @param categoryName
      * @param organization
@@ -224,7 +224,8 @@ public interface APIAdmin  {
 
     /**
      * Returns all api categories of the organization
-     * @param organization  Organization
+     *
+     * @param organization Organization
      * @return
      * @throws APIManagementException
      */
@@ -258,6 +259,7 @@ public interface APIAdmin  {
 
     /**
      * This method used to retrieve key manager configurations for tenant
+     *
      * @param organization organization of the key manager
      * @return KeyManagerConfigurationDTO list
      * @throws APIManagementException if error occurred
@@ -266,6 +268,7 @@ public interface APIAdmin  {
 
     /**
      * This method returns all the key managers registered in all the tenants
+     *
      * @return
      * @throws APIManagementException
      */
@@ -273,8 +276,9 @@ public interface APIAdmin  {
 
     /**
      * This method used to retrieve key manager with Id in respective tenant
+     *
      * @param organization organization requested
-     * @param id uuid of key manager
+     * @param id           uuid of key manager
      * @return KeyManagerConfigurationDTO for retrieved data
      * @throws APIManagementException
      */
@@ -302,8 +306,9 @@ public interface APIAdmin  {
 
     /**
      * This method used to check existence of key manager with Id in respective tenant
+     *
      * @param organization organization requested
-     * @param id uuid of key manager
+     * @param id           uuid of key manager
      * @return existence
      * @throws APIManagementException
      */
@@ -311,14 +316,17 @@ public interface APIAdmin  {
 
     /**
      * This method used to create key Manager
+     *
      * @param keyManagerConfigurationDTO key manager data
      * @return created key manager
      * @throws APIManagementException
      */
     KeyManagerConfigurationDTO addKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException;
+
     /**
      * This method used to update key Manager
+     *
      * @param keyManagerConfigurationDTO key manager data
      * @return updated key manager
      * @throws APIManagementException
@@ -328,7 +336,8 @@ public interface APIAdmin  {
 
     /**
      * hTis method used to delete IDP mapped with key manager
-     * @param organization organization requested
+     *
+     * @param organization               organization requested
      * @param keyManagerConfigurationDTO key manager data
      * @throws APIManagementException
      */
@@ -337,8 +346,9 @@ public interface APIAdmin  {
 
     /**
      * This method used to delete key manager
-     * @param organization organization requested
-     * @param keyManagerConfigurationDTO  key manager data
+     *
+     * @param organization               organization requested
+     * @param keyManagerConfigurationDTO key manager data
      * @throws APIManagementException
      */
     void deleteKeyManagerConfigurationById(String organization, KeyManagerConfigurationDTO keyManagerConfigurationDTO)
@@ -346,8 +356,9 @@ public interface APIAdmin  {
 
     /**
      * This method used to retrieve key manager from name
+     *
      * @param organization organization requested
-     * @param name name requested
+     * @param name         name requested
      * @return keyManager data
      * @throws APIManagementException
      */
@@ -379,7 +390,8 @@ public interface APIAdmin  {
 
     /**
      * This method used to check the existence of the scope name for the particular user
-     * @param username user to be validated
+     *
+     * @param username  user to be validated
      * @param scopeName scope name to be checked
      * @return true if a scope exists by the given username
      * @throws APIManagementException
@@ -389,7 +401,8 @@ public interface APIAdmin  {
 
     /**
      * This method used to check the existence of the scope name
-     * @param username logged in username to get the tenantDomain
+     *
+     * @param username  logged in username to get the tenantDomain
      * @param scopeName scope name to be checked
      * @return true if a scope exists
      * @throws APIManagementException
@@ -451,18 +464,19 @@ public interface APIAdmin  {
     /**
      * Get policy list for given level
      *
-     * @param tenantId  tenant ID of user
-     * @param level     policy level
+     * @param organization organization of user
+     * @param level        policy level
      * @return
      * @throws APIManagementException
      */
-    Policy[] getPolicies(int tenantId, String level) throws APIManagementException;
+    Policy[] getPolicies(String organization, String level) throws APIManagementException;
 
     Policy getPolicyByNameAndType(String organization, String level, String name) throws APIManagementException;
 
     /**
      * Get api throttling policy by name
-     * @param username name of the user
+     *
+     * @param username   name of the user
      * @param policyName name of the policy
      * @throws APIManagementException
      */
@@ -470,7 +484,8 @@ public interface APIAdmin  {
 
     /**
      * Get application throttling policy by name
-     * @param username name of the user
+     *
+     * @param username   name of the user
      * @param policyName name of the policy
      * @throws APIManagementException
      */
@@ -478,7 +493,8 @@ public interface APIAdmin  {
 
     /**
      * Get subscription throttling policy by name
-     * @param username name of the user
+     *
+     * @param username   name of the user
      * @param policyName name of the policy
      * @throws APIManagementException
      */
@@ -486,13 +502,21 @@ public interface APIAdmin  {
 
     /**
      * Get global throttling policy by name
+     *
      * @param policyName name of the policy
      * @throws APIManagementException
      */
     GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException;
 
     /**
+     * @return List of block Conditions
+     * @throws APIManagementException
+     */
+    List<BlockConditionsDTO> getBlockConditions(String organization) throws APIManagementException;
+
+    /**
      * Get api throttling policy by uuid
+     *
      * @param uuid UUID of the policy
      * @throws APIManagementException
      */
@@ -500,6 +524,7 @@ public interface APIAdmin  {
 
     /**
      * Get application throttling policy by uuid
+     *
      * @param uuid UUID of the policy
      * @throws APIManagementException
      */
@@ -507,6 +532,7 @@ public interface APIAdmin  {
 
     /**
      * Get subscription throttling policy by uuid
+     *
      * @param uuid UUID of the policy
      * @throws APIManagementException
      */
@@ -514,6 +540,7 @@ public interface APIAdmin  {
 
     /**
      * Get global throttling policy by uuid
+     *
      * @param uuid UUID of the policy
      * @throws APIManagementException
      */
@@ -528,6 +555,92 @@ public interface APIAdmin  {
      */
     BlockConditionsDTO getBlockConditionByUUID(String uuid) throws APIManagementException;
 
-    boolean hasAttachments(String username, String policyName, String policyLevel, String organization) throws APIManagementException;
+    /**
+     * Add a block condition with condition status
+     *
+     * @param conditionType   type of the condition (IP, Context .. )
+     * @param conditionValue  value of the condition
+     * @param conditionStatus status of the condition
+     * @param organization    organization
+     * @return UUID of the new Block Condition
+     * @throws APIManagementException
+     */
+    String addBlockCondition(String conditionType, String conditionValue, boolean conditionStatus, String organization)
+            throws APIManagementException;
+
+    void addPolicy(Policy policy, String username) throws APIManagementException;
+
+    /**
+     * Updates a block condition given its UUID
+     *
+     * @param uuid  uuid of the block condition
+     * @param state state of condition
+     * @return state change success or not
+     * @throws APIManagementException
+     */
+    boolean updateBlockConditionByUUID(String uuid, String state) throws APIManagementException;
+
+    /**
+     * Updates throttle policy in global CEP, gateway and database.
+     * <p>
+     * Database transactions and deployements are not rolledback on failiure.
+     * A flag will be inserted into the database whether the operation was
+     * successfull or not.
+     * </p>
+     *
+     * @param policy updated {@link Policy} object
+     * @throws APIManagementException
+     */
+    void updatePolicy(Policy policy) throws APIManagementException;
+
+    /**
+     * Deletes a block condition given its UUID
+     *
+     * @param uuid uuid of the block condition
+     * @return true if successfully deleted
+     * @throws APIManagementException
+     */
+    boolean deleteBlockConditionByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Delete throttling policy
+     *
+     * @param username    username
+     * @param policyLevel policy type
+     * @param policyName  policy name
+     * @throws APIManagementException
+     */
+    void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException;
+
+    boolean hasAttachments(String username, String policyName, String policyLevel, String organization)
+            throws APIManagementException;
+
+    /**
+     * Get the given Subscription Throttle Policy Permission
+     *
+     * @return Subscription Throttle Policy
+     * @throws APIManagementException If failed to retrieve Subscription Throttle Policy Permission
+     */
+    Object getThrottleTierPermission(String tierName, String organization) throws APIManagementException;
+
+    /**
+     * Update Throttle Tier Permissions
+     *
+     * @param tierName       Tier Name
+     * @param permissionType Permission Type
+     * @param roles          Roles
+     * @throws APIManagementException If failed to update subscription status
+     */
+    void updateThrottleTierPermissions(String tierName, String permissionType, String roles, String organization)
+            throws APIManagementException;
+
+    /**
+     * Delete the Tier Permissions
+     *
+     * @param tierName     Tier Name
+     * @param organization Organization
+     * @throws APIManagementException
+     */
+    void deleteTierPermissions(String tierName, String organization) throws APIManagementException;
 
 }

@@ -82,12 +82,12 @@ public class PolicyDAOImpl implements PolicyDAO {
             connection.commit();
         } catch (SQLIntegrityConstraintViolationException e) {
             boolean isAPIPolicyExists = isPolicyExist(connection, PolicyConstants.POLICY_LEVEL_API,
-                    policy.getTenantId(),
+                    policy.getTenantDomain(),
                     policy.getPolicyName());
 
             if (isAPIPolicyExists) {
                 log.warn(
-                        "API Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                        "API Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantDomain()
                                 + " is already persisted");
             } else {
                 handleExceptionWithCode("Failed to add API Policy: " + policy, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
@@ -104,11 +104,11 @@ public class PolicyDAOImpl implements PolicyDAO {
             }
             if (StringUtils.containsIgnoreCase(e.getMessage(), "Violation of UNIQUE KEY constraint")) {
                 boolean isAPIPolicyExists = isPolicyExist(connection, PolicyConstants.POLICY_LEVEL_API,
-                        policy.getTenantId(),
+                        policy.getTenantDomain(),
                         policy.getPolicyName());
 
                 if (isAPIPolicyExists) {
-                    log.warn("API Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                    log.warn("API Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantDomain()
                             + " is already persisted");
                 }
             } else {
@@ -169,7 +169,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
 
-    private boolean isPolicyExist(Connection connection, String policyType, int tenantId, String policyName)
+    private boolean isPolicyExist(Connection connection, String policyType, String organization, String policyName)
             throws APIManagementException {
 
         PreparedStatement isExistStatement = null;
@@ -187,17 +187,17 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
         try {
             String query = "SELECT " + PolicyConstants.POLICY_ID + " FROM " + policyTable
-                    + " WHERE TENANT_ID =? AND NAME = ? ";
+                    + " WHERE ORGANIZATION =? AND NAME = ? ";
             connection.setAutoCommit(true);
             isExistStatement = connection.prepareStatement(query);
-            isExistStatement.setInt(1, tenantId);
+            isExistStatement.setString(1, organization);
             isExistStatement.setString(2, policyName);
             ResultSet result = isExistStatement.executeQuery();
             if (result != null && result.next()) {
                 isExist = true;
             }
         } catch (SQLException e) {
-            handleExceptionWithCode("Failed to check is exist: " + policyName + '-' + tenantId, e,
+            handleExceptionWithCode("Failed to check is exist: " + policyName + '-' + organization, e,
                     ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(isExistStatement, connection, null);
@@ -452,12 +452,12 @@ public class PolicyDAOImpl implements PolicyDAO {
 
             conn.commit();
         } catch (SQLIntegrityConstraintViolationException e) {
-            boolean isAppPolicyExists = isPolicyExist(conn, PolicyConstants.POLICY_LEVEL_APP, policy.getTenantId(),
+            boolean isAppPolicyExists = isPolicyExist(conn, PolicyConstants.POLICY_LEVEL_APP, policy.getTenantDomain(),
                     policy.getPolicyName());
 
             if (isAppPolicyExists) {
                 log.warn(
-                        "Application Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                        "Application Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantDomain()
                                 + " is already persisted");
             } else {
                 handleExceptionWithCode("Failed to add Application Policy: " + policy, e,
@@ -474,11 +474,11 @@ public class PolicyDAOImpl implements PolicyDAO {
                 }
             }
             if (StringUtils.containsIgnoreCase(e.getMessage(), "Violation of UNIQUE KEY constraint")) {
-                boolean isAppPolicyExists = isPolicyExist(conn, PolicyConstants.POLICY_LEVEL_APP, policy.getTenantId(),
+                boolean isAppPolicyExists = isPolicyExist(conn, PolicyConstants.POLICY_LEVEL_APP, policy.getTenantDomain(),
                         policy.getPolicyName());
 
                 if (isAppPolicyExists) {
-                    log.warn("Application Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                    log.warn("Application Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantDomain()
                             + " is already persisted");
                 }
             } else {
@@ -571,9 +571,7 @@ public class PolicyDAOImpl implements PolicyDAO {
         policy.setDescription(resultSet.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
         policy.setDisplayName(resultSet.getString(ThrottlePolicyConstants.COLUMN_DISPLAY_NAME));
         policy.setPolicyId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
-        policy.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
-        // TODO:// set tenantdomain
-        //policy.setTenantDomain(IdentityTenantUtil.getTenantDomain(policy.getTenantId()));
+        policy.setTenantDomain(resultSet.getString(ThrottlePolicyConstants.COLUMN_ORGANIZATION));
         policy.setDefaultQuotaPolicy(quotaPolicy);
         policy.setDeployed(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
     }
@@ -631,12 +629,12 @@ public class PolicyDAOImpl implements PolicyDAO {
             conn.commit();
         } catch (SQLIntegrityConstraintViolationException e) {
             boolean isSubscriptionPolicyExists = isPolicyExist(conn, PolicyConstants.POLICY_LEVEL_SUB,
-                    policy.getTenantId(),
+                    policy.getTenantDomain(),
                     policy.getPolicyName());
 
             if (isSubscriptionPolicyExists) {
                 log.warn(
-                        "Subscription Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                        "Subscription Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantDomain()
                                 + " is already persisted");
             } else {
                 handleExceptionWithCode("Failed to add Subscription Policy: " + policy, e,
@@ -654,11 +652,11 @@ public class PolicyDAOImpl implements PolicyDAO {
             }
             if (StringUtils.containsIgnoreCase(e.getMessage(), "Violation of UNIQUE KEY constraint")) {
                 boolean isSubscriptionPolicyExists = isPolicyExist(conn, PolicyConstants.POLICY_LEVEL_SUB,
-                        policy.getTenantId(),
+                        policy.getTenantDomain(),
                         policy.getPolicyName());
 
                 if (isSubscriptionPolicyExists) {
-                    log.warn("Subscription Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                    log.warn("Subscription Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantDomain()
                             + " is already persisted");
                 }
             } else {
@@ -731,7 +729,7 @@ public class PolicyDAOImpl implements PolicyDAO {
             String addQuery = SQLConstants.INSERT_GLOBAL_POLICY_SQL;
             policyStatement = conn.prepareStatement(addQuery);
             policyStatement.setString(1, policy.getPolicyName());
-            policyStatement.setInt(2, policy.getTenantId());
+            policyStatement.setString(2, policy.getTenantDomain());
             policyStatement.setString(3, policy.getKeyTemplate());
             policyStatement.setString(4, policy.getDescription());
 
@@ -782,7 +780,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                 globalPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
                 globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
                 globalPolicy.setUUID(rs.getString(ThrottlePolicyConstants.COLUMN_UUID));
-                globalPolicy.setTenantId(rs.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                globalPolicy.setTenantDomain(rs.getString(ThrottlePolicyConstants.COLUMN_ORGANIZATION));
                 globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
                 globalPolicy.setDeployed(rs.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
                 InputStream siddhiQueryBlob = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
@@ -1081,16 +1079,16 @@ public class PolicyDAOImpl implements PolicyDAO {
         int policyId = 0;
         String selectQuery;
         if (policy != null) {
-            if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
+            if (!StringUtils.isBlank(policy.getPolicyName()) && StringUtils.isNotBlank(policy.getTenantDomain())) {
                 selectQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_SQL;
                 updateQuery = SQLConstants.ThrottleSQLConstants.UPDATE_API_POLICY_SQL;
             } else if (!StringUtils.isBlank(policy.getUUID())) {
                 selectQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_BY_UUID_SQL;
                 updateQuery = SQLConstants.ThrottleSQLConstants.UPDATE_API_POLICY_BY_UUID_SQL;
             } else {
-                String errorMsg = "Policy object doesn't contain mandatory parameters. At least UUID or Name,Tenant Id"
+                String errorMsg = "Policy object doesn't contain mandatory parameters. At least UUID or Name,Organization"
                         + " should be provided. Name: " + policy.getPolicyName()
-                        + ", Tenant Id: " + policy.getTenantId() + ", UUID: " + policy.getUUID();
+                        + ", Organization: " + policy.getTenantDomain() + ", UUID: " + policy.getUUID();
                 log.error(errorMsg);
                 throw new APIManagementException(errorMsg, ExceptionCodes.BAD_POLICY_OBJECT);
             }
@@ -1108,7 +1106,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                  PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
                 if (selectQuery.equals(SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_SQL)) {
                     selectStatement.setString(1, policy.getPolicyName());
-                    selectStatement.setInt(2, policy.getTenantId());
+                    selectStatement.setString(2, policy.getTenantDomain());
                 } else {
                     selectStatement.setString(1, policy.getUUID());
                 }
@@ -1142,9 +1140,9 @@ public class PolicyDAOImpl implements PolicyDAO {
                 updateStatement.setLong(6, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
                 updateStatement.setString(7, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
 
-                if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
+                if (!StringUtils.isBlank(policy.getPolicyName()) && StringUtils.isNotBlank(policy.getTenantDomain())) {
                     updateStatement.setString(8, policy.getPolicyName());
-                    updateStatement.setInt(9, policy.getTenantId());
+                    updateStatement.setString(9, policy.getTenantDomain());
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
                     updateStatement.setString(8, policy.getUUID());
                 }
@@ -1166,12 +1164,12 @@ public class PolicyDAOImpl implements PolicyDAO {
                     log.error("Failed to rollback the add Global Policy: " + policy.toString(), ex);
                 }
                 handleExceptionWithCode("Failed to update API policy: "
-                                + policy.getPolicyName() + '-' + policy.getTenantId()
+                                + policy.getPolicyName() + '-' + policy.getTenantDomain()
                         , e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
             handleExceptionWithCode("Failed to update API policy: "
-                    + policy.getPolicyName() + '-' + policy.getTenantId(), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                    + policy.getPolicyName() + '-' + policy.getTenantDomain(), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return policy;
     }
@@ -1184,9 +1182,9 @@ public class PolicyDAOImpl implements PolicyDAO {
         boolean hasCustomAttrib = false;
         String updateQuery;
 
-        if (policy.getTenantId() == -1 || StringUtils.isEmpty(policy.getPolicyName())) {
+        if (StringUtils.isEmpty(policy.getTenantDomain())|| StringUtils.isEmpty(policy.getPolicyName())) {
             String errorMsg = "Policy object doesn't contain mandatory parameters. Name: " + policy.getPolicyName() +
-                    ", Tenant Id: " + policy.getTenantId();
+                    ", Organization: " + policy.getTenantDomain();
             log.error(errorMsg);
             throw new APIManagementException(errorMsg, ExceptionCodes.BAD_POLICY_OBJECT);
         }
@@ -1197,7 +1195,7 @@ public class PolicyDAOImpl implements PolicyDAO {
             }
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-            if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
+            if (!StringUtils.isBlank(policy.getPolicyName()) && StringUtils.isNotBlank(policy.getTenantDomain())) {
                 updateQuery = SQLConstants.UPDATE_APPLICATION_POLICY_SQL;
                 if (hasCustomAttrib) {
                     updateQuery = SQLConstants.UPDATE_APPLICATION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL;
@@ -1209,9 +1207,9 @@ public class PolicyDAOImpl implements PolicyDAO {
                 }
             } else {
                 String errorMsg =
-                        "Policy object doesn't contain mandatory parameters. At least UUID or Name,Tenant Id"
+                        "Policy object doesn't contain mandatory parameters. At least UUID or Name,Organization"
                                 + " should be provided. Name: " + policy.getPolicyName()
-                                + ", Tenant Id: " + policy.getTenantId() + ", UUID: " + policy.getUUID();
+                                + ", Organization: " + policy.getTenantDomain() + ", UUID: " + policy.getUUID();
                 log.error(errorMsg);
                 throw new APIManagementException(errorMsg, ExceptionCodes.BAD_POLICY_OBJECT);
             }
@@ -1266,7 +1264,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                 }
             }
             handleExceptionWithCode(
-                    "Failed to update application policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e,
+                    "Failed to update application policy: " + policy.getPolicyName() + '-' + policy.getTenantDomain(), e,
                     ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
@@ -1285,7 +1283,7 @@ public class PolicyDAOImpl implements PolicyDAO {
             if (policy.getCustomAttributes() != null) {
                 hasCustomAttrib = true;
             }
-            if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
+            if (!StringUtils.isBlank(policy.getPolicyName()) && StringUtils.isNotBlank(policy.getTenantDomain())) {
                 updateQuery = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_SQL;
                 if (hasCustomAttrib) {
                     updateQuery = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL;
@@ -1297,9 +1295,9 @@ public class PolicyDAOImpl implements PolicyDAO {
                 }
             } else {
                 String errorMsg =
-                        "Policy object doesn't contain mandatory parameters. At least UUID or Name,Tenant Id"
+                        "Policy object doesn't contain mandatory parameters. At least UUID or Name,Organization"
                                 + " should be provided. Name: " + policy.getPolicyName()
-                                + ", Tenant Id: " + policy.getTenantId() + ", UUID: " + policy.getUUID();
+                                + ", Organization: " + policy.getTenantDomain() + ", UUID: " + policy.getUUID();
                 log.error(errorMsg);
                 throw new APIManagementException(errorMsg, ExceptionCodes.BAD_POLICY_OBJECT);
             }
@@ -1409,7 +1407,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                 }
             }
             handleExceptionWithCode(
-                    "Failed to update subscription policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e,
+                    "Failed to update subscription policy: " + policy.getPolicyName() + '-' + policy.getTenantDomain(), e,
                     ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
@@ -1429,15 +1427,15 @@ public class PolicyDAOImpl implements PolicyDAO {
             siddhiQueryInputStream = new ByteArrayInputStream(byteArray);
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-            if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
+            if (!StringUtils.isBlank(policy.getPolicyName()) && StringUtils.isNotBlank(policy.getTenantDomain())) {
                 updateStatement = connection.prepareStatement(SQLConstants.UPDATE_GLOBAL_POLICY_SQL);
             } else if (!StringUtils.isBlank(policy.getUUID())) {
                 updateStatement = connection.prepareStatement(SQLConstants.UPDATE_GLOBAL_POLICY_BY_UUID_SQL);
             } else {
                 String errorMsg =
-                        "Policy object doesn't contain mandatory parameters. At least UUID or Name,Tenant Id"
+                        "Policy object doesn't contain mandatory parameters. At least UUID or Name,Organization"
                                 + " should be provided. Name: " + policy.getPolicyName()
-                                + ", Tenant Id: " + policy.getTenantId() + ", UUID: " + policy.getUUID();
+                                + ", Organization: " + policy.getTenantDomain() + ", UUID: " + policy.getUUID();
                 log.error(errorMsg);
                 throw new APIManagementException(errorMsg, ExceptionCodes.BAD_POLICY_OBJECT);
             }
@@ -1464,7 +1462,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                 }
             }
             handleExceptionWithCode("Failed to update global policy: "
-                            + policy.getPolicyName() + '-' + policy.getTenantId(), e,
+                            + policy.getPolicyName() + '-' + policy.getTenantDomain(), e,
                     ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
@@ -1509,7 +1507,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     @Override
-    public void removeThrottlePolicy(String policyLevel, String policyName, int tenantId)
+    public void removeThrottlePolicy(String policyLevel, String policyName, String organization)
             throws APIManagementException {
 
         Connection connection = null;
@@ -1533,18 +1531,19 @@ public class PolicyDAOImpl implements PolicyDAO {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             deleteStatement = connection.prepareStatement(query);
-            deleteStatement.setInt(1, tenantId);
+            deleteStatement.setString(1, organization);
             deleteStatement.setString(2, policyName);
             deleteStatement.executeUpdate();
             if (deleteTierPermissionsQuery != null) {
                 deleteStatement = connection.prepareStatement(deleteTierPermissionsQuery);
                 deleteStatement.setString(1, policyName);
-                deleteStatement.setInt(2, tenantId);
+                deleteStatement.setString(2, organization);
                 deleteStatement.executeUpdate();
             }
             connection.commit();
         } catch (SQLException e) {
-            handleExceptionWithCode("Failed to remove policy " + policyLevel + '-' + policyName + '-' + tenantId, e,
+            handleExceptionWithCode("Failed to remove policy " + policyLevel + '-' + policyName + '-'
+                            + organization, e,
                     ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(deleteStatement, connection, null);
@@ -1796,7 +1795,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                 globalPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
                 globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
                 globalPolicy.setUUID(rs.getString(ThrottlePolicyConstants.COLUMN_UUID));
-                globalPolicy.setTenantId(rs.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                globalPolicy.setTenantDomain(rs.getString(ThrottlePolicyConstants.COLUMN_ORGANIZATION));
                 globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
                 globalPolicy.setDeployed(rs.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
                 InputStream siddhiQueryBlob = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
@@ -1814,7 +1813,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     @Override
-    public APIPolicy[] getAPIPolicies(int tenantID) throws APIManagementException {
+    public APIPolicy[] getAPIPolicies(String organization) throws APIManagementException {
 
         List<APIPolicy> policies = new ArrayList<APIPolicy>();
         Connection conn = null;
@@ -1829,7 +1828,7 @@ public class PolicyDAOImpl implements PolicyDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, tenantID);
+            ps.setString(1, organization);
             rs = ps.executeQuery();
             while (rs.next()) {
                 APIPolicy apiPolicy = new APIPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
@@ -1958,7 +1957,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                 globalPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
                 globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
                 globalPolicy.setUUID(rs.getString(ThrottlePolicyConstants.COLUMN_UUID));
-                globalPolicy.setTenantId(rs.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                globalPolicy.setTenantDomain(rs.getString(ThrottlePolicyConstants.COLUMN_ORGANIZATION));
                 globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
                 globalPolicy.setDeployed(rs.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
                 InputStream siddhiQueryBlob = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);

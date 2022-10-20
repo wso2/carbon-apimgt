@@ -44,7 +44,6 @@ import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.apk.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.apk.apimgt.rest.api.util.dto.ErrorListItemDTO;
-import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.uri.template.URITemplateException;
 
 import java.io.File;
@@ -251,8 +250,8 @@ public class RestApiUtil {
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public static boolean isDueToAuthorizationFailure(Throwable e) {
         Throwable rootCause = getPossibleErrorCause(e);
-        return rootCause instanceof AuthorizationFailedException
-                || rootCause instanceof APIMgtAuthorizationFailedException;
+        //TODO: APK rootCause instanceof AuthorizationFailedException ||
+        return rootCause instanceof APIMgtAuthorizationFailedException;
     }
 
 

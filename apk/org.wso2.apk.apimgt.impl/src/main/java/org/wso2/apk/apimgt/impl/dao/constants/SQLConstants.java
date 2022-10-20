@@ -607,11 +607,11 @@ public class SQLConstants {
     public static final String GET_THROTTLE_TIER_PERMISSION_ID_SQL =
             " SELECT THROTTLE_TIER_PERMISSIONS_ID " +
             " FROM AM_THROTTLE_TIER_PERMISSIONS " +
-            " WHERE TIER = ? AND " + "TENANT_ID = ?";
+            " WHERE TIER = ? AND " + "ORGANIZATION = ?";
 
     public static final String ADD_THROTTLE_TIER_PERMISSION_SQL =
             " INSERT INTO" +
-            "   AM_THROTTLE_TIER_PERMISSIONS (TIER, PERMISSIONS_TYPE, ROLES, TENANT_ID)" +
+            "   AM_THROTTLE_TIER_PERMISSIONS (TIER, PERMISSIONS_TYPE, ROLES, ORGANIZATION)" +
             " VALUES(?, ?, ?, ?)";
 
     public static final String UPDATE_THROTTLE_TIER_PERMISSION_SQL =
@@ -623,36 +623,36 @@ public class SQLConstants {
             "   ROLES = ? " +
             " WHERE " +
             "   THROTTLE_TIER_PERMISSIONS_ID = ? " +
-            "   AND TENANT_ID = ?";
+            "   AND ORGANIZATION = ?";
 
     public static final String DELETE_THROTTLE_TIER_PERMISSION_SQL = "DELETE FROM AM_THROTTLE_TIER_PERMISSIONS WHERE " +
-            "THROTTLE_TIER_PERMISSIONS_ID = ? AND TENANT_ID = ?";
+            "THROTTLE_TIER_PERMISSIONS_ID = ? AND ORGANIZATION = ?";
 
     public static final String GET_THROTTLE_TIER_PERMISSIONS_SQL =
             " SELECT TIER,PERMISSIONS_TYPE, ROLES " +
             " FROM AM_THROTTLE_TIER_PERMISSIONS " +
-            " WHERE TENANT_ID = ?";
+            " WHERE ORGANIZATION = ?";
 
     public static final String GET_THROTTLE_TIER_PERMISSION_SQL =
             " SELECT PERMISSIONS_TYPE, ROLES " +
                     " FROM AM_THROTTLE_TIER_PERMISSIONS " +
-                    " WHERE TIER = ? AND TENANT_ID = ?";
+                    " WHERE TIER = ? AND ORGANIZATION = ?";
 
     public static final String DELETE_THROTTLE_TIER_BY_NAME_PERMISSION_SQL =
             " DELETE FROM " +
             " AM_THROTTLE_TIER_PERMISSIONS " +
-            " WHERE TIER = ? AND TENANT_ID = ?";
+            " WHERE TIER = ? AND ORGANIZATION = ?";
 
   //--------------------
 
     public static final String GET_TIER_PERMISSION_ID_SQL =
             " SELECT TIER_PERMISSIONS_ID " +
             " FROM AM_TIER_PERMISSIONS " +
-            " WHERE TIER = ? AND " + "TENANT_ID = ?";
+            " WHERE TIER = ? AND " + "ORGANIZATION = ?";
 
     public static final String ADD_TIER_PERMISSION_SQL =
             " INSERT INTO" +
-            "   AM_TIER_PERMISSIONS (TIER, PERMISSIONS_TYPE, ROLES, TENANT_ID)" +
+            "   AM_TIER_PERMISSIONS (TIER, PERMISSIONS_TYPE, ROLES, ORGANIZATION)" +
             " VALUES(?, ?, ?, ?)";
 
     public static final String UPDATE_TIER_PERMISSION_SQL =
@@ -664,17 +664,17 @@ public class SQLConstants {
             "   ROLES = ? " +
             " WHERE " +
             "   TIER_PERMISSIONS_ID = ? " +
-            "   AND TENANT_ID = ?";
+            "   AND ORGANIZATION = ?";
 
     public static final String GET_TIER_PERMISSIONS_SQL =
             " SELECT TIER , PERMISSIONS_TYPE , ROLES " +
             " FROM AM_TIER_PERMISSIONS " +
-            " WHERE TENANT_ID = ?";
+            " WHERE ORGANIZATION = ?";
 
     public static final String GET_PERMISSION_OF_TIER_SQL =
             " SELECT PERMISSIONS_TYPE, ROLES " +
             " FROM AM_TIER_PERMISSIONS " +
-            " WHERE TIER = ? AND TENANT_ID = ?";
+            " WHERE TIER = ? AND ORGANIZATION = ?";
 
     public static final String GET_SUBSCRIBERS_OF_PROVIDER_SQL =
             " SELECT " +
@@ -2631,7 +2631,7 @@ public class SQLConstants {
             "DELETE FROM AM_POLICY_APPLICATION WHERE ORGANIZATION = ? AND NAME = ?";
 
     public static final String DELETE_SUBSCRIPTION_POLICY_SQL =
-            "DELETE FROM AM_POLICY_SUBSCRIPTION WHERE TENANT_ID = ? AND NAME = ?";
+            "DELETE FROM AM_POLICY_SUBSCRIPTION WHERE ORGANIZATION = ? AND NAME = ?";
 
     public static final String DELETE_GLOBAL_POLICY_SQL =
             "DELETE FROM AM_POLICY_GLOBAL WHERE ORGANIZATION = ? AND NAME = ?";
@@ -3157,7 +3157,7 @@ public class SQLConstants {
         public static final String ADD_BLOCK_CONDITIONS_SQL =
                 "INSERT INTO AM_BLOCK_CONDITIONS (TYPE,BLOCK_CONDITION,ENABLED,DOMAIN,UUID) VALUES (?,?,?,?,?)";
         public static final String GET_BLOCK_CONDITIONS_SQL =
-                "SELECT CONDITION_ID,TYPE,BLOCK_CONDITION,ENABLED,DOMAIN,UUID FROM AM_BLOCK_CONDITIONS WHERE DOMAIN =?";
+                "SELECT CONDITION_ID,TYPE,BLOCK_CONDITION,ENABLED,ORGANIZATION,UUID FROM AM_BLOCK_CONDITIONS WHERE ORGANIZATION =?";
         public static final String GET_BLOCK_CONDITION_SQL =
                 "SELECT TYPE,BLOCK_CONDITION,ENABLED,DOMAIN,UUID FROM AM_BLOCK_CONDITIONS WHERE CONDITION_ID =?";
         public static final String GET_BLOCK_CONDITION_BY_UUID_SQL =

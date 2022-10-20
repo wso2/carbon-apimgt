@@ -67,11 +67,6 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.apk.apimgt.api</artifactId>
             <scope>provided</scope>
             <version>9.26.10-SNAPSHOT</version>
@@ -90,7 +85,8 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.user</artifactId>
+            <artifactId>org.wso2.apk.apimgt.user</artifactId>
+            <version>9.26.10-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -186,7 +182,7 @@
                             <generateApis>false</generateApis>
                             <output>.</output>
                             <templateDirectory>
-                                ${project.parent.basedir}/../apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/server-templates
+                                ${project.parent.basedir}/org.wso2.apk.apimgt.rest.api.util/src/main/resources/server-templates
                             </templateDirectory>
                             <skipOverwrite>true</skipOverwrite>
                             <modelNameSuffix>DTO</modelNameSuffix>
