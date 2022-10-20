@@ -13,8 +13,7 @@ import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.RemoteUserManagerClient;
+import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.math.BigDecimal;
@@ -647,7 +646,8 @@ public class ConsumerDAOImpl implements ConsumerDAO {
         }
 
         try {
-            String[] user = RemoteUserManagerClient.getInstance().getUserList(claimURI, login);
+//            String[] user = RemoteUserManagerClient.getInstance().getUserList(claimURI, login);
+            String[] user = {};
             if (user.length > 0) {
                 username = user[0];
             }
@@ -907,7 +907,8 @@ public class ConsumerDAOImpl implements ConsumerDAO {
     }
 
     private ResultSet getSubscriptionResultSet(String groupingId, Subscriber subscriber,
-                                               PreparedStatement statement, String organization) throws SQLException {
+                                               PreparedStatement statement, String organization)
+            throws SQLException, APIManagementException {
 
         int tenantId = APIUtil.getTenantId(subscriber.getName());
         int paramIndex = 0;

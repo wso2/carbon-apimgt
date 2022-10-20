@@ -1,9 +1,8 @@
 package org.wso2.apk.apimgt.impl.dao;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.model.*;
-
-import org.apache.commons.lang3.tuple.Pair;
 import org.wso2.apk.apimgt.api.model.webhooks.Subscription;
 
 import java.util.Map;
@@ -11,14 +10,15 @@ import java.util.Set;
 
 public interface ApplicationDAO {
 
-     /**
-      * Add a new Application from the store.
-      * @param application Application Object
-      * @param userId User ID
-      * @param organization Organization
-      * @return Application ID
-      * @throws APIManagementException if error
-      */
+    /**
+     * Add a new Application from the store.
+     *
+     * @param application  Application Object
+     * @param userId       User ID
+     * @param organization Organization
+     * @return Application ID
+     * @throws APIManagementException if error
+     */
     int addApplication(Application application, String userId, String organization)
             throws APIManagementException;
 
@@ -26,7 +26,7 @@ public interface ApplicationDAO {
      * Retrieves the Application which is corresponding to the given UUID String
      *
      * @param uuid UUID of Application
-     * @return  Application Object
+     * @return Application Object
      * @throws APIManagementException
      */
     Application getApplicationByUUID(String uuid) throws APIManagementException;
@@ -40,7 +40,8 @@ public interface ApplicationDAO {
      */
     Application getApplicationById(int applicationId) throws APIManagementException;
 
-    /** Updates an Application identified by its id
+    /**
+     * Updates an Application identified by its id
      *
      * @param application Application object to be updated
      * @throws APIManagementException
@@ -167,31 +168,31 @@ public interface ApplicationDAO {
     /**
      * Check if key mapping exists for (app ID, key type and key manager) or (consumer key and key manager) values.
      *
-     * @param applicationId AppID
+     * @param applicationId  AppID
      * @param keyManagerName KeyManager Name
-     * @param keyManagerId KeyManager Id
-     * @param keyType KeyType
-     * @param consumerKey   Consumer Key
+     * @param keyManagerId   KeyManager Id
+     * @param keyType        KeyType
+     * @param consumerKey    Consumer Key
      * @return true if key mapping exists
      * @throws APIManagementException if an error occurs.
      */
     boolean isKeyMappingExistsForConsumerKeyOrApplication(int applicationId, String keyManagerName,
-                                                                 String keyManagerId, String keyType,
-                                                                 String consumerKey) throws APIManagementException;
+                                                          String keyManagerId, String keyType,
+                                                          String consumerKey) throws APIManagementException;
 
     /**
      * This method will create a new client at key-manager side.further it will add new record to
      * the AM_APPLICATION_KEY_MAPPING table
      *
-     * @param keyType         key type.
-     * @param applicationId   apim application id.
-     * @param clientId        consumer key.
-     * @param keyMappingId    key mapping id.
-     * @throws APIManagementException   if an error occurs while creation key mappings.
+     * @param keyType       key type.
+     * @param applicationId apim application id.
+     * @param clientId      consumer key.
+     * @param keyMappingId  key mapping id.
+     * @throws APIManagementException if an error occurs while creation key mappings.
      */
     void createApplicationKeyTypeMappingForManualClients(String keyType, int applicationId,
-                                                                String clientId, String keyManagerId,
-                                                                String keyMappingId) throws APIManagementException;
+                                                         String clientId, String keyManagerId,
+                                                         String keyMappingId) throws APIManagementException;
 
     /**
      * Checks whether application is accessible to the specified user
@@ -216,7 +217,7 @@ public interface ApplicationDAO {
      * Retrieves the consumer keys and keyManager in a given application
      *
      * @param appId application id
-     * @return Map<ConsumerKey, Pair<keyManagerName, keyManagerTenantDomain>
+     * @return Map<ConsumerKey, Pair < keyManagerName, keyManagerTenantDomain>
      * @throws APIManagementException
      */
     Map<String, Pair<String, String>> getConsumerKeysForApplication(int appId) throws APIManagementException;
@@ -233,6 +234,7 @@ public interface ApplicationDAO {
     /**
      * Cleans the pending approval tasks associated with the given application subjected to be deleted
      * Pending approvals for Application creation, Subscription Creation, Subscription Deletion, Subscription Update will be deleted
+     *
      * @param applicationId ID of the application which the associated pending tasks should be removed
      * @throws APIManagementException IF any issue occurred in retrieving workflow references for the given applicationId
      */
@@ -241,7 +243,7 @@ public interface ApplicationDAO {
     /**
      * Retrieve Registration Approval State
      *
-     * @param appId Application ID
+     * @param appId   Application ID
      * @param keyType Key Type
      * @throws APIManagementException
      */
@@ -258,7 +260,7 @@ public interface ApplicationDAO {
      * @throws APIManagementException if an error occurs
      */
     boolean isKeyMappingExistsForApplication(int applicationId, String keyManagerName,
-                                                    String keyManagerId, String keyType) throws APIManagementException;
+                                             String keyManagerId, String keyType) throws APIManagementException;
 
     /**
      * Retrieve Key Mapping ID from Application and Key Type and Key Manager
@@ -270,15 +272,15 @@ public interface ApplicationDAO {
      * @throws APIManagementException if an error occurs
      */
     String getKeyMappingIdFromApplicationIdKeyTypeAndKeyManager(int applicationId, String tokenType,
-                                                                       String keyManagerName)
+                                                                String keyManagerName)
             throws APIManagementException;
 
     /**
      * Retrieve Application
      *
-     * @param applicationId  app ID
-     * @param userId User Id
-     * @param groupId Group ID
+     * @param applicationId app ID
+     * @param userId        User Id
+     * @param groupId       Group ID
      * @return Application
      * @throws APIManagementException if an error occurs
      */
@@ -311,7 +313,7 @@ public interface ApplicationDAO {
                                                 int offset, String search, String sortColumn, String sortOrder, String organization)
             throws APIManagementException;
 
-   /**
+    /**
      * This method used to update Application metadata according to oauth app info
      *
      * @param applicationId
@@ -320,8 +322,8 @@ public interface ApplicationDAO {
      * @param updatedAppInfo
      * @throws APIManagementException
      */
-   void updateApplicationKeyTypeMetaData(int applicationId, String keyType, String keyManagerName,
-                                                 OAuthApplicationInfo updatedAppInfo) throws APIManagementException;
+    void updateApplicationKeyTypeMetaData(int applicationId, String keyType, String keyManagerName,
+                                          OAuthApplicationInfo updatedAppInfo) throws APIManagementException;
 
     /**
      * This method used tot get Subscriber from subscriberId.
@@ -330,17 +332,17 @@ public interface ApplicationDAO {
      * @return Subscriber
      * @throws APIManagementException if failed to get Subscriber from subscriber id
      */
-   Subscriber getSubscriber(String subscriberName) throws APIManagementException;
+    Subscriber getSubscriber(String subscriberName) throws APIManagementException;
 
-   /**
+    /**
      * Update Application Owner
      *
-     * @param userName Owner
+     * @param userName    Owner
      * @param application Application
      * @return
      * @throws APIManagementException
      */
-   boolean updateApplicationOwner(String userName, Application application) throws
+    boolean updateApplicationOwner(String userName, Application application) throws
             APIManagementException;
 
     /**
@@ -350,9 +352,9 @@ public interface ApplicationDAO {
      * @param applicationId
      * @throws APIManagementException
      */
-   void deleteApplicationAttributes(String attributeKey, int applicationId) throws APIManagementException;
+    void deleteApplicationAttributes(String attributeKey, int applicationId) throws APIManagementException;
 
-   /**
+    /**
      * Add new attributes against an Application in API Store
      *
      * @param applicationAttributes Map of key, value pair of attributes
@@ -360,7 +362,7 @@ public interface ApplicationDAO {
      * @param tenantId              Id of tenant
      * @throws APIManagementException
      */
-   void addApplicationAttributes(Map<String, String> applicationAttributes, int applicationId, int tenantId)
+    void addApplicationAttributes(Map<String, String> applicationAttributes, int applicationId, int tenantId)
             throws APIManagementException;
 
 
@@ -368,44 +370,44 @@ public interface ApplicationDAO {
      * Retrieve API Key
      *
      * @param applicationId Application ID
-     * @param keyMappingId Key Mapping ID
+     * @param keyMappingId  Key Mapping ID
      * @return
      * @throws APIManagementException
      */
-   APIKey getAPIKeyFromApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)
+    APIKey getAPIKeyFromApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)
             throws APIManagementException;
 
-   /**
+    /**
      * Retrieves set of web hook topic subscriptions for a application.
      *
      * @param applicationId application UUID
      * @return set of web hook subscriptions.
      * @throws APIManagementException if failed to retrieve web hook topc subscriptions
      */
-   Set<Subscription> getTopicSubscriptions(String applicationId) throws APIManagementException;
+    Set<Subscription> getTopicSubscriptions(String applicationId) throws APIManagementException;
 
     /**
      * Retrieves paginated Subscribed APIs by Application.
      *
-     * @param application application object
+     * @param application  application object
      * @param organization Organization
      * @return set of Subscribed APIs
      * @throws APIManagementException if failed to retrieve APIs
      */
-   Set<SubscribedAPI> getPaginatedSubscribedAPIsByApplication(Application application, Integer offset,
-                                                                      Integer limit, String organization)
+    Set<SubscribedAPI> getPaginatedSubscribedAPIsByApplication(Application application, Integer offset,
+                                                               Integer limit, String organization)
             throws APIManagementException;
 
     /**
      * Retrieves Consumer Key.
      *
      * @param applicationId application Id
-     * @param keyType KeyType
-     * @param keyManager KeyManager Name
+     * @param keyType       KeyType
+     * @param keyManager    KeyManager Name
      * @return Consumer Key
      * @throws APIManagementException if failed to retrieve Consumer Key
      */
-   String getConsumerKeyByApplicationIdKeyTypeKeyManager(int applicationId, String keyType, String keyManager)
+    String getConsumerKeyByApplicationIdKeyTypeKeyManager(int applicationId, String keyType, String keyManager)
             throws APIManagementException;
 
 

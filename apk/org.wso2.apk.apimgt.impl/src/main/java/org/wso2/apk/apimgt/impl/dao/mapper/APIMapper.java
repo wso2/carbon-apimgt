@@ -32,7 +32,6 @@ import org.wso2.apk.apimgt.api.model.APIProduct;
 import org.wso2.apk.apimgt.api.model.Tier;
 import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPI;
 import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPIInfo;
-import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPI;
 import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPIInfo;
 
 import java.util.ArrayList;

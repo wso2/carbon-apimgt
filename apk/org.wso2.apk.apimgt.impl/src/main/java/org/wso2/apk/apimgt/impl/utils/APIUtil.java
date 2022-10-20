@@ -3122,7 +3122,7 @@ public final class APIUtil {
         }
         if (inputRoles != null) {
             for (String inputRole : inputRoles) {
-                if (org.wso2.carbon.apimgt.impl.utils.APIUtil.compareRoleList(userRoleList, inputRole)) {
+                if (compareRoleList(userRoleList, inputRole)) {
                     foundUserRole = true;
                     break;
                 }
@@ -3631,8 +3631,12 @@ public final class APIUtil {
                 || value.equals("0") || value.equalsIgnoreCase("no");
     }
 
-    public static boolean isRoleExistForUser(String userName, String roleName) {
-        //TODO: APK
-        return true;
+    public static HashMap<Integer, String> getAllAlertTypeByStakeHolder(String stakeHolder)
+            throws APIManagementException {
+        HashMap<Integer, String> map;
+        map = ApiMgtDAO.getInstance().getAllAlertTypesByStakeHolder(stakeHolder);
+        return map;
     }
+
+
 }

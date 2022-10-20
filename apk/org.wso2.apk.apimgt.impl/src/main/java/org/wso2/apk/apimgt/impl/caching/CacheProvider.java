@@ -29,7 +29,6 @@ import org.wso2.apk.apimgt.impl.ConfigurationHolder;
 import org.wso2.apk.apimgt.impl.config.APIMConfigService;
 import org.wso2.apk.apimgt.impl.config.APIMConfigServiceImpl;
 import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.base.ServerConfiguration;
 
 import java.util.concurrent.TimeUnit;
 
@@ -92,10 +91,11 @@ public class CacheProvider {
     }
 
     public static long getDefaultCacheTimeout() {
-        if (ServerConfiguration.getInstance().getFirstProperty(APIConstants.DEFAULT_CACHE_TIMEOUT) != null) {
-            return Long.parseLong(ServerConfiguration.getInstance().
-                    getFirstProperty(APIConstants.DEFAULT_CACHE_TIMEOUT)) * 60;
-        }
+        //TODO: APK
+//        if (ServerConfiguration.getInstance().getFirstProperty(APIConstants.DEFAULT_CACHE_TIMEOUT) != null) {
+//            return Long.parseLong(ServerConfiguration.getInstance().
+//                    getFirstProperty(APIConstants.DEFAULT_CACHE_TIMEOUT)) * 60;
+//        }
         return APIConstants.DEFAULT_TIMEOUT;
     }
 

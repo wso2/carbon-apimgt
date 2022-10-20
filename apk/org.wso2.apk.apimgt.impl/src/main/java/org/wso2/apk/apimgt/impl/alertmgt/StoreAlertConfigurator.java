@@ -24,9 +24,9 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.apk.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.apk.apimgt.impl.dto.AlertTypeDTO;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;

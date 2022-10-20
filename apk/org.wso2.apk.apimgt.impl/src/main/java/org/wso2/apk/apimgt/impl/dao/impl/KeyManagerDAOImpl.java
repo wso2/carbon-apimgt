@@ -11,7 +11,6 @@ import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.apk.apimgt.impl.dao.KeyManagerDAO;
 import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

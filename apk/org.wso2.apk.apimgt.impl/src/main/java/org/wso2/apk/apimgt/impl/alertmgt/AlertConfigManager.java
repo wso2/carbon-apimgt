@@ -19,7 +19,7 @@
 package org.wso2.apk.apimgt.impl.alertmgt;
 
 import org.wso2.apk.apimgt.impl.alertmgt.exception.AlertManagementException;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
 
 /**
  * Alert Configuration Manager class. This class is used to get the required implementation of AlertConfigurator.

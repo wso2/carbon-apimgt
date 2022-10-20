@@ -24,15 +24,15 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.model.Scope;
 import org.wso2.apk.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
+import static org.wso2.apk.apimgt.impl.utils.APIUtil.handleException;
 
 // Keep following function since it is still used in jaggery publisher portal. Can remove this class once publisher
 // portal is removed.

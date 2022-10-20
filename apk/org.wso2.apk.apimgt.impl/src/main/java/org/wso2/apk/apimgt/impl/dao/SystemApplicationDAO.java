@@ -18,8 +18,8 @@
 
 package org.wso2.apk.apimgt.impl.dao;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.apk.apimgt.api.APIMgtDAOException;
 import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.apk.apimgt.impl.dto.SystemApplicationDTO;
@@ -43,7 +43,7 @@ import java.util.concurrent.Semaphore;
  */
 public class SystemApplicationDAO {
 
-    private static final Logger log = LoggerFactory.getLogger(SystemApplicationDAO.class);
+    private static final Log log = LogFactory.getLog(SystemApplicationDAO.class);
     private static final String SYSTEM_APP_TABLE_NAME = "AM_SYSTEM_APPS";
     private static Semaphore semaphore = new Semaphore(1);
 

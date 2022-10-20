@@ -648,15 +648,6 @@ public interface APIProvider extends APIManager {
     String addBlockCondition(String conditionType, String conditionValue) throws APIManagementException;
 
     /**
-     * Deletes a block condition given its Id
-     *
-     * @param conditionId Id of the condition
-     * @return true if successfully deleted
-     * @throws APIManagementException
-     */
-    boolean deleteBlockCondition(int conditionId) throws APIManagementException;
-
-    /**
      * Deletes a block condition given its UUID
      *
      * @param uuid uuid of the block condition

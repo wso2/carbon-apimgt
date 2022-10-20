@@ -13,7 +13,6 @@ import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.apk.apimgt.impl.dao.util.DBUtils;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.sql.Connection;

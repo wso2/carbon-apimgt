@@ -21,7 +21,8 @@ package org.wso2.apk.apimgt.impl.factory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.apk.apimgt.api.APIManagementException;
-import org.wso2.apk.apimgt.impl.dao.constants.*;
+import org.wso2.apk.apimgt.impl.dao.constants.SQLConstantPostgreSQL;
+import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 
 import java.lang.reflect.Field;
@@ -34,6 +35,9 @@ import java.sql.SQLException;
  */
 public class SQLConstantManagerFactory {
 
+    private SQLConstantManagerFactory() {
+    }
+
     private static Log log = LogFactory.getLog(SQLConstantManagerFactory.class);
     private static SQLConstants sqlConstants = null;
 
@@ -43,6 +47,7 @@ public class SQLConstantManagerFactory {
 
     /**
      * This method initialize when server start up. And select relevant DB dirver and load the const class.
+     *
      * @throws APIManagementException
      */
     public static void initializeSQLConstantManager() throws APIManagementException {
@@ -54,7 +59,7 @@ public class SQLConstantManagerFactory {
             if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
                 dbType = "postgre";
                 sqlConstantPostgreSQL = new SQLConstantPostgreSQL();
-            } else{
+            } else {
                 log.error("Could not find DB type to load constants");
                 throw new APIManagementException("Error occurred while initializing SQL Constants Manager");
             }
@@ -69,6 +74,7 @@ public class SQLConstantManagerFactory {
 
     /**
      * This method will return the class's constant field's value by given string.
+     *
      * @param sql Sql constant name
      * @return sql string according to the database.
      */

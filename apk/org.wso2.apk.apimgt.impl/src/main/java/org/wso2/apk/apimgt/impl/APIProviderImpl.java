@@ -115,7 +115,7 @@ import org.wso2.apk.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.apk.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.apk.apimgt.impl.dto.CheckListItem;
 import org.wso2.apk.apimgt.impl.dto.JwtTokenInfoDTO;
-import org.wso2.apk.apimgt.impl.dto.KeyManagerDto;
+//import org.wso2.apk.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.apk.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.apk.apimgt.impl.dto.TierPermissionDTO;
@@ -3249,17 +3249,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             return createdBlockConditionsDto.getUUID();
         }
         return null;
-    }
-
-    @Override
-    public boolean deleteBlockCondition(int conditionId) throws APIManagementException {
-
-        BlockConditionsDTO blockCondition = blockConditionDAOImpl.getBlockCondition(conditionId);
-        boolean deleteState = blockConditionDAOImpl.deleteBlockCondition(conditionId);
-        if (deleteState && blockCondition != null) {
-            unpublishBlockCondition(blockCondition);
-        }
-        return deleteState;
     }
 
     @Override

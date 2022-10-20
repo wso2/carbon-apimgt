@@ -11,7 +11,6 @@ import org.wso2.apk.apimgt.api.model.Environment;
 import org.wso2.apk.apimgt.api.model.VHost;
 import org.wso2.apk.apimgt.impl.dao.EnvironmentDAO;
 import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
