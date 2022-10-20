@@ -30,6 +30,24 @@ public class MonetizationConfigurationDto {
     private String insightAppConsumerSecret;
     private String granularity;
     private String publishTimeDurationInDays;
+
+    private String analyticsHost;
+
+    private int analyticsPort;
+
+    private String analyticsUserName;
+
+    private byte[] analyticsPassword;
+
+    public String getAnalyticsIndexName() {
+        return analyticsIndexName;
+    }
+
+    public void setAnalyticsIndexName(String analyticsIndexName) {
+        this.analyticsIndexName = analyticsIndexName;
+    }
+
+    private String analyticsIndexName;
     private JSONArray monetizationAttributes = new JSONArray();
 
     public String getMonetizationImpl() {
@@ -120,5 +138,37 @@ public class MonetizationConfigurationDto {
     public void setPublishTimeDurationInDays(String publishTimeDurationInDays) {
 
         this.publishTimeDurationInDays = publishTimeDurationInDays;
+    }
+
+    public String getAnalyticsHost() {
+        return analyticsHost;
+    }
+
+    public void setAnalyticsHost(String analyticsHost) {
+        this.analyticsHost = analyticsHost;
+    }
+
+    public int getAnalyticsPort() {
+        return analyticsPort;
+    }
+
+    public void setAnalyticsPort(int analyticsPort) {
+        this.analyticsPort = analyticsPort;
+    }
+
+    public String getAnalyticsUserName() {
+        return analyticsUserName;
+    }
+
+    public void setAnalyticsUserName(String analyticsUserName) {
+        this.analyticsUserName = analyticsUserName;
+    }
+
+    public byte[] getAnalyticsPassword() {
+        return analyticsPassword;
+    }
+
+    public void setAnalyticsPassword(byte[] analyticsPassword) {
+        this.analyticsPassword = analyticsPassword;
     }
 }

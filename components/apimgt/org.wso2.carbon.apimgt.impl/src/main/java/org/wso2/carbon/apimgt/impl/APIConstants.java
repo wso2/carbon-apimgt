@@ -2253,6 +2253,11 @@ public final class APIConstants {
         public static final String ADDITIONAL_ATTRIBUTES = "AdditionalAttributes";
         public static final String ATTRIBUTE = "Attribute";
 
+        public static final String ANALYTICS_HOST = "AnalyticsHost";
+        public static final String ANALYTICS_PORT = "AnalyticsPort";
+        public static final String ANALYTICS_USERNAME = "AnalyticsUsername";
+        public static final String ANALYTICS_PASSWORD = "AnalyticsPassword";
+        public static final String ANALYTICS_INDEX_NAME = "AnalyticsIndexName";
         public static final String IS_ATTRIBITE_REQUIRED = "Required";
         public static final String IS_ATTRIBUTE_HIDDEN = "Hidden";
         public static final String ATTRIBUTE_DESCRIPTION = "Description";
