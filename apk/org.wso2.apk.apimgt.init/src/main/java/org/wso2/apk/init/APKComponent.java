@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 
 public class APKComponent {
 
-    public void activate(String configuration) throws APIManagementException {
+    public static void activate(String configuration) throws APIManagementException {
 
         // Set configurations
         ConfigurationHolder config = new ConfigurationHolder();
