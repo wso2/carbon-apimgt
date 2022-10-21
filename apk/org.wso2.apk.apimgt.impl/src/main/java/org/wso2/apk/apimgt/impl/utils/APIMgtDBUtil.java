@@ -62,7 +62,6 @@ public final class APIMgtDBUtil {
      *
      * @throws APIManagerDatabaseException if an error occurs while loading DB configuration
      */
-    //TODO: add this to init
     public static void initialize() throws APIManagerDatabaseException {
         if (dataSource != null) {
             return;

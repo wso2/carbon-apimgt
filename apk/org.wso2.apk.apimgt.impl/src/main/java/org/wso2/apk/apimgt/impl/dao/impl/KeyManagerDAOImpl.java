@@ -11,7 +11,6 @@ import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.apk.apimgt.impl.dao.KeyManagerDAO;
 import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -373,7 +372,7 @@ public class KeyManagerDAOImpl implements KeyManagerDAO {
     public KeyManagerConfigurationDTO getKeyManagerConfigurationByUUID(String uuid)
             throws APIManagementException {
 
-        try (Connection conn = org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil.getConnection()) {
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
             return getKeyManagerConfigurationByUUID(conn, uuid);
         } catch (SQLException | IOException e) {
             throw new APIManagementException(

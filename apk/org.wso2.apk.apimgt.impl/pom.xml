@@ -32,55 +32,9 @@
     <name>WSO2 Carbon - API Management Implementation</name>
 
     <dependencies>
-
-        <dependency>
-            <groupId>org.wso2.carbon.analytics-common</groupId>
-            <artifactId>org.wso2.carbon.event.output.adapter.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.analytics-common</groupId>
-            <artifactId>org.wso2.carbon.event.output.adapter.email</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>wsdl4j</groupId>
-                    <artifactId>wsdl4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>wsdl4j.wso2</groupId>
-                    <artifactId>wsdl4j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.wso2.carbon.analytics-common</groupId>
-            <artifactId>org.wso2.carbon.event.output.adapter.sms</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.apache.woden.wso2</groupId>
             <artifactId>woden</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.user.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.governance</groupId>
-            <artifactId>org.wso2.carbon.governance.api</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>jboss</groupId>
-                    <artifactId>javassist</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>wsdl4j.wso2</groupId>
-                    <artifactId>wsdl4j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.apk.apimgt.api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.poi.wso2</groupId>
@@ -91,68 +45,9 @@
             <artifactId>wsdl4j.wso2</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.core</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>wsdl4j.wso2</groupId>
-                    <artifactId>wsdl4j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.apk.apimgt.api</artifactId>
             <version>9.26.10-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>wsdl4j.wso2</groupId>
-                    <artifactId>wsdl4j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.identity.framework</groupId>
-            <artifactId>org.wso2.carbon.identity.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
-            <artifactId>org.wso2.carbon.identity.oauth</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.identity.framework</groupId>
-            <artifactId>org.wso2.carbon.captcha.mgt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.identity.governance</groupId>
-            <artifactId>org.wso2.carbon.identity.recovery</artifactId>
-            <version>${carbon.identity.governance.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.governance</groupId>
-            <artifactId>org.wso2.carbon.governance.registry.extensions</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>wsdl4j</groupId>
-                    <artifactId>wsdl4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>wsdl4j.wso2</groupId>
-                    <artifactId>wsdl4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>xalan</groupId>
-                    <artifactId>xalan</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.com.h2database</groupId>
-            <artifactId>h2</artifactId>
         </dependency>
         <dependency>
             <groupId>com.ibm.icu</groupId>
@@ -177,10 +72,6 @@
             <artifactId>httpmime</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.commons</groupId>
-            <artifactId>org.wso2.carbon.event.core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.registry</groupId>
             <artifactId>org.wso2.carbon.registry.indexing</artifactId>
         </dependency>
@@ -189,66 +80,18 @@
             <artifactId>json-simple</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
-            <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.identity.framework</groupId>
-            <artifactId>org.wso2.carbon.identity.application.mgt.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.identity.framework</groupId>
-            <artifactId>org.wso2.carbon.identity.mgt.stub</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.wso2.carbon.identity.user.ws</groupId>
-            <artifactId>org.wso2.carbon.um.ws.api.stub</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.wso2.carbon.identity.framework</groupId>
-            <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.wso2.carbon.analytics-common</groupId>
-            <artifactId>org.wso2.carbon.databridge.agent</artifactId>
-        </dependency>
-
-
-
-        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.governance</groupId>
-            <artifactId>org.wso2.carbon.governance.custom.lifecycles.checklist</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.governance</groupId>
-            <artifactId>org.wso2.carbon.governance.lcm</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.event-processing</groupId>
-            <artifactId>org.wso2.carbon.event.processor.stub</artifactId>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
@@ -293,14 +136,6 @@
         <dependency>
             <groupId>xerces.wso2</groupId>
             <artifactId>xercesImpl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.identity.framework</groupId>
-            <artifactId>org.wso2.carbon.identity.user.profile.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.identity.framework</groupId>
-            <artifactId>org.wso2.carbon.identity.user.registration.stub</artifactId>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
@@ -368,31 +203,10 @@
             <artifactId>feign-slf4j</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.identity.framework</groupId>
-            <artifactId>org.wso2.carbon.user.mgt.common</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
             <version>${fasterxml.jackson.core.version}</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.analytics-common</groupId>
-            <artifactId>org.wso2.carbon.event.stream.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.persistence</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.synapse</groupId>
-            <artifactId>synapse-core</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.org.everit.json</groupId>
@@ -408,10 +222,6 @@
             <groupId>io.apicurio</groupId>
             <artifactId>apicurio-data-models</artifactId>
             <version>1.1.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.eventing</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-validator</groupId>
@@ -434,15 +244,21 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.apk.apimgt.user</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+            <version>9.26.10-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>5.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>1.5.2.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json.wso2</groupId>
+            <artifactId>json</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -455,35 +271,6 @@
                         <exclude>*</exclude>
                     </excludes>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>create-test-database</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <path id="h2.classpath">
-                                    <path refid="maven.compile.classpath" />
-                                </path>
-                                <echo message="########### Create Test Database ##############" />
-                                <sql autocommit="true" driver="org.h2.Driver" onerror="continue" password="wso2carbon" url="jdbc:h2:${basedir}/target/repository/database/WSO2AM_DB" userid="wso2carbon">
-                                    <classpath>
-                                        <path refid="h2.classpath" />
-                                    </classpath>
-                                    <fileset file="${basedir}/../../../features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/sql/h2.sql" />
-                                    <fileset file="${basedir}/src/test/resources/dbscripts/h2-sample-data.sql" />
-                                </sql>
-                                <echo message="##################### END ########################" />
-                            </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -517,32 +304,6 @@
                         --add-opens=java.xml/jdk.xml.internal=ALL-UNNAMED
                         --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED
                     </argLine>
-                    <systemProperties>
-                        <property>
-                            <name>APIManagerDBConfigurationPath</name>
-                            <value>${basedir}/src/test/resources/amConfig.xml</value>
-                        </property>
-                        <property>
-                            <name>IdentityConfigurationPath</name>
-                            <value>${basedir}/src/test/resources/identity.xml</value>
-                        </property>
-                        <property>
-                            <name>axis2.repo</name>
-                            <value>${basedir}/src/test/resources</value>
-                        </property>
-                        <property>
-                            <name>carbon.config.dir.path</name>
-                            <value>${basedir}/src/test/resources/repository/conf</value>
-                        </property>
-                        <property>
-                            <name>axis2.xml</name>
-                            <value>${basedir}/src/test/resources/axis2_client.xml</value>
-                        </property>
-                        <property>
-                            <name>carbon.home</name>
-                            <value>${basedir}/src/test/resources</value>
-                        </property>
-                    </systemProperties>
                     <classpathDependencyExcludes>
                         <classpathDependencyExclude>org.ops4j.pax.logging</classpathDependencyExclude>
                     </classpathDependencyExcludes>
@@ -564,45 +325,24 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.wso2.carbon.apimgt.impl.internal.*
+                            org.wso2.apk.apimgt.impl.internal.*
                         </Private-Package>
                         <Export-Package>
                             !org.apache.commons.codec.*,
-                            !org.wso2.carbon.apimgt.impl.dto.xsd;version="${carbon.apimgt.version}",
-                            org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.version}",
+                            org.wso2.apk.apimgt.impl.*;version="${carbon.apimgt.version}",
                             !org.apache.commons.collections4.*,
                         </Export-Package>
                         <Import-Package>
-                            org.wso2.carbon.governance.api.*,
-                            org.apache.woden.*,
-                            org.wso2.carbon.apimgt.keymgt.client.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.apk.apimgt.api.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.apk.apimgt.api.model.xsd.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.persistence.*;version="${carbon.apimgt.version}",
                             !org.wso2.apk.apimgt.api.model.xsd.*,
-                            org.wso2.carbon.apimgt.persistence.*;version="${carbon.apimgt.version}",
                             javax.servlet;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.http;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",
-                            org.eclipse.equinox.http.helper,
                             com.google.gson,
-                            org.apache.axis2.*; version="${imp.pkg.version.axis2}",
                             org.apache.commons.*,
                             org.apache.http.*,
-                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
-                            org.osgi.util.*;version="${imp.package.version.osgi.util}",
-                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
-                            org.apache.axiom.*; version="${imp.pkg.version.axiom}",
-                            org.wso2.carbon.utils; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
-                            org.wso2.carbon.registry.common.*,
-                            org.wso2.carbon.registry.indexing.*;
-                            version="${carbon.registry.package.import.version.range}",
                             org.apache.pdfbox.*; version="${pdfbox.version}",
-                            org.apache.poi.*,
-                            org.apache.neethi.*,
-                            org.apache.velocity.*,
-                            org.apache.solr.common,
                             javax.cache,
                             javax.naming,
                             javax.sql,
@@ -622,26 +362,8 @@
                             com.fasterxml.jackson.datatype.guava,
                             com.github.benmanes.caffeine.cache;version="${caffeine.version}",
                             org.openapitools.codegen.*,
-                            org.wso2.carbon.identity.oauth.*;version="${carbon.identity-inbound-auth-oauth.imp.pkg.version}",
-                            org.wso2.carbon.identity.oauth2.*;version="${carbon.identity-inbound-auth-oauth.imp.pkg.version}",
-                            org.wso2.carbon.identity.recovery.*;version="${carbon.identity.recovery.pkg.version}",
-                            org.wso2.carbon.identity.*;version="${carbon.identity.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.keymgt.stub.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.gateway.dto.stub.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.apk.apimgt.api.dto.xsd.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.utils.*; version="${carbon.platform.package.import.version.range}",
-                            org.wso2.carbon.authenticator.stub.*;version="${carbon.platform.package.import.version.range}",
-                            org.wso2.carbon.base;version="${imp.pkg.version.org.wso2.carbon.base}",
-                            org.wso2.carbon.context;version="${carbon.platform.package.import.version.range}",
-                            org.wso2.carbon.core.*;version="${carbon.platform.package.import.version.range}",
-                            org.wso2.carbon.user.core.*;version="${carbon.platform.package.import.version.range}",
-                            org.wso2.carbon.user.api;version="${imp.pkg.version.org.wso2.carbon.user.api}",
-                            org.wso2.carbon.user.mgt.stub.*;version="${carbon.identity.imp.pkg.version}",
-                            org.wso2.carbon.user.mgt.*;version="${carbon.identity.imp.pkg.version}",
                             org.xml.sax,
-                            org.wso2.carbon.um.ws.api.stub,
-                            org.wso2.securevault.*,
-                            org.wso2.carbon.registry.*;version="${carbon.registry.imp.pkg.version}",
                             okio.*;version="${okio.wso2.version}",
                             okhttp3.*;version="${okhttp.wso2.version}"
                             *;resolution:=optional
@@ -650,7 +372,6 @@
                     </instructions>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 </project>

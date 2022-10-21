@@ -335,6 +335,12 @@ public final class APIUtil {
         return apiStatus;
     }
 
+    public static void handleException(String msg) throws APIManagementException {
+
+        log.error(msg);
+        throw new APIManagementException(msg);
+    }
+
     public static void handleException(String msg, Throwable t) throws APIManagementException {
 
         log.error(msg, t);
@@ -2420,6 +2426,18 @@ public final class APIUtil {
     }
 
     /**
+     * Validate the input file name for invalid path elements
+     *
+     * @param fileName File name
+     */
+    public static void validateFileName(String fileName) throws APIManagementException {
+
+        if (!fileName.isEmpty() && (fileName.contains("../") || fileName.contains("..\\"))) {
+            handleException("File name contains invalid path elements. " + fileName);
+        }
+    }
+
+    /**
      * Convert special characters to encoded value.
      *
      * @param role
@@ -3122,7 +3140,7 @@ public final class APIUtil {
         }
         if (inputRoles != null) {
             for (String inputRole : inputRoles) {
-                if (org.wso2.carbon.apimgt.impl.utils.APIUtil.compareRoleList(userRoleList, inputRole)) {
+                if (compareRoleList(userRoleList, inputRole)) {
                     foundUserRole = true;
                     break;
                 }
@@ -3631,8 +3649,12 @@ public final class APIUtil {
                 || value.equals("0") || value.equalsIgnoreCase("no");
     }
 
-    public static boolean isRoleExistForUser(String userName, String roleName) {
-        //TODO: APK
-        return true;
+    public static HashMap<Integer, String> getAllAlertTypeByStakeHolder(String stakeHolder)
+            throws APIManagementException {
+        HashMap<Integer, String> map;
+        map = ApiMgtDAO.getInstance().getAllAlertTypesByStakeHolder(stakeHolder);
+        return map;
     }
+
+
 }

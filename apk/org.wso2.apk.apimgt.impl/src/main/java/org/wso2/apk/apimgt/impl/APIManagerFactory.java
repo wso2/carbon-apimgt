@@ -47,14 +47,18 @@ public class APIManagerFactory {
     }
 
     private APIProvider newProvider(String username) throws APIManagementException {
-        return new UserAwareAPIProvider(username);
+        //TODO: APK
+//        return new UserAwareAPIProvider(username);
+        return new APIProviderImpl(username);
     }
 
     private APIConsumer newConsumer(String username) throws APIManagementException {
         if (username.equals(ANONYMOUS_USER)) {
             username = null;
         }
-        return new UserAwareAPIConsumer(username);
+        //TODO: APK
+//        return new UserAwareAPIConsumer(username);
+        return null;
 
     }
 
@@ -62,7 +66,9 @@ public class APIManagerFactory {
         if (username.equals(ANONYMOUS_USER)) {
             username = null;
         }
-        return new UserAwareAPIConsumer(username, organization);
+        //TODO: APK
+//        return new UserAwareAPIConsumer(username, organization);
+        return null;
     }
 
     public APIProvider getAPIProvider(String username) throws APIManagementException {

@@ -1045,7 +1045,7 @@ public class ThrottlingCommonImpl {
                 String permissionType;
                 if (policyPermissions.getPermissionType() ==
                         SubscriptionThrottlePolicyPermissionDTO.PermissionTypeEnum.ALLOW) {
-                    permissionType = org.wso2.carbon.apimgt.impl.APIConstants.TIER_PERMISSION_ALLOW;
+                    permissionType = APIConstants.TIER_PERMISSION_ALLOW;
                 } else {
                     permissionType = APIConstants.TIER_PERMISSION_DENY;
                 }

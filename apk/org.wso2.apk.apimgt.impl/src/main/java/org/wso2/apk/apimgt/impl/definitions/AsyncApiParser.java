@@ -23,7 +23,7 @@ import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.model.*;
 import org.wso2.apk.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
 
 import java.net.URI;
 import java.net.URISyntaxException;

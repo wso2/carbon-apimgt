@@ -23,10 +23,9 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.apk.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.apk.apimgt.impl.dto.AlertTypeDTO;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,7 +89,7 @@ public class PublisherAlertConfigurator extends AlertConfigurator {
     @Override
     public List<Map<String, String>> getAlertConfiguration(String userName, String alertName)
             throws APIManagementException {
-        String domainName = MultitenantUtils.getTenantDomain(userName);
+        String domainName = APIUtil.getTenantDomain(userName);
         String configPropertyName = AlertMgtConstants.alertTypeConfigMap.get(alertName);
         String query = "from ApiCreatorAlertConfiguration on apiCreatorTenantDomain=='" + domainName + "' and "
                 + configPropertyName + "!=0 select apiName,apiVersion,apiCreator,apiCreatorTenantDomain, "
@@ -139,7 +138,7 @@ public class PublisherAlertConfigurator extends AlertConfigurator {
             throw new APIManagementException("Alert type does not support adding configuration");
         }
 
-        String domainName = MultitenantUtils.getTenantDomain(userName);
+        String domainName = APIUtil.getTenantDomain(userName);
         return "select '" + apiName + "' as apiName, '" + apiVersion + "' as apiVersion, '"
                 + userName + "' as apiCreator, '" + domainName + "' as apiCreatorTenantDomain,"
                 + thresholdResponseTime + "L as thresholdResponseTime,"
@@ -150,9 +149,10 @@ public class PublisherAlertConfigurator extends AlertConfigurator {
                 + "and ApiCreatorAlertConfiguration.apiCreatorTenantDomain == apiCreatorTenantDomain";
     }
 
-    private String buildAlertConfigDeleteQuery(String apiName, String apiVersion, String userName, String alertType) {
+    private String buildAlertConfigDeleteQuery(String apiName, String apiVersion, String userName, String alertType)
+            throws APIManagementException {
         String alertConfigKey = AlertMgtConstants.alertTypeConfigMap.get(alertType);
-        String domainName = MultitenantUtils.getTenantDomain(userName);
+        String domainName = APIUtil.getTenantDomain(userName);
         return "select '" + apiName + "' as apiName, '" + apiVersion + "' as apiVersion, '"
                 + userName + "' as apiCreator, '" + domainName + "' as apiCreatorTenantDomain,"
                 + "0L as " + alertConfigKey +" update ApiCreatorAlertConfiguration "

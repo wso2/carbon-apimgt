@@ -50,6 +50,8 @@ public class ConfigurationHolder {
 
     private Set<APIStore> externalAPIStores = new HashSet<>();
 
+    private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
+
     public ThrottleProperties getThrottleProperties() {
         return throttleProperties;
     }
@@ -120,5 +122,10 @@ public class ConfigurationHolder {
     public static Map<String, String> getAnalyticsProperties() {
 
         return analyticsProperties;
+    }
+
+    public Map<String, Map<String, String>> getLoginConfiguration() {
+
+        return loginConfiguration;
     }
 }

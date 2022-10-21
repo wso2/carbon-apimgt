@@ -18,8 +18,8 @@
 
 package org.wso2.apk.apimgt.impl.dao.constants;
 
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.apk.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.apk.apimgt.impl.APIConstants;
 
 public class PostgreSQLConstants {
 
@@ -625,11 +625,11 @@ public class PostgreSQLConstants {
         public static final String GET_THROTTLE_TIER_PERMISSION_ID_SQL =
                 " SELECT THROTTLE_TIER_PERMISSIONS_ID " +
                         " FROM AM_THROTTLE_TIER_PERMISSIONS " +
-                        " WHERE TIER = ? AND " + "TENANT_ID = ?";
+                        " WHERE TIER = ? AND " + "ORGANIZATION = ?";
 
         public static final String ADD_THROTTLE_TIER_PERMISSION_SQL =
                 " INSERT INTO" +
-                        "   AM_THROTTLE_TIER_PERMISSIONS (TIER, PERMISSIONS_TYPE, ROLES, TENANT_ID)" +
+                        "   AM_THROTTLE_TIER_PERMISSIONS (TIER, PERMISSIONS_TYPE, ROLES, ORGANIZATION)" +
                         " VALUES(?, ?, ?, ?)";
 
         public static final String UPDATE_THROTTLE_TIER_PERMISSION_SQL =
@@ -641,36 +641,36 @@ public class PostgreSQLConstants {
                         "   ROLES = ? " +
                         " WHERE " +
                         "   THROTTLE_TIER_PERMISSIONS_ID = ? " +
-                        "   AND TENANT_ID = ?";
+                        "   AND ORGANIZATION = ?";
 
         public static final String DELETE_THROTTLE_TIER_PERMISSION_SQL = "DELETE FROM AM_THROTTLE_TIER_PERMISSIONS WHERE " +
-                "THROTTLE_TIER_PERMISSIONS_ID = ? AND TENANT_ID = ?";
+                "THROTTLE_TIER_PERMISSIONS_ID = ? AND ORGANIZATION = ?";
 
         public static final String GET_THROTTLE_TIER_PERMISSIONS_SQL =
                 " SELECT TIER,PERMISSIONS_TYPE, ROLES " +
                         " FROM AM_THROTTLE_TIER_PERMISSIONS " +
-                        " WHERE TENANT_ID = ?";
+                        " WHERE ORGANIZATION = ?";
 
         public static final String GET_THROTTLE_TIER_PERMISSION_SQL =
                 " SELECT PERMISSIONS_TYPE, ROLES " +
                         " FROM AM_THROTTLE_TIER_PERMISSIONS " +
-                        " WHERE TIER = ? AND TENANT_ID = ?";
+                        " WHERE TIER = ? AND ORGANIZATION = ?";
 
         public static final String DELETE_THROTTLE_TIER_BY_NAME_PERMISSION_SQL =
                 " DELETE FROM " +
                         " AM_THROTTLE_TIER_PERMISSIONS " +
-                        " WHERE TIER = ? AND TENANT_ID = ?";
+                        " WHERE TIER = ? AND ORGANIZATION = ?";
 
         //--------------------
 
         public static final String GET_TIER_PERMISSION_ID_SQL =
                 " SELECT TIER_PERMISSIONS_ID " +
                         " FROM AM_TIER_PERMISSIONS " +
-                        " WHERE TIER = ? AND " + "TENANT_ID = ?";
+                        " WHERE TIER = ? AND " + "ORGANIZATION = ?";
 
         public static final String ADD_TIER_PERMISSION_SQL =
                 " INSERT INTO" +
-                        "   AM_TIER_PERMISSIONS (TIER, PERMISSIONS_TYPE, ROLES, TENANT_ID)" +
+                        "   AM_TIER_PERMISSIONS (TIER, PERMISSIONS_TYPE, ROLES, ORGANIZATION)" +
                         " VALUES(?, ?, ?, ?)";
 
         public static final String UPDATE_TIER_PERMISSION_SQL =
@@ -682,17 +682,17 @@ public class PostgreSQLConstants {
                         "   ROLES = ? " +
                         " WHERE " +
                         "   TIER_PERMISSIONS_ID = ? " +
-                        "   AND TENANT_ID = ?";
+                        "   AND ORGANIZATION = ?";
 
         public static final String GET_TIER_PERMISSIONS_SQL =
                 " SELECT TIER , PERMISSIONS_TYPE , ROLES " +
                         " FROM AM_TIER_PERMISSIONS " +
-                        " WHERE TENANT_ID = ?";
+                        " WHERE ORGANIZATION = ?";
 
         public static final String GET_PERMISSION_OF_TIER_SQL =
                 " SELECT PERMISSIONS_TYPE, ROLES " +
                         " FROM AM_TIER_PERMISSIONS " +
-                        " WHERE TIER = ? AND TENANT_ID = ?";
+                        " WHERE TIER = ? AND ORGANIZATION = ?";
 
         public static final String GET_SUBSCRIBERS_OF_PROVIDER_SQL =
                 " SELECT " +
@@ -2308,24 +2308,24 @@ public class PostgreSQLConstants {
 
 
         public static final String INSERT_APPLICATION_POLICY_SQL =
-                "INSERT INTO AM_POLICY_APPLICATION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
+                "INSERT INTO AM_POLICY_APPLICATION (NAME, DISPLAY_NAME, ORGANIZATION, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                         " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID) \n" +
                         "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
         public static final String INSERT_APPLICATION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
-                "INSERT INTO AM_POLICY_APPLICATION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
+                "INSERT INTO AM_POLICY_APPLICATION (NAME, DISPLAY_NAME, ORGANIZATION, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                         " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID,CUSTOM_ATTRIBUTES) \n" +
                         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 
         public static final String INSERT_SUBSCRIPTION_POLICY_SQL =
-                "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
+                "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, ORGANIZATION, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                         " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID, RATE_LIMIT_COUNT, \n" +
                         " RATE_LIMIT_TIME_UNIT,STOP_ON_QUOTA_REACH, MAX_DEPTH, MAX_COMPLEXITY, \n" +
                         " BILLING_PLAN,MONETIZATION_PLAN,FIXED_RATE,BILLING_CYCLE,PRICE_PER_REQUEST,CURRENCY, CONNECTIONS_COUNT) \n" +
                         " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         public static final String INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
-                "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
+                "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, ORGANIZATION, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                         " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID,  RATE_LIMIT_COUNT, \n" +
                         " RATE_LIMIT_TIME_UNIT, STOP_ON_QUOTA_REACH, MAX_DEPTH, MAX_COMPLEXITY, \n" +
                         " BILLING_PLAN, CUSTOM_ATTRIBUTES, MONETIZATION_PLAN, \n" +
@@ -2334,7 +2334,7 @@ public class PostgreSQLConstants {
 
 
         public static final String INSERT_GLOBAL_POLICY_SQL =
-                "INSERT INTO AM_POLICY_GLOBAL (NAME ,TENANT_ID, KEY_TEMPLATE, DESCRIPTION ,SIDDHI_QUERY, "
+                "INSERT INTO AM_POLICY_GLOBAL (NAME ,ORGANIZATION, KEY_TEMPLATE, DESCRIPTION ,SIDDHI_QUERY, "
                         + "IS_DEPLOYED, UUID) \n" +
                         "VALUES (?,?,?,?,?,?,?)";
 
@@ -2344,7 +2344,7 @@ public class PostgreSQLConstants {
                         "FROM " +
                         "   AM_POLICY_APPLICATION " +
                         " WHERE" +
-                        "   TENANT_ID =?";
+                        "   ORGANIZATION =?";
 
         public static final String GET_SUB_POLICY_NAMES =
                 " SELECT " +
@@ -2352,7 +2352,7 @@ public class PostgreSQLConstants {
                         "FROM " +
                         "   AM_POLICY_SUBSCRIPTION " +
                         " WHERE" +
-                        "   TENANT_ID =?";
+                        "   ORGANIZATION =?";
 
         public static final String GET_GLOBAL_POLICY_NAMES =
                 " SELECT " +
@@ -2360,7 +2360,7 @@ public class PostgreSQLConstants {
                         "FROM " +
                         "   AM_POLICY_GLOBAL " +
                         " WHERE" +
-                        "   TENANT_ID =?";
+                        "   ORGANIZATION =?";
 
         public static final String GET_GLOBAL_POLICY_KEY_TEMPLATES =
                 " SELECT " +
@@ -2368,7 +2368,7 @@ public class PostgreSQLConstants {
                         "FROM " +
                         "   AM_POLICY_GLOBAL " +
                         " WHERE" +
-                        "   TENANT_ID =?";
+                        "   ORGANIZATION =?";
 
         public static final String GET_GLOBAL_POLICY_KEY_TEMPLATE =
                 " SELECT " +
@@ -2386,14 +2386,14 @@ public class PostgreSQLConstants {
                         "FROM " +
                         "   AM_POLICY_APPLICATION " +
                         " WHERE" +
-                        "   TENANT_ID =?";
+                        "   ORGANIZATION =?";
         public static final String GET_SUBSCRIPTION_POLICIES =
                 " SELECT " +
                         "   * " +
                         "FROM " +
                         "   AM_POLICY_SUBSCRIPTION " +
                         " WHERE" +
-                        "   TENANT_ID =?";
+                        "   ORGANIZATION =?";
 
         public static final String GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_PREFIX =
                 " SELECT " +
@@ -2404,7 +2404,7 @@ public class PostgreSQLConstants {
                         "  NAME IN (";
 
         public static final String GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_SUFFIX =
-                ") AND TENANT_ID =?";
+                ") AND ORGANIZATION =?";
 
         public static final String GET_GLOBAL_POLICIES =
                 " SELECT " +
@@ -2412,7 +2412,7 @@ public class PostgreSQLConstants {
                         "FROM " +
                         "   AM_POLICY_GLOBAL " +
                         " WHERE" +
-                        "   TENANT_ID =?";
+                        "   ORGANIZATION =?";
 
         public static final String GET_GLOBAL_POLICY =
                 " SELECT " +
@@ -2437,7 +2437,7 @@ public class PostgreSQLConstants {
                         "AM_POLICY_APPLICATION " +
                         "WHERE " +
                         "NAME = ? AND " +
-                        "TENANT_ID =?";
+                        "ORGANIZATION =?";
 
         public static final String GET_APPLICATION_POLICY_BY_UUID_SQL =
                 "SELECT " +
@@ -2454,7 +2454,7 @@ public class PostgreSQLConstants {
                         "   AM_POLICY_SUBSCRIPTION " +
                         "WHERE " +
                         "NAME = ? AND " +
-                        "TENANT_ID =?";
+                        "ORGANIZATION =?";
 
         public static final String GET_API_PROVIDER_WITH_NAME_VERSION_FOR_SUPER_TENANT =
                 "SELECT API.API_PROVIDER FROM AM_API API WHERE API.API_NAME = ? AND API.API_VERSION = ? AND "
@@ -2482,7 +2482,7 @@ public class PostgreSQLConstants {
                         "QUOTA_UNIT = ?, " +
                         "UNIT_TIME = ?, " +
                         "TIME_UNIT = ? " +
-                        "WHERE NAME = ? AND TENANT_ID = ?";
+                        "WHERE NAME = ? AND ORGANIZATION = ?";
 
         public static final String UPDATE_APPLICATION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL =
                 "UPDATE AM_POLICY_APPLICATION " +
@@ -2495,7 +2495,7 @@ public class PostgreSQLConstants {
                         "UNIT_TIME = ?, " +
                         "TIME_UNIT = ?, " +
                         " CUSTOM_ATTRIBUTES = ? "+
-                        "WHERE NAME = ? AND TENANT_ID = ?";
+                        "WHERE NAME = ? AND ORGANIZATION = ?";
 
         public static final String UPDATE_APPLICATION_POLICY_BY_UUID_SQL =
                 "UPDATE AM_POLICY_APPLICATION " +
@@ -2544,7 +2544,7 @@ public class PostgreSQLConstants {
                         "PRICE_PER_REQUEST = ?, " +
                         "CURRENCY = ?, " +
                         "CONNECTIONS_COUNT = ?" +
-                        "WHERE NAME = ? AND TENANT_ID = ?";
+                        "WHERE NAME = ? AND ORGANIZATION = ?";
 
         public static final String UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL =
                 "UPDATE AM_POLICY_SUBSCRIPTION " +
@@ -2569,7 +2569,7 @@ public class PostgreSQLConstants {
                         "PRICE_PER_REQUEST = ?, " +
                         "CURRENCY = ?, " +
                         "CONNECTIONS_COUNT = ? " +
-                        "WHERE NAME = ? AND TENANT_ID = ?";
+                        "WHERE NAME = ? AND ORGANIZATION = ?";
 
         public static final String UPDATE_SUBSCRIPTION_POLICY_BY_UUID_SQL =
                 "UPDATE AM_POLICY_SUBSCRIPTION " +
@@ -2626,7 +2626,7 @@ public class PostgreSQLConstants {
                         "DESCRIPTION = ?, " +
                         "SIDDHI_QUERY = ?, " +
                         "KEY_TEMPLATE = ? " +
-                        "WHERE NAME = ? AND TENANT_ID = ?";
+                        "WHERE NAME = ? AND ORGANIZATION = ?";
 
         public static final String UPDATE_GLOBAL_POLICY_BY_UUID_SQL =
                 "UPDATE AM_POLICY_GLOBAL " +
@@ -2637,22 +2637,22 @@ public class PostgreSQLConstants {
                         "WHERE UUID = ?";
 
         public static final String UPDATE_APPLICATION_POLICY_STATUS_SQL =
-                "UPDATE AM_POLICY_APPLICATION SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";
+                "UPDATE AM_POLICY_APPLICATION SET IS_DEPLOYED = ? WHERE NAME = ? AND ORGANIZATION = ?";
 
         public static final String UPDATE_SUBSCRIPTION_POLICY_STATUS_SQL =
-                "UPDATE AM_POLICY_SUBSCRIPTION SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";
+                "UPDATE AM_POLICY_SUBSCRIPTION SET IS_DEPLOYED = ? WHERE NAME = ? AND ORGANIZATION = ?";
 
         public static final String UPDATE_GLOBAL_POLICY_STATUS_SQL =
-                "UPDATE AM_POLICY_GLOBAL SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";
+                "UPDATE AM_POLICY_GLOBAL SET IS_DEPLOYED = ? WHERE NAME = ? AND ORGANIZATION = ?";
 
         public static final String DELETE_APPLICATION_POLICY_SQL =
-                "DELETE FROM AM_POLICY_APPLICATION WHERE TENANT_ID = ? AND NAME = ?";
+                "DELETE FROM AM_POLICY_APPLICATION WHERE ORGANIZATION = ? AND NAME = ?";
 
         public static final String DELETE_SUBSCRIPTION_POLICY_SQL =
-                "DELETE FROM AM_POLICY_SUBSCRIPTION WHERE TENANT_ID = ? AND NAME = ?";
+                "DELETE FROM AM_POLICY_SUBSCRIPTION WHERE ORGANIZATION = ? AND NAME = ?";
 
         public static final String DELETE_GLOBAL_POLICY_SQL =
-                "DELETE FROM AM_POLICY_GLOBAL WHERE TENANT_ID = ? AND NAME = ?";
+                "DELETE FROM AM_POLICY_GLOBAL WHERE ORGANIZATION = ? AND NAME = ?";
 
         public static final String GET_API_DETAILS_SQL = "SELECT * FROM AM_API ";
 
@@ -3069,15 +3069,15 @@ public class PostgreSQLConstants {
             public static final String QUOTA_TYPE_REQUESTCOUNT = PolicyConstants.REQUEST_COUNT_TYPE;
 
             public static final String GET_POLICY_NAMES = " SELECT " + "   NAME " + "FROM " + "   AM_API_THROTTLE_POLICY"
-                    + " WHERE" + "   TYPE = ?" + "   AND TENANT_ID =?";
+                    + " WHERE" + "   TYPE = ?" + "   AND ORGANIZATION =?";
 
-            public static final String GET_EXISTING_POLICY_SQL = "SELECT POLICY_ID FROM AM_API_THROTTLE_POLICY WHERE NAME = ? AND TENANT_ID = ? ";
+            public static final String GET_EXISTING_POLICY_SQL = "SELECT POLICY_ID FROM AM_API_THROTTLE_POLICY WHERE NAME = ? AND ORGANIZATION = ? ";
 
-            public static final String INSERT_API_POLICY_SQL = "INSERT INTO AM_API_THROTTLE_POLICY (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_TYPE, \n"
+            public static final String INSERT_API_POLICY_SQL = "INSERT INTO AM_API_THROTTLE_POLICY (NAME, DISPLAY_NAME, ORGANIZATION, DESCRIPTION, DEFAULT_QUOTA_TYPE, \n"
                     + "  DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT , IS_DEPLOYED, UUID, APPLICABLE_LEVEL) \n"
                     + " VALUES (?,?,?,?,? ,?,?,?,?,? ,?,?)";
 
-            public static final String INSERT_API_POLICY_WITH_ID_SQL = "INSERT INTO AM_API_THROTTLE_POLICY (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_TYPE, \n"
+            public static final String INSERT_API_POLICY_WITH_ID_SQL = "INSERT INTO AM_API_THROTTLE_POLICY (NAME, DISPLAY_NAME, ORGANIZATION, DESCRIPTION, DEFAULT_QUOTA_TYPE, \n"
                     + " DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, \n"
                     + " IS_DEPLOYED, UUID, APPLICABLE_LEVEL, POLICY_ID) \n" + "VALUES (?,?,?,?,?, ?,?,?,?,? ,?,?,?)";
 
@@ -3088,29 +3088,29 @@ public class PostgreSQLConstants {
 
             public static final String UPDATE_API_POLICY_SQL = "UPDATE AM_API_THROTTLE_POLICY SET DISPLAY_NAME = ?,"
                     + "DESCRIPTION = ?, DEFAULT_QUOTA_TYPE = ?, DEFAULT_QUOTA = ?, DEFAULT_QUOTA_UNIT = ?,"
-                    + "DEFAULT_UNIT_TIME = ?, DEFAULT_TIME_UNIT = ? WHERE NAME = ? AND TENANT_ID = ?";
+                    + "DEFAULT_UNIT_TIME = ?, DEFAULT_TIME_UNIT = ? WHERE NAME = ? AND ORGANIZATION = ?";
 
             public static final String GET_API_POLICY_NAMES = " SELECT " + "   NAME " + "FROM "
-                    + "   AM_API_THROTTLE_POLICY " + " WHERE" + "   TENANT_ID =?";
+                    + "   AM_API_THROTTLE_POLICY " + " WHERE" + "   ORGANIZATION =?";
 
             public static final String GET_API_POLICIES = " SELECT " + "   * " + "FROM " + "   AM_API_THROTTLE_POLICY "
-                    + " WHERE" + "   TENANT_ID =? ORDER BY NAME";
+                    + " WHERE" + "   ORGANIZATION =? ORDER BY NAME";
 
             public static final String GET_API_POLICY_ID_SQL = "SELECT " + "POLICY_ID, UUID " + "FROM "
-                    + " AM_API_THROTTLE_POLICY " + "WHERE " + "NAME = ? AND " + "TENANT_ID = ?";
+                    + " AM_API_THROTTLE_POLICY " + "WHERE " + "NAME = ? AND " + "ORGANIZATION = ?";
 
             public static final String GET_API_POLICY_ID_BY_UUID_SQL = "SELECT " + "POLICY_ID, UUID " + "FROM "
                     + " AM_API_THROTTLE_POLICY " + "WHERE " + "UUID = ?";
 
             public static final String GET_API_POLICY_SQL = "SELECT " + "* " + "FROM " + "AM_API_THROTTLE_POLICY "
-                    + " WHERE " + "NAME = ? AND " + "TENANT_ID =?";
+                    + " WHERE " + "NAME = ? AND " + "ORGANIZATION =?";
 
             public static final String GET_API_POLICY_BY_UUID_SQL = "SELECT " + "* " + "FROM " + "AM_API_THROTTLE_POLICY "
                     + " WHERE " + "UUID = ?";
 
-            public static final String UPDATE_API_POLICY_STATUS_SQL = "UPDATE AM_API_THROTTLE_POLICY SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";
+            public static final String UPDATE_API_POLICY_STATUS_SQL = "UPDATE AM_API_THROTTLE_POLICY SET IS_DEPLOYED = ? WHERE NAME = ? AND ORGANIZATION = ?";
 
-            public static final String DELETE_API_POLICY_SQL = "DELETE FROM AM_API_THROTTLE_POLICY WHERE TENANT_ID = ? AND NAME = ?";
+            public static final String DELETE_API_POLICY_SQL = "DELETE FROM AM_API_THROTTLE_POLICY WHERE ORGANIZATION = ? AND NAME = ?";
 
             public static final String INSERT_CONDITION_GROUP_SQL = "INSERT INTO AM_CONDITION_GROUP(POLICY_ID, QUOTA_TYPE,QUOTA,QUOTA_UNIT,UNIT_TIME,TIME_UNIT,DESCRIPTION) \n"
                     + " VALUES (?,?,?,?,?,?,?)";
@@ -3147,29 +3147,29 @@ public class PostgreSQLConstants {
                     " INSERT INTO AM_IP_CONDITION(STARTING_IP,ENDING_IP,SPECIFIC_IP,WITHIN_IP_RANGE,CONDITION_GROUP_ID ) \n" +
                             " VALUES (?,?,?,?,?)";
 
-            public static final String IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL = "SELECT APPPOLICY.TENANT_ID, APPPOLICY.QUOTA_TYPE "
+            public static final String IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL = "SELECT APPPOLICY.ORGANIZATION, APPPOLICY.QUOTA_TYPE "
                     + " FROM AM_POLICY_APPLICATION APPPOLICY," + "AM_POLICY_SUBSCRIPTION SUBPOLICY "
-                    + " WHERE APPPOLICY.TENANT_ID =? AND " + "APPPOLICY.NAME =? AND " + "SUBPOLICY.NAME=? ";
+                    + " WHERE APPPOLICY.ORGANIZATION =? AND " + "APPPOLICY.NAME =? AND " + "SUBPOLICY.NAME=? ";
 
             public static final String IS_ANY_POLICY_CONTENT_AWARE_SQL = "select sum(c) as c from("
                     + " (SELECT count(*) as c"
-                    + " FROM AM_API_THROTTLE_POLICY APIPOLICY where APIPOLICY.NAME =?  AND APIPOLICY.TENANT_ID =? AND APIPOLICY.DEFAULT_QUOTA_TYPE = 'bandwidthVolume')"
+                    + " FROM AM_API_THROTTLE_POLICY APIPOLICY where APIPOLICY.NAME =?  AND APIPOLICY.ORGANIZATION =? AND APIPOLICY.DEFAULT_QUOTA_TYPE = 'bandwidthVolume')"
                     + " union "
                     + " (SELECT count(*) as c"
-                    + " FROM AM_API_THROTTLE_POLICY APIPOLICY , AM_CONDITION_GROUP cg where APIPOLICY.NAME =?  AND APIPOLICY.TENANT_ID =? AND cg.POLICY_ID = APIPOLICY.POLICY_ID AND cg.QUOTA_TYPE = 'bandwidthVolume')"
+                    + " FROM AM_API_THROTTLE_POLICY APIPOLICY , AM_CONDITION_GROUP cg where APIPOLICY.NAME =?  AND APIPOLICY.ORGANIZATION =? AND cg.POLICY_ID = APIPOLICY.POLICY_ID AND cg.QUOTA_TYPE = 'bandwidthVolume')"
                     + " union "
                     + " (SELECT count(*) as c"
                     + " FROM AM_API_THROTTLE_POLICY APIPOLICY, AM_API_URL_MAPPING RS, AM_CONDITION_GROUP cg where"
-                    + " RS.API_ID = ? AND RS.REVISION_UUID IS NULL AND APIPOLICY.NAME = RS.THROTTLING_TIER AND APIPOLICY.TENANT_ID =? AND cg.POLICY_ID = APIPOLICY.POLICY_ID AND cg.QUOTA_TYPE = 'bandwidthVolume' "
+                    + " RS.API_ID = ? AND RS.REVISION_UUID IS NULL AND APIPOLICY.NAME = RS.THROTTLING_TIER AND APIPOLICY.ORGANIZATION =? AND cg.POLICY_ID = APIPOLICY.POLICY_ID AND cg.QUOTA_TYPE = 'bandwidthVolume' "
                     + " ) "
                     + " union "
                     + "  (SELECT count(*) as c"
                     + " FROM AM_API_THROTTLE_POLICY APIPOLICY, AM_API_URL_MAPPING RS where "
-                    + " RS.API_ID = ? AND RS.REVISION_UUID IS NULL AND APIPOLICY.NAME = RS.THROTTLING_TIER AND APIPOLICY.TENANT_ID =? AND APIPOLICY.DEFAULT_QUOTA_TYPE = 'bandwidthVolume') "
+                    + " RS.API_ID = ? AND RS.REVISION_UUID IS NULL AND APIPOLICY.NAME = RS.THROTTLING_TIER AND APIPOLICY.ORGANIZATION =? AND APIPOLICY.DEFAULT_QUOTA_TYPE = 'bandwidthVolume') "
                     + " union "
-                    + " (SELECT count(*) as c FROM AM_POLICY_SUBSCRIPTION SUBPOLICY WHERE SUBPOLICY.NAME= ? AND SUBPOLICY.TENANT_ID = ? AND SUBPOLICY.QUOTA_TYPE = 'bandwidthVolume')"
+                    + " (SELECT count(*) as c FROM AM_POLICY_SUBSCRIPTION SUBPOLICY WHERE SUBPOLICY.NAME= ? AND SUBPOLICY.ORGANIZATION = ? AND SUBPOLICY.QUOTA_TYPE = 'bandwidthVolume')"
                     + " union "
-                    + " (SELECT count(*) as c FROM AM_POLICY_APPLICATION APPPOLICY where APPPOLICY.NAME = ? AND APPPOLICY.TENANT_ID = ? AND APPPOLICY.QUOTA_TYPE = 'bandwidthVolume')"
+                    + " (SELECT count(*) as c FROM AM_POLICY_APPLICATION APPPOLICY where APPPOLICY.NAME = ? AND APPPOLICY.ORGANIZATION = ? AND APPPOLICY.QUOTA_TYPE = 'bandwidthVolume')"
                     + " ) x";
 
             public static final String GET_CONDITION_GROUPS_FOR_POLICIES_SQL = "SELECT grp.CONDITION_GROUP_ID ,AUM.HTTP_METHOD,AUM.AUTH_SCHEME, pol.APPLICABLE_LEVEL, "
@@ -3178,7 +3178,7 @@ public class PostgreSQLConstants {
                     + " INNER JOIN  AM_API API ON AUM.API_ID = API.API_ID"
                     + " LEFT OUTER JOIN AM_API_THROTTLE_POLICY pol ON AUM.THROTTLING_TIER = pol.NAME "
                     + " LEFT OUTER JOIN AM_CONDITION_GROUP grp ON pol.POLICY_ID  = grp.POLICY_ID"
-                    + " where API.CONTEXT= ? AND API.API_VERSION = ? AND pol.TENANT_ID = ? AND AUM.REVISION_UUID IS NULL"
+                    + " where API.CONTEXT= ? AND API.API_VERSION = ? AND pol.ORGANIZATION = ? AND AUM.REVISION_UUID IS NULL"
                     /*+ " GROUP BY AUM.HTTP_METHOD,AUM.URL_PATTERN, AUM.URL_MAPPING_ID"*/
                     + " ORDER BY AUM.URL_MAPPING_ID";
 
@@ -3187,18 +3187,18 @@ public class PostgreSQLConstants {
                     "FROM AM_API_URL_MAPPING AUM, AM_API_PRODUCT_MAPPING APM, AM_API API, AM_API_THROTTLE_POLICY POL " +
                     "LEFT OUTER JOIN AM_CONDITION_GROUP GRP ON POL.POLICY_ID  = GRP.POLICY_ID " +
                     "WHERE APM.API_ID = API.API_ID " +
-                    "AND API.CONTEXT = ? AND API.API_VERSION = ? AND POL.TENANT_ID = ? " +
+                    "AND API.CONTEXT = ? AND API.API_VERSION = ? AND POL.ORGANIZATION = ? " +
                     "AND APM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND AUM.THROTTLING_TIER = POL.NAME AND AUM.REVISION_UUID IS NULL " +
                     "ORDER BY AUM.URL_MAPPING_ID";
 
             public static final String ADD_BLOCK_CONDITIONS_SQL =
                     "INSERT INTO AM_BLOCK_CONDITIONS (TYPE,BLOCK_CONDITION,ENABLED,DOMAIN,UUID) VALUES (?,?,?,?,?)";
             public static final String GET_BLOCK_CONDITIONS_SQL =
-                    "SELECT CONDITION_ID,TYPE,BLOCK_CONDITION,ENABLED,DOMAIN,UUID FROM AM_BLOCK_CONDITIONS WHERE DOMAIN =?";
+                    "SELECT CONDITION_ID,TYPE,BLOCK_CONDITION,ENABLED,ORGANIZATION,UUID FROM AM_BLOCK_CONDITIONS WHERE ORGANIZATION =?";
             public static final String GET_BLOCK_CONDITION_SQL =
-                    "SELECT TYPE,BLOCK_CONDITION,ENABLED,DOMAIN,UUID FROM AM_BLOCK_CONDITIONS WHERE CONDITION_ID =?";
+                    "SELECT TYPE,BLOCK_CONDITION,ENABLED,ORGANIZATION,UUID FROM AM_BLOCK_CONDITIONS WHERE CONDITION_ID =?";
             public static final String GET_BLOCK_CONDITION_BY_UUID_SQL =
-                    "SELECT CONDITION_ID,TYPE,BLOCK_CONDITION,ENABLED,DOMAIN,UUID FROM AM_BLOCK_CONDITIONS WHERE UUID =?";
+                    "SELECT CONDITION_ID,TYPE,BLOCK_CONDITION,ENABLED,ORGANIZATION,UUID FROM AM_BLOCK_CONDITIONS WHERE UUID =?";
             public static final String UPDATE_BLOCK_CONDITION_STATE_SQL =
                     "UPDATE AM_BLOCK_CONDITIONS SET ENABLED = ? WHERE CONDITION_ID = ?";
             public static final String UPDATE_BLOCK_CONDITION_STATE_BY_UUID_SQL =
@@ -3208,11 +3208,11 @@ public class PostgreSQLConstants {
             public static final String DELETE_BLOCK_CONDITION_BY_UUID_SQL =
                     "DELETE FROM AM_BLOCK_CONDITIONS WHERE UUID=?";
             public static final String BLOCK_CONDITION_EXIST_SQL =
-                    "SELECT CONDITION_ID,TYPE,BLOCK_CONDITION,ENABLED,DOMAIN,UUID FROM AM_BLOCK_CONDITIONS WHERE DOMAIN =? "
+                    "SELECT CONDITION_ID,TYPE,BLOCK_CONDITION,ENABLED,DOMAIN,UUID FROM AM_BLOCK_CONDITIONS WHERE ORGANIZATION =? "
                             + "AND TYPE =? AND BLOCK_CONDITION =?";
             public static final String GET_SUBSCRIPTION_BLOCK_CONDITION_BY_VALUE_AND_DOMAIN_SQL =
                     "SELECT CONDITION_ID,TYPE,BLOCK_CONDITION,ENABLED,DOMAIN,UUID FROM AM_BLOCK_CONDITIONS WHERE "
-                            + "BLOCK_CONDITION = ? AND DOMAIN = ? ";
+                            + "BLOCK_CONDITION = ? AND ORGANIZATION = ? ";
 
             public static final String TIER_HAS_SUBSCRIPTION = " select count(sub.TIER_ID) as c from AM_SUBSCRIPTION sub, AM_API api "
                     + " where sub.TIER_ID = ? and api.API_PROVIDER like ? and sub.API_ID = api.API_ID ";
@@ -3230,7 +3230,7 @@ public class PostgreSQLConstants {
                     + "ON AM_API_THROTTLE_POLICY.POLICY_ID = AM_CONDITION_GROUP.POLICY_ID "
                     + "WHERE "
                     + "(DEFAULT_QUOTA_TYPE  = '" + QUOTA_TYPE_BANDWIDTH + "' OR QUOTA_TYPE  = '"+ QUOTA_TYPE_BANDWIDTH + "') "
-                    + "AND TENANT_ID = ?";
+                    + "AND ORGANIZATION = ?";
             public static final String TIER_HAS_ATTACHED_TO_APPLICATION = "SELECT 1 FROM AM_APPLICATION WHERE " +
                     "ORGANIZATION = ? " +
                     "AND AM_APPLICATION.APPLICATION_TIER = ?";

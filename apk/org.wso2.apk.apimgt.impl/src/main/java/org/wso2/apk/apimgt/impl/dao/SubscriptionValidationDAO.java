@@ -17,7 +17,6 @@
  */
 package org.wso2.apk.apimgt.impl.dao;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,10 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -385,7 +381,7 @@ public class SubscriptionValidationDAO {
     public List<API> getAllApis(String organization, boolean isExpand) {
 
         String sql = SubscriptionValidationSQLConstants.GET_ALL_APIS_BY_ORGANIZATION_AND_DEPLOYMENT_SQL;
-        if (SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+        if (APIConstants.SUPER_TENANT_DOMAIN.equals(organization)) {
             sql = sql.concat("WHERE AM_API.CONTEXT NOT LIKE '/t/%'");
         } else {
             sql = sql.concat("WHERE AM_API.CONTEXT LIKE '/t/" + organization + "%'");
@@ -1053,7 +1049,7 @@ public class SubscriptionValidationDAO {
     public List<API> getAllApis(String organization, String deployment, boolean isExpand) {
 
         String sql = SubscriptionValidationSQLConstants.GET_ALL_APIS_BY_ORGANIZATION_AND_DEPLOYMENT_SQL;
-        if (SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+        if (APIConstants.SUPER_TENANT_DOMAIN.equals(organization)) {
             sql = sql.concat("WHERE AM_API.CONTEXT NOT LIKE '/t/%'");
         } else {
             sql = sql.concat("WHERE AM_API.CONTEXT LIKE '/t/" + organization + "%'");
@@ -1232,7 +1228,7 @@ public class SubscriptionValidationDAO {
     public API getApiByUUID(String apiId, String deployment, String organization, boolean isExpand) {
 
         String sql = SubscriptionValidationSQLConstants.GET_API_BY_UUID_SQL;
-        if (SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+        if (APIConstants.SUPER_TENANT_DOMAIN.equals(organization)) {
             sql = sql.concat("AND AM_API.CONTEXT NOT LIKE '/t/%'");
         } else {
             sql = sql.concat("AND AM_API.CONTEXT LIKE '/t/" + organization + "%'");

@@ -34,8 +34,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.wso2.carbon.apimgt.impl.APIConstants.*;
-
 public class RestApiCommonUtil {
 
     public static final ThreadLocal userThreadLocal = new ThreadLocal();
@@ -848,11 +846,11 @@ public class RestApiCommonUtil {
         Map<String, Object> tempMap = new HashMap();
         tempMap.put("type", "http");
         tempMap.put("urls", urls);
-        openAPI.addExtension(X_WSO2_PRODUCTION_ENDPOINTS, tempMap);
-        openAPI.addExtension(X_WSO2_SANDBOX_ENDPOINTS, tempMap);
-        openAPI.addExtension(X_WSO2_AUTH_HEADER, "Authorization");
-        openAPI.addExtension(X_WSO2_BASEPATH, context + "/" + version);
-        openAPI.addExtension(X_WSO2_DISABLE_SECURITY, true);
+        openAPI.addExtension(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS, tempMap);
+        openAPI.addExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, tempMap);
+        openAPI.addExtension(APIConstants.X_WSO2_AUTH_HEADER, "Authorization");
+        openAPI.addExtension(APIConstants.X_WSO2_BASEPATH, context + "/" + version);
+        openAPI.addExtension(APIConstants.X_WSO2_DISABLE_SECURITY, true);
         return Json.mapper().writeValueAsString(openAPI);
     }
 

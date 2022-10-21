@@ -16,8 +16,8 @@
 
 package org.wso2.apk.apimgt.impl.dao.exceptions;
 
-import org.wso2.carbon.apimgt.api.ErrorHandler;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.apk.apimgt.api.ErrorHandler;
+import org.wso2.apk.apimgt.api.ExceptionCodes;
 
 /**
  * This is the custom exception class for Documentation Persistence.

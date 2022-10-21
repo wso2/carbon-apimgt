@@ -16,7 +16,6 @@ import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.apk.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.apk.apimgt.impl.workflow.WorkflowConstants;
-import org.wso2.apk.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.apk.apimgt.impl.workflow.WorkflowStatus;
 
 import java.io.InputStream;
@@ -68,7 +67,8 @@ public class WorkflowDAOImpl implements WorkflowDAO {
 
             rs = prepStmt.executeQuery();
             while (rs.next()) {
-                workflowDTO = WorkflowExecutorFactory.getInstance().createWorkflowDTO(rs.getString("WF_TYPE"));
+                //TODO: APK
+//                workflowDTO = WorkflowExecutorFactory.getInstance().createWorkflowDTO(rs.getString("WF_TYPE"));
                 workflowDTO.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
                 workflowDTO.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
                 workflowDTO.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").getTime());
@@ -369,7 +369,8 @@ public class WorkflowDAOImpl implements WorkflowDAO {
 
             rs = prepStmt.executeQuery();
             while (rs.next()) {
-                workflowDTO = WorkflowExecutorFactory.getInstance().createWorkflowDTO(rs.getString("WF_TYPE"));
+                //TODO: APK
+//                workflowDTO = WorkflowExecutorFactory.getInstance().createWorkflowDTO(rs.getString("WF_TYPE"));
                 workflowDTO.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
                 workflowDTO.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
                 workflowDTO.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").getTime());

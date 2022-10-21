@@ -103,7 +103,6 @@ import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.impl.utils.PublisherAPISearchResultComparator;
 import org.wso2.apk.apimgt.impl.utils.VHostUtils;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -705,7 +704,7 @@ public class ApiDAOImpl implements ApiDAO {
             if (apiDefinition != null) {
                 byte[] apiDefinitionBytes = apiDefinition.getBytes();
                 preparedStatement.setBinaryStream(1, new ByteArrayInputStream(apiDefinitionBytes));
-                preparedStatement.setString(2, org.wso2.carbon.apimgt.persistence.APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
+                preparedStatement.setString(2, APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
             }
             preparedStatement.setString(3, organization.getName());
             preparedStatement.setString(4, apiId);
@@ -767,7 +766,7 @@ public class ApiDAOImpl implements ApiDAO {
             if (apiDefinition != null) {
                 byte[] apiDefinitionBytes = apiDefinition.getBytes();
                 preparedStatement.setBinaryStream(1, new ByteArrayInputStream(apiDefinitionBytes));
-                preparedStatement.setString(2, org.wso2.carbon.apimgt.persistence.APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME);
+                preparedStatement.setString(2, APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME);
             }
             preparedStatement.setString(3, organization.getName());
             preparedStatement.setString(4, apiId);
@@ -829,7 +828,7 @@ public class ApiDAOImpl implements ApiDAO {
             if (schemaDefinition != null) {
                 byte[] apiDefinitionBytes = schemaDefinition.getBytes();
                 preparedStatement.setBinaryStream(1, new ByteArrayInputStream(apiDefinitionBytes));
-                preparedStatement.setString(2, "graphqlapi" + org.wso2.carbon.apimgt.persistence.APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION);
+                preparedStatement.setString(2, "graphqlapi" + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION);
             }
             preparedStatement.setString(3, organization.getName());
             preparedStatement.setString(4, apiId);
@@ -2918,7 +2917,7 @@ public class ApiDAOImpl implements ApiDAO {
             preparedStatement = connection.prepareStatement(saveThumbnailQuery);
             if (resourceFile.getContent() != null) {
                 preparedStatement.setString(1, "thumbnail");
-                preparedStatement.setString(2, org.wso2.carbon.apimgt.persistence.APIConstants.API_ICON_IMAGE + resourceFile.getContentType());
+                preparedStatement.setString(2, APIConstants.API_ICON_IMAGE + resourceFile.getContentType());
                 preparedStatement.setString(3, organization.getName());
                 preparedStatement.setString(4, apiId);
             }
@@ -6344,8 +6343,10 @@ public class ApiDAOImpl implements ApiDAO {
             }
 
             addAPIProductResourceMappings(apiProduct.getProductResources(), apiProduct.getOrganization(), connection);
-            String tenantUserName = MultitenantUtils
-                    .getTenantAwareUsername(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            //TODO: APK
+//            String tenantUserName = MultitenantUtils
+//                    .getTenantAwareUsername(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            String tenantUserName = identifier.getProviderName();
             int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             recordAPILifeCycleEvent(productId, null, APIStatus.CREATED.toString(), tenantUserName, tenantId,
                     connection);

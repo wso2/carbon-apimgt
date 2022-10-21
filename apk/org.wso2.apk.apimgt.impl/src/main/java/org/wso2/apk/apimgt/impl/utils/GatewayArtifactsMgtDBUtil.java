@@ -4,15 +4,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.APIManagerDatabaseException;
-import org.wso2.apk.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class GatewayArtifactsMgtDBUtil {
 
@@ -74,6 +73,7 @@ public class GatewayArtifactsMgtDBUtil {
 
     /**
      * Close ResultSet
+     *
      * @param resultSet ResultSet
      */
     public static void closeResultSet(ResultSet resultSet) {

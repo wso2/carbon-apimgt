@@ -21,11 +21,14 @@ package org.wso2.apk.init;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.wso2.apk.apimgt.api.APIManagerDatabaseException;
 import org.wso2.apk.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.apk.apimgt.impl.ConfigurationHolder;
 import org.wso2.apk.apimgt.impl.caching.CacheProvider;
+import org.wso2.apk.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 
 
 public class APKComponent {
@@ -45,6 +48,15 @@ public class APKComponent {
             throw new APIManagementException("Error while reading configurations");
         }
 
+        try {
+            // Initialize database
+            APIMgtDBUtil.initialize();
+        } catch (APIManagerDatabaseException e) {
+            throw new APIManagementException("Error while initializing database connection");
+        }
+
+        // Initialise SQL constant manager
+        SQLConstantManagerFactory.initializeSQLConstantManager();
 
         // initialize API-M Caches
         CacheProvider.createTenantConfigCache();

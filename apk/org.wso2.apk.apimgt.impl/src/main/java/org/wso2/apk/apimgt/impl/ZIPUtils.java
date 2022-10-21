@@ -61,7 +61,7 @@ public class ZIPUtils {
              ZipOutputStream zos = new ZipOutputStream(fos)) {
             for (File file : fileList) {
                 String path = file.getAbsolutePath().substring(
-                        file.getAbsolutePath().indexOf(org.wso2.carbon.apimgt.impl.APIConstants.API_WSDL_EXTRACTED_DIRECTORY)
+                        file.getAbsolutePath().indexOf(APIConstants.API_WSDL_EXTRACTED_DIRECTORY)
                                 + APIConstants.API_WSDL_EXTRACTED_DIRECTORY.length() + 1);
                 ZipEntry ze = new ZipEntry(path);
                 zos.putNextEntry(ze);

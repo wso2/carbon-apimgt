@@ -18,17 +18,17 @@
 
 package org.wso2.apk.apimgt.impl.restapi;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.ExceptionCodes;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import java.io.IOException;
-import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.StringReader;
 
 public class PublisherUtils {
     private PublisherUtils() {

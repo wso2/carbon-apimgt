@@ -22,18 +22,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.ExceptionCodes;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -52,7 +44,7 @@ public class APIFileUtil {
     private static final Logger log = LoggerFactory.getLogger(APIFileUtil.class);
 
     public static String extractUploadedArchive(InputStream uploadedApiArchiveInputStream, String importedDirectoryName,
-            String apiArchiveLocation, String extractLocation) throws APIManagementException {
+                                                String apiArchiveLocation, String extractLocation) throws APIManagementException {
         String archiveExtractLocation;
         try {
             // create api import directory structure
@@ -205,9 +197,9 @@ public class APIFileUtil {
 
     private static void writeFileToDestination(ZipFile zip, ZipEntry entry, File destinationFile) throws IOException {
         try (InputStream zipInputStream = zip.getInputStream(entry);
-                BufferedInputStream inputStream = new BufferedInputStream(zipInputStream);
-                // write the current file to the destination
-                FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
+             BufferedInputStream inputStream = new BufferedInputStream(zipInputStream);
+             // write the current file to the destination
+             FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
             IOUtils.copy(inputStream, outputStream);
         }
     }
@@ -249,7 +241,7 @@ public class APIFileUtil {
      * @return collection of files for the extension
      */
     public static Collection<File> searchFilesWithMatchingExtension(File folder, String extension) {
-        return FileUtils.listFiles(folder, new String[] {extension}, true);
+        return FileUtils.listFiles(folder, new String[]{extension}, true);
     }
 
     /**
@@ -272,8 +264,8 @@ public class APIFileUtil {
      * Iterates through the files in the given path with extension and search the provided string. If a file is found,
      * then returns true
      *
-     * @param path folder path
-     * @param extension file extension to filter
+     * @param path           folder path
+     * @param extension      file extension to filter
      * @param stringTosearch string to search in files
      * @return true when a file is found in the folder path whose content contains the provided string
      */

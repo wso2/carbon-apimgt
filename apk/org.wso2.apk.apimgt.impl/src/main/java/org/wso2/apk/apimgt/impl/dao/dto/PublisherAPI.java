@@ -19,7 +19,7 @@
 package org.wso2.apk.apimgt.impl.dao.dto;
 
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
+import org.wso2.apk.apimgt.api.model.SOAPToRestSequence;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;

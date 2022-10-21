@@ -53,7 +53,7 @@ import org.json.simple.JSONObject;
 import org.wso2.apk.apimgt.api.*;
 import org.wso2.apk.apimgt.api.model.*;
 import org.wso2.apk.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.impl.utils.APIUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
