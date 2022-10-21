@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.impl.internal;
 import org.apache.axis2.engine.ListenerManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.ssl.SSLContexts;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -37,6 +40,8 @@ import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
+import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
+import org.wso2.carbon.apimgt.common.gateway.http.BrowserHostnameVerifier;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.eventing.EventPublisherException;
 import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
@@ -129,6 +134,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -138,6 +144,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.cache.Cache;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+
+import static org.wso2.carbon.apimgt.common.gateway.util.CommonAPIUtil.ALLOW_ALL;
+import static org.wso2.carbon.apimgt.common.gateway.util.CommonAPIUtil.HOST_NAME_VERIFIER;
+import static org.wso2.carbon.apimgt.common.gateway.util.CommonAPIUtil.STRICT;
 
 @Component(
          name = "org.wso2.apimgt.impl.services",
@@ -301,6 +313,7 @@ public class APIManagerComponent {
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();
             retrieveAndSetParentTrustStore();
+            populateHttpClientConfiguration();
             if (configuration.getGatewayArtifactSynchronizerProperties().isRetrieveFromStorageEnabled()) {
                 if (APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME
                         .equals(configuration.getGatewayArtifactSynchronizerProperties().getRetrieverName())) {
@@ -965,6 +978,63 @@ public class APIManagerComponent {
 
     protected void unsetAPIMConfigService(APIMConfigService apimConfigService) {
         ServiceReferenceHolder.getInstance().setAPIMConfigService(null);
+    }
+
+    /**
+     * Populate the http client configuration {@link HttpClientConfigurationDTO} assigned to the
+     * API Manager Configuration
+     */
+    void populateHttpClientConfiguration() {
+        APIManagerConfiguration configuration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                        .getAPIManagerConfiguration();
+        HttpClientConfigurationDTO.Builder builder  = new HttpClientConfigurationDTO.Builder();
+
+        int maxTotal = Integer.parseInt(configuration.getFirstProperty(APIConstants.HTTP_CLIENT_MAX_TOTAL));
+        int defaultMaxPerRoute = Integer.parseInt(configuration.getFirstProperty(APIConstants.HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE));
+
+        boolean proxyEnabled = Boolean.parseBoolean(configuration.getFirstProperty(APIConstants.PROXY_ENABLE));
+
+        if (proxyEnabled) {
+            String proxyHost = configuration.getFirstProperty(APIConstants.PROXY_HOST);
+            int proxyPort = Integer.parseInt(configuration.getFirstProperty(APIConstants.PROXY_PORT));
+            String proxyUsername = configuration.getFirstProperty(APIConstants.PROXY_USERNAME);
+            String proxyPassword = configuration.getFirstProperty(APIConstants.PROXY_PASSWORD);
+            String nonProxyHostsString = configuration.getFirstProperty(APIConstants.NON_PROXY_HOSTS);
+            String[] nonProxyHosts = configuration.getFirstProperty(nonProxyHostsString) != null ?
+                    nonProxyHostsString.split("\\|") : null;
+            String proxyProtocol = configuration.getFirstProperty(APIConstants.PROXY_PROTOCOL);
+            builder = builder.withProxy(proxyHost, proxyPort, proxyUsername, proxyPassword, proxyProtocol,
+                    nonProxyHosts);
+        }
+
+        SSLContext sslContext = null;
+        try {
+            KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
+            sslContext = SSLContexts.custom().loadTrustMaterial(trustStore, null).build();
+        } catch ( KeyStoreException e) {
+            log.error("Failed to read from Key Store", e);
+        } catch (
+                NoSuchAlgorithmException e) {
+            log.error("Failed to load Key Store.", e);
+        } catch (
+                KeyManagementException e) {
+            log.error("Failed to load key from Key Store" , e);
+        }
+        String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
+        HostnameVerifier hostnameVerifier;
+        switch(hostnameVerifierOption) {
+            case ALLOW_ALL:
+                hostnameVerifier = NoopHostnameVerifier.INSTANCE;;
+                break;
+            case STRICT:
+                hostnameVerifier = new DefaultHostnameVerifier();
+                break;
+            default:
+                hostnameVerifier = new BrowserHostnameVerifier();
+        }
+        configuration.setHttpClientConfiguration(builder.withConnectionParams(maxTotal, defaultMaxPerRoute)
+                .withSSLContext(sslContext, hostnameVerifier).build());
     }
 }
 

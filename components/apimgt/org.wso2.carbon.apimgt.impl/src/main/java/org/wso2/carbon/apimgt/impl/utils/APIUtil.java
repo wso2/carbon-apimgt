@@ -54,31 +54,15 @@ import org.apache.commons.validator.routines.RegexValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContexts;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.DeprecatedRuntimeConstants;
@@ -150,8 +134,10 @@ import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.quotalimiter.OnPremQuotaLimiter;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
+import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.JWTSignatureAlg;
+import org.wso2.carbon.apimgt.common.gateway.util.CommonAPIUtil;
 import org.wso2.carbon.apimgt.eventing.EventPublisher;
 import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
 import org.wso2.carbon.apimgt.eventing.EventPublisherException;
@@ -177,7 +163,6 @@ import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -189,7 +174,6 @@ import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
-import org.wso2.carbon.apimgt.impl.proxy.ExtendedProxyRoutePlanner;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.resolver.OnPremResolver;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -268,7 +252,6 @@ import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.security.InvalidKeyException;
-import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
@@ -309,7 +292,6 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
-import javax.net.ssl.SSLContext;
 import javax.security.cert.X509Certificate;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -363,7 +345,6 @@ public final class APIUtil {
 
     private static Schema tenantConfigJsonSchema;
     private static Schema operationPolicySpecSchema;
-
 
     private APIUtil() {
 
@@ -4893,121 +4874,20 @@ public final class APIUtil {
         }
         int port = configUrl.getPort();
         String protocol = configUrl.getProtocol();
-        return getHttpClient(port, protocol);
-    }
-
-    /**
-     * Return a PoolingHttpClientConnectionManager instance
-     *
-     * @param protocol- service endpoint protocol. It can be http/https
-     * @return PoolManager
-     */
-    private static PoolingHttpClientConnectionManager getPoolingHttpClientConnectionManager(String protocol)
-            throws APIManagementException {
-
-        PoolingHttpClientConnectionManager poolManager;
-        if (APIConstants.HTTPS_PROTOCOL.equals(protocol)) {
-            SSLConnectionSocketFactory socketFactory = createSocketFactory();
-            org.apache.http.config.Registry<ConnectionSocketFactory> socketFactoryRegistry =
-                    RegistryBuilder.<ConnectionSocketFactory>create()
-                            .register(APIConstants.HTTPS_PROTOCOL, socketFactory).build();
-            poolManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-        } else {
-            poolManager = new PoolingHttpClientConnectionManager();
-        } return poolManager;
-    }
-
-    private static SSLConnectionSocketFactory createSocketFactory() throws APIManagementException {
-        SSLContext sslContext;
-
-        String keyStorePath = CarbonUtils.getServerConfiguration()
-                .getFirstProperty(APIConstants.TRUST_STORE_LOCATION);
-        try {
-            KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
-            sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
-
-            X509HostnameVerifier hostnameVerifier;
-            String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
-
-            if (ALLOW_ALL.equalsIgnoreCase(hostnameVerifierOption)) {
-                hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-            } else if (STRICT.equalsIgnoreCase(hostnameVerifierOption)) {
-                hostnameVerifier = SSLSocketFactory.STRICT_HOSTNAME_VERIFIER;
-            } else {
-                hostnameVerifier = SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
-            }
-
-            return new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
-        } catch (KeyStoreException e) {
-            handleException("Failed to read from Key Store", e);
-        } catch (NoSuchAlgorithmException e) {
-            handleException("Failed to load Key Store from " + keyStorePath, e);
-        } catch (KeyManagementException e) {
-            handleException("Failed to load key from" + keyStorePath, e);
-        }
-
-        return null;
+        return APIUtil.getHttpClient(port, protocol);
     }
 
     /**
      * Return a http client instance
      *
-     * @param port      - server port
      * @param protocol- service endpoint protocol http/https
      * @return
      */
     public static HttpClient getHttpClient(int port, String protocol) {
 
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-
-        String maxTotal = configuration
-                .getFirstProperty(APIConstants.HTTP_CLIENT_MAX_TOTAL);
-        String defaultMaxPerRoute = configuration
-                .getFirstProperty(APIConstants.HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE);
-
-        String proxyEnabled = configuration.getFirstProperty(APIConstants.PROXY_ENABLE);
-        String proxyHost = configuration.getFirstProperty(APIConstants.PROXY_HOST);
-        String proxyPort = configuration.getFirstProperty(APIConstants.PROXY_PORT);
-        String proxyUsername = configuration.getFirstProperty(APIConstants.PROXY_USERNAME);
-        String proxyPassword = configuration.getFirstProperty(APIConstants.PROXY_PASSWORD);
-        String nonProxyHosts = configuration.getFirstProperty(APIConstants.NON_PROXY_HOSTS);
-        String proxyProtocol = configuration.getFirstProperty(APIConstants.PROXY_PROTOCOL);
-
-        if (proxyProtocol != null) {
-            protocol = proxyProtocol;
-        }
-
-        PoolingHttpClientConnectionManager pool = null;
-        try {
-            pool = getPoolingHttpClientConnectionManager(protocol);
-        } catch (APIManagementException e) {
-            log.error("Error while getting http client connection manager", e);
-        }
-        pool.setMaxTotal(Integer.parseInt(maxTotal));
-        pool.setDefaultMaxPerRoute(Integer.parseInt(defaultMaxPerRoute));
-
-        RequestConfig params = RequestConfig.custom().build();
-        HttpClientBuilder clientBuilder = HttpClients.custom().setConnectionManager(pool)
-                .setDefaultRequestConfig(params);
-
-        if (Boolean.parseBoolean(proxyEnabled)) {
-            HttpHost host = new HttpHost(proxyHost, Integer.parseInt(proxyPort), protocol);
-            DefaultProxyRoutePlanner routePlanner;
-            if (!StringUtils.isBlank(nonProxyHosts)) {
-                routePlanner = new ExtendedProxyRoutePlanner(host, configuration);
-            } else {
-                routePlanner = new DefaultProxyRoutePlanner(host);
-            }
-            clientBuilder = clientBuilder.setRoutePlanner(routePlanner);
-            if (!StringUtils.isBlank(proxyUsername) && !StringUtils.isBlank(proxyPassword)) {
-                CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-                credentialsProvider.setCredentials(new AuthScope(proxyHost, Integer.parseInt(proxyPort)),
-                        new UsernamePasswordCredentials(proxyUsername, proxyPassword));
-                clientBuilder = clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-            }
-        }
-        return clientBuilder.build();
+        HttpClientConfigurationDTO configuration = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration().getHttpClientConfiguration();
+        return CommonAPIUtil.getHttpClient(protocol, configuration);
     }
 
 
@@ -7159,7 +7039,6 @@ public final class APIUtil {
         URL spURL;
         try {
             spURL = new URL(spEndpoint);
-
             HttpClient httpClient = APIUtil.getHttpClient(spURL.getPort(), spURL.getProtocol());
             HttpPost httpPost = new HttpPost(spEndpoint);
 
