@@ -41,12 +41,12 @@ public class TenantThemeCommonImpl {
 
     public static void importTenantTheme(InputStream fileInputStream) throws APIManagementException {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        if (RestApiConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            String errorMessage = "Super Tenant " + RestApiConstants.SUPER_TENANT_DOMAIN_NAME +
+        if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
+            String errorMessage = "Super Tenant " + APIConstants.SUPER_TENANT_DOMAIN +
                     " is not allowed to import a tenant theme";
             throw new APIManagementException(errorMessage,
                     ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_NOT_ALLOWED,
-                            RestApiConstants.SUPER_TENANT_DOMAIN_NAME));
+                            APIConstants.SUPER_TENANT_DOMAIN));
         }
         try {
             RestApiAdminUtils.importTenantTheme(fileInputStream, tenantDomain);

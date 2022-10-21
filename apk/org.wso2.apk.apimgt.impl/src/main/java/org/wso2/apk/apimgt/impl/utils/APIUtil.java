@@ -335,6 +335,12 @@ public final class APIUtil {
         return apiStatus;
     }
 
+    public static void handleException(String msg) throws APIManagementException {
+
+        log.error(msg);
+        throw new APIManagementException(msg);
+    }
+
     public static void handleException(String msg, Throwable t) throws APIManagementException {
 
         log.error(msg, t);
@@ -2417,6 +2423,18 @@ public final class APIUtil {
             return (JSONObject) tenantConfigs.get(property);
         }
         return null;
+    }
+
+    /**
+     * Validate the input file name for invalid path elements
+     *
+     * @param fileName File name
+     */
+    public static void validateFileName(String fileName) throws APIManagementException {
+
+        if (!fileName.isEmpty() && (fileName.contains("../") || fileName.contains("..\\"))) {
+            handleException("File name contains invalid path elements. " + fileName);
+        }
     }
 
     /**

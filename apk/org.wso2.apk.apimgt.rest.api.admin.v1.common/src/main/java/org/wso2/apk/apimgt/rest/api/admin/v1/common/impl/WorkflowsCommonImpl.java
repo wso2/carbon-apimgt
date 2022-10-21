@@ -117,46 +117,47 @@ public class WorkflowsCommonImpl {
         }
 
         try {
-            org.wso2.apk.apimgt.impl.dto.WorkflowDTO workflowDTO = apiMgtDAO.retrieveWorkflow(workflowReferenceId);
+            //TODO: APK
+//            org.wso2.apk.apimgt.impl.dto.WorkflowDTO workflowDTO = apiMgtDAO.retrieveWorkflow(workflowReferenceId);
+//
+//            if (workflowDTO == null) {
+//                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
+//                        RestApiConstants.RESOURCE_WORKFLOW, workflowReferenceId));
+//            }
+//
+//            String tenantDomain = workflowDTO.getTenantDomain();
+//            if (tenantDomain != null && !tenantDomain.equals(tenantDomainOfUser)) {
+//                throw new APIManagementException(ExceptionCodes.UNAUTHORIZED);
+//            }
+//            if (body == null) {
+//                throw new APIManagementException("Request payload is missing", ExceptionCodes.PARAMETER_NOT_PROVIDED);
+//            }
+//
+//            if (body.getDescription() != null) {
+//                workflowDTO.setWorkflowDescription(body.getDescription());
+//            }
+//
+//            workflowDTO.setStatus(WorkflowStatus.valueOf(body.getStatus().toString()));
+//
+//            if (body.getAttributes() != null) {
+//                workflowDTO.setAttributes(body.getAttributes());
+//            }
+//
+//            String workflowType = workflowDTO.getWorkflowType();
+//
+//            if (WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(workflowType) &&
+//                    WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
+//                APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+//                int applicationId = Integer.parseInt(workflowDTO.getWorkflowReference());
+//                apiConsumer.cleanupPendingTasksForApplicationDeletion(applicationId);
+//            }
 
-            if (workflowDTO == null) {
-                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
-                        RestApiConstants.RESOURCE_WORKFLOW, workflowReferenceId));
-            }
-
-            String tenantDomain = workflowDTO.getTenantDomain();
-            if (tenantDomain != null && !tenantDomain.equals(tenantDomainOfUser)) {
-                throw new APIManagementException(ExceptionCodes.UNAUTHORIZED);
-            }
-            if (body == null) {
-                throw new APIManagementException("Request payload is missing", ExceptionCodes.PARAMETER_NOT_PROVIDED);
-            }
-
-            if (body.getDescription() != null) {
-                workflowDTO.setWorkflowDescription(body.getDescription());
-            }
-
-            workflowDTO.setStatus(WorkflowStatus.valueOf(body.getStatus().toString()));
-
-            if (body.getAttributes() != null) {
-                workflowDTO.setAttributes(body.getAttributes());
-            }
-
-            String workflowType = workflowDTO.getWorkflowType();
-
-            if (WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(workflowType) &&
-                    WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
-                APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-                int applicationId = Integer.parseInt(workflowDTO.getWorkflowReference());
-                apiConsumer.cleanupPendingTasksForApplicationDeletion(applicationId);
-            }
-
-            WorkflowExecutor workflowExecutor = WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
-            workflowExecutor.complete(workflowDTO);
-            if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
-                WorkflowUtils.sendNotificationAfterWFComplete(workflowDTO, workflowType);
-            }
-        } catch (WorkflowException e) {
+//            WorkflowExecutor workflowExecutor = WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
+//            workflowExecutor.complete(workflowDTO);
+//            if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
+//                WorkflowUtils.sendNotificationAfterWFComplete(workflowDTO, workflowType);
+//            }
+        } catch (Exception e) {
             String msg = "Error while resuming workflow " + workflowReferenceId;
             throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC, msg));
         }
