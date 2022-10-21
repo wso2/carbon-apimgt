@@ -704,7 +704,7 @@ public class ApiDAOImpl implements ApiDAO {
             if (apiDefinition != null) {
                 byte[] apiDefinitionBytes = apiDefinition.getBytes();
                 preparedStatement.setBinaryStream(1, new ByteArrayInputStream(apiDefinitionBytes));
-                preparedStatement.setString(2, org.wso2.carbon.apimgt.persistence.APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
+                preparedStatement.setString(2, APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
             }
             preparedStatement.setString(3, organization.getName());
             preparedStatement.setString(4, apiId);
@@ -766,7 +766,7 @@ public class ApiDAOImpl implements ApiDAO {
             if (apiDefinition != null) {
                 byte[] apiDefinitionBytes = apiDefinition.getBytes();
                 preparedStatement.setBinaryStream(1, new ByteArrayInputStream(apiDefinitionBytes));
-                preparedStatement.setString(2, org.wso2.carbon.apimgt.persistence.APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME);
+                preparedStatement.setString(2, APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME);
             }
             preparedStatement.setString(3, organization.getName());
             preparedStatement.setString(4, apiId);
@@ -828,7 +828,7 @@ public class ApiDAOImpl implements ApiDAO {
             if (schemaDefinition != null) {
                 byte[] apiDefinitionBytes = schemaDefinition.getBytes();
                 preparedStatement.setBinaryStream(1, new ByteArrayInputStream(apiDefinitionBytes));
-                preparedStatement.setString(2, "graphqlapi" + org.wso2.carbon.apimgt.persistence.APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION);
+                preparedStatement.setString(2, "graphqlapi" + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION);
             }
             preparedStatement.setString(3, organization.getName());
             preparedStatement.setString(4, apiId);
@@ -2917,7 +2917,7 @@ public class ApiDAOImpl implements ApiDAO {
             preparedStatement = connection.prepareStatement(saveThumbnailQuery);
             if (resourceFile.getContent() != null) {
                 preparedStatement.setString(1, "thumbnail");
-                preparedStatement.setString(2, org.wso2.carbon.apimgt.persistence.APIConstants.API_ICON_IMAGE + resourceFile.getContentType());
+                preparedStatement.setString(2, APIConstants.API_ICON_IMAGE + resourceFile.getContentType());
                 preparedStatement.setString(3, organization.getName());
                 preparedStatement.setString(4, apiId);
             }

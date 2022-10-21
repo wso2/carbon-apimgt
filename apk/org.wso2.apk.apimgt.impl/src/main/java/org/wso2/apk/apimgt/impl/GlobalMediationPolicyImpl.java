@@ -10,7 +10,7 @@ import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.model.Mediation;
 import org.wso2.apk.apimgt.api.model.policy.PolicyConstants;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.user.exceptions.UserException;
 import org.wso2.apk.apimgt.user.mgt.internal.UserManagerHolder;
@@ -38,22 +38,24 @@ public class GlobalMediationPolicyImpl {
      */
     protected Registry registry;
 
+    //TODO: APK
     public GlobalMediationPolicyImpl(String organization) throws APIManagementException {
         String internalOrganizationDomain = APIUtil.getInternalOrganizationDomain(organization);
         try {
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(internalOrganizationDomain)) {
                 int id = UserManagerHolder.getUserManager().getTenantId(internalOrganizationDomain);
-                registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(id);
+//                registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(id);
             } else {
-                registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(-1234);
+//                registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(-1234);
             }
         } catch (UserException e) {
             throw new APIManagementException("Error while retrieving Tenant id for organization" + organization,
                     ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while retrieving Registry for organization" + organization,
-                    ExceptionCodes.INTERNAL_ERROR);
         }
+//        } catch (RegistryException e) {
+//            throw new APIManagementException("Error while retrieving Registry for organization" + organization,
+//                    ExceptionCodes.INTERNAL_ERROR);
+//        }
     }
 
     public List<Mediation> getAllGlobalMediationPolicies() throws APIManagementException {

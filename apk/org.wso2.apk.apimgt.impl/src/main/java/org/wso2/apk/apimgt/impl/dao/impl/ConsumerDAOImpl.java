@@ -90,7 +90,7 @@ public class ConsumerDAOImpl implements ConsumerDAO {
 
         Connection conn = null;
         try {
-            conn = org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil.getConnection();
+            conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
             addOrUpdateRating(id, rating, user, conn);
 
@@ -105,7 +105,7 @@ public class ConsumerDAOImpl implements ConsumerDAO {
             }
             handleException("Failed to add Application", e);
         } finally {
-            org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil.closeAllConnections(null, conn, null);
+            APIMgtDBUtil.closeAllConnections(null, conn, null);
         }
     }
 
@@ -318,7 +318,7 @@ public class ConsumerDAOImpl implements ConsumerDAO {
             String sqlDeleteQuery;
             if (rateId != null) {
                 //This query to delete the specific rate row from the AM_API_RATINGS table
-                sqlDeleteQuery = org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.REMOVE_RATING_SQL;
+                sqlDeleteQuery = SQLConstants.REMOVE_RATING_SQL;
                 // Adding data to the AM_API_RATINGS  table
                 ps = conn.prepareStatement(sqlDeleteQuery);
                 ps.setString(1, rateId);
@@ -668,21 +668,21 @@ public class ConsumerDAOImpl implements ConsumerDAO {
 
         Map<String, Map<String, String>> loginConfiguration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getLoginConfiguration();
-        if (loginConfiguration.get(org.wso2.carbon.apimgt.impl.APIConstants.EMAIL_LOGIN) != null) {
-            Map<String, String> emailConf = loginConfiguration.get(org.wso2.carbon.apimgt.impl.APIConstants.EMAIL_LOGIN);
-            if ("true".equalsIgnoreCase(emailConf.get(org.wso2.carbon.apimgt.impl.APIConstants.PRIMARY_LOGIN))) {
+        if (loginConfiguration.get(APIConstants.EMAIL_LOGIN) != null) {
+            Map<String, String> emailConf = loginConfiguration.get(APIConstants.EMAIL_LOGIN);
+            if ("true".equalsIgnoreCase(emailConf.get(APIConstants.PRIMARY_LOGIN))) {
                 return !isUserLoggedInEmail(userId);
             }
-            if ("false".equalsIgnoreCase(emailConf.get(org.wso2.carbon.apimgt.impl.APIConstants.PRIMARY_LOGIN))) {
+            if ("false".equalsIgnoreCase(emailConf.get(APIConstants.PRIMARY_LOGIN))) {
                 return isUserLoggedInEmail(userId);
             }
         }
-        if (loginConfiguration.get(org.wso2.carbon.apimgt.impl.APIConstants.USERID_LOGIN) != null) {
-            Map<String, String> userIdConf = loginConfiguration.get(org.wso2.carbon.apimgt.impl.APIConstants.USERID_LOGIN);
-            if ("true".equalsIgnoreCase(userIdConf.get(org.wso2.carbon.apimgt.impl.APIConstants.PRIMARY_LOGIN))) {
+        if (loginConfiguration.get(APIConstants.USERID_LOGIN) != null) {
+            Map<String, String> userIdConf = loginConfiguration.get(APIConstants.USERID_LOGIN);
+            if ("true".equalsIgnoreCase(userIdConf.get(APIConstants.PRIMARY_LOGIN))) {
                 return isUserLoggedInEmail(userId);
             }
-            if ("false".equalsIgnoreCase(userIdConf.get(org.wso2.carbon.apimgt.impl.APIConstants.PRIMARY_LOGIN))) {
+            if ("false".equalsIgnoreCase(userIdConf.get(APIConstants.PRIMARY_LOGIN))) {
                 return !isUserLoggedInEmail(userId);
             }
         }

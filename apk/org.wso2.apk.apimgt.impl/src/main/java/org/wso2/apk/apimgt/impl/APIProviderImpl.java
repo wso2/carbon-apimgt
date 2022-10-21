@@ -103,8 +103,8 @@ import org.wso2.apk.apimgt.api.model.policy.Pipeline;
 import org.wso2.apk.apimgt.api.model.policy.Policy;
 import org.wso2.apk.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.apk.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
-import org.wso2.carbon.apimgt.eventing.EventPublisherType;
+//import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
+//import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 //import org.wso2.apk.apimgt.impl.certificatemgt.CertificateManager;
 //import org.wso2.apk.apimgt.impl.certificatemgt.CertificateManagerImpl;
 //import org.wso2.apk.apimgt.impl.certificatemgt.ResponseCode;
@@ -4070,7 +4070,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         APIProduct oldApi = getAPIProductbyUUID(product.getUuid(),
-                org.wso2.carbon.apimgt.user.ctx.UserContext.getThreadLocalUserContext().getOrganization());
+                org.wso2.apk.apimgt.user.ctx.UserContext.getThreadLocalUserContext().getOrganization());
         Gson gson = new Gson();
         Map<String, String> oldMonetizationProperties = gson.fromJson(oldApi.getMonetizationProperties().toString(),
                 HashMap.class);

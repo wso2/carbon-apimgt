@@ -68,7 +68,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.apk.apimgt.init.*;version="${carbon.apimgt.version}"
+                            org.wso2.apk.init.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                         <Import-Package>
                             *;resolution:=optional

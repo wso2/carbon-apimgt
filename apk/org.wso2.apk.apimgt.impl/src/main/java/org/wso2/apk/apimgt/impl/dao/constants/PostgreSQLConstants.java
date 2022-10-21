@@ -18,8 +18,8 @@
 
 package org.wso2.apk.apimgt.impl.dao.constants;
 
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.apk.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.apk.apimgt.impl.APIConstants;
 
 public class PostgreSQLConstants {
 
