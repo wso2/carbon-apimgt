@@ -664,6 +664,7 @@ public final class APIUtil {
             //TODO fix tenant flow
 //            PrivilegedCarbonContext.startTenantFlow();
 //            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            //TODO: handle user store functionality
             int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
             authorized = UserManagerHolder.getUserManager().isUserAuthorized(tenantId,
                     getTenantAwareUsername(userNameWithoutChange), permission,
@@ -718,6 +719,7 @@ public final class APIUtil {
         }
         try {
             String tenantDomain = getTenantDomain(username);
+            // TODO: remove tenant id and handle user store functionalities
             int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
             roles = UserManagerHolder.getUserManager().getRoleListOfUser(tenantId,
                     getTenantAwareUsername(username));
@@ -3656,5 +3658,30 @@ public final class APIUtil {
         return map;
     }
 
+    public static boolean isAllowDisplayAPIsWithMultipleStatus() {
 
+        ConfigurationHolder config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        String displayAllAPIs = config.getFirstProperty(APIConstants.API_STORE_DISPLAY_ALL_APIS);
+        if (displayAllAPIs == null) {
+            log.warn("The configurations related to show deprecated APIs in API Developer Portal are missing in the "
+                    + "configuration file.");
+            return false;
+        }
+        return Boolean.parseBoolean(displayAllAPIs);
+    }
+
+    public static boolean isAllowDisplayMultipleVersions() {
+
+        ConfigurationHolder config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+
+        String displayMultiVersions = config.getFirstProperty(APIConstants.API_STORE_DISPLAY_MULTIPLE_VERSIONS);
+        if (displayMultiVersions == null) {
+            log.warn("The configurations related to show multiple versions of API in API Developer Portal " +
+                    "are missing in the configuration file.");
+            return false;
+        }
+        return Boolean.parseBoolean(displayMultiVersions);
+    }
 }

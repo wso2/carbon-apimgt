@@ -52,6 +52,8 @@ public class ConfigurationHolder {
 
     private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
 
+    private Map<String, String> persistenceProperties = new ConcurrentHashMap<String, String>();
+
     public ThrottleProperties getThrottleProperties() {
         return throttleProperties;
     }
@@ -127,5 +129,9 @@ public class ConfigurationHolder {
     public Map<String, Map<String, String>> getLoginConfiguration() {
 
         return loginConfiguration;
+    }
+
+    public Map<String, String> getPersistenceProperties() {
+        return persistenceProperties;
     }
 }
