@@ -60,12 +60,12 @@ public class TenantThemeCommonImpl {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         APIAdminImpl apiAdmin = new APIAdminImpl();
-        if (!apiAdmin.isTenantThemeExist(tenantId)) {
+        if (!apiAdmin.isTenantThemeExist(tenantDomain)) {
             throw new APIManagementException("Tenant Theme for tenant " + tenantDomain + " does not exist.",
                     ExceptionCodes.from(ExceptionCodes.TENANT_THEME_NOT_FOUND, tenantDomain));
 
         }
-        InputStream tenantTheme = apiAdmin.getTenantTheme(tenantId);
+        InputStream tenantTheme = apiAdmin.getTenantTheme(tenantDomain);
         String tempPath =
                 System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator + TENANT_THEMES_EXPORT_DIR_PREFIX;
         String tempFile = tenantDomain + APIConstants.ZIP_FILE_EXTENSION;

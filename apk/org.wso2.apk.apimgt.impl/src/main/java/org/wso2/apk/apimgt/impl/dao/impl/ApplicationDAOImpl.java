@@ -252,7 +252,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     }
 
     @Override
-    public Application[] getApplicationsWithPagination(String user, String owner, int tenantId, int limit,
+    public Application[] getApplicationsWithPagination(String user, String owner, String organization, int limit,
                                                        int offset, String sortBy, String sortOrder, String appName)
             throws APIManagementException {
 
@@ -261,7 +261,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         ResultSet rs = null;
         String sqlQuery = null;
         List<Application> applicationList = new ArrayList<>();
-        sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_BY_TENANT_ID");
+        sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_BY_ORGANIZATION");
         Application[] applications = null;
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -272,7 +272,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             sqlQuery = sqlQuery.replace("$1", sortBy);
             sqlQuery = sqlQuery.replace("$2", sortOrder);
             prepStmt = connection.prepareStatement(sqlQuery);
-            prepStmt.setInt(1, tenantId);
+            prepStmt.setString(1, organization);
             prepStmt.setString(2, "%" + owner + "%");
             prepStmt.setString(3, "%" + appName + "%");
             prepStmt.setInt(4, offset);
@@ -288,7 +288,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 application.setId(rs.getInt("APPLICATION_ID"));
                 application.setUUID(rs.getString("UUID"));
                 application.setGroupId(rs.getString("GROUP_ID"));
-                subscriber.setTenantId(rs.getInt("TENANT_ID"));
+                subscriber.setOrganization(rs.getString("ORGANIZATION"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setOwner(subscriberName);
@@ -296,8 +296,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             }
             applications = applicationList.toArray(new Application[applicationList.size()]);
         } catch (SQLException e) {
-            handleExceptionWithCode("Error while obtaining details of the Application for tenant id : " + tenantId, e,
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            handleExceptionWithCode("Error while obtaining details of the Application for organization : "
+                            + organization, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
@@ -305,7 +305,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     }
 
     @Override
-    public int getApplicationsCount(int tenantId, String searchOwner, String searchApplication) throws
+    public int getApplicationsCount(String organization, String searchOwner, String searchApplication) throws
             APIManagementException {
 
         Connection connection = null;
@@ -316,7 +316,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             connection = APIMgtDBUtil.getConnection();
             sqlQuery = SQLConstants.GET_APPLICATIONS_COUNT;
             prepStmt = connection.prepareStatement(sqlQuery);
-            prepStmt.setInt(1, tenantId);
+            prepStmt.setString(1, organization);
             prepStmt.setString(2, "%" + searchOwner + "%");
             prepStmt.setString(3, "%" + searchApplication + "%");
             resultSet = prepStmt.executeQuery();
@@ -330,7 +330,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 return applicationCount;
             }
         } catch (SQLException e) {
-            handleExceptionWithCode("Failed to get application count of tenant id : " + tenantId, e,
+            handleExceptionWithCode("Failed to get application count of organization: " + organization, e,
                     ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
@@ -510,7 +510,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         PreparedStatement ps = null;
         ResultSet result = null;
 
-        int tenantId = APIUtil.getTenantId(subscriberName);
+        String organization = APIUtil.getTenantDomain(subscriberName);
 
         String sqlQuery = SQLConstants.GET_TENANT_SUBSCRIBER_SQL;
         if (forceCaseInsensitiveComparisons) {
@@ -522,7 +522,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, subscriberName);
-            ps.setInt(2, tenantId);
+            ps.setString(2, organization);
             result = ps.executeQuery();
 
             if (result.next()) {
@@ -531,7 +531,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 subscriber.setId(result.getInt("SUBSCRIBER_ID"));
                 subscriber.setName(subscriberName);
                 subscriber.setSubscribedDate(result.getDate(APIConstants.SUBSCRIBER_FIELD_DATE_SUBSCRIBED));
-                subscriber.setTenantId(result.getInt("TENANT_ID"));
+                subscriber.setOrganization(result.getString("ORGANIZATION"));
             }
         } catch (SQLException e) {
             handleException("Failed to get Subscriber for :" + subscriberName, e);
@@ -1084,10 +1084,10 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
         int applicationId = 0;
         try {
-            int tenantId = APIUtil.getTenantId(userId);
+            String userOrganization = APIUtil.getTenantDomain(userId);
 
             //Get subscriber Id
-            Subscriber subscriber = getSubscriber(userId, tenantId, conn);
+            Subscriber subscriber = getSubscriber(userId, userOrganization, conn);
             if (subscriber == null) {
                 String msg = "Could not load Subscriber records for: " + userId;
                 log.error(msg);
@@ -1137,7 +1137,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
             //Adding data to AM_APPLICATION_ATTRIBUTES table
             if (application.getApplicationAttributes() != null) {
-                addApplicationAttributes(conn, application.getApplicationAttributes(), applicationId, tenantId);
+                addApplicationAttributes(conn, application.getApplicationAttributes(), applicationId, userOrganization);
             }
         } catch (SQLException e) {
             handleException("Failed to add Application", e);
@@ -1148,7 +1148,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     }
 
     private void addApplicationAttributes(Connection conn, Map<String, String> attributes, int applicationId,
-                                          int tenantId)
+                                          String organization)
             throws APIManagementException {
 
         PreparedStatement ps = null;
@@ -1161,7 +1161,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                         ps.setInt(1, applicationId);
                         ps.setString(2, attribute.getKey());
                         ps.setString(3, attribute.getValue());
-                        ps.setInt(4, tenantId);
+                        ps.setString(4, organization);
                         ps.addBatch();
                     }
                 }
@@ -1178,12 +1178,12 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * returns a subscriber record for given username,tenant Id
      *
      * @param username   UserName
-     * @param tenantId   Tenant Id
+     * @param organization   Tenant Id
      * @param connection
      * @return Subscriber
      * @throws APIManagementException if failed to get subscriber
      */
-    private Subscriber getSubscriber(String username, int tenantId, Connection connection)
+    private Subscriber getSubscriber(String username, String organization, Connection connection)
             throws APIManagementException {
 
         PreparedStatement prepStmt = null;
@@ -1200,7 +1200,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         try {
             prepStmt = connection.prepareStatement(sqlQuery);
             prepStmt.setString(1, username);
-            prepStmt.setInt(2, tenantId);
+            prepStmt.setString(2, organization);
             rs = prepStmt.executeQuery();
 
             if (rs.next()) {
@@ -1208,7 +1208,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 subscriber.setEmail(rs.getString("EMAIL_ADDRESS"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
                 subscriber.setSubscribedDate(rs.getDate("DATE_SUBSCRIBED"));
-                subscriber.setTenantId(rs.getInt("TENANT_ID"));
+                subscriber.setOrganization(rs.getString("ORGANIZATION"));
                 return subscriber;
             }
         } catch (SQLException e) {
@@ -1583,7 +1583,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             }
             Subscriber subscriber = application.getSubscriber();
             String domain = MultitenantUtils.getTenantDomain(subscriber.getName());
-            int tenantId = APIUtil.getTenantIdFromTenantDomain(domain);
 
             preparedStatement = conn.prepareStatement(SQLConstants.REMOVE_APPLICATION_ATTRIBUTES_SQL);
             preparedStatement.setInt(1, application.getId());
@@ -1594,7 +1593,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             }
 
             if (application.getApplicationAttributes() != null && !application.getApplicationAttributes().isEmpty()) {
-                addApplicationAttributes(conn, application.getApplicationAttributes(), application.getId(), tenantId);
+                addApplicationAttributes(conn, application.getApplicationAttributes(), application.getId(), domain);
             }
             conn.commit();
         } catch (SQLException e) {
@@ -2129,14 +2128,14 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     }
 
     @Override
-    public void addApplicationAttributes(Map<String, String> applicationAttributes, int applicationId, int tenantId)
-            throws APIManagementException {
+    public void addApplicationAttributes(Map<String, String> applicationAttributes, int applicationId,
+                                         String organization) throws APIManagementException {
 
         Connection connection = null;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-            addApplicationAttributes(connection, applicationAttributes, applicationId, tenantId);
+            addApplicationAttributes(connection, applicationAttributes, applicationId, organization);
             connection.commit();
         } catch (SQLException sqlException) {
             if (connection != null) {

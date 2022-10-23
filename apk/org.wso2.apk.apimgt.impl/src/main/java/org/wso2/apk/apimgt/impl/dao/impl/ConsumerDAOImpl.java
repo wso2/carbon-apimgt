@@ -54,7 +54,7 @@ public class ConsumerDAOImpl implements ConsumerDAO {
         PreparedStatement ps = null;
         ResultSet result = null;
 
-        int tenantId = APIUtil.getTenantId(subscriberName);
+        String organization = APIUtil.getTenantDomain(subscriberName);
 
         String sqlQuery = SQLConstants.GET_TENANT_SUBSCRIBER_SQL;
         if (forceCaseInsensitiveComparisons) {
@@ -66,7 +66,7 @@ public class ConsumerDAOImpl implements ConsumerDAO {
 
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, subscriberName);
-            ps.setInt(2, tenantId);
+            ps.setString(2, organization);
             result = ps.executeQuery();
 
             if (result.next()) {
@@ -75,7 +75,7 @@ public class ConsumerDAOImpl implements ConsumerDAO {
                 subscriber.setId(result.getInt("SUBSCRIBER_ID"));
                 subscriber.setName(subscriberName);
                 subscriber.setSubscribedDate(result.getDate(APIConstants.SUBSCRIBER_FIELD_DATE_SUBSCRIBED));
-                subscriber.setTenantId(result.getInt("TENANT_ID"));
+                subscriber.setOrganization(result.getString("ORGANIZATION"));
             }
         } catch (SQLException e) {
             handleException("Failed to get Subscriber for :" + subscriberName, e);
@@ -910,7 +910,7 @@ public class ConsumerDAOImpl implements ConsumerDAO {
                                                PreparedStatement statement, String organization)
             throws SQLException, APIManagementException {
 
-        int tenantId = APIUtil.getTenantId(subscriber.getName());
+        String subOrganization = APIUtil.getTenantDomain(subscriber.getName());
         int paramIndex = 0;
 
         if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
@@ -918,7 +918,7 @@ public class ConsumerDAOImpl implements ConsumerDAO {
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                 String[] groupIDArray = groupingId.split(",");
 
-                statement.setInt(++paramIndex, tenantId);
+                statement.setString(++paramIndex, subOrganization);
                 statement.setString(++paramIndex, organization);
                 for (String groupId : groupIDArray) {
                     statement.setString(++paramIndex, groupId);
@@ -926,13 +926,13 @@ public class ConsumerDAOImpl implements ConsumerDAO {
                 statement.setString(++paramIndex, tenantDomain);
                 statement.setString(++paramIndex, subscriber.getName());
             } else {
-                statement.setInt(++paramIndex, tenantId);
+                statement.setString(++paramIndex, subOrganization);
                 statement.setString(++paramIndex, organization);
                 statement.setString(++paramIndex, groupingId);
                 statement.setString(++paramIndex, subscriber.getName());
             }
         } else {
-            statement.setInt(++paramIndex, tenantId);
+            statement.setString(++paramIndex, subOrganization);
             statement.setString(++paramIndex, organization);
             statement.setString(++paramIndex, subscriber.getName());
         }
@@ -978,12 +978,12 @@ public class ConsumerDAOImpl implements ConsumerDAO {
         ResultSet resultSet = null;
         Set<String> scopeKeysSet = new HashSet<>();
         Set<Integer> apiIdSet = new HashSet<>();
-        int tenantId = APIUtil.getTenantId(subscriber.getName());
+        String organization = APIUtil.getTenantDomain(subscriber.getName());
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             String sqlQueryForGetSubscribedApis = SQLConstants.GET_SUBSCRIBED_API_IDs_BY_APP_ID_SQL;
             getSubscribedApisAndProducts = conn.prepareStatement(sqlQueryForGetSubscribedApis);
-            getSubscribedApisAndProducts.setInt(1, tenantId);
+            getSubscribedApisAndProducts.setString(1, organization);
             getSubscribedApisAndProducts.setInt(2, applicationId);
             resultSet = getSubscribedApisAndProducts.executeQuery();
             String getIncludedApisInProductQuery = SQLConstants.GET_INCLUDED_APIS_IN_PRODUCT_SQL;
@@ -1034,7 +1034,7 @@ public class ConsumerDAOImpl implements ConsumerDAO {
         Connection connection = null;
         PreparedStatement ps = null;
         ResultSet result = null;
-        int tenantId = APIUtil.getTenantId(subscriber.getName());
+        String organization = APIUtil.getTenantDomain(subscriber.getName());
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -1062,7 +1062,7 @@ public class ConsumerDAOImpl implements ConsumerDAO {
 
                     ps = fillQueryParams(connection, sqlQuery, groupIdArr, 3);
                     ps.setString(1, applicationName);
-                    ps.setInt(2, tenantId);
+                    ps.setString(2, organization);
                     int paramIndex = groupIdArr.length + 2;
                     ps.setString(++paramIndex, tenantDomain);
                     ps.setString(++paramIndex, subscriber.getName());
@@ -1070,7 +1070,7 @@ public class ConsumerDAOImpl implements ConsumerDAO {
                     sqlQuery += whereClauseWithGroupId;
                     ps = connection.prepareStatement(sqlQuery);
                     ps.setString(1, applicationName);
-                    ps.setInt(2, tenantId);
+                    ps.setString(2, organization);
                     ps.setString(3, groupingId);
                     ps.setString(4, subscriber.getName());
                 }
@@ -1082,7 +1082,7 @@ public class ConsumerDAOImpl implements ConsumerDAO {
                 }
                 ps = connection.prepareStatement(sqlQuery);
                 ps.setString(1, applicationName);
-                ps.setInt(2, tenantId);
+                ps.setString(2, organization);
                 ps.setString(3, subscriber.getName());
             }
             result = ps.executeQuery();
@@ -1159,9 +1159,8 @@ public class ConsumerDAOImpl implements ConsumerDAO {
             ps.setString(2, apiIdentifier.getApiName());
             ps.setString(3, apiIdentifier.getVersion());
             ps.setString(4, loginUserName);
-            int tenantId;
-            tenantId = APIUtil.getTenantId(loginUserName);
-            ps.setInt(5, tenantId);
+            String organization = APIUtil.getTenantDomain(loginUserName);
+            ps.setString(5, organization);
 
             rs = ps.executeQuery();
 

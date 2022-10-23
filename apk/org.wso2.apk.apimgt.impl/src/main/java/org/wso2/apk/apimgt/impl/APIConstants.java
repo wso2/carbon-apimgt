@@ -2673,6 +2673,7 @@ public final class APIConstants {
         public static final String APPLICATION_TIER_COLUMN = "APPLICATION_TIER";
         public static final String SUBSCRIBER_COLUMN = "SUBSCRIBER";
         public static final String TENANT_ID_COLUMN = "TENANT_ID";
+        public static final String ORGANIZATION_COLUMN = "ORGANIZATION";
         public static final String SUBSCRIBE_MODE = "subscribe";
         public static final String UNSUBSCRIBE_MODE = "unsubscribe";
         public static final String UPDATED_AT = "updatedAt";

@@ -43,6 +43,8 @@ public class Subscription implements Serializable {
     private String apiTier;
     private String subscriberName;
 
+    private String organization;
+
     public String getAppID() {
         return appID;
     }
@@ -183,5 +185,15 @@ public class Subscription implements Serializable {
 
     public void setSubscriberName(String subscriberName) {
         this.subscriberName = subscriberName;
+    }
+
+    public String getOrganization() {
+
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+
+        this.organization = organization;
     }
 }

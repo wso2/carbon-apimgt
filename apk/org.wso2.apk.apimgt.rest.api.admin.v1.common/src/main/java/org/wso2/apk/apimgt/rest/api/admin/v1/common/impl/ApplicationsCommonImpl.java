@@ -39,7 +39,6 @@ import org.wso2.apk.apimgt.rest.api.admin.v1.dto.ScopeInfoDTO;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.apk.apimgt.user.ctx.UserContext;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -125,10 +124,10 @@ public class ApplicationsCommonImpl {
         int allApplicationsCount = 0;
         // If no user is passed, get the applications for the tenant (not only for the user)
         APIAdmin apiAdmin = new APIAdminImpl();
-        int tenantId = APIUtil.getTenantId(user);
-        allMatchedApps = apiAdmin.getApplicationsWithPagination(user, givenUser, tenantId, limit, offset,
+        String userOrganization = APIUtil.getTenantDomain(user);
+        allMatchedApps = apiAdmin.getApplicationsWithPagination(user, givenUser, userOrganization, limit, offset,
                 applicationName, sortBy, sortOrder);
-        allApplicationsCount = apiAdmin.getApplicationsCount(tenantId, givenUser, applicationName);
+        allApplicationsCount = apiAdmin.getApplicationsCount(userOrganization, givenUser, applicationName);
         applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps);
         ApplicationMappingUtil.setPaginationParams(applicationListDTO, limit, offset, allApplicationsCount);
         return applicationListDTO;
@@ -149,7 +148,7 @@ public class ApplicationsCommonImpl {
         String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
         Application application = apiConsumer.getApplicationByUUID(applicationId, organization);
         if (application != null) {
-            String applicationTenantDomain = MultitenantUtils.getTenantDomain(application.getOwner());
+            String applicationTenantDomain = APIUtil.getTenantDomain(application.getOwner());
             //If we need to remove this validation due to cross tenant subscription feature, we have to further validate
             //and verify that the invoking user's tenant domain has an API subscribed by this application
             if (tenantDomain.equals(applicationTenantDomain)) {

@@ -83,7 +83,7 @@ public interface APIAdmin {
      *
      * @param user            Logged-in user
      * @param owner           Owner of the application
-     * @param tenantId        Logged-in user tenant-id
+     * @param organization    Organization
      * @param limit           The limit
      * @param offset          The offset
      * @param applicationName The application name
@@ -92,20 +92,21 @@ public interface APIAdmin {
      * @return List of applications match to the search conditions
      * @throws APIManagementException
      */
-    Application[] getApplicationsWithPagination(String user, String owner, int tenantId, int limit, int offset,
+    Application[] getApplicationsWithPagination(String user, String owner, String organization, int limit, int offset,
                                                 String applicationName, String sortBy, String sortOrder)
             throws APIManagementException;
 
     /**
      * Get count of the applications for the tenantId.
      *
-     * @param tenantId          content to get application count based on tenant_id
+     * @param organization      Organization
      * @param searchOwner       content to search applications based on owners
      * @param searchApplication content to search applications based on application
      * @throws APIManagementException if failed to get application
+     * @return
      */
 
-    public int getApplicationsCount(int tenantId, String searchOwner, String searchApplication)
+    public int getApplicationsCount(String organization, String searchOwner, String searchApplication)
             throws APIManagementException;
 
     /**
@@ -413,47 +414,47 @@ public interface APIAdmin {
     /**
      * Adds a tenant theme to the database
      *
-     * @param tenantId     tenant ID of user
+     * @param organization     tenant ID of user
      * @param themeContent content of the tenant theme
      * @throws APIManagementException if an error occurs when adding a tenant theme to the database
      */
-    void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException;
+    void addTenantTheme(String organization, InputStream themeContent) throws APIManagementException;
 
     /**
      * Updates an existing tenant theme in the database
      *
-     * @param tenantId     tenant ID of user
+     * @param organization     tenant ID of user
      * @param themeContent content of the tenant theme
      * @throws APIManagementException if an error occurs when updating an existing tenant theme in the database
      */
-    void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException;
+    void updateTenantTheme(String organization, InputStream themeContent) throws APIManagementException;
 
     /**
      * Retrieves a tenant theme from the database
      *
-     * @param tenantId tenant ID of user
+     * @param organization tenant ID of user
      * @return content of the tenant theme
      * @throws APIManagementException if an error occurs when retrieving a tenant theme from the database
      */
-    InputStream getTenantTheme(int tenantId) throws APIManagementException;
+    InputStream getTenantTheme(String organization) throws APIManagementException;
 
     /**
      * Checks whether a tenant theme exist for a particular tenant
      *
-     * @param tenantId tenant ID of user
+     * @param organization tenant ID of user
      * @return true if a tenant theme exist for a particular tenant ID, false otherwise
      * @throws APIManagementException if an error occurs when determining whether a tenant theme exists for a given
      *                                tenant ID
      */
-    boolean isTenantThemeExist(int tenantId) throws APIManagementException;
+    boolean isTenantThemeExist(String organization) throws APIManagementException;
 
     /**
      * Deletes a tenant theme from the database
      *
-     * @param tenantId tenant ID of user
+     * @param organization tenant ID of user
      * @throws APIManagementException if an error occurs when deleting a tenant theme from the database
      */
-    void deleteTenantTheme(int tenantId) throws APIManagementException;
+    void deleteTenantTheme(String organization) throws APIManagementException;
 
     String getTenantConfig(String organization) throws APIManagementException;
 

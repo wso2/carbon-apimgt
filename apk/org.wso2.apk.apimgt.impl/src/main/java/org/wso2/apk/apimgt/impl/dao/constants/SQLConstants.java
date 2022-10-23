@@ -63,7 +63,7 @@ public class SQLConstants {
             "   AM_APPLICATION APP " +
             " WHERE " +
             "   SB.USER_ID = ? " +
-            "   AND SB.TENANT_ID = ? " +
+            "   AND SB.ORGANIZATION = ? " +
             "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
             "   AND API.API_ID = SP.API_ID" +
@@ -83,7 +83,7 @@ public class SQLConstants {
             "   AM_APPLICATION APP " +
             " WHERE " +
             "   LOWER(SB.USER_ID) = LOWER(?) " +
-            "   AND SB.TENANT_ID = ? " +
+            "   AND SB.ORGANIZATION = ? " +
             "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
             "   AND API.API_ID = SP.API_ID" +
@@ -98,7 +98,7 @@ public class SQLConstants {
                     "   AM_SUBSCRIPTION SUBS, " +
                     "   AM_API API " +
                     " WHERE " +
-                    "   SUB.TENANT_ID = ? " +
+                    "   SUB.ORGANIZATION = ? " +
                     "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
                     "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
                     "   AND API.API_ID=SUBS.API_ID" +
@@ -125,7 +125,7 @@ public class SQLConstants {
                     "   AM_SUBSCRIBER SB, " +
                     "   AM_APPLICATION APP " +
                     " WHERE " +
-                    "   SB.TENANT_ID = ? " +
+                    "   SB.ORGANIZATION = ? " +
                     "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
                     "   AND API.API_ID = SP.API_ID" +
@@ -148,7 +148,7 @@ public class SQLConstants {
                     "   AM_SUBSCRIBER SB, " +
                     "   AM_APPLICATION APP " +
                     " WHERE " +
-                    "   SB.TENANT_ID = ? " +
+                    "   SB.ORGANIZATION = ? " +
                     "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
                     "   AND API.API_ID = SP.API_ID" +
@@ -188,7 +188,6 @@ public class SQLConstants {
     public static final String GET_SUBSCRIBED_USERS_FOR_API_SQL =
             " SELECT " +
             "   SB.USER_ID, " +
-            "   SB.TENANT_ID " +
             " FROM " +
             "   AM_SUBSCRIBER SB, " +
             "   AM_APPLICATION APP, " +
@@ -205,7 +204,7 @@ public class SQLConstants {
 
     public static final String ADD_SUBSCRIBER_SQL =
             " INSERT" +
-            "   INTO AM_SUBSCRIBER (USER_ID, TENANT_ID, EMAIL_ADDRESS, DATE_SUBSCRIBED, CREATED_BY, CREATED_TIME, " +
+            "   INTO AM_SUBSCRIBER (USER_ID, ORGANIZATION, EMAIL_ADDRESS, DATE_SUBSCRIBED, CREATED_BY, CREATED_TIME, " +
                     "UPDATED_TIME) " +
             " VALUES (?,?,?,?,?,?,?)";
 
@@ -223,7 +222,7 @@ public class SQLConstants {
             " UPDATE AM_SUBSCRIBER " +
             " SET" +
             "   USER_ID=?," +
-            "   TENANT_ID=?," +
+            "   ORGANIZATION=?," +
             "   EMAIL_ADDRESS=?," +
             "   DATE_SUBSCRIBED=?," +
             "   UPDATED_BY=?," +
@@ -233,7 +232,7 @@ public class SQLConstants {
 
     public static final String GET_SUBSCRIBER_SQL =
             " SELECT " +
-            "   USER_ID, TENANT_ID, EMAIL_ADDRESS, DATE_SUBSCRIBED " +
+            "   USER_ID, ORGANIZATION, EMAIL_ADDRESS, DATE_SUBSCRIBED " +
             " FROM " +
             "   AM_SUBSCRIBER " +
             " WHERE " +
@@ -358,27 +357,27 @@ public class SQLConstants {
             " SELECT " +
             "   SUBSCRIBER_ID, " +
             "   USER_ID, " +
-            "   TENANT_ID, " +
+            "   ORGANIZATION, " +
             "   EMAIL_ADDRESS, " +
             "   DATE_SUBSCRIBED " +
             " FROM " +
             "   AM_SUBSCRIBER " +
             " WHERE " +
             "   USER_ID = ? " +
-            "   AND TENANT_ID = ?";
+            "   AND ORGANIZATION = ?";
 
     public static final String GET_TENANT_SUBSCRIBER_CASE_INSENSITIVE_SQL =
             " SELECT " +
             "   SUBSCRIBER_ID, " +
             "   USER_ID, " +
-            "   TENANT_ID, " +
+            "   ORGANIZATION, " +
             "   EMAIL_ADDRESS, " +
             "   DATE_SUBSCRIBED " +
             " FROM " +
             "   AM_SUBSCRIBER " +
             " WHERE " +
             "   LOWER(USER_ID) = LOWER(?) " +
-            "   AND TENANT_ID = ?";
+            "   AND ORGANIZATION = ?";
 
     public static final String GET_SUBSCRIBED_APIS_SQL =
             " SELECT " +
@@ -401,7 +400,7 @@ public class SQLConstants {
             "   AM_SUBSCRIPTION SUBS, " +
             "   AM_API API " +
             " WHERE " +
-            "   SUB.TENANT_ID = ? " +
+            "   SUB.ORGANIZATION = ? " +
             "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
             "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
             "   AND API.API_ID=SUBS.API_ID" +
@@ -429,7 +428,7 @@ public class SQLConstants {
                     "   AM_SUBSCRIPTION SUBS, " +
                     "   AM_API API " +
                     " WHERE " +
-                    "   SUB.TENANT_ID = ? " +
+                    "   SUB.ORGANIZATION = ? " +
                     "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
                     "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
                     "   AND API.API_ID=SUBS.API_ID" +
@@ -444,7 +443,7 @@ public class SQLConstants {
             "   AND SUBS.APPLICATION_ID = APP.APPLICATION_ID" +
             "   AND APP.NAME=?" +
             "   AND APP.SUBSCRIBER_ID= SUB.SUBSCRIBER_ID" +
-            "   AND SUB.TENANT_ID=?";
+            "   AND SUB.ORGANIZATION=?";
 
     public static final String GET_SUBSCRIPTION_COUNT_BY_APP_ID_SQL =
             " SELECT COUNT(*) AS SUB_COUNT " +
@@ -465,7 +464,7 @@ public class SQLConstants {
             "   AND SUBS.APPLICATION_ID = APP.APPLICATION_ID" +
             "   AND APP.NAME=?" +
             "   AND APP.SUBSCRIBER_ID= SUB.SUBSCRIBER_ID" +
-            "   AND SUB.TENANT_ID=?";
+            "   AND SUB.ORGANIZATION=?";
 
     public static final String GET_SUBSCRIPTION_COUNT_BY_APP_ID_CASE_INSENSITIVE_SQL =
             " SELECT COUNT(*) AS SUB_COUNT " +
@@ -476,7 +475,7 @@ public class SQLConstants {
                     "   AND SUBS.APPLICATION_ID = APP.APPLICATION_ID" +
                     "   AND APP.APPLICATION_ID=?" +
                     "   AND APP.SUBSCRIBER_ID= SUB.SUBSCRIBER_ID" +
-                    "   AND SUB.TENANT_ID=?";
+                    "   AND SUB.ORGANIZATION=?";
 
     public static final String GET_PAGINATED_SUBSCRIBED_APIS_SQL =
             " SELECT " +
@@ -500,7 +499,7 @@ public class SQLConstants {
             "   AM_SUBSCRIPTION SUBS, " +
             "   AM_API API " +
             " WHERE " +
-            "   SUB.TENANT_ID = ? " +
+            "   SUB.ORGANIZATION = ? " +
             "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
             "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
             "   AND API.API_ID=SUBS.API_ID" +
@@ -586,7 +585,7 @@ public class SQLConstants {
             "   AM_SUBSCRIPTION SUBS, " +
             "   AM_API API " +
             " WHERE " +
-            "   SUB.TENANT_ID = ? " +
+            "   SUB.ORGANIZATION = ? " +
             "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
             "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID" +
             "   AND API.API_ID=SUBS.API_ID " +
@@ -790,7 +789,7 @@ public class SQLConstants {
             "   AND API.API_NAME = ?" +
             "   AND API.API_VERSION = ?" +
             "   AND SUB.USER_ID = ?" +
-            "   AND SUB.TENANT_ID = ? " +
+            "   AND SUB.ORGANIZATION = ? " +
             "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID" +
             "   AND API.API_ID = SUBS.API_ID" +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
@@ -812,7 +811,7 @@ public class SQLConstants {
             "   AND API.API_NAME = ?" +
             "   AND API.API_VERSION = ?" +
             "   AND LOWER(SUB.USER_ID) = LOWER(?)" +
-            "   AND SUB.TENANT_ID = ? " +
+            "   AND SUB.ORGANIZATION = ? " +
             "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID" +
             "   AND API.API_ID = SUBS.API_ID" +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
@@ -834,7 +833,7 @@ public class SQLConstants {
                     "   AND API.API_NAME = ?" +
                     "   AND API.API_VERSION = ?" +
                     "   AND SUB.USER_ID = ?" +
-                    "   AND SUB.TENANT_ID = ? " +
+                    "   AND SUB.ORGANIZATION = ? " +
                     "   AND SUBS.APPLICATION_ID = ? " +
                     "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID" +
                     "   AND API.API_ID = SUBS.API_ID" +
@@ -857,7 +856,7 @@ public class SQLConstants {
                     "   AND API.API_NAME = ?" +
                     "   AND API.API_VERSION = ?" +
                     "   AND LOWER(SUB.USER_ID) = LOWER(?)" +
-                    "   AND SUB.TENANT_ID = ? " +
+                    "   AND SUB.ORGANIZATION = ? " +
                     "   AND SUBS.APPLICATION_ID = ? " +
                     "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID" +
                     "   AND API.API_ID = SUBS.API_ID" +
@@ -1015,7 +1014,7 @@ public class SQLConstants {
             "   APPLICATION_ID = ?";
 
     public static final String ADD_APPLICATION_ATTRIBUTES_SQL =
-            " INSERT INTO AM_APPLICATION_ATTRIBUTES (APPLICATION_ID, NAME, APP_ATTRIBUTE, TENANT_ID) VALUES (?,?,?,?)";
+            " INSERT INTO AM_APPLICATION_ATTRIBUTES (APPLICATION_ID, NAME, APP_ATTRIBUTE, ORGANIZATION) VALUES (?,?,?,?)";
 
     public static final String REMOVE_APPLICATION_ATTRIBUTES_SQL =
             " DELETE FROM " +
@@ -1101,7 +1100,7 @@ public class SQLConstants {
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
-            "   SUB.TENANT_ID=?" +
+            "   SUB.ORGANIZATION=?" +
             " And "+
             "    ( SUB.CREATED_BY like ?" +
             " AND APP.NAME like ? )";
@@ -1324,27 +1323,27 @@ public class SQLConstants {
             " SELECT " +
             "   SUB.SUBSCRIBER_ID AS SUBSCRIBER_ID," +
             "   SUB.USER_ID AS USER_ID, " +
-            "   SUB.TENANT_ID AS TENANT_ID," +
+            "   SUB.ORGANIZATION AS ORGANIZATION," +
             "   SUB.EMAIL_ADDRESS AS EMAIL_ADDRESS," +
             "   SUB.DATE_SUBSCRIBED AS DATE_SUBSCRIBED " +
             " FROM " +
             "   AM_SUBSCRIBER SUB " +
             " WHERE " +
             "   LOWER(SUB.USER_ID) = LOWER(?) " +
-            "   AND SUB.TENANT_ID = ?";
+            "   AND SUB.ORGANIZATION = ?";
 
     public static final String GET_SUBSCRIBER_DETAILS_SQL =
             " SELECT " +
             "   SUB.SUBSCRIBER_ID AS SUBSCRIBER_ID," +
             "   SUB.USER_ID AS USER_ID, " +
-            "   SUB.TENANT_ID AS TENANT_ID," +
+            "   SUB.ORGANIZATION AS ORGANIZATION," +
             "   SUB.EMAIL_ADDRESS AS EMAIL_ADDRESS," +
             "   SUB.DATE_SUBSCRIBED AS DATE_SUBSCRIBED " +
             " FROM " +
             "   AM_SUBSCRIBER SUB " +
             " WHERE " +
             "   SUB.USER_ID = ? " +
-            "   AND SUB.TENANT_ID = ?";
+            "   AND SUB.ORGANIZATION = ?";
 
     public static final String GET_API_ID_SQL =
             "SELECT API.API_ID FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND API.API_VERSION = ? ";
@@ -3494,7 +3493,7 @@ public class SQLConstants {
                         "SUB.TIER_ID AS SUB_TIER, " +
                         "APP.APPLICATION_TIER AS APPLICATION_TIER, " +
                         "SUBSCRIBER.USER_ID AS SUBSCRIBER, " +
-                        "SUBSCRIBER.TENANT_ID AS TENANT_ID " +
+                        "SUBSCRIBER.ORGANIZATION AS ORGANIZATION " +
                         "FROM AM_WEBHOOKS_SUBSCRIPTION WH, " +
                         "AM_API API, " +
                         "AM_SUBSCRIPTION SUB, " +
@@ -3520,7 +3519,7 @@ public class SQLConstants {
                         "SUB.TIER_ID AS SUB_TIER, " +
                         "APP.APPLICATION_TIER AS APPLICATION_TIER, " +
                         "SUBSCRIBER.USER_ID AS SUBSCRIBER, " +
-                        "SUBSCRIBER.TENANT_ID AS TENANT_ID " +
+                        "SUBSCRIBER.ORGANIZATION AS ORGANIZATION " +
                         "FROM AM_WEBHOOKS_SUBSCRIPTION WH, " +
                         "AM_API API, " +
                         "AM_SUBSCRIPTION SUB, " +
@@ -3562,10 +3561,10 @@ public class SQLConstants {
      */
     public static class TenantThemeConstants {
 
-        public static final String ADD_TENANT_THEME = "INSERT INTO AM_TENANT_THEMES (TENANT_ID, THEME) VALUES (?,?)";
+        public static final String ADD_TENANT_THEME = "INSERT INTO AM_TENANT_THEMES (ORGANIZATION, THEME) VALUES (?,?)";
         public static final String UPDATE_TENANT_THEME = "UPDATE AM_TENANT_THEMES SET THEME = ? WHERE TENANT_ID = ?";
-        public static final String DELETE_TENANT_THEME = "DELETE FROM AM_TENANT_THEMES WHERE TENANT_ID = ?";
-        public static final String GET_TENANT_THEME = "SELECT * FROM AM_TENANT_THEMES WHERE TENANT_ID = ?";
+        public static final String DELETE_TENANT_THEME = "DELETE FROM AM_TENANT_THEMES WHERE ORGANIZATION = ?";
+        public static final String GET_TENANT_THEME = "SELECT * FROM AM_TENANT_THEMES WHERE ORGANIZATION = ?";
     }
 
     public static final String GET_API_VERSIONS =
