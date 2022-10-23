@@ -33,14 +33,18 @@ import org.json.simple.parser.ParseException;
 import org.wso2.apk.apimgt.api.*;
 import org.wso2.apk.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.apk.apimgt.api.model.*;
-import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPIInfo;
-import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPISearchResult;
-import org.wso2.apk.apimgt.impl.dao.dto.Organization;
-import org.wso2.apk.apimgt.impl.dao.dto.UserContext;
+import org.wso2.apk.apimgt.api.model.Documentation;
+import org.wso2.apk.apimgt.api.model.DocumentationType;
+import org.wso2.apk.apimgt.api.model.ResourceFile;
+import org.wso2.apk.apimgt.impl.dao.dto.*;
 import org.wso2.apk.apimgt.impl.dao.exceptions.APIPersistenceException;
+import org.wso2.apk.apimgt.impl.dao.exceptions.OASPersistenceException;
 import org.wso2.apk.apimgt.impl.dao.mapper.APIMapper;
 import org.wso2.apk.apimgt.impl.dto.*;
 import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.apk.apimgt.impl.recommendationmgt.RecommendationEnvironment;
+import org.wso2.apk.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
+import org.wso2.apk.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.apk.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 
@@ -2450,7 +2454,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
                 currentRolesList.retainAll(roles);
 
-                if (org.wso2.carbon.apimgt.impl.APIConstants.TIER_PERMISSION_ALLOW.equals(type)) {
+                if (APIConstants.TIER_PERMISSION_ALLOW.equals(type)) {
                     /* Current User is not allowed for this Tier*/
                     if (currentRolesList.isEmpty()) {
                         deniedTiers.add(tierPermission.getTierName());
@@ -3288,7 +3292,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return basePath;
     }
 
-    public void publishSearchQuery(String query, String username, String organization) {
+    public void publishSearchQuery(String query, String username, String organization) throws APIManagementException {
         if (recommendationEnvironment != null) {
             RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(query, username, organization);
             Thread recommendationThread = new Thread(extractor);
@@ -3296,7 +3300,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-    public void publishClickedAPI(ApiTypeWrapper clickedApi, String username, String organization) {
+    public void publishClickedAPI(ApiTypeWrapper clickedApi, String username, String organization)
+            throws APIManagementException {
         if (recommendationEnvironment != null) {
             RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(clickedApi, username, organization);
             Thread recommendationThread = new Thread(extractor);
@@ -3496,12 +3501,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
         try {
             Organization org = new Organization(organization);
-            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org ,
-                    uuid);
+            DevPortalAPI devPortalApi = apiDAOImpl.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
                 checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
                         devPortalApi.getVisibleRoles());
-                if (org.wso2.carbon.apimgt.impl.APIConstants.API_PRODUCT.equalsIgnoreCase(devPortalApi.getType())) {
+                if (APIConstants.API_PRODUCT.equalsIgnoreCase(devPortalApi.getType())) {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
                     apiProduct.setID(new APIProductIdentifier(devPortalApi.getProviderName(),
                             devPortalApi.getApiName(), devPortalApi.getVersion()));
@@ -3539,15 +3543,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
 
         if (visibility == null || visibility.trim().isEmpty()
-                || visibility.equalsIgnoreCase(org.wso2.carbon.apimgt.impl.APIConstants.API_GLOBAL_VISIBILITY)) {
+                || visibility.equalsIgnoreCase(APIConstants.API_GLOBAL_VISIBILITY)) {
             if (log.isDebugEnabled()) {
                 log.debug("API does not have any visibility restriction");
             }
             return;
         }
-        if (APIUtil.hasPermission(userNameWithTenantDomain, org.wso2.carbon.apimgt.impl.APIConstants.Permissions.APIM_ADMIN)
-                || APIUtil.hasPermission(userNameWithTenantDomain, org.wso2.carbon.apimgt.impl.APIConstants.Permissions.API_CREATE)
-                || APIUtil.hasPermission(userNameWithTenantDomain, org.wso2.carbon.apimgt.impl.APIConstants.Permissions.API_PUBLISH)) {
+        if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.APIM_ADMIN)
+                || APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.API_CREATE)
+                || APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.API_PUBLISH)) {
             return;
         }
 
@@ -3562,7 +3566,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 log.debug("User " + username + " has roles " + Arrays.toString(userRoleList));
             }
             for (String role : visibilityRolesList) {
-                if (!role.equalsIgnoreCase(org.wso2.carbon.apimgt.impl.APIConstants.NULL_USER_ROLE_LIST)
+                if (!role.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST)
                         && APIUtil.compareRoleList(userRoleList, role)) {
                     return;
                 }

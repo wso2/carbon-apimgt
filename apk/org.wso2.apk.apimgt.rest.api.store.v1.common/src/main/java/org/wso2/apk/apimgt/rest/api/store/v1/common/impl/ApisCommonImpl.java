@@ -37,6 +37,7 @@ import org.wso2.apk.apimgt.api.model.Environment;
 import org.wso2.apk.apimgt.api.model.ResourceFile;
 import org.wso2.apk.apimgt.api.model.Tier;
 import org.wso2.apk.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
+import org.wso2.apk.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.apk.apimgt.api.model.webhooks.Topic;
 import org.wso2.apk.apimgt.impl.APIClientGenerationException;
 import org.wso2.apk.apimgt.impl.APIClientGenerationManager;
@@ -67,7 +68,6 @@ import org.wso2.apk.apimgt.rest.api.store.v1.common.mappings.DocumentationMappin
 import org.wso2.apk.apimgt.rest.api.store.v1.common.mappings.GraphqlQueryAnalysisMappingUtil;
 import org.wso2.apk.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.apk.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,11 +80,11 @@ import java.util.stream.Collectors;
 /**
  * This class has Api service related Implementation
  */
-public class ApisServiceImpl {
+public class ApisCommonImpl {
 
-    private static final Log log = LogFactory.getLog(ApisServiceImpl.class);
+    private static final Log log = LogFactory.getLog(ApisCommonImpl.class);
 
-    private ApisServiceImpl() {
+    private ApisCommonImpl() {
     }
 
     /**
@@ -94,7 +94,7 @@ public class ApisServiceImpl {
      * @param offset       offset
      * @param query        query
      * @param organization organization
-     * @return
+     * @return API List DTO
      */
     public static APIListDTO getAPIList(Integer limit, Integer offset, String query, String organization)
             throws APIManagementException {
@@ -104,6 +104,7 @@ public class ApisServiceImpl {
         APIListDTO apiListDTO = new APIListDTO();
 
         try {
+            //TODO: get validated organization from the message context
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
 
@@ -699,14 +700,13 @@ public class ApisServiceImpl {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         apiConsumer.publishClickedAPI(api, userName, organization);
 
-        if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(
-                status) || APIConstants.DEPRECATED.equals(status)) {
+        if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
+                || APIConstants.DEPRECATED.equals(status)) {
 
             return APIMappingUtil.fromAPItoDTO(api, organization);
         } else {
-            throw new APIManagementException(
-                    "User " + userName + " does not have permission to access API with Id : " + apiId,
-                    ExceptionCodes.NO_READ_PERMISSIONS);
+            throw new APIManagementException("User " + userName + " does not have permission to access API with Id : "
+                    + apiId, ExceptionCodes.NO_READ_PERMISSIONS);
         }
     }
 

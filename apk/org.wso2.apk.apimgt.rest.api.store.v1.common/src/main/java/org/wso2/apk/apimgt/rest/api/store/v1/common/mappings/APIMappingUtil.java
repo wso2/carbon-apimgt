@@ -437,8 +437,7 @@ public class APIMappingUtil {
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(false);
         dto.setAdvertiseInfo(advertiseInfoDTO);
-        String apiTenant = MultitenantUtils.getTenantDomain(
-                APIUtil.replaceEmailDomainBack(model.getId().getProviderName()));
+        String apiTenant = APIUtil.getTenantDomain(APIUtil.replaceEmailDomainBack(model.getId().getProviderName()));
         String subscriptionAvailability = model.getSubscriptionAvailability();
         String subscriptionAllowedTenants = model.getSubscriptionAvailableTenants();
         dto.setIsSubscriptionAvailable(

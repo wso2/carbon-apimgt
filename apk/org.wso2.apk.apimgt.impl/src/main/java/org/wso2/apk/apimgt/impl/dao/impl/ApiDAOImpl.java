@@ -98,6 +98,7 @@ import org.wso2.apk.apimgt.impl.dao.ResourceCategoryDAO;
 import org.wso2.apk.apimgt.impl.dao.constants.PostgreSQLConstants;
 import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.apk.apimgt.impl.dao.mapper.APIMapper;
+import org.wso2.apk.apimgt.impl.dao.util.DBSearchUtils;
 import org.wso2.apk.apimgt.impl.dao.util.DBUtils;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
@@ -3108,23 +3109,30 @@ public class ApiDAOImpl implements ApiDAO {
                 String mediaType = resultSet.getString("MEDIA_TYPE");
                 InputStream apiDefinitionBlob = resultSet.getBinaryStream("API_DEFINITION");
                 if (apiDefinitionBlob != null) {
-                    if (StringUtils.equals("swagger.json",mediaType)) {
+                    if (StringUtils.equals("swagger.json", mediaType)) {
                         api.setSwaggerDefinition(APIMgtDBUtil.getStringFromInputStream(apiDefinitionBlob));
-                    } else if (StringUtils.equals("asyncapi.json",mediaType)) {
+                    } else if (StringUtils.equals("asyncapi.json", mediaType)) {
                         api.setAsyncApiDefinition(APIMgtDBUtil.getStringFromInputStream(apiDefinitionBlob));
                     }
                 }
                 API apiObject = APIMapper.INSTANCE.toApi(api);
                 devPortalAPI = APIMapper.INSTANCE.toDevPortalApi(apiObject);
+                if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) {
+                    return devPortalAPI;
+                }
+                String apiOrganization = APIUtil.getTenantDomain(APIUtil.replaceEmailDomainBack(apiObject.getId()
+                        .getProviderName()));
+                if (!organization.equals(apiOrganization)) {
+                    throw new APIPersistenceException("User does not have permission to view API : "
+                            + apiObject.getId().getApiName());
+                }
             }
         } catch (SQLException e) {
             if (log.isDebugEnabled()) {
                 log.debug("Error while retrieving api artefact for API uuid: " + apiId);
-                throw new APIPersistenceException("Error while retrieving api artefact for API uuid: " + apiId, e);
-            } else {
-                throw new APIPersistenceException("Error while retrieving api artefact for API uuid: " + apiId, e);
             }
-        } catch (JsonProcessingException e) {
+            throw new APIPersistenceException("Error while retrieving api artefact for API uuid: " + apiId, e);
+        } catch (JsonProcessingException | APIManagementException e) {
             throw new RuntimeException(e);
         } finally {
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
@@ -3135,8 +3143,21 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public DevPortalAPISearchResult searchAPIsForDevPortal(Organization organization, String searchQuery, int start,
                                                            int offset, UserContext ctx) throws APIPersistenceException {
+        String requestedOrganizationName = organization.getName();
         DevPortalAPISearchResult result = null;
+        log.debug("Requested query for devportal search: " + searchQuery);
+        String modifiedQuery = DBSearchUtils.getDevPortalSearchQuery(searchQuery, ctx,
+                APIUtil.isAllowDisplayAPIsWithMultipleStatus(), APIUtil.isAllowDisplayMultipleVersions());
         String searchAllQuery = PostgreSQLConstants.SEARCH_ALL_DEVPORTAL_SQL;
+        log.debug("Modified query for devportal search: " + modifiedQuery);
+
+        if (searchQuery != null && searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
+//            result = searchPaginatedDevPortalAPIsByDoc(userRegistry, tenantIDLocal, searchQuery.split(":")[1],
+//                    userNameLocal, start, offset);
+        } else {
+//            result = searchPaginatedDevPortalAPIs(userRegistry, tenantIDLocal, modifiedQuery, start, offset);
+        }
+
         if (StringUtils.isEmpty(searchQuery)) {
             result = searchPaginatedDevportalAPIs(organization.getName(), searchAllQuery, start, offset);
         }

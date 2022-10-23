@@ -1854,6 +1854,7 @@ public final class APIConstants {
 
     public static final String SEARCH_AND_TAG = "&";
     public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
+    public static final String API_OVERVIEW_STATUS_SEARCH_TYPE_KEY = "status=";
     public static final String ENABLE_STORE_SEARCH_TYPE_KEY = "enableStore=(true OR null)";
     public static final String LCSTATE_SEARCH_KEY = "lcState";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "doc";
@@ -2935,4 +2936,8 @@ public final class APIConstants {
 
     // Constants related to basic health check APIs
     public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
+
+    public static class MultitenantConstants {
+        public static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
+    }
 }
