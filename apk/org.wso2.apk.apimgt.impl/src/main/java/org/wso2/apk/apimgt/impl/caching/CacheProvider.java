@@ -102,4 +102,10 @@ public class CacheProvider {
     private static ConfigurationHolder getApiManagerConfiguration() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
     }
+
+    public static Cache getRecommendationsCache() {
+        //TODO: implement recommendation cache
+//        return getCache(APIConstants.RECOMMENDATIONS_CACHE_NAME);
+        return null;
+    }
 }

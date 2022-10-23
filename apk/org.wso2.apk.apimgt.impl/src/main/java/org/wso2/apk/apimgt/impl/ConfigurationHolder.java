@@ -24,6 +24,7 @@ import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.apk.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.apk.apimgt.impl.monetization.MonetizationConfigurationDto;
 import org.wso2.apk.apimgt.api.model.Environment;
+import org.wso2.apk.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -53,6 +54,8 @@ public class ConfigurationHolder {
     private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
 
     private Map<String, String> persistenceProperties = new ConcurrentHashMap<String, String>();
+
+    private RecommendationEnvironment recommendationEnvironment = new RecommendationEnvironment();
 
     public ThrottleProperties getThrottleProperties() {
         return throttleProperties;
@@ -133,5 +136,9 @@ public class ConfigurationHolder {
 
     public Map<String, String> getPersistenceProperties() {
         return persistenceProperties;
+    }
+
+    public RecommendationEnvironment getApiRecommendationEnvironment() {
+        return recommendationEnvironment;
     }
 }

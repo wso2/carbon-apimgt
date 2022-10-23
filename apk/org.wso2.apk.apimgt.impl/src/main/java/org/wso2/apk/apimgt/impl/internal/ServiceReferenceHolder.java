@@ -20,6 +20,7 @@ import org.wso2.apk.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.apk.apimgt.impl.caching.CacheProvider;
 import org.wso2.apk.apimgt.impl.config.APIMConfigService;
 import org.wso2.apk.apimgt.impl.config.APIMConfigServiceImpl;
+import org.wso2.apk.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 
 public class ServiceReferenceHolder {
 
@@ -27,6 +28,8 @@ public class ServiceReferenceHolder {
     private APIManagerConfigurationService amConfigurationService;
     private APIMConfigService apimConfigService;
     private CacheProvider cacheProvider;
+
+    private AccessTokenGenerator accessTokenGenerator;
 
     private ServiceReferenceHolder() {
 
@@ -68,4 +71,11 @@ public class ServiceReferenceHolder {
         this.cacheProvider = cacheProvider;
     }
 
+    public AccessTokenGenerator getAccessTokenGenerator() {
+        return accessTokenGenerator;
+    }
+
+    public void setAccessTokenGenerator(AccessTokenGenerator accessTokenGenerator) {
+        this.accessTokenGenerator = accessTokenGenerator;
+    }
 }
