@@ -31,9 +31,9 @@ import java.util.stream.Collectors;
  *
  * This is the service implementation class for Sdk generate related operations
  */
-public class SdkGenServiceImpl {
+public class SdkGenCommonImpl {
 
-    private SdkGenServiceImpl() {
+    private SdkGenCommonImpl() {
     }
 
     /**
