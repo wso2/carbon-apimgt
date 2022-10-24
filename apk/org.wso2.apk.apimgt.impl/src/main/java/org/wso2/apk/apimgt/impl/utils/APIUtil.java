@@ -128,6 +128,7 @@ import org.wso2.apk.apimgt.impl.dao.PolicyDAO;
 import org.wso2.apk.apimgt.impl.dao.ScopesDAO;
 import org.wso2.apk.apimgt.impl.dao.WorkflowDAO;
 import org.wso2.apk.apimgt.impl.dao.impl.ApplicationDAOImpl;
+import org.wso2.apk.apimgt.impl.dao.impl.EnvironmentDAOImpl;
 import org.wso2.apk.apimgt.impl.dao.impl.PolicyDAOImpl;
 import org.wso2.apk.apimgt.impl.dao.impl.WorkflowDAOImpl;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
@@ -2587,7 +2588,7 @@ public final class APIUtil {
     // Take organization as a parameter
     public static Map<String, Environment> getEnvironments(String organization) throws APIManagementException {
         // get dynamic gateway environments read from database
-        Map<String, Environment> envFromDB = ApiMgtDAO.getInstance().getAllEnvironments(organization).stream()
+        Map<String, Environment> envFromDB = EnvironmentDAOImpl.getInstance().getAllEnvironments(organization).stream()
                 .collect(Collectors.toMap(Environment::getName, env -> env));
 
         // clone and overwrite api-manager.xml environments with environments from DB if exists with same name
