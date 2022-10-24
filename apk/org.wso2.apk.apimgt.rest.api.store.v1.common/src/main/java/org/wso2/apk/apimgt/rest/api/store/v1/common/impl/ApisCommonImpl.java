@@ -69,6 +69,7 @@ import org.wso2.apk.apimgt.rest.api.store.v1.common.mappings.GraphqlQueryAnalysi
 import org.wso2.apk.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.apk.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -483,9 +484,13 @@ public class ApisCommonImpl {
      * @param language : Preferred sdk language.
      * @return : The sdk as a zip archive.
      */
-    public static Map<String, String> getSdkArtifacts(String apiId, String language, String organization)
+    public static File getSdkArtifacts(String apiId, String language, String organization)
             throws APIManagementException {
 
+        if (StringUtils.isEmpty(apiId) || StringUtils.isEmpty(language)) {
+            String message = "Error generating the SDK. API id or language should not be empty";
+            throw new APIManagementException(message, ExceptionCodes.SDK_NOT_GENERATED);
+        }
         APIDTO api = getAPIByAPIId(apiId, organization);
         APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
         Map<String, String> sdkArtifacts;
@@ -494,7 +499,7 @@ public class ApisCommonImpl {
                 sdkArtifacts = apiClientGenerationManager.generateSDK(language, api.getName(), api.getVersion(),
                         api.getApiDefinition());
                 //Create the sdk response.
-                return sdkArtifacts;
+                return new File(sdkArtifacts.get("zipFilePath"));
             } catch (APIClientGenerationException e) {
                 String message = "Error generating client sdk for api: " + api.getName() + " for language: " + language;
                 throw new APIManagementException(message, ExceptionCodes.SDK_NOT_GENERATED);
