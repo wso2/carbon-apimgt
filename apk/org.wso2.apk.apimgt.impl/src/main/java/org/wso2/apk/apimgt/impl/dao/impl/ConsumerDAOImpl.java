@@ -1581,5 +1581,42 @@ public class ConsumerDAOImpl implements ConsumerDAO {
         }
     }
 
+    public void updateSubscriptionStatusAndTier(int subscriptionId, String status) throws APIManagementException {
 
+        Connection conn = null;
+        PreparedStatement ps = null;
+        SubscribedAPI subscribedAPI = getSubscriptionById(subscriptionId);
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            //This query is to update the AM_SUBSCRIPTION table
+            String sqlQuery = SQLConstants.UPDATE_SUBSCRIPTION_STATUS_AND_TIER_SQL;
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, null);
+            if (subscribedAPI.getRequestedTier().getName() == null) {
+                ps.setString(2, subscribedAPI.getTier().getName());
+            } else {
+                ps.setString(2, subscribedAPI.getRequestedTier().getName());
+            }
+            ps.setString(3, status);
+            ps.setInt(4, subscriptionId);
+            ps.execute();
+
+            //Commit transaction
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback subscription status update ", e1);
+                }
+            }
+            handleException("Failed to update subscription status ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
 }

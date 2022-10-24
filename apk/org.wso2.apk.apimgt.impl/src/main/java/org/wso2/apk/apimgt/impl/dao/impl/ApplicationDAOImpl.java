@@ -1910,7 +1910,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
     @Override
     public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start,
-                                                       int offset, String search, String sortColumn, String sortOrder, String organization)
+                                                       int offset, String search, String sortColumn, String sortOrder,
+                                                       String organization)
             throws APIManagementException {
 
         Connection connection = null;
@@ -2333,6 +2334,315 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             throw new APIManagementException(msg, e);
         }
         return null;
+    }
+
+    @Override
+    public boolean isApplicationGroupCombinationExists(String applicationName, String username, String groupId)
+            throws APIManagementException {
+        if (username == null) {
+            return false;
+        }
+
+        Subscriber subscriber = getSubscriber(username);
+
+        int appId = 0;
+
+        String sqlQuery = SQLConstants.GET_APPLICATION_ID_PREFIX_FOR_GROUP_COMPARISON;
+        String whereClauseWithGroupId = " AND APP.GROUP_ID = ?";
+        String whereClauseWithMultiGroupId = " AND (APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM "
+                + "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))";
+
+        try (Connection connection = APIMgtDBUtil.getConnection();) {
+            if (!StringUtils.isEmpty(groupId)) {
+                if (multiGroupAppSharingEnabled) {
+                    sqlQuery += whereClauseWithMultiGroupId;
+                    String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
+                    String[] grpIdArray = groupId.split(",");
+
+                    int noOfParams = grpIdArray.length;
+
+                    try (PreparedStatement preparedStatement = fillQueryParams(connection, sqlQuery,
+                            grpIdArray, 2)) {
+
+                        preparedStatement.setString(1, applicationName);
+                        int paramIndex = noOfParams + 1;
+                        preparedStatement.setString(++paramIndex, tenantDomain);
+
+                        try (ResultSet resultSet = preparedStatement.executeQuery();) {
+                            if (resultSet.next()) {
+                                appId = resultSet.getInt("APPLICATION_ID");
+                            }
+
+                            if (appId > 0) {
+                                return true;
+                            }
+                        }
+                    }
+                } else {
+                    sqlQuery += whereClauseWithGroupId;
+                    try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);) {
+                        preparedStatement.setString(1, applicationName);
+                        preparedStatement.setString(2, groupId);
+
+                        try (ResultSet resultSet = preparedStatement.executeQuery();) {
+                            if (resultSet.next()) {
+                                appId = resultSet.getInt("APPLICATION_ID");
+                            }
+
+                            if (appId > 0) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while getting application group combination data for application: " +
+                    applicationName, e);
+        }
+        return false;
+    }
+
+    public boolean isApplicationOwnedBySubscriber(String appName, String username, String organization)
+            throws APIManagementException {
+
+        if (username == null) {
+            return false;
+        }
+        Subscriber subscriber = getSubscriber(username);
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        int appId = 0;
+        String sqlQuery = SQLConstants.GET_APPLICATION_ID_PREFIX;
+        String whereClause = " AND SUB.USER_ID = ? ";
+        String whereClauseCaseInsensitive = " AND LOWER(SUB.USER_ID) = LOWER(?) ";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            if (forceCaseInsensitiveComparisons) {
+                sqlQuery += whereClauseCaseInsensitive;
+            } else {
+                sqlQuery += whereClause;
+            }
+            preparedStatement = connection.prepareStatement(sqlQuery);
+            preparedStatement.setString(1, appName);
+            preparedStatement.setString(2, organization);
+            preparedStatement.setString(3, subscriber.getName());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                appId = resultSet.getInt("APPLICATION_ID");
+            }
+            if (appId > 0) {
+                return true;
+            }
+        } catch (SQLException e) {
+            handleExceptionWithCode("Error while getting the id  of " + appName + " from the persistence store.", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return false;
+    }
+
+    public String getApplicationUUID(String appName, String username) throws APIManagementException {
+
+        if (username == null) {
+            return null;
+        }
+        Subscriber subscriber = getSubscriber(username);
+        String applicationUUID = null;
+
+        String sql = "SELECT UUID FROM AM_APPLICATION WHERE NAME = ? AND SUBSCRIBER_ID  = ?";
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sql)) {
+            prepStmt.setString(1, appName);
+            prepStmt.setInt(2, subscriber.getId());
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    applicationUUID = rs.getString("UUID");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error when getting the application id from" + " the persistence store.", e);
+        }
+        return applicationUUID;
+    }
+
+    public boolean isApplicationExist(String appName, String username, String groupId,
+                                      String organization) throws APIManagementException {
+
+        if (username == null) {
+            return false;
+        }
+        Subscriber subscriber = getSubscriber(username);
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        int appId = 0;
+
+        String sqlQuery = SQLConstants.GET_APPLICATION_ID_PREFIX;
+
+        String whereClauseWithGroupId = " AND (APP.GROUP_ID = ? OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL)"
+                + " AND SUB.USER_ID = ?))";
+        String whereClauseWithGroupIdCaseInsensitive = " AND (APP.GROUP_ID = ? "
+                + "OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL) AND LOWER(SUB.USER_ID) = LOWER(?)))";
+
+        String whereClauseWithMultiGroupId = " AND  ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
+                "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  ( SUB.USER_ID = ? ) " +
+                "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?)))";
+
+        String whereClauseWithMultiGroupIdCaseInsensitive = " AND  ( (APP.APPLICATION_ID IN  (SELECT APPLICATION_ID " +
+                "FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) " +
+                "OR (LOWER(SUB.USER_ID) = LOWER(?))" +
+                "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?)))";
+
+        String whereClause = " AND SUB.USER_ID = ? ";
+        String whereClauseCaseInsensitive = " AND LOWER(SUB.USER_ID) = LOWER(?) ";
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            if (!StringUtils.isEmpty(groupId)) {
+                if (multiGroupAppSharingEnabled) {
+                    if (forceCaseInsensitiveComparisons) {
+                        sqlQuery += whereClauseWithMultiGroupIdCaseInsensitive;
+                    } else {
+                        sqlQuery += whereClauseWithMultiGroupId;
+                    }
+                    String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
+                    String[] grpIdArray = groupId.split(",");
+                    int noOfParams = grpIdArray.length;
+                    preparedStatement = fillQueryParams(connection, sqlQuery, grpIdArray, 3);
+                    preparedStatement.setString(1, appName);
+                    preparedStatement.setString(2, organization);
+                    int paramIndex = noOfParams + 2;
+                    preparedStatement.setString(++paramIndex, tenantDomain);
+                    preparedStatement.setString(++paramIndex, subscriber.getName());
+                    preparedStatement.setString(++paramIndex, tenantDomain + '/' + groupId);
+                } else {
+                    if (forceCaseInsensitiveComparisons) {
+                        sqlQuery += whereClauseWithGroupIdCaseInsensitive;
+                    } else {
+                        sqlQuery += whereClauseWithGroupId;
+                    }
+                    preparedStatement = connection.prepareStatement(sqlQuery);
+                    preparedStatement.setString(1, appName);
+                    preparedStatement.setString(2, organization);
+                    preparedStatement.setString(3, groupId);
+                    preparedStatement.setString(4, subscriber.getName());
+                }
+            } else {
+                if (forceCaseInsensitiveComparisons) {
+                    sqlQuery += whereClauseCaseInsensitive;
+                } else {
+                    sqlQuery += whereClause;
+                }
+                preparedStatement = connection.prepareStatement(sqlQuery);
+                preparedStatement.setString(1, appName);
+                preparedStatement.setString(2, organization);
+                preparedStatement.setString(3, subscriber.getName());
+            }
+
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                appId = resultSet.getInt("APPLICATION_ID");
+            }
+
+            if (appId > 0) {
+                return true;
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while getting the id  of " + appName + " from the persistence store.", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return false;
+    }
+
+    public String getApplicationStatusById(int applicationId) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String status = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            String sqlQuery = SQLConstants.GET_APPLICATION_STATUS_BY_ID_SQL;
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, applicationId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                status = resultSet.getString("APPLICATION_STATUS");
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the update Application ", e1);
+                }
+            }
+            handleException("Failed to update Application", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return status;
+    }
+
+    public String getApplicationStatus(String appName, String userId) throws APIManagementException {
+
+        int applicationId = getApplicationId(appName, userId);
+        return getApplicationStatusById(applicationId);
+    }
+
+    public Application[] getApplicationsByTier(String tier) throws APIManagementException {
+
+        if (tier == null) {
+            return null;
+        }
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        Application[] applications = null;
+
+        String sqlQuery = SQLConstants.GET_APPLICATION_BY_TIER_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setString(1, tier);
+            rs = prepStmt.executeQuery();
+            ArrayList<Application> applicationsList = new ArrayList<Application>();
+            Application application;
+            while (rs.next()) {
+                application = new Application(rs.getString("NAME"), getSubscriber(
+                        rs.getString("SUBSCRIBER_ID")));
+                application.setId(rs.getInt("APPLICATION_ID"));
+                applicationsList.add(application);
+            }
+            Collections.sort(applicationsList, new Comparator<Application>() {
+                public int compare(Application o1, Application o2) {
+
+                    return o1.getName().compareToIgnoreCase(o2.getName());
+                }
+            });
+            applications = applicationsList.toArray(new Application[applicationsList.size()]);
+
+        } catch (SQLException e) {
+            handleException("Error when reading the application information from" + " the persistence store.", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return applications;
     }
 
 }

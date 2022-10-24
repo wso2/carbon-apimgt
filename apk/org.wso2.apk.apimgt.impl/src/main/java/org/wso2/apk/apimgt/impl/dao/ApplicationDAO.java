@@ -411,4 +411,68 @@ public interface ApplicationDAO {
             throws APIManagementException;
 
 
+    /**
+     *
+     * @param applicationName application name
+     * @param username username
+     * @param groupId group id
+     * @return whether a certain application group combination exists or not
+     * @throws APIManagementException if failed to assess whether a certain application group combination exists or not
+     */
+    public boolean isApplicationGroupCombinationExists(String applicationName, String username, String groupId)
+            throws APIManagementException;
+
+
+    /**
+     * Check whether the new user has an application
+     *
+     * @param appName  application name
+     * @param username subscriber
+     * @return true if application is available for the subscriber
+     * @throws APIManagementException if failed to get applications for given subscriber
+     */
+    public boolean isApplicationOwnedBySubscriber(String appName, String username, String organization) throws
+            APIManagementException;
+
+    public String getApplicationUUID(String appName, String username) throws APIManagementException;
+
+    /**
+     * Check whether given application name is available under current subscriber or group
+     *
+     * @param appName  application name
+     * @param username subscriber
+     * @param groupId  group of the subscriber
+     * @param organization identifier of the organization
+     * @return true if application is available for the subscriber
+     * @throws APIManagementException if failed to get applications for given subscriber
+     */
+    public boolean isApplicationExist(String appName, String username, String groupId,
+                                      String organization) throws APIManagementException;
+
+    /**
+     * get the status of the Application creation process given the application Id
+     *
+     * @param applicationId Id of the Application
+     * @return
+     * @throws APIManagementException
+     */
+    public String getApplicationStatusById(int applicationId) throws APIManagementException;
+
+    /**
+     * get the status of the Application creation process
+     *
+     * @param appName
+     * @return
+     * @throws APIManagementException
+     */
+    public String getApplicationStatus(String appName, String userId) throws APIManagementException;
+
+    /**
+     * Get all applications associated with given tier
+     *
+     * @param tier String tier name
+     * @return Application object array associated with tier
+     * @throws APIManagementException on error in getting applications array
+     */
+    public Application[] getApplicationsByTier(String tier) throws APIManagementException;
 }

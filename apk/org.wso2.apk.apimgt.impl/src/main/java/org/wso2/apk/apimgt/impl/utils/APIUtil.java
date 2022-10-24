@@ -127,10 +127,7 @@ import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.apk.apimgt.impl.dao.PolicyDAO;
 import org.wso2.apk.apimgt.impl.dao.ScopesDAO;
 import org.wso2.apk.apimgt.impl.dao.WorkflowDAO;
-import org.wso2.apk.apimgt.impl.dao.impl.ApplicationDAOImpl;
-import org.wso2.apk.apimgt.impl.dao.impl.EnvironmentDAOImpl;
-import org.wso2.apk.apimgt.impl.dao.impl.PolicyDAOImpl;
-import org.wso2.apk.apimgt.impl.dao.impl.WorkflowDAOImpl;
+import org.wso2.apk.apimgt.impl.dao.impl.*;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.apk.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
@@ -880,7 +877,7 @@ public final class APIUtil {
 
     public static float getAverageRating(String id) throws APIManagementException {
 
-        return ApiMgtDAO.getInstance().getAverageRating(id);
+        return ConsumerDAOImpl.getInstance().getAverageRating(id);
     }
 
     public static float getAverageRating(int apiId) throws APIManagementException {
@@ -890,12 +887,12 @@ public final class APIUtil {
 
     public static String getApplicationUUID(String appName, String userId) throws APIManagementException {
 
-        return ApiMgtDAO.getInstance().getApplicationUUID(appName, userId);
+        return ApplicationDAOImpl.getInstance().getApplicationUUID(appName, userId);
     }
 
     public static int getApplicationId(String appName, String userId) throws APIManagementException {
 
-        return ApiMgtDAO.getInstance().getApplicationId(appName, userId);
+        return ApplicationDAOImpl.getInstance().getApplicationId(appName, userId);
     }
 
     public static int getApplicationId(String appName, String userId, String groupId) throws APIManagementException {
@@ -1443,7 +1440,7 @@ public final class APIUtil {
     public static boolean isApplicationExist(String subscriber, String applicationName, String groupId,
                                              String organization) throws APIManagementException {
 
-        return ApiMgtDAO.getInstance().isApplicationExist(applicationName, subscriber, groupId, organization);
+        return ApplicationDAOImpl.getInstance().isApplicationExist(applicationName, subscriber, groupId, organization);
     }
 
     /**
@@ -1457,7 +1454,7 @@ public final class APIUtil {
     public static boolean isApplicationOwnedBySubscriber(String subscriber, String applicationName, String organization)
             throws APIManagementException {
 
-        return ApiMgtDAO.getInstance().isApplicationOwnedBySubscriber(applicationName, subscriber, organization);
+        return ApplicationDAOImpl.getInstance().isApplicationOwnedBySubscriber(applicationName, subscriber, organization);
     }
 
     private static boolean isUnlimitedTierPaid(String tenantDomain) throws APIManagementException {

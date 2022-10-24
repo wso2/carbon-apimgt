@@ -196,7 +196,6 @@ public interface ConsumerDAO {
     void addRevokedJWTSignature(String eventId, String jwtSignature, String type,
                                        Long expiryTime, int tenantId) throws APIManagementException;
 
-
-
+    public void updateSubscriptionStatusAndTier(int subscriptionId, String status) throws APIManagementException;
 
 }
