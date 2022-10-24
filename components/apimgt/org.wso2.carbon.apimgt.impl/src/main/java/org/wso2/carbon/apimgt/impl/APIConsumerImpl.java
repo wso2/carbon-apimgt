@@ -5283,7 +5283,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
         String apiTenantDomain;
         String updatedDefinition = null;
-        Map<String,String> hostsWithSchemes;
         String definition;
         if(api.getSwaggerDefinition() != null) {
             definition = api.getSwaggerDefinition();
@@ -5295,9 +5294,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         api.setUriTemplates(oasParser.getURITemplates(definition));
         apiTenantDomain = MultitenantUtils.getTenantDomain(
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        hostsWithSchemes = getHostWithSchemeMappingForEnvironment(api, apiTenantDomain, environmentName);
         api.setContext(getBasePath(apiTenantDomain, api.getContext()));
-        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
+        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, apiTenantDomain, environmentName);
         return updatedDefinition;
     }
 
