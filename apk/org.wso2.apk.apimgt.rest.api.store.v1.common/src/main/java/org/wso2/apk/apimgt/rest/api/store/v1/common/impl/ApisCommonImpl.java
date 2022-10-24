@@ -205,7 +205,7 @@ public class ApisCommonImpl {
             apiConsumer.getLightweightAPIByUUID(apiId, organization);
             return apiConsumer.getGraphqlSchemaDefinition(apiId, organization);
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving API : " + apiId;
+            String errorMessage = "Error while retrieving the GraphQL schema definition for API : " + apiId;
             throw new APIManagementException(errorMessage, e.getErrorHandler());
         }
     }
@@ -647,10 +647,11 @@ public class ApisCommonImpl {
         return apiConsumer.getLightweightAPIByUUID(apiId, organization);
     }
 
-    public static ResourceFile getWSDLOfAPI(API api, String environmentName, String organization)
+    public static ResourceFile getWSDLOfAPI(String apiId, String environmentName, String organization)
             throws APIManagementException {
 
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
         List<Environment> environments = APIUtil.getEnvironmentsOfAPI(api);
         if (!environments.isEmpty()) {
             return getWSDLFromSelectedEnvironment(apiConsumer, organization, api, environmentName, environments);
@@ -871,7 +872,9 @@ public class ApisCommonImpl {
 
         if (selectedEnvironment != null) {
             wsdl = apiConsumer.getWSDL(api, selectedEnvironment.getName(), selectedEnvironment.getType(), organization);
-
+        } else {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_GATEWAY_ENVIRONMENT,
+                    environmentName));
         }
         return wsdl;
     }

@@ -27,6 +27,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.Constants;
 import org.apache.commons.codec.binary.Base64;
@@ -65,6 +66,9 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.DeprecatedRuntimeConstants;
+import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.xerces.util.SecurityManager;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
@@ -136,9 +140,11 @@ import org.wso2.apk.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.apk.apimgt.user.exceptions.UserException;
 import org.wso2.apk.apimgt.user.mgt.internal.UserManagerHolder;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -176,7 +182,9 @@ import javax.net.ssl.SSLContext;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -3789,5 +3797,189 @@ public final class APIUtil {
             apiSwagger = apiSwagger.replace(matcher.group(), "");
         }
         return apiSwagger;
+    }
+
+    /**
+     * This method used to get the currently published gateway environments of an API .
+     *
+     * @param api API object with the attributes value
+     */
+    public static List<Environment> getEnvironmentsOfAPI(API api) throws APIManagementException {
+
+        String organization = api.getOrganization();
+        Map<String, Environment> gatewayEnvironments = getEnvironments(organization);
+        Set<String> apiEnvironments = api.getEnvironments();
+        List<Environment> returnEnvironments = new ArrayList<Environment>();
+
+        for (Environment environment : gatewayEnvironments.values()) {
+            for (String apiEnvironment : apiEnvironments) {
+                if (environment.getName().equals(apiEnvironment)) {
+                    returnEnvironments.add(environment);
+                    break;
+                }
+            }
+        }
+        return returnEnvironments;
+    }
+
+    public static void initializeVelocityContext(VelocityEngine velocityEngine){
+        velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
+        velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");
+        velocityEngine.setProperty("runtime.conversion.handler", "none");
+    }
+
+    /**
+     * Read the GateWay Endpoint from the APIConfiguration. If multiple Gateway
+     * environments defined, get the gateway endpoint according to the environment type
+     *
+     * @param transports      transports allowed for gateway endpoint
+     * @param environmentName gateway environment name
+     * @param environmentType gateway environment type
+     * @return Gateway URL
+     */
+    public static String getGatewayEndpoint(String transports, String environmentName, String environmentType,
+                                            String organization)
+            throws APIManagementException {
+
+        String gatewayURLs;
+        String gatewayEndpoint = "";
+
+        Map<String, Environment> gatewayEnvironments = getEnvironments(organization);
+        Environment environment = gatewayEnvironments.get(environmentName);
+        if (environment.getType().equals(environmentType)) {
+            gatewayURLs = environment.getApiGatewayEndpoint();
+            gatewayEndpoint = extractHTTPSEndpoint(gatewayURLs, transports);
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway urls are: " + gatewayURLs + " and the url with the correct transport is: "
+                        + gatewayEndpoint);
+            }
+        } else {
+            handleException("Environment type mismatch for environment: " + environmentName +
+                    " for the environment types: " + environment.getType() + " and " + environmentType);
+        }
+        return gatewayEndpoint;
+    }
+
+    private static String extractHTTPSEndpoint(String gatewayURLs, String transports) {
+
+        String gatewayURL;
+        String gatewayHTTPURL = null;
+        String gatewayHTTPSURL = null;
+        boolean httpsEnabled = false;
+        String[] gatewayURLsArray = gatewayURLs.split(",");
+        String[] transportsArray = transports.split(",");
+
+        for (String transport : transportsArray) {
+            if (transport.startsWith(APIConstants.HTTPS_PROTOCOL)) {
+                httpsEnabled = true;
+            }
+        }
+        if (gatewayURLsArray.length > 1) {
+            for (String url : gatewayURLsArray) {
+                if (url.startsWith("https:")) {
+                    gatewayHTTPSURL = url;
+                } else {
+                    if (!url.startsWith("ws:")) {
+                        gatewayHTTPURL = url;
+                    }
+                }
+            }
+
+            if (httpsEnabled) {
+                gatewayURL = gatewayHTTPSURL;
+            } else {
+                gatewayURL = gatewayHTTPURL;
+            }
+        } else {
+            gatewayURL = gatewayURLs;
+        }
+        return gatewayURL;
+    }
+
+    /**
+     * Build OMElement from inputstream
+     *
+     * @param inputStream
+     * @return
+     * @throws Exception
+     */
+    public static OMElement buildOMElement(InputStream inputStream) throws Exception {
+
+        XMLStreamReader parser;
+        StAXOMBuilder builder;
+        try {
+            XMLInputFactory factory = XMLInputFactory.newInstance();
+            factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+            parser = factory.createXMLStreamReader(inputStream);
+            builder = new StAXOMBuilder(parser);
+        } catch (XMLStreamException e) {
+            String msg = "Error in initializing the parser.";
+            log.error(msg, e);
+            throw new Exception(msg, e);
+        }
+
+        return builder.getDocumentElement();
+    }
+
+    /**
+     * Returns whether the provided URL content contains the string to match
+     *
+     * @param url   URL
+     * @param match string to match
+     * @return whether the provided URL content contains the string to match
+     */
+    public static boolean isURLContentContainsString(URL url, String match, int maxLines) {
+
+        try (BufferedReader in =
+                     new BufferedReader(new InputStreamReader(url.openStream(), Charset.defaultCharset()))) {
+            String inputLine;
+            StringBuilder urlContent = new StringBuilder();
+            while ((inputLine = in.readLine()) != null && maxLines > 0) {
+                maxLines--;
+                urlContent.append(inputLine);
+                if (urlContent.indexOf(match) > 0) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            log.error("Error Reading Input from Stream from " + url, e);
+
+        }
+        return false;
+    }
+
+    public static String getGatewayendpoint(String transports, String organization) throws APIManagementException {
+
+        String gatewayURLs;
+
+        Map<String, Environment> gatewayEnvironments = getEnvironments(organization);
+        if (gatewayEnvironments.size() > 1) {
+            for (Environment environment : gatewayEnvironments.values()) {
+                if (APIConstants.GATEWAY_ENV_TYPE_HYBRID.equals(environment.getType())) {
+                    gatewayURLs = environment.getApiGatewayEndpoint(); // This might have http,https
+                    // pick correct endpoint
+                    return APIUtil.extractHTTPSEndpoint(gatewayURLs, transports);
+                }
+            }
+            for (Environment environment : gatewayEnvironments.values()) {
+                if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
+                    gatewayURLs = environment.getApiGatewayEndpoint(); // This might have http,https
+                    // pick correct endpoint
+                    return APIUtil.extractHTTPSEndpoint(gatewayURLs, transports);
+                }
+            }
+            for (Environment environment : gatewayEnvironments.values()) {
+                if (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())) {
+                    gatewayURLs = environment.getApiGatewayEndpoint(); // This might have http,https
+                    // pick correct endpoint
+                    return APIUtil.extractHTTPSEndpoint(gatewayURLs, transports);
+                }
+            }
+        } else {
+            gatewayURLs = ((Environment) gatewayEnvironments.values().toArray()[0]).getApiGatewayEndpoint();
+            return extractHTTPSEndpoint(gatewayURLs, transports);
+        }
+
+        return null;
     }
 }
