@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl.internal;
 
+import org.wso2.carbon.apimgt.api.APIEndpointUrlExtractor;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
@@ -69,6 +70,7 @@ public class ServiceReferenceHolder {
     private ResourceQuotaLimiter resourceQuotaLimiter;
     private EventPublisherFactory eventPublisherFactory;
     private APIMConfigService apimConfigService;
+    private APIEndpointUrlExtractor apiEndpointUrlExtractor;
 
     private ServiceReferenceHolder() {
 
@@ -319,5 +321,13 @@ public class ServiceReferenceHolder {
             return apimConfigService;
         }
         return new APIMConfigServiceImpl();
+    }
+
+    public APIEndpointUrlExtractor getApiEndpointUrlExtractor() {
+        return apiEndpointUrlExtractor;
+    }
+
+    public void setApiEndpointUrlExtractor(APIEndpointUrlExtractor apiEndpointUrlExtractor) {
+        this.apiEndpointUrlExtractor = apiEndpointUrlExtractor;
     }
 }
