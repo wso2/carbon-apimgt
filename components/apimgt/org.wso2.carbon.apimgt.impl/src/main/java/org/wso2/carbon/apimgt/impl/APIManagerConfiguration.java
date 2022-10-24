@@ -122,6 +122,7 @@ public class APIManagerConfiguration {
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
     private RedisConfig redisConfig = new RedisConfig();
     private Map<String, List<String>> restApiJWTAuthAudiences = new HashMap<>();
+    private JSONObject subscriberAttributes = new JSONObject();
 
     public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;
@@ -502,6 +503,8 @@ public class APIManagerConfiguration {
                 setThrottleProperties(serverConfig);
             } else if (APIConstants.WorkflowConfigConstants.WORKFLOW.equals(localName)) {
                 setWorkflowProperties(serverConfig);
+            } else if (APIConstants.SUBSCRIBER_CONFIGURATION.equals(localName)) {
+                    setSubscriberAttributeConfigs(serverConfig);
             } else if (APIConstants.ApplicationAttributes.APPLICATION_ATTRIBUTES.equals(localName)) {
                 Iterator iterator = element.getChildrenWithLocalName(APIConstants.ApplicationAttributes.ATTRIBUTE);
                 while (iterator.hasNext()) {
@@ -560,6 +563,38 @@ public class APIManagerConfiguration {
             }
             readChildElements(element, nameStack);
             nameStack.pop();
+        }
+    }
+
+    public JSONObject getSubscriberAttributes() {
+        return subscriberAttributes;
+    }
+
+    /**
+     * Set the Subscriber Contact into Configuration.
+     * @param element
+     */
+    private void setSubscriberAttributeConfigs(OMElement element) {
+        OMElement subscriberContactConfigurationElement = element.getFirstChildWithName(new QName(APIConstants.
+                SUBSCRIBER_CONFIGURATION));
+        if (subscriberContactConfigurationElement != null) {
+            OMElement emailRecipientElement = subscriberContactConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.SUBSCRIBER_CONFIGURATION_RECIPIENT));
+            if (emailRecipientElement != null) {
+                subscriberAttributes.put(APIConstants.SUBSCRIBER_CONFIGURATION_RECIPIENT,
+                        emailRecipientElement.getText());
+            } else {
+                log.debug("Subscriber recipient field is set to default (cc).");
+            }
+
+            OMElement emailDelimiterElement = subscriberContactConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.SUBSCRIBER_CONFIGURATION_DELIMITER));
+            if (emailRecipientElement != null) {
+                subscriberAttributes.put(APIConstants.SUBSCRIBER_CONFIGURATION_DELIMITER,
+                        emailDelimiterElement.getText());
+            } else {
+                log.debug("Subscriber email delimiter field is set to default (,).");
+            }
         }
     }
 
