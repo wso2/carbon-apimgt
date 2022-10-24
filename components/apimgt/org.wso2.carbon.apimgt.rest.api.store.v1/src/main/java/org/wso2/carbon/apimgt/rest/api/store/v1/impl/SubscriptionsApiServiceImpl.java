@@ -125,8 +125,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 subscriptionListDTO = SubscriptionMappingUtil
                         .fromSubscriptionListToDTO(subscribedAPIList, limit, offset, organization);
 
-                SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, "", limit,
-                        offset, subscribedAPIList.size());
+                SubscriptionMappingUtil
+                        .setPaginationParams(subscriptionListDTO, apiId, applicationId, groupId, limit, offset,
+                                subscribedAPIList.size());
 
                 return Response.ok().entity(subscriptionListDTO).build();
             } else if (!StringUtils.isEmpty(applicationId)) {
@@ -141,12 +142,15 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 }
 
+                int total = apiConsumer.getSubscriptionCount(subscriber, application.getName(), groupId);
                 subscriptions = apiConsumer.getPaginatedSubscribedAPIsByApplication(application, offset, limit,
                         organization);
                 subscribedAPIList.addAll(subscriptions);
 
                 subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedAPIList, limit,
                         offset, organization);
+                SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, applicationId, groupId, limit,
+                        offset, total);
                 return Response.ok().entity(subscriptionListDTO).build();
 
             } else {
