@@ -523,7 +523,6 @@ public class ApisCommonImpl {
             environmentName = retrieveAvailableEnvironment(organization, api.getEnvironmentList());
         }
 
-        // TODO: in the master it gets the first available environment if environment is not provided
         if (StringUtils.isNotEmpty(environmentName)) {
             apiSwagger = getSwaggerForEnvironment(apiConsumer, api, organization);
         } else {
