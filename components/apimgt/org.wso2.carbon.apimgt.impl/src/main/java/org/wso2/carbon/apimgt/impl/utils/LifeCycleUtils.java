@@ -58,7 +58,7 @@ public class LifeCycleUtils {
             Boolean> checklist) throws PersistenceException, APIPersistenceException, APIManagementException {
         String targetStatus;
         String apiName = apiTypeWrapper.getName();
-        String apiType = apiTypeWrapper.geType();
+        String apiType = apiTypeWrapper.getType();
         String apiContext = apiTypeWrapper.getContext();
         String uuid = apiTypeWrapper.getUuid();
         String currentStatus = apiTypeWrapper.getStatus();

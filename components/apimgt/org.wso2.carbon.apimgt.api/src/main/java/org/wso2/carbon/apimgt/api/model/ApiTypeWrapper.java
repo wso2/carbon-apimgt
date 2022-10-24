@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class ApiTypeWrapper {
     private API api;
     private APIProduct apiProduct;
@@ -160,10 +164,49 @@ public class ApiTypeWrapper {
         return api.getAccessControlRoles();
     }
 
-    public String geType() {
+    public String getType() {
         if (isAPIProduct){
             return apiProduct.getType();
         }
         return api.getType();
+    }
+
+    public String getVersion() {
+        return isAPIProduct ? apiProduct.getId().getVersion() : api.getId().getVersion();
+    }
+
+    public Boolean getIsDefaultVersion() {
+        return !isAPIProduct && api.isPublishedDefaultVersion();
+    }
+
+    public List<String> getTransports() {
+        return isAPIProduct ? Arrays.asList(apiProduct.getTransports().split(","))
+                : Arrays.asList(api.getTransports().split(","));
+    }
+
+    public boolean isGraphQLSubscriptionsAvailable() {
+        return isAPIProduct ? isGraphQLSubscriptionsAvailableInApiProduct(apiProduct)
+                : isGraphQLSubscriptionsAvailableInApi(api);
+    }
+
+    private boolean isGraphQLSubscriptionsAvailableInApiProduct(APIProduct apiProduct) {
+        List<URITemplate> apiProductUriTemplates = new ArrayList<>();
+        for (APIProductResource productResource : apiProduct.getProductResources()) {
+            URITemplate uriTemplate = productResource.getUriTemplate();
+            apiProductUriTemplates.add(uriTemplate);
+        }
+        return apiProductUriTemplates.stream()
+                .filter(uriTemplate -> "Subscription".equalsIgnoreCase(uriTemplate.getHTTPVerb()))
+                .findAny().orElse(null) != null;
+    }
+
+    private boolean isGraphQLSubscriptionsAvailableInApi(API api) {
+        List<URITemplate> apiUriTemplates = new ArrayList<>();
+        if ("GRAPHQL".equals(api.getType())) {
+            apiUriTemplates.addAll(api.getUriTemplates());
+        }
+        return apiUriTemplates.stream()
+                .filter(uriTemplate -> "Subscription".equalsIgnoreCase(uriTemplate.getHTTPVerb()))
+                .findAny().orElse(null) != null;
     }
 }
