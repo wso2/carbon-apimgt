@@ -3731,4 +3731,63 @@ public final class APIUtil {
         }
         return false;
     }
+
+    /**
+     * Removes x-wso2-request-interceptor and x-wso2-response-interceptor from swagger as they should not be provided
+     * to store consumers
+     *
+     * @param apiSwagger swagger definition of API
+     * @return swagger which exclude x-wso2-request-interceptor and x-wso2-response-interceptor elements
+     */
+    public static String removeInterceptorsFromSwagger(String apiSwagger) {
+        // Removes x-wso2-request-interceptor key:values
+        String requestInterceptorScriptRegex = "\"x-wso2-request-interceptor\" ?: ?\\{([^}]*)}";
+        Pattern pattern = Pattern.compile("[,\\n ]*" + requestInterceptorScriptRegex);
+        Matcher matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+        pattern = Pattern.compile(requestInterceptorScriptRegex + ",?");
+        matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+
+        // Removes x-wso2-response-interceptor key:values
+        String responseInterceptorScriptRegex = "[,\\n ]*\"x-wso2-response-interceptor\" ?: ?\\{([^}]*)}";
+        pattern = Pattern.compile("[,\\n ]*" + responseInterceptorScriptRegex);
+        matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+        pattern = Pattern.compile(responseInterceptorScriptRegex + ",?");
+        matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+
+        return apiSwagger;
+    }
+
+    /**
+     * Removes x-mediation-scripts from swagger as they should not be provided to store consumers
+     *
+     * @param apiSwagger swagger definition of API
+     * @return swagger which exclude x-mediation-script elements
+     */
+    public static String removeXMediationScriptsFromSwagger(String apiSwagger) {
+        //removes x-mediation-script key:values
+        String mediationScriptRegex = "\"x-mediation-script\":\".*?(?<!\\\\)\"";
+        Pattern pattern = Pattern.compile("," + mediationScriptRegex);
+        Matcher matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+        pattern = Pattern.compile(mediationScriptRegex + ",");
+        matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+        return apiSwagger;
+    }
 }
