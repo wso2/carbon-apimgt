@@ -47,8 +47,11 @@ import org.wso2.apk.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.apk.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.apk.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.apk.apimgt.impl.utils.APIAPIProductNameComparator;
+import org.wso2.apk.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.impl.utils.VHostUtils;
+import org.wso2.apk.apimgt.impl.wsdl.WSDLProcessor;
+import org.wso2.apk.apimgt.impl.wsdl.model.WSDLValidationResponse;
 
 import javax.cache.Cache;
 import java.io.InputStream;
