@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.gateway.handlers.common;
 
+import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.io.FileUtils;
@@ -132,5 +133,35 @@ public class APIMgtLatencyStatsHandlerTest {
         long requestTime = Long.parseLong(String.valueOf(synCtx.getProperty("api.ut.requestTime")));
         Assert.assertTrue(requestTime <= System.currentTimeMillis());
         Assert.assertEquals(synCtx.getProperty(APIMgtGatewayConstants.OPEN_API_STRING), swaggerValue);
+    }
+
+    @Test
+    public void handleRequestWithSwaggerYaml() throws Exception {
+
+        String apiUUID = "414f0c50-1429-11ed-861d-0242ac120002";
+        File swaggerJsonFile = new File(Thread.currentThread().getContextClassLoader().
+                getResource("swaggerEntry/swagger.yaml").getFile());
+        String swaggerValue = FileUtils.readFileToString(swaggerJsonFile);
+        Entry entry = new Entry();
+        entry.setValue(swaggerValue);
+
+        SynapseConfiguration synCfg = new SynapseConfiguration();
+        synCfg.getLocalRegistry().put(apiUUID, entry);
+        org.apache.axis2.context.MessageContext axisMsgCtx = new org.apache.axis2.context.MessageContext();
+        AxisConfiguration axisConfig = new AxisConfiguration();
+        ConfigurationContext cfgCtx = new ConfigurationContext(axisConfig);
+        MessageContext synCtx = new Axis2MessageContext(axisMsgCtx, synCfg,
+                new Axis2SynapseEnvironment(cfgCtx, synCfg));
+        synCfg.setProperty(APIMgtGatewayConstants.REQUEST_EXECUTION_START_TIME, "123456789");
+        synCtx.setProperty(APIMgtGatewayConstants.API_STATUS, APIConstants.PUBLISHED);
+        APIMgtLatencyStatsHandler apiMgtLatencyStatsHandler = new APIMgtLatencyStatsHandler();
+        apiMgtLatencyStatsHandler.setApiUUID(apiUUID);
+        apiMgtLatencyStatsHandler.handleRequest(synCtx);
+        long requestTime = Long.parseLong(String.valueOf(synCtx.getProperty("api.ut.requestTime")));
+        Assert.assertTrue(requestTime <= System.currentTimeMillis());
+        Assert.assertEquals(synCtx.getProperty(APIMgtGatewayConstants.OPEN_API_STRING), swaggerValue);
+        OpenAPI openApi = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
+        String headerName = openApi.getPaths().get("/pet").getPost().getParameters().get(0).getName();
+        Assert.assertEquals(headerName, "authorization");
     }
 }
