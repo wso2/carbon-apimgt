@@ -6,6 +6,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.ErrorHandler;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
+import org.wso2.apk.apimgt.api.dto.ConditionDTO;
+import org.wso2.apk.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.apk.apimgt.api.model.policy.APIPolicy;
 import org.wso2.apk.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.apk.apimgt.api.model.policy.BandwidthLimit;
@@ -901,6 +903,56 @@ public class PolicyDAOImpl implements PolicyDAO {
         return pipelines;
     }
 
+    /**
+     * Converts an {@code Pipeline} object into a {@code ConditionGroupDTO}.{@code ConditionGroupDTO} class tries to
+     * contain the same information held by  {@code Pipeline}, but in a much lightweight fashion.
+     *
+     * @param conditionGroup Id of the condition group ({@code Pipeline}) to be converted
+     * @return An object of {@code ConditionGroupDTO} type.
+     * @throws APIManagementException
+     */
+    public ConditionGroupDTO createConditionGroupDTO(int conditionGroup) throws APIManagementException {
+
+        List<Condition> conditions = getConditions(conditionGroup);
+        ArrayList<ConditionDTO> conditionDTOs = new ArrayList<ConditionDTO>(conditions.size());
+        for (Condition condition : conditions) {
+            ConditionDTO conditionDTO = new ConditionDTO();
+            conditionDTO.setConditionType(condition.getType());
+
+            conditionDTO.isInverted(condition.isInvertCondition());
+            if (PolicyConstants.IP_RANGE_TYPE.equals(condition.getType())) {
+                IPCondition ipRangeCondition = (IPCondition) condition;
+                conditionDTO.setConditionName(ipRangeCondition.getStartingIP());
+                conditionDTO.setConditionValue(ipRangeCondition.getEndingIP());
+
+            } else if (PolicyConstants.IP_SPECIFIC_TYPE.equals(condition.getType())) {
+                IPCondition ipCondition = (IPCondition) condition;
+                conditionDTO.setConditionName(PolicyConstants.IP_SPECIFIC_TYPE);
+                conditionDTO.setConditionValue(ipCondition.getSpecificIP());
+
+            } else if (PolicyConstants.HEADER_TYPE.equals(condition.getType())) {
+                HeaderCondition headerCondition = (HeaderCondition) condition;
+                conditionDTO.setConditionName(headerCondition.getHeaderName());
+                conditionDTO.setConditionValue(headerCondition.getValue());
+
+            } else if (PolicyConstants.JWT_CLAIMS_TYPE.equals(condition.getType())) {
+                JWTClaimsCondition jwtClaimsCondition = (JWTClaimsCondition) condition;
+                conditionDTO.setConditionName(jwtClaimsCondition.getClaimUrl());
+                conditionDTO.setConditionValue(jwtClaimsCondition.getAttribute());
+
+            } else if (PolicyConstants.QUERY_PARAMETER_TYPE.equals(condition.getType())) {
+                QueryParameterCondition parameterCondition = (QueryParameterCondition) condition;
+                conditionDTO.setConditionName(parameterCondition.getParameter());
+                conditionDTO.setConditionValue(parameterCondition.getValue());
+            }
+            conditionDTOs.add(conditionDTO);
+        }
+
+        ConditionGroupDTO conditionGroupDTO = new ConditionGroupDTO();
+        conditionGroupDTO.setConditions(conditionDTOs.toArray(new ConditionDTO[]{}));
+
+        return conditionGroupDTO;
+    }
 
     /**
      * Retrieves list of Conditions for a pipeline specified by <code>pipelineId</code>

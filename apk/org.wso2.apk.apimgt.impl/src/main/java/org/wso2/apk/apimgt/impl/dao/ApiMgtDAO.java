@@ -4582,57 +4582,6 @@ public class ApiMgtDAO {
         return apiProvider;
     }
 
-    /**
-     * Converts an {@code Pipeline} object into a {@code ConditionGroupDTO}.{@code ConditionGroupDTO} class tries to
-     * contain the same information held by  {@code Pipeline}, but in a much lightweight fashion.
-     *
-     * @param conditionGroup Id of the condition group ({@code Pipeline}) to be converted
-     * @return An object of {@code ConditionGroupDTO} type.
-     * @throws APIManagementException
-     */
-    public ConditionGroupDTO createConditionGroupDTO(int conditionGroup) throws APIManagementException {
-
-        List<Condition> conditions = getConditions(conditionGroup);
-        ArrayList<ConditionDTO> conditionDTOs = new ArrayList<ConditionDTO>(conditions.size());
-        for (Condition condition : conditions) {
-            ConditionDTO conditionDTO = new ConditionDTO();
-            conditionDTO.setConditionType(condition.getType());
-
-            conditionDTO.isInverted(condition.isInvertCondition());
-            if (PolicyConstants.IP_RANGE_TYPE.equals(condition.getType())) {
-                IPCondition ipRangeCondition = (IPCondition) condition;
-                conditionDTO.setConditionName(ipRangeCondition.getStartingIP());
-                conditionDTO.setConditionValue(ipRangeCondition.getEndingIP());
-
-            } else if (PolicyConstants.IP_SPECIFIC_TYPE.equals(condition.getType())) {
-                IPCondition ipCondition = (IPCondition) condition;
-                conditionDTO.setConditionName(PolicyConstants.IP_SPECIFIC_TYPE);
-                conditionDTO.setConditionValue(ipCondition.getSpecificIP());
-
-            } else if (PolicyConstants.HEADER_TYPE.equals(condition.getType())) {
-                HeaderCondition headerCondition = (HeaderCondition) condition;
-                conditionDTO.setConditionName(headerCondition.getHeaderName());
-                conditionDTO.setConditionValue(headerCondition.getValue());
-
-            } else if (PolicyConstants.JWT_CLAIMS_TYPE.equals(condition.getType())) {
-                JWTClaimsCondition jwtClaimsCondition = (JWTClaimsCondition) condition;
-                conditionDTO.setConditionName(jwtClaimsCondition.getClaimUrl());
-                conditionDTO.setConditionValue(jwtClaimsCondition.getAttribute());
-
-            } else if (PolicyConstants.QUERY_PARAMETER_TYPE.equals(condition.getType())) {
-                QueryParameterCondition parameterCondition = (QueryParameterCondition) condition;
-                conditionDTO.setConditionName(parameterCondition.getParameter());
-                conditionDTO.setConditionValue(parameterCondition.getValue());
-            }
-            conditionDTOs.add(conditionDTO);
-        }
-
-        ConditionGroupDTO conditionGroupDTO = new ConditionGroupDTO();
-        conditionGroupDTO.setConditions(conditionDTOs.toArray(new ConditionDTO[]{}));
-
-        return conditionGroupDTO;
-    }
-
     public void updateAPI(API api) throws APIManagementException {
 
         updateAPI(api, null);
@@ -13440,6 +13389,58 @@ public class ApiMgtDAO {
                     stringElement.substring(1, stringElement.length() - 1).replaceAll("\\s", "").split(","));
         }
         return list;
+    }
+
+    /**
+     * Populated common attributes of policy type objects to <code>policy</code>
+     * from <code>resultSet</code>
+     *
+     * @param policy    initiallized {@link Policy} object to populate
+     * @param resultSet {@link ResultSet} with data to populate <code>policy</code>
+     * @throws SQLException
+     */
+    private void setCommonPolicyDetails(Policy policy, ResultSet resultSet) throws SQLException {
+
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        String prefix = "";
+
+        if (policy instanceof APIPolicy) {
+            prefix = "DEFAULT_";
+        }
+
+        quotaPolicy.setType(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+        if (resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
+                .equalsIgnoreCase(PolicyConstants.REQUEST_COUNT_TYPE)) {
+            RequestCountLimit reqLimit = new RequestCountLimit();
+            reqLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            reqLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+            reqLimit.setRequestCount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+            quotaPolicy.setLimit(reqLimit);
+        } else if (resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
+                .equalsIgnoreCase(PolicyConstants.BANDWIDTH_TYPE)) {
+            BandwidthLimit bandLimit = new BandwidthLimit();
+            bandLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            bandLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+            bandLimit.setDataAmount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+            bandLimit.setDataUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_UNIT));
+            quotaPolicy.setLimit(bandLimit);
+        } else if (resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
+                .equalsIgnoreCase(PolicyConstants.EVENT_COUNT_TYPE)) {
+            EventCountLimit eventCountLimit = new EventCountLimit();
+            eventCountLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            eventCountLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+            eventCountLimit.setEventCount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+            quotaPolicy.setLimit(eventCountLimit);
+        }
+
+        policy.setUUID(resultSet.getString(ThrottlePolicyConstants.COLUMN_UUID));
+        policy.setDescription(resultSet.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
+        policy.setDisplayName(resultSet.getString(ThrottlePolicyConstants.COLUMN_DISPLAY_NAME));
+        policy.setPolicyId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+        policy.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+        policy.setTenantDomain(APIUtil.getTenantDomainFromTenantId(policy.getTenantId()));
+        policy.setDefaultQuotaPolicy(quotaPolicy);
+        policy.setDeployed(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
     }
 
 }

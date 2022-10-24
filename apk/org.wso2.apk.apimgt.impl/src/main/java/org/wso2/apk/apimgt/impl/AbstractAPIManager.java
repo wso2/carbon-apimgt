@@ -547,7 +547,7 @@ public abstract class AbstractAPIManager implements APIManager {
         defaultApp.setTokenType(APIConstants.TOKEN_TYPE_JWT);
         defaultApp.setUUID(UUID.randomUUID().toString());
         defaultApp.setDescription(APIConstants.DEFAULT_APPLICATION_DESCRIPTION);
-        int applicationId = apiMgtDAO.addApplication(defaultApp, subscriber.getName(), tenantDomain);
+        int applicationId = applicationDAOImpl.addApplication(defaultApp, subscriber.getName(), tenantDomain);
 
         // TODO: send application Event
 //        ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
@@ -580,7 +580,7 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     public Application getApplicationByUUID(String uuid) throws APIManagementException {
 
-        Application application = apiMgtDAO.getApplicationByUUID(uuid);
+        Application application = applicationDAOImpl.getApplicationByUUID(uuid);
         if (application != null) {
             Set<APIKey> keys = getApplicationKeys(application.getId());
             for (APIKey key : keys) {
@@ -603,7 +603,7 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     public Application getApplicationByUUID(String uuid, String tenantDomain) throws APIManagementException {
 
-        Application application = apiMgtDAO.getApplicationByUUID(uuid);
+        Application application = applicationDAOImpl.getApplicationByUUID(uuid);
         if (application != null) {
             Set<APIKey> keys = getApplicationKeys(application.getId(), tenantDomain);
             for (APIKey key : keys) {
@@ -622,7 +622,7 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public Application getLightweightApplicationByUUID(String uuid) throws APIManagementException {
 
-        return apiMgtDAO.getApplicationByUUID(uuid);
+        return applicationDAOImpl.getApplicationByUUID(uuid);
     }
 
     /**
@@ -634,7 +634,7 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
 
-        return apiMgtDAO.getSubscriptionByUUID(uuid);
+        return applicationDAOImpl.getSubscriptionByUUID(uuid);
     }
 
     protected final void handleException(String msg, Exception e) throws APIManagementException {
@@ -800,17 +800,16 @@ public abstract class AbstractAPIManager implements APIManager {
     public Policy[] getPolicies(String username, String level) throws APIManagementException {
 
         Policy[] policies = null;
-
-        int tenantID = APIUtil.getTenantId(username);
+        String tenantDomain = APIUtil.getTenantDomain(username);
 
         if (PolicyConstants.POLICY_LEVEL_API.equals(level)) {
-            policies = apiMgtDAO.getAPIPolicies(tenantID);
+            policies = policyDAOImpl.getAPIPolicies(tenantDomain);
         } else if (PolicyConstants.POLICY_LEVEL_APP.equals(level)) {
-            policies = apiMgtDAO.getApplicationPolicies(tenantID);
+            policies = policyDAOImpl.getApplicationPolicies(tenantDomain);
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(level)) {
-            policies = apiMgtDAO.getSubscriptionPolicies(tenantID);
+            policies = policyDAOImpl.getSubscriptionPolicies(tenantDomain);
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(level)) {
-            policies = apiMgtDAO.getGlobalPolicies(tenantID);
+            policies = policyDAOImpl.getGlobalPolicies(tenantDomain);
         }
 
         //Get the API Manager configurations and check whether the unlimited tier is disabled. If disabled, remove
@@ -920,9 +919,9 @@ public abstract class AbstractAPIManager implements APIManager {
                 tenantDomain = xWso2Tenant;
             }
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
-                    apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+                    keyManagerDAOImpl.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
             if (keyManagerConfigurationDTO == null) {
-                keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
+                keyManagerConfigurationDTO = keyManagerDAOImpl.getKeyManagerConfigurationByUUID(keyManagerName);
                 if (keyManagerConfigurationDTO != null) {
                     keyManagerName = keyManagerConfigurationDTO.getName();
                 } else {

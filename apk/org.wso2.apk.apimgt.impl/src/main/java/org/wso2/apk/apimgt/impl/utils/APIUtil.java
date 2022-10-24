@@ -124,8 +124,11 @@ import org.wso2.apk.apimgt.impl.PasswordResolverFactory;
 import org.wso2.apk.apimgt.impl.config.APIMConfigService;
 import org.wso2.apk.apimgt.impl.config.APIMConfigServiceImpl;
 import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.apk.apimgt.impl.dao.PolicyDAO;
 import org.wso2.apk.apimgt.impl.dao.ScopesDAO;
 import org.wso2.apk.apimgt.impl.dao.WorkflowDAO;
+import org.wso2.apk.apimgt.impl.dao.impl.ApplicationDAOImpl;
+import org.wso2.apk.apimgt.impl.dao.impl.PolicyDAOImpl;
 import org.wso2.apk.apimgt.impl.dao.impl.WorkflowDAOImpl;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.apk.apimgt.impl.dto.WorkflowDTO;
@@ -896,7 +899,7 @@ public final class APIUtil {
 
     public static int getApplicationId(String appName, String userId, String groupId) throws APIManagementException {
 
-        Application application = ApiMgtDAO.getInstance().getApplicationByName(appName, userId, groupId);
+        Application application = ApplicationDAOImpl.getInstance().getApplicationByName(appName, userId, groupId);
         if (application != null) {
             return application.getId();
         } else {
@@ -2004,14 +2007,15 @@ public final class APIUtil {
     public static Map<String, Tier> getTiersFromPolicies(String policyLevel, int tenantId) throws APIManagementException {
 
         Map<String, Tier> tierMap = new TreeMap<>();
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        PolicyDAO policyDAO = PolicyDAOImpl.getInstance();
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         Policy[] policies;
         if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
-            policies = apiMgtDAO.getSubscriptionPolicies(tenantId);
+            policies = policyDAO.getSubscriptionPolicies(tenantDomain);
         } else if (PolicyConstants.POLICY_LEVEL_API.equalsIgnoreCase(policyLevel)) {
-            policies = apiMgtDAO.getAPIPolicies(tenantId);
+            policies = policyDAO.getAPIPolicies(tenantDomain);
         } else if (PolicyConstants.POLICY_LEVEL_APP.equalsIgnoreCase(policyLevel)) {
-            policies = apiMgtDAO.getApplicationPolicies(tenantId);
+            policies = policyDAO.getApplicationPolicies(tenantDomain);
         } else {
             throw new APIManagementException("No such a policy type : " + policyLevel, ExceptionCodes.UNSUPPORTED_POLICY_TYPE);
         }
@@ -2084,14 +2088,14 @@ public final class APIUtil {
             throws APIManagementException {
 
         int tenantId = APIUtil.getInternalOrganizationId(organization);
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        PolicyDAO policyDAO = PolicyDAOImpl.getInstance();
         Policy policy;
         if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
-            policy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantId);
+            policy = policyDAO.getSubscriptionPolicy(policyName, organization);
         } else if (PolicyConstants.POLICY_LEVEL_API.equalsIgnoreCase(policyLevel)) {
-            policy = apiMgtDAO.getAPIPolicy(policyName, tenantId);
+            policy = policyDAO.getAPIPolicy(policyName, organization);
         } else if (PolicyConstants.POLICY_LEVEL_APP.equalsIgnoreCase(policyLevel)) {
-            policy = apiMgtDAO.getApplicationPolicy(policyName, tenantId);
+            policy = policyDAO.getApplicationPolicy(policyName, organization);
         } else {
             throw new APIManagementException("No such a policy type : " + policyLevel,
                     ExceptionCodes.UNSUPPORTED_POLICY_TYPE);

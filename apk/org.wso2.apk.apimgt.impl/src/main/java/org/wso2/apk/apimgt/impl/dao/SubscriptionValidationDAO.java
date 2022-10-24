@@ -43,6 +43,7 @@ import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.apk.apimgt.impl.dao.constants.SubscriptionValidationSQLConstants;
+import org.wso2.apk.apimgt.impl.dao.impl.PolicyDAOImpl;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.user.exceptions.UserException;
@@ -722,10 +723,9 @@ public class SubscriptionValidationDAO {
                 apiPolicyConditionGroup
                         .setQuotaType(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
                 apiPolicyConditionGroup.setPolicyId(policyId);
-                ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
                 ConditionGroupDTO conditionGroupDTO = null;
                 try {
-                    conditionGroupDTO = apiMgtDAO.createConditionGroupDTO(conditionGroup);
+                    conditionGroupDTO = PolicyDAOImpl.getInstance().createConditionGroupDTO(conditionGroup);
                 } catch (APIManagementException e) {
                     log.error("Error while processing api policies for policyId : " + policyId, e);
                 }

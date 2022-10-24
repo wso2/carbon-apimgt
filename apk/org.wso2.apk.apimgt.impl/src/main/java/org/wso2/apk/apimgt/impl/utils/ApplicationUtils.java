@@ -28,6 +28,7 @@ import org.wso2.apk.apimgt.api.model.KeyManager;
 import org.wso2.apk.apimgt.api.model.OAuthAppRequest;
 import org.wso2.apk.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.apk.apimgt.impl.dao.impl.ApplicationDAOImpl;
 
 /**
  * Utility class for performing Operations related to Applications, OAuth clients.
@@ -45,7 +46,7 @@ public class ApplicationUtils {
      */
     public static Application retrieveApplication(String appName, String userId, String groupingId)
             throws APIManagementException {
-        return ApiMgtDAO.getInstance().getApplicationByName(appName, userId, groupingId);
+        return ApplicationDAOImpl.getInstance().getApplicationByName(appName, userId, groupingId);
     }
 
     /**
@@ -55,7 +56,7 @@ public class ApplicationUtils {
      * @return APIM application object will return.
      */
     public static Application retrieveApplicationById(int applicationId) throws APIManagementException {
-        return ApiMgtDAO.getInstance().getApplicationById(applicationId);
+        return ApplicationDAOImpl.getInstance().getApplicationById(applicationId);
     }
 
     /**
