@@ -276,7 +276,7 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(query, new String[]{"subscriber_id"});
 
             ps.setString(1, subscriber.getName());
-            ps.setInt(2, subscriber.getTenantId());
+            ps.setString(2, subscriber.getOrganization());
             ps.setString(3, subscriber.getEmail());
 
             Timestamp timestamp = new Timestamp(subscriber.getSubscribedDate().getTime());
@@ -474,7 +474,7 @@ public class ApiMgtDAO {
 
             ps = conn.prepareStatement(query);
             ps.setString(1, subscriber.getName());
-            ps.setInt(2, subscriber.getTenantId());
+            ps.setString(2, subscriber.getOrganization());
             ps.setString(3, subscriber.getEmail());
             ps.setTimestamp(4, new Timestamp(subscriber.getSubscribedDate().getTime()));
             ps.setString(5, subscriber.getName());
@@ -512,7 +512,7 @@ public class ApiMgtDAO {
             if (rs.next()) {
                 Subscriber subscriber = new Subscriber(rs.getString("USER_ID"));
                 subscriber.setId(subscriberId);
-                subscriber.setTenantId(rs.getInt("TENANT_ID"));
+                subscriber.setOrganization(rs.getString("ORGANIZATION"));
                 subscriber.setEmail(rs.getString("EMAIL_ADDRESS"));
                 subscriber.setSubscribedDate(new Date(rs.getTimestamp("DATE_SUBSCRIBED").getTime()));
                 return subscriber;
@@ -949,7 +949,7 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         ResultSet result = null;
 
-        int tenantId = APIUtil.getTenantId(subscriberName);
+        String organization = APIUtil.getTenantDomain(subscriberName);
 
         String sqlQuery = SQLConstants.GET_TENANT_SUBSCRIBER_SQL;
         if (forceCaseInsensitiveComparisons) {
@@ -961,7 +961,7 @@ public class ApiMgtDAO {
 
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, subscriberName);
-            ps.setInt(2, tenantId);
+            ps.setString(2, organization);
             result = ps.executeQuery();
 
             if (result.next()) {
@@ -970,7 +970,7 @@ public class ApiMgtDAO {
                 subscriber.setId(result.getInt("SUBSCRIBER_ID"));
                 subscriber.setName(subscriberName);
                 subscriber.setSubscribedDate(result.getDate(APIConstants.SUBSCRIBER_FIELD_DATE_SUBSCRIBED));
-                subscriber.setTenantId(result.getInt("TENANT_ID"));
+                subscriber.setOrganization(result.getString("ORGANIZATION"));
             }
         } catch (SQLException e) {
             handleException("Failed to get Subscriber for :" + subscriberName, e);
@@ -1149,8 +1149,8 @@ public class ApiMgtDAO {
                     String groupIdArr[] = groupingId.split(",");
 
                     ps = fillQueryParams(connection, sqlQuery, groupIdArr, 3);
-                    int tenantId = APIUtil.getTenantId(subscriber.getName());
-                    ps.setInt(1, tenantId);
+                    String organization = APIUtil.getTenantDomain(subscriber.getName());
+                    ps.setString(1, organization);
                     ps.setString(2, applicationName);
                     int paramIndex = groupIdArr.length + 2;
                     ps.setString(++paramIndex, tenantDomain);
@@ -1162,8 +1162,8 @@ public class ApiMgtDAO {
                         sqlQuery += whereClauseWithGroupId;
                     }
                     ps = connection.prepareStatement(sqlQuery);
-                    int tenantId = APIUtil.getTenantId(subscriber.getName());
-                    ps.setInt(1, tenantId);
+                    String organization = APIUtil.getTenantDomain(subscriber.getName());
+                    ps.setString(1, organization);
                     ps.setString(2, applicationName);
                     ps.setString(3, groupingId);
                     ps.setString(4, subscriber.getName());
@@ -1175,8 +1175,8 @@ public class ApiMgtDAO {
                     sqlQuery += whereClause;
                 }
                 ps = connection.prepareStatement(sqlQuery);
-                int tenantId = APIUtil.getTenantId(subscriber.getName());
-                ps.setInt(1, tenantId);
+                String organization = APIUtil.getTenantDomain(subscriber.getName());
+                ps.setString(1, organization);
                 ps.setString(2, applicationName);
                 ps.setString(3, subscriber.getName());
             }
@@ -1216,12 +1216,12 @@ public class ApiMgtDAO {
         ResultSet resultSet = null;
         Set<String> scopeKeysSet = new HashSet<>();
         Set<Integer> apiIdSet = new HashSet<>();
-        int tenantId = APIUtil.getTenantId(subscriber.getName());
+        String organization = APIUtil.getTenantDomain(subscriber.getName());
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             String sqlQueryForGetSubscribedApis = SQLConstants.GET_SUBSCRIBED_API_IDs_BY_APP_ID_SQL;
             getSubscribedApisAndProducts = conn.prepareStatement(sqlQueryForGetSubscribedApis);
-            getSubscribedApisAndProducts.setInt(1, tenantId);
+            getSubscribedApisAndProducts.setString(1, organization);
             getSubscribedApisAndProducts.setInt(2, applicationId);
             resultSet = getSubscribedApisAndProducts.executeQuery();
             String getIncludedApisInProductQuery = SQLConstants.GET_INCLUDED_APIS_IN_PRODUCT_SQL;
@@ -1271,7 +1271,7 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement ps = null;
         ResultSet result = null;
-        int tenantId = APIUtil.getTenantId(subscriber.getName());
+        String organization = APIUtil.getTenantDomain(subscriber.getName());
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -1299,7 +1299,7 @@ public class ApiMgtDAO {
 
                     ps = fillQueryParams(connection, sqlQuery, groupIdArr, 3);
                     ps.setString(1, applicationName);
-                    ps.setInt(2, tenantId);
+                    ps.setString(2, organization);
                     int paramIndex = groupIdArr.length + 2;
                     ps.setString(++paramIndex, tenantDomain);
                     ps.setString(++paramIndex, subscriber.getName());
@@ -1307,7 +1307,7 @@ public class ApiMgtDAO {
                     sqlQuery += whereClauseWithGroupId;
                     ps = connection.prepareStatement(sqlQuery);
                     ps.setString(1, applicationName);
-                    ps.setInt(2, tenantId);
+                    ps.setString(2, organization);
                     ps.setString(3, groupingId);
                     ps.setString(4, subscriber.getName());
                 }
@@ -1319,7 +1319,7 @@ public class ApiMgtDAO {
                 }
                 ps = connection.prepareStatement(sqlQuery);
                 ps.setString(1, applicationName);
-                ps.setInt(2, tenantId);
+                ps.setString(2, organization);
                 ps.setString(3, subscriber.getName());
             }
             result = ps.executeQuery();
@@ -1513,7 +1513,7 @@ public class ApiMgtDAO {
                                                PreparedStatement statement, String organization)
             throws SQLException, APIManagementException {
 
-        int tenantId = APIUtil.getTenantId(subscriber.getName());
+        String subOrganization = APIUtil.getTenantDomain(subscriber.getName());
         int paramIndex = 0;
 
         if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
@@ -1521,7 +1521,7 @@ public class ApiMgtDAO {
                 String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
                 String[] groupIDArray = groupingId.split(",");
 
-                statement.setInt(++paramIndex, tenantId);
+                statement.setString(++paramIndex, subOrganization);
                 statement.setString(++paramIndex, organization);
                 for (String groupId : groupIDArray) {
                     statement.setString(++paramIndex, groupId);
@@ -1529,13 +1529,13 @@ public class ApiMgtDAO {
                 statement.setString(++paramIndex, tenantDomain);
                 statement.setString(++paramIndex, subscriber.getName());
             } else {
-                statement.setInt(++paramIndex, tenantId);
+                statement.setString(++paramIndex, subOrganization);
                 statement.setString(++paramIndex, organization);
                 statement.setString(++paramIndex, groupingId);
                 statement.setString(++paramIndex, subscriber.getName());
             }
         } else {
-            statement.setInt(++paramIndex, tenantId);
+            statement.setString(++paramIndex, subOrganization);
             statement.setString(++paramIndex, organization);
             statement.setString(++paramIndex, subscriber.getName());
         }
@@ -2387,9 +2387,8 @@ public class ApiMgtDAO {
             ps.setString(2, apiIdentifier.getApiName());
             ps.setString(3, apiIdentifier.getVersion());
             ps.setString(4, loginUserName);
-            int tenantId;
-            tenantId = APIUtil.getTenantId(loginUserName);
-            ps.setInt(5, tenantId);
+            String organization = APIUtil.getTenantDomain(loginUserName);
+            ps.setString(5, organization);
 
             rs = ps.executeQuery();
 
@@ -2433,9 +2432,8 @@ public class ApiMgtDAO {
             ps.setString(2, apiIdentifier.getApiName());
             ps.setString(3, apiIdentifier.getVersion());
             ps.setString(4, loginUserName);
-            int tenantId;
-            tenantId = APIUtil.getTenantId(loginUserName);
-            ps.setInt(5, tenantId);
+            String organization = APIUtil.getTenantDomain(loginUserName);
+            ps.setString(5, organization);
             ps.setInt(6, applicationId);
 
             rs = ps.executeQuery();
@@ -2740,10 +2738,9 @@ public class ApiMgtDAO {
         ResultSet rs = null;
 
         try {
-            int tenantId;
-            tenantId = APIUtil.getTenantId(userId);
+            String organization = APIUtil.getTenantDomain(userId);
             //Get subscriber Id
-            Subscriber subscriber = getSubscriber(userId, tenantId, conn);
+            Subscriber subscriber = getSubscriber(userId, organization, conn);
             if (subscriber == null) {
                 String msg = "Could not load Subscriber records for: " + userId;
                 log.error(msg);
@@ -2836,11 +2833,10 @@ public class ApiMgtDAO {
         ResultSet rs = null;
 
         try {
-            int tenantId;
+            String organization = APIUtil.getTenantDomain(userId);
             String rateId = null;
-            tenantId = APIUtil.getTenantId(userId);
             //Get subscriber Id
-            Subscriber subscriber = getSubscriber(userId, tenantId, conn);
+            Subscriber subscriber = getSubscriber(userId, organization, conn);
             if (subscriber == null) {
                 String msg = "Could not load Subscriber records for: " + userId;
                 log.error(msg);
@@ -2920,10 +2916,9 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         int userRating = 0;
         try {
-            int tenantId;
-            tenantId = APIUtil.getTenantId(userId);
+            String organization = APIUtil.getTenantDomain(userId);
             //Get subscriber Id
-            Subscriber subscriber = getSubscriber(userId, tenantId, conn);
+            Subscriber subscriber = getSubscriber(userId, organization, conn);
             if (subscriber == null) {
                 String msg = "Could not load Subscriber records for: " + userId;
                 log.error(msg);
@@ -3005,10 +3000,9 @@ public class ApiMgtDAO {
         int id = -1;
         String ratingId = null;
         try {
-            int tenantId;
-            tenantId = APIUtil.getTenantId(userId);
+            String organization = APIUtil.getTenantDomain(userId);
             //Get subscriber Id
-            Subscriber subscriber = getSubscriber(userId, tenantId, conn);
+            Subscriber subscriber = getSubscriber(userId, organization, conn);
             if (subscriber == null) {
                 String msg = "Could not load Subscriber records for: " + userId;
                 log.error(msg);
@@ -3307,10 +3301,10 @@ public class ApiMgtDAO {
 
         int applicationId = 0;
         try {
-            int tenantId = APIUtil.getTenantId(userId);
+            String userOrganization = APIUtil.getTenantDomain(userId);
 
             //Get subscriber Id
-            Subscriber subscriber = getSubscriber(userId, tenantId, conn);
+            Subscriber subscriber = getSubscriber(userId, userOrganization, conn);
             if (subscriber == null) {
                 String msg = "Could not load Subscriber records for: " + userId;
                 log.error(msg);
@@ -3360,7 +3354,7 @@ public class ApiMgtDAO {
 
             //Adding data to AM_APPLICATION_ATTRIBUTES table
             if (application.getApplicationAttributes() != null) {
-                addApplicationAttributes(conn, application.getApplicationAttributes(), applicationId, tenantId);
+                addApplicationAttributes(conn, application.getApplicationAttributes(), applicationId, userOrganization);
             }
         } catch (SQLException e) {
             handleException("Failed to add Application", e);
@@ -3403,7 +3397,6 @@ public class ApiMgtDAO {
             }
             Subscriber subscriber = application.getSubscriber();
             String domain = APIUtil.getTenantDomain(subscriber.getName());
-            int tenantId = APIUtil.getTenantIdFromTenantDomain(domain);
 
             preparedStatement = conn.prepareStatement(SQLConstants.REMOVE_APPLICATION_ATTRIBUTES_SQL);
             preparedStatement.setInt(1, application.getId());
@@ -3414,7 +3407,7 @@ public class ApiMgtDAO {
             }
 
             if (application.getApplicationAttributes() != null && !application.getApplicationAttributes().isEmpty()) {
-                addApplicationAttributes(conn, application.getApplicationAttributes(), application.getId(), tenantId);
+                addApplicationAttributes(conn, application.getApplicationAttributes(), application.getId(), domain);
             }
             conn.commit();
         } catch (SQLException e) {
@@ -4758,12 +4751,12 @@ public class ApiMgtDAO {
      * returns a subscriber record for given username,tenant Id
      *
      * @param username   UserName
-     * @param tenantId   Tenant Id
+     * @param organization
      * @param connection
      * @return Subscriber
      * @throws APIManagementException if failed to get subscriber
      */
-    private Subscriber getSubscriber(String username, int tenantId, Connection connection)
+    private Subscriber getSubscriber(String username, String organization, Connection connection)
             throws APIManagementException {
 
         PreparedStatement prepStmt = null;
@@ -4780,7 +4773,7 @@ public class ApiMgtDAO {
         try {
             prepStmt = connection.prepareStatement(sqlQuery);
             prepStmt.setString(1, username);
-            prepStmt.setInt(2, tenantId);
+            prepStmt.setString(2, organization);
             rs = prepStmt.executeQuery();
 
             if (rs.next()) {
@@ -4788,7 +4781,7 @@ public class ApiMgtDAO {
                 subscriber.setEmail(rs.getString("EMAIL_ADDRESS"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
                 subscriber.setSubscribedDate(rs.getDate("DATE_SUBSCRIBED"));
-                subscriber.setTenantId(rs.getInt("TENANT_ID"));
+                subscriber.setOrganization(rs.getString("ORGANIZATION"));
                 return subscriber;
             }
         } catch (SQLException e) {
@@ -12378,7 +12371,7 @@ public class ApiMgtDAO {
 
         //identify logged in user
         String loginUserName = getLoginUserName(userId);
-        int tenantId = APIUtil.getTenantId(loginUserName);
+        String organization = APIUtil.getTenantDomain(loginUserName);
 
         String sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_BY_APP_SQL;
         if (forceCaseInsensitiveComparisons) {
@@ -12388,7 +12381,7 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, tenantId);
+            ps.setString(1, organization);
             ps.setInt(2, applicationID);
             rs = ps.executeQuery();
             while (rs.next()) {
@@ -12718,7 +12711,7 @@ public class ApiMgtDAO {
     }
 
     private void addApplicationAttributes(Connection conn, Map<String, String> attributes, int applicationId,
-                                          int tenantId)
+                                          String organization)
             throws APIManagementException {
 
         PreparedStatement ps = null;
@@ -12731,7 +12724,7 @@ public class ApiMgtDAO {
                         ps.setInt(1, applicationId);
                         ps.setString(2, attribute.getKey());
                         ps.setString(3, attribute.getValue());
-                        ps.setInt(4, tenantId);
+                        ps.setString(4, organization);
                         ps.addBatch();
                     }
                 }
@@ -12797,37 +12790,6 @@ public class ApiMgtDAO {
             handleException("Error in establishing SQL connection ", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, null);
-        }
-    }
-
-    /**
-     * Add new attributes against an Application in API Store
-     *
-     * @param applicationAttributes Map of key, value pair of attributes
-     * @param applicationId         Id of Application against which attributes are getting stored
-     * @param tenantId              Id of tenant
-     * @throws APIManagementException
-     */
-    public void addApplicationAttributes(Map<String, String> applicationAttributes, int applicationId, int tenantId)
-            throws APIManagementException {
-
-        Connection connection = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            addApplicationAttributes(connection, applicationAttributes, applicationId, tenantId);
-            connection.commit();
-        } catch (SQLException sqlException) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException e) {
-                    log.error("Failed to rollback add application attributes ", e);
-                }
-            }
-            handleException("Failed to add Application", sqlException);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(null, connection, null);
         }
     }
 
@@ -14403,66 +14365,66 @@ public class ApiMgtDAO {
     /**
      * Adds a tenant theme to the database
      *
-     * @param tenantId     tenant ID of user
+     * @param organization     tenant ID of user
      * @param themeContent content of the tenant theme
      * @throws APIManagementException if an error occurs when adding a tenant theme to the database
      */
-    public void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+    public void addTenantTheme(String organization, InputStream themeContent) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.TenantThemeConstants.ADD_TENANT_THEME)) {
-            statement.setInt(1, tenantId);
+            statement.setString(1, organization);
             statement.setBinaryStream(2, themeContent);
             statement.executeUpdate();
         } catch (SQLException e) {
             handleExceptionWithCode("Failed to add tenant theme of tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                    + organization, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
     /**
      * Updates an existing tenant theme in the database
      *
-     * @param tenantId     tenant ID of user
+     * @param organization     tenant ID of user
      * @param themeContent content of the tenant theme
      * @throws APIManagementException if an error occurs when updating an existing tenant theme in the database
      */
-    public void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+    public void updateTenantTheme(String organization, InputStream themeContent) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(SQLConstants.TenantThemeConstants.UPDATE_TENANT_THEME)) {
             statement.setBinaryStream(1, themeContent);
-            statement.setInt(2, tenantId);
+            statement.setString(2, organization);
             statement.executeUpdate();
         } catch (SQLException e) {
             handleExceptionWithCode("Failed to update tenant theme of tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                    + organization, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
     /**
      * Retrieves a tenant theme from the database
      *
-     * @param tenantId tenant ID of user
+     * @param organization tenant ID of user
      * @return content of the tenant theme
      * @throws APIManagementException if an error occurs when retrieving a tenant theme from the database
      */
-    public InputStream getTenantTheme(int tenantId) throws APIManagementException {
+    public InputStream getTenantTheme(String organization) throws APIManagementException {
 
         InputStream tenantThemeContent = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.TenantThemeConstants.GET_TENANT_THEME)) {
-            statement.setInt(1, tenantId);
+            statement.setString(1, organization);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 tenantThemeContent = resultSet.getBinaryStream("THEME");
             }
         } catch (SQLException e) {
             handleExceptionWithCode("Failed to fetch tenant theme of tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                    + organization, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return tenantThemeContent;
     }
@@ -14470,22 +14432,22 @@ public class ApiMgtDAO {
     /**
      * Checks whether a tenant theme exist for a particular tenant
      *
-     * @param tenantId tenant ID of user
+     * @param organization tenant ID of user
      * @return true if a tenant theme exist for a particular tenant ID, false otherwise
      * @throws APIManagementException if an error occurs when determining whether a tenant theme exists for a given
      *                                tenant ID
      */
-    public boolean isTenantThemeExist(int tenantId) throws APIManagementException {
+    public boolean isTenantThemeExist(String organization) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.TenantThemeConstants.GET_TENANT_THEME)) {
-            statement.setInt(1, tenantId);
+            statement.setString(1, organization);
             ResultSet resultSet = statement.executeQuery();
             return resultSet.next();
         } catch (SQLException e) {
             handleExceptionWithCode("Failed to check whether tenant theme exist for tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                    + organization, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return false;
     }
@@ -14493,19 +14455,19 @@ public class ApiMgtDAO {
     /**
      * Deletes a tenant theme from the database
      *
-     * @param tenantId tenant ID of user
+     * @param organization tenant ID of user
      * @throws APIManagementException if an error occurs when deleting a tenant theme from the database
      */
-    public void deleteTenantTheme(int tenantId) throws APIManagementException {
+    public void deleteTenantTheme(String organization) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.TenantThemeConstants.DELETE_TENANT_THEME)) {
-            statement.setInt(1, tenantId);
+            statement.setString(1, organization);
             statement.executeUpdate();
         } catch (SQLException e) {
             handleExceptionWithCode("Failed to delete tenant theme of tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                    + organization, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 

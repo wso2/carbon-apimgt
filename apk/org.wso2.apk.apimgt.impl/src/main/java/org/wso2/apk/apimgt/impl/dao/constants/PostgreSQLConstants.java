@@ -64,7 +64,7 @@ public class PostgreSQLConstants {
                         "   AM_APPLICATION APP " +
                         " WHERE " +
                         "   SB.USER_ID = ? " +
-                        "   AND SB.TENANT_ID = ? " +
+                        "   AND SB.ORGANIZATION = ? " +
                         "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                         "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
                         "   AND API.API_ID = SP.API_ID" +
@@ -84,7 +84,7 @@ public class PostgreSQLConstants {
                         "   AM_APPLICATION APP " +
                         " WHERE " +
                         "   LOWER(SB.USER_ID) = LOWER(?) " +
-                        "   AND SB.TENANT_ID = ? " +
+                        "   AND SB.ORGANIZATION = ? " +
                         "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                         "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
                         "   AND API.API_ID = SP.API_ID" +
@@ -99,7 +99,7 @@ public class PostgreSQLConstants {
                         "   AM_SUBSCRIPTION SUBS, " +
                         "   AM_API API " +
                         " WHERE " +
-                        "   SUB.TENANT_ID = ? " +
+                        "   SUB.ORGANIZATION = ? " +
                         "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
                         "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
                         "   AND API.API_ID=SUBS.API_ID" +

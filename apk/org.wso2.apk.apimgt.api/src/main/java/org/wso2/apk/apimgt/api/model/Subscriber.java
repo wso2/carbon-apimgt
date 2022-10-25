@@ -35,6 +35,8 @@ public class Subscriber {
     private int tenantId;
     private String email;
 
+    private String organization;
+
     public Subscriber(String name) {
         this.name = name;
     }
@@ -85,5 +87,15 @@ public class Subscriber {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getOrganization() {
+
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+
+        this.organization = organization;
     }
 }

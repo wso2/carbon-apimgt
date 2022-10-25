@@ -127,7 +127,7 @@ public interface AdminDAO {
      * @param themeContent content of the tenant theme
      * @throws APIManagementException if an error occurs when adding a tenant theme to the database
      */
-    void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException;
+    void addTenantTheme(String organization, InputStream themeContent) throws APIManagementException;
 
     /**
      * Updates an existing tenant theme in the database
@@ -136,7 +136,7 @@ public interface AdminDAO {
      * @param themeContent content of the tenant theme
      * @throws APIManagementException if an error occurs when updating an existing tenant theme in the database
      */
-    void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException;
+    void updateTenantTheme(String organization, InputStream themeContent) throws APIManagementException;
 
     /**
      * Retrieves a tenant theme from the database
@@ -145,24 +145,24 @@ public interface AdminDAO {
      * @return content of the tenant theme
      * @throws APIManagementException if an error occurs when retrieving a tenant theme from the database
      */
-    InputStream getTenantTheme(int tenantId) throws APIManagementException;
+    InputStream getTenantTheme(String tenantId) throws APIManagementException;
 
     /**
      * Checks whether a tenant theme exist for a particular tenant
      *
-     * @param tenantId tenant ID of user
+     * @param organization tenant ID of user
      * @return true if a tenant theme exist for a particular tenant ID, false otherwise
      * @throws APIManagementException if an error occurs when determining whether a tenant theme exists for a given
      *                                tenant ID
      */
-    boolean isTenantThemeExist(int tenantId) throws APIManagementException;
+    boolean isTenantThemeExist(String organization) throws APIManagementException;
 
     /**
      * Deletes a tenant theme from the database
      *
-     * @param tenantId tenant ID of user
+     * @param organization tenant ID of user
      * @throws APIManagementException if an error occurs when deleting a tenant theme from the database
      */
-    void deleteTenantTheme(int tenantId) throws APIManagementException;
+    void deleteTenantTheme(String organization) throws APIManagementException;
 
 }

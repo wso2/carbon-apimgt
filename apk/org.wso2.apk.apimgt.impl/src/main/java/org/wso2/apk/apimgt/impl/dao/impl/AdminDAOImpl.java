@@ -364,81 +364,81 @@ public class AdminDAOImpl implements AdminDAO {
     }
 
     @Override
-    public void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+    public void addTenantTheme(String organization, InputStream themeContent) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.TenantThemeConstants.ADD_TENANT_THEME)) {
-            statement.setInt(1, tenantId);
+            statement.setString(1, organization);
             statement.setBinaryStream(2, themeContent);
             statement.executeUpdate();
         } catch (SQLException e) {
             handleExceptionWithCode("Failed to add tenant theme of tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                    + organization, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
     @Override
-    public void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+    public void updateTenantTheme(String organization, InputStream themeContent) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(SQLConstants.TenantThemeConstants.UPDATE_TENANT_THEME)) {
             statement.setBinaryStream(1, themeContent);
-            statement.setInt(2, tenantId);
+            statement.setString(2, organization);
             statement.executeUpdate();
         } catch (SQLException e) {
             handleExceptionWithCode("Failed to update tenant theme of tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                    + organization, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
     @Override
-    public InputStream getTenantTheme(int tenantId) throws APIManagementException {
+    public InputStream getTenantTheme(String organization) throws APIManagementException {
 
         InputStream tenantThemeContent = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.TenantThemeConstants.GET_TENANT_THEME)) {
-            statement.setInt(1, tenantId);
+            statement.setString(1, organization);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 tenantThemeContent = resultSet.getBinaryStream("THEME");
             }
         } catch (SQLException e) {
             handleExceptionWithCode("Failed to fetch tenant theme of tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                    + organization, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return tenantThemeContent;
     }
 
     @Override
-    public boolean isTenantThemeExist(int tenantId) throws APIManagementException {
+    public boolean isTenantThemeExist(String organization) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.TenantThemeConstants.GET_TENANT_THEME)) {
-            statement.setInt(1, tenantId);
+            statement.setString(1, organization);
             ResultSet resultSet = statement.executeQuery();
             return resultSet.next();
         } catch (SQLException e) {
             handleExceptionWithCode("Failed to check whether tenant theme exist for tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                    + organization, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return false;
     }
 
     @Override
-    public void deleteTenantTheme(int tenantId) throws APIManagementException {
+    public void deleteTenantTheme(String organization) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.TenantThemeConstants.DELETE_TENANT_THEME)) {
-            statement.setInt(1, tenantId);
+            statement.setString(1, organization);
             statement.executeUpdate();
         } catch (SQLException e) {
             handleExceptionWithCode("Failed to delete tenant theme of tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                    + organization, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 

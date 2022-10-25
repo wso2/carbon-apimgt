@@ -79,7 +79,7 @@ public interface ApplicationDAO {
      * @return
      * @throws APIManagementException
      */
-    Application[] getApplicationsWithPagination(String user, String owner, int tenantId, int limit,
+    Application[] getApplicationsWithPagination(String user, String owner, String organization, int limit,
                                                 int offset, String sortBy, String sortOrder, String appName)
             throws APIManagementException;
 
@@ -101,7 +101,7 @@ public interface ApplicationDAO {
      * @param searchApplication content to search applications based on application
      * @throws APIManagementException if failed to get application
      */
-    int getApplicationsCount(int tenantId, String searchOwner, String searchApplication) throws
+    int getApplicationsCount(String organization, String searchOwner, String searchApplication) throws
             APIManagementException;
 
     /**
@@ -362,7 +362,7 @@ public interface ApplicationDAO {
      * @param tenantId              Id of tenant
      * @throws APIManagementException
      */
-    void addApplicationAttributes(Map<String, String> applicationAttributes, int applicationId, int tenantId)
+    void addApplicationAttributes(Map<String, String> applicationAttributes, int applicationId, String organization)
             throws APIManagementException;
 
 

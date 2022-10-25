@@ -5457,7 +5457,7 @@ public class ApiDAOImpl implements ApiDAO {
             if (rs.next()) {
                 Subscriber subscriber = new Subscriber(rs.getString("USER_ID"));
                 subscriber.setId(subscriberId);
-                subscriber.setTenantId(rs.getInt("TENANT_ID"));
+                subscriber.setOrganization(rs.getString("ORGANIZATION"));
                 subscriber.setEmail(rs.getString("EMAIL_ADDRESS"));
                 subscriber.setSubscribedDate(new Date(rs.getTimestamp("DATE_SUBSCRIBED").getTime()));
                 return subscriber;

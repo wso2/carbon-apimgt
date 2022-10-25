@@ -293,7 +293,7 @@ public class WebhooksDAO {
                         subscription.setExpiryTime(rs.getLong(APIConstants.Webhooks.EXPIRY_AT_COLUMN));
                         subscription.setApiContext(rs.getString(APIConstants.Webhooks.API_CONTEXT_COLUMN));
                         subscription.setApiVersion(rs.getString(APIConstants.Webhooks.API_VERSION_COLUMN));
-                        subscription.setTenantId(rs.getInt(APIConstants.Webhooks.TENANT_ID_COLUMN));
+                        subscription.setOrganization(rs.getString(APIConstants.Webhooks.ORGANIZATION_COLUMN));
                         subscription.setTier(rs.getString(APIConstants.Webhooks.SUB_TIER_COLUMN));
                         subscription.setApiTier(rs.getString(APIConstants.Webhooks.API_TIER_COLUMN));
                         subscription.setApplicationTier(rs.getString(APIConstants.Webhooks.APPLICATION_TIER_COLUMN));

@@ -28,14 +28,42 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.wso2.apk.apimgt.api.*;
+import org.wso2.apk.apimgt.api.APIAdmin;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.apk.apimgt.api.BlockConditionNotFoundException;
+import org.wso2.apk.apimgt.api.ExceptionCodes;
+import org.wso2.apk.apimgt.api.MonetizationException;
+import org.wso2.apk.apimgt.api.PolicyNotFoundException;
 import org.wso2.apk.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.apk.apimgt.api.model.*;
+import org.wso2.apk.apimgt.api.model.APICategory;
+import org.wso2.apk.apimgt.api.model.Application;
+import org.wso2.apk.apimgt.api.model.ApplicationInfo;
+import org.wso2.apk.apimgt.api.model.BlockConditionsDTO;
+import org.wso2.apk.apimgt.api.model.Environment;
+import org.wso2.apk.apimgt.api.model.Monetization;
+import org.wso2.apk.apimgt.api.model.MonetizationUsagePublishInfo;
+import org.wso2.apk.apimgt.api.model.VHost;
+import org.wso2.apk.apimgt.api.model.Workflow;
 import org.wso2.apk.apimgt.api.model.botDataAPI.BotDetectionData;
-import org.wso2.apk.apimgt.api.model.policy.*;
+import org.wso2.apk.apimgt.api.model.policy.APIPolicy;
+import org.wso2.apk.apimgt.api.model.policy.ApplicationPolicy;
+import org.wso2.apk.apimgt.api.model.policy.Condition;
+import org.wso2.apk.apimgt.api.model.policy.GlobalPolicy;
+import org.wso2.apk.apimgt.api.model.policy.Pipeline;
+import org.wso2.apk.apimgt.api.model.policy.Policy;
+import org.wso2.apk.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.apk.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.apk.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.apk.apimgt.impl.dao.impl.*;
+import org.wso2.apk.apimgt.impl.dao.impl.AdminDAOImpl;
+import org.wso2.apk.apimgt.impl.dao.impl.ApplicationDAOImpl;
+import org.wso2.apk.apimgt.impl.dao.impl.BlockConditionDAOImpl;
+import org.wso2.apk.apimgt.impl.dao.impl.EnvironmentDAOImpl;
+import org.wso2.apk.apimgt.impl.dao.impl.KeyManagerDAOImpl;
+import org.wso2.apk.apimgt.impl.dao.impl.PolicyDAOImpl;
+import org.wso2.apk.apimgt.impl.dao.impl.TierDAOImpl;
+import org.wso2.apk.apimgt.impl.dao.impl.WorkflowDAOImpl;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.apk.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.apk.apimgt.impl.dto.WorkflowProperties;
@@ -45,6 +73,20 @@ import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -53,13 +95,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * This class provides the core API admin functionality.
@@ -194,27 +229,25 @@ public class APIAdminImpl implements APIAdmin {
     /**
      * @inheritDoc
      **/
-    public Application[] getApplicationsWithPagination(String user, String owner, int tenantId, int limit,
+    public Application[] getApplicationsWithPagination(String user, String owner, String organization, int limit,
                                                        int offset, String applicationName, String sortBy,
                                                        String sortOrder) throws APIManagementException {
 
-        return applicationDAOImpl.getApplicationsWithPagination(user, owner, tenantId, limit, offset, sortBy, sortOrder,
-                applicationName);
+        return applicationDAOImpl.getApplicationsWithPagination(user, owner, organization, limit, offset, sortBy,
+                sortOrder, applicationName);
     }
 
     /**
-     * Get count of the applications for the tenantId.
+     * Get count of the applications for the organization.
      *
-     * @param tenantId          content to get application count based on tenant_id
      * @param searchOwner       content to search applications based on owners
      * @param searchApplication content to search applications based on application
      * @throws APIManagementException if failed to get application
      */
-
-    public int getApplicationsCount(int tenantId, String searchOwner, String searchApplication)
+    public int getApplicationsCount(String organization, String searchOwner, String searchApplication)
             throws APIManagementException {
 
-        return applicationDAOImpl.getApplicationsCount(tenantId, searchOwner, searchApplication);
+        return applicationDAOImpl.getApplicationsCount(organization, searchOwner, searchApplication);
     }
 
     /**
@@ -607,33 +640,33 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+    public void addTenantTheme(String organization, InputStream themeContent) throws APIManagementException {
 
-        adminDAOImpl.addTenantTheme(tenantId, themeContent);
+        adminDAOImpl.addTenantTheme(organization, themeContent);
     }
 
     @Override
-    public void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+    public void updateTenantTheme(String organization, InputStream themeContent) throws APIManagementException {
 
-        adminDAOImpl.updateTenantTheme(tenantId, themeContent);
+        adminDAOImpl.updateTenantTheme(organization, themeContent);
     }
 
     @Override
-    public InputStream getTenantTheme(int tenantId) throws APIManagementException {
+    public InputStream getTenantTheme(String organization) throws APIManagementException {
 
-        return adminDAOImpl.getTenantTheme(tenantId);
+        return adminDAOImpl.getTenantTheme(organization);
     }
 
     @Override
-    public boolean isTenantThemeExist(int tenantId) throws APIManagementException {
+    public boolean isTenantThemeExist(String organization) throws APIManagementException {
 
-        return adminDAOImpl.isTenantThemeExist(tenantId);
+        return adminDAOImpl.isTenantThemeExist(organization);
     }
 
     @Override
-    public void deleteTenantTheme(int tenantId) throws APIManagementException {
+    public void deleteTenantTheme(String organization) throws APIManagementException {
 
-        adminDAOImpl.deleteTenantTheme(tenantId);
+        adminDAOImpl.deleteTenantTheme(organization);
     }
 
     @Override
