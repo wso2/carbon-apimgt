@@ -17,8 +17,15 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.Serializable;
@@ -38,6 +45,7 @@ import java.util.Set;
 public class API implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private static final Log log = LogFactory.getLog(API.class);
 
     private APIIdentifier id;
 
@@ -903,6 +911,69 @@ public class API implements Serializable {
         // This is to support new Endpoint object
         if ((endpointConfig == null || StringUtils.isAllEmpty(endpointConfig) && endpoints.size() > 0)) {
             return getEndpointConfigString(endpoints);
+        }
+
+        if (isEndpointSecured()) {
+            try {
+                JSONParser parser = new JSONParser();
+                ObjectMapper objectMapper = new ObjectMapper();
+                JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfig);
+                EndpointSecurity productionAndSandbox = new EndpointSecurity();
+                if (endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) == null) {
+                    JSONObject epSecurity = new JSONObject();
+                    productionAndSandbox.setEnabled(true);
+                    if (isEndpointAuthDigest()) {
+                        productionAndSandbox.setType(APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST);
+                    } else {
+                        productionAndSandbox.setType(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC);
+                    }
+                    productionAndSandbox.setUsername(getEndpointUTUsername());
+                    productionAndSandbox.setPassword(getEndpointUTPassword());
+                    Object productionAndSandboxSecurity = parser.parse(
+                            objectMapper.writeValueAsString(productionAndSandbox));
+                    epSecurity.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionAndSandboxSecurity);
+                    epSecurity.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, productionAndSandboxSecurity);
+                    endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, epSecurity);
+                } else {
+                    JSONObject endpointSecurity = (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY);
+                    if (endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) == null) {
+                        EndpointSecurity production = new EndpointSecurity();
+                        production.setEnabled(true);
+                        if (isEndpointAuthDigest()) {
+                            productionAndSandbox.setType(APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST);
+                        } else {
+                            productionAndSandbox.setType(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC);
+                        }
+                        production.setUsername(getEndpointUTUsername());
+                        production.setPassword(getEndpointUTPassword());
+                        String productionSecurity = objectMapper.writeValueAsString(production);
+                        endpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION,
+                                parser.parse(productionSecurity));
+                        endpointConfigJson.replace(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    }
+                    if (endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) == null) {
+                        EndpointSecurity sandbox = new EndpointSecurity();
+                        sandbox.setEnabled(true);
+                        if (isEndpointAuthDigest()) {
+                            productionAndSandbox.setType(APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST);
+                        } else {
+                            productionAndSandbox.setType(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC);
+                        }
+                        sandbox.setUsername(getEndpointUTUsername());
+                        sandbox.setPassword(getEndpointUTPassword());
+                        String sandboxSecurity = objectMapper.writeValueAsString(sandbox);
+                        endpointSecurity.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, parser.parse(sandboxSecurity));
+                        endpointConfigJson.replace(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    }
+                }
+                endpointConfig = objectMapper.writeValueAsString(endpointConfigJson);
+            } catch (ParseException e) {
+                log.error("Error while retrieving endpoint config for API : " + getUUID(), e);
+            } catch (JsonProcessingException e) {
+                log.error("Error while processing endpoint config JSON for API : " + getUUID(), e);
+            } catch (Exception e) {
+                log.error("Error while processing endpoint config for API : " + getUUID(), e);
+            }
         }
         return endpointConfig;
     }
