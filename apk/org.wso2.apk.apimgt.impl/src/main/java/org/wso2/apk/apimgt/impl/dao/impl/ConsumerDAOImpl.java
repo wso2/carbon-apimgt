@@ -14,7 +14,8 @@ import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.api.model.APIIdentifier;
 import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.apk.apimgt.user.mgt.util.UserUtils;
+//import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -915,7 +916,7 @@ public class ConsumerDAOImpl implements ConsumerDAO {
 
         if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
             if (multiGroupAppSharingEnabled) {
-                String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                String tenantDomain = UserUtils.getTenantDomain(subscriber.getName());
                 String[] groupIDArray = groupingId.split(",");
 
                 statement.setString(++paramIndex, subOrganization);
@@ -1056,7 +1057,7 @@ public class ConsumerDAOImpl implements ConsumerDAO {
             boolean hasGrouping = false;
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
                 if (multiGroupAppSharingEnabled) {
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                    String tenantDomain = UserUtils.getTenantDomain(subscriber.getName());
                     sqlQuery += whereClauseWithMultiGroupId;
                     String[] groupIdArr = groupingId.split(",");
 

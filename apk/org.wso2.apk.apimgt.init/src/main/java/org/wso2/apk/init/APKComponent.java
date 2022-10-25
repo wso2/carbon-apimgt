@@ -21,17 +21,21 @@ package org.wso2.apk.init;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.APIManagerDatabaseException;
 import org.wso2.apk.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.apk.apimgt.impl.ConfigurationHolder;
 import org.wso2.apk.apimgt.impl.caching.CacheProvider;
 import org.wso2.apk.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 
 
 public class APKComponent {
+
+    private static final Log log = LogFactory.getLog(APKComponent.class);
 
     public static void activate(String configuration) throws APIManagementException {
 
@@ -44,6 +48,7 @@ public class APKComponent {
             config = objectMapper.readValue(configuration, ConfigurationHolder.class);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(config);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
+            log.info("Successfully set the APK configurations...");
         } catch (JsonProcessingException e) {
             throw new APIManagementException("Error while reading configurations");
         }
@@ -52,7 +57,7 @@ public class APKComponent {
             // Initialize database
             APIMgtDBUtil.initialize();
         } catch (APIManagerDatabaseException e) {
-            throw new APIManagementException("Error while initializing database connection");
+            throw new APIManagementException("Error while initializing database connection", e);
         }
 
         // Initialise SQL constant manager

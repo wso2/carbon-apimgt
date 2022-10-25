@@ -15,7 +15,8 @@ import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.apk.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.apk.apimgt.user.mgt.util.UserUtils;
+//import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.ByteArrayInputStream;
@@ -409,7 +410,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             if (groupId != null && !"null".equals(groupId) && !groupId.isEmpty()) {
                 if (multiGroupAppSharingEnabled) {
                     Subscriber subscriber = getSubscriber(userId);
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                    String tenantDomain = UserUtils.getTenantDomain(subscriber.getName());
                     if (forceCaseInsensitiveComparisons) {
                         query = query + whereClauseWithMultiGroupIdCaseInSensitive;
                     } else {
@@ -813,7 +814,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             if (!StringUtils.isEmpty(groupId) && !APIConstants.NULL_GROUPID_LIST.equals(groupId)) {
                 if (multiGroupAppSharingEnabled) {
                     Subscriber subscriber = getSubscriber(userId);
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                    String tenantDomain = UserUtils.getTenantDomain(subscriber.getName());
                     query += whereClauseWithMultiGroupId;
                     String[] groupIds = groupId.split(",");
                     int parameterIndex = groupIds.length;
@@ -893,7 +894,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             conn.setAutoCommit(false);
             applicationId = addApplication(application, loginUserName, conn, organization);
             Subscriber subscriber = getSubscriber(userId);
-            String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+            String tenantDomain = UserUtils.getTenantDomain(subscriber.getName());
 
             if (multiGroupAppSharingEnabled) {
                 updateGroupIDMappings(conn, applicationId, application.getGroupId(), tenantDomain);
@@ -1476,7 +1477,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
                 application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
 
-                String tenantDomain = MultitenantUtils.getTenantDomain(subscriberName);
+                String tenantDomain = UserUtils.getTenantDomain(subscriberName);
                 Map<String, Map<String, OAuthApplicationInfo>>
                         keyMap = getOAuthApplications(tenantDomain, application.getId());
                 application.getKeyManagerWiseOAuthApp().putAll(keyMap);
@@ -1577,12 +1578,13 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
             if (multiGroupAppSharingEnabled) {
                 Subscriber subscriber = application.getSubscriber();
-                String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                String tenantDomain = UserUtils.getTenantDomain(subscriber.getName());
                 updateGroupIDMappings(conn, application.getId(), application.getGroupId(),
                         tenantDomain);
             }
             Subscriber subscriber = application.getSubscriber();
-            String domain = MultitenantUtils.getTenantDomain(subscriber.getName());
+            String domain = UserUtils.getTenantDomain(subscriber.getName());
+            int tenantId = APIUtil.getTenantIdFromTenantDomain(domain);
 
             preparedStatement = conn.prepareStatement(SQLConstants.REMOVE_APPLICATION_ATTRIBUTES_SQL);
             preparedStatement.setInt(1, application.getId());
@@ -1814,7 +1816,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             if (groupId != null && !"null".equals(groupId) && !groupId.isEmpty()) {
                 if (multiGroupAppSharingEnabled) {
                     Subscriber subscriber = getSubscriber(userId);
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                    String tenantDomain = UserUtils.getTenantDomain(subscriber.getName());
                     if (forceCaseInsensitiveComparisons) {
                         query = query + whereClauseWithMultiGroupIdCaseInSensitive;
                     } else {
@@ -1870,7 +1872,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
                 application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
 
-                String tenantDomain = MultitenantUtils.getTenantDomain(subscriberName);
+                String tenantDomain = UserUtils.getTenantDomain(subscriberName);
                 Map<String, Map<String, OAuthApplicationInfo>>
                         keyMap = getOAuthApplications(tenantDomain, application.getId());
                 application.getKeyManagerWiseOAuthApp().putAll(keyMap);
@@ -1965,7 +1967,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
                 if (multiGroupAppSharingEnabled) {
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                    String tenantDomain = UserUtils.getTenantDomain(subscriber.getName());
                     String[] grpIdArray = groupingId.split(",");
                     int noOfParams = grpIdArray.length;
                     prepStmt = fillQueryParams(connection, sqlQuery, grpIdArray, 1);

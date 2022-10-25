@@ -26,7 +26,8 @@ import org.wso2.apk.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.apk.apimgt.impl.restapi.Constants;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.user.ctx.UserContext;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.apk.apimgt.user.mgt.util.UserUtils;
+//import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 
 import java.io.IOException;
@@ -755,7 +756,7 @@ public class RestApiCommonUtil {
 
         String username = getLoggedInUsername();
         String providerName = APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName());
-        String providerTenantDomain = MultitenantUtils.getTenantDomain(providerName);
+        String providerTenantDomain = UserUtils.getTenantDomain(providerName);
         String loggedInUserTenantDomain = getLoggedInUserTenantDomain();
         if (!providerTenantDomain.equals(loggedInUserTenantDomain)) {
             String errorMsg = "User " + username + " is not allowed to access " + apiIdentifier.toString()

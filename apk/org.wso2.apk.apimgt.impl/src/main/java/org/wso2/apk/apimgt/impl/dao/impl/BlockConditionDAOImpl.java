@@ -13,7 +13,8 @@ import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.apk.apimgt.impl.dao.util.DBUtils;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.apk.apimgt.user.mgt.util.UserUtils;
+//import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -260,7 +261,7 @@ public class BlockConditionDAOImpl implements BlockConditionDAO {
                     String appOwner = appArray[0];
                     String appName = appArray[1];
 
-                    if ((MultitenantUtils.getTenantDomain(appOwner).equals(tenantDomain)) &&
+                    if ((UserUtils.getTenantDomain(appOwner).equals(tenantDomain)) &&
                             isValidApplication(appOwner, appName)) {
                         valid = true;
                     } else {
@@ -270,7 +271,7 @@ public class BlockConditionDAOImpl implements BlockConditionDAO {
                     }
                 }
             } else if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
-                if (MultitenantUtils.getTenantDomain(conditionValue).equals(tenantDomain)) {
+                if (UserUtils.getTenantDomain(conditionValue).equals(tenantDomain)) {
                     valid = true;
                 } else {
                     throw new APIManagementException("Invalid User in Tenant Domain " + tenantDomain,
@@ -306,7 +307,7 @@ public class BlockConditionDAOImpl implements BlockConditionDAO {
                     }
 
                     // Check whether the given application is valid
-                    if ((MultitenantUtils.getTenantDomain(appOwner).equals(tenantDomain)) &&
+                    if ((UserUtils.getTenantDomain(appOwner).equals(tenantDomain)) &&
                             isValidApplication(appOwner, appName)) {
                         valid = true;
                     } else {

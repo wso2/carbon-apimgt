@@ -18,15 +18,10 @@
 
 package org.wso2.apk.apimgt.user.mgt;
 
-import org.wso2.carbon.user.core.UserCoreConstants;
-
 public class UserConstants {
 
-    public static final String DOMAIN_SEPARATOR = UserCoreConstants.DOMAIN_SEPARATOR;
     public static final String EXECUTE_ACTION =  "ui.execute"; //UserMgtConstants.EXECUTE_ACTION;
-    public static final String TENANT_DOMAIN_COMBINER = UserCoreConstants.TENANT_DOMAIN_COMBINER;
-    public static final String PRIMARY_DEFAULT_DOMAIN_NAME = UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME;
-
+    public static final String TENANT_DOMAIN_COMBINER = "@";
     public static final String TENANT_STATE_ACTIVE = "ACTIVE";
     public static final String TENANT_STATE_INACTIVE = "INACTIVE";
     public static final String INTERNAL_DOMAIN = "Internal";

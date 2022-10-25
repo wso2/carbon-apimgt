@@ -18,6 +18,7 @@
 
 package org.wso2.apk.apimgt.impl;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.wso2.apk.apimgt.api.model.APIStore;
 import org.wso2.apk.apimgt.impl.dto.DatasourceProperties;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
@@ -36,8 +37,10 @@ public class ConfigurationHolder {
 
     private Map<String, List<String>> configuration = new ConcurrentHashMap<>();
 
+    @JsonProperty("throttlingConfiguration")
     private ThrottleProperties throttleProperties = new ThrottleProperties();
 
+    @JsonProperty("datasourceConfiguration")
     private DatasourceProperties datasourceProperties = new DatasourceProperties();
 
     private WorkflowProperties workflowProperties = new WorkflowProperties();

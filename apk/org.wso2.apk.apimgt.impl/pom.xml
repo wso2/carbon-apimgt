@@ -60,10 +60,6 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.utils</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
@@ -362,7 +358,6 @@
                             com.fasterxml.jackson.datatype.guava,
                             com.github.benmanes.caffeine.cache;version="${caffeine.version}",
                             org.openapitools.codegen.*,
-                            org.wso2.carbon.utils.*; version="${carbon.platform.package.import.version.range}",
                             org.xml.sax,
                             okio.*;version="${okio.wso2.version}",
                             okhttp3.*;version="${okhttp.wso2.version}"
