@@ -524,6 +524,8 @@ public enum ExceptionCodes implements ErrorHandler {
     OPERATION_POLICY_GATEWAY_ERROR(903008,
             "Either Synapse or Choreo Gateway Definition files or both should be present", 400,
             "Operation Policy cannot be imported due to the missing Gateway files."),
+    ERROR_VALIDATING_API_POLICY(902011, "Error while validating API policies enforced for the API", 400,
+            "Error while validating the API policies enforced for the API"),
 
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
             " not allowed for user %s ", false),

@@ -1684,4 +1684,14 @@ public interface APIProvider extends APIManager {
      */
     boolean isValidContext(String providerName, String apiName, String contextTemplate, String userName,
                            String organization) throws APIManagementException;
+    /***
+     * Validate the policies with spec
+     * @param policySpecification policy spec
+     * @param appliedPolicy policyID
+     * @param apiType API Type
+     * @return validation status
+     * @throws APIManagementException
+     */
+    boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification, OperationPolicy
+            appliedPolicy, String apiType) throws APIManagementException;
 }

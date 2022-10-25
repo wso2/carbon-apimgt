@@ -1511,7 +1511,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             }
 
                             OperationPolicySpecification policySpecification = policyData.getSpecification();
-                            if (validateAppliedPolicyWithSpecification(policySpecification, policy, api)) {
+                            if (validateAppliedPolicyWithSpecification(policySpecification, policy, api.getType())) {
                                 validatedPolicies.add(policy);
                             }
                         } else {
@@ -1533,7 +1533,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 }
 
                                 OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
-                                if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, api)) {
+                                if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, api.getType())) {
                                     validatedPolicies.add(policy);
                                 }
                             } else {
@@ -1552,7 +1552,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         + policy.getPolicyName() + ". Validating the policy");
                             }
                             OperationPolicySpecification policySpecification = policyData.getSpecification();
-                            if (validateAppliedPolicyWithSpecification(policySpecification, policy, api)) {
+                            if (validateAppliedPolicyWithSpecification(policySpecification, policy, api.getType())) {
                                 policy.setPolicyId(policyData.getPolicyId());
                                 validatedPolicies.add(policy);
                             }
@@ -1569,12 +1569,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                             + policy.getPolicyName() + ". Validating the policy");
                                 }
                                 OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
-                                if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, api)) {
+                                if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, api.getType())) {
                                     policy.setPolicyId(commonPolicyData.getPolicyId());
                                     validatedPolicies.add(policy);
                                 }
                             } else {
-                                log.warn("Selected policy " + policy.getPolicyName() + " is not found. Hence dropped");
+                                log.error("Selected policy " + policy.getPolicyName() + " is not found");
+                                throw new APIManagementException("Selected policy " + policy.getPolicyName() + " is not found.",
+                                        ExceptionCodes.INVALID_OPERATION_POLICY);
                             }
                         }
                     }
@@ -1584,29 +1586,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification,
-                                                           OperationPolicy appliedPolicy, API api)
+    @Override
+    public boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification,
+                                                          OperationPolicy appliedPolicy, String apiType)
             throws APIManagementException {
 
         //Validate the policy applied direction
         if (!policySpecification.getApplicableFlows().contains(appliedPolicy.getDirection())) {
-            if (log.isDebugEnabled()) {
-                log.debug("The policy " + policySpecification.getName()
-                        + " is not support in the " + appliedPolicy.getDirection() + " flow. Hence skipped.");
-            }
             throw new APIManagementException(policySpecification.getName() + " cannot be used in the "
                     + appliedPolicy.getDirection() + " flow.",
                     ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
         }
 
         //Validate the API type
-        if (!policySpecification.getSupportedApiTypes().contains(api.getType())) {
-            if (log.isDebugEnabled()) {
-                log.debug("The policy " + policySpecification.getName() + " cannot be used for the "
-                        + api.getType() + " API type.");
-            }
+        if (!policySpecification.getSupportedApiTypes().contains(apiType)) {
             throw new APIManagementException(policySpecification.getName() + " cannot be used for the "
-                    + api.getType() + " API type.",
+                    + apiType + " API type.",
                     ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
         }
 
@@ -1626,12 +1621,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             }
                         }
                     } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Required policy attribute " + attribute.getName()
-                                    + " is not found for the the policy " + policySpecification.getName());
-                        }
                         throw new APIManagementException("Required policy attribute " + attribute.getName()
-                                + " is not found for the the policy " + policySpecification.getName()
+                                + " is not found for the policy " + policySpecification.getName() + " "
                                 + appliedPolicy.getDirection() + " flow.",
                                 ExceptionCodes.MISSING_MANDATORY_POLICY_ATTRIBUTES);
                     }
