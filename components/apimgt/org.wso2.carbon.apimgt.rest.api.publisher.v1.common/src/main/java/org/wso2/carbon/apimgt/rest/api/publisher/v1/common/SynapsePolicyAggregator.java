@@ -160,7 +160,8 @@ public class SynapsePolicyAggregator {
     private static String sanitizeOMElementWithSuperParentNode(String xmlString) throws Exception {
 
         String updatedXmlString = "<root>" + xmlString + "</root>";
-        OMElement sanitizedPolicyElement = APIUtil.buildOMElement(new ByteArrayInputStream(updatedXmlString.getBytes()));
+        OMElement sanitizedPolicyElement =
+                APIUtil.buildOMElement(new ByteArrayInputStream(updatedXmlString.getBytes()));
         StringBuilder filteredTemplate = new StringBuilder();
         for (Iterator childElements = sanitizedPolicyElement.getChildElements();
              childElements.hasNext(); ) {
