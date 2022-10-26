@@ -4,6 +4,9 @@ import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.model.Scope;
 import org.wso2.apk.apimgt.api.model.SharedScopeUsage;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
@@ -101,5 +104,55 @@ public interface ScopeDAO {
      * @throws APIManagementException if an error occurs while getting all scopes
      */
     Set<String> getScopesBySubscribedAPIs(List<String> identifiers) throws APIManagementException;
+
+    /**
+     * Add new local scopes
+     *
+     * @param scopeSet  scope set
+     * @param tenantId  tenant ID
+     * @return
+     * @throws APIManagementException if an error occurs while adding local scopes
+     */
+    boolean addScopes(Set<Scope> scopeSet, int tenantId) throws APIManagementException;
+
+    /**
+     * Update local scope
+     *
+     * @param scope scope to be updated
+     * @param tenantId tenant ID
+     * @return
+     * @throws APIManagementException if an error occurs while updating a scope
+     */
+    boolean updateScope(Scope scope, int tenantId) throws APIManagementException;
+
+    /**
+     * Delete local scope
+     *
+     * @param scopeName scope to be deleted
+     * @param tenantId tenant ID
+     * @return
+     * @throws APIManagementException if an error occurs while deleting a scope
+     */
+    boolean deleteScope(String scopeName, int tenantId) throws APIManagementException;
+
+    /**
+     * Delete a set of local scopes
+     *
+     * @param scopes scopes to be deleted
+     * @param tenantId tenant ID
+     * @return
+     * @throws APIManagementException if an error occurs while deleting scopes
+     */
+    boolean deleteScopes(Set<String> scopes, int tenantId) throws APIManagementException;
+
+    /**
+     * Checks whether a scope exists by the specified scope key
+     *
+     * @param scopeKey scope key
+     * @param tenantId tenant ID
+     * @return
+     * @throws APIManagementException if an error occurs while checking for scope existence
+     */
+    boolean isScopeExist(String scopeKey, int tenantId) throws APIManagementException;
 
 }

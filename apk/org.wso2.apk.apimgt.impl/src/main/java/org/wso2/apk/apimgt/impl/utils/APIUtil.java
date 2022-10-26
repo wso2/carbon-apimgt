@@ -125,7 +125,6 @@ import org.wso2.apk.apimgt.impl.config.APIMConfigService;
 import org.wso2.apk.apimgt.impl.config.APIMConfigServiceImpl;
 import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.apk.apimgt.impl.dao.PolicyDAO;
-import org.wso2.apk.apimgt.impl.dao.ScopesDAO;
 import org.wso2.apk.apimgt.impl.dao.WorkflowDAO;
 import org.wso2.apk.apimgt.impl.dao.impl.*;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
@@ -2965,7 +2964,7 @@ public final class APIUtil {
     public static Scope getScopeByName(String scopeKey, String organization) throws APIManagementException {
 
         int tenantId = APIUtil.getInternalIdFromTenantDomainOrOrganization(organization);
-        return ScopesDAO.getInstance().getScope(scopeKey, tenantId);
+        return ScopeDAOImpl.getInstance().getScope(scopeKey, tenantId);
     }
 
     /**
@@ -3199,7 +3198,7 @@ public final class APIUtil {
      */
     public static APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException {
 
-        return ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(uuid);
+        return ApiDAOImpl.getInstance().getAPIIdentifierFromUUID(uuid);
     }
 
     public static String[] getFilteredUserRoles(String username) throws APIManagementException {

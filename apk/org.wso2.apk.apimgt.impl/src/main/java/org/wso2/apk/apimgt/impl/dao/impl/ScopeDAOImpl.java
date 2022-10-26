@@ -393,4 +393,175 @@ public class ScopeDAOImpl implements ScopeDAO {
 
 
 
+    public boolean addScopes(Set<Scope> scopeSet, int tenantId) throws APIManagementException {
+
+        if (scopeSet == null || scopeSet.isEmpty()) {
+            return false;
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement addScopeStatement = connection.prepareStatement(SQLConstants.INSERT_SCOPE_SQL)) {
+                    for (Scope scope : scopeSet) {
+                        if (!isScopeExist(connection, scope.getKey(), tenantId)) {
+                            addScopeStatement.setString(1, scope.getKey());
+                            addScopeStatement.setString(2, scope.getName());
+                            addScopeStatement.setString(3, scope.getDescription());
+                            addScopeStatement.setInt(4, tenantId);
+                            addScopeStatement.setString(5, APIConstants.DEFAULT_SCOPE_TYPE);
+                            addScopeStatement.addBatch();
+                        }
+                    }
+                    addScopeStatement.executeBatch();
+                    try (PreparedStatement addScopeBindingStatement =
+                                 connection.prepareStatement(SQLConstants.ADD_SCOPE_MAPPING)) {
+                        for (Scope scope : scopeSet) {
+                            addScopeBindingsToBatch(addScopeBindingStatement, scope, tenantId);
+                        }
+                        addScopeBindingStatement.executeBatch();
+                    }
+                }
+                connection.commit();
+                return true;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIManagementException("Error while saving scopes into db", e, ExceptionCodes.INTERNAL_ERROR);
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving database connection", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+    }
+
+    public boolean updateScope(Scope scope, int tenantId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.UPDATE_SCOPE_SQL)) {
+                preparedStatement.setString(1, scope.getName());
+                preparedStatement.setString(2, scope.getDescription());
+                preparedStatement.setString(3, scope.getKey());
+                preparedStatement.setInt(4, tenantId);
+                preparedStatement.executeUpdate();
+                deleteScopeBindings(connection, scope.getKey(), tenantId);
+                addScopeBindings(connection, scope, tenantId);
+                connection.commit();
+                return true;
+            } catch (SQLException e) {
+                log.error("Error while updating scopes into db", e);
+                connection.rollback();
+                throw new APIManagementException("Error while updating scopes into db", e,
+                        ExceptionCodes.INTERNAL_ERROR);
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving database connection", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+    }
+
+    public boolean deleteScope(String scopeName, int tenantId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.DELETE_SCOPE_SQL)) {
+                preparedStatement.setString(1, scopeName);
+                preparedStatement.setInt(2, tenantId);
+                preparedStatement.executeUpdate();
+                connection.commit();
+                return true;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIManagementException("Error while deleting scopes from db", e,
+                        ExceptionCodes.INTERNAL_ERROR);
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving database connection", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+    }
+
+    public boolean deleteScopes(Set<String> scopes, int tenantId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.DELETE_SCOPE_SQL)) {
+                for (String scope : scopes) {
+                    preparedStatement.setString(1, scope);
+                    preparedStatement.setInt(2, tenantId);
+                    preparedStatement.addBatch();
+                }
+                preparedStatement.executeBatch();
+                connection.commit();
+                return true;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIManagementException("Error while deleting scopes from db", e,
+                        ExceptionCodes.INTERNAL_ERROR);
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving database connection", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+    }
+
+    public boolean isScopeExist(String scopeKey, int tenantId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            return isScopeExist(connection, scopeKey, tenantId);
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving database connection", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+    }
+
+    private void addScopeBindingsToBatch(PreparedStatement preparedStatement, Scope scope, int tenantId)
+            throws SQLException {
+
+        if (StringUtils.isNotEmpty(scope.getRoles()) && scope.getRoles().trim().length() > 0) {
+            for (String role : scope.getRoles().split(",")) {
+                preparedStatement.setString(1, scope.getKey());
+                preparedStatement.setInt(2, tenantId);
+                preparedStatement.setString(3, role);
+                preparedStatement.setString(4, APIConstants.DEFAULT_BINDING_TYPE);
+                preparedStatement.addBatch();
+            }
+        }
+    }
+
+    private boolean isScopeExist(Connection connection, String scopeKey, int tenantId) throws SQLException {
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.SCOPE_EXIST_SQL)) {
+            preparedStatement.setString(1, scopeKey);
+            preparedStatement.setInt(2, tenantId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next();
+            }
+        }
+    }
+
+    private void addScopeBindings(Connection connection, Scope scope, int tenantId) throws SQLException {
+
+        if (StringUtils.isNotEmpty(scope.getRoles()) && scope.getRoles().split(",").length > 0) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.ADD_SCOPE_MAPPING)) {
+                for (String role : scope.getRoles().split(",")) {
+                    preparedStatement.setString(1, scope.getKey());
+                    preparedStatement.setInt(2, tenantId);
+                    preparedStatement.setString(3, role);
+                    preparedStatement.setString(4, APIConstants.DEFAULT_BINDING_TYPE);
+                    preparedStatement.addBatch();
+                }
+                preparedStatement.executeBatch();
+            }
+        }
+    }
+
+    private void deleteScopeBindings(Connection connection, String scopeKey, int tenantId) throws SQLException {
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.DELETE_SCOPE_MAPPING)) {
+            preparedStatement.setString(1, scopeKey);
+            preparedStatement.setInt(2, tenantId);
+            preparedStatement.executeUpdate();
+        }
+    }
+
 }

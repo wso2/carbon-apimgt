@@ -5783,7 +5783,7 @@ public class ApiDAOImpl implements ApiDAO {
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-            APIIdentifier identifier = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(uuid);
+            APIIdentifier identifier = getAPIIdentifierFromUUID(uuid);
             id = getAPIID(uuid, connection);
 
             prepStmt = connection.prepareStatement(deleteAuditAPIMapping);
@@ -6826,6 +6826,37 @@ public class ApiDAOImpl implements ApiDAO {
             handleExceptionWithCode("Failed to retrieve Connection", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return null;
+    }
+
+    public String getAPILevelTier(int id) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement selectPreparedStatement = null;
+        ResultSet resultSet = null;
+        String apiLevelTier = null;
+        try {
+            String query = SQLConstants.GET_API_DETAILS_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(true);
+            selectPreparedStatement = connection.prepareStatement(query + " WHERE API_ID = ?");
+            selectPreparedStatement.setInt(1, id);
+            resultSet = selectPreparedStatement.executeQuery();
+            while (resultSet.next()) {
+                apiLevelTier = resultSet.getString("API_TIER");
+            }
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to rollback getting API Details", ex);
+                }
+            }
+            handleExceptionWithCode("Failed to get API Details", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+        }
+        return apiLevelTier;
     }
 
     @Override

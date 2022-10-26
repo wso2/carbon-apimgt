@@ -4563,7 +4563,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void addScopes(Set<Scope> scopes, int tenantId) throws APIManagementException {
 
         if (scopes != null) {
-            scopesDAO.addScopes(scopes, tenantId);
+            scopeDAOImpl.addScopes(scopes, tenantId);
             for (Scope scope : scopes) {
                 //TODO:APK
 //                ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(),
@@ -4581,7 +4581,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void updateScope(Scope scope, int tenantId) throws APIManagementException {
 
         if (scope != null) {
-            scopesDAO.updateScope(scope, tenantId);
+            scopeDAOImpl.updateScope(scope, tenantId);
             //TODO:APK
 //            ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(),
 //                    System.currentTimeMillis(), APIConstants.EventType.SCOPE_UPDATE.name(), tenantId,
@@ -4596,7 +4596,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void deleteScope(String scopeKey, int tenantId) throws APIManagementException {
 
         if (StringUtils.isNotEmpty(scopeKey)) {
-            scopesDAO.deleteScope(scopeKey, tenantId);
+            scopeDAOImpl.deleteScope(scopeKey, tenantId);
             //TODO:APK
 //            ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(),
 //                    System.currentTimeMillis(), APIConstants.EventType.SCOPE_DELETE.name(), tenantId,

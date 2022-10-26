@@ -75,7 +75,6 @@ import org.wso2.apk.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo
 import org.wso2.apk.apimgt.api.model.policy.Policy;
 import org.wso2.apk.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.apk.apimgt.impl.dao.ScopesDAO;
 import org.wso2.apk.apimgt.impl.dao.impl.*;
 import org.wso2.apk.apimgt.impl.dao.mapper.DocumentMapper;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
@@ -109,7 +108,6 @@ public abstract class AbstractAPIManager implements APIManager {
     protected ConsumerDAOImpl consumerDAOImpl;
     protected KeyManagerDAOImpl keyManagerDAOImpl;
     protected EnvironmentSpecificAPIPropertyDAO environmentSpecificAPIPropertyDAO;
-    protected ScopesDAO scopesDAO;
     protected int tenantId = -1; //-1 the issue does not occur.;
     protected String tenantDomain;
     protected String organization;
@@ -132,7 +130,6 @@ public abstract class AbstractAPIManager implements APIManager {
     public AbstractAPIManager(String username, String organization) throws APIManagementException {
         apiDAOImpl = ApiDAOImpl.getInstance();
         apiMgtDAO = ApiMgtDAO.getInstance();
-        scopesDAO = ScopesDAO.getInstance();
         environmentSpecificAPIPropertyDAO = EnvironmentSpecificAPIPropertyDAO.getInstance();
         environmentDAO = EnvironmentDAOImpl.getInstance();
         applicationDAOImpl = ApplicationDAOImpl.getInstance();
@@ -223,7 +220,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @throws APIManagementException error while getting the API information from AM_API
      */
     public APIInfo getAPIInfoByUUID(String id) throws APIManagementException {
-        return apiMgtDAO.getAPIInfoByUUID(id);
+        return apiDAOImpl.getAPIInfoByUUID(id);
     }
 
     public boolean isAPIAvailable(APIIdentifier identifier, String organization) throws APIManagementException {
@@ -438,7 +435,7 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException {
 
-        return scopesDAO.isScopeExist(scopeKey, tenantid);
+        return scopeDAOImpl.isScopeExist(scopeKey, tenantid);
     }
 
     /**
@@ -1086,7 +1083,7 @@ public abstract class AbstractAPIManager implements APIManager {
         api.setRating(APIUtil.getAverageRating(internalId));
         apiId.setId(internalId);
         // api level tier
-        String apiLevelTier = apiMgtDAO.getAPILevelTier(internalId);
+        String apiLevelTier = apiDAOImpl.getAPILevelTier(internalId);
         api.setApiLevelPolicy(apiLevelTier);
 
         // available tier
@@ -1126,7 +1123,7 @@ public abstract class AbstractAPIManager implements APIManager {
             JSONObject resourceConfigsJSON = (JSONObject) jsonParser.parse(resourceConfigsString);
             paths = (JSONObject) resourceConfigsJSON.get(APIConstants.SWAGGER_PATHS);
         }
-        Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesOfAPI(api.getUuid());
+        Set<URITemplate> uriTemplates = apiDAOImpl.getURITemplatesOfAPI(api.getUuid());
         for (URITemplate uriTemplate : uriTemplates) {
             String uTemplate = uriTemplate.getUriTemplate();
             String method = uriTemplate.getHTTPVerb();

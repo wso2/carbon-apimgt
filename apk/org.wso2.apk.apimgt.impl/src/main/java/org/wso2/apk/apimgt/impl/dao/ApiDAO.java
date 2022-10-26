@@ -1147,6 +1147,15 @@ public interface ApiDAO {
     String getAPILevelTier(String apiUUID, String revisionUUID) throws APIManagementException;
 
     /**
+     * Get API Tier by internal API Id
+     *
+     * @param id Internal API ID
+     * @return
+     * @throws APIManagementException
+     */
+    String getAPILevelTier(int id) throws APIManagementException;
+
+    /**
      * Get API Status
      *
      * @param uuid  API UUID
