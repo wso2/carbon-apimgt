@@ -43,7 +43,7 @@
         <module>org.wso2.apk.apimgt.api</module>
         <module>org.wso2.apk.apimgt.impl</module>
         <module>org.wso2.apk.apimgt.rest.api.admin.v1.common</module>
-        <module>org.wso2.apk.apimgt.rest.api.publisher.v1.common</module>
+        <module>org.wso2.apk.apimgt.rest.api.backoffice.v1.common</module>
         <module>org.wso2.apk.apimgt.rest.api.store.v1.common</module>
         <module>org.wso2.apk.apimgt.rest.api.common</module>
         <module>org.wso2.apk.apimgt.rest.api.util</module>
