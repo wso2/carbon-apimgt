@@ -2989,26 +2989,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     /**
      * This method is used to get keys of custom attributes, configured by user
      *
-     * @param userId user name of logged in user
+     * @param userId username of logged-in user
      * @return Array of JSONObject, contains keys of attributes
      * @throws APIManagementException
      */
     public JSONArray getAppAttributesFromConfig(String userId) throws APIManagementException {
-
-        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
-        int tenantId = 0;
-        try {
-            tenantId = getTenantId(tenantDomain);
-        } catch (UserStoreException e) {
-            handleException("Error in getting tenantId of " + tenantDomain, e);
-        }
+        String tenantDomain = APIUtil.getTenantDomain(userId);
         JSONArray applicationAttributes = null;
         JSONObject applicationConfig = APIUtil.getAppAttributeKeysFromRegistry(tenantDomain);
         if (applicationConfig != null) {
             applicationAttributes = (JSONArray) applicationConfig.get(APIConstants.ApplicationAttributes.ATTRIBUTES);
         } else {
-            APIManagerConfiguration configuration = getAPIManagerConfiguration();
-            applicationAttributes = configuration.getApplicationAttributes();
+            ConfigurationHolder configurationHolder = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            applicationAttributes = configurationHolder.getApplicationAttributes();
         }
         return applicationAttributes;
     }

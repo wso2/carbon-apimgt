@@ -96,11 +96,11 @@ import java.util.Set;
 /**
  * This is the service implementation class for api application api service operations
  */
-public class ApplicationServiceImpl {
+public class ApplicationsCommonImpl {
 
-    private static final Log log = LogFactory.getLog(ApplicationServiceImpl.class);
+    private static final Log log = LogFactory.getLog(ApplicationsCommonImpl.class);
 
-    private ApplicationServiceImpl() {
+    private ApplicationsCommonImpl() {
     }
 
     /**
@@ -112,7 +112,7 @@ public class ApplicationServiceImpl {
      * @param offset  starting index
      * @return Response object containing resulted applications
      */
-    public static ApplicationListDTO applicationsGet(String groupId, String query, String sortBy, String sortOrder,
+    public static ApplicationListDTO getApplicationList(String groupId, String query, String sortBy, String sortOrder,
             Integer limit, Integer offset, String organization) throws APIManagementException {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
