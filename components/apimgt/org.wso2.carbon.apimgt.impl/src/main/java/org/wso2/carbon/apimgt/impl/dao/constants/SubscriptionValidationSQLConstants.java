@@ -30,12 +30,15 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.ORGANIZATION AS ORGANIZATION," +
                     "   SUB.USER_ID AS SUB_NAME," +
                     "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
-                    "   ATTRIBUTES.APP_ATTRIBUTE AS ATTRIBUTE_VALUE" +
+                    "   ATTRIBUTES.APP_ATTRIBUTE AS ATTRIBUTE_VALUE," +
+                    "   GROUP_MAP.GROUP_ID AS GROUP_ID" +
                     " FROM " +
                     "   AM_SUBSCRIBER SUB," +
                     "   AM_APPLICATION APP" +
                     "   LEFT OUTER JOIN AM_APPLICATION_ATTRIBUTES ATTRIBUTES  " +
                     "ON APP.APPLICATION_ID = ATTRIBUTES.APPLICATION_ID" +
+                    "   LEFT OUTER JOIN AM_APPLICATION_GROUP_MAPPING GROUP_MAP" +
+                    "  ON APP.APPLICATION_ID = GROUP_MAP.APPLICATION_ID" +
                     " WHERE " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID ";
 
