@@ -3982,4 +3982,22 @@ public final class APIUtil {
 
         return null;
     }
+
+    /**
+     * Get if there are any tenant-specific application configurations from the tenant
+     * registry
+     *
+     * @param organization The organization name.
+     * @return JSONObject The Application Attributes read from tenant registry or else null
+     * @throws APIManagementException Throws if the registry resource doesn't exist
+     *                                or the content cannot be parsed to JSON
+     */
+    public static JSONObject getAppAttributeKeysFromRegistry(String organization) throws APIManagementException {
+        JSONObject tenantConfigs = getTenantConfig(organization);
+        String property = APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS;
+        if (tenantConfigs.containsKey(property)) {
+            return (JSONObject) tenantConfigs.get(APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS);
+        }
+        return null;
+    }
 }

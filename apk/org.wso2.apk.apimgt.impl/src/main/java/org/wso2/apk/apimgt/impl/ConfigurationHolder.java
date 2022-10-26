@@ -18,6 +18,7 @@
 
 package org.wso2.apk.apimgt.impl;
 
+import org.json.simple.JSONArray;
 import org.wso2.apk.apimgt.api.model.APIStore;
 import org.wso2.apk.apimgt.impl.dto.DatasourceProperties;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
@@ -60,6 +61,8 @@ public class ConfigurationHolder {
     public ThrottleProperties getThrottleProperties() {
         return throttleProperties;
     }
+
+    private JSONArray applicationAttributes = new JSONArray();
 
     public void setThrottleProperties(ThrottleProperties throttleProperties) {
         //TODO: Read configs and assign
@@ -140,5 +143,9 @@ public class ConfigurationHolder {
 
     public RecommendationEnvironment getApiRecommendationEnvironment() {
         return recommendationEnvironment;
+    }
+
+    public JSONArray getApplicationAttributes() {
+        return applicationAttributes;
     }
 }
