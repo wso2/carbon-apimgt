@@ -2140,10 +2140,12 @@ public class APIMappingUtil {
 
         for (APIOperationsDTO operationsDTO : apiOperationsDTO) {
             String key = operationsDTO.getTarget() + ":" + operationsDTO.getVerb();
-            List<OperationPolicy> operationPolicies = uriTemplateMap.get(key).getOperationPolicies();
-            if (!operationPolicies.isEmpty()) {
-                operationsDTO.setOperationPolicies(
-                        OperationPolicyMappingUtil.fromOperationPolicyListToDTO(operationPolicies));
+            if (uriTemplateMap.get(key) != null) {
+                List<OperationPolicy> operationPolicies = uriTemplateMap.get(key).getOperationPolicies();
+                if (!operationPolicies.isEmpty()) {
+                    operationsDTO.setOperationPolicies(
+                            OperationPolicyMappingUtil.fromOperationPolicyListToDTO(operationPolicies));
+                }
             }
         }
     }
