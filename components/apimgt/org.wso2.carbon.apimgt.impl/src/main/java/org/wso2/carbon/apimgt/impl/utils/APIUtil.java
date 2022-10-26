@@ -9695,6 +9695,9 @@ public final class APIUtil {
 
         ArrayList<String> supportedAPIList = new ArrayList<>();
         supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP);
+        supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_SOAP);
+        supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_SOAPTOREST);
+        supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_GRAPHQL);
         policySpecification.setSupportedApiTypes(supportedAPIList);
 
         ArrayList<String> applicableFlows = new ArrayList<>();

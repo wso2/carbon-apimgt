@@ -52,7 +52,10 @@
       "items": {
         "type": "string",
         "enum": [
-          "HTTP"
+          "HTTP",
+          "SOAP",
+          "SOAPTOREST",
+          "GRAPHQL"
         ]
       },
       "minItems": 1
