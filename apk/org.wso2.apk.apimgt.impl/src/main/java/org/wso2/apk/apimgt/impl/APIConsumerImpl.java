@@ -1443,7 +1443,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             log.info("Replaced provided value: " + oldValue + " with default the value" +
                                     " for the hidden application attribute: " + attributeName);
                         }
-                    } else if (!applicationAttributes.keySet().contains(attributeName)) {
+                    } else if (!applicationAttributes.containsKey(attributeName)) {
                         if (StringUtils.isNotEmpty(defaultValue)) {
                             /*
                              * If a required attribute is not provided and a default value is given, we replace it with
@@ -1493,37 +1493,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
                 APIConstants.AuditLogConstants.CREATED, this.username);
 
-        boolean isTenantFlowStarted = false;
-        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
-        }
-        try {
-
-            WorkflowExecutor appCreationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-            ApplicationWorkflowDTO appWFDto = new ApplicationWorkflowDTO();
-            appWFDto.setApplication(application);
-
-            appWFDto.setExternalWorkflowReference(appCreationWFExecutor.generateUUID());
-            appWFDto.setWorkflowReference(String.valueOf(applicationId));
-            appWFDto.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-            appWFDto.setCallbackUrl(appCreationWFExecutor.getCallbackURL());
-            appWFDto.setStatus(WorkflowStatus.CREATED);
-            appWFDto.setTenantDomain(organization);
-            appWFDto.setTenantId(tenantId);
-            appWFDto.setUserName(userId);
-            appWFDto.setCreatedTime(System.currentTimeMillis());
-            appCreationWFExecutor.execute(appWFDto);
-        } catch (WorkflowException e) {
-            //If the workflow execution fails, roll back transaction by removing the application entry.
-            application.setId(applicationId);
-            apiMgtDAO.deleteApplication(application);
-            log.error("Unable to execute Application Creation Workflow", e);
-            handleException("Unable to execute Application Creation Workflow", e);
-        } finally {
-            if (isTenantFlowStarted) {
-                endTenantFlow();
-            }
-        }
+        //TODO: handle workflow functionality
 
         if (log.isDebugEnabled()) {
             log.debug("Application Name: " + application.getName() +" added successfully.");
@@ -1536,28 +1506,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
-        // get the workflow state once the executor is executed.
-        WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(applicationId),
-                WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-        // only send the notification if approved
-        // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
-        if (wfDTO != null) {
-            if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
-                ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
-                        System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
-                        organization, applicationId, application.getUUID(), application.getName(),
-                        application.getTokenType(),
-                        application.getTier(), application.getGroupId(), application.getApplicationAttributes(), userId);
-                APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
-            }
-        } else {
-            ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
-                    System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
-                    organization, applicationId, application.getUUID(), application.getName(),
-                    application.getTokenType(), application.getTier(), application.getGroupId(),
-                    application.getApplicationAttributes(), userId);
-            APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
-        }
+        // TODO: send the event after creation is successful
         return applicationId;
     }
 

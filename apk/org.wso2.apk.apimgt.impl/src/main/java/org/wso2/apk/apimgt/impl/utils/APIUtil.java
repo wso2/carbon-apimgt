@@ -157,6 +157,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -3999,5 +4000,38 @@ public final class APIUtil {
             return (JSONObject) tenantConfigs.get(APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS);
         }
         return null;
+    }
+
+    public static Tier findTier(Collection<Tier> tiers, String tierName) {
+        for (Tier tier : tiers) {
+            if (tier.getName() != null && tier.getName().equals(tierName)) {
+                return tier;
+            }
+        }
+        return null;
+    }
+
+    // moved from UserCoreUtil
+    public static String extractDomainFromName(String nameWithDomain) {
+        //TODO: implement user store functionality
+//        if (nameWithDomain.indexOf(UserConstants.DOMAIN_SEPARATOR) > 0) {
+//            String[] names = nameWithDomain.split(UserConstants.DOMAIN_SEPARATOR);
+//            return names[0];
+//        } else if (UserStoreMgtDSComponent.getRealmService() != null) {
+//
+//            RealmConfiguration realmConfiguration = UserStoreMgtDSComponent.getRealmService().getBootstrapRealmConfiguration();
+//            return realmConfiguration.getUserStoreProperty("DomainName") != null ? realmConfiguration.getUserStoreProperty("DomainName") : "PRIMARY";
+//        } else {
+//            return "PRIMARY";
+//        }
+        return "PRIMARY";
+    }
+
+    public static String retrieveDefaultReservedUsername() {
+        ConfigurationHolder apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String defaultReservedUsername = apiManagerConfiguration
+                .getFirstProperty(APIConstants.API_DEVPORTAL_DEFAULT_RESERVED_USERNAME);
+        return defaultReservedUsername;
     }
 }

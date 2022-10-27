@@ -82,6 +82,8 @@ import org.wso2.apk.apimgt.impl.dao.impl.*;
 import org.wso2.apk.apimgt.impl.dao.mapper.DocumentMapper;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.apk.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.apk.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.apk.apimgt.impl.utils.APINameComparator;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.impl.utils.TierNameComparator;
@@ -941,12 +943,11 @@ public abstract class AbstractAPIManager implements APIManager {
             }
             KeyManager keyManager = null;
 
-            // TODO : check keyManagerConfigurationDTO.isEnabled()
-//            if (keyManagerConfigurationDTO.isEnabled()) {
-//                keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
-//            } else {
-//                continue;
-//            }
+            if (keyManagerConfigurationDTO.isEnabled()) {
+                keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+            } else {
+                continue;
+            }
             apiKey.setKeyManager(keyManagerConfigurationDTO.getName());
             if (StringUtils.isNotEmpty(consumerKey)) {
                 if (keyManager != null) {
@@ -963,8 +964,7 @@ public abstract class AbstractAPIManager implements APIManager {
                         }
                         if (StringUtils.isNotEmpty(apiKey.getAppMetaData())) {
                             OAuthApplicationInfo storedOAuthApplicationInfo =
-                                    new Gson().fromJson(apiKey.getAppMetaData()
-                                            , OAuthApplicationInfo.class);
+                                    new Gson().fromJson(apiKey.getAppMetaData(), OAuthApplicationInfo.class);
                             if (oAuthApplicationInfo == null) {
                                 oAuthApplicationInfo = storedOAuthApplicationInfo;
                             } else {
@@ -1348,13 +1348,9 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     protected boolean isOauthAppValidation() {
-
-        // TODO : Read from  config
-//        String oauthAppValidation = null;
-//        String oauthAppValidation = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-//                .getAPIManagerConfiguration()
-//                .getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION);
-        String oauthAppValidation = null;
+        String oauthAppValidation = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration()
+                .getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION);
         if (StringUtils.isNotEmpty(oauthAppValidation)) {
             return Boolean.parseBoolean(oauthAppValidation);
         }
