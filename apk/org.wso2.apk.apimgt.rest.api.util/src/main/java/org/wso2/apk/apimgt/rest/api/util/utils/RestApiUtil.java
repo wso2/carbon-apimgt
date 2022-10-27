@@ -174,7 +174,8 @@ public class RestApiUtil {
         JSONObject loginInfoJsonObj = new JSONObject();
         try {
             loginInfoJsonObj.put("user", username);
-            loginInfoJsonObj.put("isSuperTenant", tenantDomain.equals("carbon.super"));
+            loginInfoJsonObj.put("isSuperTenant", tenantDomain.equals(APIConstants.MultitenantConstants
+                    .SUPER_TENANT_DOMAIN_NAME));
             String loginInfoString = loginInfoJsonObj.toJSONString();
             String[] groupIdArr = getGroupIds(loginInfoString);
             String groupId = "";
