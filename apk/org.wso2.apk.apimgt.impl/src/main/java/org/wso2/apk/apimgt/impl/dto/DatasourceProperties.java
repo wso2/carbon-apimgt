@@ -26,8 +26,8 @@ public class DatasourceProperties {
     private String password;
     private int maxPoolSize;
     private int minIdleTime;
-    private int maxLifeTime;
-    private int validationTimeout;
+    private long maxLifeTime;
+    private long validationTimeout;
     private boolean setAutocommit;
     private String testQuery;
 
@@ -87,7 +87,7 @@ public class DatasourceProperties {
         this.minIdleTime = minIdleTime;
     }
 
-    public int getMaxLifeTime() {
+    public long getMaxLifeTime() {
         return maxLifeTime;
     }
 
@@ -95,7 +95,7 @@ public class DatasourceProperties {
         this.maxLifeTime = maxLifeTime;
     }
 
-    public int getValidationTimeout() {
+    public long getValidationTimeout() {
         return validationTimeout;
     }
 

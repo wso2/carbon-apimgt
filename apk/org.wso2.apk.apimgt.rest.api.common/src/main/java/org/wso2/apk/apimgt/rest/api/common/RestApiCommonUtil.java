@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 
 public class RestApiCommonUtil {
 
-    public static final ThreadLocal userThreadLocal = new ThreadLocal();
+//    public static final ThreadLocal userThreadLocal = new ThreadLocal();
     private static final Log log = LogFactory.getLog(RestApiCommonUtil.class);
     private static Set<URITemplate> storeResourceMappings;
     private static Set<URITemplate> publisherResourceMappings;
@@ -46,17 +46,18 @@ public class RestApiCommonUtil {
 
     public static void unsetThreadLocalRequestedTenant() {
 
-        userThreadLocal.remove();
+//        userThreadLocal.remove();
     }
 
     public static String getThreadLocalRequestedTenant() {
 
-        return (String) userThreadLocal.get();
+//        return (String) userThreadLocal.get();
+        return null;
     }
 
     public static void setThreadLocalRequestedTenant(String user) {
 
-        userThreadLocal.set(user);
+//        userThreadLocal.set(user);
     }
 
     public static APIProvider getLoggedInUserProvider() throws APIManagementException {
@@ -377,12 +378,14 @@ public class RestApiCommonUtil {
 
     public static String getLoggedInUsername() {
 
-        return UserContext.getThreadLocalUserContext().getUsername();
+//        return UserContext.getThreadLocalUserContext().getUsername();
+        return "apkuser";
     }
 
     public static String getLoggedInUserTenantDomain() {
 
-        return UserContext.getThreadLocalUserContext().getOrganization();
+//        return UserContext.getThreadLocalUserContext().getOrganization();
+        return "carbon.super";
     }
 
     /**

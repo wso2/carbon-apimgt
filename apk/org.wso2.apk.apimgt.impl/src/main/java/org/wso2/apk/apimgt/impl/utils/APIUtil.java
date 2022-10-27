@@ -237,26 +237,26 @@ public final class APIUtil {
     }
 
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
-    static {
-        tenantIdleTimeMillis =
-                Long.parseLong(System.getProperty(
-                        TENANT_IDLE_TIME,
-                        String.valueOf(DEFAULT_TENANT_IDLE_MINS)))
-                        * 60 * 1000;
-        try (InputStream inputStream = APIAdminImpl.class.getResourceAsStream("/tenant/tenant-config-schema.json")) {
-            org.json.JSONObject tenantConfigSchema = new org.json.JSONObject(IOUtils.toString(inputStream));
-            tenantConfigJsonSchema = SchemaLoader.load(tenantConfigSchema);
-        } catch (IOException e) {
-            log.error("Error occurred while reading tenant-config-schema.json", e);
-        }
-
-        try (InputStream inputStream = APIUtil.class.getResourceAsStream("/operationPolicy/operation-policy-specification-schema.json")) {
-            org.json.JSONObject operationPolicySpecificationSchema = new org.json.JSONObject(IOUtils.toString(inputStream));
-            operationPolicySpecSchema = SchemaLoader.load(operationPolicySpecificationSchema);
-        } catch (IOException e) {
-            log.error("Error occurred while reading operation-policy-specification-schema.json", e);
-        }
-    }
+//    static {
+//        tenantIdleTimeMillis =
+//                Long.parseLong(System.getProperty(
+//                        TENANT_IDLE_TIME,
+//                        String.valueOf(DEFAULT_TENANT_IDLE_MINS)))
+//                        * 60 * 1000;
+//        try (InputStream inputStream = APIAdminImpl.class.getResourceAsStream("/tenant/tenant-config-schema.json")) {
+//            org.json.JSONObject tenantConfigSchema = new org.json.JSONObject(IOUtils.toString(inputStream));
+//            tenantConfigJsonSchema = SchemaLoader.load(tenantConfigSchema);
+//        } catch (IOException e) {
+//            log.error("Error occurred while reading tenant-config-schema.json", e);
+//        }
+//
+//        try (InputStream inputStream = APIUtil.class.getResourceAsStream("/operationPolicy/operation-policy-specification-schema.json")) {
+//            org.json.JSONObject operationPolicySpecificationSchema = new org.json.JSONObject(IOUtils.toString(inputStream));
+//            operationPolicySpecSchema = SchemaLoader.load(operationPolicySpecificationSchema);
+//        } catch (IOException e) {
+//            log.error("Error occurred while reading operation-policy-specification-schema.json", e);
+//        }
+//    }
 
     private static String hostAddress = null;
     private static final int timeoutInSeconds = 15;

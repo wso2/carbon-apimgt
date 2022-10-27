@@ -43,7 +43,6 @@ public class APKComponent {
         ConfigurationHolder config = new ConfigurationHolder();
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        // TODO: Read configuration object and use object mapper to load APIManager Configuration
         try {
             config = objectMapper.readValue(configuration, ConfigurationHolder.class);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(config);
@@ -56,14 +55,17 @@ public class APKComponent {
         try {
             // Initialize database
             APIMgtDBUtil.initialize();
-        } catch (APIManagerDatabaseException e) {
+            log.info("Datasource initialized successfully!");
+        } catch (Exception e) {
             throw new APIManagementException("Error while initializing database connection", e);
         }
 
         // Initialise SQL constant manager
+        log.debug("Initializing SQL constant manager");
         SQLConstantManagerFactory.initializeSQLConstantManager();
 
-        // initialize API-M Caches
-        CacheProvider.createTenantConfigCache();
+        //TODO: APK
+//        // initialize API-M Caches
+//        CacheProvider.createTenantConfigCache();
     }
 }
