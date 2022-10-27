@@ -214,7 +214,7 @@ public class ThrottlingCommonImpl {
      * @return Application policy list
      * @throws APIManagementException When getting application policies fail
      */
-    public static ApplicationThrottlePolicyListDTO getApplicationThrottlePolicies() throws APIManagementException {
+    public static String getApplicationThrottlePolicies() throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         String userName = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomain = APIUtil.getTenantDomain(userName);
@@ -223,19 +223,22 @@ public class ThrottlingCommonImpl {
         for (Policy policy : appPolicies) {
             policies.add((ApplicationPolicy) policy);
         }
-        return ApplicationThrottlePolicyMappingUtil
+
+        ApplicationThrottlePolicyListDTO dtoList = ApplicationThrottlePolicyMappingUtil
                 .fromApplicationPolicyArrayToListDTO(policies.toArray(new ApplicationPolicy[policies.size()]));
+        return RestApiAdminUtils.getJsonFromDTO(dtoList);
     }
 
     /**
      * Add new application throttle policy
      *
-     * @param body Application policy DTO
+//     * @param body Application policy DTO
      * @return Application policy DTO
      * @throws APIManagementException When adding application policy fails
      */
-    public static ApplicationThrottlePolicyDTO addApplicationThrottlePolicy(ApplicationThrottlePolicyDTO body)
+    public static String addApplicationThrottlePolicy(String json)
             throws APIManagementException {
+        ApplicationThrottlePolicyDTO body = RestApiAdminUtils.getDTOFromJson(json, ApplicationThrottlePolicyDTO.class);
         RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
         APIAdmin apiAdmin = new APIAdminImpl();
 
@@ -251,10 +254,11 @@ public class ThrottlingCommonImpl {
         }
         //Add the policy
         apiAdmin.addPolicy(appPolicy, username);
-
         //retrieve the new policy and send back as the response
         ApplicationPolicy newAppPolicy = apiAdmin.getApplicationPolicy(username, body.getPolicyName());
-        return ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyToDTO(newAppPolicy);
+        ApplicationThrottlePolicyDTO policyDto = ApplicationThrottlePolicyMappingUtil
+                .fromApplicationThrottlePolicyToDTO(newAppPolicy);
+        return RestApiAdminUtils.getJsonFromDTO(policyDto);
     }
 
     /**
@@ -1341,11 +1345,11 @@ public class ThrottlingCommonImpl {
                                 applicationPolicy.getPolicyName()));
             }
         } else {
-            ApplicationThrottlePolicyDTO applicationThrottlePolicyDTO = addApplicationThrottlePolicy(applicationPolicy);
-            String message =
-                    "Successfully imported Application Throttling Policy : " + applicationPolicy.getPolicyName();
-            responseObject.put(DTO, applicationThrottlePolicyDTO);
-            responseObject.put(MESSAGE, message);
+//            ApplicationThrottlePolicyDTO applicationThrottlePolicyDTO = addApplicationThrottlePolicy(applicationPolicy);
+//            String message =
+//                    "Successfully imported Application Throttling Policy : " + applicationPolicy.getPolicyName();
+//            responseObject.put(DTO, applicationThrottlePolicyDTO);
+//            responseObject.put(MESSAGE, message);
         }
         return responseObject;
     }
