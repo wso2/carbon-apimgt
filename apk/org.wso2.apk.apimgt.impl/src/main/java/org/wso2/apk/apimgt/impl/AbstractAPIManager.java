@@ -805,8 +805,6 @@ public abstract class AbstractAPIManager implements APIManager {
             policies = policyDAOImpl.getApplicationPolicies(tenantDomain);
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(level)) {
             policies = policyDAOImpl.getSubscriptionPolicies(tenantDomain);
-        } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(level)) {
-            policies = policyDAOImpl.getGlobalPolicies(tenantDomain);
         }
 
         //Get the API Manager configurations and check whether the unlimited tier is disabled. If disabled, remove

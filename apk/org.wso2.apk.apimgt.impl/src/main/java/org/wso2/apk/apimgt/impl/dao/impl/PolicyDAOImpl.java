@@ -13,7 +13,6 @@ import org.wso2.apk.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.apk.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.apk.apimgt.api.model.policy.Condition;
 import org.wso2.apk.apimgt.api.model.policy.EventCountLimit;
-import org.wso2.apk.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.apk.apimgt.api.model.policy.HeaderCondition;
 import org.wso2.apk.apimgt.api.model.policy.IPCondition;
 import org.wso2.apk.apimgt.api.model.policy.JWTClaimsCondition;
@@ -182,8 +181,6 @@ public class PolicyDAOImpl implements PolicyDAO {
             policyTable = PolicyConstants.API_THROTTLE_POLICY_TABLE;
         } else if (PolicyConstants.POLICY_LEVEL_APP.equalsIgnoreCase(policyType)) {
             policyTable = PolicyConstants.POLICY_APPLICATION_TABLE;
-        } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equalsIgnoreCase(policyType)) {
-            policyTable = PolicyConstants.POLICY_GLOBAL_TABLE;
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyType)) {
             policyTable = PolicyConstants.POLICY_SUBSCRIPTION_TABLE;
         }
@@ -721,85 +718,6 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     @Override
-    public void addGlobalPolicy(GlobalPolicy policy) throws APIManagementException {
-
-        Connection conn = null;
-        PreparedStatement policyStatement = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-            String addQuery = SQLConstants.INSERT_GLOBAL_POLICY_SQL;
-            policyStatement = conn.prepareStatement(addQuery);
-            policyStatement.setString(1, policy.getPolicyName());
-            policyStatement.setString(2, policy.getTenantDomain());
-            policyStatement.setString(3, policy.getKeyTemplate());
-            policyStatement.setString(4, policy.getDescription());
-
-            InputStream siddhiQueryInputStream;
-            byte[] byteArray = policy.getSiddhiQuery().getBytes(Charset.defaultCharset());
-            int lengthOfBytes = byteArray.length;
-            siddhiQueryInputStream = new ByteArrayInputStream(byteArray);
-            policyStatement.setBinaryStream(5, siddhiQueryInputStream, lengthOfBytes);
-            policyStatement.setBoolean(6, false);
-            policyStatement.setString(7, UUID.randomUUID().toString());
-            policyStatement.executeUpdate();
-            conn.commit();
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-
-                    // rollback failed. exception will be thrown later for upper exception
-                    log.error("Failed to rollback the add Global Policy: " + policy.toString(), ex);
-                }
-            }
-            handleExceptionWithCode("Failed to add Global Policy: " + policy, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
-        }
-    }
-
-    @Override
-    public GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException {
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String sqlQuery = SQLConstants.GET_GLOBAL_POLICY;
-
-        GlobalPolicy globalPolicy = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, policyName);
-            rs = ps.executeQuery();
-
-            if (rs.next()) {
-                String siddhiQuery = null;
-                globalPolicy = new GlobalPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
-                globalPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
-                globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
-                globalPolicy.setUUID(rs.getString(ThrottlePolicyConstants.COLUMN_UUID));
-                globalPolicy.setTenantDomain(rs.getString(ThrottlePolicyConstants.COLUMN_ORGANIZATION));
-                globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
-                globalPolicy.setDeployed(rs.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
-                InputStream siddhiQueryBlob = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
-                if (siddhiQueryBlob != null) {
-                    siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
-                }
-                globalPolicy.setSiddhiQuery(siddhiQuery);
-            }
-        } catch (SQLException e) {
-            handleExceptionWithCode("Error while executing SQL", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return globalPolicy;
-    }
-
-    @Override
     public APIPolicy getAPIPolicy(String policyName, String organization) throws APIManagementException {
 
         APIPolicy policy = null;
@@ -1213,7 +1131,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                     connection.rollback();
                 } catch (SQLException ex) {
                     // rollback failed. exception will be thrown later for upper exception
-                    log.error("Failed to rollback the add Global Policy: " + policy.toString(), ex);
+                    log.error("Failed to rollback the add API Policy: " + policy.toString(), ex);
                 }
                 handleExceptionWithCode("Failed to update API policy: "
                                 + policy.getPolicyName() + '-' + policy.getTenantDomain()
@@ -1467,61 +1385,6 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     @Override
-    public void updateGlobalPolicy(GlobalPolicy policy) throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement updateStatement = null;
-        InputStream siddhiQueryInputStream;
-
-        try {
-            byte[] byteArray = policy.getSiddhiQuery().getBytes(Charset.defaultCharset());
-            int lengthOfBytes = byteArray.length;
-            siddhiQueryInputStream = new ByteArrayInputStream(byteArray);
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            if (!StringUtils.isBlank(policy.getPolicyName()) && StringUtils.isNotBlank(policy.getTenantDomain())) {
-                updateStatement = connection.prepareStatement(SQLConstants.UPDATE_GLOBAL_POLICY_SQL);
-            } else if (!StringUtils.isBlank(policy.getUUID())) {
-                updateStatement = connection.prepareStatement(SQLConstants.UPDATE_GLOBAL_POLICY_BY_UUID_SQL);
-            } else {
-                String errorMsg =
-                        "Policy object doesn't contain mandatory parameters. At least UUID or Name,Organization"
-                                + " should be provided. Name: " + policy.getPolicyName()
-                                + ", Organization: " + policy.getTenantDomain() + ", UUID: " + policy.getUUID();
-                log.error(errorMsg);
-                throw new APIManagementException(errorMsg, ExceptionCodes.BAD_POLICY_OBJECT);
-            }
-
-            updateStatement.setString(1, policy.getDescription());
-            updateStatement.setBinaryStream(2, siddhiQueryInputStream, lengthOfBytes);
-            updateStatement.setString(3, policy.getKeyTemplate());
-            if (!StringUtils.isBlank(policy.getPolicyName()) && StringUtils.isNotBlank(policy.getTenantDomain())) {
-                updateStatement.setString(4, policy.getPolicyName());
-                updateStatement.setString(5, policy.getTenantDomain());
-            } else if (!StringUtils.isBlank(policy.getUUID())) {
-                updateStatement.setString(4, policy.getUUID());
-            }
-            updateStatement.executeUpdate();
-            connection.commit();
-        } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-
-                    // Rollback failed. Exception will be thrown later for upper exception
-                    log.error("Failed to rollback the update Global Policy: " + policy.toString(), ex);
-                }
-            }
-            handleExceptionWithCode("Failed to update global policy: "
-                            + policy.getPolicyName() + '-' + policy.getTenantDomain(), e,
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
-        }
-    }
-
-    @Override
     public String[] getPolicyNames(String policyLevel, String username) throws APIManagementException {
 
         List<String> names = new ArrayList<String>();
@@ -1540,9 +1403,8 @@ public class PolicyDAOImpl implements PolicyDAO {
                 sqlQuery = SQLConstants.GET_APP_POLICY_NAMES;
             } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
                 sqlQuery = SQLConstants.GET_SUB_POLICY_NAMES;
-            } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
-                sqlQuery = SQLConstants.GET_GLOBAL_POLICY_NAMES;
             }
+
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, tenantDomain);
             rs = ps.executeQuery();
@@ -1575,8 +1437,6 @@ public class PolicyDAOImpl implements PolicyDAO {
             deleteTierPermissionsQuery = SQLConstants.DELETE_THROTTLE_TIER_BY_NAME_PERMISSION_SQL;
         } else if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
             query = SQLConstants.ThrottleSQLConstants.DELETE_API_POLICY_SQL;
-        } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
-            query = SQLConstants.DELETE_GLOBAL_POLICY_SQL;
         }
 
         try {
@@ -1600,36 +1460,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(deleteStatement, connection, null);
         }
-    }
-
-    @Override
-    public boolean isKeyTemplatesExist(GlobalPolicy policy) throws APIManagementException {
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sqlQuery = null;
-
-        try {
-            conn = APIMgtDBUtil.getConnection();
-
-            sqlQuery = SQLConstants.GET_GLOBAL_POLICY_KEY_TEMPLATE;
-
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, policy.getTenantDomain());
-            ps.setString(2, policy.getKeyTemplate());
-            ps.setString(3, policy.getPolicyName());
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return true;
-            }
-
-        } catch (SQLException e) {
-            handleException("Error while executing SQL to get GLOBAL_POLICY_KEY_TEMPLATE", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return false;
     }
 
     @Override
@@ -1825,45 +1655,6 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     @Override
-    public GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException {
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String sqlQuery = SQLConstants.GET_GLOBAL_POLICY_BY_UUID;
-
-        GlobalPolicy globalPolicy = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, uuid);
-            rs = ps.executeQuery();
-
-            if (rs.next()) {
-                String siddhiQuery = null;
-                globalPolicy = new GlobalPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
-                globalPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
-                globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
-                globalPolicy.setUUID(rs.getString(ThrottlePolicyConstants.COLUMN_UUID));
-                globalPolicy.setTenantDomain(rs.getString(ThrottlePolicyConstants.COLUMN_ORGANIZATION));
-                globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
-                globalPolicy.setDeployed(rs.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
-                InputStream siddhiQueryBlob = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
-                if (siddhiQueryBlob != null) {
-                    siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
-                }
-                globalPolicy.setSiddhiQuery(siddhiQuery);
-            }
-        } catch (SQLException e) {
-            handleException("Error while retrieving global policy by uuid " + uuid, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return globalPolicy;
-    }
-
-    @Override
     public APIPolicy[] getAPIPolicies(String organization) throws APIManagementException {
 
         List<APIPolicy> policies = new ArrayList<APIPolicy>();
@@ -1982,48 +1773,6 @@ public class PolicyDAOImpl implements PolicyDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return policies.toArray(new SubscriptionPolicy[policies.size()]);
-    }
-
-    @Override
-    public GlobalPolicy[] getGlobalPolicies(String organization) throws APIManagementException {
-
-        List<GlobalPolicy> policies = new ArrayList<GlobalPolicy>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String sqlQuery = SQLConstants.GET_GLOBAL_POLICIES;
-        if (forceCaseInsensitiveComparisons) {
-            sqlQuery = SQLConstants.GET_GLOBAL_POLICIES;
-        }
-
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, organization);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                String siddhiQuery = null;
-                GlobalPolicy globalPolicy = new GlobalPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
-                globalPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
-                globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
-                globalPolicy.setUUID(rs.getString(ThrottlePolicyConstants.COLUMN_UUID));
-                globalPolicy.setTenantDomain(rs.getString(ThrottlePolicyConstants.COLUMN_ORGANIZATION));
-                globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
-                globalPolicy.setDeployed(rs.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
-                InputStream siddhiQueryBlob = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
-                if (siddhiQueryBlob != null) {
-                    siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
-                }
-                globalPolicy.setSiddhiQuery(siddhiQuery);
-                policies.add(globalPolicy);
-            }
-        } catch (SQLException e) {
-            handleExceptionWithCode("Error while executing SQL", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return policies.toArray(new GlobalPolicy[policies.size()]);
     }
 
 }

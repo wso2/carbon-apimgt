@@ -3193,17 +3193,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return policyNames;
     }
 
-    /**
-     * Returns true if key template given by the global policy already exists.
-     * But this check will exclude the policy represented by the policy name
-     *
-     * @param policy Global policy
-     * @return true if Global policy key template already exists
-     */
-    public boolean isGlobalPolicyKeyTemplateExists(GlobalPolicy policy) throws APIManagementException {
-        return policyDAOImpl.isKeyTemplatesExist(policy);
-    }
-
     @Override
     public BlockConditionsDTO getBlockCondition(int conditionId) throws APIManagementException {
         return blockConditionDAOImpl.getBlockCondition(conditionId);
@@ -3295,11 +3284,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public SubscriptionPolicy getSubscriptionPolicy(String username, String policyName) throws APIManagementException {
         return policyDAOImpl.getSubscriptionPolicy(policyName, APIUtil.getTenantDomain(username));
-    }
-
-    @Override
-    public GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException {
-        return policyDAOImpl.getGlobalPolicy(policyName);
     }
 
     /**

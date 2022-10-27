@@ -712,8 +712,6 @@ public class APIAdminImpl implements APIAdmin {
             policies = policyDAOImpl.getApplicationPolicies(organization);
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(level)) {
             policies = policyDAOImpl.getSubscriptionPolicies(organization);
-        } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(level)) {
-            policies = policyDAOImpl.getGlobalPolicies(organization);
         }
 
         //Get the API Manager configurations and check whether the unlimited tier is disabled. If disabled, remove
@@ -759,8 +757,6 @@ public class APIAdminImpl implements APIAdmin {
             policy = policyDAOImpl.getApplicationPolicy(name, organization);
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(level)) {
             policy = policyDAOImpl.getSubscriptionPolicy(name, organization);
-        } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(level)) {
-            policy = policyDAOImpl.getGlobalPolicy(name);
         }
 
         //Get the API Manager configurations and check whether the unlimited tier is disabled. If disabled, remove
@@ -802,11 +798,6 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException {
-        return policyDAOImpl.getGlobalPolicy(policyName);
-    }
-
-    @Override
     public List<BlockConditionsDTO> getBlockConditions(String organization) throws APIManagementException {
         return blockConditionDAOImpl.getBlockConditions(organization);
     }
@@ -834,15 +825,6 @@ public class APIAdminImpl implements APIAdmin {
         SubscriptionPolicy policy = policyDAOImpl.getSubscriptionPolicyByUUID(uuid);
         if (policy == null) {
             handlePolicyNotFoundException("Subscription Policy: " + uuid + " was not found.");
-        }
-        return policy;
-    }
-
-    @Override
-    public GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException {
-        GlobalPolicy policy = policyDAOImpl.getGlobalPolicyByUUID(uuid);
-        if (policy == null) {
-            handlePolicyNotFoundException("Global Policy: " + uuid + " was not found.");
         }
         return policy;
     }
@@ -954,27 +936,6 @@ public class APIAdminImpl implements APIAdmin {
 //                    subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),
 //                    subPolicy.getGraphQLMaxDepth(),subPolicy.getGraphQLMaxComplexity(),subPolicy.getSubscriberCount());
 //            APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
-        } else if (policy instanceof GlobalPolicy) {
-            GlobalPolicy globalPolicy = (GlobalPolicy) policy;
-
-            // checking if policy already exist
-            Policy existingPolicy = getGlobalPolicy(globalPolicy.getPolicyName());
-            if (existingPolicy != null) {
-                throw new APIManagementException("Policy name already exists", ExceptionCodes.GLOBAL_POLICY_EXISTS);
-            }
-
-            policyDAOImpl.addGlobalPolicy(globalPolicy);
-
-            //TODO:APK
-//            publishKeyTemplateEvent(globalPolicy.getKeyTemplate(), "add");
-
-            GlobalPolicy retrievedPolicy = policyDAOImpl.getGlobalPolicy(globalPolicy.getPolicyName());
-            //TODO:APK
-//            GlobalPolicyEvent globalPolicyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
-//                    globalPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
-//                    globalPolicy.getPolicyName());
-//            APIUtil.sendNotification(globalPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else {
             String msg = "Policy type " + policy.getClass().getName() + " is not supported";
             log.error(msg);
@@ -1080,23 +1041,6 @@ public class APIAdminImpl implements APIAdmin {
 //                    subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),subPolicy.getGraphQLMaxDepth(),
 //                    subPolicy.getGraphQLMaxComplexity(), subPolicy.getSubscriberCount());
 //            APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
-        } else if (policy instanceof GlobalPolicy) {
-            GlobalPolicy globalPolicy = (GlobalPolicy) policy;
-
-            // getting key templates before updating database
-            GlobalPolicy oldGlobalPolicy = policyDAOImpl.getGlobalPolicy(policy.getPolicyName());
-            oldKeyTemplate = oldGlobalPolicy.getKeyTemplate();
-            newKeyTemplate = globalPolicy.getKeyTemplate();
-
-            policyDAOImpl.updateGlobalPolicy(globalPolicy);
-
-            GlobalPolicy retrievedPolicy = policyDAOImpl.getGlobalPolicy(globalPolicy.getPolicyName());
-            //TODO:APK
-//            GlobalPolicyEvent globalPolicyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
-//                    globalPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
-//                    globalPolicy.getPolicyName());
-//            APIUtil.sendNotification(globalPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else {
             String msg = "Policy type " + policy.getClass().getName() + " is not supported";
             log.error(msg);
@@ -1169,26 +1113,11 @@ public class APIAdminImpl implements APIAdmin {
 //                    subscriptionPolicy.isStopOnQuotaReach(), subscriptionPolicy.getGraphQLMaxDepth(),
 //                    subscriptionPolicy.getGraphQLMaxComplexity(), subscriptionPolicy.getSubscriberCount());
 //            APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
-        } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
-            GlobalPolicy globalPolicy = policyDAOImpl.getGlobalPolicy(policyName);
-            //TODO:APK
-//            GlobalPolicyEvent globalPolicyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
-//                    System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,
-//                    globalPolicy.getTenantDomain(), globalPolicy.getPolicyId(), globalPolicy.getPolicyName());
-//            APIUtil.sendNotification(globalPolicyEvent, APIConstants.NotifierType.POLICY.name());
         }
 
-        GlobalPolicy globalPolicy = null;
-        if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
-            globalPolicy = policyDAOImpl.getGlobalPolicy(policyName);
-        }
         //remove from database
         policyDAOImpl.removeThrottlePolicy(policyLevel, policyName, tenantDomain);
 
-        if (globalPolicy != null) {
-            //TODO:APK
-//            publishKeyTemplateEvent(globalPolicy.getKeyTemplate(), "remove");
-        }
     }
 
     @Override

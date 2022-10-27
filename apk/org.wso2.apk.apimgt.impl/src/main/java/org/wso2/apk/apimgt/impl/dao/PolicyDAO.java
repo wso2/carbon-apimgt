@@ -64,23 +64,6 @@ public interface PolicyDAO {
     SubscriptionPolicy getSubscriptionPolicy(String policyName, String organization) throws APIManagementException;
 
     /**
-     * Add a Global level throttling policy to database
-     *
-     * @param policy Global Policy
-     * @throws APIManagementException
-     */
-    void addGlobalPolicy(GlobalPolicy policy) throws APIManagementException;
-
-    /**
-     * Get a particular Global level policy.
-     *
-     * @param policyName name of the global polixy
-     * @return {@link GlobalPolicy}
-     * @throws APIManagementException
-     */
-    GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException;
-
-    /**
      * Update a API level throttling policy to database.
      * <p>
      * If condition group already exists for the policy, that condition Group will be deleted and condition Group will
@@ -111,14 +94,6 @@ public interface PolicyDAO {
     void updateSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException;
 
     /**
-     * Updates global throttle policy in database
-     *
-     * @param policy updated policy object
-     * @throws APIManagementException
-     */
-    void updateGlobalPolicy(GlobalPolicy policy) throws APIManagementException;
-
-    /**
      * Retrieves list of available policy names under <code>policyLevel</code>
      * and user <code>username</code>'s tenant
      *
@@ -139,15 +114,6 @@ public interface PolicyDAO {
      */
     void removeThrottlePolicy(String policyLevel, String policyName, String organization)
             throws APIManagementException;
-
-    /**
-     * Returns true if the key template exist in DB
-     *
-     * @param policy Global Policy
-     * @return true if key template already exists
-     * @throws APIManagementException
-     */
-    boolean isKeyTemplatesExist(GlobalPolicy policy) throws APIManagementException;
 
     /**
      * Returns true if Application Policy is attached to Application
@@ -208,15 +174,6 @@ public interface PolicyDAO {
     SubscriptionPolicy getSubscriptionPolicyByUUID(String uuid) throws APIManagementException;
 
     /**
-     * Get a particular Global level policy given UUID.
-     *
-     * @param uuid name of the global polixy
-     * @return {@link GlobalPolicy}
-     * @throws APIManagementException
-     */
-    GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException;
-
-    /**
      * Get API level policies. Result only contains basic details of the policy,
      * it doesn't contain pipeline information.
      *
@@ -237,19 +194,9 @@ public interface PolicyDAO {
     /**
      * Get all subscription level policies belongs to specific tenant
      *
-     * @param organization tenantID filters the polices belongs to specific tenant
+     * @param organization filters the polices belongs to specific organization
      * @return subscriptionPolicy array list
      */
     SubscriptionPolicy[] getSubscriptionPolicies(String organization) throws APIManagementException;
-
-    /**
-     * Get all Global level policeis belongs to specific tenant
-     *
-     * @param organization Policy organization
-     * @return
-     * @throws APIManagementException
-     */
-    GlobalPolicy[] getGlobalPolicies(String organization) throws APIManagementException;
-
 
 }
