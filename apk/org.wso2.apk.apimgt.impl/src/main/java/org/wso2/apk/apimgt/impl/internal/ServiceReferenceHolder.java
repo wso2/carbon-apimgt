@@ -16,11 +16,15 @@
 
 package org.wso2.apk.apimgt.impl.internal;
 
+import org.wso2.apk.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.apk.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.apk.apimgt.impl.caching.CacheProvider;
 import org.wso2.apk.apimgt.impl.config.APIMConfigService;
 import org.wso2.apk.apimgt.impl.config.APIMConfigServiceImpl;
 import org.wso2.apk.apimgt.impl.recommendationmgt.AccessTokenGenerator;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ServiceReferenceHolder {
 
@@ -30,6 +34,7 @@ public class ServiceReferenceHolder {
     private CacheProvider cacheProvider;
 
     private AccessTokenGenerator accessTokenGenerator;
+    private Map<String, KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap = new HashMap<>();
 
     private ServiceReferenceHolder() {
 
@@ -77,5 +82,22 @@ public class ServiceReferenceHolder {
 
     public void setAccessTokenGenerator(AccessTokenGenerator accessTokenGenerator) {
         this.accessTokenGenerator = accessTokenGenerator;
+    }
+
+    public void addKeyManagerConnectorConfiguration(String type,
+                                                    KeyManagerConnectorConfiguration keyManagerConnectorConfiguration) {
+        keyManagerConnectorConfigurationMap.put(type, keyManagerConnectorConfiguration);
+    }
+
+    public void removeKeyManagerConnectorConfiguration(String type) {
+        keyManagerConnectorConfigurationMap.remove(type);
+    }
+
+    public KeyManagerConnectorConfiguration getKeyManagerConnectorConfiguration(String type) {
+        return keyManagerConnectorConfigurationMap.get(type);
+    }
+
+    public Map<String, KeyManagerConnectorConfiguration> getKeyManagerConnectorConfigurations() {
+        return keyManagerConnectorConfigurationMap;
     }
 }
