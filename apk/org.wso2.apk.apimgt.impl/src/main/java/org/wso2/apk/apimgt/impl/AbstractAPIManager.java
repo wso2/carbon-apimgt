@@ -504,7 +504,7 @@ public abstract class AbstractAPIManager implements APIManager {
             int tenantId = UserManagerHolder.getUserManager().getTenantId(getTenantDomain(username));
             subscriber.setEmail(StringUtils.EMPTY);
             subscriber.setTenantId(tenantId);
-            apiMgtDAO.addSubscriber(subscriber, groupingId);
+            consumerDAOImpl.addSubscriber(subscriber, groupingId);
             if (APIUtil.isDefaultApplicationCreationEnabled() &&
                     !APIUtil.isDefaultApplicationCreationDisabledForTenant(getTenantDomain(username))) {
                 // Add a default application once subscriber is added
@@ -559,13 +559,13 @@ public abstract class AbstractAPIManager implements APIManager {
     public void updateSubscriber(Subscriber subscriber)
             throws APIManagementException {
 
-        apiMgtDAO.updateSubscriber(subscriber);
+        consumerDAOImpl.updateSubscriber(subscriber);
     }
 
     public Subscriber getSubscriber(int subscriberId)
             throws APIManagementException {
 
-        return apiMgtDAO.getSubscriber(subscriberId);
+        return consumerDAOImpl.getSubscriber(subscriberId);
     }
 
     /**
@@ -1054,7 +1054,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public List<APIProductResource> getResourcesOfAPIProduct(APIProductIdentifier productIdentifier)
             throws APIManagementException {
 
-        return apiMgtDAO.getAPIProductResourceMappings(productIdentifier);
+        return apiDAOImpl.getAPIProductResourceMappings(productIdentifier);
     }
 
     protected void populateDevPortalAPIInformation(String uuid, String organization, API api)

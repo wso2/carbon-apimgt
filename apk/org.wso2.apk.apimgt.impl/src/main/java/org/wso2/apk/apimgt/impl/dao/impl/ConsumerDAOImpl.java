@@ -7,6 +7,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.apk.apimgt.api.*;
 import org.wso2.apk.apimgt.api.model.*;
+import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.apk.apimgt.impl.dao.ConsumerDAO;
 import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
@@ -20,6 +21,7 @@ import org.wso2.apk.apimgt.user.mgt.util.UserUtils;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 public class ConsumerDAOImpl implements ConsumerDAO {
     private static final Log log = LogFactory.getLog(ConsumerDAOImpl.class);
@@ -45,6 +47,50 @@ public class ConsumerDAOImpl implements ConsumerDAO {
 
         log.error(msg, t);
         throw new APIManagementException(msg, t);
+    }
+
+    public void addSubscriber(Subscriber subscriber, String groupingId) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            String query = SQLConstants.ADD_SUBSCRIBER_SQL;
+            ps = conn.prepareStatement(query, new String[]{"subscriber_id"});
+
+            ps.setString(1, subscriber.getName());
+            ps.setInt(2, subscriber.getTenantId());
+            ps.setString(3, subscriber.getEmail());
+
+            Timestamp timestamp = new Timestamp(subscriber.getSubscribedDate().getTime());
+            ps.setTimestamp(4, timestamp);
+            ps.setString(5, subscriber.getName());
+            ps.setTimestamp(6, timestamp);
+            ps.setTimestamp(7, timestamp);
+            ps.executeUpdate();
+
+            int subscriberId = 0;
+            rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                subscriberId = Integer.parseInt(rs.getString(1));
+            }
+            subscriber.setId(subscriberId);
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Error while rolling back the failed operation", e1);
+                }
+            }
+            handleException("Error in adding new subscriber: " + e.getMessage(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
     }
 
     @Override
@@ -84,6 +130,69 @@ public class ConsumerDAOImpl implements ConsumerDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, result);
         }
         return subscriber;
+    }
+
+    public void updateSubscriber(Subscriber subscriber) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            String query = SQLConstants.UPDATE_SUBSCRIBER_SQL;
+
+            ps = conn.prepareStatement(query);
+            ps.setString(1, subscriber.getName());
+            ps.setInt(2, subscriber.getTenantId());
+            ps.setString(3, subscriber.getEmail());
+            ps.setTimestamp(4, new Timestamp(subscriber.getSubscribedDate().getTime()));
+            ps.setString(5, subscriber.getName());
+            ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+            ps.setInt(7, subscriber.getId());
+            ps.executeUpdate();
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Error while rolling back the failed operation", e1);
+                }
+            }
+            handleException("Error in updating subscriber: " + e.getMessage(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
+    public Subscriber getSubscriber(int subscriberId) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String query = SQLConstants.GET_SUBSCRIBER_SQL;
+
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, subscriberId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                Subscriber subscriber = new Subscriber(rs.getString("USER_ID"));
+                subscriber.setId(subscriberId);
+                subscriber.setTenantId(rs.getInt("TENANT_ID"));
+                subscriber.setEmail(rs.getString("EMAIL_ADDRESS"));
+                subscriber.setSubscribedDate(new Date(rs.getTimestamp("DATE_SUBSCRIBED").getTime()));
+                return subscriber;
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving subscriber: " + e.getMessage(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return null;
     }
 
     @Override
@@ -411,6 +520,91 @@ public class ConsumerDAOImpl implements ConsumerDAO {
     }
 
     @Override
+    public JSONObject getUserRatingInfo(String uuid, String user) throws APIManagementException {
+
+        Connection conn = null;
+        JSONObject userRating = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            userRating = getUserRatingInfo(uuid, user, conn);
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback getting user ratings info ", e1);
+                }
+            }
+            handleException("Failed to get user ratings info", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, conn, null);
+        }
+        return userRating;
+    }
+
+    /**
+     * @param uuid API uuid
+     * @param userId     User Id
+     * @param conn       Database connection
+     * @throws APIManagementException if failed to get user API Ratings
+     */
+    private JSONObject getUserRatingInfo(String uuid, String userId, Connection conn)
+            throws APIManagementException, SQLException {
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        JSONObject ratingObj = new JSONObject();
+        int userRating = 0;
+        int id = -1;
+        String ratingId = null;
+        try {
+            int tenantId;
+            tenantId = APIUtil.getTenantId(userId);
+            //Get subscriber Id
+            Subscriber subscriber = getSubscriber(userId, tenantId, conn);
+            if (subscriber == null) {
+                String msg = "Could not load Subscriber records for: " + userId;
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+            //Get API Id
+            id = getAPIID(uuid, conn);
+
+            String sqlQuery = SQLConstants.GET_API_RATING_INFO_SQL;
+            if (id == -1) {
+                String msg = "Could not load API record for API with UUID: " + uuid;
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+            //This query to get rating information from the AM_API_RATINGS table
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, subscriber.getId());
+            ps.setInt(2, id);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                ratingId = rs.getString("RATING_ID");
+                userRating = rs.getInt("RATING");
+            }
+            if (ratingId != null) {
+                // A rating record exists
+                ratingObj.put(APIConstants.RATING_ID, ratingId);
+                ratingObj.put(APIConstants.USER_NAME, userId);
+                ratingObj.put(APIConstants.RATING, userRating);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve API ratings ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, rs);
+        }
+        return ratingObj;
+    }
+
+    @Override
     public JSONArray getAPIRatings(String apiId) throws APIManagementException {
 
         Connection conn = null;
@@ -562,6 +756,47 @@ public class ConsumerDAOImpl implements ConsumerDAO {
 
         BigDecimal decimal = new BigDecimal(avrRating);
         return Float.parseFloat(decimal.setScale(1, BigDecimal.ROUND_UP).toString());
+    }
+
+    @Override
+    public float getAverageRating(int apiId) throws APIManagementException {
+
+        Connection conn = null;
+        float avrRating = 0;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            if (apiId == -1) {
+                String msg = "Invalid APIId : " + apiId;
+                log.error(msg);
+                return Float.NEGATIVE_INFINITY;
+            }
+            //This query to update the AM_API_RATINGS table
+            String sqlQuery = SQLConstants.GET_API_AVERAGE_RATING_SQL;
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, apiId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                avrRating = rs.getFloat("RATING");
+            }
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback getting user ratings ", e1);
+                }
+            }
+            handleException("Failed to get user ratings", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return avrRating;
     }
 
     @Override
@@ -1384,6 +1619,262 @@ public class ConsumerDAOImpl implements ConsumerDAO {
     }
 
     @Override
+    public void removeSubscription(Identifier identifier, int applicationId) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        int id = -1;
+        String uuid;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            String subscriptionUUIDQuery = SQLConstants.GET_SUBSCRIPTION_UUID_SQL;
+            if (identifier.getId() > 0) {
+                id = identifier.getId();
+            } else if (identifier instanceof APIIdentifier) {
+                String apiUuid;
+                if (identifier.getUUID() != null) {
+                    apiUuid = identifier.getUUID();
+                } else {
+                    apiUuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier((APIIdentifier) identifier);
+                }
+                id = getAPIID(apiUuid, conn);
+            } else if (identifier instanceof APIProductIdentifier) {
+                id = ((APIProductIdentifier) identifier).getProductId();
+            }
+            ps = conn.prepareStatement(subscriptionUUIDQuery);
+            ps.setInt(1, id);
+            ps.setInt(2, applicationId);
+            resultSet = ps.executeQuery();
+
+            if (resultSet.next()) {
+                uuid = resultSet.getString("UUID");
+                SubscribedAPI subscribedAPI = new SubscribedAPI(uuid);
+                removeSubscription(subscribedAPI, conn);
+            } else {
+                throw new APIManagementException("UUID does not exist for the given apiId:" + id + " and " +
+                        "application id:" + applicationId,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE,
+                                "Failed to remove subscription data"));
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    log.error("Failed to rollback the add subscription ", ex);
+                }
+            }
+            handleException("Failed to add subscriber data ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+    }
+
+    private void removeSubscription(SubscribedAPI subscription, Connection conn) throws APIManagementException {
+
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        PreparedStatement preparedStForUpdateOrDelete = null;
+        String subStatus = null;
+
+        try {
+            String subscriptionStatusQuery = SQLConstants.GET_SUBSCRIPTION_STATUS_BY_UUID_SQL;
+
+            ps = conn.prepareStatement(subscriptionStatusQuery);
+            ps.setString(1, subscription.getUUID());
+            resultSet = ps.executeQuery();
+
+            if (resultSet.next()) {
+                subStatus = resultSet.getString("SUB_STATUS");
+            }
+
+            // If the user was unblocked, remove the entry from DB, else change the status and keep the entry.
+            String updateQuery = SQLConstants.UPDATE_SUBSCRIPTION_SQL;
+            String deleteQuery = SQLConstants.REMOVE_SUBSCRIPTION_SQL;
+
+            if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus) || APIConstants.SubscriptionStatus
+                    .PROD_ONLY_BLOCKED.equals(subStatus)) {
+                preparedStForUpdateOrDelete = conn.prepareStatement(updateQuery);
+                preparedStForUpdateOrDelete.setString(1, subscription.getUUID());
+            } else {
+                preparedStForUpdateOrDelete = conn.prepareStatement(deleteQuery);
+                preparedStForUpdateOrDelete.setString(1, subscription.getUUID());
+            }
+            preparedStForUpdateOrDelete.executeUpdate();
+        } catch (SQLException e) {
+            handleExceptionWithCode("Failed to remove subscriber data " + subscription.getUUID(), e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE,
+                            "Failed to remove subscription data"));
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
+            APIMgtDBUtil.closeAllConnections(preparedStForUpdateOrDelete, null, null);
+        }
+    }
+
+    @Override
+    public void removeAllSubscriptions(String uuid) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        int apiId;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            apiId = getAPIID(uuid, conn);
+
+            String sqlQuery = SQLConstants.REMOVE_ALL_SUBSCRIPTIONS_SQL;
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, apiId);
+            ps.executeUpdate();
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback remove all subscription ", e1);
+                }
+            }
+            handleExceptionWithCode("Failed to remove all subscriptions data ", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
+    @Override
+    public String getSubscriptionStatusById(int subscriptionId) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String subscriptionStatus = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String getApiQuery = SQLConstants.GET_SUBSCRIPTION_STATUS_BY_ID_SQL;
+            ps = conn.prepareStatement(getApiQuery);
+            ps.setInt(1, subscriptionId);
+            resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                subscriptionStatus = resultSet.getString("SUB_STATUS");
+            }
+            return subscriptionStatus;
+        } catch (SQLException e) {
+            String errorMessage = "Failed to retrieve subscription status";
+            handleExceptionWithCode(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
+
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return null;
+    }
+
+    @Override
+    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName, String groupingId)
+            throws APIManagementException {
+
+        Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet result = null;
+        String sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_SQL;
+
+        String whereClauseWithGroupId = " AND (APP.GROUP_ID = ? OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL)"
+                + " AND SUB.USER_ID = ?))";
+        String whereClauseWithGroupIdorceCaseInsensitiveComp = " AND (APP.GROUP_ID = ?"
+                + " OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL) AND LOWER(SUB.USER_ID) = LOWER(?)))";
+        String whereClause = " AND SUB.USER_ID = ? ";
+        String whereClauseCaseSensitive = " AND LOWER(SUB.USER_ID) = LOWER(?) ";
+
+        String whereClauseWithMultiGroupId = " AND  ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM " +
+                "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params)  AND TENANT = ?))  OR  ( SUB.USER_ID = ? ))";
+        String whereClauseWithMultiGroupIdCaseInsensitive = " AND  ( (APP.APPLICATION_ID IN  (SELECT APPLICATION_ID " +
+                "FROM AM_APPLICATION_GROUP_MAPPING  WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  ( LOWER(SUB" +
+                ".USER_ID) = LOWER" +
+                "(?) ))";
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
+
+                if (multiGroupAppSharingEnabled) {
+                    if (forceCaseInsensitiveComparisons) {
+                        sqlQuery += whereClauseWithMultiGroupIdCaseInsensitive;
+                    } else {
+                        sqlQuery += whereClauseWithMultiGroupId;
+                    }
+                    String tenantDomain = APIUtil.getTenantDomain(subscriber.getName());
+                    String groupIdArr[] = groupingId.split(",");
+
+                    ps = fillQueryParams(connection, sqlQuery, groupIdArr, 3);
+                    int tenantId = APIUtil.getTenantId(subscriber.getName());
+                    ps.setInt(1, tenantId);
+                    ps.setString(2, applicationName);
+                    int paramIndex = groupIdArr.length + 2;
+                    ps.setString(++paramIndex, tenantDomain);
+                    ps.setString(++paramIndex, subscriber.getName());
+                } else {
+                    if (forceCaseInsensitiveComparisons) {
+                        sqlQuery += whereClauseWithGroupIdorceCaseInsensitiveComp;
+                    } else {
+                        sqlQuery += whereClauseWithGroupId;
+                    }
+                    ps = connection.prepareStatement(sqlQuery);
+                    int tenantId = APIUtil.getTenantId(subscriber.getName());
+                    ps.setInt(1, tenantId);
+                    ps.setString(2, applicationName);
+                    ps.setString(3, groupingId);
+                    ps.setString(4, subscriber.getName());
+                }
+            } else {
+                if (forceCaseInsensitiveComparisons) {
+                    sqlQuery += whereClauseCaseSensitive;
+                } else {
+                    sqlQuery += whereClause;
+                }
+                ps = connection.prepareStatement(sqlQuery);
+                int tenantId = APIUtil.getTenantId(subscriber.getName());
+                ps.setInt(1, tenantId);
+                ps.setString(2, applicationName);
+                ps.setString(3, subscriber.getName());
+            }
+            result = ps.executeQuery();
+
+            while (result.next()) {
+                APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
+                        ("API_PROVIDER")), result.getString("API_NAME"), result.getString("API_VERSION"));
+                apiIdentifier.setUuid(result.getString("API_UUID"));
+
+                SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
+                subscribedAPI.setSubscriptionId(result.getInt("SUBS_ID"));
+                subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
+                subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
+                subscribedAPI.setUUID(result.getString("SUB_UUID"));
+                subscribedAPI.setTier(new Tier(result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
+
+                Application application = new Application(result.getString("APP_NAME"), subscriber);
+                application.setUUID(result.getString("APP_UUID"));
+                subscribedAPI.setApplication(application);
+                subscribedAPIs.add(subscribedAPI);
+            }
+        } catch (SQLException e) {
+            handleExceptionWithCode("Failed to get SubscribedAPI of :" + subscriber.getName(), e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, result);
+        }
+        return subscribedAPIs;
+    }
+
+    @Override
     public int updateSubscription(ApiTypeWrapper apiTypeWrapper, String inputSubscriptionUUId, String status,
                                   String requestedThrottlingTier) throws APIManagementException {
 
@@ -1618,5 +2109,30 @@ public class ConsumerDAOImpl implements ConsumerDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
+    }
+
+    /**
+     * Get subscriber ID using subscription ID
+     *
+     * @param subscriptionId
+     * @return subscriber ID
+     * @throws APIManagementException
+     */
+    private int getSubscriberIdBySubscriptionUUID(String subscriptionId) throws APIManagementException {
+
+        int subscriberId = 0;
+        String query = SQLConstants.GET_SUBSCRIBER_ID_BY_SUBSCRIPTION_UUID_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setString(1, subscriptionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    subscriberId = rs.getInt(APIConstants.APPLICATION_SUBSCRIBER_ID);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving Subscriber ID: ", e);
+        }
+        return subscriberId;
     }
 }

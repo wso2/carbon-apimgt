@@ -23,6 +23,7 @@ public interface KeyManagerDAO {
      * @return List of Key Manager Configurations
      * @throws APIManagementException if failed to Configurations
      */
+    //Todo: can be removed
     List<KeyManagerConfigurationDTO> getKeyManagerConfigurations() throws APIManagementException;
 
     /**

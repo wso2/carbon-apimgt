@@ -413,8 +413,8 @@ public class ApiDAOImpl implements ApiDAO {
 
     /**
      * Sets/removes default api entry such that api will not represent as default api further.
-     * If the api's version is the same as the published version, then the whole entry will be removed.
-     * Otherwise only the default version attribute is set to null.
+     * If the API's version is the same as the published version, then the whole entry will be removed.
+     * Otherwise, only the default version attribute is set to null.
      *
      * @param apiIdList
      * @param connection
@@ -6567,6 +6567,154 @@ public class ApiDAOImpl implements ApiDAO {
                 APIMgtDBUtil.closeAllConnections(null, connection, null);
             }
         }
+    }
+
+    @Override
+    public List<APIProductResource> getAPIProductResourceMappings(APIProductIdentifier productIdentifier)
+            throws APIManagementException {
+
+        int productId = getAPIProductId(productIdentifier);
+        List<APIProductResource> productResourceList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            if (checkAPIUUIDIsARevisionUUID(productIdentifier.getUUID()) == null) {
+                String sql = SQLConstants.GET_RESOURCES_OF_PRODUCT;
+                try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                    ps.setInt(1, productId);
+                    ps.setString(2, String.valueOf(productId));
+                    try (ResultSet rs = ps.executeQuery()) {
+                        while (rs.next()) {
+                            APIProductResource resource = new APIProductResource();
+                            APIIdentifier apiId = new APIIdentifier(rs.getString("API_PROVIDER"), rs.getString(
+                                    "API_NAME"),
+                                    rs.getString("API_VERSION"));
+                            apiId.setUuid(rs.getString("API_UUID"));
+                            resource.setProductIdentifier(productIdentifier);
+                            resource.setApiIdentifier(apiId);
+                            resource.setApiName(rs.getString("API_NAME"));
+                            URITemplate uriTemplate = new URITemplate();
+                            uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
+                            uriTemplate.setResourceURI(rs.getString("URL_PATTERN"));
+                            uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
+                            int uriTemplateId = rs.getInt("URL_MAPPING_ID");
+                            uriTemplate.setId(uriTemplateId);
+                            uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
+                            uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
+
+                            try (PreparedStatement scopesStatement = connection.
+                                    prepareStatement(SQLConstants.GET_SCOPE_KEYS_BY_URL_MAPPING_ID)) {
+                                scopesStatement.setInt(1, uriTemplateId);
+                                try (ResultSet scopesResult = scopesStatement.executeQuery()) {
+                                    while (scopesResult.next()) {
+                                        Scope scope = new Scope();
+                                        scope.setKey(scopesResult.getString("SCOPE_NAME"));
+                                        uriTemplate.setScopes(scope);
+                                    }
+                                }
+                            }
+
+                            try (PreparedStatement policiesStatement = connection.
+                                    prepareStatement(
+                                            SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID)) {
+                                policiesStatement.setInt(1, uriTemplateId);
+                                try (ResultSet policiesResult = policiesStatement.executeQuery()) {
+                                    List<OperationPolicy> operationPolicies = new ArrayList<>();
+                                    while (policiesResult.next()) {
+                                        OperationPolicy policy = populateOperationPolicyWithRS(policiesResult);
+                                        operationPolicies.add(policy);
+                                    }
+                                    uriTemplate.setOperationPolicies(operationPolicies);
+                                }
+                            }
+
+                            resource.setUriTemplate(uriTemplate);
+                            productResourceList.add(resource);
+                        }
+                    }
+                }
+            } else {
+                String sql = SQLConstants.GET_RESOURCES_OF_PRODUCT_REVISION;
+                try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                    ps.setInt(1, productId);
+                    ps.setString(2, productIdentifier.getUUID());
+                    ps.setString(3, productIdentifier.getUUID());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        while (rs.next()) {
+                            APIProductResource resource = new APIProductResource();
+                            APIIdentifier apiId = new APIIdentifier(rs.getString("API_PROVIDER"), rs.getString(
+                                    "API_NAME"),
+                                    rs.getString("API_VERSION"));
+                            apiId.setUuid(rs.getString("API_UUID"));
+                            resource.setProductIdentifier(productIdentifier);
+                            resource.setApiIdentifier(apiId);
+                            resource.setApiName(rs.getString("API_NAME"));
+                            URITemplate uriTemplate = new URITemplate();
+                            uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
+                            uriTemplate.setResourceURI(rs.getString("URL_PATTERN"));
+                            uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
+                            int uriTemplateId = rs.getInt("URL_MAPPING_ID");
+                            uriTemplate.setId(uriTemplateId);
+                            uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
+                            uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
+
+                            try (PreparedStatement scopesStatement = connection.
+                                    prepareStatement(SQLConstants.GET_SCOPE_KEYS_BY_URL_MAPPING_ID)) {
+                                scopesStatement.setInt(1, uriTemplateId);
+                                try (ResultSet scopesResult = scopesStatement.executeQuery()) {
+                                    while (scopesResult.next()) {
+                                        Scope scope = new Scope();
+                                        scope.setKey(scopesResult.getString("SCOPE_NAME"));
+                                        uriTemplate.setScopes(scope);
+                                    }
+                                }
+                            }
+
+                            try (PreparedStatement policiesStatement = connection.
+                                    prepareStatement(
+                                            SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID)) {
+                                policiesStatement.setInt(1, uriTemplateId);
+                                try (ResultSet policiesResult = policiesStatement.executeQuery()) {
+                                    List<OperationPolicy> operationPolicies = new ArrayList<>();
+                                    while (policiesResult.next()) {
+                                        OperationPolicy policy = populateOperationPolicyWithRS(policiesResult);
+                                        operationPolicies.add(policy);
+                                    }
+                                    uriTemplate.setOperationPolicies(operationPolicies);
+                                }
+                            }
+
+                            resource.setUriTemplate(uriTemplate);
+                            productResourceList.add(resource);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleExceptionWithCode("Failed to get product resources of api product : " + productIdentifier, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return productResourceList;
+    }
+
+    @Override
+    public APIProductIdentifier getAPIProductIdentifierFromUUID(String uuid) throws APIManagementException {
+
+        APIProductIdentifier identifier = null;
+        String sql = SQLConstants.GET_API_IDENTIFIER_BY_UUID_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            PreparedStatement prepStmt = connection.prepareStatement(sql);
+            prepStmt.setString(1, uuid);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    String provider = resultSet.getString(1);
+                    String name = resultSet.getString(2);
+                    String version = resultSet.getString(3);
+                    identifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), name, version, uuid);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve the API Product Identifier details for UUID : " + uuid, e);
+        }
+        return identifier;
     }
 
     /**

@@ -1086,6 +1086,25 @@ public interface ApiDAO {
                                        Connection connection) throws APIManagementException;
 
     /**
+     * get resource mapping of the api product
+     * TODO://Get resource scopes from AM_API_RESOURCE_SCOPE table and retrieve scope meta data and bindings from KM.
+     *
+     * @param productIdentifier api product identifier
+     * @throws APIManagementException
+     */
+    List<APIProductResource> getAPIProductResourceMappings(APIProductIdentifier productIdentifier)
+            throws APIManagementException;
+
+    /**
+     * Get API Product Identifier by the product's UUID.
+     *
+     * @param uuid uuid of the API
+     * @return API Identifier
+     * @throws APIManagementException if an error occurs
+     */
+    APIProductIdentifier getAPIProductIdentifierFromUUID(String uuid) throws APIManagementException;
+
+    /**
      * Delete API product and its related scopes
      *
      * @param productIdentifier product ID

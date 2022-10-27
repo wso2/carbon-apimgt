@@ -1633,6 +1633,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     @Override
+    //Todo: rename
     public boolean hasApplicationPolicyAttachedToApplication(String policyName, String organization) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement =
@@ -1697,6 +1698,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     @Override
+    //Todo: add organization to method signature
     public APIPolicy getAPIPolicyByUUID(String uuid) throws APIManagementException {
 
         APIPolicy policy = null;
@@ -1705,9 +1707,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         ResultSet resultSet = null;
 
         String sqlQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICY_BY_UUID_SQL;
-        if (forceCaseInsensitiveComparisons) {
-            sqlQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICY_BY_UUID_SQL;
-        }
 
         try {
             connection = APIMgtDBUtil.getConnection();

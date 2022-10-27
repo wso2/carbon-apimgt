@@ -1,12 +1,22 @@
 package org.wso2.apk.apimgt.impl.dao;
 
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.model.*;
 
 import java.util.Set;
 
 public interface ConsumerDAO {
+
+    /**
+     * Add a Subscriber
+     *
+     * @param subscriber Subscriber
+     * @param groupingId Grouping ID
+     * @throws APIManagementException if failed to add Subscriber
+     */
+    void addSubscriber(Subscriber subscriber, String groupingId) throws APIManagementException;
 
     /**
      * This method used to get Subscriber from subscriberId.
@@ -16,6 +26,23 @@ public interface ConsumerDAO {
      * @throws APIManagementException if failed to get Subscriber from subscriber id
      */
     Subscriber getSubscriber(String subscriberName) throws APIManagementException;
+
+    /**
+     * Update Subscriber
+     *
+     * @param subscriber subscriber
+     * @throws APIManagementException if failed to update Subscriber
+     */
+    void updateSubscriber(Subscriber subscriber) throws APIManagementException;
+
+    /**
+     * Get Subscriber by Subscriber ID
+     *
+     * @param subscriberId subscriber ID
+     * @return
+     * @throws APIManagementException
+     */
+    Subscriber getSubscriber(int subscriberId) throws APIManagementException;
 
     /**
      * Add Rating for API
@@ -47,6 +74,15 @@ public interface ConsumerDAO {
     int getUserRating(String uuid, String user) throws APIManagementException;
 
     /**
+     * Retrieve API Rating info provided by User as a JSON Object
+     *
+     * @param uuid API uuid
+     * @param user       User name
+     * @throws APIManagementException if failed to get user API Ratings
+     */
+    JSONObject getUserRatingInfo(String uuid, String user) throws APIManagementException;
+
+    /**
      * @param apiId API uuid
      * @throws APIManagementException if failed to get API Ratings
      */
@@ -60,6 +96,15 @@ public interface ConsumerDAO {
      * @throws APIManagementException if failed to retrieve average rating for API
      */
     float getAverageRating(String apiId) throws APIManagementException;
+
+    /**
+     * Retrieve Average API Rating by API Id
+     *
+     * @param apiId API ID
+     * @return Average Rating
+     * @throws APIManagementException if failed to retrieve average rating for API
+     */
+    float getAverageRating(int apiId) throws APIManagementException;
 
     /**
      * @param apiIdentifier
@@ -142,6 +187,43 @@ public interface ConsumerDAO {
      * @throws APIManagementException
      */
     void removeSubscriptionById(int subscription_id) throws APIManagementException;
+
+    /**
+     * Removes the subscription entry from AM_SUBSCRIPTIONS for identifier.
+     *
+     * @param identifier    Identifier
+     * @param applicationId ID of the application which has the subscription
+     * @throws APIManagementException
+     */
+    void removeSubscription(Identifier identifier, int applicationId) throws APIManagementException;
+
+    /**
+     * Remove Subscriptions for API UUID
+     *
+     * @param uuid API UUID
+     * @throws APIManagementException if failed to remove subscriptions
+     */
+    void removeAllSubscriptions(String uuid) throws APIManagementException;
+
+    /**
+     * Get subscription status by subscription ID
+     *
+     * @param subscriptionId subscription ID
+     * @return
+     * @throws APIManagementException
+     */
+    String getSubscriptionStatusById(int subscriptionId) throws APIManagementException;
+
+    /**
+     * This method returns the set of APIs for given subscriber, subscribed under the specified application.
+     *
+     * @param subscriber      subscriber
+     * @param applicationName Application Name
+     * @return Set<API>
+     * @throws APIManagementException if failed to get SubscribedAPIs
+     */
+    Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName, String groupingId)
+            throws APIManagementException;
 
     /**
      * Add Subscription

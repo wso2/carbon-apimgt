@@ -881,7 +881,7 @@ public final class APIUtil {
 
     public static float getAverageRating(int apiId) throws APIManagementException {
 
-        return ApiMgtDAO.getInstance().getAverageRating(apiId);
+        return ConsumerDAOImpl.getInstance().getAverageRating(apiId);
     }
 
     public static String getApplicationUUID(String appName, String userId) throws APIManagementException {
@@ -3186,7 +3186,7 @@ public final class APIUtil {
      */
     public static APIProductIdentifier getAPIProductIdentifierFromUUID(String uuid) throws APIManagementException {
 
-        return ApiMgtDAO.getInstance().getAPIProductIdentifierFromUUID(uuid);
+        return ApiDAOImpl.getInstance().getAPIProductIdentifierFromUUID(uuid);
     }
 
     /**
