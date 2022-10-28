@@ -502,14 +502,6 @@ public interface APIAdmin {
     SubscriptionPolicy getSubscriptionPolicy(String username, String policyName) throws APIManagementException;
 
     /**
-     * Get global throttling policy by name
-     *
-     * @param policyName name of the policy
-     * @throws APIManagementException
-     */
-    GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException;
-
-    /**
      * @return List of block Conditions
      * @throws APIManagementException
      */
@@ -538,14 +530,6 @@ public interface APIAdmin {
      * @throws APIManagementException
      */
     SubscriptionPolicy getSubscriptionPolicyByUUID(String uuid) throws APIManagementException;
-
-    /**
-     * Get global throttling policy by uuid
-     *
-     * @param uuid UUID of the policy
-     * @throws APIManagementException
-     */
-    GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException;
 
     /**
      * Retrieves a block condition by its UUID

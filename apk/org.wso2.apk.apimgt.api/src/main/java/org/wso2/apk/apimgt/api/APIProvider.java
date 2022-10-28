@@ -262,23 +262,6 @@ public interface APIProvider extends APIManager {
     SubscriptionPolicy getSubscriptionPolicy(String username, String policyName) throws APIManagementException;
 
     /**
-     * Get global throttling policy by name
-     * @param policyName name of the policy
-     * @throws APIManagementException
-     */
-    GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException;
-
-
-    /**
-     * Returns true if key template given by the global policy already exists.
-     * But this check will exclude the policy represented by the policy name
-     *
-     * @param policy Global policy
-     * @return true if Global policy key template already exists
-     */
-    boolean isGlobalPolicyKeyTemplateExists (GlobalPolicy policy) throws APIManagementException;
-
-    /**
      * Adds a new API to the Store
      *
      * @param api API
