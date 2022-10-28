@@ -232,7 +232,7 @@ public class ThrottlingCommonImpl {
     /**
      * Add new application throttle policy
      *
-//     * @param body Application policy DTO
+     * @param json Application policy DTO
      * @return Application policy DTO
      * @throws APIManagementException When adding application policy fails
      */
@@ -268,7 +268,7 @@ public class ThrottlingCommonImpl {
      * @return Application throttle policy
      * @throws APIManagementException When an intenal error occurs
      */
-    public static ApplicationThrottlePolicyDTO getApplicationThrottlePolicyById(String policyId)
+    public static String getApplicationThrottlePolicyById(String policyId)
             throws APIManagementException {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
@@ -279,7 +279,9 @@ public class ThrottlingCommonImpl {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_APP_POLICY, policyId));
             }
-            return ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyToDTO(appPolicy);
+            ApplicationThrottlePolicyDTO dto = ApplicationThrottlePolicyMappingUtil
+                    .fromApplicationThrottlePolicyToDTO(appPolicy);
+            return RestApiAdminUtils.getJsonFromDTO(dto);
 
         } catch (PolicyNotFoundException e) {
             throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
@@ -291,14 +293,15 @@ public class ThrottlingCommonImpl {
      * Update application throttle policy
      *
      * @param policyId Policy ID
-     * @param body     Application throttle policy DTO
+     * @param json     Application throttle policy DTO
      * @return Application throttle policy DTO
      * @throws APIManagementException When an internal error occurs
      */
-    public static ApplicationThrottlePolicyDTO updateApplicationThrottlePolicy(String policyId,
-                                                                               ApplicationThrottlePolicyDTO body)
+    public static String updateApplicationThrottlePolicy(String policyId, String json)
             throws APIManagementException {
         try {
+            ApplicationThrottlePolicyDTO body = RestApiAdminUtils.getDTOFromJson(json,
+                    ApplicationThrottlePolicyDTO.class);
             APIAdmin apiAdmin = new APIAdminImpl();
 
             //will give PolicyNotFoundException if there's no policy exists with UUID
@@ -318,7 +321,9 @@ public class ThrottlingCommonImpl {
 
             //retrieve the new policy and send back as the response
             ApplicationPolicy newAppPolicy = apiAdmin.getApplicationPolicyByUUID(policyId);
-            return ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyToDTO(newAppPolicy);
+            ApplicationThrottlePolicyDTO updatedDto = ApplicationThrottlePolicyMappingUtil
+                    .fromApplicationThrottlePolicyToDTO(newAppPolicy);
+            return RestApiAdminUtils.getJsonFromDTO(updatedDto);
         } catch (PolicyNotFoundException e) {
             throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
                     RestApiConstants.RESOURCE_APP_POLICY, policyId));
@@ -362,7 +367,7 @@ public class ThrottlingCommonImpl {
      * @return Subscription policy list
      * @throws APIManagementException When an internal error occurs
      */
-    public static SubscriptionThrottlePolicyListDTO getAllSubscriptionThrottlePolicies() throws APIManagementException {
+    public static String getAllSubscriptionThrottlePolicies() throws APIManagementException {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
             String userName = RestApiCommonUtil.getLoggedInUsername();
@@ -372,8 +377,9 @@ public class ThrottlingCommonImpl {
             for (Policy policy : subscriptionPolicies) {
                 policies.add((SubscriptionPolicy) policy);
             }
-            return SubscriptionThrottlePolicyMappingUtil
+            SubscriptionThrottlePolicyListDTO dtoList = SubscriptionThrottlePolicyMappingUtil
                     .fromSubscriptionPolicyArrayToListDTO(policies.toArray(new SubscriptionPolicy[policies.size()]));
+            return RestApiAdminUtils.getJsonFromDTO(dtoList);
         } catch (ParseException e) {
             String errorMessage = "Error while retrieving Subscription level policies";
             throw new APIManagementException(errorMessage, e, ExceptionCodes.SUBSCRIPTION_POLICY_GET_ALL_FAILED);
@@ -383,12 +389,14 @@ public class ThrottlingCommonImpl {
     /**
      * Add new subscription policy
      *
-     * @param body Subscription throttle policy DTO
+     * @param json Subscription throttle policy DTO
      * @return Subscription throttle policy DTO
      * @throws APIManagementException When an internal error occurs
      */
-    public static SubscriptionThrottlePolicyDTO addSubscriptionThrottlePolicy(SubscriptionThrottlePolicyDTO body)
+    public static String addSubscriptionThrottlePolicy(String json)
             throws APIManagementException {
+        SubscriptionThrottlePolicyDTO body = RestApiAdminUtils.getDTOFromJson(json,
+                SubscriptionThrottlePolicyDTO.class);
         try {
             RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
             APIAdmin apiAdmin = new APIAdminImpl();
@@ -423,7 +431,7 @@ public class ThrottlingCommonImpl {
 
             //setting policy permissions
             setPolicyPermissionsToDTO(policyDTO);
-            return policyDTO;
+            return RestApiAdminUtils.getJsonFromDTO(policyDTO);
         } catch (ParseException e) {
             String errorMessage = "Error while adding a Subscription level policy: " + body.getPolicyName();
             throw new APIManagementException(errorMessage, ExceptionCodes.SUBSCRIPTION_POLICY_ADD_FAILED);
@@ -481,7 +489,7 @@ public class ThrottlingCommonImpl {
      * @return Subscription policy
      * @throws APIManagementException When an internal error occurs
      */
-    public static SubscriptionThrottlePolicyDTO getSubscriptionThrottlePolicyById(String policyId)
+    public static String getSubscriptionThrottlePolicyById(String policyId)
             throws APIManagementException {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
@@ -497,7 +505,7 @@ public class ThrottlingCommonImpl {
 
             //setting policy permissions
             setPolicyPermissionsToDTO(policyDTO);
-            return policyDTO;
+            return RestApiAdminUtils.getJsonFromDTO(policyDTO);
         } catch (ParseException e) {
             String errorMessage = "Error while retrieving Subscription level policy: " + policyId;
             throw new APIManagementException(errorMessage, ExceptionCodes.SUBSCRIPTION_POLICY_GET_FAILED);
@@ -511,13 +519,14 @@ public class ThrottlingCommonImpl {
      * Update subscription policy
      *
      * @param policyId Policy ID
-     * @param body     Subscription policy DTO
+     * @param json     Subscription policy DTO
      * @return Subscription policy DTO
      * @throws APIManagementException When an internal error occurs
      */
-    public static SubscriptionThrottlePolicyDTO updateSubscriptionThrottlePolicy(String policyId,
-                                                                                 SubscriptionThrottlePolicyDTO body)
+    public static String updateSubscriptionThrottlePolicy(String policyId, String json)
             throws APIManagementException {
+        SubscriptionThrottlePolicyDTO body = RestApiAdminUtils.getDTOFromJson(json,
+                SubscriptionThrottlePolicyDTO.class);
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIAdmin apiAdmin = new APIAdminImpl();
@@ -551,7 +560,7 @@ public class ThrottlingCommonImpl {
                     SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyToDTO(newSubscriptionPolicy);
             //setting policy permissions
             setPolicyPermissionsToDTO(policyDTO);
-            return policyDTO;
+            return RestApiAdminUtils.getJsonFromDTO(policyDTO);
         } catch (PolicyNotFoundException e) {
             throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
                     RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY, policyId));
@@ -1283,13 +1292,13 @@ public class ThrottlingCommonImpl {
         Policy policyIfExists = apiAdmin.getSubscriptionPolicy(username, subscriptionPolicy.getPolicyName());
         if (policyIfExists != null) {
             if (overwrite) {
-                String uuid = policyIfExists.getUUID();
-                SubscriptionThrottlePolicyDTO subscriptionThrottlePolicyDTO
-                        = updateSubscriptionThrottlePolicy(uuid, subscriptionPolicy);
-                String message = "Successfully updated Subscription Throttling Policy : "
-                        + subscriptionPolicy.getPolicyName();
-                responseObject.put(DTO, subscriptionThrottlePolicyDTO);
-                responseObject.put(MESSAGE, message);
+//                String uuid = policyIfExists.getUUID();
+//                SubscriptionThrottlePolicyDTO subscriptionThrottlePolicyDTO
+//                        = updateSubscriptionThrottlePolicy(uuid, subscriptionPolicy);
+//                String message = "Successfully updated Subscription Throttling Policy : "
+//                        + subscriptionPolicy.getPolicyName();
+//                responseObject.put(DTO, subscriptionThrottlePolicyDTO);
+//                responseObject.put(MESSAGE, message);
                 return responseObject;
             } else {
                 String errorMessage = "Subscription Policy with name " + subscriptionPolicy.getPolicyName()
@@ -1299,12 +1308,12 @@ public class ThrottlingCommonImpl {
                                 subscriptionPolicy.getPolicyName()));
             }
         } else {
-            SubscriptionThrottlePolicyDTO subscriptionThrottlePolicyDTO
-                    = addSubscriptionThrottlePolicy(subscriptionPolicy);
-            String message =
-                    "Successfully imported Subscription Throttling Policy : " + subscriptionPolicy.getPolicyName();
-            responseObject.put(DTO, subscriptionThrottlePolicyDTO);
-            responseObject.put(MESSAGE, message);
+//            SubscriptionThrottlePolicyDTO subscriptionThrottlePolicyDTO
+//                    = addSubscriptionThrottlePolicy(subscriptionPolicy);
+//            String message =
+//                    "Successfully imported Subscription Throttling Policy : " + subscriptionPolicy.getPolicyName();
+//            responseObject.put(DTO, subscriptionThrottlePolicyDTO);
+//            responseObject.put(MESSAGE, message);
             return responseObject;
         }
     }
@@ -1331,12 +1340,12 @@ public class ThrottlingCommonImpl {
         if (policyIfExists != null) {
             if (overwrite) {
                 String uuid = policyIfExists.getUUID();
-                ApplicationThrottlePolicyDTO applicationThrottlePolicyDTO
-                        = updateApplicationThrottlePolicy(uuid, applicationPolicy);
-                String message = "Successfully updated Application Throttling Policy : "
-                        + applicationPolicy.getPolicyName();
-                responseObject.put(DTO, applicationThrottlePolicyDTO);
-                responseObject.put(MESSAGE, message);
+//                ApplicationThrottlePolicyDTO applicationThrottlePolicyDTO
+//                        = updateApplicationThrottlePolicy(uuid, applicationPolicy);
+//                String message = "Successfully updated Application Throttling Policy : "
+//                        + applicationPolicy.getPolicyName();
+//                responseObject.put(DTO, applicationThrottlePolicyDTO);
+//                responseObject.put(MESSAGE, message);
             } else {
                 String errorMessage = "Application Policy with name " + applicationPolicy.getPolicyName()
                         + EXISTS_CONSTANT;
