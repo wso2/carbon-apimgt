@@ -207,6 +207,9 @@ public class APIMappingUtil {
         if (dto.isEnableSchemaValidation() != null) {
             model.setEnableSchemaValidation(dto.isEnableSchemaValidation());
         }
+        if (dto.isEnableSubscriberVerification() != null) {
+            model.setEnableSubscriberVerification(dto.isEnableSubscriberVerification());
+        }
         model.setEnableStore(true);
         if (dto.getAdvertiseInfo() != null) {
             AdvertiseInfoDTO advertiseInfoDTO = dto.getAdvertiseInfo();
@@ -972,6 +975,7 @@ public class APIMappingUtil {
         dto.setRevisionedApiId(model.getRevisionedApiId());
         dto.setRevisionId(model.getRevisionId());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
+        dto.setEnableSubscriberVerification(model.isEnableSubscriberVerification());
 
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());

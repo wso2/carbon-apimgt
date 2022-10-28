@@ -167,5 +167,13 @@ public class APIMgtGatewayConstants {
     public static final String OAUTH_ENDPOINT_INSTANCE = "oauth.instance";
     public static final String VALIDATED_X509_CERT = "ValidatedX509Cert";
     public static final String RESOURCE_SPAN = "API:Resource";
+
+    /**
+     * Web-sub related properties
+     */
+    public static final String SUBSCRIBER_LINK_HEADER_HUB = "; rel=\"hub\", ";
+    public static final String SUBSCRIBER_LINK_HEADER_SELF = "; rel=\"self\" ";
+
+    public static final String SUBSCRIBER_LINK_HEADER_PROPERTY = "SUBSCRIBER_LINK_HEADER";
 }
 

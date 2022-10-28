@@ -103,6 +103,7 @@ public final class APIConstants {
 
     //This constant is used in Json schema validator
     public static final String API_OVERVIEW_ENABLE_JSON_SCHEMA = "overview_enableSchemaValidation";
+    public static final String API_OVERVIEW_ENABLE_SUB_VERIFICATION = "overview_enableSubscriberVerification";
 
     public static final String API_OVERVIEW_ENABLE_STORE = "overview_enableStore";
 

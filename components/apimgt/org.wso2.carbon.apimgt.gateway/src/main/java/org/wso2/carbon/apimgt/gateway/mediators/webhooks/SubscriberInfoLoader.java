@@ -23,6 +23,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
+import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -65,6 +66,12 @@ public class SubscriberInfoLoader extends AbstractMediator {
             messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_CALLBACK_PROPERTY, subscriber.getCallbackURL());
             messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_SECRET_PROPERTY, subscriber.getSecret());
             messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_APPLICATION_ID_PROPERTY, subscriber.getAppID());
+
+            String linkHeader = messageContext.getProperty(RESTConstants.REST_URL_PREFIX).toString()
+                    + messageContext.getProperty(RESTConstants.REST_API_CONTEXT).toString()
+                    + APIMgtGatewayConstants.SUBSCRIBER_LINK_HEADER_HUB + subscriber.getTopicName()
+                    + APIMgtGatewayConstants.SUBSCRIBER_LINK_HEADER_SELF;
+            messageContext.setProperty(APIMgtGatewayConstants.SUBSCRIBER_LINK_HEADER_PROPERTY, linkHeader);
         }
         return true;
     }
