@@ -1956,7 +1956,7 @@
 
         <carbon.commons.version>4.9.0</carbon.commons.version>
         <carbon.registry.version>4.8.2</carbon.registry.version>
-        <carbon.mediation.version>4.7.143-SNAPSHOT</carbon.mediation.version>
+        <carbon.mediation.version>4.7.143</carbon.mediation.version>
 
         <mongodb.driver.version>4.1.0</mongodb.driver.version>
 
