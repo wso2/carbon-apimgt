@@ -2939,6 +2939,7 @@ public final class APIConstants {
 
     public static class MultitenantConstants {
         public static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
+        public static final int SUPER_TENANT_ID = -1234;
     }
 
     public static class OAuthConstants {

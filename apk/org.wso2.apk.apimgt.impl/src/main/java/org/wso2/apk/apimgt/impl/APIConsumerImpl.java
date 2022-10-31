@@ -25,31 +25,41 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.apk.apimgt.api.*;
+import org.wso2.apk.apimgt.api.APIConsumer;
+import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.apk.apimgt.api.model.*;
 import org.wso2.apk.apimgt.api.model.Documentation;
 import org.wso2.apk.apimgt.api.model.DocumentationType;
 import org.wso2.apk.apimgt.api.model.ResourceFile;
-import org.wso2.apk.apimgt.impl.dao.dto.*;
+import org.wso2.apk.apimgt.impl.dao.dto.Organization;
 import org.wso2.apk.apimgt.impl.dao.exceptions.APIPersistenceException;
 import org.wso2.apk.apimgt.impl.dao.exceptions.OASPersistenceException;
 import org.wso2.apk.apimgt.impl.dao.mapper.APIMapper;
 import org.wso2.apk.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.apk.apimgt.impl.dto.*;
+import org.wso2.apk.apimgt.impl.dto.ApplicationDTO;
+import org.wso2.apk.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
+import org.wso2.apk.apimgt.impl.dto.JwtTokenInfoDTO;
+import org.wso2.apk.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.apk.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.apk.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.apk.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.apk.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.apk.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.apk.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.apk.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.apk.apimgt.impl.utils.VHostUtils;
+import org.wso2.apk.apimgt.impl.workflow.WorkflowConstants;
+import org.wso2.apk.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.apk.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.apk.apimgt.impl.wsdl.model.WSDLValidationResponse;
 
@@ -441,7 +451,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         String callBackURL = null;
         if (StringUtils.isEmpty(tenantDomain)) {
-            tenantDomain = MultitenantUtils.getTenantDomain(userName);
+            tenantDomain = APIUtil.getTenantDomain(userName);
         }
         String keyManagerId = null;
         KeyManagerConfigurationDTO keyManagerConfiguration = null;
@@ -470,9 +480,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
                     " Client Application", ExceptionCodes.KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION);
         }
-        OAuthAppRequest oauthAppRequest = ApplicationUtils
-                .createOauthAppRequest(applicationName, clientId, callBackURL, "default", jsonString, tokenType,
-                        tenantDomain, keyManagerName);
+        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, clientId, callBackURL,
+                "default", jsonString, tokenType, tenantDomain, keyManagerName);
 
         // if clientId is null in the argument `ApplicationUtils#createOauthAppRequest` will set it using
         // the props in `jsonString`. Hence we are taking the updated `clientId` here
@@ -653,7 +662,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     public Monetization getMonetizationImplClass() throws APIManagementException {
 
-        APIManagerConfiguration configuration = getAPIManagerConfiguration();
+        ConfigurationHolder configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
         Monetization monetizationImpl = null;
         if (configuration == null) {
             log.error("API Manager configuration is not initialized.");
@@ -1801,15 +1811,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                                          boolean isImportMode)
     throws APIManagementException {
 
-        boolean isTenantFlowStarted = false;
         if (StringUtils.isEmpty(tenantDomain)) {
-            tenantDomain = MultitenantUtils.getTenantDomain(userId);
+            tenantDomain = APIUtil.getTenantDomain(userId);
         } else {
             int tenantId = APIUtil.getInternalOrganizationId(tenantDomain);
 
             // To handle choreo scenario.
-            if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
-                tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            if (tenantId == APIConstants.MultitenantConstants.SUPER_TENANT_ID) {
+                tenantDomain = APIConstants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
             }
         }
 
@@ -1827,9 +1836,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 keyManagerId = keyManagerConfiguration.getUuid();
             }
             if (keyManagerConfiguration == null || !keyManagerConfiguration.isEnabled()) {
-                throw new APIManagementException(
-                        "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
-                        ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
+                throw new APIManagementException("Key Manager " + keyManagerName + " doesn't exist in Tenant "
+                        + tenantDomain, ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
             }
             if (KeyManagerConfiguration.TokenType.EXCHANGED.toString().equals(keyManagerConfiguration.getTokenType())) {
                 throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
@@ -1850,196 +1858,132 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
             }
         }
-        try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
-            }
-
-            //check if there are any existing key mappings set for the application and the key manager.
-            if (apiMgtDAO.isKeyMappingExistsForApplication(application.getId(), keyManagerName, keyManagerId,
-                    tokenType)) {
-                throw new APIManagementException("Key Mappings already exists for application " + application.getName(),
-                        ExceptionCodes.KEY_MAPPING_ALREADY_EXIST);
-            }
-
-            // initiate WorkflowExecutor
-            WorkflowExecutor appRegistrationWorkflow = null;
-            // initiate ApplicationRegistrationWorkflowDTO
-            ApplicationRegistrationWorkflowDTO appRegWFDto = null;
-
-            ApplicationKeysDTO appKeysDto = new ApplicationKeysDTO();
-
-            boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(getAPIManagerConfiguration().
-                    getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
-
-            boolean isUserAppOwner;
-            if (isCaseInsensitiveComparisons) {
-                isUserAppOwner = application.getSubscriber().getName().equalsIgnoreCase(userId);
-            } else {
-                isUserAppOwner = application.getSubscriber().getName().equals(userId);
-            }
-
-            if (!isUserAppOwner) {
-                throw new APIManagementException("user: " + application.getSubscriber().getName() + ", " +
-                        "attempted to generate tokens for application owned by: " + userId);
-            }
-
-            // if its a PRODUCTION application.
-            if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
-                // initiate workflow type. By default simple work flow will be
-                // executed.
-                appRegistrationWorkflow =
-                        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
-                appRegWFDto =
-                        (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
-                                .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
-
-            }// if it is a sandBox application.
-            else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) {
-                // if its a SANDBOX application.
-                appRegistrationWorkflow =
-                        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
-                appRegWFDto =
-                        (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
-                                .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
-            } else {
-                throw new APIManagementException("Invalid Token Type '" + tokenType + "' requested.");
-            }
-
-            //check whether callback url is empty and set null
-            if (StringUtils.isBlank(callbackUrl)) {
-                callbackUrl = null;
-            }
-            String applicationTokenType = application.getTokenType();
-            if (StringUtils.isEmpty(application.getTokenType())) {
-                applicationTokenType = APIConstants.DEFAULT_TOKEN_TYPE;
-            }
-            // Build key manager instance and create oAuthAppRequest by jsonString.
-            OAuthAppRequest request =
-                    ApplicationUtils
-                            .createOauthAppRequest(application.getName(), null, callbackUrl, tokenScope, jsonString,
-                                    applicationTokenType, tenantDomain, keyManagerName);
-            request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
-            request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
-            request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_CALLBACK_URL, callbackUrl);
-            request.getOAuthApplicationInfo().setApplicationUUID(application.getUUID());
-
-            // Setting request values in WorkflowDTO - In future we should keep
-            // Application/OAuthApplication related
-            // information in the respective entities not in the workflowDTO.
-            appRegWFDto.setStatus(WorkflowStatus.CREATED);
-            appRegWFDto.setCreatedTime(System.currentTimeMillis());
-            appRegWFDto.setTenantDomain(tenantDomain);
-            appRegWFDto.setTenantId(tenantId);
-            appRegWFDto.setExternalWorkflowReference(appRegistrationWorkflow.generateUUID());
-            appRegWFDto.setWorkflowReference(appRegWFDto.getExternalWorkflowReference());
-            appRegWFDto.setApplication(application);
-            appRegWFDto.setKeyManager(keyManagerId);
-            request.setMappingId(appRegWFDto.getWorkflowReference());
-            if (!application.getSubscriber().getName().equals(userId)) {
-                appRegWFDto.setUserName(application.getSubscriber().getName());
-            } else {
-                appRegWFDto.setUserName(userId);
-            }
-
-            appRegWFDto.setCallbackUrl(appRegistrationWorkflow.getCallbackURL());
-            appRegWFDto.setAppInfoDTO(request);
-            appRegWFDto.setDomainList(allowedDomains);
-
-            appRegWFDto.setKeyDetails(appKeysDto);
-            appRegistrationWorkflow.execute(appRegWFDto);
-
-            Map<String, Object> keyDetails = new HashMap<String, Object>();
-            keyDetails.put(APIConstants.FrontEndParameterNames.KEY_STATE, appRegWFDto.getStatus().toString());
-            OAuthApplicationInfo applicationInfo = appRegWFDto.getApplicationInfo();
-            String keyMappingId = apiMgtDAO.getKeyMappingIdFromApplicationIdKeyTypeAndKeyManager(application.getId(),
-                    tokenType, keyManagerId);
-            keyDetails.put(APIConstants.FrontEndParameterNames.KEY_MAPPING_ID, keyMappingId);
-            if (applicationInfo != null) {
-                keyDetails.put(APIConstants.FrontEndParameterNames.CONSUMER_KEY, applicationInfo.getClientId());
-                keyDetails.put(APIConstants.FrontEndParameterNames.CONSUMER_SECRET, applicationInfo.getClientSecret());
-                keyDetails.put(ApplicationConstants.OAUTH_APP_DETAILS, applicationInfo.getJsonString());
-                keyDetails.put(APIConstants.FrontEndParameterNames.MODE, APIConstants.OAuthAppMode.CREATED.name());
-            }
-
-            // There can be instances where generating the Application Token is
-            // not required. In those cases,
-            // token info will have nothing.
-            AccessTokenInfo tokenInfo = appRegWFDto.getAccessTokenInfo();
-            if (tokenInfo != null) {
-                keyDetails.put("accessToken", tokenInfo.getAccessToken());
-                keyDetails.put("validityTime", tokenInfo.getValidityPeriod());
-                keyDetails.put("tokenDetails", tokenInfo.getJSONString());
-                keyDetails.put("tokenScope", tokenInfo.getScopes());
-            }
-
-            JSONObject appLogObject = new JSONObject();
-            appLogObject.put("Generated keys for application", application.getName());
-            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
-                    APIConstants.AuditLogConstants.UPDATED, this.username);
-
-            String orgId = application.getOrganization();
-            // if its a PRODUCTION application.
-            if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
-                // get the workflow state once the executor is executed.
-                WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(appRegWFDto.getExternalWorkflowReference(),
-                        WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
-                // only send the notification if approved
-                // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
-                if (wfDTO != null) {
-                    if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
-                        ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
-                                UUID.randomUUID().toString(), System.currentTimeMillis(),
-                                APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, orgId,
-                                application.getId(), application.getUUID(), applicationInfo.getClientId(), tokenType,
-                                keyManagerName);
-                        APIUtil.sendNotification(applicationRegistrationEvent,
-                                APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
-                    }
-                } else {
-                    ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
-                            UUID.randomUUID().toString(), System.currentTimeMillis(),
-                            APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, orgId,
-                            application.getId(), application.getUUID(), applicationInfo.getClientId(), tokenType,
-                            keyManagerName);
-                    APIUtil.sendNotification(applicationRegistrationEvent,
-                            APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
-                }
-            } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) {
-                // get the workflow state once the executor is executed.
-                WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(appRegWFDto.getExternalWorkflowReference(),
-                        WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
-                // only send the notification if approved
-                // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
-                if (wfDTO != null) {
-                    if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
-                        ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
-                                UUID.randomUUID().toString(), System.currentTimeMillis(),
-                                APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, orgId,
-                                application.getId(), application.getUUID(), applicationInfo.getClientId(), tokenType,
-                                keyManagerName);
-                        APIUtil.sendNotification(applicationRegistrationEvent,
-                                APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
-                    }
-                } else {
-                    ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
-                            UUID.randomUUID().toString(), System.currentTimeMillis(),
-                            APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, orgId,
-                            application.getId(), application.getUUID(), applicationInfo.getClientId(), tokenType,
-                            keyManagerName);
-                    APIUtil.sendNotification(applicationRegistrationEvent,
-                            APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
-                }
-            }
-            return keyDetails;
-        } catch (WorkflowException e) {
-            log.error("Could not execute Workflow", e);
-            throw new APIManagementException(e);
-        } finally {
-            if (isTenantFlowStarted) {
-                endTenantFlow();
-            }
+        //check if there are any existing key mappings set for the application and the key manager.
+        if (apiMgtDAO.isKeyMappingExistsForApplication(application.getId(), keyManagerName, keyManagerId, tokenType)) {
+            throw new APIManagementException("Key Mappings already exists for application " + application.getName(),
+                    ExceptionCodes.KEY_MAPPING_ALREADY_EXIST);
         }
+
+        // initiate ApplicationRegistrationWorkflowDTO
+        ApplicationRegistrationWorkflowDTO appRegWFDto = null;
+
+        ApplicationKeysDTO appKeysDto = new ApplicationKeysDTO();
+
+        boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
+
+        boolean isUserAppOwner;
+        if (isCaseInsensitiveComparisons) {
+            isUserAppOwner = application.getSubscriber().getName().equalsIgnoreCase(userId);
+        } else {
+            isUserAppOwner = application.getSubscriber().getName().equals(userId);
+        }
+
+        if (!isUserAppOwner) {
+            throw new APIManagementException("user: " + application.getSubscriber().getName() + ", " +
+                    "attempted to generate tokens for application owned by: " + userId);
+        }
+
+        // if it is a PRODUCTION application.
+        if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
+            appRegWFDto = (ApplicationRegistrationWorkflowDTO) APIUtil
+                    .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+
+        }// if it is a sandBox application.
+        else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) {
+            appRegWFDto = (ApplicationRegistrationWorkflowDTO) APIUtil
+                            .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+        } else {
+            throw new APIManagementException("Invalid Token Type '" + tokenType + "' requested.");
+        }
+
+        //check whether callback url is empty and set null
+        if (StringUtils.isBlank(callbackUrl)) {
+            callbackUrl = null;
+        }
+        String applicationTokenType = application.getTokenType();
+        if (StringUtils.isEmpty(application.getTokenType())) {
+            applicationTokenType = APIConstants.DEFAULT_TOKEN_TYPE;
+        }
+        // Build key manager instance and create oAuthAppRequest by jsonString.
+        OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(), null,
+                callbackUrl, tokenScope, jsonString, applicationTokenType, tenantDomain, keyManagerName);
+        request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
+        request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
+        request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_CALLBACK_URL, callbackUrl);
+        request.getOAuthApplicationInfo().setApplicationUUID(application.getUUID());
+
+        // Setting request values in WorkflowDTO - In future we should keep
+        // Application/OAuthApplication related
+        // information in the respective entities not in the workflowDTO.
+        appRegWFDto.setStatus(WorkflowStatus.CREATED);
+        appRegWFDto.setCreatedTime(System.currentTimeMillis());
+        appRegWFDto.setTenantDomain(tenantDomain);
+        appRegWFDto.setTenantId(tenantId);
+        appRegWFDto.setExternalWorkflowReference(UUID.randomUUID().toString());
+        appRegWFDto.setWorkflowReference(appRegWFDto.getExternalWorkflowReference());
+        appRegWFDto.setApplication(application);
+        appRegWFDto.setKeyManager(keyManagerId);
+        request.setMappingId(appRegWFDto.getWorkflowReference());
+        if (!application.getSubscriber().getName().equals(userId)) {
+            appRegWFDto.setUserName(application.getSubscriber().getName());
+        } else {
+            appRegWFDto.setUserName(userId);
+        }
+        //TODO: check whether a call back url is set
+        appRegWFDto.setCallbackUrl(null);
+        appRegWFDto.setAppInfoDTO(request);
+        appRegWFDto.setDomainList(allowedDomains);
+        appRegWFDto.setKeyDetails(appKeysDto);
+        registerApplication(appRegWFDto);
+
+        Map<String, Object> keyDetails = new HashMap<String, Object>();
+        keyDetails.put(APIConstants.FrontEndParameterNames.KEY_STATE, appRegWFDto.getStatus().toString());
+        OAuthApplicationInfo applicationInfo = appRegWFDto.getApplicationInfo();
+        String keyMappingId = apiMgtDAO.getKeyMappingIdFromApplicationIdKeyTypeAndKeyManager(application.getId(),
+                tokenType, keyManagerId);
+        keyDetails.put(APIConstants.FrontEndParameterNames.KEY_MAPPING_ID, keyMappingId);
+        if (applicationInfo != null) {
+            keyDetails.put(APIConstants.FrontEndParameterNames.CONSUMER_KEY, applicationInfo.getClientId());
+            keyDetails.put(APIConstants.FrontEndParameterNames.CONSUMER_SECRET, applicationInfo.getClientSecret());
+            keyDetails.put(ApplicationConstants.OAUTH_APP_DETAILS, applicationInfo.getJsonString());
+            keyDetails.put(APIConstants.FrontEndParameterNames.MODE, APIConstants.OAuthAppMode.CREATED.name());
+        }
+
+        // There can be instances where generating the Application Token is
+        // not required. In those cases,
+        // token info will have nothing.
+        AccessTokenInfo tokenInfo = appRegWFDto.getAccessTokenInfo();
+        if (tokenInfo != null) {
+            keyDetails.put("accessToken", tokenInfo.getAccessToken());
+            keyDetails.put("validityTime", tokenInfo.getValidityPeriod());
+            keyDetails.put("tokenDetails", tokenInfo.getJSONString());
+            keyDetails.put("tokenScope", tokenInfo.getScopes());
+        }
+
+        JSONObject appLogObject = new JSONObject();
+        appLogObject.put("Generated keys for application", application.getName());
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                APIConstants.AuditLogConstants.UPDATED, this.username);
+        return keyDetails;
+    }
+
+    private void registerApplication(WorkflowDTO workflowDTO) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Executing Application registration Workflow..");
+        }
+        ApplicationRegistrationWorkflowDTO appRegDTO = (ApplicationRegistrationWorkflowDTO) workflowDTO;
+        Application application = appRegDTO.getApplication();
+        String message = "Approve request to create " + appRegDTO.getKeyType() + " keys for " + application.getName() +
+                " from application creator - " + appRegDTO.getUserName() + " with throttling tier - " + application.getTier();
+        workflowDTO.setWorkflowDescription(message);
+        workflowDTO.setProperties("keyType", appRegDTO.getKeyType());
+        workflowDTO.setProperties("applicationName", application.getName());
+        workflowDTO.setProperties("userName", appRegDTO.getUserName());
+        workflowDTO.setProperties("applicationTier", application.getTier());
+
+        apiMgtDAO.createApplicationRegistrationEntry(appRegDTO,false);
     }
 
 

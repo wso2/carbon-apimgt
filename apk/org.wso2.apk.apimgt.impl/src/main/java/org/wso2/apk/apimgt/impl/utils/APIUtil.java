@@ -132,11 +132,16 @@ import org.wso2.apk.apimgt.impl.dao.ScopesDAO;
 import org.wso2.apk.apimgt.impl.dao.WorkflowDAO;
 import org.wso2.apk.apimgt.impl.dao.dto.UserContext;
 import org.wso2.apk.apimgt.impl.dao.impl.WorkflowDAOImpl;
+import org.wso2.apk.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
+import org.wso2.apk.apimgt.impl.dto.ApplicationWorkflowDTO;
+import org.wso2.apk.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.apk.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.apk.apimgt.impl.proxy.ExtendedProxyRoutePlanner;
 import org.wso2.apk.apimgt.impl.recommendationmgt.RecommendationEnvironment;
+import org.wso2.apk.apimgt.impl.workflow.APIStateWorkflowDTO;
+import org.wso2.apk.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.apk.apimgt.user.exceptions.UserException;
 import org.wso2.apk.apimgt.user.mgt.internal.UserManagerHolder;
 
@@ -4033,5 +4038,40 @@ public final class APIUtil {
         String defaultReservedUsername = apiManagerConfiguration
                 .getFirstProperty(APIConstants.API_DEVPORTAL_DEFAULT_RESERVED_USERNAME);
         return defaultReservedUsername;
+    }
+
+    /**
+     * Create a DTO object related to a given workflow type.
+     * @param wfType Type of the workflow.
+     */
+    public static WorkflowDTO createWorkflowDTO(String wfType) {
+
+        WorkflowDTO workflowDTO = null;
+        if (WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equals(wfType) ||
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(wfType)) {
+            workflowDTO = new ApplicationWorkflowDTO();
+            workflowDTO.setWorkflowType(wfType);
+        } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION.equals(wfType)) {
+            workflowDTO = new ApplicationRegistrationWorkflowDTO();
+            ((ApplicationRegistrationWorkflowDTO) workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+            workflowDTO.setWorkflowType(wfType);
+        } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX.equals(wfType)) {
+            workflowDTO = new ApplicationRegistrationWorkflowDTO();
+            ((ApplicationRegistrationWorkflowDTO) workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
+            workflowDTO.setWorkflowType(wfType);
+        } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(wfType) ||
+                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE.equals(wfType) ||
+                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION.equals(wfType)) {
+            workflowDTO = new SubscriptionWorkflowDTO();
+            workflowDTO.setWorkflowType(wfType);
+        } else if (WorkflowConstants.WF_TYPE_AM_USER_SIGNUP.equals(wfType)) {
+            workflowDTO = new WorkflowDTO();
+            workflowDTO.setWorkflowType(wfType);
+        } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equals(wfType) ||
+                WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE.equals(wfType)) {
+            workflowDTO = new APIStateWorkflowDTO();
+            workflowDTO.setWorkflowType(wfType);
+        }
+        return workflowDTO;
     }
 }

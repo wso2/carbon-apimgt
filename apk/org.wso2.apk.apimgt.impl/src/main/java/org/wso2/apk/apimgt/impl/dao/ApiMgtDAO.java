@@ -107,6 +107,7 @@ import org.wso2.apk.apimgt.impl.dao.util.DBUtils;
 import org.wso2.apk.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.apk.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.apk.apimgt.impl.dto.APISubscriptionInfoDTO;
+import org.wso2.apk.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.apk.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.apk.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
@@ -4710,6 +4711,90 @@ public class ApiMgtDAO {
             handleException("Error while removing AM_APPLICATION_KEY_MAPPING table", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, null);
+        }
+    }
+
+    /**
+     * Persist the details of the token generation request (allowed domains & validity period) to be used back
+     * when approval has been granted.
+     *
+     * @param dto                 DTO related to Application Registration.
+     * @param onlyKeyMappingEntry When this flag is enabled, only AM_APPLICATION_KEY_MAPPING will get affected.
+     * @throws APIManagementException if failed to create entries in  AM_APPLICATION_REGISTRATION and
+     *                                AM_APPLICATION_KEY_MAPPING tables.
+     */
+    public void createApplicationRegistrationEntry(ApplicationRegistrationWorkflowDTO dto, boolean onlyKeyMappingEntry)
+            throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        PreparedStatement queryPs = null;
+        PreparedStatement appRegPs = null;
+        ResultSet resultSet = null;
+
+        Application application = dto.getApplication();
+        Subscriber subscriber = application.getSubscriber();
+        String jsonString = dto.getAppInfoDTO().getOAuthApplicationInfo().getJsonString();
+
+        String registrationQuery = SQLConstants.GET_APPLICATION_REGISTRATION_SQL;
+        String registrationEntry = SQLConstants.ADD_APPLICATION_REGISTRATION_SQL;
+        String keyMappingEntry = SQLConstants.ADD_APPLICATION_KEY_MAPPING_SQL;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            queryPs = conn.prepareStatement(registrationQuery);
+            queryPs.setInt(1, subscriber.getId());
+            queryPs.setInt(2, application.getId());
+            queryPs.setString(3, dto.getKeyType());
+            queryPs.setString(4, dto.getKeyManager());
+            resultSet = queryPs.executeQuery();
+
+            if (resultSet.next()) {
+                throw new APIManagementException("Application '" + application.getName() + "' is already registered.",
+                        ExceptionCodes.APPLICATION_ALREADY_REGISTERED);
+            }
+
+            if (!onlyKeyMappingEntry) {
+                appRegPs = conn.prepareStatement(registrationEntry);
+                appRegPs.setInt(1, subscriber.getId());
+                appRegPs.setString(2, dto.getWorkflowReference());
+                appRegPs.setInt(3, application.getId());
+                appRegPs.setString(4, dto.getKeyType());
+                appRegPs.setString(5, dto.getDomainList());
+                appRegPs.setLong(6, dto.getValidityTime());
+                appRegPs.setString(7, (String) dto.getAppInfoDTO().getOAuthApplicationInfo()
+                        .getParameter("tokenScope"));
+                appRegPs.setString(8, jsonString);
+                appRegPs.setString(9, dto.getKeyManager());
+                appRegPs.execute();
+            }
+
+            ps = conn.prepareStatement(keyMappingEntry);
+            ps.setInt(1, application.getId());
+            ps.setString(2, dto.getKeyType());
+            ps.setString(3, dto.getStatus().toString());
+            ps.setString(4, dto.getKeyManager());
+            ps.setString(5, UUID.randomUUID().toString());
+            ps.setString(6, APIConstants.OAuthAppMode.CREATED.name());
+            ps.execute();
+
+            conn.commit();
+        } catch (SQLException e) {
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException e1) {
+                handleException("Error occurred while Rolling back changes done on Application Registration", e1);
+            }
+            handleException("Error occurred while creating an " +
+                    "Application Registration Entry for Application : " + application.getName(), e);
+        } finally {
+            APIMgtDBUtil.closeStatement(queryPs);
+            APIMgtDBUtil.closeStatement(appRegPs);
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
     }
 
