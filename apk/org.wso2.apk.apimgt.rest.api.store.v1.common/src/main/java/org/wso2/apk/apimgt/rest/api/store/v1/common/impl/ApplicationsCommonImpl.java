@@ -783,7 +783,7 @@ public class ApplicationsCommonImpl {
         return getApplicationKeys(applicationUUID, null);
     }
 
-    public static ApplicationTokenDTO generateToken(String applicationId, String keyType,
+    public static ApplicationTokenDTO generateApplicationToken(String applicationId, String keyType,
             ApplicationTokenGenerateRequestDTO body) throws APIManagementException {
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -802,7 +802,17 @@ public class ApplicationsCommonImpl {
                         } else {
                             grantType = APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS;
                         }
-
+                        try {
+                            // verify that the provided jsonInput is a valid json
+                            if (body.getAdditionalProperties() != null
+                                    && !body.getAdditionalProperties().toString().isEmpty()) {
+                                jsonInput = validateAdditionalParameters(grantType, body);
+                            }
+                        } catch (JsonProcessingException | ParseException | ClassCastException e) {
+                            throw new APIManagementException("Error while generating " + keyType + " token for " +
+                                    "application " + applicationId + ". Invalid jsonInput '"
+                                    + body.getAdditionalProperties() + "' provided.");
+                        }
                         if (StringUtils.isNotEmpty(body.getConsumerSecret())) {
                             appKey.setConsumerSecret(body.getConsumerSecret());
                         }
@@ -831,13 +841,11 @@ public class ApplicationsCommonImpl {
                 }
             } else {
                 throw new APIManagementException("Request application is " + (applicationId != null ?
-                        "with id " + applicationId :
-                        " " + "not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
+                        "with id " + applicationId : " not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
             }
         } catch (APIManagementException e) {
-            throw new APIManagementException(
-                    RestApiConstants.GENERIC_ERROR_STRING + " " + keyType + " token for application " + applicationId,
-                    ExceptionCodes.APPLICATION_TOKEN_GENERATION_FAILED);
+            throw new APIManagementException(RestApiConstants.GENERIC_ERROR_STRING + " " + keyType
+                    + " token for application " + applicationId, ExceptionCodes.APPLICATION_TOKEN_GENERATION_FAILED);
         }
     }
 
@@ -1079,7 +1087,17 @@ public class ApplicationsCommonImpl {
                         grantType = APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS;
                     }
 
-                    jsonInput = validateAdditionalParameters(grantType, body, appKey.getKeyType(), applicationId);
+                    try {
+                        // verify that the provided jsonInput is a valid json
+                        if (body.getAdditionalProperties() != null
+                                && !body.getAdditionalProperties().toString().isEmpty()) {
+                            jsonInput = validateAdditionalParameters(grantType, body);
+                        }
+                    } catch (JsonProcessingException | ParseException | ClassCastException e) {
+                        throw new APIManagementException("Error while generating " + appKey.getKeyType()
+                                + " token for " + "application " + applicationId + ". Invalid jsonInput '"
+                                + body.getAdditionalProperties() + "' provided.");
+                    }
 
                     if (StringUtils.isNotEmpty(body.getConsumerSecret())) {
                         appKey.setConsumerSecret(body.getConsumerSecret());
@@ -1203,30 +1221,19 @@ public class ApplicationsCommonImpl {
         return null;
     }
 
-    private static String validateAdditionalParameters(String grantType, ApplicationTokenGenerateRequestDTO body,
-            ApplicationKeyDTO.KeyTypeEnum keyType, String applicationId) throws APIManagementException {
+    private static String validateAdditionalParameters(String grantType, ApplicationTokenGenerateRequestDTO body)
+            throws APIManagementException, JsonProcessingException, ParseException {
 
-        String jsonInput = null;
-        try {
-            // verify that the provided jsonInput is a valid json
-            if (body.getAdditionalProperties() != null && !body.getAdditionalProperties().toString().isEmpty()) {
-                ObjectMapper mapper = new ObjectMapper();
-                jsonInput = mapper.writeValueAsString(body.getAdditionalProperties());
-                JSONParser parser = new JSONParser();
-                JSONObject json = (JSONObject) parser.parse(jsonInput);
-                if (APIConstants.OAuthConstants.TOKEN_EXCHANGE.equals(grantType) && json.get(
-                        APIConstants.OAuthConstants.SUBJECT_TOKEN) == null) {
-                    String errorMessage = "Missing required parameter " + APIConstants.OAuthConstants.SUBJECT_TOKEN
-                            + " is not provided to generate token using Token Exchange grant";
-                    throw new APIManagementException(
-                            ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE, errorMessage));
-                }
-            }
-        } catch (JsonProcessingException | ParseException | ClassCastException e) {
-            String errorMessage = RestApiConstants.GENERIC_ERROR_STRING + " " + keyType + " token for " + "application "
-                    + applicationId + ". Invalid jsonInput '" + body.getAdditionalProperties() + "' provided.";
-            throw new APIManagementException(
-                    ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE, errorMessage));
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonInput = mapper.writeValueAsString(body.getAdditionalProperties());
+        JSONParser parser = new JSONParser();
+        JSONObject json = (JSONObject) parser.parse(jsonInput);
+        if (APIConstants.OAuthConstants.TOKEN_EXCHANGE.equals(grantType) &&
+                json.get(APIConstants.OAuthConstants.SUBJECT_TOKEN) == null) {
+            String errorMsg = "Missing required parameter " + APIConstants.OAuthConstants.SUBJECT_TOKEN
+                    + " is not provided to generate token using Token Exchange grant";
+            throw new APIManagementException(ExceptionCodes.from(
+                    ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE, errorMsg));
         }
         return jsonInput;
     }
