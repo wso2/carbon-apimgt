@@ -106,7 +106,7 @@ public class BlockConditionDAOImpl implements BlockConditionDAO {
                 blockCondition.setConditionType(resultSet.getString("TYPE"));
                 blockCondition.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
                 blockCondition.setConditionId(conditionId);
-                blockCondition.setTenantDomain(resultSet.getString("DOMAIN"));
+                blockCondition.setTenantDomain(resultSet.getString("ORGANIZATION"));
                 blockCondition.setUUID(resultSet.getString("UUID"));
             }
         } catch (SQLException e) {
@@ -144,7 +144,7 @@ public class BlockConditionDAOImpl implements BlockConditionDAO {
                 blockCondition.setConditionType(resultSet.getString("TYPE"));
                 blockCondition.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
                 blockCondition.setConditionId(resultSet.getInt("CONDITION_ID"));
-                blockCondition.setTenantDomain(resultSet.getString("DOMAIN"));
+                blockCondition.setTenantDomain(resultSet.getString("ORGANIZATION"));
                 blockCondition.setUUID(resultSet.getString("UUID"));
             }
         } catch (SQLException e) {

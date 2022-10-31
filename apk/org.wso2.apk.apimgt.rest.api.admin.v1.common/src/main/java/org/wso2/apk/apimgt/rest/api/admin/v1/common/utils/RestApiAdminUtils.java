@@ -385,7 +385,7 @@ public class RestApiAdminUtils {
         apiAdmin.updateTenantTheme(organization, existingTenantTheme);
     }
 
-    public static <T extends ThrottlePolicyDTO> T getDTOFromJson(String json, Class<T> clazz)
+    public static <T> T getDTOFromJson(String json, Class<T> clazz)
             throws APIManagementException{
         ObjectMapper mapper = new ObjectMapper();
         try {

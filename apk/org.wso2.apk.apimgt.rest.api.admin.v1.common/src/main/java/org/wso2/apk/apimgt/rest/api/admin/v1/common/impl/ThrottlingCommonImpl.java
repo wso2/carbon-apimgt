@@ -445,7 +445,7 @@ public class ThrottlingCommonImpl {
      * @return Throttle policy details
      * @throws APIManagementException When an internal error occurs
      */
-    public static ThrottlePolicyDetailsListDTO throttlingPolicySearch(String query) throws APIManagementException {
+    public static String throttlingPolicySearch(String query) throws APIManagementException {
         ThrottlePolicyDetailsListDTO resultListDTO = new ThrottlePolicyDetailsListDTO();
         String policyType;
         String policyName;
@@ -479,7 +479,7 @@ public class ThrottlingCommonImpl {
 
         resultListDTO.setCount(result.size());
         resultListDTO.setList(result);
-        return resultListDTO;
+        return RestApiAdminUtils.getJsonFromDTO(resultListDTO);
     }
 
     /**
@@ -600,160 +600,6 @@ public class ThrottlingCommonImpl {
             throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
                     RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY, policyId));
         }
-    }
-
-    /**
-     * Get all custom rules
-     *
-     * @return List of custom rules
-     * @throws APIManagementException When an internal error occurs
-     */
-    public static CustomRuleListDTO getAllCustomRules() throws APIManagementException {
-        APIAdmin apiAdmin = new APIAdminImpl();
-        String userName = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = APIUtil.getTenantDomain(userName);
-
-        //only super tenant is allowed to access global policies/custom rules
-        checkTenantDomainForCustomRules();
-
-        Policy[] globalPolicies = apiAdmin.getPolicies(tenantDomain, PolicyConstants.POLICY_LEVEL_GLOBAL);
-        List<GlobalPolicy> policies = new ArrayList<>();
-        for (Policy policy : globalPolicies) {
-            policies.add((GlobalPolicy) policy);
-        }
-        return GlobalThrottlePolicyMappingUtil
-                .fromGlobalPolicyArrayToListDTO(policies.toArray(new GlobalPolicy[policies.size()]));
-    }
-
-    /**
-     * Create new custom rule
-     *
-     * @param body Custom rule DTO
-     * @return Custom rule DTO
-     * @throws APIManagementException When an internal error occurs
-     */
-    public static CustomRuleDTO addCustomRule(CustomRuleDTO body, String httpMethod) throws APIManagementException {
-        RestApiAdminUtils
-                .validateCustomRuleRequiredProperties(body, httpMethod);
-        APIAdmin apiAdmin = new APIAdminImpl();
-        String username = RestApiCommonUtil.getLoggedInUsername();
-
-        //only super tenant is allowed to access global policies/custom rules
-        checkTenantDomainForCustomRules();
-
-        GlobalPolicy globalPolicy = GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyDTOToModel(body);
-        //Check if there's a policy exists before adding the new policy
-        try {
-            Policy policyIfExists = apiAdmin.getGlobalPolicy(globalPolicy.getPolicyName());
-            if (policyIfExists != null) {
-                String errorMessage = "Custom rule with name " + globalPolicy.getPolicyName() + EXISTS_CONSTANT;
-                throw new APIManagementException(errorMessage,
-                        ExceptionCodes.from(ExceptionCodes.CUSTOM_RULE_EXISTS, globalPolicy.getPolicyName()));
-            }
-        } catch (PolicyNotFoundException ignore) {
-            //do nothing
-        }
-        //Add the policy
-        apiAdmin.addPolicy(globalPolicy, username);
-
-        //retrieve the new policy and send back as the response
-        GlobalPolicy newGlobalPolicy = apiAdmin.getGlobalPolicy(body.getPolicyName());
-        return GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyToDTO(newGlobalPolicy);
-    }
-
-    /**
-     * Get custom rule by ID
-     *
-     * @param ruleId Custom rule ID
-     * @return Custom rule
-     * @throws APIManagementException When an internal error occurs
-     */
-    public static CustomRuleDTO getCustomRuleById(String ruleId) throws APIManagementException {
-        try {
-            APIAdmin apiAdmin = new APIAdminImpl();
-
-            //only super tenant is allowed to access global policies/custom rules
-            checkTenantDomainForCustomRules();
-
-            //This will give PolicyNotFoundException if there's no policy exists with UUID
-            GlobalPolicy globalPolicy = apiAdmin.getGlobalPolicyByUUID(ruleId);
-            if (!RestApiAdminUtils.isPolicyAccessibleToUser(globalPolicy)) {
-                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
-                        RestApiConstants.RESOURCE_CUSTOM_RULE, ruleId));
-            }
-            return GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyToDTO(globalPolicy);
-        } catch (PolicyNotFoundException e) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
-                    RestApiConstants.RESOURCE_CUSTOM_RULE, ruleId));
-        }
-    }
-
-    /**
-     * Update custom rule
-     *
-     * @param ruleId Custom rule ID
-     * @param body   Custom rule DTO
-     * @return Custom rule DTO
-     * @throws APIManagementException When an internal error occurs
-     */
-    public static CustomRuleDTO updateCustomRule(String ruleId, CustomRuleDTO body) throws APIManagementException {
-        try {
-            APIAdmin apiAdmin = new APIAdminImpl();
-
-            //only super tenant is allowed to access global policies/custom rules
-            checkTenantDomainForCustomRules();
-
-            //will give PolicyNotFoundException if there's no policy exists with UUID
-            GlobalPolicy existingPolicy = apiAdmin.getGlobalPolicyByUUID(ruleId);
-            if (!RestApiAdminUtils.isPolicyAccessibleToUser(existingPolicy)) {
-                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
-                        RestApiConstants.RESOURCE_CUSTOM_RULE, ruleId));
-            }
-
-            //overridden properties
-            body.setPolicyId(ruleId);
-            body.setPolicyName(existingPolicy.getPolicyName());
-
-            //update the policy
-            GlobalPolicy globalPolicy = GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyDTOToModel(body);
-            apiAdmin.updatePolicy(globalPolicy);
-
-            //retrieve the new policy and send back as the response
-            GlobalPolicy newGlobalPolicy = apiAdmin.getGlobalPolicyByUUID(ruleId);
-            return GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyToDTO(newGlobalPolicy);
-        } catch (PolicyNotFoundException e) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
-                    RestApiConstants.RESOURCE_CUSTOM_RULE, ruleId));
-        }
-    }
-
-    /**
-     * Delete custom rule
-     *
-     * @param ruleId Custom rule ID
-     * @throws APIManagementException When an internal error occurs
-     */
-    public static void removeCustomRule(String ruleId) throws APIManagementException {
-        try {
-            APIAdmin apiAdmin = new APIAdminImpl();
-
-            //only super tenant is allowed to access global policies/custom rules
-            checkTenantDomainForCustomRules();
-
-            String username = RestApiCommonUtil.getLoggedInUsername();
-
-            //This will give PolicyNotFoundException if there's no policy exists with UUID
-            GlobalPolicy existingPolicy = apiAdmin.getGlobalPolicyByUUID(ruleId);
-            if (!RestApiAdminUtils.isPolicyAccessibleToUser(existingPolicy)) {
-                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
-                        RestApiConstants.RESOURCE_CUSTOM_RULE, ruleId));
-            }
-            apiAdmin.deletePolicy(username, PolicyConstants.POLICY_LEVEL_GLOBAL, existingPolicy.getPolicyName());
-        } catch (PolicyNotFoundException e) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
-                    RestApiConstants.RESOURCE_CUSTOM_RULE, ruleId));
-        }
-
     }
 
     /**
@@ -887,13 +733,15 @@ public class ThrottlingCommonImpl {
      * @return Block condition DTO
      * @throws APIManagementException When an internal error occurs
      */
-    public static BlockingConditionListDTO getAllDenyPolicies() throws APIManagementException {
+    public static String getAllDenyPolicies() throws APIManagementException {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
             String userName = RestApiCommonUtil.getLoggedInUsername();
             String organization = APIUtil.getTenantDomain(userName);
             List<BlockConditionsDTO> blockConditions = apiAdmin.getBlockConditions(organization);
-            return BlockingConditionMappingUtil.fromBlockConditionListToListDTO(blockConditions);
+            BlockingConditionListDTO listDTO = BlockingConditionMappingUtil
+                    .fromBlockConditionListToListDTO(blockConditions);
+            return RestApiAdminUtils.getJsonFromDTO(listDTO);
         } catch (ParseException e) {
             String errorMessage = "Error while retrieving Block Conditions";
             throw new APIManagementException(errorMessage, e,
@@ -904,11 +752,12 @@ public class ThrottlingCommonImpl {
     /**
      * Create new deny policy
      *
-     * @param body Block condition DTO
+     * @param json Block condition DTO
      * @return Block condition DTO
      * @throws APIManagementException When an internal error occurs
      */
-    public static BlockingConditionDTO addDenyPolicy(BlockingConditionDTO body) throws APIManagementException {
+    public static String addDenyPolicy(String json) throws APIManagementException {
+        BlockingConditionDTO body = RestApiAdminUtils.getDTOFromJson(json, BlockingConditionDTO.class);
         APIAdmin apiAdmin = new APIAdminImpl();
         String userName = RestApiCommonUtil.getLoggedInUsername();
         String organization = APIUtil.getTenantDomain(userName);
@@ -945,7 +794,9 @@ public class ThrottlingCommonImpl {
         try {
             //retrieve the new blocking condition and send back as the response
             BlockConditionsDTO newBlockingCondition = apiAdmin.getBlockConditionByUUID(uuid);
-            return BlockingConditionMappingUtil.fromBlockingConditionToDTO(newBlockingCondition);
+            BlockingConditionDTO blockingDTO = BlockingConditionMappingUtil
+                    .fromBlockingConditionToDTO(newBlockingCondition);
+            return RestApiAdminUtils.getJsonFromDTO(blockingDTO);
         } catch (ParseException e) {
             String errorMessage = "Error while adding Blocking Condition. Condition type: "
                     + body.getConditionType() + ", " + "value: " + body.getConditionValue() + ". " + e.getMessage();
@@ -954,7 +805,7 @@ public class ThrottlingCommonImpl {
         }
     }
 
-    public static BlockingConditionDTO getDenyPolicyById(String conditionId) throws APIManagementException {
+    public static String getDenyPolicyById(String conditionId) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
 
         try {
@@ -964,7 +815,8 @@ public class ThrottlingCommonImpl {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                         RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId));
             }
-            return BlockingConditionMappingUtil.fromBlockingConditionToDTO(blockCondition);
+            BlockingConditionDTO blockingDTO = BlockingConditionMappingUtil.fromBlockingConditionToDTO(blockCondition);
+            return RestApiAdminUtils.getJsonFromDTO(blockingDTO);
         } catch (BlockConditionAlreadyExistsException e) {
             throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
                     RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId));
@@ -998,9 +850,10 @@ public class ThrottlingCommonImpl {
         }
     }
 
-    public static BlockingConditionDTO updateDenyPolicy(String conditionId, BlockingConditionStatusDTO body)
+    public static String updateDenyPolicy(String conditionId, String json)
             throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
+        BlockingConditionStatusDTO body = RestApiAdminUtils.getDTOFromJson(json, BlockingConditionStatusDTO.class);
 
         try {
             //This will give BlockConditionNotFoundException if there's no block condition exists with UUID
@@ -1015,7 +868,9 @@ public class ThrottlingCommonImpl {
 
             //retrieve the new blocking condition and send back as the response
             BlockConditionsDTO newBlockingCondition = apiAdmin.getBlockConditionByUUID(conditionId);
-            return BlockingConditionMappingUtil.fromBlockingConditionToDTO(newBlockingCondition);
+            BlockingConditionDTO blockingDTO = BlockingConditionMappingUtil
+                    .fromBlockingConditionToDTO(newBlockingCondition);
+            return RestApiAdminUtils.getJsonFromDTO(blockingDTO);
         } catch (BlockConditionNotFoundException e) {
             throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
                     RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId));
@@ -1257,9 +1112,6 @@ public class ThrottlingCommonImpl {
         } else if (RestApiConstants.RESOURCE_APP_POLICY.equals(policyType)) {
             responseObject = resolveUpdateApplicationPolicy(mapper, apiAdmin, overwrite, username,
                     exportThrottlePolicyDTO);
-        } else if (RestApiConstants.RESOURCE_CUSTOM_RULE.equals(policyType)) {
-            responseObject = resolveUpdateCustomRule(mapper, apiAdmin, overwrite, exportThrottlePolicyDTO,
-                    httpMethod);
         } else if (RestApiConstants.RESOURCE_ADVANCED_POLICY.equals(policyType)) {
             responseObject = resolveUpdateAdvancedPolicy(mapper, apiAdmin, overwrite, username,
                     exportThrottlePolicyDTO);
@@ -1359,46 +1211,6 @@ public class ThrottlingCommonImpl {
 //                    "Successfully imported Application Throttling Policy : " + applicationPolicy.getPolicyName();
 //            responseObject.put(DTO, applicationThrottlePolicyDTO);
 //            responseObject.put(MESSAGE, message);
-        }
-        return responseObject;
-    }
-
-    /**
-     * Checks if the policy exists to either update the policy or indicate the conflict or import a new policy
-     *
-     * @param mapper                  Object mapper
-     * @param apiAdmin                API Admin
-     * @param overwrite               Override the existing policy
-     * @param exportThrottlePolicyDTO Throttle policy DTO
-     * @param httpMethod              HTTP Method
-     * @return Map of policy DTO and message
-     * @throws APIManagementException When an internal error occurs
-     */
-    private static Map<String, Object> resolveUpdateCustomRule(ObjectMapper mapper, APIAdmin apiAdmin,
-                                                               boolean overwrite,
-                                                               ExportThrottlePolicyDTO exportThrottlePolicyDTO,
-                                                               String httpMethod)
-            throws APIManagementException {
-        Map<String, Object> responseObject = new HashMap<>();
-        CustomRuleDTO customPolicy = mapper.convertValue(exportThrottlePolicyDTO.getData(), CustomRuleDTO.class);
-        Policy policyIfExists = apiAdmin.getGlobalPolicy(customPolicy.getPolicyName());
-        if (policyIfExists != null) {
-            if (overwrite) {
-                String uuid = policyIfExists.getUUID();
-                CustomRuleDTO customRuleDTO = updateCustomRule(uuid, customPolicy);
-                String message = "Successfully updated Custom Throttling Policy : " + customPolicy.getPolicyName();
-                responseObject.put(DTO, customRuleDTO);
-                responseObject.put(MESSAGE, message);
-            } else {
-                String errorMessage = "Custom Policy with name " + customPolicy.getPolicyName() + EXISTS_CONSTANT;
-                throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.CUSTOM_RULE_EXISTS,
-                        customPolicy.getPolicyName()));
-            }
-        } else {
-            CustomRuleDTO customRuleDTO = addCustomRule(customPolicy, httpMethod);
-            String message = "Successfully imported Custom Throttling Policy : " + customPolicy.getPolicyName();
-            responseObject.put(DTO, customRuleDTO);
-            responseObject.put(MESSAGE, message);
         }
         return responseObject;
     }
