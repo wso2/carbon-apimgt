@@ -1414,16 +1414,14 @@ public class ApplicationsCommonImpl {
     }
 
     /**
-     * @param apiConsumer          apiConsumer
-     * @param supportedGrantTypes  supportedGrantTypes
-     * @param username             username
-     * @param additionalAttributes additionalAttributes
-     * @param application          application
-     * @param keyType
-     * @param callbackUrl
-     * @param groupId
-     * @return
-     * @throws APIManagementException
+     *
+     * @param apiConsumer api consumer
+     * @param body body of the request ApplicationKeyDTO
+     * @param username username
+     * @param application application
+     * @param keyType key type
+     * @return Oauth application info
+     * @throws APIManagementException API Manager exception
      */
     private static OAuthApplicationInfo updateAuthClient(APIConsumer apiConsumer, ApplicationKeyDTO body,
             String username, Application application, String keyType) throws APIManagementException {
