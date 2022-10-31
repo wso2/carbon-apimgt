@@ -23,11 +23,13 @@ package org.wso2.apk.apimgt.impl.utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.model.AccessTokenRequest;
 import org.wso2.apk.apimgt.api.model.Application;
 import org.wso2.apk.apimgt.api.model.KeyManager;
 import org.wso2.apk.apimgt.api.model.OAuthAppRequest;
 import org.wso2.apk.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.apk.apimgt.impl.factory.KeyManagerHolder;
 
 /**
  * Utility class for performing Operations related to Applications, OAuth clients.
@@ -74,8 +76,7 @@ public class ApplicationUtils {
     public static OAuthAppRequest createOauthAppRequest(String clientName, String clientId, String callbackURL,
                                                         String tokenScope, String clientDetails, String tokenType,
                                                         String tenantDomain, String keyManagerName)
-            throws
-            APIManagementException {
+            throws APIManagementException {
 
         //initiate OauthAppRequest object.
         OAuthAppRequest appRequest = new OAuthAppRequest();
@@ -90,9 +91,7 @@ public class ApplicationUtils {
 
             //parse json string and set applicationInfo parameters.
 
-            // TODO: get KM instance.
-            KeyManager keyManagerInstance = null;
-                    // KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+            KeyManager keyManagerInstance = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
             if (keyManagerInstance != null) {
                 authApplicationInfo = keyManagerInstance.buildFromJSON(authApplicationInfo, clientDetails);
             }
@@ -111,6 +110,16 @@ public class ApplicationUtils {
         return appRequest;
     }
 
+    public static AccessTokenRequest createAccessTokenRequest(KeyManager keyManager,
+                                                              OAuthApplicationInfo oAuthApplication,
+                                                              AccessTokenRequest tokenRequest) throws APIManagementException {
+        if (tokenRequest == null) {
+            tokenRequest = new AccessTokenRequest();
+        }
 
-
+        if (keyManager != null) {
+            return keyManager.buildAccessTokenRequestFromOAuthApp(oAuthApplication, tokenRequest);
+        }
+        return null;
+    }
 }

@@ -662,7 +662,7 @@ public class ApplicationsCommonImpl {
     }
 
     /**
-     * Generate keys for a application
+     * Generate keys for an application
      *
      * @param applicationId application identifier
      * @param body          request body
@@ -694,8 +694,7 @@ public class ApplicationsCommonImpl {
             }
         } else {
             throw new APIManagementException("Request application is " + (applicationId != null ?
-                    "with id " + applicationId :
-                    " " + "not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
+                    "with id " + applicationId : " not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
         }
     }
 
@@ -1392,9 +1391,9 @@ public class ApplicationsCommonImpl {
         if (!StringUtils.isEmpty(grantTypes)) {
             jsonParamObj.put(APIConstants.JSON_GRANT_TYPES, grantTypes);
         }
-                    /* Read clientId & clientSecret from ApplicationKeyGenerateRequestDTO object.
-                       User can provide clientId only or both clientId and clientSecret
-                       User cannot provide clientSecret only */
+        /* Read clientId & clientSecret from ApplicationKeyGenerateRequestDTO object.
+           User can provide clientId only or both clientId and clientSecret
+           User cannot provide clientSecret only */
         if (!StringUtils.isEmpty(clientId)) {
             jsonParamObj.put(APIConstants.JSON_CLIENT_ID, clientId);
             if (!StringUtils.isEmpty(clientSecret)) {
