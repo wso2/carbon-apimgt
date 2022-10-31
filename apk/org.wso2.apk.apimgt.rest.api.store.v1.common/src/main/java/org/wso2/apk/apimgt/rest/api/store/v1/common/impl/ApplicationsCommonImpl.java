@@ -1007,14 +1007,12 @@ public class ApplicationsCommonImpl {
                 return applicationKeyDTO;
             } else {
                 String message = "You don't have permission to access the application with Id " + applicationId;
-                throw new APIManagementException(message,
-                        ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION, "application "
-                                + applicationId));
+                throw new APIManagementException(message, ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION,
+                        "application " + applicationId));
             }
         } else {
             throw new APIManagementException("Request application is " + (applicationId != null ?
-                    "with id " + applicationId :
-                    " " + "not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
+                    "with id " + applicationId : " not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
         }
     }
 
