@@ -178,7 +178,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * Regenerate consumer secret.
      *
      * @param clientId For which consumer key we need to regenerate consumer secret.
-     * @param keyManagerName
+     * @param keyManagerName Name of the key manager
      * @return New consumer secret.
      * @throws APIManagementException This is the custom exception class for API management.
      */

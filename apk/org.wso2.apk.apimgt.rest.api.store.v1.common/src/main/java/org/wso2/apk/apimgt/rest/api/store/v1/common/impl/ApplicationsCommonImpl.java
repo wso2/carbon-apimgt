@@ -726,7 +726,7 @@ public class ApplicationsCommonImpl {
     /**
      * Clean up application keys
      *
-     * @param applicationId Application Id
+     * @param applicationId Application ID
      * @param keyType       Key Type whether PRODUCTION or SANDBOX
      * @return
      */
@@ -866,7 +866,7 @@ public class ApplicationsCommonImpl {
     /**
      * Returns Keys of an application by key type
      *
-     * @param applicationId Application Id
+     * @param applicationId Application ID
      * @param keyMappingId  Key Mapping ID
      * @return Application Key Information
      */
@@ -943,7 +943,7 @@ public class ApplicationsCommonImpl {
     /**
      * Re generate consumer secret.
      *
-     * @param applicationId Application Id
+     * @param applicationId Application ID
      * @param keyType       Key Type (Production | Sandbox)
      * @return A response object containing application keys.
      */
@@ -1015,12 +1015,12 @@ public class ApplicationsCommonImpl {
     }
 
     /**
-     * @param applicationId
-     * @param organization
-     * @return
-     * @throws APIManagementException
+     * @param applicationId application ID
+     * @param organization organization of the application
+     * @return list DTO of application keys
+     * @throws APIManagementException API Manager exception
      */
-    public static ApplicationKeyListDTO getApplicationIdOauthKeys(String applicationId, String organization)
+    public static ApplicationKeyListDTO getApplicationOauthKeys(String applicationId, String organization)
             throws APIManagementException {
         Set<APIKey> applicationKeys = getApplicationKeys(applicationId, organization);
         List<ApplicationKeyDTO> keyDTOList = new ArrayList<>();
@@ -1039,9 +1039,9 @@ public class ApplicationsCommonImpl {
     }
 
     /**
-     * @param applicationId
-     * @param keyMappingId
-     * @throws APIManagementException
+     * @param applicationId application ID
+     * @param keyMappingId key mapping ID
+     * @throws APIManagementException API Manager Exception
      */
     public static void cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(String applicationId,
             String keyMappingId) throws APIManagementException {
@@ -1113,13 +1113,13 @@ public class ApplicationsCommonImpl {
     }
 
     /**
-     * @param applicationId
-     * @param keyMappingId
-     * @param body
-     * @return
-     * @throws APIManagementException
+     * @param applicationId application ID
+     * @param keyMappingId key mapping ID
+     * @param body request body
+     * @return application key DTO
+     * @throws APIManagementException API Manager Exception
      */
-    public static ApplicationKeyDTO applicationsApplicationIdOauthKeysKeyMappingIdPut(String applicationId,
+    public static ApplicationKeyDTO updateApplicationOauthKeysKeyMapping(String applicationId,
             String keyMappingId, ApplicationKeyDTO body) throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
@@ -1175,12 +1175,12 @@ public class ApplicationsCommonImpl {
     }
 
     /**
-     * @param applicationId
-     * @param keyMappingId
-     * @return
-     * @throws APIManagementException
+     * @param applicationId application ID
+     * @param keyMappingId key mapping ID
+     * @return application key DTO
+     * @throws APIManagementException API Manager Exception
      */
-    public static ApplicationKeyDTO applicationsApplicationIdOauthKeysKeyMappingIdRegenerateSecretPost(
+    public static ApplicationKeyDTO regenerateSecretApplicationOauthKeysKeyMapping(
             String applicationId, String keyMappingId) throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
