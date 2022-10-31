@@ -436,10 +436,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     /**
      *
      * @param jsonString this string will contain oAuth app details
-     * @param userName user name of logged in user.
+     * @param userName username of logged-in user.
      * @param clientId this is the consumer key of oAuthApplication
-     * @param applicationName this is the APIM appication name.
-     * @param keyType
+     * @param applicationName this is the APIM application name.
+     * @param keyType key type of the application
      * @param tokenType this is theApplication Token Type. This can be either default or jwt.
      * @param keyManagerName key Manager name
      * @return
@@ -473,9 +473,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             keyManagerId = keyManagerConfiguration.getUuid();
         }
         if (keyManagerConfiguration == null || !keyManagerConfiguration.isEnabled()) {
-            throw new APIManagementException(
-                    "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
-                    ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
+            throw new APIManagementException("Key Manager " + keyManagerName + " doesn't exist in Tenant "
+                    + tenantDomain, ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
         }
         if (KeyManagerConfiguration.TokenType.EXCHANGED.toString().equals(keyManagerConfiguration.getTokenType())) {
             throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
@@ -490,9 +489,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
         if (keyManager == null) {
-            throw new APIManagementException(
-                    "Key Manager " + keyManagerName + "Couldn't initialized in tenant " + tenantDomain + ".",
-                    ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
+            throw new APIManagementException("Key Manager " + keyManagerName + "Couldn't initialized in tenant "
+                    + tenantDomain + ".", ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
         }
 
         //Get application ID
