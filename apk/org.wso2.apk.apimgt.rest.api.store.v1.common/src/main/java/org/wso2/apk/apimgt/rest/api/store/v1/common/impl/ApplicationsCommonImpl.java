@@ -757,14 +757,12 @@ public class ApplicationsCommonImpl {
                 } else {
                     throw new APIManagementException(
                             "User " + username + " does not have permission to access application with Id : "
-                                    + applicationUUID,
-                            ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
+                                    + applicationUUID, ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
                                     RestApiConstants.RESOURCE_APPLICATION, application.getUUID()));
                 }
             } else {
                 throw new APIManagementException("Request application is " + (applicationUUID != null ?
-                        "with id " + applicationUUID :
-                        " " + "not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
+                        "with id " + applicationUUID : " not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
             }
         } catch (APIManagementException e) {
             throw new APIManagementException(
