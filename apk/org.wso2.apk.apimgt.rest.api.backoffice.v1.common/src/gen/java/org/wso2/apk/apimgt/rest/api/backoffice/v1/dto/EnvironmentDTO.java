@@ -1,13 +1,24 @@
 package org.wso2.apk.apimgt.rest.api.backoffice.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.AdditionalPropertyDTO;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.GatewayEnvironmentProtocolURIDTO;
+import javax.validation.constraints.*;
+
+
+import io.swagger.annotations.*;
 import java.util.Objects;
+
+import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 
 
@@ -20,7 +31,6 @@ public class EnvironmentDTO   {
     private String serverUrl = null;
     private String provider = null;
     private Boolean showInApiConsole = null;
-    private List<VHostDTO> vhosts = new ArrayList<VHostDTO>();
     private List<GatewayEnvironmentProtocolURIDTO> endpointURIs = new ArrayList<GatewayEnvironmentProtocolURIDTO>();
     private List<AdditionalPropertyDTO> additionalProperties = new ArrayList<AdditionalPropertyDTO>();
 
@@ -150,24 +160,6 @@ public class EnvironmentDTO   {
 
   /**
    **/
-  public EnvironmentDTO vhosts(List<VHostDTO> vhosts) {
-    this.vhosts = vhosts;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("vhosts")
-  public List<VHostDTO> getVhosts() {
-    return vhosts;
-  }
-  public void setVhosts(List<VHostDTO> vhosts) {
-    this.vhosts = vhosts;
-  }
-
-  /**
-   **/
   public EnvironmentDTO endpointURIs(List<GatewayEnvironmentProtocolURIDTO> endpointURIs) {
     this.endpointURIs = endpointURIs;
     return this;
@@ -204,7 +196,7 @@ public class EnvironmentDTO   {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -219,14 +211,13 @@ public class EnvironmentDTO   {
         Objects.equals(serverUrl, environment.serverUrl) &&
         Objects.equals(provider, environment.provider) &&
         Objects.equals(showInApiConsole, environment.showInApiConsole) &&
-        Objects.equals(vhosts, environment.vhosts) &&
         Objects.equals(endpointURIs, environment.endpointURIs) &&
         Objects.equals(additionalProperties, environment.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, type, serverUrl, provider, showInApiConsole, vhosts, endpointURIs, additionalProperties);
+    return Objects.hash(id, name, displayName, type, serverUrl, provider, showInApiConsole, endpointURIs, additionalProperties);
   }
 
   @Override
@@ -241,7 +232,6 @@ public class EnvironmentDTO   {
     sb.append("    serverUrl: ").append(toIndentedString(serverUrl)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    showInApiConsole: ").append(toIndentedString(showInApiConsole)).append("\n");
-    sb.append("    vhosts: ").append(toIndentedString(vhosts)).append("\n");
     sb.append("    endpointURIs: ").append(toIndentedString(endpointURIs)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
@@ -252,7 +242,7 @@ public class EnvironmentDTO   {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }

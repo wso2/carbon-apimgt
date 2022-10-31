@@ -1,14 +1,21 @@
 package org.wso2.apk.apimgt.rest.api.backoffice.v1.dto;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.ApplicationInfoDTO;
+import javax.validation.constraints.*;
 
+
+import io.swagger.annotations.*;
 import java.util.Objects;
+
+import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
 
 
 
@@ -16,7 +23,7 @@ public class SubscriptionDTO   {
   
     private String subscriptionId = null;
     private ApplicationInfoDTO applicationInfo = null;
-    private String throttlingPolicy = null;
+    private String usagePlan = null;
 
     @XmlType(name="SubscriptionStatusEnum")
     @XmlEnum(String.class)
@@ -94,20 +101,20 @@ return null;
 
   /**
    **/
-  public SubscriptionDTO throttlingPolicy(String throttlingPolicy) {
-    this.throttlingPolicy = throttlingPolicy;
+  public SubscriptionDTO usagePlan(String usagePlan) {
+    this.usagePlan = usagePlan;
     return this;
   }
 
   
   @ApiModelProperty(example = "Unlimited", required = true, value = "")
-  @JsonProperty("throttlingPolicy")
+  @JsonProperty("usagePlan")
   @NotNull
-  public String getThrottlingPolicy() {
-    return throttlingPolicy;
+  public String getUsagePlan() {
+    return usagePlan;
   }
-  public void setThrottlingPolicy(String throttlingPolicy) {
-    this.throttlingPolicy = throttlingPolicy;
+  public void setUsagePlan(String usagePlan) {
+    this.usagePlan = usagePlan;
   }
 
   /**
@@ -130,7 +137,7 @@ return null;
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -140,13 +147,13 @@ return null;
     SubscriptionDTO subscription = (SubscriptionDTO) o;
     return Objects.equals(subscriptionId, subscription.subscriptionId) &&
         Objects.equals(applicationInfo, subscription.applicationInfo) &&
-        Objects.equals(throttlingPolicy, subscription.throttlingPolicy) &&
+        Objects.equals(usagePlan, subscription.usagePlan) &&
         Objects.equals(subscriptionStatus, subscription.subscriptionStatus);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionId, applicationInfo, throttlingPolicy, subscriptionStatus);
+    return Objects.hash(subscriptionId, applicationInfo, usagePlan, subscriptionStatus);
   }
 
   @Override
@@ -156,7 +163,7 @@ return null;
     
     sb.append("    subscriptionId: ").append(toIndentedString(subscriptionId)).append("\n");
     sb.append("    applicationInfo: ").append(toIndentedString(applicationInfo)).append("\n");
-    sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
+    sb.append("    usagePlan: ").append(toIndentedString(usagePlan)).append("\n");
     sb.append("    subscriptionStatus: ").append(toIndentedString(subscriptionStatus)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -166,7 +173,7 @@ return null;
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }

@@ -1,40 +1,32 @@
 package org.wso2.apk.apimgt.rest.api.backoffice.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.constraints.*;
+
+
+import io.swagger.annotations.*;
 import java.util.Objects;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+
+import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
+
+
 
 public class ScopeDTO   {
   
-    private String id = null;
     private String name = null;
     private String displayName = null;
     private String description = null;
     private List<String> bindings = new ArrayList<String>();
     private Integer usageCount = null;
-
-  /**
-   * UUID of the Scope. Valid only for shared scopes. 
-   **/
-  public ScopeDTO id(String id) {
-    this.id = id;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the Scope. Valid only for shared scopes. ")
-  @JsonProperty("id")
-  public String getId() {
-    return id;
-  }
-  public void setId(String id) {
-    this.id = id;
-  }
 
   /**
    * name of Scope 
@@ -129,7 +121,7 @@ public class ScopeDTO   {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -137,8 +129,7 @@ public class ScopeDTO   {
       return false;
     }
     ScopeDTO scope = (ScopeDTO) o;
-    return Objects.equals(id, scope.id) &&
-        Objects.equals(name, scope.name) &&
+    return Objects.equals(name, scope.name) &&
         Objects.equals(displayName, scope.displayName) &&
         Objects.equals(description, scope.description) &&
         Objects.equals(bindings, scope.bindings) &&
@@ -147,7 +138,7 @@ public class ScopeDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, description, bindings, usageCount);
+    return Objects.hash(name, displayName, description, bindings, usageCount);
   }
 
   @Override
@@ -155,7 +146,6 @@ public class ScopeDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ScopeDTO {\n");
     
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
@@ -169,7 +159,7 @@ public class ScopeDTO   {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }
