@@ -256,6 +256,12 @@
             <artifactId>postgresql</artifactId>
             <version>42.5.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>7.6.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -312,6 +318,74 @@
                     </dependency>
                 </dependencies>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.22.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--<plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.20.1</version>
+                <executions>
+                    <execution>
+                        <id>prepare-it-database</id>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <name>postgres</name>
+                                    <alias>it-database</alias>
+                                    <build>
+                                        <from>postgres:latest</from>
+                                        <assembly>
+                                            <mode>dir</mode>
+                                            &lt;!&ndash; database startup script &ndash;&gt;
+                                            <targetDir>/docker-entrypoint-initdb.d</targetDir>
+                                            <inline>
+                                                <files>
+                                                    <file>
+                                                        <source>src/test/docker/setup-postgres.sql</source>
+                                                    </file>
+                                                </files>
+                                            </inline>
+                                        </assembly>
+                                    </build>
+                                    <run>
+                                        <ports>
+                                            <port>it-database.port:5432</port>
+                                        </ports>
+                                        <env>
+                                            <POSTGRES_USER>admin</POSTGRES_USER>
+                                            <POSTGRES_PASSWORD>admin</POSTGRES_PASSWORD>
+                                        </env>
+                                        &lt;!&ndash;<wait>
+                                            <log>(?s)database system is ready to accept connections.*database system is ready to accept connections</log>
+                                            <time>10000</time>
+                                        </wait>&ndash;&gt;
+                                    </run>
+                                </image>
+                            </images>
+                        </configuration>
+                    </execution>
+                    &lt;!&ndash;<execution>
+                        <id>remove-it-database</id>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>&ndash;&gt;
+                </executions>
+            </plugin>-->
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>

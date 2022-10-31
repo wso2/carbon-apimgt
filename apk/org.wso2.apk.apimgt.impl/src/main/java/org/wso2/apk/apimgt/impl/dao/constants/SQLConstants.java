@@ -2524,7 +2524,7 @@ public class SQLConstants {
                     "BILLING_CYCLE = ?," +
                     "PRICE_PER_REQUEST = ?, " +
                     "CURRENCY = ?, " +
-                    "CONNECTIONS_COUNT = ?" +
+                    "CONNECTIONS_COUNT = ? " +
             "WHERE NAME = ? AND ORGANIZATION = ?";
 
     public static final String UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL =

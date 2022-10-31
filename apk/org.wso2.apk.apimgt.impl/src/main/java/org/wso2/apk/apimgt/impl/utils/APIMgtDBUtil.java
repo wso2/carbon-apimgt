@@ -96,6 +96,14 @@ public final class APIMgtDBUtil {
         }
     }
 
+    public static synchronized void initialize(HikariDataSource dataSource) throws APIManagerDatabaseException {
+        if (dataSource != null) {
+            APIMgtDBUtil.dataSource = dataSource;
+        } else {
+            initialize();
+        }
+    }
+
     /**
      * Utility method to get a new database connection
      *

@@ -30,6 +30,7 @@ import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.apk.apimgt.impl.dao.util.DBUtils;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -1335,7 +1336,7 @@ public class PolicyDAOImpl implements PolicyDAO {
         List<String> names = new ArrayList<String>();
         String sqlQuery = null;
 
-        String tenantDomain = APIUtil.getTenantDomain(username);
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
