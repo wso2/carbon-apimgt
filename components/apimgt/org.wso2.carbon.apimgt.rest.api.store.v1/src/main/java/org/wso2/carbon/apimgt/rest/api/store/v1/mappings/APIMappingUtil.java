@@ -71,6 +71,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -442,6 +443,7 @@ public class APIMappingUtil {
         String subscriptionAllowedTenants = model.getSubscriptionAvailableTenants();
         dto.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
                 subscriptionAllowedTenants));
+        dto.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         return dto;
     }
 

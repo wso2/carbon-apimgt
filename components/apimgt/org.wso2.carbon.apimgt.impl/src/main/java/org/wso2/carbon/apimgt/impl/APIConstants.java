@@ -2709,6 +2709,8 @@ public final class APIConstants {
         public static final String SUBSCRIBER_TOPIC_PROPERTY = "SUBSCRIBER_TOPIC";
         public static final String SUBSCRIBER_APPLICATION_ID_PROPERTY = "SUBSCRIBER_APPLICATION_ID";
         public static final String PAYLOAD_PROPERTY = "ORIGINAL_PAYLOAD";
+
+        public static final String SUBSCRIPTION_PARAMETER_PROPERTY = "SUBSCRIPTION_PARAMETERS";
     }
 
     public enum PolicyType {
@@ -2890,6 +2892,9 @@ public final class APIConstants {
             + "resources" + File.separator + "operation_policies" + File.separator + "definitions";
     public static final String OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE = "Synapse";
     public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP = "HTTP";
+    public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_SOAP = "SOAP";
+    public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_SOAPTOREST = "SOAPTOREST";
+    public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_GRAPHQL = "GRAPHQL";
     public static final String DEFAULT_POLICY_VERSION = "v1";
 
 

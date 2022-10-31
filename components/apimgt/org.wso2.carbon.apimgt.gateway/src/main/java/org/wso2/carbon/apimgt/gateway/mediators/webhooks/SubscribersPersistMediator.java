@@ -19,11 +19,8 @@ package org.wso2.carbon.apimgt.gateway.mediators.webhooks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.util.EntityUtils;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
@@ -44,11 +41,6 @@ import org.wso2.carbon.apimgt.gateway.utils.WebhooksUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -60,26 +52,23 @@ public class SubscribersPersistMediator extends AbstractMediator {
     @Override
     public boolean mediate(MessageContext messageContext) {
         try {
-            Map<String, String> queryParams = populateQueryParamData(messageContext);
-            if (queryParams.isEmpty()) {
-                populateException("Query params must present in the request", messageContext);
+            Map<String, String> params = (Map<String, String>) messageContext.getProperty(
+                    APIConstants.Webhooks.SUBSCRIPTION_PARAMETER_PROPERTY);
+
+            if (params != null && params.isEmpty()) {
+                populateException("Subscription parameters must present in the request", messageContext);
             }
-            String callback = queryParams.get(APIConstants.Webhooks.HUB_CALLBACK_QUERY_PARAM);
-            String topicName = queryParams.get(APIConstants.Webhooks.HUB_TOPIC_QUERY_PARAM);
-            String mode = queryParams.get(APIConstants.Webhooks.HUB_MODE_QUERY_PARAM);
-            String secret = queryParams.get(APIConstants.Webhooks.HUB_SECRET_QUERY_PARAM);
-            String leaseSeconds = queryParams.get(APIConstants.Webhooks.HUB_LEASE_SECONDS_QUERY_PARAM);
+            String callback = params.get(APIConstants.Webhooks.HUB_CALLBACK_QUERY_PARAM);
+            String topicName = params.get(APIConstants.Webhooks.HUB_TOPIC_QUERY_PARAM);
+            String mode = params.get(APIConstants.Webhooks.HUB_MODE_QUERY_PARAM);
+            String secret = params.get(APIConstants.Webhooks.HUB_SECRET_QUERY_PARAM);
+            String leaseSeconds = params.get(APIConstants.Webhooks.HUB_LEASE_SECONDS_QUERY_PARAM);
             messageContext.setProperty(Constants.SKIP_DEFAULT_METRICS_PUBLISHING, true);
             org.apache.axis2.context.MessageContext axisCtx =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             axisCtx.setProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE, APIConstants.API_TYPE_WEBSUB);
-            if (StringUtils.isEmpty(callback)) {
-                populateException("Callback URL cannot be empty", messageContext);
-            }
-            if (StringUtils.isEmpty(mode)) {
-                populateException("Mode cannot be empty", messageContext);
-            } else if (!(APIConstants.Webhooks.SUBSCRIBE_MODE.equalsIgnoreCase(mode.trim()) || APIConstants.Webhooks.
-                    UNSUBSCRIBE_MODE.equalsIgnoreCase(mode.trim()))) {
+            if (!(APIConstants.Webhooks.SUBSCRIBE_MODE.equalsIgnoreCase(mode.trim())
+                    || APIConstants.Webhooks.UNSUBSCRIBE_MODE.equalsIgnoreCase(mode.trim()))) {
                 populateException("Invalid Entry for hub.mode", messageContext);
             }
             AuthenticationContext authenticationContext = APISecurityUtils.getAuthenticationContext(messageContext);
@@ -99,7 +88,7 @@ public class SubscribersPersistMediator extends AbstractMediator {
             HttpResponse httpResponse = WebhooksUtils.persistData(jsonString, subscriptionDataPersisRetries,
                     APIConstants.Webhooks.SUBSCRIPTION_EVENT_TYPE);
             handleResponse(httpResponse, messageContext);
-        } catch (URISyntaxException | InterruptedException | IOException e) {
+        } catch (InterruptedException | IOException e) {
             messageContext.setProperty(SynapseConstants.ERROR_CODE, HttpStatus.SC_INTERNAL_SERVER_ERROR);
             messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, "Error while persisting request");
             messageContext.setProperty(SynapseConstants.ERROR_DETAIL, "Error while persisting request");
@@ -158,26 +147,6 @@ public class SubscribersPersistMediator extends AbstractMediator {
         messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMsg);
         messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorMsg);
         throw new SynapseException(errorMsg);
-    }
-
-    /**
-     * This method is used to populate query param data of the subscription request.
-     *
-     * @param messageContext    the message context.
-     */
-    private Map<String, String> populateQueryParamData(MessageContext messageContext) throws URISyntaxException {
-        Map<String, String> queryData = new HashMap<>();
-        String urlQueryParams = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
-                getProperty(APIConstants.TRANSPORT_URL_IN);
-        if (StringUtils.isEmpty(urlQueryParams)) {
-            handleException("Invalid subscription request: URL params are missing", messageContext);
-        }
-        List<NameValuePair> queryParameter = URLEncodedUtils.parse(new URI(urlQueryParams),
-                StandardCharsets.UTF_8.name());
-        for (NameValuePair nvPair : queryParameter) {
-            queryData.put(nvPair.getName(), nvPair.getValue());
-        }
-        return queryData;
     }
 
     /**
