@@ -26,7 +26,8 @@ import org.wso2.apk.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.apk.apimgt.impl.restapi.Constants;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.user.ctx.UserContext;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.apk.apimgt.user.mgt.util.UserUtils;
+//import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 
 import java.io.IOException;
@@ -36,7 +37,7 @@ import java.util.regex.Pattern;
 
 public class RestApiCommonUtil {
 
-    public static final ThreadLocal userThreadLocal = new ThreadLocal();
+//    public static final ThreadLocal userThreadLocal = new ThreadLocal();
     private static final Log log = LogFactory.getLog(RestApiCommonUtil.class);
     private static Set<URITemplate> storeResourceMappings;
     private static Set<URITemplate> publisherResourceMappings;
@@ -45,17 +46,18 @@ public class RestApiCommonUtil {
 
     public static void unsetThreadLocalRequestedTenant() {
 
-        userThreadLocal.remove();
+//        userThreadLocal.remove();
     }
 
     public static String getThreadLocalRequestedTenant() {
 
-        return (String) userThreadLocal.get();
+//        return (String) userThreadLocal.get();
+        return null;
     }
 
     public static void setThreadLocalRequestedTenant(String user) {
 
-        userThreadLocal.set(user);
+//        userThreadLocal.set(user);
     }
 
     public static APIProvider getLoggedInUserProvider() throws APIManagementException {
@@ -376,12 +378,14 @@ public class RestApiCommonUtil {
 
     public static String getLoggedInUsername() {
 
-        return UserContext.getThreadLocalUserContext().getUsername();
+//        return UserContext.getThreadLocalUserContext().getUsername();
+        return "apkuser";
     }
 
     public static String getLoggedInUserTenantDomain() {
 
-        return UserContext.getThreadLocalUserContext().getOrganization();
+//        return UserContext.getThreadLocalUserContext().getOrganization();
+        return "carbon.super";
     }
 
     /**
@@ -755,7 +759,7 @@ public class RestApiCommonUtil {
 
         String username = getLoggedInUsername();
         String providerName = APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName());
-        String providerTenantDomain = MultitenantUtils.getTenantDomain(providerName);
+        String providerTenantDomain = UserUtils.getTenantDomain(providerName);
         String loggedInUserTenantDomain = getLoggedInUserTenantDomain();
         if (!providerTenantDomain.equals(loggedInUserTenantDomain)) {
             String errorMsg = "User " + username + " is not allowed to access " + apiIdentifier.toString()

@@ -88,7 +88,8 @@ public class UserContext {
     }
 
     public String getUsername() {
-        return username;
+//        return username;
+        return "apkuser";
     }
 
     public int getOrganizationId() {
@@ -96,7 +97,8 @@ public class UserContext {
     }
 
     public String getOrganization() {
-        return organization;
+//        return organization;
+        return "carbon.super";
     }
 
     public String[] getRoles() {

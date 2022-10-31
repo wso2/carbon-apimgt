@@ -24,7 +24,8 @@ import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.TenantInfoDTO;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.apk.apimgt.user.mgt.util.UserUtils;
+//import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Base64;
 
@@ -56,7 +57,7 @@ public class TenantInfoCommonImpl {
                     ExceptionCodes.USER_DOES_NOT_EXIST);
         }
 
-        String tenantDomain = MultitenantUtils.getTenantDomain(decodedUserName);
+        String tenantDomain = UserUtils.getTenantDomain(decodedUserName);
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         tenantInfoDTO.setTenantDomain(tenantDomain);
         tenantInfoDTO.setTenantId(tenantId);

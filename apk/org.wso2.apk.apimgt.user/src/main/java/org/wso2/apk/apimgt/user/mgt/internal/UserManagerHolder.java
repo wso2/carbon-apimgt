@@ -19,14 +19,14 @@
 package org.wso2.apk.apimgt.user.mgt.internal;
 
 import org.wso2.apk.apimgt.user.mgt.UserManager;
-import org.wso2.apk.apimgt.user.mgt.impl.CarbonUserManagerImpl;
+import org.wso2.apk.apimgt.user.mgt.impl.APKUserManagerImpl;
 
 public class UserManagerHolder {
     private static UserManager userManager = null;
 
     public static UserManager getUserManager() {
         if (userManager == null) {
-            userManager = new CarbonUserManagerImpl();
+            userManager = new APKUserManagerImpl();
         }
         return userManager;
     }

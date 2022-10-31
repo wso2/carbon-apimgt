@@ -18,6 +18,9 @@
 
 package org.wso2.apk.apimgt.rest.api.admin.v1.common.utils;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -33,6 +36,7 @@ import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.apk.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
+import org.wso2.apk.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
 import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.apk.apimgt.user.ctx.UserContext;
 
@@ -379,6 +383,26 @@ public class RestApiAdminUtils {
         FileUtils.copyDirectory(backupDirectory, tenantThemeDirectory);
         FileUtils.deleteDirectory(backupDirectory);
         apiAdmin.updateTenantTheme(organization, existingTenantTheme);
+    }
+
+    public static <T extends ThrottlePolicyDTO> T getDTOFromJson(String json, Class<T> clazz)
+            throws APIManagementException{
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(json, clazz);
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error");
+        }
+    }
+
+    public static <T> String getJsonFromDTO(T dto) throws APIManagementException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        try {
+            return mapper.writeValueAsString(dto);
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error");
+        }
     }
 }
 

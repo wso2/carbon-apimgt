@@ -21,17 +21,21 @@ package org.wso2.apk.init;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.APIManagerDatabaseException;
 import org.wso2.apk.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.apk.apimgt.impl.ConfigurationHolder;
 import org.wso2.apk.apimgt.impl.caching.CacheProvider;
 import org.wso2.apk.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 
 
 public class APKComponent {
+
+    private static final Log log = LogFactory.getLog(APKComponent.class);
 
     public static void activate(String configuration) throws APIManagementException {
 
@@ -39,11 +43,11 @@ public class APKComponent {
         ConfigurationHolder config = new ConfigurationHolder();
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        // TODO: Read configuration object and use object mapper to load APIManager Configuration
         try {
             config = objectMapper.readValue(configuration, ConfigurationHolder.class);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(config);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
+            log.info("Successfully set the APK configurations...");
         } catch (JsonProcessingException e) {
             throw new APIManagementException("Error while reading configurations");
         }
@@ -51,14 +55,17 @@ public class APKComponent {
         try {
             // Initialize database
             APIMgtDBUtil.initialize();
-        } catch (APIManagerDatabaseException e) {
-            throw new APIManagementException("Error while initializing database connection");
+            log.info("Datasource initialized successfully!");
+        } catch (Exception e) {
+            throw new APIManagementException("Error while initializing database connection", e);
         }
 
         // Initialise SQL constant manager
+        log.debug("Initializing SQL constant manager");
         SQLConstantManagerFactory.initializeSQLConstantManager();
 
-        // initialize API-M Caches
-        CacheProvider.createTenantConfigCache();
+        //TODO: APK
+//        // initialize API-M Caches
+//        CacheProvider.createTenantConfigCache();
     }
 }

@@ -39,6 +39,8 @@ import org.wso2.apk.apimgt.rest.api.admin.v1.dto.ScopeInfoDTO;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.apk.apimgt.user.ctx.UserContext;
+import org.wso2.apk.apimgt.user.mgt.util.UserUtils;
+//import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -148,7 +150,7 @@ public class ApplicationsCommonImpl {
         String tenantDomain = UserContext.getThreadLocalUserContext().getOrganization();
         Application application = apiConsumer.getApplicationByUUID(applicationId, organization);
         if (application != null) {
-            String applicationTenantDomain = APIUtil.getTenantDomain(application.getOwner());
+            String applicationTenantDomain = UserUtils.getTenantDomain(application.getOwner());
             //If we need to remove this validation due to cross tenant subscription feature, we have to further validate
             //and verify that the invoking user's tenant domain has an API subscribed by this application
             if (tenantDomain.equals(applicationTenantDomain)) {

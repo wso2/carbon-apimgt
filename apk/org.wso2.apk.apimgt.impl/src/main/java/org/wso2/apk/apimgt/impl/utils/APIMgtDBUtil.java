@@ -54,7 +54,6 @@ public final class APIMgtDBUtil {
     }
 
     private static final Log log = LogFactory.getLog(APIMgtDBUtil.class);
-    private static final String DATA_SOURCE_NAME = "DataSourceName";
     private static volatile HikariDataSource dataSource = null;
 
     /**
@@ -62,7 +61,7 @@ public final class APIMgtDBUtil {
      *
      * @throws APIManagerDatabaseException if an error occurs while loading DB configuration
      */
-    public static void initialize() throws APIManagerDatabaseException {
+    public static void initialize() {
         if (dataSource != null) {
             return;
         }
@@ -76,20 +75,6 @@ public final class APIMgtDBUtil {
                 ConfigurationHolder config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                         .getAPIManagerConfiguration();
                 DatasourceProperties datasourceProperties = config.getDatasourceProperties();
-//                String dataSourceName = config.getFirstProperty(DATA_SOURCE_NAME);
-                String dataSourceName = datasourceProperties.getName();
-
-                if (dataSourceName != null) {
-                    try {
-                        Context ctx = new InitialContext();
-                        dataSource = (HikariDataSource) ctx.lookup(dataSourceName);
-                    } catch (NamingException e) {
-                        throw new APIManagerDatabaseException("Error while looking up the data " +
-                                "source: " + dataSourceName, e);
-                    }
-                } else {
-                    log.error(DATA_SOURCE_NAME + " not defined in Config");
-                }
                 if (dataSource == null) {
                     HikariConfig hikariConfig = new HikariConfig();
                     hikariConfig.setJdbcUrl(datasourceProperties.getUrl());
@@ -105,6 +90,7 @@ public final class APIMgtDBUtil {
                     hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
                     hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
                     dataSource = new HikariDataSource(hikariConfig);
+                    log.debug("Hikari datasource created successfully");
                 }
             }
         }

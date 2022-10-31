@@ -195,7 +195,8 @@ import org.wso2.apk.apimgt.impl.dao.mapper.DocumentMapper;
 import org.wso2.apk.apimgt.user.exceptions.UserException;
 import org.wso2.apk.apimgt.user.mgt.internal.UserManagerHolder;
 //import org.wso2.carbon.databridge.commons.Event;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.apk.apimgt.user.mgt.util.UserUtils;
+//import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Cache;
 import javax.xml.stream.XMLStreamException;
@@ -492,7 +493,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public API addAPI(API api) throws APIManagementException {
         validateApiInfo(api);
-        String tenantDomain = MultitenantUtils
+        String tenantDomain = UserUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateResourceThrottlingTiers(api, tenantDomain);
         validateKeyManagers(api);
@@ -575,7 +576,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int apiId = apiDAOImpl.addAPI(org, api);
         //TODO:APK
 //        addLocalScopes(api.getId().getApiName(), api.getUriTemplates(), api.getOrganization());
-        String tenantDomain = MultitenantUtils
+        String tenantDomain = UserUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateOperationPolicyParameters(api, tenantDomain);
         //TODO:APK
@@ -875,7 +876,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Invalid API update operation involving API status changes",
                     ExceptionCodes.UPDATE_STATE_CHANGE);
         }
-        String tenantDomain = MultitenantUtils
+        String tenantDomain = UserUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         //Validate Transports
         validateAndSetTransports(api);
@@ -1518,7 +1519,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public Map<String, String> getSubscriberClaims(String subscriber) throws APIManagementException {
-        String tenantDomain = MultitenantUtils.getTenantDomain(subscriber);
+        String tenantDomain = UserUtils.getTenantDomain(subscriber);
         int tenantId = 0;
         Map<String, String> claimMap = new HashMap<>();
         Map<String, String> subscriberClaims = null;
@@ -2153,7 +2154,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         subscribedAPI = applicationDAOImpl.getSubscriptionByUUID(subscribedAPI.getUUID());
         Identifier identifier =
                 subscribedAPI.getAPIIdentifier() != null ? subscribedAPI.getAPIIdentifier() : subscribedAPI.getProductId();
-        String tenantDomain = MultitenantUtils
+        String tenantDomain = UserUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
         String orgId = subscribedAPI.getOrganization();
         //TODO:APK
@@ -3232,7 +3233,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public String addBlockCondition(String conditionType, String conditionValue) throws APIManagementException {
 
         if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
-            conditionValue = MultitenantUtils.getTenantAwareUsername(conditionValue);
+            conditionValue = UserUtils.getTenantAwareUsername(conditionValue);
             conditionValue = conditionValue + "@" + tenantDomain;
         }
         BlockConditionsDTO blockConditionsDTO = new BlockConditionsDTO();
@@ -3273,7 +3274,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String blockingConditionType = blockCondition.getConditionType();
         String blockingConditionValue = blockCondition.getConditionValue();
         if (APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
-            blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
+            blockingConditionValue = UserUtils.getTenantAwareUsername(blockingConditionValue);
             blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
             blockCondition.setConditionValue(blockingConditionValue);
         }
@@ -3312,7 +3313,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String blockingConditionType = blockCondition.getConditionType();
             String blockingConditionValue = blockCondition.getConditionValue();
             if (APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
-                blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
+                blockingConditionValue = UserUtils.getTenantAwareUsername(blockingConditionValue);
                 blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
                 blockCondition.setConditionValue(blockingConditionValue);
             }
@@ -3805,7 +3806,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<API, List<APIProductResource>> apiToProductResourceMapping = new HashMap<>();
 
         validateApiProductInfo(product);
-        String tenantDomain = MultitenantUtils
+        String tenantDomain = UserUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
 
         if (log.isDebugEnabled()) {
@@ -4451,7 +4452,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     public JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException {
-        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
+        String tenantDomain = UserUtils.getTenantDomain(userId);
         JSONObject securityAuditConfig = APIUtil.getSecurityAuditAttributesFromRegistry(tenantDomain);
         if (securityAuditConfig != null) {
             if ((securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL) != null) &&
