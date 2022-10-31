@@ -134,13 +134,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     private void readRecommendationConfigs() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+        ConfigurationHolder config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         recommendationEnvironment = config.getApiRecommendationEnvironment();
     }
 
     private void readTagCacheConfigs() {
-        APIManagerConfiguration config = getAPIManagerConfiguration();
+        ConfigurationHolder config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
         String enableTagCache = config.getFirstProperty(APIConstants.STORE_TAG_CACHE_DURATION);
         if (enableTagCache == null) {
             isTagCacheEnabled = false;
@@ -3103,7 +3104,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public void changeUserPassword(String currentPassword, String newPassword) throws APIManagementException {
         //check whether EnablePasswordChange configuration is set to 'true'
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+        ConfigurationHolder config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         boolean enableChangePassword =
                 Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENABLE_CHANGE_PASSWORD));
