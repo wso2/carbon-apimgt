@@ -122,4 +122,26 @@ public class ApplicationUtils {
         }
         return null;
     }
+
+    /**
+     * This method adds additional parameters specified in JSON input to TokenRequest.
+     *
+     * @param keyManager Key manager object
+     * @param jsonParams Additional Parameters required by the Authorization Server.
+     * @param tokenRequest Values captured in TokenRequest.
+     * @return Token Request after adding parameters in JSON input.
+     * @throws APIManagementException API Manager Exception
+     */
+    public static AccessTokenRequest populateTokenRequest(KeyManager keyManager, String jsonParams,
+                                                          AccessTokenRequest tokenRequest)
+            throws APIManagementException {
+
+        if (tokenRequest == null) {
+            tokenRequest = new AccessTokenRequest();
+        }
+        if (keyManager != null){
+            return keyManager.buildAccessTokenRequestFromJSON(jsonParams, tokenRequest);
+        }
+        return null;
+    }
 }

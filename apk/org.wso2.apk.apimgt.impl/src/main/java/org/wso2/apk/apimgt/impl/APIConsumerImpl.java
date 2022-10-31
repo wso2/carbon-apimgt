@@ -241,8 +241,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 keyManagerTenant = keyManagerConfiguration.getOrganization();
             } else {
                 //keeping this just in case the name is sent by mistake.
-                keyManagerConfiguration =
-                        apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+                keyManagerConfiguration = apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
                 if (keyManagerConfiguration == null) {
                     throw new APIManagementException("Key Manager " + keyManagerName + " couldn't found.",
                             ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
