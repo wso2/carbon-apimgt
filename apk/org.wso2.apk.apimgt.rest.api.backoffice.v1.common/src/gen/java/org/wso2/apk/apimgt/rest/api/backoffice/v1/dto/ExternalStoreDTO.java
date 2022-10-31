@@ -1,9 +1,22 @@
 package org.wso2.apk.apimgt.rest.api.backoffice.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import javax.validation.constraints.*;
 
+
+import io.swagger.annotations.*;
 import java.util.Objects;
+
+import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
+
+
 
 public class ExternalStoreDTO   {
   
@@ -86,7 +99,7 @@ public class ExternalStoreDTO   {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -122,7 +135,7 @@ public class ExternalStoreDTO   {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }

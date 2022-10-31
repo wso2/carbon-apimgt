@@ -1,11 +1,23 @@
 package org.wso2.apk.apimgt.rest.api.backoffice.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.EnvironmentDTO;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.MonetizationAttributeDTO;
+import javax.validation.constraints.*;
+
+
+import io.swagger.annotations.*;
 import java.util.Objects;
+
+import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import javax.validation.Valid;
 
 
@@ -16,10 +28,7 @@ public class SettingsDTO   {
     private List<EnvironmentDTO> environment = new ArrayList<EnvironmentDTO>();
     private List<String> scopes = new ArrayList<String>();
     private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<MonetizationAttributeDTO>();
-    private Object securityAuditProperties = null;
-    private Boolean externalStoresEnabled = null;
     private Boolean docVisibilityEnabled = null;
-    private Boolean crossTenantSubscriptionEnabled = false;
     private String authorizationHeader = null;
 
   /**
@@ -94,42 +103,6 @@ public class SettingsDTO   {
   }
 
   /**
-   **/
-  public SettingsDTO securityAuditProperties(Object securityAuditProperties) {
-    this.securityAuditProperties = securityAuditProperties;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("securityAuditProperties")
-  public Object getSecurityAuditProperties() {
-    return securityAuditProperties;
-  }
-  public void setSecurityAuditProperties(Object securityAuditProperties) {
-    this.securityAuditProperties = securityAuditProperties;
-  }
-
-  /**
-   * Is External Stores configuration enabled 
-   **/
-  public SettingsDTO externalStoresEnabled(Boolean externalStoresEnabled) {
-    this.externalStoresEnabled = externalStoresEnabled;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "true", value = "Is External Stores configuration enabled ")
-  @JsonProperty("externalStoresEnabled")
-  public Boolean isExternalStoresEnabled() {
-    return externalStoresEnabled;
-  }
-  public void setExternalStoresEnabled(Boolean externalStoresEnabled) {
-    this.externalStoresEnabled = externalStoresEnabled;
-  }
-
-  /**
    * Is Document Visibility configuration enabled 
    **/
   public SettingsDTO docVisibilityEnabled(Boolean docVisibilityEnabled) {
@@ -145,24 +118,6 @@ public class SettingsDTO   {
   }
   public void setDocVisibilityEnabled(Boolean docVisibilityEnabled) {
     this.docVisibilityEnabled = docVisibilityEnabled;
-  }
-
-  /**
-   * Is Cross Tenant Subscriptions Enabled 
-   **/
-  public SettingsDTO crossTenantSubscriptionEnabled(Boolean crossTenantSubscriptionEnabled) {
-    this.crossTenantSubscriptionEnabled = crossTenantSubscriptionEnabled;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "false", value = "Is Cross Tenant Subscriptions Enabled ")
-  @JsonProperty("crossTenantSubscriptionEnabled")
-  public Boolean isCrossTenantSubscriptionEnabled() {
-    return crossTenantSubscriptionEnabled;
-  }
-  public void setCrossTenantSubscriptionEnabled(Boolean crossTenantSubscriptionEnabled) {
-    this.crossTenantSubscriptionEnabled = crossTenantSubscriptionEnabled;
   }
 
   /**
@@ -185,7 +140,7 @@ public class SettingsDTO   {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -197,16 +152,13 @@ public class SettingsDTO   {
         Objects.equals(environment, settings.environment) &&
         Objects.equals(scopes, settings.scopes) &&
         Objects.equals(monetizationAttributes, settings.monetizationAttributes) &&
-        Objects.equals(securityAuditProperties, settings.securityAuditProperties) &&
-        Objects.equals(externalStoresEnabled, settings.externalStoresEnabled) &&
         Objects.equals(docVisibilityEnabled, settings.docVisibilityEnabled) &&
-        Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled) &&
         Objects.equals(authorizationHeader, settings.authorizationHeader);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, authorizationHeader);
+    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, docVisibilityEnabled, authorizationHeader);
   }
 
   @Override
@@ -218,10 +170,7 @@ public class SettingsDTO   {
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    monetizationAttributes: ").append(toIndentedString(monetizationAttributes)).append("\n");
-    sb.append("    securityAuditProperties: ").append(toIndentedString(securityAuditProperties)).append("\n");
-    sb.append("    externalStoresEnabled: ").append(toIndentedString(externalStoresEnabled)).append("\n");
     sb.append("    docVisibilityEnabled: ").append(toIndentedString(docVisibilityEnabled)).append("\n");
-    sb.append("    crossTenantSubscriptionEnabled: ").append(toIndentedString(crossTenantSubscriptionEnabled)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -231,7 +180,7 @@ public class SettingsDTO   {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }

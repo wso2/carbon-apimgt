@@ -1,0 +1,4095 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: BackOffice REST API
+  description: This document specifies a **RESTful API** for WSO2 **APK** - **BackOffice**.
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/SanojPunchihewa/BackOfficeAPI/1.0.0
+paths:
+  /runtimes:
+    get:
+      tags:
+        - Runtime APIs
+      summary: |
+        Retrieve/Search Runtimes
+      description: |
+        This operation provides you a list of available Runtimes qualifying under a given search condition.
+
+        Each retrieved Runtime is represented with a minimal amount of attributes. If you want to get complete details of an Runtime, you need to use **Get details of a Runtime** operation.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/Accept'
+      responses:
+        200:
+          description: |
+            OK.
+            List of Runtimes is returned.
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuntimeList'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_list_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/runtimes"'
+      operationId: getAllRuntimes
+
+  /runtimes/{runtimeId}:
+    get:
+      tags:
+        - Runtime APIs
+      summary: |
+        Get details of a Runtime
+      description: |
+        Using this operation, you can retrieve complete details of a single Runtime. You need to provide the Id of the Runtime to retrive it.
+      parameters:
+        - $ref: '#/components/parameters/runtimeId'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested Runtime is returned
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Runtime'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_list_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/runtime/7a2298c4-c905-403f-8fac-38c73301631f"'
+      operationId: getRuntime
+  /runtimes/{runtimeId}/apis:
+    get:
+      tags:
+        - Runtime APIs
+      summary: |
+        Retrieve/Search Runtime APIs
+      description: |
+        This operation provides you a list of available Runtime APIs qualifying under a given search condition.
+
+        Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
+      parameters:
+        - $ref: '#/components/parameters/runtimeId'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/sortOrder'
+        - name: query
+          in: query
+          description: |
+            **Search condition**.
+
+            You can search in attributes by using an **"<attribute>:"** modifier.
+
+            Eg.
+            "provider:wso2" will match an API if the provider of the API contains "wso2".
+            "provider:"wso2"" will match an API if the provider of the API is exactly "wso2".
+            "status:PUBLISHED" will match an API if the API is in PUBLISHED state.
+
+            Also you can use combined modifiers
+            Eg.
+            name:pizzashack version:v1 will match an API if the name of the API is pizzashack and version is v1.
+
+            Supported attribute modifiers are [**version, context, name, status,
+            description, provider, api-category, tags, doc, contexttemplate,
+            lcstate, content, type, label, enablestore, thirdparty**]
+            
+            If no advanced attribute modifier has been specified,  the API names containing
+            the search term will be returned as a result.
+
+            Please note that you need to use encoded URL (URL encoding) if you are using a client which does not support URL encoding (such as curl)
+          schema:
+            type: string
+        - $ref: '#/components/parameters/If-None-Match'
+        - $ref: '#/components/parameters/Accept'
+      responses:
+        200:
+          description: |
+            OK.
+            List of qualifying Runtime APIs is returned.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuntimeAPIList'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_list_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/runtimes/7a2298c4-c905-403f-8fac-38c73301631f/apis"'
+      operationId: getAllAPIs
+
+  ######################################################
+  # The "Individual API" resource Runtime APIs
+  ######################################################
+  /runtimes/{runtimeId}/apis/{apiId}:
+    get:
+      tags:
+        - Runtime APIs
+      summary: Get Details of an API
+      description: |
+        Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API to retrive it.
+      parameters:
+        - $ref: '#/components/parameters/runtimeId'
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested API is returned
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuntimeAPI'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_product_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/runtimes/7a2298c4-c905-403f-8fac-38c73301631f/apis/7a2298c4-c905-403f-8fac-38c73301631f"'
+      operationId: getAPI
+
+  /runtimes/{runtimeId}/apis/{apiId}/definition:
+    get:
+      tags:
+        - Runtime APIs
+      summary: Get the API Definition
+      description: |
+        This operation can be used to retrieve the definition of an API.
+      parameters:
+        - $ref: '#/components/parameters/runtimeId'
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested definition document of the API is returned
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuntimeAPIDefinition'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_definition_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/runtimes/7a2298c4-c905-403f-8fac-38c73301631f/apis/7a2298c4-c905-403f-8fac-38c73301631f/definition"'
+      operationId: getAPIDefinition
+
+  /runtimes/{runtimeId}/apis/{apiId}/resource-paths:
+    get:
+      tags:
+        - Runtime APIs
+      summary: Get Resource Paths of an API
+      description: |
+        This operation can be used to retrieve resource paths defined for a specific API.
+      parameters:
+        - $ref: '#/components/parameters/runtimeId'
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            ResourcePaths returned.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modified the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourcePathList'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/runtimes/7a2298c4-c905-403f-8fac-38c73301631f/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/resource-paths"'
+      operationId: getAPIResourcePaths
+
+  ######################################################
+  # The "Back Office API Collection" resource APIs
+  ######################################################
+  /backoffice-apis:
+    get:
+      tags:
+        - Back Office APIs
+      summary: |
+        Retrieve/Search Back Office APIs
+      description: |
+        This operation provides you a list of available Back Office APIs qualifying under a given search condition.
+
+        Each retrieved Back Office API is represented with a minimal amount of attributes. If you want to get complete details of an Back Office API, you need to use **Get details of an Back Office API** operation.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - name: query
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Accept'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            List of qualifying Back Office APIs is returned.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackOfficeAPIList'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis?query=PizzaBackOfficeAPI"'
+      operationId: getAllBackOfficeAPIs
+
+    post:
+      tags:
+        - Back Office APIs
+      summary: Create a New Back Office API
+      description: |
+        This operation can be used to create a new Back Office API specifying the details of the Back Office API in the payload.
+      requestBody:
+        description: BackOffice API object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BackOfficeAPI'
+        required: true
+      responses:
+        201:
+          description: |
+            'Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.'
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Location:
+              description: |
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackOfficeAPI'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis"'
+      operationId: createBackOfficeAPI
+
+  ################################################################
+  # The "Individual Back Office API" resource APIs
+  ################################################################
+  /backoffice-apis/{backofficeApiId}:
+    get:
+      tags:
+        - Back Office APIs
+      summary: Get Details of an Back Office API
+      description: |
+        Using this operation, you can retrieve complete details of a single Back Office API. You need to provide the Id of the API to retrive it.
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/Accept'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested Back Office API is returned
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackOfficeAPI'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_publish
+            - apim:api_manage
+            - apim:api_product_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33"'
+      operationId: getBackOfficeAPI
+
+    put:
+      tags:
+        - Back Office APIs
+      summary: Update an Back Office API
+      description: |
+        This operation can be used to update an existing Back Office API.
+        But the properties `name`, `provider` and `version` cannot be changed.
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        description: BackOffice API object that needs to be updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BackOfficeAPI'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated Back Office API object
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Location:
+              description: |
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackOfficeAPI'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33"'
+      operationId: updateBackOfficeAPI
+
+
+    delete:
+      tags:
+        - Back Office APIs
+      summary: Delete an Back Office API
+      description: |
+        This operation can be used to delete an existing Back Office API proving the Id of the Back Office API.
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/If-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Resource successfully deleted.
+          content: {}
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+            - apim:api_product_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33"'
+      operationId: deleteBackOfficeAPI
+
+  /backoffice-apis/{backofficeApiId}/thumbnail:
+    get:
+      tags:
+        - Back Office APIs
+      summary: Get Thumbnail Image
+      description: |
+        This operation can be used to download a thumbnail image of an Back Office API.
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/Accept'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Thumbnail image returned
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content: {}
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33/thumbnail"
+          > image.jpeg'
+      operationId: getBackOfficeAPIThumbnail
+
+    put:
+      tags:
+        - Back Office APIs
+      summary: Upload a Thumbnail Image
+      description: |
+        This operation can be used to upload a thumbnail image of an Back Office API. The thumbnail to be uploaded should be given as a form data parameter `file`.
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  description: Image to upload
+                  format: binary
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Image updated
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Location:
+              description: |
+                The URL of the uploaded thumbnail image of the Back Office API.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileInfo'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: multipart/form-data" -F file=@image.jpeg "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/d48a3412-1b85-49be-99f4-b81a3722ae73/thumbnail"'
+      operationId: updateBackOfficeAPIThumbnail
+
+  /backoffice-apis/{backofficeApiId}/documents:
+    get:
+      tags:
+        - Back Office API Documents
+      summary: Get a List of Documents of an Back Office API
+      description: |
+        This operation can be used to retrive a list of documents belonging to an Back Office API by providing the ID of the Back Office API.
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/Accept'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Document list is returned.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentList'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:document_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33/documents"'
+      operationId: getBackOfficeAPIDocuments
+
+    post:
+      tags:
+        - Back Office API Documents
+      summary: Add a New Document to an Back Office API
+      description: |
+        This operation can be used to add a new documentation to an Back Office API. This operation only adds the metadata of a document. To add the actual content we need to use **Upload the content of an Back Office API document ** API once we obtain a document Id by this operation.
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+      requestBody:
+        description: Document object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Document'
+        required: true
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created Document object as entity in the body.
+            Location header contains URL of newly added document.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Location:
+              description: |
+                Location to the newly created Document.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:document_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33/documents"'
+      operationId: addBackOfficeAPIDocument
+
+  /backoffice-apis/{backofficeApiId}/documents/{documentId}:
+    get:
+      tags:
+        - Back Office API Documents
+      summary: Get a Document of an Back Office API
+      description: |
+        This operation can be used to retrieve a particular document's metadata associated with an API.
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/documentId'
+        - $ref: '#/components/parameters/Accept'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Document returned.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:document_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
+      operationId: getBackOfficeAPIDocument
+
+    put:
+      tags:
+        - Back Office API Documents
+      summary: Update a Document of an Back Office API
+      description: |
+        This operation can be used to update metadata of an API's document.
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/documentId'
+        - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        description: Document object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Document'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Document updated
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Location:
+              description: |
+                The URL of the updated document.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:document_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
+      operationId: updateBackOfficeAPIDocument
+
+    delete:
+      tags:
+        - Back Office API Documents
+      summary: Delete a Document of an Back Office API
+      description: |
+        This operation can be used to delete a document associated with an Back Office API.
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/documentId'
+        - $ref: '#/components/parameters/If-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Resource successfully deleted.
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:document_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
+      operationId: deleteBackOfficeAPIDocument
+
+  /backoffice-apis/{backofficeApiId}/documents/{documentId}/content:
+    get:
+      tags:
+        - Back Office API Documents
+      summary: Get the Content of an Back Office API Document
+      description: |
+        This operation can be used to retrive the content of an API's document.
+
+        The document can be of 3 types. In each cases responses are different.
+
+        1. **Inline type**:
+           The content of the document will be retrieved in `text/plain` content type
+
+           _Sample cURL_ : `curl -k -H "Authorization:Bearer 579f0af4-37be-35c7-81a4-f1f1e9ee7c51" -F inlineContent=@"docs.txt" -X POST "https://localhost:9443/api/apk/backoffice/v1/apis/995a4972-3178-4b17-a374-756e0e19127c/documents/43c2bcce-60e7-405f-bc36-e39c0c5e189e/content`
+        2. **FILE type**:
+           The file will be downloaded with the related content type (eg. `application/pdf`)
+        3. **URL type**:
+            The client will recieve the URL of the document as the Location header with the response with - `303 See Other`
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/documentId'
+        - $ref: '#/components/parameters/Accept'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            File or inline content returned.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content: {}
+        303:
+          description: |
+            See Other.
+            Source can be retrived from the URL specified at the Location header.
+          headers:
+            Location:
+              description: |
+                The Source URL of the document.
+              schema:
+                type: string
+          content: {}
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:document_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3/content"'
+      operationId: getBackOfficeAPIDocumentContent
+
+    post:
+      tags:
+        - Back Office API Documents
+      summary: Upload the Content of an Back Office API Document
+      description: |
+        Thid operation can be used to upload a file or add inline content to an Back Office API document.
+
+        **IMPORTANT:**
+        * Either **file** or **inlineContent** form data parameters should be specified at one time.
+        * Document's source type should be **FILE** in order to upload a file to the document using **file** parameter.
+        * Document's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter.
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/documentId'
+        - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                file:
+                  type: string
+                  description: Document to upload
+                  format: binary
+                inlineContent:
+                  type: string
+                  description: Inline content of the document
+      responses:
+        200:
+          description: |
+            OK.
+            Document updated
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Location:
+              description: |
+                The URL of the updated content of the document.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:document_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: multipart/form-data" -F file=@sample.pdf "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3/content"'
+      operationId: addBackOfficeAPIDocumentContent
+
+  /backoffice-apis/{backofficeApiId}/monetize:
+    post:
+      tags:
+        - Back Office API Monetization
+      summary: Configure Monetization for a Given API
+      description: |
+        This operation can be used to configure monetization for a given API.
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+      requestBody:
+        description: Monetization data object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BackOfficeAPIMonetizationInfo'
+        required: true
+      responses:
+        201:
+          description: |
+            OK.
+            Monetization status changed successfully.
+          content: {}
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetize'
+      operationId: addAPIMonetization
+
+  /backoffice-apis/{backofficeApiId}/monetization:
+    get:
+      tags:
+        - Back Office API Monetization
+      summary: Get Monetization Status for each Tier in a Given API
+      description: |
+        This operation can be used to get monetization status for each tier in a given API
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+      responses:
+        200:
+          description: |
+            OK.
+            Monetization status for each tier returned successfully.
+          content: {}
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetization"'
+      operationId: getAPIMonetization
+
+  /backoffice-apis/{backofficeApiId}/revenue:
+    get:
+      tags:
+        - Back Office API Monetization
+      summary: Get Total Revenue Details of a Given Monetized API with Meterd Billing
+      description: |
+        This operation can be used to get details of total revenue details of a given monetized API with meterd billing.
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+      responses:
+        200:
+          description: |
+            OK.
+            Details of a total revenue returned.
+          headers:
+            ETag:
+              description: Entity Tag of the response resource. Used by caches, or
+                in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: Date and time the resource has been modified the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIRevenue'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/96077508-fd01-4fae-bc64-5de0e2baf43c/revenue"'
+      operationId: getAPIRevenue
+
+  /backoffice-apis/{backofficeApiId}/external-stores:
+    get:
+      tags:
+        - External Stores
+      summary: Get the List of External Stores to which an API is Published
+      description: |
+        This operation can be used to retrieve a list of external stores which an API is published to by providing the ID of the API.
+      operationId: getAllPublishedExternalStoresByAPI
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            External Store list is returned.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIExternalStoreList'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/96077508-fd01-4fae-bc64-5de0e2baf43c/external-stores"'
+
+  /backoffice-apis/{backofficeApiId}/publish-to-external-stores:
+    post:
+      tags:
+        - External Stores
+      summary: Publish an API to External Stores
+      description: |
+        This operation can be used to publish an API to a list of external stores.
+      operationId: publishAPIToExternalStores
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+        - name: externalStoreIds
+          in: query
+          description: External Store Ids of stores which the API needs to be published
+            or updated.
+          schema:
+            type: string
+        - $ref: '#/components/parameters/If-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            API was successfully published to all the selected external stores.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the blocked subscription.
+                Used by caches, or in conditional requests (This is not supported by WSO2 API Manager as of yet).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the subscription which was blocked.
+                Used by caches, or in conditional requests (This is not supported by WSO2 API Manager as of yet).
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIExternalStoreList'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/96077508-fd01-4fae-bc64-5de0e2baf43c/publish-to-external-stores?externalStoreId=Store123#"'
+
+  ######################################################
+  # The "Subscription Collection" resource APIs
+  ######################################################
+  /subscriptions:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get all Subscriptions
+      description: |
+        This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of
+
+        1. Retrieving all subscriptions for the user's APIs.
+        `GET https://127.0.0.1:9443/api/apk/backoffice/v1/subscriptions`
+
+        2. Retrieving subscriptions for a specific API.
+        `GET https://127.0.0.1:9443/api/apk/backoffice/v1/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`
+      parameters:
+        - $ref: '#/components/parameters/apiId-Q-Opt'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/If-None-Match'
+        - name: query
+          in: query
+          description: |
+            Keywords to filter subscriptions
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            Subscription list returned.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionList'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:subscription_view
+            - apim:subscription_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/subscriptions?apiId=96077508-fd01-4fae-bc64-5de0e2baf43c"'
+      operationId: getSubscriptions
+
+  ######################################################
+  # The Individual Subscription resource APIs
+  ######################################################
+  /subscriptions/{subscriptionId}/usage:
+    get:
+      tags:
+        - Back Office API Monetization
+      summary: Get Details of a Pending Invoice for a Monetized Subscription with Metered Billing.
+      description: |
+        This operation can be used to get details of a pending invoice for a monetized subscription with meterd billing.
+      parameters:
+        - $ref: '#/components/parameters/subscriptionId'
+      responses:
+        200:
+          description: |
+            OK.
+            Details of a pending invoice returned.
+          headers:
+            ETag:
+              description: Entity Tag of the response resource. Used by caches, or
+                in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: Date and time the resource has been modified the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIMonetizationUsage'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        404:
+          description: |
+            Not Found.
+            Requested Subscription does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:subscription_view
+            - apim:subscription_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809/usage"'
+      operationId: getSubscriptionUsage
+
+  /subscriptions/{subscriptionId}/subscriber-info:
+    get:
+      tags:
+        - Subscriber
+      summary: Get Details of a Subscriber
+      description: |
+        This operation can be used to get details of a user who subscribed to the API.
+      parameters:
+        - $ref: '#/components/parameters/subscriptionId'
+      responses:
+        200:
+          description: |
+            OK.
+             Details of the subscriber are returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriberInfo'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:subscription_view
+            - apim:subscription_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809/subscriber-info"'
+      operationId: getSubscriberInfoBySubscriptionId
+
+  /subscriptions/block-subscription:
+    post:
+      tags:
+        - Subscriptions
+      summary: Block a Subscription
+      description: |
+        This operation can be used to block a subscription. Along with the request, `blockState` must be specified as a query parameter.
+
+        1. `BLOCKED` : Subscription is completely blocked for both Production and Sandbox environments.
+        2. `PROD_ONLY_BLOCKED` : Subscription is blocked for Production environment only.
+      parameters:
+        - $ref: '#/components/parameters/subscriptionId-Q'
+        - name: blockState
+          in: query
+          description: |
+            Subscription block state.
+          required: true
+          schema:
+            type: string
+            enum:
+              - BLOCKED
+              - PROD_ONLY_BLOCKED
+        - $ref: '#/components/parameters/If-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Subscription was blocked successfully.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the blocked subscription.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the subscription has been blocked.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+          content: {}
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscription_block
+            - apim:subscription_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/subscriptions/block-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809&blockState=PROD_ONLY_BLOCKED"'
+      operationId: blockSubscription
+
+  /subscriptions/unblock-subscription:
+    post:
+      tags:
+        - Subscriptions
+      summary: Unblock a Subscription
+      description: |
+        This operation can be used to unblock a subscription specifying the subscription Id. The subscription will be fully unblocked after performing this operation.
+      parameters:
+        - $ref: '#/components/parameters/subscriptionId-Q'
+        - $ref: '#/components/parameters/If-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Subscription was unblocked successfully.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the unblocked subscription.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the subscription has been unblocked.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+          content: {}
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscription_block
+            - apim:subscription_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/subscriptions/unblock-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809"'
+      operationId: unBlockSubscription
+
+
+  ######################################################
+  # The "Thorttling Tier Collection" resource APIs
+  ######################################################
+  /usage-plans:
+    get:
+      tags:
+        - Usage Plan
+      summary: Get All Useage Plans
+      description: |
+        This operation can be used to list the available usage plans.
+      operationId: getAllUsagePlans
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            List of policies returned.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsagePlanList'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:tier_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/usage-plans"'
+
+  ######################################################
+  # The "Content Search Results" resource APIs
+  ######################################################
+  /search:
+    get:
+      tags:
+        - Unified Search
+      summary: |
+        Retrieve/Search APIs and API Documents by Content
+      description: |
+        This operation provides you a list of available APIs and API Documents qualifying the given keyword match.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - name: query
+          in: query
+          description: |
+            **Search**.
+
+            You can search by proving a keyword.
+          schema:
+            type: string
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            List of qualifying APIs and API documents is returned.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResultList'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/search?query=pizza"'
+      operationId: search
+
+  /backoffice-apis/export:
+    get:
+      tags:
+        - Import Export
+      summary: Export an Back Office API
+      description: |
+        This operation can be used to export the details of a particular Back Office API as a zip file.
+      parameters:
+        - name: name
+          in: query
+          description: |
+            Back Office API Name
+          schema:
+            type: string
+        - name: version
+          in: query
+          description: |
+            Version of the Back Office API
+          schema:
+            type: string
+        - name: providerName
+          in: query
+          description: |
+            Provider name of the Back Office API
+          schema:
+            type: string
+        - name: revisionNumber
+          in: query
+          description: |
+            Revision number of the Back Office API
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: |
+            Format of output documents. Can be YAML or JSON.
+          schema:
+            type: string
+            enum:
+              - JSON
+              - YAML
+        - name: preserveStatus
+          in: query
+          description: |
+            Preserve Back Office API Status on export
+          schema:
+            type: boolean
+        - name: latestRevision
+          in: query
+          description: |
+            Export the latest revision of the Back Office API
+          schema:
+            type: boolean
+            default: false
+      responses:
+        200:
+          description: |
+            OK.
+            Export Successful.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_product_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/export?name=LeasingBackOfficeAPI&version=1.0.0&revisionNumber=2&provider=admin&format=YAML"
+          > exportBackOfficeAPI.zip'
+      operationId: exportBackOfficeAPI
+
+  /backoffice-apis/import:
+    post:
+      tags:
+        - Import Export
+      summary: Import an Back Office API
+      description: |
+        This operation can be used to import an Back Office API.
+      parameters:
+        - name: preserveProvider
+          in: query
+          description: |
+            Preserve Original Provider of the Back Office API. This is the user choice to keep or replace the Back Office API provider
+          required: false
+          schema:
+            type: boolean
+        - name: rotateRevision
+          in: query
+          description: |
+            Once the revision max limit reached, undeploy and delete the earliest revision and create a new revision
+          required: false
+          schema:
+            type: boolean
+        - name: importAPIs
+          in: query
+          description: |
+            Whether to import the dependent APIs or not.
+          schema:
+            type: boolean
+        - name: overwriteBackOfficeAPI
+          in: query
+          description: |
+            Whether to update the Back Office API or not. This is used when updating already existing Back Office APIs.
+          schema:
+            type: boolean
+        - name: overwriteAPIs
+          in: query
+          description: |
+            Whether to update the dependent APIs or not. This is used when updating already existing dependent APIs of an Back Office API.
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  description: |
+                    Zip archive consisting on exported Back Office API configuration
+                  format: binary
+      responses:
+        200:
+          description: |
+            Created.
+            Back Office API Imported Successfully.
+          content: {}
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_product_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            -F file=@admin-PizzaShackBackOfficeAPI.zip "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/import?preserveProvider=false&overwriteBackOfficeAPI=false&overwriteAPIs=false&importAPIs=false"'
+      operationId: importBackOfficeAPI
+
+  ######################################################
+  # The "ExternalStore Collection" resource APIs
+  ######################################################
+  /external-stores:
+    get:
+      tags:
+        - External Stores
+      summary: Retrieve External Stores List to Publish an API
+      description: |
+        Retrieve external stores list configured to publish an API
+      operationId: getAllExternalStores
+      responses:
+        200:
+          description: |
+            OK.
+            External Stores list returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalStore'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/external-stores"'
+
+  ######################################################
+  # The BackOffice settings resource APIs
+  ######################################################
+  /settings:
+    get:
+      tags:
+        - Settings
+      summary: Retreive BackOffice Settings
+      description: |
+        Retreive BackOffice settings
+      responses:
+        200:
+          description: |
+            OK.
+            Settings returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:backoffice_settings
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/backoffice/v3/settings"'
+      operationId: getSettings
+
+  ######################################################
+  # The "API Category Collection" resource API
+  ######################################################
+  /api-categories:
+    get:
+      tags:
+        - API Category (Collection)
+      summary: Get all API categories
+      description: |
+        Get all API categories
+      responses:
+        200:
+          description: |
+            OK.
+            Categories returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APICategoryList'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/api-categories"'
+      operationId: getAllAPICategories
+
+  /backoffice-apis/change-lifecycle:
+    post:
+      tags:
+        - Back Office API Lifecycle
+      summary: Change Back Office API LC Status
+      description: |
+        This operation is used to change the lifecycle of an Back Office API.
+        Eg: Publish an Back Office API which is in `CREATED` state. In order to change the lifecycle, we need to provide the
+        lifecycle `action` as a query parameter.
+
+        For example, to Publish an Back Office API, `action` should be `Publish`.
+
+      parameters:
+        - name: action
+          in: query
+          description: |
+            The action to demote or promote the state of the Back Office API.
+
+            Supported actions are [ **Publish**, **Demote to Created**]
+          required: true
+          schema:
+            type: string
+            enum:
+              - Publish
+              - Demote to Created
+        - $ref: '#/components/parameters/backofficeApiId-Q'
+        - $ref: '#/components/parameters/If-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Lifecycle changed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+            - apim:api_product_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish"'
+      operationId: changeBackOfficeAPILifecycle
+
+  /backoffice-apis/{backofficeApiId}/lifecycle-history:
+    get:
+      tags:
+        - Back Office API Lifecycle
+      summary: Get Lifecycle State Change History of the Back Office APIs.
+      description: |
+        This operation can be used to retrieve Lifecycle state change history of the Back Office APIs.
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Lifecycle state change history returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LifecycleHistory'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-history"'
+      operationId: getBackOfficeAPILifecycleHistory
+
+  /backoffice-apis/{backofficeApiId}/lifecycle-state:
+    get:
+      tags:
+        - Back Office API Lifecycle
+      summary: Get Lifecycle State Data of the Back Office API.
+      description: |
+        This operation can be used to retrieve Lifecycle state data of the Back Office API.
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Lifecycle state data returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LifecycleState'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_create
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state"'
+      operationId: getBackOfficeAPILifecycleState
+
+  /backoffice-apis/{backofficeApiId}/lifecycle-state/pending-tasks:
+    delete:
+      tags:
+        - Back Office API Lifecycle
+      summary: Delete Pending Lifecycle State Change Tasks
+      description: |
+        This operation can be used to remove pending lifecycle state change requests that are in pending state
+      parameters:
+        - $ref: '#/components/parameters/backofficeApiId'
+      responses:
+        200:
+          description: |
+            OK.
+            Lifecycle state change pending task removed successfully.
+          content: {}
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
+      operationId: deleteBackOfficeAPILifecycleStatePendingTasks
+
+components:
+  schemas:
+    RuntimeAPIDefinition:
+      title: Runtime API Schema
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - swagger
+            - graphql
+            - wsdl
+            - async
+        schemaDefinition:
+          type: string
+    Comment:
+      title: Comment
+      required:
+        - content
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: 943d3002-000c-42d3-a1b9-d6559f8a4d49
+        content:
+          maxLength: 512
+          type: string
+          example: This is a comment
+        createdTime:
+          type: string
+          readOnly: true
+          example : 2021-02-11-09:57:25
+        createdBy:
+          type: string
+          readOnly: true
+          example: admin
+        updatedTime:
+          type: string
+          readOnly: true
+          example : 2021-02-12-19:57:25
+        category:
+          type: string
+          readOnly: true
+          default: general
+          example : general
+        parentCommentId:
+          type: string
+          readOnly: true
+          example: 6f38aea2-f41e-4ac9-b3f2-a9493d00ba97
+        entryPoint:
+          type: string
+          readOnly: true
+          enum: [devPortal, publisher]
+        commenterInfo:
+          $ref: '#/components/schemas/CommenterInfo'
+        replies:
+          $ref: '#/components/schemas/CommentList'
+    CommentList:
+      title: Comments List
+      type: object
+      properties:
+        count:
+          type: integer
+          readOnly: true
+          description: |
+            Number of Comments returned.
+          example: 1
+        list:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/Comment'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    CommenterInfo:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: David
+        fullName:
+          type: string
+          example: John David
+    RuntimeList:
+      title: Runtime List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Runtimes returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuntimeInfo'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    RuntimeInfo:
+      title: Runtime Info object with basic Runtime details.
+      type: object
+      properties:
+        id:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          type: string
+          example: RuntimeDev1
+        description:
+          type: string
+          example: Runtime 1 used for dev
+    Runtime:
+      title: Runtime object.
+      type: object
+      properties:
+        id:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          type: string
+          example: RuntimeDev1
+        description:
+          type: string
+          example: Runtime 1 used for dev
+    RuntimeAPIList:
+      title: RuntimeAPI List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of APIs returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIInfo'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    APIInfo:
+      title: Runtime API Info object with basic API details.
+      type: object
+      properties:
+        id:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          type: string
+          example: CalculatorAPI
+        description:
+          type: string
+          example: A calculator API that supports basic operations
+        context:
+          type: string
+          example: CalculatorAPI
+        version:
+          type: string
+          example: 1.0.0
+        type:
+          type: string
+          example: HTTP
+        createdTime:
+          type: string
+          example : 2021-02-11 09:57:25
+        updatedTime:
+          type: string
+          example : 2021-02-11 09:57:25
+
+    RuntimeAPI:
+      title: Runtime API object
+      required:
+        - context
+        - name
+        - version
+      type: object
+      properties:
+        id:
+          type: string
+          description: |
+            UUID of the runtime api
+          readOnly: true
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          maxLength: 60
+          minLength: 1
+          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\[\]\/]*$)'
+          type: string
+          example: PizzaShackAPI
+        description:
+          maxLength: 32766
+          type: string
+          example: This is a simple API for Pizza Shack online pizza delivery store.
+        context:
+          maxLength: 232
+          minLength: 1
+          type: string
+          example: pizza
+        version:
+          maxLength: 30
+          minLength: 1
+          type: string
+          pattern: '^[^~!@#;:%^*()+={}|\\<>"'',&/$\[\]\s+\/]+$'
+          example: 1.0.0
+        type:
+          type: string
+          description: The api creation type to be used. Accepted values are HTTP,
+            WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC
+          example: HTTP
+          default: HTTP
+          enum:
+            - HTTP
+            - WS
+            - SOAPTOREST
+            - SOAP
+            - GRAPHQL
+            - WEBSUB
+            - SSE
+            - WEBHOOK
+            - ASYNC
+        transport:
+          type: array
+          description: |
+            Supported transports for the API (http and/or https).
+          example:
+            - http
+            - https
+          items:
+            type: string
+        additionalProperties:
+          type: array
+          description: Map of custom properties of API
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+          x-otherScopes:
+            - apim:api_publish
+            - apim:api_manage
+        additionalPropertiesMap:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+                default: false
+          x-otherScopes:
+            - apim:api_publish
+            - apim:api_manage
+        createdTime:
+          type: string
+        lastUpdatedTime:
+          type: string
+          x-otherScopes:
+            - apim:api_publish
+            - apim:api_manage
+        operations:
+          type: array
+          example:
+            - target: /order/{orderId}
+              verb: POST
+              usagePlan: Unlimited
+            - target: /menu
+              verb: GET
+              usagePlan: Unlimited
+          items:
+            $ref: '#/components/schemas/APIOperations'
+        apiUsagePolicy:
+          type: string
+          description: The API level usage policy selected for the particular Runtime
+            API
+          example: Unlimited
+          x-otherScopes:
+            - apim:api_publish
+            - apim:api_manage
+        revision:
+          $ref: '#/components/schemas/RuntimeAPIRevision'
+        deployments:
+          type: array
+          readOnly: true
+          example:
+            - name: US
+              deployedTime: 2022-10-28T06:13:35.024Z
+            - name: Europe
+              deployedTime: 2022-10-28T06:13:35.024Z
+          items:
+            $ref: '#/components/schemas/RuntimeAPIDeployment'
+      x-scopes:
+        - apim:api_create
+        - apim:api_manage
+
+    #-----------------------------------------------------
+    # The API Revision resource
+    #-----------------------------------------------------
+    RuntimeAPIRevision:
+      title: Object with basic Runtime API Revision details
+      properties:
+        displayName:
+          type: string
+          readOnly: true
+          example: REVISION 1
+        id:
+          type: string
+          readOnly: true
+          example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
+        description:
+          maxLength: 255
+          minLength: 0
+          type: string
+          example: removed a post resource
+        createdTime:
+          readOnly: true
+          type: string
+          format: date-time
+    #-----------------------------------------------------
+    # The API Revision Deployment resource
+    #-----------------------------------------------------
+    RuntimeAPIDeployment:
+      title: Basic Runtime API deployment details
+      properties:
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: Europe
+        deployedTime:
+          readOnly: true
+          type: string
+          format: date-time
+    BackOfficeAPIList:
+      title: Back Office API List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Back Office APIs returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/BackOfficeAPIInfo'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    BackOfficeAPIInfo:
+      title: API Info object with basic BackOffice API details.
+      type: object
+      properties:
+        id:
+          type: string
+          description: |
+            UUID of the Back Office API
+          readOnly: true
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          type: string
+          description: Name of the Back Office API
+          example: PizzaShackBackOfficeAPI
+        context:
+          type: string
+          example: pizzaproduct
+        description:
+          type: string
+          description: A brief description about the API
+          example: This is a simple API for Pizza Shack online pizza delivery store
+        hasThumbnail:
+          type: boolean
+          example: true
+        state:
+          type: string
+          description: |
+            State of the Back Office API. Only published Back Office APIs are visible on the Developer Portal
+          enum:
+            - CREATED
+            - PUBLISHED
+    BackOfficeAPI:
+      title: Back Office API object
+      required:
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          description: |
+            UUID of the Back Office API
+          readOnly: true
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: Name of the Back Office API
+          example: PizzaShackBackOfficeAPI
+        context:
+          maxLength: 60
+          minLength: 1
+          type: string
+          example: pizzaproduct
+        description:
+          type: string
+          description: A brief description about the API
+          example: This is a simple API for Pizza Shack online pizza delivery store
+        hasThumbnail:
+          type: boolean
+          example: false
+        state:
+          type: string
+          description: |
+            State of the Back Office API. Only published Back Office APIs are visible on the Developer Portal
+          default: CREATED
+          enum:
+            - CREATED
+            - PUBLISHED
+        tags:
+          type: array
+          example:
+            - pizza
+            - food
+          items:
+            type: string
+        additionalProperties:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+          description: Map of custom properties of API
+        additionalPropertiesMap:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+                default: false
+        monetization:
+          $ref: '#/components/schemas/BackOfficeAPIMonetizationInfo'
+        businessInformation:
+          $ref: '#/components/schemas/BackOfficeAPIBusinessInformation'
+        createdTime:
+          type: string
+        lastUpdatedTime:
+          type: string
+        runtimeApis:
+          type: array
+          description: |
+            Runtime APIs and resources in the Back Office API.
+          example:
+            - apiId: 01234567-0123-0123-0123-012345678901
+              runtimeId: 01234567-765-0765-0123-012345678901
+          items:
+            $ref: '#/components/schemas/ProductAPI'
+        categories:
+          type: array
+          description: |
+            API categories
+          example: []
+          items:
+            type: string
+    ProductAPI:
+      title: ProductAPI
+      required:
+        - runtimeId
+        - apiId
+      type: object
+      properties:
+        runtimeId:
+          type: string
+          example: 01234567-765-0765-0123-012345678901
+        apiId:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+    ResourcePath:
+      title: ResourcePath
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        resourcePath:
+          type: string
+          example: /menu
+        httpVerb:
+          type: string
+          example: GET
+    ResourcePathList:
+      title: ResourcePath List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of API Resource Paths returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourcePath'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    BackOfficeAPIBusinessInformation:
+      type: object
+      properties:
+        businessOwner:
+          maxLength: 120
+          type: string
+          example: businessowner
+        businessOwnerEmail:
+          type: string
+          example: businessowner@wso2.com
+        technicalOwner:
+          maxLength: 120
+          type: string
+          example: technicalowner
+        technicalOwnerEmail:
+          type: string
+          example: technicalowner@wso2.com
+    SubscriberInfo:
+      title: SubscriberInfo
+      type: object
+      properties:
+        name:
+          type: string
+          example: admin
+    ApplicationInfo:
+      title: Application info object with basic application details
+      type: object
+      properties:
+        applicationId:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          type: string
+          example: CalculatorApp
+        subscriber:
+          type: string
+          example: admin
+        description:
+          type: string
+          example: Sample calculator application
+        subscriptionCount:
+          type: integer
+    DocumentList:
+      title: Document List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Documents returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    Document:
+      title: Document
+      required:
+        - name
+        - sourceType
+        - type
+        - visibility
+      type: object
+      properties:
+        documentId:
+          type: string
+          readOnly: true
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          maxLength: 60
+          minLength: 1
+          type: string
+          example: PizzaShackDoc
+        type:
+          type: string
+          example: HOWTO
+          enum:
+            - HOWTO
+            - SAMPLES
+            - PUBLIC_FORUM
+            - SUPPORT_FORUM
+            - API_MESSAGE_FORMAT
+            - SWAGGER_DOC
+            - OTHER
+        summary:
+          maxLength: 32766
+          minLength: 1
+          type: string
+          example: Summary of PizzaShackAPI Documentation
+        sourceType:
+          type: string
+          example: INLINE
+          enum:
+            - INLINE
+            - MARKDOWN
+            - URL
+            - FILE
+        sourceUrl:
+          type: string
+          readOnly: true
+          example: ""
+        fileName:
+          type: string
+          readOnly: true
+          example: ""
+        inlineContent:
+          type: string
+          example: This is doc content. This can have many lines.
+        otherTypeName:
+          type: string
+          readOnly: true
+          example: ""
+        visibility:
+          type: string
+          example: API_LEVEL
+          enum:
+            - OWNER_ONLY
+            - PRIVATE
+            - API_LEVEL
+        createdTime:
+          type: string
+          readOnly: true
+        createdBy:
+          type: string
+          example: admin
+        lastUpdatedTime:
+          type: string
+          readOnly: true
+        lastUpdatedBy:
+          type: string
+          readOnly: true
+          example: admin
+    UsagePlanList:
+      title: Usage Plan list
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Usage Plans returned.
+          example: 1
+        list:
+          type: array
+          description: |
+            Array of Usage Policies
+          items:
+            $ref: '#/components/schemas/UsagePlan'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    SubscriptionList:
+      title: Subscription List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Subscriptions returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    Subscription:
+      title: Subscription
+      required:
+        - applicationInfo
+        - subscriptionId
+        - subscriptionStatus
+        - usagePlan
+      type: object
+      properties:
+        subscriptionId:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        applicationInfo:
+          $ref: '#/components/schemas/ApplicationInfo'
+        usagePlan:
+          type: string
+          example: Unlimited
+        subscriptionStatus:
+          type: string
+          example: BLOCKED
+          enum:
+            - BLOCKED
+            - PROD_ONLY_BLOCKED
+            - UNBLOCKED
+            - ON_HOLD
+            - REJECTED
+            - TIER_UPDATE_PENDING
+            - DELETE_PENDING
+    UsageLimitBase:
+      title: Throttle Limit Base
+      required:
+        - timeUnit
+        - unitTime
+      type: object
+      properties:
+        timeUnit:
+          type: string
+          description: Unit of the time. Allowed values are "sec", "min", "hour",
+            "day"
+          example: min
+        unitTime:
+          type: integer
+          description: Time limit that the usage limit applies.
+          example: 10
+    UsageLimit:
+      title: Usage Limit
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+          description: |
+            Type of the usage limit. Allowed values are "REQUESTCOUNTLIMIT" and "BANDWIDTHLIMIT".
+            Please see schemas of "RequestCountLimit" and "BandwidthLimit" usage limit types in
+            Definitions section.
+          example: REQUESTCOUNTLIMIT
+          enum:
+            - REQUESTCOUNTLIMIT
+            - BANDWIDTHLIMIT
+            - EVENTCOUNTLIMIT
+        requestCount:
+          $ref: '#/components/schemas/RequestCountLimit'
+        bandwidth:
+          $ref: '#/components/schemas/BandwidthLimit'
+        eventCount:
+          $ref: '#/components/schemas/EventCountLimit'
+
+    BandwidthLimit:
+      title: Bandwidth Limit object
+      allOf:
+        - $ref: '#/components/schemas/UsageLimitBase'
+        - required:
+            - dataAmount
+            - dataUnit
+          type: object
+          properties:
+            dataAmount:
+              type: integer
+              description: Amount of data allowed to be transfered
+              format: int64
+              example: 1000
+            dataUnit:
+              type: string
+              description: Unit of data allowed to be transfered. Allowed values are
+                "KB", "MB" and "GB"
+              example: KB
+    RequestCountLimit:
+      title: Request Count Limit object
+      allOf:
+        - $ref: '#/components/schemas/UsageLimitBase'
+        - required:
+            - requestCount
+          type: object
+          properties:
+            requestCount:
+              type: integer
+              description: Maximum number of requests allowed
+              format: int64
+              example: 30
+    EventCountLimit:
+      title: Event Count Limit object
+      allOf:
+        - $ref: '#/components/schemas/UsageLimitBase'
+        - required:
+            - eventCount
+          type: object
+          properties:
+            eventCount:
+              type: integer
+              description: Maximum number of events allowed
+              format: int64
+              example: 3000
+    UsagePlan:
+      title: Usage Plan
+      allOf:
+        - required:
+            - defaultLimit
+          type: object
+          properties:
+            policyId:
+              type: integer
+              description: Id of policy
+              example: 1
+            uuid:
+              type: string
+              description: policy uuid
+              example: 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93
+            policyName:
+              maxLength: 60
+              minLength: 1
+              type: string
+              description: Name of policy
+              example: 30PerMin
+            displayName:
+              type: string
+              description: Display name of the policy
+              example: 30PerMin
+              maxLength: 512
+            description:
+              maxLength: 1024
+              type: string
+              description: Description of the policy
+              example: Allows 30 request per minute
+            organization:
+              type: string
+              description: Usage policy organization
+              example: wso2
+            defaultLimit:
+              $ref: '#/components/schemas/UsageLimit'
+            rateLimitCount:
+              type: integer
+              description: Burst control request count
+              example: 10
+            rateLimitTimeUnit:
+              type: string
+              description: Burst control time unit
+              example: min
+            subscriberCount:
+              type: integer
+              description: Number of subscriptions allowed
+              example: 10
+            customAttributes:
+              type: array
+              description: |
+                Custom attributes added to the Usage plan
+              example: [ ]
+              items:
+                $ref: '#/components/schemas/CustomAttribute'
+            stopOnQuotaReach:
+              type: boolean
+              description: |
+                This indicates the action to be taken when a user goes beyond the allocated quota. If checked, the user's requests will be dropped. If unchecked, the requests will be allowed to pass through.
+              default: false
+            billingPlan:
+              type: string
+              description: |
+                define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL.
+              example: FREE
+            permissions:
+              $ref: '#/components/schemas/SubscriptionThrottlePolicyPermission'
+    CustomAttribute:
+      title: Name-Value pair
+      required:
+        - name
+        - value
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the custom attribute
+          example: customAttr1
+        value:
+          type: string
+          description: Value of the custom attribute
+          example: value1
+    SubscriptionThrottlePolicyPermission:
+      title: SubscriptionThrottlePolicyPermission
+      required:
+        - permissionType
+        - roles
+      type: object
+      properties:
+        permissionType:
+          type: string
+          example: deny
+          enum:
+            - ALLOW
+            - DENY
+        roles:
+          type: array
+          example:
+            - Internal/everyone
+          items:
+            type: string
+    APIMonetizationUsage:
+      title: API monetization usage object
+      type: object
+      properties:
+        properties:
+          type: object
+          additionalProperties:
+            type: string
+          description: Map of custom properties related to monetization usage
+    APIRevenue:
+      title: API revenue data object
+      type: object
+      properties:
+        properties:
+          type: object
+          additionalProperties:
+            type: string
+          description: Map of custom properties related to API revenue
+    Error:
+      title: Error object returned with 4XX HTTP Status
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+          description: Error message.
+        description:
+          type: string
+          description: |
+            A detail description about the error message.
+        moreInfo:
+          type: string
+          description: |
+            Preferably an url with more details about the error.
+        error:
+          type: array
+          description: |
+            If there are more than one error list them out.
+            For example, list out validation errors by each field.
+          items:
+            $ref: '#/components/schemas/ErrorListItem'
+    ErrorListItem:
+      title: Description of individual errors that may have occurred during a request.
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+          description: |
+            Description about individual errors occurred
+        description:
+          type: string
+          description: |
+            A detail description about the error message.
+    Environment:
+      title: Environment
+      required:
+        - id
+        - name
+        - serverUrl
+        - showInApiConsole
+        - type
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          example: default
+        displayName:
+          type: string
+          example: Default
+        type:
+          type: string
+          example: hybrid
+        serverUrl:
+          type: string
+          example: https://localhost:9443/services/
+        provider:
+          type: string
+          example: wso2
+        showInApiConsole:
+          type: boolean
+          example: true
+        endpointURIs:
+          type: array
+          items:
+            $ref: '#/components/schemas/GatewayEnvironmentProtocolURI'
+        additionalProperties:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdditionalProperty'
+    AdditionalProperty:
+      title: Additional Gateway Properties
+      type: object
+      properties:
+        key:
+          type: string
+          example: Organization
+        value:
+          type: string
+          example: wso2
+    FileInfo:
+      title: File Information including meta data
+      type: object
+      properties:
+        relativePath:
+          type: string
+          description: relative location of the file (excluding the base context and
+            host of the Publisher API)
+          example: apis/01234567-0123-0123-0123-012345678901/thumbnail
+        mediaType:
+          type: string
+          description: media-type of the file
+          example: image/jpeg
+    Scope:
+      title: Scope
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: |
+            name of Scope
+          example: apim:api_view
+        displayName:
+          maxLength: 255
+          type: string
+          description: |
+            display name of Scope
+          example: api_view
+        description:
+          maxLength: 512
+          type: string
+          description: |
+            description of Scope
+          example: This Scope can used to view Apis
+        bindings:
+          type: array
+          description: |
+            role bindings list of the Scope
+          example:
+            - admin
+            - Internal/creator
+            - Internal/publisher
+          items:
+            type: string
+        usageCount:
+          type: integer
+          description: |
+            usage count of Scope
+          readOnly: true
+          example: 3
+    APIScope:
+      title: APIScope
+      required:
+        - scope
+      type: object
+      properties:
+        scope:
+          $ref: '#/components/schemas/Scope'
+    APIOperations:
+      title: Operation
+      type: object
+      properties:
+        id:
+          type: string
+          example: postapiresource
+        target:
+          type: string
+          example: /order/{orderId}
+        verb:
+          type: string
+          example: POST
+        usagePlan:
+          type: string
+          example: Unlimited
+    ExternalStore:
+      title: External Store
+      type: object
+      properties:
+        id:
+          type: string
+          description: |
+            The external store identifier, which is a unique value.
+          example: Store123#
+        displayName:
+          type: string
+          description: |
+            The name of the external API Store that is displayed in the Publisher UI.
+          example: UKStore
+        type:
+          type: string
+          description: |
+            The type of the Store. This can be a WSO2-specific API Store or an external one.
+          example: wso2
+        endpoint:
+          type: string
+          description: |
+            The endpoint URL of the external store
+          example: http://localhost:9764/store
+    APIExternalStore:
+      title: API External Store
+      type: object
+      properties:
+        id:
+          type: string
+          description: |
+            The external store identifier, which is a unique value.
+          example: Store123#
+        lastUpdatedTime:
+          type: string
+          description: |
+            The recent timestamp which a given API is updated in the external store.
+          example: 2019-09-09T13:57:16.229
+    APIExternalStoreList:
+      title: API External Store List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of external stores returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIExternalStore'
+    LifecycleState:
+      title: Lifecycle State
+      type: object
+      properties:
+        state:
+          type: string
+          example: Created
+        availableTransitions:
+          type: array
+          items:
+            type: object
+            properties:
+              event:
+                type: string
+                example: Publish
+              targetState:
+                type: string
+                example: Published
+    LifecycleHistory:
+      title: Lifecycle history item list
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/LifecycleHistoryItem'
+    LifecycleHistoryItem:
+      title: Lifecycle history item
+      type: object
+      properties:
+        previousState:
+          type: string
+          example: Created
+        postState:
+          type: string
+          example: Published
+        user:
+          type: string
+          example: admin
+        updatedTime:
+          type: string
+          format: dateTime
+          example: 2019-02-31T23:59:60Z
+    WorkflowResponse:
+      title: workflow Response
+      required:
+        - workflowStatus
+      type: object
+      properties:
+        workflowStatus:
+          type: string
+          description: |
+            This attribute declares whether this workflow task is approved or rejected.
+          example: APPROVED
+          enum:
+            - CREATED
+            - APPROVED
+            - REJECTED
+            - REGISTERED
+        jsonPayload:
+          type: string
+          description: |
+            Attributes that returned after the workflow execution
+          example: null
+        lifecycleState:
+          $ref: '#/components/schemas/LifecycleState'
+    ThreatProtectionPolicy:
+      title: Threat Protection Policy Schema
+      required:
+        - name
+        - policy
+        - type
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Policy ID
+        name:
+          type: string
+          description: Name of the policy
+        type:
+          type: string
+          description: Type of the policy
+        policy:
+          type: string
+          description: policy as a json string
+    SearchResultList:
+      title: Unified Search Result List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of results returned.
+          example: 1
+        list:
+          type: array
+          items:
+            type: object
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    BackOfficeAPIMonetizationInfo:
+      title: Back Office API monetization object
+      required:
+        - enabled
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Flag to indicate the monetization status
+          example: true
+        properties:
+          type: object
+          additionalProperties:
+            type: string
+          description: Map of custom properties related to monetization
+    Settings:
+      title: SettingsDTO
+      type: object
+      properties:
+        devportalUrl:
+          type: string
+          description: The Developer Portal URL
+          example: https://localhost:9443/devportal
+        environment:
+          type: array
+          items:
+            $ref: '#/components/schemas/Environment'
+        scopes:
+          type: array
+          example:
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+          items:
+            type: string
+        monetizationAttributes:
+          type: array
+          example: []
+          items:
+            $ref: '#/components/schemas/MonetizationAttribute'
+        docVisibilityEnabled:
+          type: boolean
+          description: |
+            Is Document Visibility configuration enabled
+          example: false
+        authorizationHeader:
+          type: string
+          description: Authorization Header
+          example: authorization
+    Pagination:
+      title: Pagination
+      type: object
+      properties:
+        offset:
+          type: integer
+          example: 0
+        limit:
+          type: integer
+          example: 1
+        total:
+          type: integer
+          example: 10
+        next:
+          type: string
+          description: |
+            Link to the next subset of resources qualified.
+            Empty if no more resources are to be returned.
+        previous:
+          type: string
+          description: |
+            Link to the previous subset of resources qualified.
+            Empty if current subset is the first subset returned.
+    MonetizationAttribute:
+      title: Monetization attribute object
+      type: object
+      properties:
+        required:
+          type: boolean
+          description: |
+            Is attribute required
+          example: true
+        name:
+          type: string
+          description: |
+            Name of the attribute
+        displayName:
+          type: string
+          description: |
+            Display name of the attribute
+        description:
+          type: string
+          description: |
+            Description of the attribute
+        hidden:
+          type: boolean
+          description: |
+            Is attribute hidden
+        default:
+          type: string
+          description: |
+            Default value of the attribute
+    APICategory:
+      title: API Category
+      required:
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          type: string
+          example: Finance
+        description:
+          type: string
+          example: Finance related APIs
+    APICategoryList:
+      title: API Category List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of API categories returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APICategory'
+    GatewayEnvironmentProtocolURI:
+      title: Gateway Environment protocols and URIs
+      required:
+        - protocol
+        - endpointURI
+      type: object
+      properties:
+        protocol:
+          type: string
+          example: default
+        endpointURI:
+          type: string
+          example: default
+  responses:
+    BadRequest:
+      description: Bad Request. Invalid request or validation error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 400
+            message: Bad Request
+            description: Invalid request or validation error
+            moreInfo: ""
+            error: []
+    Conflict:
+      description: Conflict. Specified resource already exists.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 409
+            message: Conflict
+            description: Specified resource already exists
+            moreInfo: ""
+            error: []
+    Forbidden:
+      description: Forbidden. The request must be conditional but no condition has
+        been specified.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 403
+            message: Forbidden
+            description: The request must be conditional but no condition has been
+              specified
+            moreInfo: ""
+            error: []
+    InternalServerError:
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 500
+            message: Internal Server Error
+            description: The server encountered an internal error. Please contact
+              administrator.
+            moreInfo: ""
+            error: []
+    NotAcceptable:
+      description: Not Acceptable. The requested media type is not supported.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 406
+            message: Not Acceptable
+            description: The requested media type is not supported
+            moreInfo: ""
+            error: []
+    NotFound:
+      description: Not Found. The specified resource does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 404
+            message: Not Found
+            description: The specified resource does not exist
+            moreInfo: ""
+            error: []
+    PreconditionFailed:
+      description: Precondition Failed. The request has not been performed because
+        one of the preconditions is not met.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 412
+            message: Precondition Failed
+            description: The request has not been performed because one of the preconditions
+              is not met
+            moreInfo: ""
+            error: []
+    Unauthorized:
+      description: Unauthorized. The user is not authorized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 401
+            message: Unauthorized
+            description: The user is not authorized
+            moreInfo: ""
+            error: []
+    UnsupportedMediaType:
+      description: Unsupported Media Type. The entity of the request was not in a
+        supported format.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 415
+            message: Unsupported media type
+            description: The entity of the request was not in a supported format
+            moreInfo: ""
+            error: []
+  parameters:
+    replyLimit:
+      name: replyLimit
+      in: query
+      description: |
+        Maximum size of replies array to return.
+      schema:
+        type: integer
+        default: 25
+    replyOffset:
+      name: replyOffset
+      in: query
+      description: |
+        Starting point within the complete list of replies.
+      schema:
+        type: integer
+        default: 0
+    commentId:
+      name: commentId
+      in: path
+      description: |
+        Comment Id
+      required: true
+      schema:
+        type: string
+    parentCommentID:
+      name: replyTo
+      in: query
+      description: |
+        ID of the perent comment.
+      schema:
+        type: string
+    includeCommenterInfo:
+      name: includeCommenterInfo
+      in: query
+      description: |
+        Whether we need to display commentor details.
+      schema:
+        type: boolean
+        default : false
+    apiId:
+      name: apiId
+      in: path
+      description: |
+        **API ID** consisting of the **UUID** of the API.
+      required: true
+      schema:
+        type: string
+    runtimeId:
+      name: runtimeId
+      in: path
+      description: |
+        **Runtime ID** consisting of the **UUID** of the Runtime.
+      required: true
+      schema:
+        type: string
+    endpointId:
+      name: endpointId
+      in: path
+      description: |
+        **Endpoint ID** consisting of the **UUID** of the Endpoint**.
+      required: true
+      schema:
+        type: string
+    apiId-Q:
+      name: apiId
+      in: query
+      description: |
+        **API ID** consisting of the **UUID** of the API.
+        The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
+        Should be formatted as **provider-name-version**.
+      required: true
+      schema:
+        type: string
+    apiId-Q-Opt:
+      name: apiId
+      in: query
+      description: |
+        **API ID** consisting of the **UUID** of the API.
+        The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
+        Should be formatted as **provider-name-version**.
+      schema:
+        type: string
+    labelType-Q:
+      name: labelType
+      in: query
+      description: |
+        **API ID** consisting of the **UUID** of the API.
+        The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
+        Should be formatted as **provider-name-version**.
+      schema:
+        type: string
+    name:
+      name: name
+      in: path
+      description: |
+        Name of the API
+      required: true
+      schema:
+        type: string
+    version:
+      name: version
+      in: path
+      description: |
+        Version of the API
+      required: true
+      schema:
+        type: string
+    apiName-Q:
+      name: name
+      in: query
+      description: |
+        Name of the API
+      schema:
+        type: string
+    apiVersion-Q:
+      name: version
+      in: query
+      description: |
+        Version of the API
+      schema:
+        type: string
+    apiProvider-Q:
+      name: providerName
+      in: query
+      description: |
+        Provider name of the API
+      schema:
+        type: string
+    documentId:
+      name: documentId
+      in: path
+      description: |
+        Document Identifier
+      required: true
+      schema:
+        type: string
+    applicationId:
+      name: applicationId
+      in: path
+      description: |
+        **Application Identifier** consisting of the UUID of the Application.
+      required: true
+      schema:
+        type: string
+    subscriptionId:
+      name: subscriptionId
+      in: path
+      description: |
+        Subscription Id
+      required: true
+      schema:
+        type: string
+    resourcePolicyId:
+      name: resourcePolicyId
+      in: path
+      description: |
+        registry resource Id
+      required: true
+      schema:
+        type: string
+    subscriptionId-Q:
+      name: subscriptionId
+      in: query
+      description: |
+        Subscription Id
+      required: true
+      schema:
+        type: string
+    operationPolicyId:
+      name: operationPolicyId
+      in: path
+      description: |
+        Operation policy Id
+      required: true
+      schema:
+        type: string
+
+    # API Revision Identifier
+    # Specified as part of the path expression
+    revisionId:
+      name: revisionId
+      in: path
+      description: |
+        Revision ID of an API
+      required: true
+      schema:
+        type: string
+
+    # API Revision Identifier
+    # Specified as part of the query string
+    revisionId-Q:
+      name: revisionId
+      in: query
+      description: |
+        Revision ID of an API
+      schema:
+        type: string
+    revisionNum-Q:
+      name: revisionNumber
+      in: query
+      description: |
+        Revision Number of an API
+      schema:
+        type: string
+    deploymentId:
+      name: deploymentId
+      in: path
+      description: |
+        Base64 URL encoded value of the name of an environment
+      required: true
+      schema:
+        type: string
+    policyName:
+      name: policyName
+      in: path
+      description: |
+        Tier name
+      required: true
+      schema:
+        type: string
+    policyName-Q:
+      name: policyName
+      in: query
+      description: |
+        Name of the policy
+      required: true
+      schema:
+        type: string
+    policyLevel:
+      name: policyLevel
+      in: path
+      description: |
+        List API or Application or Resource type policies.
+      required: true
+      schema:
+        type: string
+        enum:
+          - api
+          - subcription
+    policyLevel-Q:
+      name: policyLevel
+      in: query
+      description: |
+        List API or Application or Resource type policies.
+      required: true
+      schema:
+        type: string
+        enum:
+          - api
+          - subcription
+    limit:
+      name: limit
+      in: query
+      description: |
+        Maximum size of resource array to return.
+      schema:
+        type: integer
+        default: 25
+    policyLimit:
+      name: limit
+      in: query
+      description: |
+        Maximum size of policy array to return.
+      schema:
+        type: integer
+    Accept:
+      name: Accept
+      in: header
+      description: |
+        Media types acceptable for the response. Default is application/json.
+      schema:
+        type: string
+        default: application/json
+    offset:
+      name: offset
+      in: query
+      description: |
+        Starting point within the complete list of items qualified.
+      schema:
+        type: integer
+        default: 0
+    sortBy:
+      name: sortBy
+      in: query
+      description: |
+        Criteria for sorting.
+      schema:
+        type: string
+        default: createdTime
+        enum:
+          - apiName
+          - version
+          - createdTime
+          - status
+    sortOrder:
+      name: sortOrder
+      in: query
+      description: |
+        Order of sorting(ascending/descending).
+      schema:
+        type: string
+        default: desc
+        enum:
+          - asc
+          - desc
+    If-None-Match:
+      name: If-None-Match
+      in: header
+      description: |
+        Validator for conditional requests; based on the ETag of the formerly retrieved
+        variant of the resource.
+      schema:
+        type: string
+    If-Match:
+      name: If-Match
+      in: header
+      description: |
+        Validator for conditional requests; based on ETag.
+      schema:
+        type: string
+    scopeName:
+      name: scopeId
+      in: path
+      description: |
+        Base64 URL encoded value of the scope name
+      required: true
+      schema:
+        type: string
+    scopeId:
+      name: scopeId
+      in: path
+      description: |
+        Scope Id consisting the UUID of the shared scope
+      required: true
+      schema:
+        type: string
+    threatProtectionPolicyId:
+      name: policyId
+      in: path
+      description: |
+        The UUID of a Policy
+      required: true
+      schema:
+        type: string
+    roleId:
+      name: roleId
+      in: path
+      description: |
+        The Base 64 URL encoded role name with domain. If the given role is in secondary user-store, role ID should be
+        derived as Base64URLEncode({user-store-name}/{role-name}). If the given role is in PRIMARY user-store, role ID
+        can be derived as Base64URLEncode(role-name)
+      required: true
+      schema:
+        type: string
+    backofficeApiId:
+      name: backofficeApiId
+      in: path
+      description: |
+        **Back Office API ID** consisting of the **UUID** of the Back Office API. Using the **UUID** in the API call is recommended.
+      required: true
+      schema:
+        type: string
+        x-encoded: true
+      x-encoded: true
+    alertType:
+      name: alertType
+      in: path
+      description: The alert type.
+      required: true
+      schema:
+        type: string
+    configurationId:
+      name: configurationId
+      in: path
+      description: The alert configuration id.
+      required: true
+      schema:
+        type: string
+    tierQuotaType:
+      name: tierQuotaType
+      description: Filter the subscription base on tier quota type
+      in: query
+      schema:
+        type: string
+    envId:
+      name: envId
+      in: path
+      description: |
+        **Env ID** consisting of the **UUID** of the gateway environment.
+      required: true
+      schema:
+        type: string
+    backofficeApiId-Q:
+      name: backofficeApiId
+      in: query
+      description: |
+        **Back Office API ID** consisting of the **UUID** of the Back Office API.
+        The combination of the provider, name and the version of the Back Office API is also accepted as a valid Back Office API ID.
+        Should be formatted as **provider-name-version**.
+      required: true
+      schema:
+        type: string
+  requestBodies:
+    threatProtectionPolicy:
+      description: |
+        Threat protection policy request parameter
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ThreatProtectionPolicy'
+      required: true
+  securitySchemes:
+    OAuth2Security:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: https://localhost:9443/oauth2/token
+          scopes:
+            openid: Authorize access to user details
+            apim:api_view: View API
+            apim:api_create: Create API
+            apim:api_delete: Delete API
+            apim:api_publish: Publish API
+            apim:api_manage: Manage all API related operations
+            apim:subscription_view: View Subscription
+            apim:subscription_block: Block Subscription
+            apim:subscription_manage: Manage all Subscription related operations
+            apim:document_manage: Create, update and delete API documents
+            apim:backoffice_settings: Retrieve BackOffice settings
+            apim:app_import_export: Import and export applications related operations
+            apim:api_product_import_export: Import and export Back Office APIs related operations
+            apim:admin: Manage all admin operations
+            apim:comment_view: Read permission to comments
+            apim:comment_write: Write permission to comments
+            apim:comment_manage: Read and Write comments
+            apim:tier_view: View Usage plans
+            apim:api_list_view: View, Retrieve API list
+            apim:api_definition_view: View, Retrieve API definition
