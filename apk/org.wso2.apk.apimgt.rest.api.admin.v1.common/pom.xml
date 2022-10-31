@@ -21,9 +21,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon.apimgt</groupId>
+        <groupId>org.wso2.apk</groupId>
         <artifactId>apk</artifactId>
-        <version>9.26.10-SNAPSHOT</version>
+        <version>0.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -56,29 +56,29 @@
             <artifactId>spring-context</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.apk</groupId>
             <artifactId>org.wso2.apk.apimgt.impl</artifactId>
-            <version>9.26.10-SNAPSHOT</version>
+            <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.apk</groupId>
             <artifactId>org.wso2.apk.apimgt.api</artifactId>
-            <version>9.26.10-SNAPSHOT</version>
+            <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.apk</groupId>
             <artifactId>org.wso2.apk.apimgt.rest.api.util</artifactId>
-            <version>9.26.10-SNAPSHOT</version>
+            <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.apk</groupId>
             <artifactId>org.wso2.apk.apimgt.rest.api.common</artifactId>
-            <version>9.26.10-SNAPSHOT</version>
+            <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.apk</groupId>
             <artifactId>org.wso2.apk.apimgt.user</artifactId>
-            <version>9.26.10-SNAPSHOT</version>
+            <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -209,9 +209,9 @@
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>
-                            org.wso2.apk.apimgt.rest.api.admin.v1.dto.*;version="${carbon.apimgt.version}",
-                            org.wso2.apk.apimgt.rest.api.admin.v1.common.impl.*;version="${carbon.apimgt.version}",
-                            org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.*;version="${carbon.apimgt.version}"
+                            org.wso2.apk.apimgt.rest.api.admin.v1.dto.*;version="${apk.apimgt.version}",
+                            org.wso2.apk.apimgt.rest.api.admin.v1.common.impl.*;version="${apk.apimgt.version}",
+                            org.wso2.apk.apimgt.rest.api.admin.v1.common.utils.*;version="${apk.apimgt.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>

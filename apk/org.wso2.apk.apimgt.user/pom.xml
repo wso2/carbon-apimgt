@@ -21,9 +21,9 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.wso2.carbon.apimgt</groupId>
+        <groupId>org.wso2.apk</groupId>
         <artifactId>apk</artifactId>
-        <version>9.26.10-SNAPSHOT</version>
+        <version>0.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -76,7 +76,7 @@
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>
-                            org.wso2.apk.apimgt.user.*;version="${carbon.apimgt.version}"
+                            org.wso2.apk.apimgt.user.*;version="${apk.apimgt.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>
