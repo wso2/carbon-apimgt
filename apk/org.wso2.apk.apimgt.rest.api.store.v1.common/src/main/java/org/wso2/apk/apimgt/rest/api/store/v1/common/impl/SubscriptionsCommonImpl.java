@@ -34,7 +34,6 @@ import org.wso2.apk.apimgt.api.model.Monetization;
 import org.wso2.apk.apimgt.api.model.SubscribedAPI;
 import org.wso2.apk.apimgt.api.model.Subscriber;
 import org.wso2.apk.apimgt.api.model.SubscriptionResponse;
-import org.wso2.apk.apimgt.impl.workflow.HttpWorkflowResponse;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.apk.apimgt.rest.api.util.utils.RestAPIStoreUtils;
@@ -44,6 +43,7 @@ import org.wso2.apk.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
 import org.wso2.apk.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
 import org.wso2.apk.apimgt.rest.api.store.v1.common.mappings.AdditionalSubscriptionInfoMappingUtil;
 import org.wso2.apk.apimgt.rest.api.store.v1.common.mappings.SubscriptionMappingUtil;
+import org.wso2.apk.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -54,9 +54,9 @@ import java.util.Set;
 /**
  * This is the service implementation class for Store subscription related operations
  */
-public class SubscriptionServiceImpl {
+public class SubscriptionsCommonImpl {
 
-    private SubscriptionServiceImpl() {
+    private SubscriptionsCommonImpl() {
     }
 
     /**
@@ -81,6 +81,10 @@ public class SubscriptionServiceImpl {
         //pre-processing
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
+        // currently groupId is taken from the user so that groupId coming as a query parameter is not honored.
+        // As an improvement, we can check admin privileges of the user and honor groupId.
+        groupId = RestApiUtil.getLoggedInUserGroupId();
 
         APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
         SubscriptionListDTO subscriptionListDTO;

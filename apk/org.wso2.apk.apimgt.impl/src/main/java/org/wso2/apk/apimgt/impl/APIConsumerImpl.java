@@ -38,6 +38,7 @@ import org.wso2.apk.apimgt.api.model.*;
 import org.wso2.apk.apimgt.api.model.Documentation;
 import org.wso2.apk.apimgt.api.model.DocumentationType;
 import org.wso2.apk.apimgt.api.model.ResourceFile;
+import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPI;
 import org.wso2.apk.apimgt.impl.dao.dto.Organization;
 import org.wso2.apk.apimgt.impl.dao.exceptions.APIPersistenceException;
 import org.wso2.apk.apimgt.impl.dao.exceptions.OASPersistenceException;
