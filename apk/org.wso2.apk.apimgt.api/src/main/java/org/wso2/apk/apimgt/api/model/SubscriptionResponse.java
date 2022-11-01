@@ -25,20 +25,14 @@ public class SubscriptionResponse {
 
     private String subscriptionStatus = null;
     private String subscriptionUUID = null;
-    private WorkflowResponse workflowResponse = null;
 
-    public SubscriptionResponse(String addSubscriptionStatus, String addedSubscriptionUUID, WorkflowResponse workflowResponse) {
+    public SubscriptionResponse(String addSubscriptionStatus, String addedSubscriptionUUID) {
         this.subscriptionStatus = addSubscriptionStatus;
         this.subscriptionUUID = addedSubscriptionUUID;
-        this.workflowResponse = workflowResponse;
        }
 
     public String getSubscriptionUUID() {
         return subscriptionUUID;
-    }
-
-    public WorkflowResponse getWorkflowResponse() {
-        return workflowResponse;
     }
 
     public String getSubscriptionStatus() {
