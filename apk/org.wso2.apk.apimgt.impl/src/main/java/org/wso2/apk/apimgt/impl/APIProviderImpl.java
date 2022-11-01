@@ -21,16 +21,16 @@ package org.wso2.apk.apimgt.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.util.AXIOMUtil;
-import org.apache.axis2.Constants;
-import org.apache.axis2.util.JavaUtils;
+//import org.apache.axiom.om.OMElement;
+//import org.apache.axiom.om.util.AXIOMUtil;
+//import org.apache.axis2.Constants;
+//import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.solr.client.solrj.util.ClientUtils;
+//import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -234,7 +234,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected ImportExportAPI importExportAPI;
     protected GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
 //    private RecommendationEnvironment recommendationEnvironment;
-    private GlobalMediationPolicyImpl globalMediationPolicyImpl;
+//    private GlobalMediationPolicyImpl globalMediationPolicyImpl;
     private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig:";
 
     public APIProviderImpl(String username) throws APIManagementException {
@@ -246,7 +246,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 //        this.gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
 //        this.recommendationEnvironment = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
 //                .getAPIManagerConfiguration().getApiRecommendationEnvironment();
-        globalMediationPolicyImpl = new GlobalMediationPolicyImpl(organization);
+//        globalMediationPolicyImpl = new GlobalMediationPolicyImpl(organization);
     }
 
     protected String getUserNameWithoutChange() {
@@ -429,60 +429,61 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return count;
     }
 
-    private OMElement createThrottlePolicy(Tier tier) throws APIManagementException {
-        OMElement throttlePolicy = null;
-        String policy = APIConstants.THROTTLE_POLICY_TEMPLATE;
-
-        StringBuilder attributeBuilder = new StringBuilder();
-        Map<String, Object> tierAttributes = tier.getTierAttributes();
-
-        if (tierAttributes != null) {
-            for (Map.Entry<String, Object> entry : tierAttributes.entrySet()) {
-                if (entry.getValue() instanceof String) {
-                    String attributeName = entry.getKey().trim();
-                    String attributeValue = ((String) entry.getValue()).trim();
-
-                    // We see whether the attribute name is empty.
-                    if (!attributeName.isEmpty()) {
-                        attributeBuilder.append(String.format(APIConstants.THROTTLE_POLICY_ATTRIBUTE_TEMPLATE,
-                                attributeName, attributeValue, attributeName));
-                    }
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Unrecognized throttle attribute value : " + entry.getValue() +
-                                " of attribute name : " + entry.getKey());
-                    }
-                }
-            }
-        }
-
-        // We add the "description", "billing plan" and "stop on quota reach" as custom attributes
-        attributeBuilder.append(String.format(APIConstants.THROTTLE_POLICY_ATTRIBUTE_TEMPLATE,
-                APIConstants.THROTTLE_TIER_DESCRIPTION_ATTRIBUTE,
-                tier.getDescription().trim(),
-                APIConstants.THROTTLE_TIER_DESCRIPTION_ATTRIBUTE));
-
-        attributeBuilder.append(String.format(APIConstants.THROTTLE_POLICY_ATTRIBUTE_TEMPLATE,
-                APIConstants.THROTTLE_TIER_PLAN_ATTRIBUTE,
-                tier.getTierPlan().trim(),
-                APIConstants.THROTTLE_TIER_PLAN_ATTRIBUTE));
-
-        attributeBuilder.append(String.format(APIConstants.THROTTLE_POLICY_ATTRIBUTE_TEMPLATE,
-                APIConstants.THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE,
-                String.valueOf(tier.isStopOnQuotaReached()),
-                APIConstants.THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE));
-
-        // Note: We assume that the unit time is in milliseconds.
-        policy = String.format(policy, tier.getName(), tier.getRequestCount(), tier.getUnitTime(),
-                attributeBuilder.toString());
-
-        try {
-            throttlePolicy = AXIOMUtil.stringToOM(policy);
-        } catch (XMLStreamException e) {
-            handleException("Invalid policy xml generated", e);
-        }
-        return throttlePolicy;
-    }
+    //TODO: APK
+//    private OMElement createThrottlePolicy(Tier tier) throws APIManagementException {
+//        OMElement throttlePolicy = null;
+//        String policy = APIConstants.THROTTLE_POLICY_TEMPLATE;
+//
+//        StringBuilder attributeBuilder = new StringBuilder();
+//        Map<String, Object> tierAttributes = tier.getTierAttributes();
+//
+//        if (tierAttributes != null) {
+//            for (Map.Entry<String, Object> entry : tierAttributes.entrySet()) {
+//                if (entry.getValue() instanceof String) {
+//                    String attributeName = entry.getKey().trim();
+//                    String attributeValue = ((String) entry.getValue()).trim();
+//
+//                    // We see whether the attribute name is empty.
+//                    if (!attributeName.isEmpty()) {
+//                        attributeBuilder.append(String.format(APIConstants.THROTTLE_POLICY_ATTRIBUTE_TEMPLATE,
+//                                attributeName, attributeValue, attributeName));
+//                    }
+//                } else {
+//                    if (log.isDebugEnabled()) {
+//                        log.debug("Unrecognized throttle attribute value : " + entry.getValue() +
+//                                " of attribute name : " + entry.getKey());
+//                    }
+//                }
+//            }
+//        }
+//
+//        // We add the "description", "billing plan" and "stop on quota reach" as custom attributes
+//        attributeBuilder.append(String.format(APIConstants.THROTTLE_POLICY_ATTRIBUTE_TEMPLATE,
+//                APIConstants.THROTTLE_TIER_DESCRIPTION_ATTRIBUTE,
+//                tier.getDescription().trim(),
+//                APIConstants.THROTTLE_TIER_DESCRIPTION_ATTRIBUTE));
+//
+//        attributeBuilder.append(String.format(APIConstants.THROTTLE_POLICY_ATTRIBUTE_TEMPLATE,
+//                APIConstants.THROTTLE_TIER_PLAN_ATTRIBUTE,
+//                tier.getTierPlan().trim(),
+//                APIConstants.THROTTLE_TIER_PLAN_ATTRIBUTE));
+//
+//        attributeBuilder.append(String.format(APIConstants.THROTTLE_POLICY_ATTRIBUTE_TEMPLATE,
+//                APIConstants.THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE,
+//                String.valueOf(tier.isStopOnQuotaReached()),
+//                APIConstants.THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE));
+//
+//        // Note: We assume that the unit time is in milliseconds.
+//        policy = String.format(policy, tier.getName(), tier.getRequestCount(), tier.getUnitTime(),
+//                attributeBuilder.toString());
+//
+//        try {
+//            throttlePolicy = AXIOMUtil.stringToOM(policy);
+//        } catch (XMLStreamException e) {
+//            handleException("Invalid policy xml generated", e);
+//        }
+//        return throttlePolicy;
+//    }
 
     /**
      * Adds a new API to the Store
@@ -1190,132 +1191,132 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void loadMediationPoliciesToAPI(API api, String organization) throws APIManagementException {
-        if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
-                || APIUtil.isSequenceDefined(api.getFaultSequence())) {
-            Organization org = new Organization(organization);
-            String apiUUID = api.getUuid();
-            // get all policies
-            try {
-                //TODO:APK
-//                List<MediationInfo> localPolicies = apiPersistenceInstance.getAllMediationPolicies(org, apiUUID);
-                List<MediationInfo> localPolicies = new ArrayList<>();
-                List<Mediation> globalPolicies = null;
-                if (APIUtil.isSequenceDefined(api.getInSequence())) {
-                    boolean found = false;
-                    for (MediationInfo mediationInfo : localPolicies) {
-                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(mediationInfo.getType())
-                                && api.getInSequence().equals(mediationInfo.getName())) {
-                            //TODO:APK
-//                            org.wso2.apk.apimgt.impl.dao.dto.Mediation mediationPolicy = apiPersistenceInstance
-//                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
-                            Mediation mediation = new Mediation();
-//                            mediation.setConfig(mediationPolicy.getConfig());
-//                            mediation.setName(mediationPolicy.getName());
-//                            mediation.setUuid(mediationPolicy.getId());
-//                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
-//                            mediation.setGlobal(false);
-                            api.setInSequenceMediation(mediation);
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) { // global policy
-                        if (globalPolicies == null) {
-                            globalPolicies = globalMediationPolicyImpl.getAllGlobalMediationPolicies();
-                        }
-                        for (Mediation m : globalPolicies) {
-                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(m.getType())
-                                    && api.getInSequence().equals(m.getName())) {
-                                Mediation mediation = globalMediationPolicyImpl.getGlobalMediationPolicy(m.getUuid());
-                                mediation.setGlobal(true);
-                                api.setInSequenceMediation(mediation);
-                                found = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (APIUtil.isSequenceDefined(api.getOutSequence())) {
-                    boolean found = false;
-                    for (MediationInfo mediationInfo : localPolicies) {
-                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(mediationInfo.getType())
-                                && api.getOutSequence().equals(mediationInfo.getName())) {
-                            //TODO:APK
-//                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
-//                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
-                            Mediation mediation = new Mediation();
-//                            mediation.setConfig(mediationPolicy.getConfig());
-//                            mediation.setName(mediationPolicy.getName());
-//                            mediation.setUuid(mediationPolicy.getId());
-//                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
-//                            mediation.setGlobal(false);
-                            api.setOutSequenceMediation(mediation);
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) { // global policy
-                        if (globalPolicies == null) {
-                            globalPolicies = globalMediationPolicyImpl.getAllGlobalMediationPolicies();
-                        }
-                        for (Mediation m : globalPolicies) {
-                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(m.getType())
-                                    && api.getOutSequence().equals(m.getName())) {
-                                Mediation mediation = globalMediationPolicyImpl.getGlobalMediationPolicy(m.getUuid());
-                                mediation.setGlobal(true);
-                                api.setOutSequenceMediation(mediation);
-                                found = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
-                    boolean found = false;
-                    for (MediationInfo mediationInfo : localPolicies) {
-                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(mediationInfo.getType())
-                                && api.getFaultSequence().equals(mediationInfo.getName())) {
-                            //TODO:APK
-//                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
-//                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
-                            Mediation mediation = new Mediation();
-//                            mediation.setConfig(mediationPolicy.getConfig());
-//                            mediation.setName(mediationPolicy.getName());
-//                            mediation.setUuid(mediationPolicy.getId());
-//                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
-//                            mediation.setGlobal(false);
-                            api.setFaultSequenceMediation(mediation);
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) { // global policy
-                        if (globalPolicies == null) {
-                            globalPolicies = globalMediationPolicyImpl.getAllGlobalMediationPolicies();
-                        }
-                        for (Mediation m : globalPolicies) {
-                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(m.getType())
-                                    && api.getFaultSequence().equals(m.getName())) {
-                                Mediation mediation = globalMediationPolicyImpl.getGlobalMediationPolicy(m.getUuid());
-                                mediation.setGlobal(true);
-                                api.setFaultSequenceMediation(mediation);
-                                found = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                //TODO:APK
-//            } catch (MediationPolicyPersistenceException e) {
+//        if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
+//                || APIUtil.isSequenceDefined(api.getFaultSequence())) {
+//            Organization org = new Organization(organization);
+//            String apiUUID = api.getUuid();
+//            // get all policies
+//            try {
+//                //TODO:APK
+////                List<MediationInfo> localPolicies = apiPersistenceInstance.getAllMediationPolicies(org, apiUUID);
+//                List<MediationInfo> localPolicies = new ArrayList<>();
+//                List<Mediation> globalPolicies = null;
+//                if (APIUtil.isSequenceDefined(api.getInSequence())) {
+//                    boolean found = false;
+//                    for (MediationInfo mediationInfo : localPolicies) {
+//                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(mediationInfo.getType())
+//                                && api.getInSequence().equals(mediationInfo.getName())) {
+//                            //TODO:APK
+////                            org.wso2.apk.apimgt.impl.dao.dto.Mediation mediationPolicy = apiPersistenceInstance
+////                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+//                            Mediation mediation = new Mediation();
+////                            mediation.setConfig(mediationPolicy.getConfig());
+////                            mediation.setName(mediationPolicy.getName());
+////                            mediation.setUuid(mediationPolicy.getId());
+////                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+////                            mediation.setGlobal(false);
+//                            api.setInSequenceMediation(mediation);
+//                            found = true;
+//                            break;
+//                        }
+//                    }
+//                    if (!found) { // global policy
+//                        if (globalPolicies == null) {
+//                            globalPolicies = globalMediationPolicyImpl.getAllGlobalMediationPolicies();
+//                        }
+//                        for (Mediation m : globalPolicies) {
+//                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(m.getType())
+//                                    && api.getInSequence().equals(m.getName())) {
+//                                Mediation mediation = globalMediationPolicyImpl.getGlobalMediationPolicy(m.getUuid());
+//                                mediation.setGlobal(true);
+//                                api.setInSequenceMediation(mediation);
+//                                found = true;
+//                                break;
+//                            }
+//                        }
+//                    }
+//                }
+//                if (APIUtil.isSequenceDefined(api.getOutSequence())) {
+//                    boolean found = false;
+//                    for (MediationInfo mediationInfo : localPolicies) {
+//                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(mediationInfo.getType())
+//                                && api.getOutSequence().equals(mediationInfo.getName())) {
+//                            //TODO:APK
+////                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+////                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+//                            Mediation mediation = new Mediation();
+////                            mediation.setConfig(mediationPolicy.getConfig());
+////                            mediation.setName(mediationPolicy.getName());
+////                            mediation.setUuid(mediationPolicy.getId());
+////                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+////                            mediation.setGlobal(false);
+//                            api.setOutSequenceMediation(mediation);
+//                            found = true;
+//                            break;
+//                        }
+//                    }
+//                    if (!found) { // global policy
+//                        if (globalPolicies == null) {
+//                            globalPolicies = globalMediationPolicyImpl.getAllGlobalMediationPolicies();
+//                        }
+//                        for (Mediation m : globalPolicies) {
+//                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(m.getType())
+//                                    && api.getOutSequence().equals(m.getName())) {
+//                                Mediation mediation = globalMediationPolicyImpl.getGlobalMediationPolicy(m.getUuid());
+//                                mediation.setGlobal(true);
+//                                api.setOutSequenceMediation(mediation);
+//                                found = true;
+//                                break;
+//                            }
+//                        }
+//                    }
+//                }
+//                if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
+//                    boolean found = false;
+//                    for (MediationInfo mediationInfo : localPolicies) {
+//                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(mediationInfo.getType())
+//                                && api.getFaultSequence().equals(mediationInfo.getName())) {
+//                            //TODO:APK
+////                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+////                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+//                            Mediation mediation = new Mediation();
+////                            mediation.setConfig(mediationPolicy.getConfig());
+////                            mediation.setName(mediationPolicy.getName());
+////                            mediation.setUuid(mediationPolicy.getId());
+////                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
+////                            mediation.setGlobal(false);
+//                            api.setFaultSequenceMediation(mediation);
+//                            found = true;
+//                            break;
+//                        }
+//                    }
+//                    if (!found) { // global policy
+//                        if (globalPolicies == null) {
+//                            globalPolicies = globalMediationPolicyImpl.getAllGlobalMediationPolicies();
+//                        }
+//                        for (Mediation m : globalPolicies) {
+//                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(m.getType())
+//                                    && api.getFaultSequence().equals(m.getName())) {
+//                                Mediation mediation = globalMediationPolicyImpl.getGlobalMediationPolicy(m.getUuid());
+//                                mediation.setGlobal(true);
+//                                api.setFaultSequenceMediation(mediation);
+//                                found = true;
+//                                break;
+//                            }
+//                        }
+//                    }
+//                }
+//                //TODO:APK
+////            } catch (MediationPolicyPersistenceException e) {
+////                String errorMessage = "Error while loading medation policies";
+////                throw new APIManagementException(errorMessage, e,
+////                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR, errorMessage));
+//            } catch (Exception e) {
 //                String errorMessage = "Error while loading medation policies";
 //                throw new APIManagementException(errorMessage, e,
 //                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR, errorMessage));
-            } catch (Exception e) {
-                String errorMessage = "Error while loading medation policies";
-                throw new APIManagementException(errorMessage, e,
-                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR, errorMessage));
-            }
-        }
+//            }
+//        }
     }
 
     /**
@@ -1576,7 +1577,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 checkIfValidTransport(transports);
             }
         } else {
-            api.setTransports(Constants.TRANSPORT_HTTP + ',' + Constants.TRANSPORT_HTTPS);
+            //TODO: APK
+//            api.setTransports(Constants.TRANSPORT_HTTP + ',' + Constants.TRANSPORT_HTTPS);
         }
     }
 
@@ -1597,7 +1599,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 checkIfValidTransport(transports);
             }
         } else {
-            apiProduct.setTransports(Constants.TRANSPORT_HTTP + ',' + Constants.TRANSPORT_HTTPS);
+            //TODO: APK
+//            apiProduct.setTransports(Constants.TRANSPORT_HTTP + ',' + Constants.TRANSPORT_HTTPS);
         }
     }
 
@@ -1884,11 +1887,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void checkIfValidTransport(String transport) throws APIManagementException {
-        if (!Constants.TRANSPORT_HTTP.equalsIgnoreCase(transport) && !Constants.TRANSPORT_HTTPS.equalsIgnoreCase(transport)
-                && !APIConstants.WS_PROTOCOL.equalsIgnoreCase(transport) && !APIConstants.WSS_PROTOCOL.equalsIgnoreCase(transport)) {
-            throw new APIManagementException("Unsupported Transport [" + transport + ']',
-                    ExceptionCodes.from(ExceptionCodes.UNSUPPORTED_TRANSPORT_TYPE, transport));
-        }
+        //TODO: APK
+//        if (!Constants.TRANSPORT_HTTP.equalsIgnoreCase(transport) && !Constants.TRANSPORT_HTTPS.equalsIgnoreCase(transport)
+//                && !APIConstants.WS_PROTOCOL.equalsIgnoreCase(transport) && !APIConstants.WSS_PROTOCOL.equalsIgnoreCase(transport)) {
+//            throw new APIManagementException("Unsupported Transport [" + transport + ']',
+//                    ExceptionCodes.from(ExceptionCodes.UNSUPPORTED_TRANSPORT_TYPE, transport));
+//        }
     }
 
     private void removeFromGateway(API api, Set<APIRevisionDeployment> gatewaysToRemove,
@@ -3774,12 +3778,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             userRoles = filteredUserRoles.toArray(new String[0]);
         }
-        if (userRoles != null) {
-            for (String userRole : userRoles) {
-                rolesQuery.append(" OR ");
-                rolesQuery.append(ClientUtils.escapeQueryChars(APIUtil.sanitizeUserRole(userRole.toLowerCase())));
-            }
-        }
+        //TODO: APK
+//        if (userRoles != null) {
+//            for (String userRole : userRoles) {
+//                rolesQuery.append(" OR ");
+//                rolesQuery.append(ClientUtils.escapeQueryChars(APIUtil.sanitizeUserRole(userRole.toLowerCase())));
+//            }
+//        }
         rolesQuery.append(")");
         if(log.isDebugEnabled()) {
         	log.debug("User role list solr query " + APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString());

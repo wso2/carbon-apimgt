@@ -17,7 +17,6 @@
 */
 package org.wso2.apk.apimgt.impl;
 
-import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -71,7 +70,7 @@ public class APIManagerAnalyticsConfiguration {
 
     public void setAPIManagerConfiguration(ConfigurationHolder config){
         String usageEnabled = config.getFirstProperty(APIConstants.API_USAGE_ENABLED);
-        this.analyticsEnabled = JavaUtils.isTrueExplicitly(usageEnabled);
+        this.analyticsEnabled = Boolean.parseBoolean(usageEnabled);
         if (this.analyticsEnabled) {
             this.reporterClass = config.getFirstProperty(APIConstants.API_ANALYTICS_REPORTER_CLASS);
             this.responseSchemaName = config.getFirstProperty(APIConstants.API_ANALYTICS_RESPONSE_SCHEMA_NAME);

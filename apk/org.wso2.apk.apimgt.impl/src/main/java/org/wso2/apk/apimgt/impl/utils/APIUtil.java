@@ -26,9 +26,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.util.AXIOMUtil;
-import org.apache.axis2.Constants;
+//import org.apache.axiom.om.OMElement;
+//import org.apache.axiom.om.util.AXIOMUtil;
+//import org.apache.axis2.Constants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -167,7 +167,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.cache.Cache;
-import javax.cache.CacheConfiguration;
+//import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.net.ssl.SSLContext;
@@ -389,63 +389,64 @@ public final class APIUtil {
         }
         // Else Read the config from Tenant's Registry.
         externalAPIStores = new HashSet<>();
-        try {
-            Iterator apiStoreIterator = getExternalStoresIteratorFromConfig(tenantId);
-            if (apiStoreIterator != null) {
-                while (apiStoreIterator.hasNext()) {
-                    APIStore store = new APIStore();
-                    OMElement storeElem = (OMElement) apiStoreIterator.next();
-                    String type = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_TYPE));
-                    String className =
-                            storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_CLASS_NAME));
-                    store.setPublisher((APIPublisher) getClassInstance(className));
-                    store.setType(type); //Set Store type [eg:wso2]
-                    String name = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
-                    if (name == null) {
-                        log.error("The ExternalAPIStore name attribute is not defined in external-api-stores.xml.");
-                    }
-                    store.setName(name); //Set store name
-                    OMElement configDisplayName = storeElem.getFirstChildWithName
-                            (new QName(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME));
-                    String displayName = (configDisplayName != null) ? replaceSystemProperty(
-                            configDisplayName.getText()) : name;
-                    store.setDisplayName(displayName);//Set store display name
-                    store.setEndpoint(replaceSystemProperty(storeElem.getFirstChildWithName(
-                            new QName(APIConstants.EXTERNAL_API_STORE_ENDPOINT)).getText()));
-                    //Set store endpoint, which is used to publish APIs
-                    store.setPublished(false);
-                    if (APIConstants.WSO2_API_STORE_TYPE.equals(type)) {
-                        OMElement password = storeElem.getFirstChildWithName(new QName(
-                                APIConstants.EXTERNAL_API_STORE_PASSWORD));
-                        if (password != null) {
-
-                            String value = password.getText();
-                            PasswordResolver passwordResolver = PasswordResolverFactory.getInstance();
-                            store.setPassword(replaceSystemProperty(passwordResolver.getPassword(value)));
-                            store.setUsername(replaceSystemProperty(storeElem.getFirstChildWithName(
-                                    new QName(APIConstants.EXTERNAL_API_STORE_USERNAME)).getText()));
-                            //Set store login username
-                        } else {
-                            log.error("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> " +
-                                    "config of external-api-stores.xml.");
-                        }
-                    }
-                    externalAPIStores.add(store);
-                }
-            }
-        } catch (ClassNotFoundException e) {
-            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be found";
-            log.error(msg, e);
-            throw new APIManagementException(ExceptionCodes.EXTERNAL_STORE_CLASS_NOT_FOUND);
-        } catch (InstantiationException e) {
-            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be load";
-            log.error(msg, e);
-            throw new APIManagementException(ExceptionCodes.EXTERNAL_STORE_CLASS_NOT_LOADED);
-        } catch (IllegalAccessException e) {
-            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be access";
-            log.error(msg, e);
-            throw new APIManagementException(ExceptionCodes.EXTERNAL_STORE_CLASS_NOT_ACCESSIBLE);
-        }
+        //TODO: APK
+//        try {
+//            Iterator apiStoreIterator = getExternalStoresIteratorFromConfig(tenantId);
+//            if (apiStoreIterator != null) {
+//                while (apiStoreIterator.hasNext()) {
+//                    APIStore store = new APIStore();
+//                    OMElement storeElem = (OMElement) apiStoreIterator.next();
+//                    String type = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_TYPE));
+//                    String className =
+//                            storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_CLASS_NAME));
+//                    store.setPublisher((APIPublisher) getClassInstance(className));
+//                    store.setType(type); //Set Store type [eg:wso2]
+//                    String name = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
+//                    if (name == null) {
+//                        log.error("The ExternalAPIStore name attribute is not defined in external-api-stores.xml.");
+//                    }
+//                    store.setName(name); //Set store name
+//                    OMElement configDisplayName = storeElem.getFirstChildWithName
+//                            (new QName(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME));
+//                    String displayName = (configDisplayName != null) ? replaceSystemProperty(
+//                            configDisplayName.getText()) : name;
+//                    store.setDisplayName(displayName);//Set store display name
+//                    store.setEndpoint(replaceSystemProperty(storeElem.getFirstChildWithName(
+//                            new QName(APIConstants.EXTERNAL_API_STORE_ENDPOINT)).getText()));
+//                    //Set store endpoint, which is used to publish APIs
+//                    store.setPublished(false);
+//                    if (APIConstants.WSO2_API_STORE_TYPE.equals(type)) {
+//                        OMElement password = storeElem.getFirstChildWithName(new QName(
+//                                APIConstants.EXTERNAL_API_STORE_PASSWORD));
+//                        if (password != null) {
+//
+//                            String value = password.getText();
+//                            PasswordResolver passwordResolver = PasswordResolverFactory.getInstance();
+//                            store.setPassword(replaceSystemProperty(passwordResolver.getPassword(value)));
+//                            store.setUsername(replaceSystemProperty(storeElem.getFirstChildWithName(
+//                                    new QName(APIConstants.EXTERNAL_API_STORE_USERNAME)).getText()));
+//                            //Set store login username
+//                        } else {
+//                            log.error("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> " +
+//                                    "config of external-api-stores.xml.");
+//                        }
+//                    }
+//                    externalAPIStores.add(store);
+//                }
+//            }
+//        } catch (ClassNotFoundException e) {
+//            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be found";
+//            log.error(msg, e);
+//            throw new APIManagementException(ExceptionCodes.EXTERNAL_STORE_CLASS_NOT_FOUND);
+//        } catch (InstantiationException e) {
+//            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be load";
+//            log.error(msg, e);
+//            throw new APIManagementException(ExceptionCodes.EXTERNAL_STORE_CLASS_NOT_LOADED);
+//        } catch (IllegalAccessException e) {
+//            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be access";
+//            log.error(msg, e);
+//            throw new APIManagementException(ExceptionCodes.EXTERNAL_STORE_CLASS_NOT_ACCESSIBLE);
+//        }
         return externalAPIStores;
     }
 
@@ -459,16 +460,16 @@ public final class APIUtil {
     private static Iterator getExternalStoresIteratorFromConfig(int tenantId) throws APIManagementException {
 
         Iterator apiStoreIterator = null;
-        try {
+//        try {
             //TODO handle configs
-            String content = getAPIMConfigService().getExternalStoreConfig(getTenantDomainFromTenantId(tenantId));
-            OMElement element = AXIOMUtil.stringToOM(content);
-            apiStoreIterator = element.getChildrenWithLocalName("ExternalAPIStore");
-
-        } catch (XMLStreamException e) {
-            throw new APIManagementException("Malformed XML found in the External Stores Configuration resource", e,
-                    ExceptionCodes.MALFORMED_XML_IN_EXTERNAL_STORE_CONFIG);
-        }
+//            String content = getAPIMConfigService().getExternalStoreConfig(getTenantDomainFromTenantId(tenantId));
+//            OMElement element = AXIOMUtil.stringToOM(content);
+//            apiStoreIterator = element.getChildrenWithLocalName("ExternalAPIStore");
+//
+//        } catch (XMLStreamException e) {
+//            throw new APIManagementException("Malformed XML found in the External Stores Configuration resource", e,
+//                    ExceptionCodes.MALFORMED_XML_IN_EXTERNAL_STORE_CONFIG);
+//        }
         return apiStoreIterator;
     }
 
@@ -766,7 +767,8 @@ public final class APIUtil {
                 log.debug("Publisher role cache is enabled, adding the roles for the " + key + " to the cache "
                         + cacheName + "'");
             }
-            Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(cacheName).put(key, value);
+            //TODO: APK
+//            Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(cacheName).put(key, value);
         }
     }
 
@@ -784,9 +786,10 @@ public final class APIUtil {
                 log.debug("Publisher role cache is enabled, retrieving the roles for  " + key + " from the cache "
                         + cacheName + "'");
             }
-            Cache<String, T> rolesCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                    .getCache(cacheName);
-            return rolesCache.get(key);
+            //TODO: APK
+//            Cache<String, T> rolesCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+//                    .getCache(cacheName);
+//            return rolesCache.get(key);
         }
         return null;
     }
@@ -965,17 +968,19 @@ public final class APIUtil {
 
     public static Cache getAPIContextCache() {
 
-        CacheManager contextCacheManager = Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).
-                getCache(APIConstants.API_CONTEXT_CACHE).getCacheManager();
-        if (!isContextCacheInitialized) {
-            isContextCacheInitialized = true;
-            return contextCacheManager.<String, Boolean>createCacheBuilder(APIConstants.API_CONTEXT_CACHE_MANAGER).
-                    setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.DAYS,
-                            APIConstants.API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS)).setStoreByValue(false).build();
-        } else {
-            return Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).getCache(
-                    APIConstants.API_CONTEXT_CACHE);
-        }
+        //TODO: APK
+//        CacheManager contextCacheManager = Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).
+//                getCache(APIConstants.API_CONTEXT_CACHE).getCacheManager();
+//        if (!isContextCacheInitialized) {
+//            isContextCacheInitialized = true;
+//            return contextCacheManager.<String, Boolean>createCacheBuilder(APIConstants.API_CONTEXT_CACHE_MANAGER).
+//                    setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.DAYS,
+//                            APIConstants.API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS)).setStoreByValue(false).build();
+//        } else {
+//            return Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).getCache(
+//                    APIConstants.API_CONTEXT_CACHE);
+//        }
+        return null;
     }
 
     /**
@@ -1058,118 +1063,118 @@ public final class APIUtil {
         return true;
     }
 
-    /**
-     * Create API Definition in JSON
-     *
-     * @param api API
-     * @throws APIManagementException if failed to generate the content and save
-     * @deprecated
-     */
-
-    @Deprecated
-    public static String createSwaggerJSONContent(API api) throws APIManagementException {
-
-        APIIdentifier identifier = api.getId();
-        String organization = api.getOrganization();
-        Environment environment = (Environment) getEnvironments(organization).values().toArray()[0];
-        String endpoints = environment.getApiGatewayEndpoint();
-        String[] endpointsSet = endpoints.split(",");
-        String apiContext = api.getContext();
-        String version = identifier.getVersion();
-        Set<URITemplate> uriTemplates = api.getUriTemplates();
-        String description = api.getDescription();
-
-        // With the new context version strategy, the URL prefix is the apiContext. the verison will be embedded in
-        // the apiContext.
-        String urlPrefix = apiContext;
-
-        if (endpointsSet.length < 1) {
-            throw new APIManagementException("Error in creating JSON representation of the API"
-                    + identifier.getApiName());
-        }
-        if (description == null || "".equals(description)) {
-            description = "";
-        } else {
-            description = description.trim();
-        }
-
-        Map<String, List<Operation>> uriTemplateDefinitions = new HashMap<String, List<Operation>>();
-        List<APIResource> apis = new ArrayList<APIResource>();
-        for (URITemplate template : uriTemplates) {
-            List<Operation> ops;
-            List<Parameter> parameters;
-            String path = urlPrefix + APIUtil.removeAnySymbolFromUriTempate(template.getUriTemplate());
-            /* path exists in uriTemplateDefinitions */
-            if (uriTemplateDefinitions.get(path) != null) {
-                ops = uriTemplateDefinitions.get(path);
-                parameters = new ArrayList<Parameter>();
-
-                String httpVerb = template.getHTTPVerb();
-                /* For GET and DELETE Parameter name - Query Parameters */
-                if (Constants.Configuration.HTTP_METHOD_GET.equals(httpVerb)
-                        || Constants.Configuration.HTTP_METHOD_DELETE.equals(httpVerb)) {
-                    Parameter queryParam = new Parameter(APIConstants.OperationParameter.QUERY_PARAM_NAME,
-                            APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION,
-                            APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
-                    parameters.add(queryParam);
-                } else {/* For POST, PUT and PATCH Parameter name - Payload */
-                    Parameter payLoadParam = new Parameter(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME,
-                            APIConstants.OperationParameter.PAYLOAD_PARAM_DESCRIPTION,
-                            APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
-                    parameters.add(payLoadParam);
-                }
-
-                Parameter authParam = new Parameter(APIConstants.OperationParameter.AUTH_PARAM_NAME,
-                        APIConstants.OperationParameter.AUTH_PARAM_DESCRIPTION,
-                        APIConstants.OperationParameter.AUTH_PARAM_TYPE, false, false, "String");
-                parameters.add(authParam);
-                if (!"OPTIONS".equals(httpVerb)) {
-                    Operation op = new Operation(httpVerb, description, description, parameters);
-                    ops.add(op);
-                }
-            } else {/* path not exists in uriTemplateDefinitions */
-                ops = new ArrayList<Operation>();
-                parameters = new ArrayList<Parameter>();
-
-                String httpVerb = template.getHTTPVerb();
-                /* For GET and DELETE Parameter name - Query Parameters */
-                if (Constants.Configuration.HTTP_METHOD_GET.equals(httpVerb)
-                        || Constants.Configuration.HTTP_METHOD_DELETE.equals(httpVerb)) {
-                    Parameter queryParam = new Parameter(APIConstants.OperationParameter.QUERY_PARAM_NAME,
-                            APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION,
-                            APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
-                    parameters.add(queryParam);
-                } else {/* For POST,PUT and PATCH Parameter name - Payload */
-                    Parameter payLoadParam = new Parameter(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME,
-                            APIConstants.OperationParameter.PAYLOAD_PARAM_DESCRIPTION,
-                            APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
-                    parameters.add(payLoadParam);
-                }
-                Parameter authParam = new Parameter(APIConstants.OperationParameter.AUTH_PARAM_NAME,
-                        APIConstants.OperationParameter.AUTH_PARAM_DESCRIPTION,
-                        APIConstants.OperationParameter.AUTH_PARAM_TYPE, false, false, "String");
-                parameters.add(authParam);
-                if (!"OPTIONS".equals(httpVerb)) {
-                    Operation op = new Operation(httpVerb, description, description, parameters);
-                    ops.add(op);
-                }
-                uriTemplateDefinitions.put(path, ops);
-            }
-        }
-
-        final Set<Entry<String, List<Operation>>> entries = uriTemplateDefinitions.entrySet();
-
-        for (Entry entry : entries) {
-            APIResource apiResource = new APIResource((String) entry.getKey(), description,
-                    (List<Operation>) entry.getValue());
-            apis.add(apiResource);
-        }
-        APIDefinition apidefinition = new APIDefinition(version, APIConstants.SWAGGER_VERSION, endpointsSet[0],
-                apiContext, apis);
-
-        Gson gson = new Gson();
-        return gson.toJson(apidefinition);
-    }
+//    /**
+//     * Create API Definition in JSON
+//     *
+//     * @param api API
+//     * @throws APIManagementException if failed to generate the content and save
+//     * @deprecated
+//     */
+//
+//    @Deprecated
+//    public static String createSwaggerJSONContent(API api) throws APIManagementException {
+//
+//        APIIdentifier identifier = api.getId();
+//        String organization = api.getOrganization();
+//        Environment environment = (Environment) getEnvironments(organization).values().toArray()[0];
+//        String endpoints = environment.getApiGatewayEndpoint();
+//        String[] endpointsSet = endpoints.split(",");
+//        String apiContext = api.getContext();
+//        String version = identifier.getVersion();
+//        Set<URITemplate> uriTemplates = api.getUriTemplates();
+//        String description = api.getDescription();
+//
+//        // With the new context version strategy, the URL prefix is the apiContext. the verison will be embedded in
+//        // the apiContext.
+//        String urlPrefix = apiContext;
+//
+//        if (endpointsSet.length < 1) {
+//            throw new APIManagementException("Error in creating JSON representation of the API"
+//                    + identifier.getApiName());
+//        }
+//        if (description == null || "".equals(description)) {
+//            description = "";
+//        } else {
+//            description = description.trim();
+//        }
+//
+//        Map<String, List<Operation>> uriTemplateDefinitions = new HashMap<String, List<Operation>>();
+//        List<APIResource> apis = new ArrayList<APIResource>();
+//        for (URITemplate template : uriTemplates) {
+//            List<Operation> ops;
+//            List<Parameter> parameters;
+//            String path = urlPrefix + APIUtil.removeAnySymbolFromUriTempate(template.getUriTemplate());
+//            /* path exists in uriTemplateDefinitions */
+//            if (uriTemplateDefinitions.get(path) != null) {
+//                ops = uriTemplateDefinitions.get(path);
+//                parameters = new ArrayList<Parameter>();
+//
+//                String httpVerb = template.getHTTPVerb();
+//                /* For GET and DELETE Parameter name - Query Parameters */
+//                if (Constants.Configuration.HTTP_METHOD_GET.equals(httpVerb)
+//                        || Constants.Configuration.HTTP_METHOD_DELETE.equals(httpVerb)) {
+//                    Parameter queryParam = new Parameter(APIConstants.OperationParameter.QUERY_PARAM_NAME,
+//                            APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION,
+//                            APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
+//                    parameters.add(queryParam);
+//                } else {/* For POST, PUT and PATCH Parameter name - Payload */
+//                    Parameter payLoadParam = new Parameter(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME,
+//                            APIConstants.OperationParameter.PAYLOAD_PARAM_DESCRIPTION,
+//                            APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
+//                    parameters.add(payLoadParam);
+//                }
+//
+//                Parameter authParam = new Parameter(APIConstants.OperationParameter.AUTH_PARAM_NAME,
+//                        APIConstants.OperationParameter.AUTH_PARAM_DESCRIPTION,
+//                        APIConstants.OperationParameter.AUTH_PARAM_TYPE, false, false, "String");
+//                parameters.add(authParam);
+//                if (!"OPTIONS".equals(httpVerb)) {
+//                    Operation op = new Operation(httpVerb, description, description, parameters);
+//                    ops.add(op);
+//                }
+//            } else {/* path not exists in uriTemplateDefinitions */
+//                ops = new ArrayList<Operation>();
+//                parameters = new ArrayList<Parameter>();
+//
+//                String httpVerb = template.getHTTPVerb();
+//                /* For GET and DELETE Parameter name - Query Parameters */
+//                if (Constants.Configuration.HTTP_METHOD_GET.equals(httpVerb)
+//                        || Constants.Configuration.HTTP_METHOD_DELETE.equals(httpVerb)) {
+//                    Parameter queryParam = new Parameter(APIConstants.OperationParameter.QUERY_PARAM_NAME,
+//                            APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION,
+//                            APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
+//                    parameters.add(queryParam);
+//                } else {/* For POST,PUT and PATCH Parameter name - Payload */
+//                    Parameter payLoadParam = new Parameter(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME,
+//                            APIConstants.OperationParameter.PAYLOAD_PARAM_DESCRIPTION,
+//                            APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
+//                    parameters.add(payLoadParam);
+//                }
+//                Parameter authParam = new Parameter(APIConstants.OperationParameter.AUTH_PARAM_NAME,
+//                        APIConstants.OperationParameter.AUTH_PARAM_DESCRIPTION,
+//                        APIConstants.OperationParameter.AUTH_PARAM_TYPE, false, false, "String");
+//                parameters.add(authParam);
+//                if (!"OPTIONS".equals(httpVerb)) {
+//                    Operation op = new Operation(httpVerb, description, description, parameters);
+//                    ops.add(op);
+//                }
+//                uriTemplateDefinitions.put(path, ops);
+//            }
+//        }
+//
+//        final Set<Entry<String, List<Operation>>> entries = uriTemplateDefinitions.entrySet();
+//
+//        for (Entry entry : entries) {
+//            APIResource apiResource = new APIResource((String) entry.getKey(), description,
+//                    (List<Operation>) entry.getValue());
+//            apis.add(apiResource);
+//        }
+//        APIDefinition apidefinition = new APIDefinition(version, APIConstants.SWAGGER_VERSION, endpointsSet[0],
+//                apiContext, apis);
+//
+//        Gson gson = new Gson();
+//        return gson.toJson(apidefinition);
+//    }
 
     /**
      * Helper method to get tenantId from userName
@@ -1771,19 +1776,20 @@ public final class APIUtil {
     @SuppressWarnings("unchecked")
     public static Map<String, String> getRESTAPIScopesForTenant(String tenantDomain) {
 
-        Map<String, String> restAPIScopes;
-        restAPIScopes = (Map) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                .getCache(APIConstants.REST_API_SCOPE_CACHE)
-                .get(tenantDomain);
+        //TODO: APK
+        Map<String, String> restAPIScopes = null;
+//        restAPIScopes = (Map) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+//                .getCache(APIConstants.REST_API_SCOPE_CACHE)
+//                .get(tenantDomain);
         if (restAPIScopes == null) {
             try {
                 restAPIScopes = APIUtil.getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain),
                         APIUtil.getTenantRESTAPIScopeRoleMappingsConfig(tenantDomain));
                 //call load tenant config for rest API.
                 //then put cache
-                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                        .getCache(APIConstants.REST_API_SCOPE_CACHE)
-                        .put(tenantDomain, restAPIScopes);
+//                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+//                        .getCache(APIConstants.REST_API_SCOPE_CACHE)
+//                        .put(tenantDomain, restAPIScopes);
             } catch (APIManagementException e) {
                 log.error("Error while getting REST API scopes for tenant: " + tenantDomain, e);
             }
