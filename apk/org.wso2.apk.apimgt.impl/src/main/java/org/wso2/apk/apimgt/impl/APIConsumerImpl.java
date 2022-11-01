@@ -965,172 +965,80 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         String applicationName = apiMgtDAO.getApplicationNameFromId(applicationId);
 
-        try {
-            SubscriptionWorkflowDTO workflowDTO;
-            WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(
-                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-            WorkflowExecutor removeSubscriptionWFExecutor = getWorkflowExecutor(
-                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
-            String workflowExtRef = apiMgtDAO
-                    .getExternalWorkflowReferenceForSubscription(identifier, applicationId, organization);
-
-            // in a normal flow workflowExtRef is null when workflows are not enabled
-            if (workflowExtRef == null) {
-                workflowDTO = new SubscriptionWorkflowDTO();
-            } else {
-                workflowDTO = (SubscriptionWorkflowDTO) apiMgtDAO.retrieveWorkflow(workflowExtRef);
-
-                // set tiername to the workflowDTO only when workflows are enabled
-                SubscribedAPI subscription = apiMgtDAO
-                        .getSubscriptionById(Integer.parseInt(workflowDTO.getWorkflowReference()));
-                workflowDTO.setTierName(subscription.getTier().getName());
-            }
-            workflowDTO.setApiProvider(identifier.getProviderName());
-            API api = null;
-            APIProduct product = null;
-            String context = null;
-            ApiTypeWrapper wrapper;
-            if (apiIdentifier != null) {
-                //The API is retrieved without visibility permission check, since the subscribers should be allowed
-                //to delete already existing subscriptions made for restricted APIs
-                wrapper = getAPIorAPIProductByUUIDWithoutPermissionCheck(apiIdentifier.getUUID(), organization);
-                api = wrapper.getApi();
-                context = api.getContext();
-            } else if (apiProdIdentifier != null) {
-                //The API Product is retrieved without visibility permission check, since the subscribers should be
-                // allowe to delete already existing subscriptions made for restricted API Products
-                wrapper = getAPIorAPIProductByUUIDWithoutPermissionCheck(apiProdIdentifier.getUUID(), organization);
-                product = wrapper.getApiProduct();
-                context = product.getContext();
-            }
-            workflowDTO.setApiContext(context);
-            workflowDTO.setApiName(identifier.getName());
-            workflowDTO.setApiVersion(identifier.getVersion());
-            workflowDTO.setApplicationName(applicationName);
-            workflowDTO.setTenantDomain(tenantDomain);
-            workflowDTO.setTenantId(tenantId);
-            workflowDTO.setExternalWorkflowReference(workflowExtRef);
-            workflowDTO.setSubscriber(userId);
-            workflowDTO.setCallbackUrl(removeSubscriptionWFExecutor.getCallbackURL());
-            workflowDTO.setApplicationId(applicationId);
-            workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.API_ID, String.valueOf(identifier.getId()));
-
-            String status = null;
-            if (apiIdentifier != null) {
-                status = apiMgtDAO.getSubscriptionStatus(apiIdentifier.getUUID(), applicationId);
-            } else if (apiProdIdentifier != null) {
-                status = apiMgtDAO.getSubscriptionStatus(apiProdIdentifier.getUUID(), applicationId);
-            }
-
-            String subId = null;
-            if (APIConstants.SubscriptionStatus.ON_HOLD.equals(status)) {
-                try {
-                    createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
-                } catch (WorkflowException ex) {
-
-                    // failed cleanup processes are ignored to prevent failing the deletion process
-                    log.warn("Failed to clean pending subscription approval task");
-                }
-            } else if (APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING.equals(status)) {
-                try {
-                    if (apiIdentifier != null) {
-                        subId = apiMgtDAO.getSubscriptionId(apiIdentifier.getUUID(), applicationId);
-                    } else if (apiProdIdentifier != null) {
-                        subId = apiMgtDAO.getSubscriptionId(apiProdIdentifier.getUUID(), applicationId);
-                    }
-                    if (subId != null) {
-                        WorkflowDTO wf = apiMgtDAO.retrieveWorkflowFromInternalReference(subId,
-                                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
-                        WorkflowExecutor updateSubscriptionWFExecutor = getWorkflowExecutor(
-                                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
-                        updateSubscriptionWFExecutor.cleanUpPendingTask(wf.getExternalWorkflowReference());
-                    }
-
-                } catch (WorkflowException ex) {
-                    // failed cleanup processes are ignored to prevent failing the deletion process
-                    log.warn("Failed to clean pending subscription update approval task");
-                }
-            } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(status)){
-                try {
-                    if (apiIdentifier != null) {
-                        subId = apiMgtDAO.getSubscriptionId(apiIdentifier.getUUID(), applicationId);
-                    } else if (apiProdIdentifier != null) {
-                        subId = apiMgtDAO.getSubscriptionId(apiProdIdentifier.getUUID(), applicationId);
-                    }
-
-                } catch (APIManagementException ex) {
-                    // failed cleanup processes are ignored to prevent failing the deletion process
-                    log.warn("Failed to retrive subscription id");
-                }
-            }
-            if (subId != null) {
-                apiMgtDAO.updateSubscriptionStatus(Integer.parseInt(subId), APIConstants.SubscriptionStatus.DELETE_PENDING);
-                workflowDTO.setWorkflowReference(subId);
-            }
-
-            // update attributes of the new remove workflow to be created
-            workflowDTO.setStatus(WorkflowStatus.CREATED);
-            workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
-            workflowDTO.setCreatedTime(System.currentTimeMillis());
-            workflowDTO.setExternalWorkflowReference(removeSubscriptionWFExecutor.generateUUID());
-
-            Tier tier = null;
-            if (api != null) {
-                Set<Tier> policies = api.getAvailableTiers();
-                Iterator<Tier> iterator = policies.iterator();
-                boolean isPolicyAllowed = false;
-                while (iterator.hasNext()) {
-                    Tier policy = iterator.next();
-                    if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
-                        tier = policy;
-                    }
-                }
-            } else if (product != null) {
-                Set<Tier> policies = product.getAvailableTiers();
-                Iterator<Tier> iterator = policies.iterator();
-                boolean isPolicyAllowed = false;
-                while (iterator.hasNext()) {
-                    Tier policy = iterator.next();
-                    if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
-                        tier = policy;
-                    }
-                }
-            }
-            if (api != null) {
-                //check whether monetization is enabled for API and tier plan is commercial
-                if (api.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                    removeSubscriptionWFExecutor.deleteMonetizedSubscription(workflowDTO, api);
-                } else {
-                    removeSubscriptionWFExecutor.execute(workflowDTO);
-                }
-            } else if (product != null) {
-                //check whether monetization is enabled for API product and tier plan is commercial
-                if (product.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                    removeSubscriptionWFExecutor.deleteMonetizedSubscription(workflowDTO, product);
-                } else {
-                    removeSubscriptionWFExecutor.execute(workflowDTO);
-                }
-            }
-            JSONObject subsLogObject = new JSONObject();
-            subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
-            subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
-            subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
-            subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
-
-            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
-                    APIConstants.AuditLogConstants.DELETED, this.username);
-
-        } catch (WorkflowException e) {
-            String errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION
-                    + " for resource " + identifier.toString();
-            handleException(errorMsg, e);
+        API api = null;
+        APIProduct product = null;
+        ApiTypeWrapper wrapper;
+        if (apiIdentifier != null) {
+            //The API is retrieved without visibility permission check, since the subscribers should be allowed
+            //to delete already existing subscriptions made for restricted APIs
+            wrapper = getAPIorAPIProductByUUIDWithoutPermissionCheck(apiIdentifier.getUUID(), organization);
+            api = wrapper.getApi();
+        } else if (apiProdIdentifier != null) {
+            //The API Product is retrieved without visibility permission check, since the subscribers should be
+            // allowed to delete already existing subscriptions made for restricted API Products
+            wrapper = getAPIorAPIProductByUUIDWithoutPermissionCheck(apiProdIdentifier.getUUID(), organization);
+            product = wrapper.getApiProduct();
         }
+
+        Tier tier = null;
+        if (api != null) {
+            Set<Tier> policies = api.getAvailableTiers();
+            Iterator<Tier> iterator = policies.iterator();
+            boolean isPolicyAllowed = false;
+            while (iterator.hasNext()) {
+                Tier policy = iterator.next();
+                if (policy.getName() != null && (policy.getName()).equals(identifier.getTier())) {
+                    tier = policy;
+                }
+            }
+        } else if (product != null) {
+            Set<Tier> policies = product.getAvailableTiers();
+            Iterator<Tier> iterator = policies.iterator();
+            boolean isPolicyAllowed = false;
+            while (iterator.hasNext()) {
+                Tier policy = iterator.next();
+                if (policy.getName() != null && (policy.getName()).equals(identifier.getTier())) {
+                    tier = policy;
+                }
+            }
+        }
+        if (api != null) {
+            //check whether monetization is enabled for API and tier plan is commercial
+            if (api.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
+                deleteMonetizedSubscription(identifier, applicationId);
+            } else {
+                deleteSubscriptionEntry(identifier, applicationId);
+            }
+        } else if (product != null) {
+            //check whether monetization is enabled for API product and tier plan is commercial
+            if (product.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
+                deleteMonetizedSubscription(identifier, applicationId);
+            } else {
+                deleteSubscriptionEntry(identifier, applicationId);
+            }
+        }
+        JSONObject subsLogObject = new JSONObject();
+        subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
+        subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
+        subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
+        subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
+                APIConstants.AuditLogConstants.DELETED, this.username);
 
         if (log.isDebugEnabled()) {
             String logMessage = "Subscription removed from app " + applicationName + " by " + userId + " For Id: "
                     + identifier.toString();
             log.debug(logMessage);
         }
+    }
+
+    private void deleteMonetizedSubscription(Identifier identifier, int applicationId) throws APIManagementException {
+        deleteSubscriptionEntry(identifier, applicationId);
+    }
+
+    private void deleteSubscriptionEntry(Identifier identifier, int applicationId) throws APIManagementException {
+        apiMgtDAO.removeSubscription(identifier, applicationId);
     }
 
     @Override
@@ -1156,58 +1064,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public void removeSubscription(SubscribedAPI subscription, String organization) throws APIManagementException {
         if (subscription != null) {
             String uuid = subscription.getUUID();
-            String deleteWorkflowExtRef = apiMgtDAO
-                    .getExternalWorkflowReferenceForSubscriptionAndWFType(subscription.getSubscriptionId(),
-                            WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
-            if (deleteWorkflowExtRef != null) {
-                WorkflowDTO deleteWorkflow = apiMgtDAO.retrieveWorkflow(deleteWorkflowExtRef);
-                if (deleteWorkflow != null && WorkflowStatus.CREATED.equals(deleteWorkflow.getStatus())) {
-                    subscription.setSubscriptionId(-1);
-                    subscription.setSubStatus(APIConstants.SubscriptionStatus.DELETE_PENDING);
-                    return;
-                }
-            }
             Application application = subscription.getApplication();
             Identifier identifier = subscription.getAPIIdentifier() != null ? subscription.getAPIIdentifier()
                     : subscription.getProductId();
             String userId = application.getSubscriber().getName();
             removeSubscription(identifier, userId, application.getId(), organization);
-            SubscribedAPI subscriptionAfterDeletion = apiMgtDAO.getSubscriptionById(subscription.getSubscriptionId());
-            if (subscriptionAfterDeletion != null
-                    && APIConstants.SubscriptionStatus.DELETE_PENDING.equals(subscriptionAfterDeletion.getSubStatus())) {
-                subscription.setSubStatus(APIConstants.SubscriptionStatus.DELETE_PENDING);
-            }
-            else if (log.isDebugEnabled()) {
+            if (log.isDebugEnabled()) {
                 String appName = application.getName();
                 String logMessage = "Identifier:  " + identifier.toString() + " subscription (uuid : " + uuid
                         + ") removed from app " + appName;
                 log.debug(logMessage);
-            }
-
-            // get the workflow state once the executor is executed.
-            WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(application.getId()),
-                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
-            int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            // only send the notification if approved
-            // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
-            if (wfDTO != null) {
-                if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
-                    SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                            System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId,
-                            organization, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
-                            identifier.getUUID(), application.getId(), application.getUUID(), identifier.getTier(),
-                            subscription.getSubStatus());
-                    APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-                }
-            } else {
-                SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                        System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId,
-                        organization, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
-                        identifier.getUUID(), application.getId(), application.getUUID(), identifier.getTier(),
-                        subscription.getSubStatus());
-                APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
         } else {
             throw new APIManagementException("Subscription does not exists.");
@@ -3233,7 +3099,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
         try {
             Organization org = new Organization(organization);
-            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
+            DevPortalAPI devPortalApi = apiDAOImpl.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
                 if (APIConstants.API_PRODUCT.equalsIgnoreCase(devPortalApi.getType())) {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
