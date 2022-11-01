@@ -43,7 +43,6 @@ import org.wso2.apk.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.store.v1.common.models.ExportedSubscribedAPI;
 import org.wso2.apk.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
-import org.wso2.apk.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -162,8 +161,8 @@ public class ImportUtils {
         List<APIIdentifier> skippedAPIList = new ArrayList<>();
         for (ExportedSubscribedAPI subscribedAPI : subscribedAPIs) {
             APIIdentifier apiIdentifier = subscribedAPI.getApiId();
-            String tenantDomain = MultitenantUtils.getTenantDomain(
-                    APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+            String tenantDomain = APIUtil.getTenantDomain(APIUtil.replaceEmailDomainBack(apiIdentifier
+                    .getProviderName()));
             if (!StringUtils.isEmpty(tenantDomain)) {
                 String uuidFromIdentifier = ApiMgtDAO.getInstance().getUUIDFromIdentifier(apiIdentifier, tenantDomain);
                 if (StringUtils.isNotEmpty(uuidFromIdentifier)) {

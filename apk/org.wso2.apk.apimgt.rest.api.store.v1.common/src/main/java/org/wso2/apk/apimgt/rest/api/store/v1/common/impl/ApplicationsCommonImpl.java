@@ -238,40 +238,146 @@ public class ApplicationsCommonImpl {
     }
 
     /**
-     * @param applicationId
-     * @param ownerId
-     * @param applicationDTO
-     * @param skipApplicationKeys
-     * @param update
-     * @param organization
-     * @return
-     * @throws APIManagementException
+     * Import an Application which has been exported to a zip file
+     *
+     * @param fileInputStream     Content stream of the zip file which contains exported Application
+     * @param preserveOwner       If true, preserve the original owner of the application
+     * @param skipSubscriptions   If true, skip subscriptions of the application
+     * @param appOwner            Target owner of the application
+     * @param skipApplicationKeys Skip application keys while importing
+     * @param update              Update if existing application found or import
+     * @param organization        Organization of the application
+     * @return imported Application
      */
-    public static ApplicationInfoDTO applicationImport(int applicationId, String ownerId, ApplicationDTO applicationDTO,
-            Boolean skipApplicationKeys, Boolean update) throws APIManagementException {
+    public ApplicationInfoDTO importApplication(InputStream fileInputStream, Boolean preserveOwner,
+                                                Boolean skipSubscriptions, String appOwner, Boolean skipApplicationKeys,
+                                                Boolean update, String organization) throws APIManagementException {
+        String ownerId;
+        Application application;
 
-        String username = RestApiCommonUtil.getLoggedInUsername();
-        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-        Application importedApplication = apiConsumer.getApplicationById(applicationId);
-        importedApplication.setOwner(ownerId);
+        try {
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+            String extractedFolderPath = CommonUtil.getArchivePathOfExtractedDirectory(fileInputStream,
+                    ImportExportConstants.UPLOAD_APPLICATION_FILE_NAME);
+            String jsonContent = ImportUtils.getApplicationDefinitionAsJson(extractedFolderPath);
 
-        // check whether keys need to be skipped while import
-        if (skipApplicationKeys == null || !skipApplicationKeys) {
-            // if this is an update, old keys will be removed and the OAuth app will be overridden with new values
-            if (update && applicationDTO.getKeys().size() > 0 && !importedApplication.getKeys().isEmpty()) {
-                importedApplication.getKeys().clear();
+            // Retrieving the field "data" in api.yaml/json and convert it to a JSON object for further processing
+            JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
+            ExportedApplication exportedApplication = new Gson().fromJson(configElement, ExportedApplication.class);
+
+            // Retrieve the application DTO object from the aggregated exported application
+            ApplicationDTO applicationDTO = exportedApplication.getApplicationInfo();
+
+            if (!StringUtils.isBlank(appOwner)) {
+                ownerId = appOwner;
+            } else if (preserveOwner != null && preserveOwner) {
+                ownerId = applicationDTO.getOwner();
+            } else {
+                ownerId = username;
+            }
+            if (!APIUtil.getTenantDomain(ownerId).equals(APIUtil.getTenantDomain(username))) {
+                throw new APIManagementException("Cross Tenant Imports are not allowed",
+                        ExceptionCodes.TENANT_MISMATCH);
             }
 
-            // Add application keys if present and keys does not exist in the current application
-            if (applicationDTO.getKeys().size() > 0 && importedApplication.getKeys().isEmpty()) {
-                for (ApplicationKeyDTO applicationKeyDTO : applicationDTO.getKeys()) {
-                    ImportUtils.addApplicationKey(ownerId, importedApplication, applicationKeyDTO, apiConsumer, update);
+            String applicationGroupId = String.join(",", applicationDTO.getGroups());
+
+            if (applicationDTO.getGroups() != null && applicationDTO.getGroups().size() > 0) {
+                ImportUtils.validateOwner(username, applicationGroupId, apiConsumer);
+            }
+
+            if (APIUtil.isApplicationExist(ownerId, applicationDTO.getName(), applicationGroupId, organization)
+                    && update != null && update) {
+                int appId = APIUtil.getApplicationId(applicationDTO.getName(), ownerId);
+                Application oldApplication = apiConsumer.getApplicationById(appId);
+                application = preProcessAndUpdateApplication(ownerId, applicationDTO, oldApplication,
+                        oldApplication.getUUID());
+            } else {
+                application = preProcessAndAddApplication(ownerId, applicationDTO, organization);
+                update = Boolean.FALSE;
+            }
+
+            List<APIIdentifier> skippedAPIs = new ArrayList<>();
+            if (skipSubscriptions == null || !skipSubscriptions) {
+                skippedAPIs = ImportUtils.importSubscriptions(exportedApplication.getSubscribedAPIs(), ownerId,
+                        application, update, apiConsumer, organization);
+            }
+            Application importedApplication = apiConsumer.getApplicationById(application.getId());
+            importedApplication.setOwner(ownerId);
+            ApplicationInfoDTO importedApplicationDTO = ApplicationMappingUtil
+                    .fromApplicationToInfoDTO(importedApplication);
+
+            // check whether keys need to be skipped while import
+            if (skipApplicationKeys == null || !skipApplicationKeys) {
+                // if this is an update, old keys will be removed and the OAuth app will be overridden with new values
+                if (update) {
+                    if (applicationDTO.getKeys().size() > 0 && importedApplication.getKeys().size() > 0) {
+                        importedApplication.getKeys().clear();
+                    }
+                }
+                // Add application keys if present and keys does not exist in the current application
+                if (applicationDTO.getKeys().size() > 0 && importedApplication.getKeys().size() == 0) {
+                    for (ApplicationKeyDTO applicationKeyDTO : applicationDTO.getKeys()) {
+                        ImportUtils.addApplicationKey(ownerId, importedApplication, applicationKeyDTO, apiConsumer,
+                                update);
+                    }
                 }
             }
-        }
+            //TODO: handle skipped API scenario
+//            if (skippedAPIs.isEmpty()) {
+//                return importedApplicationDTO;
+//            } else {
+//
+//                APIInfoListDTO skippedAPIListDTO = APIInfoMappingUtil.fromAPIInfoListToDTO(skippedAPIs);
+//                return Response.created(location).status(207).entity(skippedAPIListDTO).build();
+//            }
+            return importedApplicationDTO;
 
-        return ApplicationMappingUtil.fromApplicationToInfoDTO(importedApplication);
+        } catch (APIImportExportException e) {
+            throw new APIManagementException("Error while importing Application", e);
+        } catch (UnsupportedEncodingException e) {
+            throw new APIManagementException("Error while Decoding apiId", e);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading the application definition", e);
+        }
     }
+
+//    /**
+//     * @param applicationId
+//     * @param ownerId
+//     * @param applicationDTO
+//     * @param skipApplicationKeys
+//     * @param update
+//     * @param organization
+//     * @return
+//     * @throws APIManagementException
+//     */
+//    public static ApplicationInfoDTO applicationImport(int applicationId, String ownerId, ApplicationDTO applicationDTO,
+//            Boolean skipApplicationKeys, Boolean update) throws APIManagementException {
+//
+//        String username = RestApiCommonUtil.getLoggedInUsername();
+//        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+//        Application importedApplication = apiConsumer.getApplicationById(applicationId);
+//        importedApplication.setOwner(ownerId);
+//
+//        // check whether keys need to be skipped while import
+//        if (skipApplicationKeys == null || !skipApplicationKeys) {
+//            // if this is an update, old keys will be removed and the OAuth app will be overridden with new values
+//            if (update && applicationDTO.getKeys().size() > 0 && !importedApplication.getKeys().isEmpty()) {
+//                importedApplication.getKeys().clear();
+//            }
+//
+//            // Add application keys if present and keys does not exist in the current application
+//            if (applicationDTO.getKeys().size() > 0 && importedApplication.getKeys().isEmpty()) {
+//                for (ApplicationKeyDTO applicationKeyDTO : applicationDTO.getKeys()) {
+//                    ImportUtils.addApplicationKey(ownerId, importedApplication, applicationKeyDTO, apiConsumer, update);
+//                }
+//            }
+//        }
+//
+//        return ApplicationMappingUtil.fromApplicationToInfoDTO(importedApplication);
+//    }
 
     /**
      * Creates a new application

@@ -1547,7 +1547,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (existingApp != null && APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(existingApp.getStatus())) {
             throw new APIManagementException("Cannot update the application while it is INACTIVE");
         }
-        boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(getAPIManagerConfiguration().
+        boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
 
         boolean isUserAppOwner;
@@ -1678,21 +1679,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
                 APIConstants.AuditLogConstants.UPDATED, this.username);
 
-
-
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
             RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application, username, requestedTenant);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
-
-        ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
-                existingApp.getOrganization(), application.getId(), application.getUUID(), application.getName(),
-                application.getTokenType(), application.getTier(), application.getGroupId(),
-                application.getApplicationAttributes(), existingApp.getSubscriber().getName());
-        APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
     }
 
     /**
