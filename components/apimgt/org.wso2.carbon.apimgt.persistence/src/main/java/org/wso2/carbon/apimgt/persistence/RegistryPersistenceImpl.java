@@ -884,10 +884,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantAdminUsername);
 
             if (searchQuery != null && searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
-                if (searchQuery.split(":").length > 1) {
-                    result = searchPaginatedPublisherAPIsByDoc(sysRegistry, tenantIDLocal, searchQuery.split(":")[1],
-                            tenantAdminUsername, start, offset);
-                }
+                result = searchPaginatedPublisherAPIsByDoc(sysRegistry, tenantIDLocal, searchQuery.split(":")[1],
+                        tenantAdminUsername, start, offset);
             } else {
                 result = searchPaginatedPublisherAPIs(sysRegistry, tenantIDLocal, modifiedQuery, start, offset);
             }
