@@ -13,6 +13,8 @@ import org.wso2.apk.apimgt.impl.dao.impl.PolicyDAOImpl;
 
 public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     private static final Logger log = LoggerFactory.getLogger(PolicyDAOImplIT.class);
+    private static final String ORGANIZATION = "test.com";
+    private static final String USERNAME = "developer@test.com"
 
     /*---------------------------------------------------------------------
     |  Author:  Sachini De Silva
@@ -41,14 +43,14 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
 
         //get added policy
         ApplicationPolicy addedPolicy = policyDAO
-                .getApplicationPolicy(policy.getPolicyName(), "carbon.super");
+                .getApplicationPolicy(policy.getPolicyName(), ORGANIZATION);
         Assert.assertNotNull(addedPolicy);
         Assert.assertEquals(addedPolicy.getPolicyName(), policy.getPolicyName());
 
-        ApplicationPolicy[] applicationPolicies = policyDAO.getApplicationPolicies("carbon.super");
+        ApplicationPolicy[] applicationPolicies = policyDAO.getApplicationPolicies(ORGANIZATION);
         Assert.assertEquals(applicationPolicies.length, 1);
 
-        String[] policyNames = policyDAO.getPolicyNames(PolicyConstants.POLICY_LEVEL_APP, "admin@carbon.super");
+        String[] policyNames = policyDAO.getPolicyNames(PolicyConstants.POLICY_LEVEL_APP, USERNAME);
         Assert.assertEquals(policyNames.length, 1);
         Assert.assertEquals(policyNames[0], policy.getPolicyName());
 
@@ -57,10 +59,10 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(addedPolicyByUUID.getPolicyName(), policy.getPolicyName());
 
         //delete policy
-        policyDAO.removeThrottlePolicy(PolicyConstants.POLICY_LEVEL_APP, policy.getPolicyName(), "carbon.super");
+        policyDAO.removeThrottlePolicy(PolicyConstants.POLICY_LEVEL_APP, policy.getPolicyName(), ORGANIZATION);
 
         //get policy after deletion
-        ApplicationPolicy deletedPolicy = policyDAO.getApplicationPolicy(policy.getPolicyName(), "carbon.super");
+        ApplicationPolicy deletedPolicy = policyDAO.getApplicationPolicy(policy.getPolicyName(), ORGANIZATION);
         Assert.assertNull(deletedPolicy);
     }
 
@@ -83,12 +85,12 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
 
         ApplicationPolicy policyToUpdate = TestObjectCreator.createUpdatedApplicationPolicy();
         policyDAO.updateApplicationPolicy(policyToUpdate);
-        ApplicationPolicy updatedPolicy = policyDAO.getApplicationPolicy(policy.getPolicyName(), "carbon.super");
+        ApplicationPolicy updatedPolicy = policyDAO.getApplicationPolicy(policy.getPolicyName(), ORGANIZATION);
         Assert.assertEquals(((RequestCountLimit)(updatedPolicy.getDefaultQuotaPolicy().getLimit())).getRequestCount(), 200);
         Assert.assertEquals(updatedPolicy.getDescription(), "Updated Custom Application Policy");
 
         //delete policy
-        policyDAO.removeThrottlePolicy(PolicyConstants.POLICY_LEVEL_APP, policy.getPolicyName(), "carbon.super");
+        policyDAO.removeThrottlePolicy(PolicyConstants.POLICY_LEVEL_APP, policy.getPolicyName(), ORGANIZATION);
     }
 
     /*---------------------------------------------------------------------
@@ -118,14 +120,14 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
 
         //get added policy
         SubscriptionPolicy addedPolicy = policyDAO
-                .getSubscriptionPolicy(policy.getPolicyName(), "carbon.super");
+                .getSubscriptionPolicy(policy.getPolicyName(), ORGANIZATION);
         Assert.assertNotNull(addedPolicy);
         Assert.assertEquals(addedPolicy.getPolicyName(), policy.getPolicyName());
 
-        SubscriptionPolicy[] subscriptionPolicies = policyDAO.getSubscriptionPolicies("carbon.super");
+        SubscriptionPolicy[] subscriptionPolicies = policyDAO.getSubscriptionPolicies(ORGANIZATION);
         Assert.assertEquals(subscriptionPolicies.length, 1);
 
-        String[] policyNames = policyDAO.getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, "admin@carbon.super");
+        String[] policyNames = policyDAO.getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, USERNAME);
         Assert.assertEquals(policyNames.length, 1);
         Assert.assertEquals(policyNames[0], policy.getPolicyName());
 
@@ -134,10 +136,10 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(addedPolicyByUUID.getPolicyName(), policy.getPolicyName());
 
         //delete policy
-        policyDAO.removeThrottlePolicy(PolicyConstants.POLICY_LEVEL_SUB, policy.getPolicyName(), "carbon.super");
+        policyDAO.removeThrottlePolicy(PolicyConstants.POLICY_LEVEL_SUB, policy.getPolicyName(), ORGANIZATION);
 
         //get policy after deletion
-        SubscriptionPolicy deletedPolicy = policyDAO.getSubscriptionPolicy(policy.getPolicyName(), "carbon.super");
+        SubscriptionPolicy deletedPolicy = policyDAO.getSubscriptionPolicy(policy.getPolicyName(), ORGANIZATION);
         Assert.assertNull(deletedPolicy);
     }
 
@@ -160,7 +162,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
 
         SubscriptionPolicy policyToUpdate = TestObjectCreator.createUpdatedSubscriptionPolicy();
         policyDAO.updateSubscriptionPolicy(policyToUpdate);
-        SubscriptionPolicy updatedPolicy = policyDAO.getSubscriptionPolicy(policy.getPolicyName(), "carbon.super");
+        SubscriptionPolicy updatedPolicy = policyDAO.getSubscriptionPolicy(policy.getPolicyName(), ORGANIZATION);
         Assert.assertEquals(((RequestCountLimit)(updatedPolicy.getDefaultQuotaPolicy().getLimit())).getRequestCount(), 200);
         Assert.assertEquals(updatedPolicy.getDescription(), "Updated Custom Subscription Policy");
     }
@@ -192,14 +194,14 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
 
         //get added policy
         APIPolicy addedPolicy = policyDAO
-                .getAPIPolicy(policy.getPolicyName(), "carbon.super");
+                .getAPIPolicy(policy.getPolicyName(), ORGANIZATION);
         Assert.assertNotNull(addedPolicy);
         Assert.assertEquals(addedPolicy.getPolicyName(), policy.getPolicyName());
 
-        APIPolicy[] apiPolicies = policyDAO.getAPIPolicies("carbon.super");
+        APIPolicy[] apiPolicies = policyDAO.getAPIPolicies(ORGANIZATION);
         Assert.assertEquals(apiPolicies.length, 1);
 
-        String[] policyNames = policyDAO.getPolicyNames(PolicyConstants.POLICY_LEVEL_API, "admin@carbon.super");
+        String[] policyNames = policyDAO.getPolicyNames(PolicyConstants.POLICY_LEVEL_API, USERNAME);
         Assert.assertEquals(policyNames.length, 1);
         Assert.assertEquals(policyNames[0], policy.getPolicyName());
 
@@ -208,10 +210,10 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(addedPolicyByUUID.getPolicyName(), policy.getPolicyName());
 
         //delete policy
-        policyDAO.removeThrottlePolicy(PolicyConstants.POLICY_LEVEL_API, policy.getPolicyName(), "carbon.super");
+        policyDAO.removeThrottlePolicy(PolicyConstants.POLICY_LEVEL_API, policy.getPolicyName(), ORGANIZATION);
 
         //get policy after deletion
-        APIPolicy deletedPolicy = policyDAO.getAPIPolicy(policy.getPolicyName(), "carbon.super");
+        APIPolicy deletedPolicy = policyDAO.getAPIPolicy(policy.getPolicyName(), ORGANIZATION);
         Assert.assertNull(deletedPolicy);
     }
 
@@ -234,7 +236,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
 
         APIPolicy policyToUpdate = TestObjectCreator.createUpdatedAPIPolicy();
         policyDAO.updateAPIPolicy(policyToUpdate);
-        APIPolicy updatedPolicy = policyDAO.getAPIPolicy(policy.getPolicyName(), "carbon.super");
+        APIPolicy updatedPolicy = policyDAO.getAPIPolicy(policy.getPolicyName(), ORGANIZATION);
         Assert.assertEquals(((RequestCountLimit)(updatedPolicy.getDefaultQuotaPolicy().getLimit())).getRequestCount(), 200);
         Assert.assertEquals(updatedPolicy.getDescription(), "Updated Custom API Policy");
     }
