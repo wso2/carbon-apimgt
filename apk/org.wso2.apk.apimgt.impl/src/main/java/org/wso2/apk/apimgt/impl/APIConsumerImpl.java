@@ -2750,7 +2750,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
 
-        RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
+//        RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
         Properties properties = new Properties();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         String eventID = UUID.randomUUID().toString();
@@ -2758,10 +2758,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         properties.put(APIConstants.NotificationEvent.TOKEN_TYPE, APIConstants.API_KEY_AUTH_TYPE);
         properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
-        ApiMgtDAO.getInstance().addRevokedJWTSignature(eventID,
-                apiKey, APIConstants.API_KEY_AUTH_TYPE,
-                expiryTime, tenantId);
-        revocationRequestPublisher.publishRevocationEvents(apiKey, expiryTime, properties);
+        apiMgtDAO.addRevokedJWTSignature(eventID, apiKey, APIConstants.API_KEY_AUTH_TYPE, expiryTime,
+                tenantId);
+        //TODO: publish revoke jwt events
+//        revocationRequestPublisher.publishRevocationEvents(apiKey, expiryTime, properties);
     }
 
     /**

@@ -73,6 +73,7 @@ import org.apache.xerces.util.SecurityManager;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
+import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -166,8 +167,10 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -4200,5 +4203,134 @@ public final class APIUtil {
             return APIConstants.DEFAULT_API_KEY_GENERATOR_IMPL;
         }
         return keyGeneratorClassName;
+    }
+
+    /**
+     * Checks whether the given token is a valid JWT by parsing header and validating the
+     * header,payload,signature format
+     *
+     * @param token the token to be validated
+     * @return true if valid JWT
+     */
+    public static boolean isValidJWT(String token) {
+
+        boolean isJwtToken = false;
+        try {
+            // Check if the decoded header contains type as 'JWT'.
+            if (StringUtils.countMatches(token, APIConstants.DOT) == 2) {
+                isJwtToken = true;
+            } else {
+                log.debug("Not a valid JWT token. " + getMaskedToken(token));
+            }
+        } catch (JSONException | IllegalArgumentException e) {
+            isJwtToken = false;
+            log.debug("Not a valid JWT token. " + getMaskedToken(token), e);
+        }
+        return isJwtToken;
+    }
+
+    /**
+     * Retrieve the signature algorithm specified in the token header.
+     *
+     * @param splitToken The JWT token which is split into [header, payload, signature]
+     * @return whether the signature algorithm
+     * @throws APIManagementException in case of signature algorithm extraction failure
+     */
+    public static String getSignatureAlgorithm(String[] splitToken) throws APIManagementException {
+
+        String signatureAlgorithm;
+        org.json.JSONObject decodedHeader;
+        try {
+            decodedHeader = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().decode(splitToken[0])));
+            signatureAlgorithm = decodedHeader.getString(APIConstants.JwtTokenConstants.SIGNATURE_ALGORITHM);
+            if (APIConstants.SIGNATURE_ALGORITHM_RS256.equals(signatureAlgorithm)) {
+                signatureAlgorithm = APIConstants.SIGNATURE_ALGORITHM_SHA256_WITH_RSA;
+            }
+            return signatureAlgorithm;
+        } catch (JSONException | IllegalArgumentException e) {
+            String msg = "Unable to find signature algorithm in the token";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Retrieve the signature algorithm specified in the token header.
+     *
+     * @param splitToken The JWT token which is split into [header, payload, signature]
+     * @return whether the signature algorithm
+     * @throws APIManagementException in case of signature algorithm extraction failure
+     */
+    public static String getSigningAlias(String[] splitToken) throws APIManagementException {
+
+        String signCertAlias;
+        org.json.JSONObject decodedHeader;
+        try {
+            decodedHeader = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().decode(splitToken[0])));
+            signCertAlias = decodedHeader.getString(APIConstants.JwtTokenConstants.JWT_KID);
+            return signCertAlias;
+        } catch (JSONException | IllegalArgumentException e) {
+            String msg = "Unable to signing certificate alias in the token";
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    public static Certificate getCertificateFromParentTrustStore(String certAlias) throws APIManagementException {
+
+        Certificate publicCert = null;
+        //Read the client-truststore.jks into a KeyStore
+        try {
+            KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
+            if (trustStore != null) {
+                // Read public certificate from trust store
+                publicCert = trustStore.getCertificate(certAlias);
+            }
+        } catch (KeyStoreException e) {
+            String msg = "Error in retrieving public certificate from the trust store with alias : " + certAlias;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return publicCert;
+    }
+
+    /**
+     * Verify the JWT token signature.
+     * This method only used for API Key revocation which contains some duplicate logic in GatewayUtils class.
+     *
+     * @param splitToken The JWT token which is split into [header, payload, signature]
+     * @return whether the signature is verified or not
+     */
+    public static boolean verifyTokenSignature(String[] splitToken, Certificate certificate,
+                                               String signatureAlgorithm) throws APIManagementException {
+        // Retrieve public key from the certificate
+        PublicKey publicKey = certificate.getPublicKey();
+        try {
+            // Verify token signature
+            Signature signatureInstance = Signature.getInstance(signatureAlgorithm);
+            signatureInstance.initVerify(publicKey);
+            String assertion = splitToken[0] + "." + splitToken[1];
+            signatureInstance.update(assertion.getBytes());
+            byte[] decodedSignature = java.util.Base64.getUrlDecoder().decode(splitToken[2]);
+            return signatureInstance.verify(decodedSignature);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | IllegalArgumentException e) {
+            String msg = "Error while verifying JWT signature with signature algorithm " + signatureAlgorithm;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Get expiry time of a given jwt token. This method should be called only after validating whether the token is
+     * JWT via isValidJWT method.
+     *
+     * @param token jwt token.
+     * @return the expiry time.
+     */
+    public static Long getExpiryOfJWT(String token) {
+
+        String[] jwtParts = token.split("\\.");
+        org.json.JSONObject jwtPayload = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().
+                decode(jwtParts[1])));
+        return jwtPayload.getLong("exp"); // extract expiry time and return
     }
 }
