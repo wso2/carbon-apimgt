@@ -487,11 +487,11 @@ public class ApplicationsCommonImpl {
     }
 
     /**
-     * @param applicationId
-     * @param keyType
-     * @param body
-     * @return
-     * @throws APIManagementException
+     * @param applicationId Application ID
+     * @param keyType key type
+     * @param body API key generation request body
+     * @return API key DTO
+     * @throws APIManagementException API Manager exception
      */
     public static APIKeyDTO generateAPIKey(String applicationId, String keyType, APIKeyGenerateRequestDTO body)
             throws APIManagementException {
@@ -504,8 +504,7 @@ public class ApplicationsCommonImpl {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
             if ((application = apiConsumer.getApplicationByUUID(applicationId)) == null) {
                 throw new APIManagementException("Request application is " + (applicationId != null ?
-                        "with id " + applicationId :
-                        " " + "not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
+                        "with id " + applicationId : " not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
             } else {
                 if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                     throw new APIManagementException(
@@ -1062,11 +1061,11 @@ public class ApplicationsCommonImpl {
 
     /***
      *
-     * @param applicationId
-     * @param keyMappingId
-     * @param body
-     * @return
-     * @throws APIManagementException
+     * @param applicationId application ID
+     * @param keyMappingId key mapping ID
+     * @param body request body of the token generation request
+     * @return Application token DTO
+     * @throws APIManagementException API Manager Exception
      */
     public static ApplicationTokenDTO generateTokenByOauthKeysKeyMappingId(String applicationId, String keyMappingId,
             ApplicationTokenGenerateRequestDTO body) throws APIManagementException {
@@ -1342,10 +1341,6 @@ public class ApplicationsCommonImpl {
         } else {
             String errorMessage = "Invalid keyType.";
             throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.INVALID_KEY_TYPE));
-        }
-
-        if (validityPeriod == null) {
-            validityPeriod = -1;
         }
 
         String restrictedIP = null;

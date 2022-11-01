@@ -53,6 +53,7 @@ import org.wso2.apk.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.apk.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.apk.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.apk.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
+import org.wso2.apk.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.apk.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.apk.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
@@ -283,7 +284,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                  String permittedIP, String permittedReferer) throws APIManagementException {
 
         JwtTokenInfoDTO jwtTokenInfoDTO = APIUtil.getJwtTokenInfoDTO(application, userName,
-                MultitenantUtils.getTenantDomain(userName));
+                APIUtil.getTenantDomain(userName));
 
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setId(application.getId());

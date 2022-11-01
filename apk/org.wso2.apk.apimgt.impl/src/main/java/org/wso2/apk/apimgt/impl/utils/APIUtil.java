@@ -132,8 +132,12 @@ import org.wso2.apk.apimgt.impl.dao.ScopesDAO;
 import org.wso2.apk.apimgt.impl.dao.WorkflowDAO;
 import org.wso2.apk.apimgt.impl.dao.dto.UserContext;
 import org.wso2.apk.apimgt.impl.dao.impl.WorkflowDAOImpl;
+import org.wso2.apk.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.apk.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.apk.apimgt.impl.dto.ApplicationWorkflowDTO;
+import org.wso2.apk.apimgt.impl.dto.JwtTokenInfoDTO;
+import org.wso2.apk.apimgt.impl.dto.SubscribedApiDTO;
+import org.wso2.apk.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.apk.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.apk.apimgt.impl.dto.WorkflowDTO;
@@ -156,10 +160,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.security.InvalidKeyException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -4079,5 +4087,118 @@ public final class APIUtil {
             workflowDTO.setWorkflowType(wfType);
         }
         return workflowDTO;
+    }
+
+    public static JwtTokenInfoDTO getJwtTokenInfoDTO(Application application, String userName, String tenantDomain)
+            throws APIManagementException {
+
+        int applicationId = application.getId();
+
+        String appOwner = application.getOwner();
+        APISubscriptionInfoDTO[] apis = ApiMgtDAO.getInstance()
+                .getSubscribedAPIsForAnApp(appOwner, applicationId);
+
+        JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
+        jwtTokenInfoDTO.setSubscriber("sub");
+        jwtTokenInfoDTO.setEndUserName(userName);
+        jwtTokenInfoDTO.setContentAware(true);
+
+        Set<String> subscriptionTiers = new HashSet<>();
+        List<SubscribedApiDTO> subscribedApiDTOList = new ArrayList<SubscribedApiDTO>();
+        for (APISubscriptionInfoDTO api : apis) {
+            subscriptionTiers.add(api.getSubscriptionTier());
+
+            SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
+            subscribedApiDTO.setName(api.getApiName());
+            subscribedApiDTO.setContext(api.getContext());
+            subscribedApiDTO.setVersion(api.getVersion());
+            subscribedApiDTO.setPublisher(APIUtil.replaceEmailDomainBack(api.getProviderId()));
+            subscribedApiDTO.setSubscriptionTier(api.getSubscriptionTier());
+            subscribedApiDTO.setSubscriberTenantDomain(tenantDomain);
+            subscribedApiDTOList.add(subscribedApiDTO);
+        }
+        jwtTokenInfoDTO.setSubscribedApiDTOList(subscribedApiDTOList);
+
+        if (subscriptionTiers.size() > 0) {
+            SubscriptionPolicy[] subscriptionPolicies = ApiMgtDAO.getInstance()
+                    .getSubscriptionPolicies(subscriptionTiers.toArray(new String[0]), APIUtil.getTenantId(appOwner));
+
+            Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<>();
+            for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies) {
+                SubscriptionPolicyDTO subscriptionPolicyDTO = new SubscriptionPolicyDTO();
+                subscriptionPolicyDTO.setSpikeArrestLimit(subscriptionPolicy.getRateLimitCount());
+                subscriptionPolicyDTO.setSpikeArrestUnit(subscriptionPolicy.getRateLimitTimeUnit());
+                subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicy.isStopOnQuotaReach());
+                subscriptionPolicyDTO.setTierQuotaType(subscriptionPolicy.getTierQuotaType());
+                subscriptionPolicyDTO.setGraphQLMaxDepth(subscriptionPolicy.getGraphQLMaxDepth());
+                subscriptionPolicyDTO.setGraphQLMaxComplexity(subscriptionPolicy.getGraphQLMaxComplexity());
+                subscriptionPolicyDTOList.put(subscriptionPolicy.getPolicyName(), subscriptionPolicyDTO);
+            }
+            jwtTokenInfoDTO.setSubscriptionPolicyDTOList(subscriptionPolicyDTOList);
+        }
+        return jwtTokenInfoDTO;
+    }
+
+    /**
+     * Helper method to get username with tenant domain.
+     *
+     * @param username username
+     * @return userName with tenant domain
+     */
+    public static String getUserNameWithTenantSuffix(String username) throws APIManagementException {
+        String usernameWithTenantPrefix = username;
+        String tenantDomain = APIUtil.getTenantDomain(username);
+        if (username != null && !username.endsWith("@" + APIConstants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)
+                && APIConstants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            usernameWithTenantPrefix = username + "@" + tenantDomain;
+        }
+        return usernameWithTenantPrefix;
+    }
+
+    /**
+     * Utility method to sign a JWT assertion with a particular signature algorithm
+     *
+     * @param assertion          valid JWT assertion
+     * @param privateKey         private key which use to sign the JWT assertion
+     * @param signatureAlgorithm signature algorithm which use to sign the JWT assertion
+     * @return byte array of the JWT signature
+     * @throws APIManagementException API Manager Exception
+     */
+    public static byte[] signJwt(String assertion, PrivateKey privateKey, String signatureAlgorithm)
+            throws APIManagementException {
+
+        try {
+            //initialize signature with private key and algorithm
+            Signature signature = Signature.getInstance(signatureAlgorithm);
+            signature.initSign(privateKey);
+
+            //update signature with data to be signed
+            byte[] dataInBytes = assertion.getBytes(Charset.defaultCharset());
+            signature.update(dataInBytes);
+
+            //sign the assertion and return the signature
+            return signature.sign();
+        } catch (NoSuchAlgorithmException e) {
+            //do not log
+            throw new APIManagementException("Signature algorithm not found", e);
+        } catch (InvalidKeyException e) {
+            //do not log
+            throw new APIManagementException("Invalid private key provided for signing", e);
+        } catch (SignatureException e) {
+            //do not log
+            throw new APIManagementException("Error while signing JWT", e);
+        }
+    }
+
+    public static String getApiKeyGeneratorImpl() {
+        ConfigurationHolder config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String keyGeneratorClassName = config.getFirstProperty(APIConstants.API_STORE_API_KEY_GENERATOR_IMPL);
+        if (keyGeneratorClassName == null) {
+            log.warn("The configurations related to Api Key Generator Impl class in APIStore " +
+                    "is missing in api-manager.xml. Hence returning the default value.");
+            return APIConstants.DEFAULT_API_KEY_GENERATOR_IMPL;
+        }
+        return keyGeneratorClassName;
     }
 }
