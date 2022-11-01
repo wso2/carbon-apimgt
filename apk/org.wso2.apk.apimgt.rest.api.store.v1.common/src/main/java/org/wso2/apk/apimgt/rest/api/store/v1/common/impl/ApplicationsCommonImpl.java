@@ -77,8 +77,6 @@ import org.wso2.apk.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.apk.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import org.wso2.apk.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.apk.apimgt.rest.api.util.utils.RestApiUtil;
-//import org.wso2.apk.identity.oauth.config.OAuthServerConfiguration;
-//import org.wso2.apk.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -584,8 +582,8 @@ public class ApplicationsCommonImpl {
         if (application == null) {
             throw new APIManagementException("No application found with name " + appName + " owned by " + appOwner,
                     ExceptionCodes.APPLICATION_NOT_FOUND);
-        } else if (!MultitenantUtils.getTenantDomain(application.getSubscriber().getName())
-                .equals(MultitenantUtils.getTenantDomain(username))) {
+        } else if (!APIUtil.getTenantDomain(application.getSubscriber().getName())
+                .equals(APIUtil.getTenantDomain(username))) {
             throw new APIManagementException("Cross Tenant Exports are not allowed", ExceptionCodes.TENANT_MISMATCH);
         }
 
@@ -1356,7 +1354,8 @@ public class ApplicationsCommonImpl {
     }
 
     /**
-     * @param applicationGroupId
+     *
+     * @param groups
      * @param appOwner
      * @param preserveOwner
      * @param exportedAppOwner
@@ -1377,7 +1376,7 @@ public class ApplicationsCommonImpl {
             ownerId = username;
         }
 
-        if (!MultitenantUtils.getTenantDomain(ownerId).equals(MultitenantUtils.getTenantDomain(username))) {
+        if (!APIUtil.getTenantDomain(ownerId).equals(APIUtil.getTenantDomain(username))) {
             throw new APIManagementException("Cross Tenant Imports are not allowed", ExceptionCodes.TENANT_MISMATCH);
         }
 

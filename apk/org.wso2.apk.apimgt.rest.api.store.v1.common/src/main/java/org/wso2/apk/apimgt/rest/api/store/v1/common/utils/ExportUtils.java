@@ -108,9 +108,8 @@ public class ExportUtils {
         try {
             createDirectory(archivePath);
             // Export application details
-            CommonUtil
-                    .writeDtoToFile(archivePath + File.separator + ImportExportConstants.TYPE_APPLICATION, exportFormat,
-                            ImportExportConstants.TYPE_APPLICATION, applicationDtoToExport);
+            CommonUtil.writeDtoToFile(archivePath + File.separator + ImportExportConstants.TYPE_APPLICATION,
+                    exportFormat, ImportExportConstants.TYPE_APPLICATION, applicationDtoToExport);
             CommonUtil.archiveDirectory(exportApplicationBasePath);
             FileUtils.deleteQuietly(new File(exportApplicationBasePath));
             return new File(exportApplicationBasePath + APIConstants.ZIP_FILE_EXTENSION);
