@@ -35,7 +35,7 @@ jobs:
       - name: Build carbon-apimgt with Tests, skipping AspectJ
         run: mvn clean install --file pom.xml -Dskip.aspectj=true
       - name: Upload unit test coverage to Codecov
-        uses: codecov/codecov-action@v1.2.1
+        uses: codecov/codecov-action@v3
         with:
           flags: unit_tests
 
@@ -93,7 +93,7 @@ jobs:
         env:
           PRODUCT_APIM_TEST_GROUPS: ${{ matrix.segment }}
       - name: Upload integration test coverage to Codecov
-        uses: codecov/codecov-action@v1.2.1
+        uses: codecov/codecov-action@v3
         with:
           flags: integration_tests
           directory: product-apim/
