@@ -18,11 +18,11 @@ package org.wso2.apk.apimgt.rest.api.store.v1.common.mappings;
 
 import org.wso2.apk.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.apk.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
+import org.wso2.apk.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.apk.apimgt.rest.api.store.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.apk.apimgt.rest.api.store.v1.dto.GraphQLSchemaTypeListDTO;
 import org.wso2.apk.apimgt.rest.api.store.v1.dto.GraphQLCustomComplexityInfoDTO;
 import org.wso2.apk.apimgt.rest.api.store.v1.dto.GraphQLSchemaTypeDTO;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +63,7 @@ public class GraphqlQueryAnalysisMappingUtil {
     public static GraphQLSchemaTypeListDTO fromGraphqlSchemaTypeListtoDTO(List<GraphqlSchemaType> typeList) {
         GraphQLSchemaTypeListDTO graphQLSchemaTypeListDTO = new GraphQLSchemaTypeListDTO();
         List<GraphQLSchemaTypeDTO> graphQLSchemaTypeDTOList = new ArrayList<>();
-        for (org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType graphqlSchemaType : typeList) {
+        for (GraphqlSchemaType graphqlSchemaType : typeList) {
             GraphQLSchemaTypeDTO graphQLSchemaTypeDTO = new GraphQLSchemaTypeDTO();
             List<String> fieldList = new ArrayList<>(graphqlSchemaType.getFieldList());
             graphQLSchemaTypeDTO.setType(graphqlSchemaType.getType());
