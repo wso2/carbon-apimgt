@@ -27,7 +27,7 @@ import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.MonetizationException;
 import org.wso2.apk.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.apk.apimgt.api.WorkflowResponse;
-import org.wso2.apk.apimgt.api.WorkflowStatus;
+import org.wso2.apk.apimgt.api.model.APIIdentifier;
 import org.wso2.apk.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.apk.apimgt.api.model.Application;
 import org.wso2.apk.apimgt.api.model.Monetization;
@@ -36,6 +36,7 @@ import org.wso2.apk.apimgt.api.model.Subscriber;
 import org.wso2.apk.apimgt.api.model.SubscriptionResponse;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.apk.apimgt.rest.api.store.v1.common.mappings.APIMappingUtil;
 import org.wso2.apk.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.apk.apimgt.rest.api.store.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.apk.apimgt.rest.api.store.v1.dto.AdditionalSubscriptionInfoListDTO;
@@ -319,13 +320,14 @@ public class SubscriptionsCommonImpl {
             try {
                 APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
                 String applicationId = subscriptionDTO.getApplicationId();
+                APIIdentifier apiIdentifier = APIMappingUtil
+                        .getAPIIdentifierFromUUID(subscriptionDTO.getApiId(), organization);
 
                 //check whether user is permitted to access the API. If the API does not exist,
                 // this will throw a APIMgtResourceNotFoundException
                 if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(subscriptionDTO.getApiId(), organization)) {
-                    throw new APIManagementException(
-                            "User " + username + " does not have permission to access API : " + subscriptionDTO.getApiId(),
-                            ExceptionCodes.NO_READ_PERMISSIONS);
+                    throw new APIManagementException("User " + username + " does not have permission to access API : "
+                            + subscriptionDTO.getApiId(), ExceptionCodes.NO_READ_PERMISSIONS);
                 }
 
                 Application application = apiConsumer.getApplicationByUUID(applicationId);
@@ -337,9 +339,9 @@ public class SubscriptionsCommonImpl {
 
                 if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                     //application access failure occurred
-                    throw new APIManagementException(
-                            "User " + username + " does not have permission to access application with Id : " + applicationId,
-                            ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
+                    throw new APIManagementException("User " + username + " does not have permission to access "
+                            + "application with Id : " + applicationId, ExceptionCodes.from(
+                                    ExceptionCodes.AUTHORIZATION_ERROR,
                                     RestApiConstants.RESOURCE_APPLICATION, applicationId));
                 }
 
@@ -360,8 +362,8 @@ public class SubscriptionsCommonImpl {
                 // taken from the message of the exception e
                 throw new APIManagementException(e.getMessage(), ExceptionCodes.FORBIDDEN_ERROR);
             } catch (SubscriptionAlreadyExistingException e) {
-                throw new APIManagementException(
-                        RestApiConstants.STATUS_CONFLICT_MESSAGE_SUBSCRIPTION_ALREADY_EXISTS + " " + subscriptionDTO.getApiId() + ", for application " + subscriptionDTO.getApplicationId(),
+                throw new APIManagementException(RestApiConstants.STATUS_CONFLICT_MESSAGE_SUBSCRIPTION_ALREADY_EXISTS
+                        + " " + subscriptionDTO.getApiId() + ", for application " + subscriptionDTO.getApplicationId(),
                         e, ExceptionCodes.SUBSCRIPTION_ALREADY_EXISTS);
             }
         }
