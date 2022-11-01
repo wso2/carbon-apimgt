@@ -14,6 +14,23 @@ import org.wso2.apk.apimgt.impl.dao.impl.PolicyDAOImpl;
 public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     private static final Logger log = LoggerFactory.getLogger(PolicyDAOImplIT.class);
 
+    /*---------------------------------------------------------------------
+    |  Author:  Sachini De Silva
+    |  Test Scenario:  Adds an application policy, fetch it by policy name and UUID, Check added policy all available
+    |         application policy list and remove added policy
+    |  Traceability: https://github.com/wso2/apk/issues/63
+    |  Pre-condition: N/A
+    |  Post-condition: N/A
+    |  Dependencies: N/A
+    |  Assertions:
+    |         Verify Application policy fetched from DB is not null after it was successfully added
+    |         Verify policy name of the application policy fetched by policy name is equal to the name of the policy added
+    |         Verify the count of all available application policies in the organization is 1
+    |         Verify the added policy's name is among the available application policy names fetched from DB
+    |         Verify the policy fetched by policy ID is not null
+    |         Verify policy name of the application policy fetched by UUID is equal to the name of the policy added
+    |         Verify policy object fetched by policy name is null after the policy is deleted
+    -------------------------------------------------------------------*/
     @Test(description = "Add, Get and Delete an Application policy")
     public void testAddGetAndDeleteApplicationPolicy() throws Exception {
         ApplicationPolicy policy = TestObjectCreator.createDefaultApplicationPolicy();
@@ -47,6 +64,17 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNull(deletedPolicy);
     }
 
+    /*---------------------------------------------------------------------
+    |  Author:  Sachini De Silva
+    |  Test Scenario:  Add and update application policy
+    |  Traceability: https://github.com/wso2/apk/issues/63
+    |  Pre-condition: N/A
+    |  Post-condition: N/A
+    |  Dependencies: N/A
+    |  Assertions:
+    |         Verify Application polciy request count after throttle policy update
+    |         Verify Application polciy description after throttle policy update
+    -------------------------------------------------------------------*/
     @Test(description = "Update an Application policy")
     public void testUpdateApplicationPolicy() throws Exception {
         ApplicationPolicy policy = TestObjectCreator.createDefaultApplicationPolicy();
@@ -54,7 +82,6 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         policyDAO.addApplicationPolicy(policy);
 
         ApplicationPolicy policyToUpdate = TestObjectCreator.createUpdatedApplicationPolicy();
-        //Thread.sleep(100L);
         policyDAO.updateApplicationPolicy(policyToUpdate);
         ApplicationPolicy updatedPolicy = policyDAO.getApplicationPolicy(policy.getPolicyName(), "carbon.super");
         Assert.assertEquals(((RequestCountLimit)(updatedPolicy.getDefaultQuotaPolicy().getLimit())).getRequestCount(), 200);
@@ -64,6 +91,23 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         policyDAO.removeThrottlePolicy(PolicyConstants.POLICY_LEVEL_APP, policy.getPolicyName(), "carbon.super");
     }
 
+    /*---------------------------------------------------------------------
+    |  Author:  Sachini De Silva
+    |  Test Scenario:  Adds a subscription policy, fetch it by policy name and UUID, Check added policy all available
+    |         subscription policy list and remove added policy
+    |  Traceability: https://github.com/wso2/apk/issues/63
+    |  Pre-condition: N/A
+    |  Post-condition: N/A
+    |  Dependencies: N/A
+    |  Assertions:
+    |         Verify subscription policy fetched from DB is not null after it was successfully added
+    |         Verify policy name of the subscription policy fetched by policy name is equal to the name of the policy added
+    |         Verify the count of all available subscription policies in the organization is 1
+    |         Verify the added policy's name is among the available subscription policy names fetched from DB
+    |         Verify the policy fetched by policy ID is not null
+    |         Verify policy name of the subscription policy fetched by UUID is equal to the name of the policy added
+    |         Verify policy object fetched by policy name is null after the policy is deleted
+    -------------------------------------------------------------------*/
     @Test(description = "Add, Get and Delete a Subscription policy")
     public void testAddGetAndDeleteSubscriptionPolicy() throws Exception {
         SubscriptionPolicy policy = TestObjectCreator.createDefaultSubscriptionPolicy();
@@ -97,6 +141,17 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNull(deletedPolicy);
     }
 
+    /*---------------------------------------------------------------------
+    |  Author:  Sachini De Silva
+    |  Test Scenario:  Add and update subscription policy
+    |  Traceability: https://github.com/wso2/apk/issues/63
+    |  Pre-condition: N/A
+    |  Post-condition: N/A
+    |  Dependencies: N/A
+    |  Assertions:
+    |         Verify subscription polciy request count after throttle policy update
+    |         Verify subscription polciy description after throttle policy update
+    -------------------------------------------------------------------*/
     @Test(description = "Update a Subscription policy")
     public void testUpdateSubscriptionPolicy() throws Exception {
         SubscriptionPolicy policy = TestObjectCreator.createDefaultSubscriptionPolicy();
@@ -104,13 +159,29 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         policyDAO.addSubscriptionPolicy(policy);
 
         SubscriptionPolicy policyToUpdate = TestObjectCreator.createUpdatedSubscriptionPolicy();
-        //Thread.sleep(100L);
         policyDAO.updateSubscriptionPolicy(policyToUpdate);
         SubscriptionPolicy updatedPolicy = policyDAO.getSubscriptionPolicy(policy.getPolicyName(), "carbon.super");
         Assert.assertEquals(((RequestCountLimit)(updatedPolicy.getDefaultQuotaPolicy().getLimit())).getRequestCount(), 200);
         Assert.assertEquals(updatedPolicy.getDescription(), "Updated Custom Subscription Policy");
     }
 
+    /*---------------------------------------------------------------------
+    |  Author:  Sachini De Silva
+    |  Test Scenario:  Adds an api policy, fetch it by policy name and UUID, Check added policy all available
+    |         api policy list and remove added policy
+    |  Traceability: https://github.com/wso2/apk/issues/63
+    |  Pre-condition: N/A
+    |  Post-condition: N/A
+    |  Dependencies: N/A
+    |  Assertions:
+    |         Verify API policy fetched from DB is not null after it was successfully added
+    |         Verify policy name of the API policy fetched by policy name is equal to the name of the policy added
+    |         Verify the count of all available API policies in the organization is 1
+    |         Verify the added policy's name is among the available API policy names fetched from DB
+    |         Verify the policy fetched by policy ID is not null
+    |         Verify policy name of the API policy fetched by UUID is equal to the name of the policy added
+    |         Verify policy object fetched by policy name is null after the policy is deleted
+    -------------------------------------------------------------------*/
     @Test(description = "Add, Get and Delete an API policy")
     public void testAddGetAndDeleteAPIPolicy() throws Exception {
         APIPolicy policy = TestObjectCreator.createDefaultAPIPolicy();
@@ -144,6 +215,17 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNull(deletedPolicy);
     }
 
+    /*---------------------------------------------------------------------
+    |  Author:  Sachini De Silva
+    |  Test Scenario:  Add and update API policy
+    |  Traceability: https://github.com/wso2/apk/issues/63
+    |  Pre-condition: N/A
+    |  Post-condition: N/A
+    |  Dependencies: N/A
+    |  Assertions:
+    |         Verify API polciy request count after throttle policy update
+    |         Verify API polciy description after throttle policy update
+    -------------------------------------------------------------------*/
     @Test(description = "Update an API policy")
     public void testUpdateAPIPolicy() throws Exception {
         APIPolicy policy = TestObjectCreator.createDefaultAPIPolicy();
@@ -151,7 +233,6 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         policyDAO.addAPIPolicy(policy);
 
         APIPolicy policyToUpdate = TestObjectCreator.createUpdatedAPIPolicy();
-        //Thread.sleep(100L);
         policyDAO.updateAPIPolicy(policyToUpdate);
         APIPolicy updatedPolicy = policyDAO.getAPIPolicy(policy.getPolicyName(), "carbon.super");
         Assert.assertEquals(((RequestCountLimit)(updatedPolicy.getDefaultQuotaPolicy().getLimit())).getRequestCount(), 200);
