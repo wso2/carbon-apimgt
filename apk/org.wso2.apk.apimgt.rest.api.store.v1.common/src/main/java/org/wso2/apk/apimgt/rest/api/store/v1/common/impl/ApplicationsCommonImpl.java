@@ -609,9 +609,8 @@ public class ApplicationsCommonImpl {
             } catch (APIManagementException e) {
                 String msg = "Error while revoking API Key of application " + applicationId;
                 if (log.isDebugEnabled()) {
-                    log.debug(
-                            "Error while revoking API Key of application " + applicationId + " and token "
-                                    + APIUtil.getMaskedToken(apiKey));
+                    log.debug("Error while revoking API Key of application " + applicationId + " and token "
+                            + APIUtil.getMaskedToken(apiKey));
                 }
                 log.error(msg, e);
                 throw new APIManagementException(msg, e, ExceptionCodes.from(ExceptionCodes.ACCESS_TOKEN_REVOKE_FAILED,
@@ -1363,7 +1362,7 @@ public class ApplicationsCommonImpl {
         long expiryTime = Long.MAX_VALUE;
         org.json.JSONObject payload = new org.json.JSONObject(new String(Base64.getUrlDecoder().decode(tokenPayload)));
         if (payload.has(APIConstants.JwtTokenConstants.EXPIRY_TIME)) {
-            expiryTime = APIUtil.getExpiryifJWT(apiKey);
+            expiryTime = APIUtil.getExpiryOfJWT(apiKey);
         }
         String tokenIdentifier = payload.getString(APIConstants.JwtTokenConstants.JWT_ID);
         apiConsumer.revokeAPIKey(tokenIdentifier, expiryTime, tenantDomain);

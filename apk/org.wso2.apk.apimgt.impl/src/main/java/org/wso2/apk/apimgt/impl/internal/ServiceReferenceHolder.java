@@ -23,6 +23,7 @@ import org.wso2.apk.apimgt.impl.config.APIMConfigService;
 import org.wso2.apk.apimgt.impl.config.APIMConfigServiceImpl;
 import org.wso2.apk.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 
+import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +36,8 @@ public class ServiceReferenceHolder {
 
     private AccessTokenGenerator accessTokenGenerator;
     private Map<String, KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap = new HashMap<>();
+
+    private KeyStore trustStore;
 
     private ServiceReferenceHolder() {
 
@@ -99,5 +102,13 @@ public class ServiceReferenceHolder {
 
     public Map<String, KeyManagerConnectorConfiguration> getKeyManagerConnectorConfigurations() {
         return keyManagerConnectorConfigurationMap;
+    }
+
+    public KeyStore getTrustStore() {
+        return trustStore;
+    }
+
+    public void setTrustStore(KeyStore trustStore) {
+        this.trustStore = trustStore;
     }
 }
