@@ -74,13 +74,6 @@
                     <groupId>org.openapitools</groupId>
                     <artifactId>openapi-generator-maven-plugin</artifactId>
                     <version>${openapi-codegen-maven-plugin.version}</version>
-<!--                    <dependencies>-->
-<!--                        <dependency>-->
-<!--                            <groupId>org.wso2.apk</groupId>-->
-<!--                            <artifactId>org.wso2.apk.apimgt.rest.api.util</artifactId>-->
-<!--                            <version>${apk.apimgt.version}</version>-->
-<!--                        </dependency>-->
-<!--                    </dependencies>-->
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -506,6 +499,11 @@
                 <version>${javax.validation-api}</version>
             </dependency>
             <dependency>
+                <groupId>javax.cache</groupId>
+                <artifactId>cache-api</artifactId>
+                <version>${javax.cache.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>xerces.wso2</groupId>
                 <artifactId>xercesImpl</artifactId>
                 <version>${xercesImpl.version}</version>
@@ -663,9 +661,9 @@
                 <version>${openfeign.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.orbit.org.mapstruct</groupId>
+                <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct</artifactId>
-                <version>${org.wso2.orbit.org.mapstruct.version}</version>
+                <version>${org.mapstruct.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mapstruct</groupId>
@@ -703,11 +701,6 @@
                 <version>${log4j2.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.woden.wso2</groupId>
-                <artifactId>woden</artifactId>
-                <version>${apache.woden.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.poi.wso2</groupId>
                 <artifactId>poi-ooxml</artifactId>
                 <version>${apache.poi.version}</version>
@@ -731,6 +724,11 @@
                 <groupId>org.aspectj</groupId>
                 <artifactId>aspectjrt</artifactId>
                 <version>${aspectj.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${hikari.version}</version>
             </dependency>
 
             <dependency>
@@ -769,22 +767,17 @@
                 <version>${xml-apis.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>com.ibm.icu</groupId>
+                <artifactId>icu4j</artifactId>
+                <version>${icu4j.version}</version>
+                <scope>test</scope>
+            </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon.registry</groupId>
-                <artifactId>org.wso2.carbon.registry.indexing</artifactId>
-                <version>${carbon.registry.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.wso2.carbon</groupId>
-                        <artifactId>org.wso2.carbon.logging</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
-                <version>${apache.felix.scr.ds.annotations.version}</version>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgres.driver.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -804,8 +797,8 @@
         <version.io.apicurio>1.1.5</version.io.apicurio>
         <json-smart.version>2.4.8</json-smart.version>
         <pax.logging.api.version>1.11.2</pax.logging.api.version>
-        <cxf.version>3.5.3</cxf.version>
-        <spring-web.version>5.1.13.RELEASE</spring-web.version>
+        <cxf.version>3.5.4</cxf.version>
+        <spring-web.version>5.3.23</spring-web.version>
         <junit.version>4.13.1</junit.version>
         <swagger-jaxrs.version>1.6.1</swagger-jaxrs.version>
         <reflection.version>0.9.11</reflection.version>
@@ -823,6 +816,7 @@
         <jmustache.version>1.15</jmustache.version>
         <google.guava.version>31.0.1-jre</google.guava.version>
         <javax.validation-api>1.1.0.Final</javax.validation-api>
+        <javax.cache.version>1.1.1</javax.cache.version>
         <slf4j.api.version>1.7.29</slf4j.api.version>
         <apache.commons.lang3.version>3.10</apache.commons.lang3.version>
         <zipkin.sender.okhttp3.version>2.16.3</zipkin.sender.okhttp3.version>
@@ -830,7 +824,7 @@
         <opentracing.mock.version>0.31.0</opentracing.mock.version>
         <swagger3.core.version>2.1.12</swagger3.core.version>
         <openfeign.version>11.0</openfeign.version>
-        <org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
+        <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
         <commons-logging.version>1.1.1</commons-logging.version>
         <commons-lang.version>2.4</commons-lang.version>
         <com.damnhandy.version>2.1.6</com.damnhandy.version>
@@ -841,7 +835,7 @@
         <google.code.gson.version>2.8.5</google.code.gson.version>
         <httpcomponents.version>4.5.10</httpcomponents.version>
         <aspectj.version>1.9.5</aspectj.version>
-        <apache.felix.scr.ds.annotations.version>1.2.4</apache.felix.scr.ds.annotations.version>
+        <hikari.version>5.0.1</hikari.version>
 
         <com.nimbusds.wso2.version>7.9.0.wso2v1</com.nimbusds.wso2.version>
         <json-simple.wso2.version>1.1.wso2v1</json-simple.wso2.version>
@@ -864,24 +858,24 @@
         <org.wso2.orbit.com.amazonaws.version>1.11.1034.wso2v2</org.wso2.orbit.com.amazonaws.version>
         <jaeger.client.version>1.8.0.wso2v1</jaeger.client.version>
         <opentelemetry.all.version>1.11.0.wso2v3</opentelemetry.all.version>
-        <org.wso2.orbit.org.mapstruct.version>1.4.1.wso2v1</org.wso2.orbit.org.mapstruct.version>
         <damnhandy.version>${com.damnhandy.version}.wso2v2</damnhandy.version>
         <apache.woden.version>1.0.0.M9-wso2v1</apache.woden.version>
         <apache.poi.version>3.9.0.wso2v3</apache.poi.version>
         <caffeine.version>2.8.1</caffeine.version>
 
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
-        <carbon.registry.version>4.8.2</carbon.registry.version>
 
         <jacoco.version>0.8.4</jacoco.version>
         <mockito.version>2.23.4</mockito.version>
         <powermock.version>2.0.2</powermock.version>
         <hamcrest.version>1.3</hamcrest.version>
         <xml-apis.version>1.4.01</xml-apis.version>
+        <icu4j.version>58.1</icu4j.version>
 
         <import.package.version.commons.logging>[1.2.0,2.0.0)</import.package.version.commons.logging>
         <javax.servlet.imp.pkg.version>[2.6.0, 3.0.0)</javax.servlet.imp.pkg.version>
-        <carbon.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.registry.imp.pkg.version>
         <wsdl4j.version.range>[1.6.3.wso2v3, 1.7.0)</wsdl4j.version.range>
+
+        <postgres.driver.version>42.5.0</postgres.driver.version>
     </properties>
 </project>

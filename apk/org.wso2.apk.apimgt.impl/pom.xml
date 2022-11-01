@@ -33,10 +33,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.woden.wso2</groupId>
-            <artifactId>woden</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.poi.wso2</groupId>
             <artifactId>poi-ooxml</artifactId>
         </dependency>
@@ -51,7 +47,6 @@
         <dependency>
             <groupId>com.ibm.icu</groupId>
             <artifactId>icu4j</artifactId>
-            <version>58.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -65,10 +60,6 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.registry</groupId>
-            <artifactId>org.wso2.carbon.registry.indexing</artifactId>
         </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple.wso2</groupId>
@@ -162,11 +153,6 @@
             <artifactId>aspectjrt</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.orbit.graphQL</groupId>
             <artifactId>graphQL</artifactId>
             <version>${graphql.java.version}</version>
@@ -216,7 +202,6 @@
         <dependency>
             <groupId>io.apicurio</groupId>
             <artifactId>apicurio-data-models</artifactId>
-            <version>1.1.5</version>
         </dependency>
         <dependency>
             <groupId>commons-validator</groupId>
@@ -240,12 +225,10 @@
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>5.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
-            <version>1.5.2.Final</version>
         </dependency>
         <dependency>
             <groupId>org.json.wso2</groupId>
@@ -254,7 +237,14 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.cache</groupId>
+            <artifactId>cache-api</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -331,13 +321,9 @@
                         <Import-Package>
                             org.wso2.apk.apimgt.api.*;version="${apk.apimgt.imp.pkg.version}",
                             !org.wso2.apk.apimgt.api.model.xsd.*,
-                            javax.servlet;version="${javax.servlet.imp.pkg.version}",
-                            javax.servlet.http;version="${javax.servlet.imp.pkg.version}",
-                            javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",
                             com.google.gson,
                             org.apache.commons.*,
                             org.apache.http.*,
-                            org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
                             org.apache.pdfbox.*; version="${pdfbox.version}",
                             javax.cache,
                             javax.naming,
