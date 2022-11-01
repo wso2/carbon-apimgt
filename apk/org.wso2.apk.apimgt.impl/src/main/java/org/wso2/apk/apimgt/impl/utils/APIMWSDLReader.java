@@ -510,52 +510,51 @@ public class APIMWSDLReader {
         }
     }
 
-    /**
-     * Validate the base URI of the WSDL reader
-     *
-     * @throws APIManagementException When error occurred while parsing the content from the URL
-     */
-
-    @Deprecated
-    public void validateBaseURI() throws APIManagementException {
-        if (baseURI.startsWith(APIConstants.WSDL_REGISTRY_LOCATION_PREFIX)) {
-            baseURI = APIUtil.getServerURL() + baseURI;
-        }
-
-        boolean isWsdl20 = false;
-        boolean isWsdl11 = false;
-
-        BufferedReader in = null;
-        try {
-            String inputLine;
-            StringBuilder urlContent = new StringBuilder();
-            URL wsdl = new URL(baseURI);
-            in = new BufferedReader(new InputStreamReader(wsdl.openStream(), Charset.defaultCharset()));
-            while ((inputLine = in.readLine()) != null) {
-                urlContent.append(inputLine);
-                isWsdl20 = urlContent.indexOf(WSDL20_NAMESPACE) > 0;
-                isWsdl11 = urlContent.indexOf(WSDL11_NAMESPACE) > 0;
-            }
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading WSDL from base URI " + baseURI, e);
-        } finally {
-            IOUtils.closeQuietly(in);
-        }
-
-        try {
-            if (isWsdl11) {
-                readAndValidateWSDL11();
-            } else if (isWsdl20) {
-                readAndValidateWSDL20();
-            } else {
-                throw new APIManagementException("URL is not in format of wsdl1.1 or wsdl2.0");
-            }
-        } catch (WSDLException e) {
-            throw new APIManagementException("Error while parsing WSDL content", e);
-        } catch (org.apache.woden.WSDLException e) {
-            throw new APIManagementException("Error while parsing WSDL content", e);
-        }
-    }
+//    /**
+//     * Validate the base URI of the WSDL reader
+//     *
+//     * @throws APIManagementException When error occurred while parsing the content from the URL
+//     */
+//    @Deprecated
+//    public void validateBaseURI() throws APIManagementException {
+//        if (baseURI.startsWith(APIConstants.WSDL_REGISTRY_LOCATION_PREFIX)) {
+//            baseURI = APIUtil.getServerURL() + baseURI;
+//        }
+//
+//        boolean isWsdl20 = false;
+//        boolean isWsdl11 = false;
+//
+//        BufferedReader in = null;
+//        try {
+//            String inputLine;
+//            StringBuilder urlContent = new StringBuilder();
+//            URL wsdl = new URL(baseURI);
+//            in = new BufferedReader(new InputStreamReader(wsdl.openStream(), Charset.defaultCharset()));
+//            while ((inputLine = in.readLine()) != null) {
+//                urlContent.append(inputLine);
+//                isWsdl20 = urlContent.indexOf(WSDL20_NAMESPACE) > 0;
+//                isWsdl11 = urlContent.indexOf(WSDL11_NAMESPACE) > 0;
+//            }
+//        } catch (IOException e) {
+//            throw new APIManagementException("Error while reading WSDL from base URI " + baseURI, e);
+//        } finally {
+//            IOUtils.closeQuietly(in);
+//        }
+//
+//        try {
+//            if (isWsdl11) {
+//                readAndValidateWSDL11();
+//            } else if (isWsdl20) {
+//                readAndValidateWSDL20();
+//            } else {
+//                throw new APIManagementException("URL is not in format of wsdl1.1 or wsdl2.0");
+//            }
+//        } catch (WSDLException e) {
+//            throw new APIManagementException("Error while parsing WSDL content", e);
+//        } catch (org.apache.woden.WSDLException e) {
+//            throw new APIManagementException("Error while parsing WSDL content", e);
+//        }
+//    }
 
     /**
      * Given a URL, this method checks if the underlying document is a WSDL2
