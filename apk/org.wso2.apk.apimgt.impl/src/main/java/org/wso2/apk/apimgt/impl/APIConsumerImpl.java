@@ -27,10 +27,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.apk.apimgt.api.APIConsumer;
+import org.wso2.apk.apimgt.api.APIDefinition;
 import org.wso2.apk.apimgt.api.APIManagementException;
+import org.wso2.apk.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.apk.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.dto.KeyManagerConfigurationDTO;
@@ -38,8 +39,19 @@ import org.wso2.apk.apimgt.api.model.*;
 import org.wso2.apk.apimgt.api.model.Documentation;
 import org.wso2.apk.apimgt.api.model.DocumentationType;
 import org.wso2.apk.apimgt.api.model.ResourceFile;
+import org.wso2.apk.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.apk.apimgt.api.model.webhooks.Subscription;
+import org.wso2.apk.apimgt.api.model.webhooks.Topic;
+import org.wso2.apk.apimgt.impl.caching.CacheProvider;
 import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPI;
+import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPIInfo;
+import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPISearchResult;
+import org.wso2.apk.apimgt.impl.dao.dto.DevPortalContentSearchResult;
+import org.wso2.apk.apimgt.impl.dao.dto.DevPortalSearchContent;
+import org.wso2.apk.apimgt.impl.dao.dto.DocumentSearchContent;
 import org.wso2.apk.apimgt.impl.dao.dto.Organization;
+import org.wso2.apk.apimgt.impl.dao.dto.SearchContent;
+import org.wso2.apk.apimgt.impl.dao.dto.UserContext;
 import org.wso2.apk.apimgt.impl.dao.exceptions.APIPersistenceException;
 import org.wso2.apk.apimgt.impl.dao.exceptions.OASPersistenceException;
 import org.wso2.apk.apimgt.impl.dao.mapper.APIMapper;
@@ -59,8 +71,11 @@ import org.wso2.apk.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.apk.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.apk.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.apk.apimgt.impl.utils.APIMWSDLReader;
+import org.wso2.apk.apimgt.impl.utils.APINameComparator;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.apk.apimgt.impl.utils.ApplicationUtils;
+import org.wso2.apk.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.apk.apimgt.impl.utils.VHostUtils;
 import org.wso2.apk.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.apk.apimgt.impl.workflow.WorkflowStatus;
@@ -165,16 +180,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("Failed to get Subscriber", e);
         }
         return subscriber;
-    }
-
-
-    protected void setUsernameToThreadLocalCarbonContext(String username) {
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
-    }
-
-    protected int getTenantId(String requestedTenantDomain) throws UserStoreException {
-        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                                             .getTenantId(requestedTenantDomain);
     }
 
 
@@ -343,17 +348,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String userName = (userNameWithoutChange != null)? userNameWithoutChange: username;
         String[] roles = APIUtil.getListOfRoles(userName);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
-        UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
-        try {
-            Set<Tag> tempTagSet = apiPersistenceInstance.getAllTags(org, userCtx);
-            synchronized (tagCacheMutex) {
-                lastUpdatedTime = System.currentTimeMillis();
-                this.tagSet = tempTagSet;
-            }
-        } catch (APIPersistenceException e) {
-            String msg = "Failed to get API tags";
-            throw new APIManagementException(msg, e);
-        }
+//        UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
+//        try {
+//            Set<Tag> tempTagSet = apiPersistenceInstance.getAllTags(org, userCtx);
+//            synchronized (tagCacheMutex) {
+//                lastUpdatedTime = System.currentTimeMillis();
+//                this.tagSet = tempTagSet;
+//            }
+//        } catch (APIPersistenceException e) {
+//            String msg = "Failed to get API tags";
+//            throw new APIManagementException(msg, e);
+//        }
         return tagSet;
     }
 
@@ -1723,20 +1728,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private static List<Scope> getAllowedScopesForUserApplication(String username,
                                                                   Set<Scope> reqScopeSet) {
         String[] userRoles = null;
-        UserStoreManager userStoreManager = null;
         String preservedCaseSensitiveValue = System.getProperty(PRESERVED_CASE_SENSITIVE_VARIABLE);
         boolean preservedCaseSensitive = JavaUtils.isTrueExplicitly(preservedCaseSensitiveValue);
 
         List<Scope> authorizedScopes = new ArrayList<Scope>();
         try {
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(MultitenantUtils.getTenantDomain(username));
-            userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
-            userRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
-        } catch (UserStoreException e) {
-            // Log and return since we do not want to stop issuing the token in
-            // case of scope validation failures.
+            int tenantId = APIUtil.getTenantId(APIUtil.getTenantDomain(username));
+            userRoles = APIUtil.getListOfRoles(APIUtil.getTenantAwareUsername(username));
+        } catch (APIManagementException e) {
             log.error("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
         }
 
@@ -2112,24 +2111,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         boolean isAppUpdated;
         String consumerKey;
         String oldUserName = application.getSubscriber().getName();
-        String oldTenantDomain = MultitenantUtils.getTenantDomain(oldUserName);
-        String newTenantDomain = MultitenantUtils.getTenantDomain(userId);
+        String oldTenantDomain = APIUtil.getTenantDomain(oldUserName);
+        String newTenantDomain = APIUtil.getTenantDomain(userId);
         if (oldTenantDomain.equals(newTenantDomain)) {
             if (!isSubscriberValid(userId)) {
-                RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-                try {
-                    int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                            .getTenantId(newTenantDomain);
-                    UserStoreManager userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
-                    if (userStoreManager.isExistingUser(userId)) {
-                        if (apiMgtDAO.getSubscriber(userId) == null){
-                            addSubscriber(userId, "");
-                        }
-                    } else {
-                        throw new APIManagementException("User " + userId + " doesn't exist in user store");
+                int tenantId = APIUtil.getTenantId(newTenantDomain);
+                if (APIUtil.isUserExist(userId)) {
+                    if (apiMgtDAO.getSubscriber(userId) == null){
+                        addSubscriber(userId, "");
                     }
-                } catch (UserStoreException e) {
-                    throw new APIManagementException("Error while adding user " + userId + " as a subscriber");
+                } else {
+                    throw new APIManagementException("User " + userId + " doesn't exist in user store");
                 }
             }
             String applicationName = application.getName();
@@ -2168,103 +2160,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             isAppUpdated = apiMgtDAO.updateApplicationOwner(userId, application);
             return isAppUpdated;
-    }
-
-
-    public JSONObject resumeWorkflow(Object[] args) {
-    	JSONObject row = new JSONObject();
-
-        if (args != null && APIUtil.isStringArray(args)) {
-
-            String workflowReference = (String) args[0];
-            String status = (String) args[1];
-            String description = null;
-            if (args.length > 2 && args[2] != null) {
-                description = (String) args[2];
-            }
-
-            boolean isTenantFlowStarted = false;
-
-            try {
-                //                if (workflowReference != null) {
-                WorkflowDTO workflowDTO = apiMgtDAO.retrieveWorkflow(workflowReference);
-                if (workflowDTO == null) {
-                    log.error("Could not find workflow for reference " + workflowReference);
-
-                    row.put("error", Boolean.TRUE);
-                    row.put("statusCode", 500);
-                    row.put("message", "Could not find workflow for reference " + workflowReference);
-                    return row;
-                }
-
-                String tenantDomain = workflowDTO.getTenantDomain();
-                if (tenantDomain != null && !MultitenantConstants
-                        .SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
-                }
-
-                workflowDTO.setWorkflowDescription(description);
-                workflowDTO.setStatus(WorkflowStatus.valueOf(status));
-
-                String workflowType = workflowDTO.getWorkflowType();
-                WorkflowExecutor workflowExecutor;
-                try {
-                    workflowExecutor = getWorkflowExecutor(workflowType);
-                    workflowExecutor.complete(workflowDTO);
-                    if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
-                        WorkflowUtils.sendNotificationAfterWFComplete(workflowDTO, workflowType);
-                    }
-                } catch (WorkflowException e) {
-                    throw new APIManagementException(e);
-                }
-                row.put("error", Boolean.FALSE);
-                row.put("statusCode", 200);
-                row.put("message", "Invoked workflow completion successfully.");
-                //                }
-            } catch (IllegalArgumentException e) {
-                String msg = "Illegal argument provided. Valid values for status are APPROVED and REJECTED.";
-                log.error(msg, e);
-
-                row.put("error", Boolean.TRUE);
-                row.put("statusCode", 500);
-                row.put("message", msg);
-
-            } catch (APIManagementException e) {
-                String msg = "Error while resuming the workflow. ";
-                log.error(msg, e);
-
-                row.put("error", Boolean.TRUE);
-                row.put("statusCode", 500);
-                row.put("message", msg + e.getMessage());
-            } finally {
-                if (isTenantFlowStarted) {
-                    endTenantFlow();
-                }
-            }
-        }
-        return row;
-    }
-
-    protected void endTenantFlow() {
-        PrivilegedCarbonContext.endTenantFlow();
-    }
-
-    protected boolean startTenantFlowForTenantDomain(String tenantDomain) {
-        boolean isTenantFlowStarted = true;
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        return isTenantFlowStarted;
-    }
-
-    /**
-     * Returns a workflow executor
-     *
-     * @param workflowType Workflow executor type
-     * @return WorkflowExecutor of given type
-     * @throws WorkflowException if an error occurred while getting WorkflowExecutor
-     */
-    protected WorkflowExecutor getWorkflowExecutor(String workflowType) throws WorkflowException {
-        return WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
     }
 
     @Override
@@ -2318,7 +2213,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (userRoles != null) {
             for (String userRole : userRoles) {
                 rolesQuery.append(" OR ");
-                rolesQuery.append(ClientUtils.escapeQueryChars(APIUtil.sanitizeUserRole(userRole.toLowerCase())));
+//                rolesQuery.append(ClientUtils.escapeQueryChars(APIUtil.sanitizeUserRole(userRole.toLowerCase())));
             }
         }
         rolesQuery.append(")");
@@ -2429,7 +2324,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * This method is used to validate keys of custom attributes, configured by user
      *
      * @param application
-     * @param userId user name of logged in user
+     * @param userId username of logged-in user
      * @throws APIManagementException
      */
     public void checkAppAttributes(Application application, String userId) throws APIManagementException {
@@ -2440,10 +2335,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         int applicationId = application.getId();
         int tenantId = 0;
         Map<String, String> newApplicationAttributes = new HashMap<>();
-        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
+        String tenantDomain = APIUtil.getTenantDomain(userId);
         try {
-            tenantId = getTenantId(tenantDomain);
-        } catch (UserStoreException e) {
+            tenantId = APIUtil.getTenantId(tenantDomain);
+        } catch (APIManagementException e) {
             handleException("Error in getting tenantId of " + tenantDomain, e);
         }
 
@@ -2466,7 +2361,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 newApplicationAttributes.put((String) key, "");
             }
         }
-        apiMgtDAO.addApplicationAttributes(newApplicationAttributes, applicationId, tenantId);
+        apiMgtDAO.addApplicationAttributes(newApplicationAttributes, applicationId, tenantDomain);
     }
 
 
@@ -2801,62 +2696,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return List of APIs recommended for the user
      */
     public String getApiRecommendations(String userName, String tenantDomain) {
-
-        if (tenantDomain != null && userName != null) {
-            Cache recommendationsCache = CacheProvider.getRecommendationsCache();
-            String cacheName = userName + "_" + tenantDomain;
-            if (recommendationsCache.containsKey(cacheName)) {
-                org.json.JSONObject cachedObject = (org.json.JSONObject) recommendationsCache.get(cacheName);
-                if (cachedObject != null) {
-                    return (String) cachedObject.get(APIConstants.RECOMMENDATIONS_CACHE_KEY);
-                }
-            }
-        }
+        //TODO: need to finalize the cache
+//        if (tenantDomain != null && userName != null) {
+//            Cache recommendationsCache = CacheProvider.getRecommendationsCache();
+//            String cacheName = userName + "_" + tenantDomain;
+//            if (recommendationsCache.containsKey(cacheName)) {
+//                org.json.JSONObject cachedObject = (org.json.JSONObject) recommendationsCache.get(cacheName);
+//                if (cachedObject != null) {
+//                    return (String) cachedObject.get(APIConstants.RECOMMENDATIONS_CACHE_KEY);
+//                }
+//            }
+//        }
         return null;
-    }
-
-    /**
-     * Change user's password
-     *
-     * @param currentPassword Current password of the user
-     * @param newPassword     New password of the user
-     */
-    @Override
-    public void changeUserPassword(String currentPassword, String newPassword) throws APIManagementException {
-        //check whether EnablePasswordChange configuration is set to 'true'
-        ConfigurationHolder config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        boolean enableChangePassword =
-                Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENABLE_CHANGE_PASSWORD));
-        if (!enableChangePassword) {
-            throw new APIManagementException("Password change operation is disabled in the system",
-                    ExceptionCodes.PASSWORD_CHANGE_DISABLED);
-        }
-
-        UserAdmin userAdmin = new UserAdmin();
-        try {
-            userAdmin.changePasswordByUser(userNameWithoutChange, currentPassword, newPassword);
-        } catch (UserAdminException e) {
-            String genericErrorMessage = "Error occurred while changing the user password";
-            if (log.isDebugEnabled()) {
-                log.debug(genericErrorMessage, e);
-            }
-            //filter the exception message
-            String exceptionMessage = e.getMessage();
-            if (exceptionMessage.matches("(?i:.*\\b(current)\\b.*\\b(password)\\b.*\\b(incorrect)\\b.*)")) {
-                String errorMessage = "The current user password entered is incorrect";
-                throw new APIManagementException(errorMessage,
-                        ExceptionCodes.CURRENT_PASSWORD_INCORRECT);
-            } else if ((exceptionMessage.matches("(?i:.*\\b(password)\\b.*\\b(length)\\b.*)")) ||
-                    (ExceptionUtils.getStackTrace(e).contains("PolicyViolationException"))
-            ) {
-                String errorMessage = "The new password entered is invalid since it doesn't comply with the password " +
-                        "pattern/policy configured";
-                throw new APIManagementException(errorMessage, ExceptionCodes.PASSWORD_PATTERN_INVALID);
-            } else {
-                throw new APIManagementException(genericErrorMessage);
-            }
-        }
     }
 
     @Override
@@ -3144,7 +2995,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 uuid = apiMgtDAO.getUUIDFromIdentifier(identifier.getProviderName(), identifier.getApiName(),
                         identifier.getVersion(), orgId);
             }
-            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid );
+            DevPortalAPI devPortalApi = apiDAOImpl.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
                 API api = APIMapper.INSTANCE.toApi(devPortalApi);
                 api.setOrganization(orgId);
@@ -3189,7 +3040,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         UserContext ctx = new UserContext(userame, org, properties, roles);
 
         try {
-            DevPortalContentSearchResult sResults = apiPersistenceInstance.searchContentForDevPortal(org, searchQuery,
+            DevPortalContentSearchResult sResults = apiDAOImpl.searchContentForDevPortal(org, searchQuery,
                     start, end, ctx);
             if (sResults != null) {
                 List<SearchContent> resultList = sResults.getResults();
@@ -3199,8 +3050,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         DocumentSearchContent docItem = (DocumentSearchContent) item;
                         Documentation doc = new Documentation(
                                 DocumentationType.valueOf(docItem.getDocType().toString()), docItem.getName());
-                        doc.setSourceType(DocumentSourceType.valueOf(docItem.getSourceType().toString()));
-                        doc.setVisibility(DocumentVisibility.valueOf(docItem.getVisibility().toString()));
+                        doc.setSourceType(Documentation.DocumentSourceType.valueOf(docItem.getSourceType().toString()));
+                        doc.setVisibility(Documentation.DocumentVisibility.valueOf(docItem.getVisibility().toString()));
                         doc.setId(docItem.getId());
                         API api = new API(new APIIdentifier(docItem.getApiProvider(), docItem.getApiName(),
                                 docItem.getApiVersion()));
@@ -3234,7 +3085,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     protected void checkAPIVisibilityRestriction(String apiId, String organization) throws APIManagementException {
         try {
-            DevPortalAPI api = apiPersistenceInstance.getDevPortalAPI(new Organization(organization), apiId);
+            DevPortalAPI api = apiDAOImpl.getDevPortalAPI(new Organization(organization), apiId);
             if (api != null) {
                 checkVisibilityPermission(userNameWithoutChange, api.getVisibility(), api.getVisibleRoles());
             }
