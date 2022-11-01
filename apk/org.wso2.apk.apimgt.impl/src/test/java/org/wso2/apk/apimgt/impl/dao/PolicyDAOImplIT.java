@@ -11,8 +11,6 @@ import org.wso2.apk.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.apk.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.apk.apimgt.impl.dao.impl.PolicyDAOImpl;
 
-import java.util.UUID;
-
 public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     private static final Logger log = LoggerFactory.getLogger(PolicyDAOImplIT.class);
 

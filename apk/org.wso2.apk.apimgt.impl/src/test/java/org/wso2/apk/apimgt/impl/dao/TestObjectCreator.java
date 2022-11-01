@@ -1,6 +1,12 @@
 package org.wso2.apk.apimgt.impl.dao;
 
-import org.wso2.apk.apimgt.api.model.policy.*;
+import org.wso2.apk.apimgt.api.model.policy.APIPolicy;
+import org.wso2.apk.apimgt.api.model.policy.ApplicationPolicy;
+import org.wso2.apk.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.apk.apimgt.api.model.policy.QuotaPolicy;
+import org.wso2.apk.apimgt.api.model.policy.RequestCountLimit;
+import org.wso2.apk.apimgt.api.model.policy.SubscriptionPolicy;
+
 import org.wso2.apk.apimgt.impl.APIConstants;
 
 import java.util.UUID;

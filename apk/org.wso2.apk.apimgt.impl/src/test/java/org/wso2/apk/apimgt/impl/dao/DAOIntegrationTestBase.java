@@ -1,17 +1,11 @@
 package org.wso2.apk.apimgt.impl.dao;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
 
-import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
-import java.sql.SQLException;
 
 public class DAOIntegrationTestBase {
     protected DBDataSource dataSource;
@@ -51,17 +45,7 @@ public class DAOIntegrationTestBase {
     }
 
     /*@AfterClass
-    public void tempDBCleanup() throws SQLException, IOException {
-        if (H2.equals(database)) {
-            ((H2DataSource) dataSource).resetDB();
-        } else if (MYSQL.contains(database)) {
-            ((MySQLDataSource) dataSource).resetDB();
-        } else if (MSSQL.contains(database)) {
-            ((MSSQLDataSource) dataSource).resetDB();
-        } else if (POSTGRES.contains(database)) {
-            ((PostgreDataSource) dataSource).resetDB();
-        } else if (ORACLE.contains(database)) {
-            ((OracleDataSource) dataSource).resetDB();
-        }
+    public void tempDBCleanup() throws SQLException {
+        dataSource.resetDB();
     }*/
 }
