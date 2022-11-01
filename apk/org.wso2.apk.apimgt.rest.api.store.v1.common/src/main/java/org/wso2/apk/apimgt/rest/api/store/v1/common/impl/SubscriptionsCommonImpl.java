@@ -421,7 +421,7 @@ public class SubscriptionsCommonImpl {
      * @param subscriptionId subscription identifier
      * @return 200 response if successfully deleted the subscription
      */
-    public static SubscribedAPI deleteSubscriptionsBySubscriptionId(String subscriptionId, String organization)
+    public static SubscribedAPI deleteSubscription(String subscriptionId, String organization)
             throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer;
