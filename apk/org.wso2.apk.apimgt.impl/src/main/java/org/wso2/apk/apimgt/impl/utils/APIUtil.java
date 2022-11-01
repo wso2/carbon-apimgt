@@ -2006,8 +2006,7 @@ public final class APIUtil {
     public static boolean isEnabledUnlimitedTier() {
 
         ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                .getThrottleProperties();
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties();
         return throttleProperties.isEnableUnlimitedTier();
     }
 
@@ -4332,5 +4331,19 @@ public final class APIUtil {
         org.json.JSONObject jwtPayload = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().
                 decode(jwtParts[1])));
         return jwtPayload.getLong("exp"); // extract expiry time and return
+    }
+
+    /**
+     * Check whether given application , group combination exists
+     *
+     * @param subscriber      subscriber name
+     * @param applicationName application name
+     * @param groupId         group of the subscriber
+     * @return true if application group combination exist
+     * @throws APIManagementException if failed to get applications for given subscriber
+     */
+    public static boolean isApplicationGroupCombinationExist(String subscriber, String applicationName, String groupId)
+            throws APIManagementException {
+        return ApiMgtDAO.getInstance().isApplicationGroupCombinationExists(applicationName, subscriber, groupId);
     }
 }
