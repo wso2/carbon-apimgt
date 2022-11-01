@@ -220,7 +220,7 @@ public class SubscriptionsCommonImpl {
      * @param body new subscription details
      * @return newly added subscription as a SubscriptionDTO if successful
      */
-    public static SubscriptionDTO updateSubscriptions(String subscriptionId, SubscriptionDTO body, String organization)
+    public static SubscriptionDTO updateSubscription(String subscriptionId, SubscriptionDTO body, String organization)
             throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer;
@@ -252,12 +252,12 @@ public class SubscriptionsCommonImpl {
             // this will throw a APIMgtResourceNotFoundException
             if (body.getApiId() != null) {
                 if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(body.getApiId(), organization)) {
-                    throw new APIManagementException(
-                            "User " + username + " does not have permission to access API with Id : " + body.getApiId(),
-                            ExceptionCodes.NO_READ_PERMISSIONS);
+                    throw new APIManagementException("User " + username + " does not have permission to access API "
+                            + "with Id : " + body.getApiId(), ExceptionCodes.NO_READ_PERMISSIONS);
                 }
             } else {
-                String errorMessage = "Request must contain either apiIdentifier or apiProductIdentifier and the " + "relevant type";
+                String errorMessage = "Request must contain either apiIdentifier or apiProductIdentifier and the "
+                        + "relevant type";
                 throw new APIManagementException(
                         ExceptionCodes.from(ExceptionCodes.INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE, errorMessage));
             }
@@ -271,10 +271,10 @@ public class SubscriptionsCommonImpl {
 
             if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                 //application access failure occurred
-                throw new APIManagementException(
-                        "User " + username + " does not have permission to access application with Id : " + applicationId,
+                throw new APIManagementException("User " + username + " does not have permission to access "
+                        + "application with Id : " + applicationId,
                         ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR, RestApiConstants.RESOURCE_APPLICATION,
-                                applicationId));
+                        applicationId));
             }
 
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(body.getApiId(), organization);
@@ -452,9 +452,8 @@ public class SubscriptionsCommonImpl {
                     ExceptionCodes.SUBSCRIPTION_NOT_FOUND);
         }
         if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(subscribedAPI.getApplication())) {
-            throw new APIManagementException(
-                    "User " + username + " does not have permission to access application with Id : " + subscribedAPI.getApplication()
-                            .getUUID(),
+            throw new APIManagementException("User " + username + " does not have permission to access application "
+                    + "with Id : " + subscribedAPI.getApplication().getUUID(),
                     ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR, RestApiConstants.RESOURCE_APPLICATION,
                             subscribedAPI.getApplication().getUUID()));
         }
