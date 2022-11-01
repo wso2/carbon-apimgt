@@ -287,22 +287,15 @@ public class SubscriptionsCommonImpl {
                     subscriptionResponse.getSubscriptionUUID());
             SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI,
                     organization);
-            WorkflowResponse workflowResponse = subscriptionResponse.getWorkflowResponse();
-            if (workflowResponse instanceof HttpWorkflowResponse) {
-                String payload = workflowResponse.getJSONPayload();
-                addedSubscriptionDTO.setRedirectionParams(payload);
-            }
-
             return addedSubscriptionDTO;
-
         } catch (APIMgtAuthorizationFailedException e) {
             //this occurs when the api:application:tier mapping is not allowed. The reason for the message is taken from
             // the message of the exception e
             throw new APIManagementException(e.getMessage(), ExceptionCodes.FORBIDDEN_ERROR);
         } catch (SubscriptionAlreadyExistingException e) {
-            throw new APIManagementException(
-                    RestApiConstants.STATUS_CONFLICT_MESSAGE_SUBSCRIPTION_ALREADY_EXISTS + " " + body.getApiId() + ", for application " + body.getApplicationId(),
-                    e, ExceptionCodes.SUBSCRIPTION_ALREADY_EXISTS);
+            throw new APIManagementException(RestApiConstants.STATUS_CONFLICT_MESSAGE_SUBSCRIPTION_ALREADY_EXISTS
+                    + " " + body.getApiId() + ", for application " + body.getApplicationId(), e,
+                    ExceptionCodes.SUBSCRIPTION_ALREADY_EXISTS);
         }
     }
 
