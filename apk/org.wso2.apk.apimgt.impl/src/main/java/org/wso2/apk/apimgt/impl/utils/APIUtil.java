@@ -125,6 +125,7 @@ import org.wso2.apk.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.apk.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.apk.apimgt.impl.ConfigurationHolder;
 import org.wso2.apk.apimgt.impl.ExternalEnvironment;
+import org.wso2.apk.apimgt.impl.IDPConfiguration;
 import org.wso2.apk.apimgt.impl.PasswordResolverFactory;
 import org.wso2.apk.apimgt.impl.config.APIMConfigService;
 import org.wso2.apk.apimgt.impl.config.APIMConfigServiceImpl;
@@ -4345,5 +4346,33 @@ public final class APIUtil {
     public static boolean isApplicationGroupCombinationExist(String subscriber, String applicationName, String groupId)
             throws APIManagementException {
         return ApiMgtDAO.getInstance().isApplicationGroupCombinationExists(applicationName, subscriber, groupId);
+    }
+
+    /**
+     * Used to check whether Provisioning Out-of-Band OAuth Clients feature is enabled
+     *
+     * @return true if feature is enabled
+     */
+    public static boolean isMapExistingAuthAppsEnabled() {
+
+        ConfigurationHolder config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        String mappingEnabled = config.getFirstProperty(APIConstants.API_STORE_MAP_EXISTING_AUTH_APPS);
+        if (mappingEnabled == null) {
+            return false;
+        }
+        return Boolean.parseBoolean(mappingEnabled);
+    }
+
+    /**
+     * Returns the configuration of the Identity Provider. This is used for login/logout operation of API Publisher and
+     * API Developer Portal. By default, this is not defined in the configuration hence this returns null. In that
+     * case, local server will be used as the IDP.
+     *
+     * @return configuration of the Identity Provider from the api-manager configuration
+     */
+    public static IDPConfiguration getIdentityProviderConfig() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getIdentityProviderConfig();
     }
 }
