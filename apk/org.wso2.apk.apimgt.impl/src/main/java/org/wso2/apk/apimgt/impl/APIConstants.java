@@ -1380,6 +1380,8 @@ public final class APIConstants {
         public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
         public static final String ENDPOINT_SECURITY_USERNAME = "username";
 
+        public static final long UNASSIGNED_VALIDITY_PERIOD = -1L;
+
         private OAuthConstants() {
 
         }
@@ -2940,12 +2942,5 @@ public final class APIConstants {
     public static class MultitenantConstants {
         public static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
         public static final int SUPER_TENANT_ID = -1234;
-    }
-
-    public static class OAuthConstants {
-        public static final long UNASSIGNED_VALIDITY_PERIOD = -1L;
-        public static final String TOKEN_EXCHANGE = "urn:ietf:params:oauth:grant-type:token-exchange";
-        public static final String SUBJECT_TOKEN = "subject_token";
-        public static final String JWT_TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
     }
 }
