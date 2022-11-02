@@ -31,7 +31,6 @@ import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.util.Json;
-import org.apache.axis2.transport.http.HTTPConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -123,7 +122,7 @@ public class SOAPOperationBindingUtils {
             Operation op = new Operation();
             List<ModelImpl> inputParameterModel = operation.getInputParameterModel();
             List<ModelImpl> outputParameterModel = operation.getOutputParameterModel();
-            if (HTTPConstants.HTTP_METHOD_GET.equals(operation.getHttpVerb())) {
+            if (APIConstants.HTTP_GET.equals(operation.getHttpVerb())) {
                 for (ModelImpl input : inputParameterModel) {
                     if (input != null && operation.getName().equalsIgnoreCase(input.getName())) {
                         Map<String, Property> properties = input.getProperties();
@@ -177,7 +176,7 @@ public class SOAPOperationBindingUtils {
             extensions.put(SOAPToRESTConstants.Swagger.SOAP_MESSAGE_TYPE, operation.getMessageType());
             op.setVendorExtension(SOAPToRESTConstants.Swagger.WSO2_SOAP, extensions);
 
-            if (!HTTPConstants.HTTP_METHOD_GET.equals(operation.getHttpVerb())) {
+            if (!APIConstants.HTTP_GET.equals(operation.getHttpVerb())) {
                 ModelImpl inputModel = new ModelImpl();
                 inputModel.setName(operation.getName() + SOAPToRESTConstants.Swagger.INPUT_POSTFIX);
                 inputModel.setType(ObjectProperty.TYPE);
@@ -311,7 +310,7 @@ public class SOAPOperationBindingUtils {
                 String resourcePath;
                 String operationName = operation.getName();
                 operation.setSoapBindingOpName(operationName);
-                operation.setHttpVerb(HTTPConstants.HTTP_METHOD_POST);
+                operation.setHttpVerb(APIConstants.HTTP_POST);
                 if (operationName.toLowerCase().startsWith("get") && operation.getInputParameterModel() != null
                         && operation.getInputParameterModel().size() <= 1) {
 
@@ -321,13 +320,13 @@ public class SOAPOperationBindingUtils {
                         properties = operation.getInputParameterModel().get(0).getProperties();
                     }
                     if (properties == null) {
-                        operation.setHttpVerb(HTTPConstants.HTTP_METHOD_GET);
+                        operation.setHttpVerb(APIConstants.HTTP_GET);
                     } else if (properties.size() <= 1) {
                         for (String property : properties.keySet()) {
                             String type = properties.get(property).getType();
                             if (!(type.equals(ObjectProperty.TYPE) || type.equals(ArrayProperty.TYPE) || type
                                     .equals(RefProperty.TYPE))) {
-                                operation.setHttpVerb(HTTPConstants.HTTP_METHOD_GET);
+                                operation.setHttpVerb(APIConstants.HTTP_GET);
                             }
                         }
                     }
