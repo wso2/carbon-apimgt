@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,6 @@ import java.util.List;
 
 public interface OperationPolicyProvider {
 
-    //Common Operation Policies
-
     /**
      * Get all common operation policies
      *
@@ -42,8 +40,9 @@ public interface OperationPolicyProvider {
      * @return Operation policy data
      * @throws APIManagementException failed to get common operation policy
      */
-    OperationPolicyData getCommonOperationPolicyByPolicyName
-    (String name, String version, String organization, boolean isWithPolicyDefinition) throws APIManagementException;
+    OperationPolicyData getCommonOperationPolicyByPolicyName(
+            String name, String version, String organization, boolean isWithPolicyDefinition)
+            throws APIManagementException;
 
     /**
      * Get common operation policy for given id
@@ -53,8 +52,8 @@ public interface OperationPolicyProvider {
      * @return Operation policy data
      * @throws APIManagementException failed to get common operation policy
      */
-    OperationPolicyData getCommonOperationPolicyByPolicyId
-    (String policyId, String organization, boolean isWithPolicyDefinition) throws APIManagementException;
+    OperationPolicyData getCommonOperationPolicyByPolicyId(
+            String policyId, String organization, boolean isWithPolicyDefinition) throws APIManagementException;
 
     /**
      * Add operation policy as a common policy
@@ -87,9 +86,6 @@ public interface OperationPolicyProvider {
      */
     void deleteOperationPolicyById(String policyId, String organization) throws APIManagementException;
 
-
-    // API Specific
-
     /**
      * Get API-Specific operation policy by policy name
      *
@@ -100,8 +96,8 @@ public interface OperationPolicyProvider {
      * @return Operation policy data object
      * @throws APIManagementException failed to get API-Specific operation policy
      */
-    OperationPolicyData getAPISpecificOperationPolicyByPolicyName
-    (String apiUUID, String policyName, String policyVersion, String organization, boolean isWithPolicyDefinition)
+    OperationPolicyData getAPISpecificOperationPolicyByPolicyName(
+            String apiUUID, String policyName, String policyVersion, String organization, boolean isWithPolicyDefinition)
             throws APIManagementException;
 
     /**
@@ -113,8 +109,8 @@ public interface OperationPolicyProvider {
      * @return Operation policy data object
      * @throws APIManagementException failed to get API-Specific operation policy
      */
-    OperationPolicyData getAPISpecificOperationPolicyByPolicyID
-    (String apiUUID, String policyId, String organization, boolean isWithPolicyDefinition)
+    OperationPolicyData getAPISpecificOperationPolicyByPolicyID(
+            String apiUUID, String policyId, String organization, boolean isWithPolicyDefinition)
             throws APIManagementException;
 
     /**
@@ -176,8 +172,6 @@ public interface OperationPolicyProvider {
      */
     String addAPISpecificOperationPolicy(String apiID, OperationPolicyData operationPolicyData, String organization)
             throws APIManagementException;
-
-    //Other
 
     /**
      * This is Choreo specific function.

@@ -151,12 +151,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdOperationPolicyIsAttachedGet(String xWSO2Tenant, String apiId, String organizationId,
                                                           MessageContext messageContext) throws APIManagementException {
         try {
-            String organization;
-            if (organizationId != null) {
-                organization = organizationId;
-            } else {
-                organization = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
-            }
+            String organization = organizationId == null ?
+                    SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext) : organizationId;
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPIbyUUID(apiId, organization);
             boolean isAttached = false;
@@ -173,8 +169,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         } catch (APIManagementException e) {
             RestApiUtil.handleBadRequest(
-                    "An error has occurred while getting API for the given organization/tenantDomain and apiId combination.",
-                    e, log);
+                    "An error has occurred while getting API for the given organization/tenantDomain " +
+                            "and apiId combination.", e, log);
         }
         return Response.ok().build();
     }

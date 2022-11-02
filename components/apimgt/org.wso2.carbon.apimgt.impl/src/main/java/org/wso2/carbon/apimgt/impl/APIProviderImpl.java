@@ -1876,8 +1876,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 for (OperationPolicy operationPolicy : operationPolicies) {
                     String clonedPolicyId;
                     if (!clonedPolicies.containsKey(operationPolicy.getPolicyId())) {
-                        clonedPolicyId = operationPolicyProviderInstance.cloneAPISpecificOperationPolicy(operationPolicy.getPolicyId(), oldAPIUuid,
-                                newAPI.getUuid(), newAPI.getOrganization());
+                        clonedPolicyId =
+                                operationPolicyProviderInstance.cloneAPISpecificOperationPolicy(
+                                        operationPolicy.getPolicyId(), oldAPIUuid, newAPI.getUuid(),
+                                        newAPI.getOrganization());
                         clonedPolicies.put(operationPolicy.getPolicyId(), clonedPolicyId);
                     } else {
                         clonedPolicyId = clonedPolicies.get(operationPolicy.getPolicyId());

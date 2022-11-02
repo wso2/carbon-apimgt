@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,8 @@ public class UserTokenUtil {
             SignedJWTInfo signedToken = getSignedJwt(token);
             JSONObject organizationClaim =
                     signedToken.getJwtClaimsSet().getJSONObjectClaim(APIConstants.OperationPolicyConstants.ORGANIZATION);
-            if (organizationClaim != null && organizationClaim.containsKey(APIConstants.OperationPolicyConstants.HANDLE)) {
+            if (organizationClaim != null &&
+                    organizationClaim.containsKey(APIConstants.OperationPolicyConstants.HANDLE)) {
                 return organizationClaim.getAsString(APIConstants.OperationPolicyConstants.HANDLE);
             }
         } catch (ParseException e) {

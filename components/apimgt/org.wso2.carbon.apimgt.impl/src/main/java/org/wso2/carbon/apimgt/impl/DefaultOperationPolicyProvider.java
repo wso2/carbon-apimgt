@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,13 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.List;
 
-public class OperationPolicyProviderImpl implements OperationPolicyProvider {
+public class DefaultOperationPolicyProvider implements OperationPolicyProvider {
 
-    private static final Log log = LogFactory.getLog(OperationPolicyProviderImpl.class);
+    private static final Log log = LogFactory.getLog(DefaultOperationPolicyProvider.class);
 
     private final ApiMgtDAO apiMgtDAO;
 
-    public OperationPolicyProviderImpl() {
+    public DefaultOperationPolicyProvider() {
         apiMgtDAO = ApiMgtDAO.getInstance();
     }
 
@@ -117,8 +117,6 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
     public void deleteOperationPolicyById(String policyId, String organization) throws APIManagementException {
         apiMgtDAO.deleteOperationPolicyByPolicyId(policyId);
     }
-
-    // API SPECIFIC
 
     /**
      * Get API-Specific operation policy by name
@@ -242,16 +240,12 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
         for (OperationPolicyData policyData : operationPolicyDataList) {
             apiMgtDAO.cloneOperationPolicy(newApiUUID, policyData);
         }
-
     }
-
-    // Other
 
     @Override
     public Boolean isReadOnly() {
         return false;
     }
-
 
     /**
      * Import Operation policy. This will check existing API specific policy first and
@@ -275,7 +269,7 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
         OperationPolicySpecification importedSpec = importedPolicyData.getSpecification();
         OperationPolicyData existingOperationPolicy = getAPISpecificOperationPolicyByPolicyName
                 (importedPolicyData.getApiUUID(), importedSpec.getName(),
-                importedSpec.getVersion(), organization, false);
+                        importedSpec.getVersion(), organization, false);
         String policyId = null;
         if (existingOperationPolicy != null) {
             if (existingOperationPolicy.getMd5Hash().equals(importedPolicyData.getMd5Hash())) {
@@ -322,7 +316,6 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
                 }
             }
         }
-
         return policyId;
     }
 }
