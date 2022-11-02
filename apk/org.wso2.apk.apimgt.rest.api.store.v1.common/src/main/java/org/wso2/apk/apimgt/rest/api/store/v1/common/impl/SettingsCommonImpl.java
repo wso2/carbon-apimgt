@@ -40,9 +40,9 @@ import java.util.Set;
 /**
  * This class has Setting API service related Implementation
  */
-public class SettingsServiceImpl {
+public class SettingsCommonImpl {
 
-    private SettingsServiceImpl() {
+    private SettingsCommonImpl() {
     }
 
     /**

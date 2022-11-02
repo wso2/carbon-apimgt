@@ -29,9 +29,9 @@ import java.util.Set;
 /**
  * This class has Webhooks ApiService related Implementation
  */
-public class WebhookServiceImpl {
+public class WebhooksCommonImpl {
 
-    private WebhookServiceImpl() {
+    private WebhooksCommonImpl() {
     }
 
     /**

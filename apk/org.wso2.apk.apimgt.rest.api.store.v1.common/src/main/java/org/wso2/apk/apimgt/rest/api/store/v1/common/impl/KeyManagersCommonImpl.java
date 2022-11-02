@@ -31,11 +31,11 @@ import java.util.List;
 /**
  * This is the service implementation class for keyManagers api service operations
  */
-public class KeyManagerServiceImpl {
+public class KeyManagersCommonImpl {
 
-    private static final Log log = LogFactory.getLog(KeyManagerServiceImpl.class);
+    private static final Log log = LogFactory.getLog(KeyManagersCommonImpl.class);
 
-    private KeyManagerServiceImpl() {
+    private KeyManagersCommonImpl() {
     }
 
     /**

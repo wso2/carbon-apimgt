@@ -33,9 +33,9 @@ import java.util.Set;
 /**
  * This class has TagsApi service related Implementation
  */
-public class TagServiceImpl {
+public class TagsCommonImpl {
 
-    private TagServiceImpl() {
+    private TagsCommonImpl() {
     }
 
     /**

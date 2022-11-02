@@ -61,7 +61,7 @@ public class SettingsMappingUtil {
         settingsDTO.setIsPasswordChangeEnabled(enableChangePassword);
 
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        String tenantDomain = APIUtil.getTenantDomain(username);
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
         String userStorePasswordPattern = null;
