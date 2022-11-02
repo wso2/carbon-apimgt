@@ -28,7 +28,6 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.util.Base64;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
@@ -48,7 +47,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.TreeMap;
 import java.util.Map;
 
 /**

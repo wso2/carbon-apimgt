@@ -20,26 +20,19 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
-import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.*;
-import org.wso2.carbon.apimgt.internal.service.dto.*;
 
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import java.io.InputStream;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 
 public class ApiPoliciesApiServiceImpl implements ApiPoliciesApiService {

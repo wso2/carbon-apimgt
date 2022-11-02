@@ -410,7 +410,9 @@ public class JMSUtils extends BaseUtils {
                 connection = conFac.createConnection();
             }
             if (isDurable) {
-                connection.setClientID(clientID);
+                if (connection != null) {
+                    connection.setClientID(clientID);
+                }
             }
 
         } else {
@@ -436,7 +438,9 @@ public class JMSUtils extends BaseUtils {
                 }
             }
             if (isDurable) {
-                connection.setClientID(clientID);
+                if (connection != null) {
+                    connection.setClientID(clientID);
+                }
             }
         }
         return connection;

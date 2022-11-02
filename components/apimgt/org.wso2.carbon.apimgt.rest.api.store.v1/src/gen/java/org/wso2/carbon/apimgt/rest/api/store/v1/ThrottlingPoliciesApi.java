@@ -41,7 +41,7 @@ ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
     @Path("/{policyLevel}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get All Available Throttling Policies", notes = "Get available Throttling Policies ", response = ThrottlingPolicyListDTO.class, authorizations = {
+    @ApiOperation(value = "Get All Available Throttling Policies", notes = "This operation can be used to get all available application or subscription level throttling policies ", response = ThrottlingPolicyListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             
         })

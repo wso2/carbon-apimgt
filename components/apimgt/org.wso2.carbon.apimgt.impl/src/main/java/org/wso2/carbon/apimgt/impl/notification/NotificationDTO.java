@@ -17,8 +17,6 @@
  */
 package org.wso2.carbon.apimgt.impl.notification;
 
-import java.util.ArrayList;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 

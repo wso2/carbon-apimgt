@@ -43,10 +43,14 @@ public class RequestProcessor {
     public InboundProcessorResponseDTO handleRequest(int msgSize, String msgText,
                                                      InboundMessageContext inboundMessageContext) {
 
-        if (log.isDebugEnabled()) {
-            log.debug("Perform websocket request throttling for: " + inboundMessageContext.getApiContext());
+        InboundProcessorResponseDTO responseDTO;
+        responseDTO = InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext);
+        if (!responseDTO.isError()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Perform websocket request throttling for: " + inboundMessageContext.getApiContext());
+            }
+            responseDTO = InboundWebsocketProcessorUtil.doThrottle(msgSize, null, inboundMessageContext, responseDTO);
         }
-        return InboundWebsocketProcessorUtil.doThrottle(msgSize, null, inboundMessageContext,
-                new InboundProcessorResponseDTO());
+        return responseDTO;
     }
 }

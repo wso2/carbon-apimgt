@@ -177,6 +177,8 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, api.getApiSecurity());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA,
                                             Boolean.toString(api.isEnableSchemaValidation()));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_SUB_VERIFICATION,
+                                  Boolean.toString(api.isEnableSubscriberVerification()));
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE, Boolean.toString(api.isEnableStore()));
             artifact.setAttribute(APIConstants.API_OVERVIEW_TESTKEY, api.getTestKey());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE, api.getVersionTimestamp());
@@ -657,6 +659,8 @@ public class RegistryPersistenceUtil {
             api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
             api.setEnableSchemaValidation(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
+            api.setEnableSubscriberVerification(
+                    Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_SUB_VERIFICATION)));
             api.setEnableStore(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE)));
             api.setTestKey(artifact.getAttribute(APIConstants.API_OVERVIEW_TESTKEY));
 
@@ -1065,8 +1069,7 @@ public class RegistryPersistenceUtil {
     }
 
     public static String getLcStateFromArtifact(GovernanceArtifact artifact) throws GovernanceException {
-        String lcState = artifact.getLifecycleState();
-        String state = (lcState != null) ? lcState : artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+        String state = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
         return (state != null) ? state.toUpperCase() : null;
     }
 

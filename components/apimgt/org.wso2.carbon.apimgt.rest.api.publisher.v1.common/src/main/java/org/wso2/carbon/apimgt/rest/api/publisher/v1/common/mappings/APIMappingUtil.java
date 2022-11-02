@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
+import org.wso2.carbon.apimgt.api.dto.APIEndpointValidationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -76,6 +77,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropert
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
@@ -90,6 +93,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
@@ -202,6 +206,9 @@ public class APIMappingUtil {
         }
         if (dto.isEnableSchemaValidation() != null) {
             model.setEnableSchemaValidation(dto.isEnableSchemaValidation());
+        }
+        if (dto.isEnableSubscriberVerification() != null) {
+            model.setEnableSubscriberVerification(dto.isEnableSubscriberVerification());
         }
         model.setEnableStore(true);
         if (dto.getAdvertiseInfo() != null) {
@@ -569,6 +576,24 @@ public class APIMappingUtil {
     }
 
     /**
+     * Converts a List object of APIs into quick info DTO List.
+     *
+     * @param apiList List of APIs
+     * @return APIListDTO object containing APIDTOs
+     */
+    public static APIMetadataListDTO fromAPIListToAPIMetadataListDTO(List<API> apiList) {
+
+        APIMetadataListDTO apiMetadataListDTO = new APIMetadataListDTO();
+        List<APIMetadataDTO> apiInfoDTOs = apiMetadataListDTO.getList();
+        for (API api : apiList) {
+            apiInfoDTOs.add(fromAPIToAPIMetadataDTO(api));
+        }
+        apiMetadataListDTO.setCount(apiInfoDTOs.size());
+
+        return apiMetadataListDTO;
+    }
+
+    /**
      * Converts a List object of URITemplates into APIOperations DTO List.
      *
      * @param uriTemplateList uriTemplateList
@@ -667,6 +692,31 @@ public class APIMappingUtil {
             apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
         }
         return apiInfoDTO;
+    }
+
+    /**
+     * Creates a very minimal DTO representation of an API object.
+     *
+     * @param api API object
+     * @return a very minimal representation DTO
+     */
+    public static APIMetadataDTO fromAPIToAPIMetadataDTO(API api) {
+
+        String context = api.getContextTemplate();
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }
+
+        APIMetadataDTO apiMetadataDTO = new APIMetadataDTO();
+        apiMetadataDTO.setContext(context);
+        apiMetadataDTO.setId(api.getUuid());
+        APIIdentifier apiId = api.getId();
+        apiMetadataDTO.setName(apiId.getApiName());
+        apiMetadataDTO.setVersion(apiId.getVersion());
+        String providerName = api.getId().getProviderName();
+        apiMetadataDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+
+        return apiMetadataDTO;
     }
 
     /**
@@ -770,6 +820,42 @@ public class APIMappingUtil {
         PaginationDTO paginationDTO = CommonMappingUtil
                 .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
         ((APIListDTO) apiListDTO).setPagination(paginationDTO);
+    }
+
+    /**
+     * Sets pagination urls for a APIMetadataListDTO object given pagination parameters and url parameters.
+     *
+     * @param apiMetadataListDTO a APIMetadataListDTO object
+     * @param alias      alias of the certificate
+     * @param limit      max number of objects returned
+     * @param offset     starting index
+     * @param size       max offset
+     */
+    public static void setPaginationParamsForAPIMetadataListDTO(
+            Object apiMetadataListDTO, String alias, int offset, int limit, int size) {
+
+        //acquiring pagination parameters and setting pagination urls
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiCommonUtil
+                    .getCertificateUsagePaginatedURL(alias,
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiCommonUtil
+                    .getCertificateUsagePaginatedURL(alias,
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
+        }
+
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        ((APIMetadataListDTO) apiMetadataListDTO).setPagination(paginationDTO);
     }
 
     private static String checkAndSetVersionParam(String context) {
@@ -889,6 +975,7 @@ public class APIMappingUtil {
         dto.setRevisionedApiId(model.getRevisionedApiId());
         dto.setRevisionId(model.getRevisionId());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
+        dto.setEnableSubscriberVerification(model.isEnableSubscriberVerification());
 
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
@@ -1198,12 +1285,24 @@ public class APIMappingUtil {
         if (corsConfiguration == null) {
             corsConfiguration = APIUtil.getDefaultCorsConfiguration();
         }
-        apiCorsConfigurationDTO
-                .setAccessControlAllowOrigins(corsConfiguration.getAccessControlAllowOrigins());
-        apiCorsConfigurationDTO
-                .setAccessControlAllowHeaders(corsConfiguration.getAccessControlAllowHeaders());
-        apiCorsConfigurationDTO
-                .setAccessControlAllowMethods(corsConfiguration.getAccessControlAllowMethods());
+        List<String> accessControlAllowOrigins = corsConfiguration.getAccessControlAllowOrigins();
+        List<String> accessControlAllowHeaders = corsConfiguration.getAccessControlAllowHeaders();
+        List<String> accessControlAllowMethods = corsConfiguration.getAccessControlAllowMethods();
+        if (accessControlAllowOrigins == null) {
+            apiCorsConfigurationDTO.setAccessControlAllowOrigins(Collections.emptyList());
+        } else {
+            apiCorsConfigurationDTO.setAccessControlAllowOrigins(accessControlAllowOrigins);
+        }
+        if (accessControlAllowHeaders == null) {
+            apiCorsConfigurationDTO.setAccessControlAllowHeaders(Collections.emptyList());
+        } else {
+            apiCorsConfigurationDTO.setAccessControlAllowHeaders(accessControlAllowHeaders);
+        }
+        if (accessControlAllowMethods == null) {
+            apiCorsConfigurationDTO.setAccessControlAllowMethods(Collections.emptyList());
+        } else {
+            apiCorsConfigurationDTO.setAccessControlAllowMethods(accessControlAllowMethods);
+        }
         apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isCorsConfigurationEnabled());
         apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAccessControlAllowCredentials());
         dto.setCorsConfiguration(apiCorsConfigurationDTO);
@@ -2045,10 +2144,12 @@ public class APIMappingUtil {
 
         for (APIOperationsDTO operationsDTO : apiOperationsDTO) {
             String key = operationsDTO.getTarget() + ":" + operationsDTO.getVerb();
-            List<OperationPolicy> operationPolicies = uriTemplateMap.get(key).getOperationPolicies();
-            if (!operationPolicies.isEmpty()) {
-                operationsDTO.setOperationPolicies(
-                        OperationPolicyMappingUtil.fromOperationPolicyListToDTO(operationPolicies));
+            if (uriTemplateMap.get(key) != null) {
+                List<OperationPolicy> operationPolicies = uriTemplateMap.get(key).getOperationPolicies();
+                if (!operationPolicies.isEmpty()) {
+                    operationsDTO.setOperationPolicies(
+                            OperationPolicyMappingUtil.fromOperationPolicyListToDTO(operationPolicies));
+                }
             }
         }
     }
@@ -2349,7 +2450,7 @@ public class APIMappingUtil {
         if (null != product.getCreatedTime()) {
             Date createdTime = product.getCreatedTime();
             Timestamp timeStamp = new Timestamp(createdTime.getTime());
-            productDto.setCreatedTime(String.valueOf(timeStamp));
+            productDto.setCreatedTime(String.valueOf(timeStamp.getTime()));
         }
 
         return productDto;
@@ -3045,6 +3146,16 @@ public class APIMappingUtil {
             }
         }
         return apiRevisionDeploymentDTO;
+    }
+
+    public static ApiEndpointValidationResponseDTO fromEndpointValidationToDTO(
+            APIEndpointValidationDTO endpointValidationDTO) {
+        ApiEndpointValidationResponseDTO apiEndpointValidationResponseDTO = new ApiEndpointValidationResponseDTO();
+        apiEndpointValidationResponseDTO.setStatusCode(endpointValidationDTO.getStatusCode());
+        apiEndpointValidationResponseDTO.setStatusMessage(endpointValidationDTO.getStatusMessage());
+        apiEndpointValidationResponseDTO.setError(endpointValidationDTO.getError());
+
+        return apiEndpointValidationResponseDTO;
     }
 
     private static Date parseStringToDate(String time) throws java.text.ParseException {

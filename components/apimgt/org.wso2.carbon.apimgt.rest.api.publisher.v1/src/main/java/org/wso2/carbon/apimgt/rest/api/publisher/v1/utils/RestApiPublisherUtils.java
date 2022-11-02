@@ -263,7 +263,7 @@ public class RestApiPublisherUtils {
         return fileContentType;
     }
 
-    public static File exportOperationPolicyData(OperationPolicyData policyData)
+    public static File exportOperationPolicyData(OperationPolicyData policyData, String format)
             throws APIManagementException {
 
         File exportFolder = null;
@@ -276,9 +276,15 @@ public class RestApiPublisherUtils {
             CommonUtil.createDirectory(archivePath);
             String policyName = archivePath + File.separator + policyData.getSpecification().getName();
             if (policyData.getSpecification() != null) {
-                CommonUtil.writeDtoToFile(policyName, ExportFormat.YAML,
-                        ImportExportConstants.TYPE_POLICY_SPECIFICATION,
-                        policyData.getSpecification());
+                if (format.equalsIgnoreCase(ExportFormat.YAML.name())) {
+                    CommonUtil.writeDtoToFile(policyName, ExportFormat.YAML,
+                            ImportExportConstants.TYPE_POLICY_SPECIFICATION,
+                            policyData.getSpecification());
+                } else if (format.equalsIgnoreCase(ExportFormat.JSON.name())) {
+                    CommonUtil.writeDtoToFile(policyName, ExportFormat.JSON,
+                            ImportExportConstants.TYPE_POLICY_SPECIFICATION,
+                            policyData.getSpecification());
+                }
             }
             if (policyData.getSynapsePolicyDefinition() != null) {
                 CommonUtil.writeFile(policyName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION,

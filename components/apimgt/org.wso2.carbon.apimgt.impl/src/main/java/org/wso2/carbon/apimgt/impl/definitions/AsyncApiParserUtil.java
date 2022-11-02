@@ -2,8 +2,6 @@ package org.wso2.carbon.apimgt.impl.definitions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import io.apicurio.datamodels.Library;
-import io.apicurio.datamodels.asyncapi.models.AaiDocument;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -13,23 +11,18 @@ import org.apache.http.client.methods.HttpGet;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.*;
-import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 

@@ -18,7 +18,6 @@
 package org.wso2.carbon.apimgt.api;
 
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import java.util.Map;
 

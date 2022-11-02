@@ -376,6 +376,19 @@ public interface KeyManager {
      */
     default Map<String, String> getUserClaims(String username, Map<String, Object> properties)
             throws APIManagementException {
+
         return Collections.emptyMap();
+    }
+
+    /**
+     * This method calls the key manager to revoke the JWT token which was identified as a One Time Token.
+     * Uses in the one Time Token Revocation Mediator
+     *
+     * @param token       JWT token
+     * @param consumerKey consumer key
+     */
+    default void revokeOneTimeToken(String token, String consumerKey) {
+
+        log.warn("revokeOneTimeToken function is not supported");
     }
 }

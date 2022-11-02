@@ -24,11 +24,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -49,6 +46,8 @@ public class OrganizationPurgeDAO {
     private static final Log log = LogFactory.getLog(OrganizationPurgeDAO.class);
     private static OrganizationPurgeDAO INSTANCE = null;
     private boolean multiGroupAppSharingEnabled = false;
+    private final String NAME = "NAME";
+    private final String ORGANIZATION = "ORGANIZATION";
 
     private OrganizationPurgeDAO() {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
@@ -62,11 +61,9 @@ public class OrganizationPurgeDAO {
      * @return {@link OrganizationPurgeDAO} instance
      */
     public static OrganizationPurgeDAO getInstance() {
-
         if (INSTANCE == null) {
             INSTANCE = new OrganizationPurgeDAO();
         }
-
         return INSTANCE;
     }
 
@@ -190,15 +187,12 @@ public class OrganizationPurgeDAO {
             connection.setAutoCommit(false);
 
             deleteAmApiUrlMappings(connection, OrganizationPurgeConstants.REMOVE_AM_URL_MAPPINGS_SQL, organization);
-
             // Remove records from AM_API table and associated data through cascade delete
             deleteOrganizationAPIData(connection, OrganizationPurgeConstants.REMOVE_BULK_APIS_DATA_FROM_AM_API_SQL, organization);
-
             deleteAPIsFromDefaultVersion(connection, OrganizationPurgeConstants.REMOVE_BULK_APIS_DEFAULT_VERSION_SQL, organization);
 
             //Remove API Cleanup tasks
             String convertStr = "";
-
             if (connection.getMetaData().getURL().contains("sqlserver")) {
                 convertStr = "CONVERT(CHAR, API.API_ID)";
             } else {
@@ -207,7 +201,6 @@ public class OrganizationPurgeDAO {
 
             String deleteBulkAPIWF = OrganizationPurgeConstants.DELETE_BULK_API_WORKFLOWS_REQUEST_SQL.replaceAll("_CONVERT_PLACEHOLDER_", convertStr);
             deleteAPICleanupTasks(connection, deleteBulkAPIWF, organization);
-
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while removing the  API data of organization " + organization + " from the database",
@@ -217,7 +210,6 @@ public class OrganizationPurgeDAO {
 
     private void deleteAmApiUrlMappings(Connection conn, String deleteURLMappingsQuery, String organization)
             throws APIManagementException {
-
         try (PreparedStatement prepStmt = conn.prepareStatement(deleteURLMappingsQuery)) {
             prepStmt.setString(1, organization);
             prepStmt.execute();
@@ -233,7 +225,6 @@ public class OrganizationPurgeDAO {
 
     private void deleteOrganizationAPIData(Connection conn, String deleteAPIQuery, String organization)
             throws APIManagementException {
-
         try (PreparedStatement prepStmt = conn.prepareStatement(deleteAPIQuery)) {
             prepStmt.setString(1, organization);
             prepStmt.execute();
@@ -249,7 +240,6 @@ public class OrganizationPurgeDAO {
 
     private void deleteAPICleanupTasks(Connection conn, String deleteCleanUpTasksQuery, String organization)
             throws APIManagementException {
-
         try (PreparedStatement prepStmt = conn.prepareStatement(deleteCleanUpTasksQuery)) {
             prepStmt.setString(1, organization);
             prepStmt.executeUpdate();
@@ -266,7 +256,6 @@ public class OrganizationPurgeDAO {
 
     private void deleteAPIsFromDefaultVersion(Connection conn, String deleteAPIDefaultVersionQuery, String organization)
             throws APIManagementException {
-
         try (PreparedStatement prepStmt = conn.prepareStatement(deleteAPIDefaultVersionQuery)) {
             prepStmt.setString(1, organization);
             prepStmt.execute();
@@ -307,7 +296,6 @@ public class OrganizationPurgeDAO {
             throw new APIManagementException(
                     "Error while deleting key managers:  " + kmIdList + " in organization " + organization, e);
         }
-
     }
 
     /**
@@ -317,14 +305,11 @@ public class OrganizationPurgeDAO {
      * @throws APIManagementException if failed to remove pending subscriptions
      */
     public void removePendingSubscriptions(String organization) throws APIManagementException {
-
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     OrganizationPurgeConstants.DELETE_PENDING_SUBSCRIPTIONS_SQL)) {
                 preparedStatement.setString(1, organization);
-
                 preparedStatement.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
@@ -354,7 +339,6 @@ public class OrganizationPurgeDAO {
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     OrganizationPurgeConstants.DELETE_APPLICATION_CREATION_WORKFLOWS_SQL)) {
                 preparedStatement.setString(1, organization);
-
                 preparedStatement.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
@@ -388,7 +372,6 @@ public class OrganizationPurgeDAO {
                     OrganizationPurgeConstants.REMOVE_PENDING_APPLICATION_REGISTRATIONS_SQL)) {
                 preparedStatement.setString(1, organization);
                 preparedStatement.executeUpdate();
-
                 connection.commit();
             } catch (SQLException e) {
                 try {
@@ -413,7 +396,6 @@ public class OrganizationPurgeDAO {
      * @throws APIManagementException if failed to delete applications for organization
      */
     public void deleteApplicationList(String organization) throws APIManagementException {
-
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
 
@@ -426,12 +408,11 @@ public class OrganizationPurgeDAO {
                     PreparedStatement deleteDomainApp = connection.prepareStatement(
                             SQLConstants.REMOVE_APPLICATION_FROM_DOMAIN_MAPPINGS_SQL)) {
                 prepStmtGetConsumerKey.setString(1, organization);
-
                 try (ResultSet rs = prepStmtGetConsumerKey.executeQuery()) {
                     while (rs.next()) {
                         String consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
-                        String keyManagerName = rs.getString("NAME");
-                        String keyManagerOrganization = rs.getString("ORGANIZATION");
+                        String keyManagerName = rs.getString(NAME);
+                        String keyManagerOrganization = rs.getString(ORGANIZATION);
 
                         // This is true when OAuth App has been created by pasting consumer key/secret in the screen.
                         String mode = rs.getString("CREATE_MODE");
@@ -453,7 +434,6 @@ public class OrganizationPurgeDAO {
                                                     + " and organization: " + organization, e);
                                 }
                             }
-
                             // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
                             // call delete.
                             if (!APIConstants.OAuthAppMode.MAPPED.name().equals(mode)) {
@@ -472,7 +452,6 @@ public class OrganizationPurgeDAO {
                                         handleException("Error while Deleting Client Application for organization: "
                                                 + organization, e);
                                     }
-
                                 }
                             }
                         }
@@ -546,7 +525,6 @@ public class OrganizationPurgeDAO {
     }
 
     private void handleException(String msg, Throwable t) throws APIManagementException {
-
         log.error(msg, t);
         throw new APIManagementException(msg, t);
     }

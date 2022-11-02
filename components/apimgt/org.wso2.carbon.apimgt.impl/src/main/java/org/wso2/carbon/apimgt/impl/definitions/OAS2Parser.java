@@ -1538,8 +1538,10 @@ public class OAS2Parser extends APIDefinition {
                     if (defaultTypeScopes == null) {
                         defaultTypeScopes = new HashMap<>();
                     }
-                    for (Map.Entry<String, String> input : noneDefaultFlowScopes.entrySet()) {
-                        defaultTypeScopes.put(input.getKey(), input.getValue());
+                    if (noneDefaultFlowScopes != null) {
+                        for (Map.Entry<String, String> input : noneDefaultFlowScopes.entrySet()) {
+                            defaultTypeScopes.put(input.getKey(), input.getValue());
+                        }
                     }
                     defaultTypeFlow.setScopes(defaultTypeScopes);
                     //Check X-Scope Bindings

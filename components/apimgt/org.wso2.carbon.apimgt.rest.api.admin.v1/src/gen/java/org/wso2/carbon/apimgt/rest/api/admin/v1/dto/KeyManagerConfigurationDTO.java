@@ -142,7 +142,7 @@ public class KeyManagerConfigurationDTO   {
   }
 
   
-  @ApiModelProperty(example = "Entet username to connect to key manager", value = "")
+  @ApiModelProperty(example = "Enter username to connect to key manager", value = "")
   @JsonProperty("tooltip")
   public String getTooltip() {
     return tooltip;

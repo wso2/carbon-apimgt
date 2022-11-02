@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 
-import java.util.List;
+import java.util.*;
 
 public class SubscriptionDeletionApprovalWorkflowExecutor extends WorkflowExecutor {
 
@@ -95,7 +95,7 @@ public class SubscriptionDeletionApprovalWorkflowExecutor extends WorkflowExecut
     @Override
     public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {
 
-        return null;
+        return Collections.emptyList();
     }
 
     @Override

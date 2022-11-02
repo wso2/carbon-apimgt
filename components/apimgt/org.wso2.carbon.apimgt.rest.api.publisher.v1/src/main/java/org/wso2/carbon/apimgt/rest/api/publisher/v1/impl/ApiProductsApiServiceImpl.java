@@ -31,7 +31,6 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
@@ -49,6 +48,7 @@ import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
+import org.wso2.carbon.apimgt.impl.restapi.publisher.ApiProductsApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -70,7 +70,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.identity.entitlement.stub.types.axis2.Publish;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
@@ -103,21 +102,20 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProductIdentifier apiProductIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
             if (log.isDebugEnabled()) {
-                log.debug("Delete API Product request: Id " +apiProductId + " by " + username);
+                log.debug("Delete API Product request: Id " + apiProductId + " by " + username);
             }
             APIProduct apiProduct = apiProvider.getAPIProductbyUUID(apiProductId, organization);
             if (apiProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
+            } else {
+                boolean isAPIPublishedOrDeprecated = APIStatus.PUBLISHED.getStatus().equals(apiProduct.getState()) ||
+                        APIStatus.DEPRECATED.getStatus().equals(apiProduct.getState());
+                List<SubscribedAPI> apiUsages = apiProvider.getAPIProductUsageByAPIProductId(apiProductIdentifier);
+                if (isAPIPublishedOrDeprecated && (apiUsages != null && apiUsages.size() > 0)) {
+                    RestApiUtil.handleConflict("Cannot remove the API " + apiProductIdentifier + " as active subscriptions exist", log);
+                }
+                apiProduct.setOrganization(organization);
             }
-
-            boolean isAPIPublishedOrDeprecated = APIStatus.PUBLISHED.getStatus().equals(apiProduct.getState()) ||
-                    APIStatus.DEPRECATED.getStatus().equals(apiProduct.getState());
-            List<SubscribedAPI> apiUsages = apiProvider.getAPIProductUsageByAPIProductId(apiProductIdentifier);
-            if (isAPIPublishedOrDeprecated && (apiUsages != null && apiUsages.size() > 0)) {
-                RestApiUtil.handleConflict("Cannot remove the API " + apiProductIdentifier + " as active subscriptions exist", log);
-            }
-
-            apiProduct.setOrganization(organization);
             apiProvider.deleteAPIProduct(apiProduct);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -916,25 +914,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIRevisionListDTO apiRevisionListDTO;
             List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiProductId);
-            if (StringUtils.equalsIgnoreCase(query, "deployed:true")) {
-                List<APIRevision> apiDeployedRevisions = new ArrayList<>();
-                for (APIRevision apiRevision : apiRevisions) {
-                    if (!apiRevision.getApiRevisionDeploymentList().isEmpty()) {
-                        apiDeployedRevisions.add(apiRevision);
-                    }
-                }
-                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiDeployedRevisions);
-            } else if (StringUtils.equalsIgnoreCase(query, "deployed:false")) {
-                List<APIRevision> apiProductNotDeployedRevisions = new ArrayList<>();
-                for (APIRevision apiRevision : apiRevisions) {
-                    if (apiRevision.getApiRevisionDeploymentList().isEmpty()) {
-                        apiProductNotDeployedRevisions.add(apiRevision);
-                    }
-                }
-                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiProductNotDeployedRevisions);
-            } else {
-                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
-            }
+            apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(
+                    ApiProductsApiServiceImplUtils.getAPIRevisionListDTO(query, apiRevisions));
             return Response.ok().entity(apiRevisionListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding retrieving API Revision for API Product id : " + apiProductId

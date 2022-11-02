@@ -25,24 +25,17 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.SubscriptionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -68,7 +61,6 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                                                        MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             // validates the subscriptionId if it exists
             SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
@@ -118,7 +110,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
             if (apiId != null) {
                 String apiUuid = apiId;
-                APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
+                APIRevision apiRevision = apiProvider.checkAPIUUIDIsARevisionUUID(apiId);
                 if (apiRevision != null && apiRevision.getApiUUID() != null) {
                     apiUuid = apiRevision.getApiUUID();
                 }
@@ -203,7 +195,6 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
             // validates the subscriptionId if it exists

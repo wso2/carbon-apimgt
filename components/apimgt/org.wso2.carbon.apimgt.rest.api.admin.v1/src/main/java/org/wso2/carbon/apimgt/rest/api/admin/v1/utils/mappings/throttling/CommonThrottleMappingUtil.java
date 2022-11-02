@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.HeaderCondition;
 import org.wso2.carbon.apimgt.api.model.policy.IPCondition;
 import org.wso2.carbon.apimgt.api.model.policy.JWTClaimsCondition;
-import org.wso2.carbon.apimgt.api.model.policy.Limit;
 import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;

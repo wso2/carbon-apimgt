@@ -60,6 +60,7 @@ public class APIDTO   {
     private String revisionedApiId = null;
     private Integer revisionId = null;
     private Boolean enableSchemaValidation = null;
+    private Boolean enableSubscriberVerification = null;
 
     @XmlType(name="TypeEnum")
     @XmlEnum(String.class)
@@ -611,6 +612,23 @@ return null;
   public void setEnableSchemaValidation(Boolean enableSchemaValidation) {
     this.enableSchemaValidation = enableSchemaValidation;
   }
+
+    /**
+     **/
+    public APIDTO enableSubscriberVerification(Boolean enableSubscriberVerification) {
+        this.enableSubscriberVerification = enableSubscriberVerification;
+        return this;
+    }
+
+    @ApiModelProperty(example = "false", value = "")
+    @JsonProperty("enableSubscriberVerification")
+    public Boolean isEnableSubscriberVerification() {
+        return enableSubscriberVerification;
+    }
+
+    public void setEnableSubscriberVerification(Boolean enableSubscriberVerification) {
+        this.enableSubscriberVerification = enableSubscriberVerification;
+    }
 
   /**
    * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC
@@ -1317,6 +1335,7 @@ return null;
         Objects.equals(revisionedApiId, API.revisionedApiId) &&
         Objects.equals(revisionId, API.revisionId) &&
         Objects.equals(enableSchemaValidation, API.enableSchemaValidation) &&
+        Objects.equals(enableSubscriberVerification, API.enableSubscriberVerification) &&
         Objects.equals(type, API.type) &&
         Objects.equals(audience, API.audience) &&
         Objects.equals(transport, API.transport) &&
@@ -1359,7 +1378,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols);
   }
 
   @Override
@@ -1384,6 +1403,7 @@ return null;
     sb.append("    revisionedApiId: ").append(toIndentedString(revisionedApiId)).append("\n");
     sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
+    sb.append("    enableSubscriberVerification: ").append(toIndentedString(enableSubscriberVerification)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    audience: ").append(toIndentedString(audience)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
@@ -1437,4 +1457,3 @@ return null;
     return o.toString().replace("\n", "\n    ");
   }
 }
-

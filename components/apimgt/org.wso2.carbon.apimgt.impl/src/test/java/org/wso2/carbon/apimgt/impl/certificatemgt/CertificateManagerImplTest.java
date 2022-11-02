@@ -18,17 +18,14 @@
  */
 package org.wso2.carbon.apimgt.impl.certificatemgt;
 
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.testng.annotations.BeforeTest;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
@@ -83,7 +80,7 @@ public class CertificateManagerImplTest {
                     "zXwljpwk01xW0pg7IxDL/hdeC8jgxlDIB1Zz2NFwjDYeJtw8+l3e5T9c6fG0MsyhOYw3D2zvo66Z\r\n" +
                     "XUHI2Xu3P3ZLhKMhMB8wHQYDVR0OBBYEFOKUFMb/vRAyLr86vxJl0hwmy+jqMAsGByqGSM44BAMF\r\n" +
                     "AAMvADAsAhQW0OvWKXAO5V+37VtaAEX0yAYhgQIUG0q66Btv7Pk/HGGwBnYiHjCpuL4=\r\n";
-    static CertificateMgtDAO certificateMgtDAO;
+    private static CertificateMgtDAO certificateMgtDAO;
 
     @BeforeClass
     public static void init() throws XMLStreamException {
@@ -378,21 +375,28 @@ public class CertificateManagerImplTest {
         List<CertificateMetadataDTO> certificateMetadataList = new ArrayList<>();
         certificateMetadataList.add(certificateMetadataDTO);
 
-        Mockito.when(certificateMgtDAO.getCertificates(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt()))
+        Mockito.when(certificateMgtDAO.getCertificates(ALIAS, null, TENANT_ID))
                 .thenReturn(certificateMetadataList);
         boolean result = certificateManager.isCertificatePresent(TENANT_ID, ALIAS);
         Assert.assertTrue(result);
     }
 
     @Test
-    public void testGetCertificateInformation() throws APIManagementException {
+    public void testGetCertificateInformation() throws Exception {
 
-        CertificateInformationDTO certificateInformation = generateCertificateInformationDTO();
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "getCertificateInformation", String.class))
-                .toReturn(certificateInformation);
+        CertificateMetadataDTO dto = generateMetadata();
+        dto.setCertificate(BASE64_ENCODED_CERT);
 
-        CertificateInformationDTO certificateInformationDTO = certificateManager.getCertificateInformation(ALIAS);
+        Mockito.when(certificateMgtDAO.getCertificate(ALIAS, MultitenantConstants.SUPER_TENANT_ID)).thenReturn(dto);
+        CertificateInformationDTO certificateInformationDTO =
+                certificateManager.getCertificateInformation(MultitenantConstants.SUPER_TENANT_ID, ALIAS);
         Assert.assertNotNull(certificateInformationDTO);
+        CertificateInformationDTO expected = CertificateMgtUtils.getInstance().getCertificateInfo(dto.getCertificate());
+        Assert.assertEquals(expected.getFrom(), certificateInformationDTO.getFrom());
+        Assert.assertEquals(expected.getStatus(), certificateInformationDTO.getStatus());
+        Assert.assertEquals(expected.getSubject(), certificateInformationDTO.getSubject());
+        Assert.assertEquals(expected.getTo(), certificateInformationDTO.getTo());
+        Assert.assertEquals(expected.getVersion(), certificateInformationDTO.getVersion());
 
     }
 

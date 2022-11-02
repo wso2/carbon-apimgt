@@ -47,10 +47,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.StringReader;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -317,8 +315,14 @@ public class CommonUtil {
 
                 //This index variable is used to get the extracted folder name; that is root directory
                 if (index == 0) {
-                    archiveName = currentEntry
-                            .substring(0, currentEntry.indexOf(ImportExportConstants.ZIP_FILE_SEPARATOR));
+                    if (currentEntry.contains("/")) {
+                        archiveName = currentEntry
+                                .substring(0, currentEntry.indexOf(ImportExportConstants.ZIP_FILE_SEPARATOR));
+                    } else if (currentEntry.contains("\\")) {
+                        archiveName = currentEntry
+                                .substring(0, currentEntry.indexOf(ImportExportConstants.WIN_ZIP_FILE_SEPARATOR));
+
+                    }
                     --index;
                 }
 

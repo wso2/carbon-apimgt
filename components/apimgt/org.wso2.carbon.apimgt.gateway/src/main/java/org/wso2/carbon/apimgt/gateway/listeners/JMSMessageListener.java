@@ -30,9 +30,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.gateway.dto.APICondition;
 
 import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

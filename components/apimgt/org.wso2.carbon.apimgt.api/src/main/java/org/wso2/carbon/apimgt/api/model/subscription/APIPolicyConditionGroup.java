@@ -23,7 +23,6 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Entity for keeping details related to ConditionGroups.

@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -111,11 +112,22 @@ public class SynapsePolicyAggregator {
                         try {
                             String renderedTemplate =
                                     renderPolicyTemplate(policyDefinition.getContent(), policyParameters);
-                            OMElement renderedPolicyElement =
-                                    APIUtil.buildOMElement(new ByteArrayInputStream(renderedTemplate.getBytes()));
-                            //This is to skip any comments that are added to the policy.
                             if (renderedTemplate != null && !renderedTemplate.isEmpty()) {
-                                caseBody.add(renderedPolicyElement.toString());
+                                String sanitizedPolicy;
+                                try {
+                                    sanitizedPolicy = sanitizeOMElementWithSuperParentNode(renderedTemplate);
+                                } catch (Exception e) {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Cannot wrap the policy " + policy.getPolicyName()
+                                                + " with a super parent. Trying without wrapping.");
+                                    }
+                                    // As we can't wrap the policy definition with a super parent, trying the build
+                                    // OM element with the provided policy definition. This will select first child node
+                                    // and drop the other child nodes if a parent node is not configured.
+                                    sanitizedPolicy = APIUtil.buildOMElement(
+                                            new ByteArrayInputStream(renderedTemplate.getBytes())).toString();
+                                }
+                                caseBody.add(sanitizedPolicy);
                             }
                         } catch (Exception e) {
                             log.error("Error parsing the policy definition for " + policy.getPolicyName());
@@ -138,6 +150,25 @@ public class SynapsePolicyAggregator {
         }
 
         return caseList;
+    }
+
+    /**
+     *  As there can be multiple child elements without a root element, for sanitization, we will
+     *  first wrap the template with a dummy root element and build the OM element.
+     *  This element will be removed after sanitization step.
+     */
+    private static String sanitizeOMElementWithSuperParentNode(String xmlString) throws Exception {
+
+        String updatedXmlString = "<root>" + xmlString + "</root>";
+        OMElement sanitizedPolicyElement =
+                APIUtil.buildOMElement(new ByteArrayInputStream(updatedXmlString.getBytes()));
+        StringBuilder filteredTemplate = new StringBuilder();
+        for (Iterator childElements = sanitizedPolicyElement.getChildElements();
+             childElements.hasNext(); ) {
+            OMElement element = (OMElement) childElements.next();
+            filteredTemplate.append(element.toString());
+        }
+        return filteredTemplate.toString();
     }
 
     public static String renderPolicyTemplate(String template, Map<String, Object> configMap) {

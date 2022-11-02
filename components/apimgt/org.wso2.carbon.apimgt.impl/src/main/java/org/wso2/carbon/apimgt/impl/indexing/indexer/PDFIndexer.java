@@ -2,7 +2,6 @@ package org.wso2.carbon.apimgt.impl.indexing.indexer;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +16,6 @@ import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.wso2.carbon.registry.indexing.AsyncIndexer;
 import org.wso2.carbon.registry.indexing.IndexingConstants;
 import org.wso2.carbon.registry.indexing.AsyncIndexer.File2Index;
 import org.wso2.carbon.registry.indexing.indexer.Indexer;

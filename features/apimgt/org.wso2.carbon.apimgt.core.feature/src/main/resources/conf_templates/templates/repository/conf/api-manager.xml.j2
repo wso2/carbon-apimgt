@@ -506,6 +506,12 @@
         <Observer>org.wso2.carbon.apimgt.impl.observers.SimpleLoggingObserver</Observer>
     </StatusObservers-->
 
+    <!-- Configuration to configure the email recipient field (To/cc/bcc) and delimeter(, or ;)-->
+    <SubscriberContactConfiguration>
+    <EmailRecipientField>{{subscriber.contact.email_recipient_field}}</EmailRecipientField>
+        <EmailAddressDelimiter>{{subscriber.contact.email_address_delimeter}}</EmailAddressDelimiter>
+    </SubscriberContactConfiguration>
+
     <!-- Configuration to enable/disable sending CORS headers in the Gateway response
          and define the Access-Control-Allow-Origin header value.-->
     <CORSConfiguration>
@@ -592,6 +598,10 @@
             </AllowedURI>
             <AllowedURI>
                 <URI>/api/am/devportal/{version}/apis/{apiId}/swagger</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/async-api-specification</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
@@ -1256,6 +1266,9 @@
         {% else %}
          <ServiceURL>{{apim.throttling.service_url}}</ServiceURL>
         {% endif %}
+        {% if apim.event_hub.event_waiting_time is defined %}
+        <EventWaitingTime>{{apim.event_hub.event_waiting_time}}</EventWaitingTime>
+        {% endif %}
          {% if apim.event_hub.init_delay is defined %}
         <InitDelay>{{apim.event_hub.init_delay}}</InitDelay>
           {% endif %}
@@ -1367,7 +1380,7 @@
         {% if apim.sync_runtime_artifacts.gateway.data_retrieval_mode is defined %}
         <DataRetrievalMode>{{apim.sync_runtime_artifacts.gateway.data_retrieval_mode}}</DataRetrievalMode>
         {% endif %}
-        {% if apim.sync_runtime_artifacts.gateway.event_waiting_time is defined %}
+        {% if  apim.event_hub.event_waiting_time is not defined and apim.sync_runtime_artifacts.gateway.event_waiting_time is defined %}
         <EventWaitingTime>{{apim.sync_runtime_artifacts.gateway.event_waiting_time}}</EventWaitingTime>
         {% endif %}
         <SkipList>

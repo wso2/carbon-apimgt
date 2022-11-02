@@ -171,7 +171,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
         String[] userRoles;
         Map<String, String> restAPIScopes;
         //get all the URI templates of the REST API from the base path
-        Set<URITemplate> uriTemplates = RestApiUtil.getURITemplatesForBasePath(basePath + version);
+        Set<URITemplate> uriTemplates = RestApiCommonUtil.getURITemplatesForBasePath(basePath + version);
         if (uriTemplates.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("No matching scopes found for request with path: " + basePath + version

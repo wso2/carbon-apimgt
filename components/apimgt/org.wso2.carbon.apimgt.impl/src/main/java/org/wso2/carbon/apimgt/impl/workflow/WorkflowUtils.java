@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.LifeCycleUtils;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.ArrayList;
@@ -304,7 +303,7 @@ public class WorkflowUtils {
         } catch (APIManagementException e) {
             String errorMsg = "Could not complete api state change workflow";
             log.error(errorMsg, e);
-        } catch (APIPersistenceException | PersistenceException e) {
+        } catch (APIPersistenceException e) {
             log.error("Error while accessing lifecycle information ", e);
         }
     }

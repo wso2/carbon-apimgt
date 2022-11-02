@@ -116,7 +116,7 @@ paths:
       tags:
         - Unified Search
       summary: |
-        Retrieve/Search Throttling Polcies
+        Retrieve/Search Throttling Policies
       description: |
         This operation provides you a list of available Throttling Policies qualifying the given keyword match.
       parameters:
@@ -124,7 +124,7 @@ paths:
           in: query
           description: |
             **Search**.
-            You can search by providing a keyword. Allowed to search by type only.
+            You can search by providing a keyword. Allowed to search by type and name only.
           schema:
             type: string
       responses:
@@ -389,6 +389,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_manage
+            - apim:policies_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -647,6 +648,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_manage
+            - apim:policies_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -901,6 +903,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_manage
+            - apim:policies_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1143,6 +1146,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_manage
+            - apim:policies_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"

@@ -31,7 +31,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.APICategoryMappin
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;

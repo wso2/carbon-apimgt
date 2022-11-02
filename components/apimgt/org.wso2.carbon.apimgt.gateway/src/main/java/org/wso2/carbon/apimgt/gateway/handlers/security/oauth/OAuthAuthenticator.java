@@ -28,6 +28,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
@@ -39,7 +40,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
-import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -48,10 +48,6 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.keymgt.model.entity.API;
-import org.wso2.carbon.apimgt.tracing.TracingSpan;
-import org.wso2.carbon.apimgt.tracing.TracingTracer;
-import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.metrics.manager.Level;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
@@ -60,7 +56,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import javax.cache.Cache;
 
 /**
@@ -223,7 +218,8 @@ public class OAuthAuthenticator implements Authenticator {
             //Initial guess of a JWT token using the presence of a DOT.
             if (StringUtils.isNotEmpty(accessToken) && accessToken.contains(APIConstants.DOT)) {
                 try {
-                    if (StringUtils.countMatches(accessToken, APIConstants.DOT) != 2) {
+                    String[] JWTElements = accessToken.split("\\.");
+                    if (JWTElements.length != 3){
                         log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
                         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                 "Invalid JWT token");
@@ -370,8 +366,8 @@ public class OAuthAuthenticator implements Authenticator {
 
             /* GraphQL Query Analysis Information */
             if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
-                synCtx.setProperty(APIConstants.MAXIMUM_QUERY_DEPTH, info.getGraphQLMaxDepth());
-                synCtx.setProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY, info.getGraphQLMaxComplexity());
+                synCtx.setProperty(GraphQLConstants.MAXIMUM_QUERY_DEPTH, info.getGraphQLMaxDepth());
+                synCtx.setProperty(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY, info.getGraphQLMaxComplexity());
             }
             if(log.isDebugEnabled()){
                 log.debug("User is authorized to access the Resource");

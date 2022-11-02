@@ -4150,6 +4150,10 @@ public class ApiMgtDAO {
                 int subscriptionCount = getSubscriptionCountByApplicationId(connection,application, organization);
                 application.setSubscriptionCount(subscriptionCount);
 
+                // Get custom attributes of application
+                Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
+                application.setApplicationAttributes(applicationAttributes);
+
                 applicationsList.add(application);
             }
 
@@ -8446,7 +8450,7 @@ public class ApiMgtDAO {
      * @param internalRef Internal reference of the workflow
      * @param workflowType Workflow type of the workflow
      * @return External workflow reference for the given internal reference and workflow type if present. Null otherwise
-     * @throws APIManagementException
+     * @throws APIManagementException If an SQL exception occurs in database interactions
      */
     public String getExternalWorkflowRefByInternalRefWorkflowType(int internalRef, String workflowType) throws APIManagementException {
 
@@ -13466,38 +13470,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(checkIsExistPreparedStatement, null, checkIsResultSet);
         }
         return status;
-    }
-
-    public String[] getAPIDetailsByContext(String context) {
-
-        String apiName = "";
-        String apiProvider = "";
-        String sql = SQLConstants.GET_API_FOR_CONTEXT_TEMPLATE_SQL;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(true);
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, context);
-
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                apiName = rs.getString("API_NAME");
-                apiProvider = rs.getString("API_PROVIDER");
-            }
-        } catch (SQLException e) {
-            log.error("Error occurred while fetching data: " + e.getMessage(), e);
-        } finally {
-            try {
-                conn.setAutoCommit(false);
-            } catch (SQLException e) {
-                log.error("Error occurred while fetching data: " + e.getMessage(), e);
-            }
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return new String[]{apiName, apiProvider};
     }
 
     /**
@@ -19271,9 +19243,7 @@ public class ApiMgtDAO {
         statement.close();
 
         if (isWithPolicyDefinition && policyData != null) {
-            if (isWithPolicyDefinition && policyData != null) {
-                populatePolicyDefinitions(connection, policyData.getPolicyId(), policyData);
-            }
+            populatePolicyDefinitions(connection, policyData.getPolicyId(), policyData);
         }
         return policyData;
     }

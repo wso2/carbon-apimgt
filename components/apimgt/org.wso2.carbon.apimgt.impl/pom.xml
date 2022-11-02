@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.23.14-SNAPSHOT</version>
+        <version>9.26.63-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -411,6 +411,10 @@
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity-engine-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.amazonaws</groupId>
+            <artifactId>awslambda</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -553,6 +557,7 @@
                             javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",
                             org.eclipse.equinox.http.helper,
                             com.google.gson,
+                            com.amazonaws.*; version="${com.amazonaws.version}",
                             org.apache.axis2.*; version="${imp.pkg.version.axis2}",
                             org.apache.commons.*,
                             org.apache.http.*,

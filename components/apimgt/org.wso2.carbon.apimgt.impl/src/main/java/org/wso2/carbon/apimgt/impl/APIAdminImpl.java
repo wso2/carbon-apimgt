@@ -1324,6 +1324,45 @@ public class APIAdminImpl implements APIAdmin {
         return policies;
     }
 
+    /**
+     * Get Policy with corresponding name and type.
+     *
+     * @param tenantId tenantId
+     * @param level    policy type
+     * @param name     policy name
+     * @return Policy with corresponding name and type
+     * @throws APIManagementException
+     */
+    @Override public Policy getPolicyByNameAndType(int tenantId, String level, String name)
+            throws APIManagementException {
+
+        Policy policy = null;
+
+        if (PolicyConstants.POLICY_LEVEL_API.equals(level)) {
+            policy = apiMgtDAO.getAPIPolicy(name, tenantId);
+        } else if (PolicyConstants.POLICY_LEVEL_APP.equals(level)) {
+            policy = apiMgtDAO.getApplicationPolicy(name, tenantId);
+        } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(level)) {
+            policy = apiMgtDAO.getSubscriptionPolicy(name, tenantId);
+        } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(level)) {
+            policy = apiMgtDAO.getGlobalPolicy(name);
+        }
+
+        //Get the API Manager configurations and check whether the unlimited tier is disabled. If disabled, remove
+        // the tier from the array.
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        ThrottleProperties throttleProperties = apiManagerConfiguration.getThrottleProperties();
+
+        if (policy != null && APIConstants.UNLIMITED_TIER.equals(policy.getPolicyName())
+                && !throttleProperties.isEnableUnlimitedTier()) {
+            return null;
+        }
+
+        return policy;
+
+    }
+
     private IdentityProvider createIdp(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
 
         IdentityProvider identityProvider = new IdentityProvider();

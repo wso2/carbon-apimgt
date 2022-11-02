@@ -130,7 +130,7 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
         SystemApplicationDAO systemApplicationDAO = new SystemApplicationDAO();
         try {
             systemApplicationDTOS = systemApplicationDAO.getApplications(tenantDomain);
-            if (systemApplicationDTOS.length < 0) {
+            if (systemApplicationDTOS.length == 0) {
                 if (log.isDebugEnabled()) {
                     log.debug("The tenant: " + tenantDomain + " doesn't have any system apps");
                 }

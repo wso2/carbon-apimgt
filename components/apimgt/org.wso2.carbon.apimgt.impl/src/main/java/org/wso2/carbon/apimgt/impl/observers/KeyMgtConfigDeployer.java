@@ -18,8 +18,6 @@
 package org.wso2.carbon.apimgt.impl.observers;
 
 import org.apache.axis2.context.ConfigurationContext;
-import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
 /**

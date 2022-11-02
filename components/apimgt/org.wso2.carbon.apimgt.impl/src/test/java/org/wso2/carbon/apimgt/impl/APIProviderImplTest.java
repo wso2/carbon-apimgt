@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.APISearchResult;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
@@ -97,6 +98,10 @@ import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
@@ -1623,5 +1628,105 @@ public class APIProviderImplTest {
 
         Assert.assertNull(api.getInSequence());
         Assert.assertNull(api.getInSequenceMediation());
+    }
+
+    @Test
+    public void testSearchPaginatedAPIsByFQDNWithCorrectInputs() throws APIManagementException, APIPersistenceException {
+
+        int API_COUNT = 10;
+        int TOTAL_API_COUNT = API_COUNT + 5;
+
+        String[] returnRoles = {
+                "Internal/subscriber",
+                "Internal/publisher",
+                "admin"
+        };
+        Map<String, Object> returnProperties = new HashMap<>();
+        returnProperties.put("isAdmin", true);
+        returnProperties.put("skipRoles", null);
+
+        Mockito.when(APIUtil.getTenantAdminUserName(Mockito.anyString())).thenReturn("admin");
+        Mockito.when(APIUtil.getFilteredUserRoles(Mockito.anyString())).thenReturn(returnRoles);
+        Mockito.when(APIUtil.getUserProperties(Mockito.anyString())).thenReturn(returnProperties);
+
+        PublisherAPISearchResult returnSearchAPIs = new PublisherAPISearchResult();
+        List<PublisherAPIInfo> list = createMockPublisherAPIInfoList(API_COUNT);
+        returnSearchAPIs.setPublisherAPIInfoList(list);
+        returnSearchAPIs.setReturnedAPIsCount(API_COUNT);
+        returnSearchAPIs.setTotalAPIsCount(TOTAL_API_COUNT);
+
+        Mockito.when(apiPersistenceInstance.searchAPIsForPublisher(
+                Mockito.any(Organization.class),
+                Mockito.anyString(),
+                Mockito.anyInt(),
+                Mockito.anyInt(),
+                Mockito.any(UserContext.class),
+                Mockito.anyString(),
+                Mockito.anyString())).thenReturn(returnSearchAPIs);
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+
+        APISearchResult response = apiProvider.searchPaginatedAPIsByFQDN("https://abc.test.com",
+                "carbon.super", 1 , 6);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getApiCount(), TOTAL_API_COUNT);
+        Assert.assertEquals(response.getApis().size(), API_COUNT);
+    }
+
+    @Test
+    public void testSearchPaginatedAPIsByFQDNWhenSearchResultIsNull() throws APIManagementException, APIPersistenceException {
+
+        String[] returnRoles = {
+                "Internal/subscriber",
+                "Internal/publisher",
+                "admin"
+        };
+        Map<String, Object> returnProperties = new HashMap<>();
+        returnProperties.put("isAdmin", true);
+        returnProperties.put("skipRoles", null);
+
+        Mockito.when(APIUtil.getTenantAdminUserName(Mockito.anyString())).thenReturn("admin");
+        Mockito.when(APIUtil.getFilteredUserRoles(Mockito.anyString())).thenReturn(returnRoles);
+        Mockito.when(APIUtil.getUserProperties(Mockito.anyString())).thenReturn(returnProperties);
+
+        Mockito.when(apiPersistenceInstance.searchAPIsForPublisher(
+                Mockito.any(Organization.class),
+                Mockito.anyString(),
+                Mockito.anyInt(),
+                Mockito.anyInt(),
+                Mockito.any(UserContext.class),
+                Mockito.anyString(),
+                Mockito.anyString())).thenReturn(null);
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+
+        APISearchResult response = apiProvider.searchPaginatedAPIsByFQDN("https://abc.test.com",
+                "carbon.super", 1 , 6);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getApiCount(), 0);
+        Assert.assertEquals(response.getApis().size(), 0);
+    }
+
+    @Test(expected = APIManagementException.class)
+    public void testSearchPaginatedAPIsByFQDNWhenEndpointIsInvalid() throws APIManagementException, APIPersistenceException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        APISearchResult response = apiProvider.searchPaginatedAPIsByFQDN("this is invalid url",
+                "carbon.super", 1 , 6);
+    }
+
+    private List<PublisherAPIInfo> createMockPublisherAPIInfoList(int num) {
+        List<PublisherAPIInfo> list = new ArrayList<>();
+        for(int i = 0; i < num; i++) {
+            PublisherAPIInfo publisherAPIInfo = new PublisherAPIInfo();
+            publisherAPIInfo.setId(String.valueOf(i));
+            publisherAPIInfo.setApiName("api" + i);
+            publisherAPIInfo.setContext("/test" + i);
+            publisherAPIInfo.setVersion("v1");
+            publisherAPIInfo.setProviderName("admin");
+            list.add(publisherAPIInfo);
+        }
+        return list;
     }
 }

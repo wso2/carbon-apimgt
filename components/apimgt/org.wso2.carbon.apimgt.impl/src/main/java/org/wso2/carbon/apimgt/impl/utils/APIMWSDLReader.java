@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.impl.wsdl.WSDL11ProcessorImpl;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDL20ProcessorImpl;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
-import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.xml.sax.SAXException;
 
@@ -76,8 +75,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 /**
  * This class is used to read the WSDL file using WSDL4J library.

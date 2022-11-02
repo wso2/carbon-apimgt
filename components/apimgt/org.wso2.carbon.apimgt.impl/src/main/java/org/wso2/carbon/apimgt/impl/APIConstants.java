@@ -566,6 +566,7 @@ public final class APIConstants {
     public static final String DEFAULT_ORGANIZATION_CLAIM_NAME = "http://wso2.org/claims/organization";
     public static final String DEFAULT_TOKEN_TYPE = "DEFAULT";
     public static final String TOKEN_TYPE_OAUTH = "OAUTH";
+    public static final String TOKEN_TYPE_DEFAULT = "Default";
     public static final String TOKEN_TYPE_JWT = "JWT";
 
     public static final String PASSWORD_RESOLVER_IMPL_CLASS = "PasswordResolverImpl";
@@ -874,6 +875,10 @@ public final class APIConstants {
 
     public static final String STATUS_OBSERVERS = "StatusObservers.";
     public static final String OBSERVER = STATUS_OBSERVERS + "Observer";
+
+    public static final String SUBSCRIBER_CONFIGURATION = "SubscriberContactConfiguration";
+    public static final String SUBSCRIBER_CONFIGURATION_RECIPIENT = "EmailRecipientField";
+    public static final String SUBSCRIBER_CONFIGURATION_DELIMITER= "EmailAddressDelimiter";
 
     public static final String CORS_CONFIGURATION = "CORSConfiguration.";
     public static final String CORS_CONFIGURATION_ENABLED = CORS_CONFIGURATION + "Enabled";
@@ -1283,10 +1288,6 @@ public final class APIConstants {
     public static final String GRAPHQL_SCHEMA = "GRAPHQL_SCHEMA";
     public static final String GRAPHQL_ACCESS_CONTROL_POLICY = "WSO2GraphQLAccessControlPolicy";
     public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
-    public static final String MAXIMUM_QUERY_COMPLEXITY = "max_query_complexity";
-    public static final String MAXIMUM_QUERY_DEPTH = "max_query_depth";
-    public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
-    public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
     public static final String GRAPHQL_ADDITIONAL_TYPE_PREFIX = "WSO2";
 
     public static final String VELOCITY_GRAPHQL_API_SUBSCRIPTION_AVAILABLE = "isSubscriptionAvailable";
@@ -1850,6 +1851,7 @@ public final class APIConstants {
     public static final String REVOKED_TOKEN_KEY = "revokedToken";
     public static final String REVOKED_TOKEN_EXPIRY_TIME = "expiryTime";
     public static final String EVENT_TYPE = "eventType";
+    public static final String EVENT_WAITING_TIME_CONFIG = "EventWaitingTime";
     public static final String EVENT_TIMESTAMP = "timestamp";
     public static final String EVENT_PAYLOAD = "event";
     public static final String EVENT_PAYLOAD_DATA = "payloadData";
@@ -1968,6 +1970,7 @@ public final class APIConstants {
         public static final String CREATED = "created";
         public static final String UPDATED = "updated";
         public static final String DELETED = "deleted";
+        public static final String LIFECYCLE_CHANGED = "lifecycle-changed";
 
         public static final String API = "API";
         public static final String ORGANIZATION = "Organization";
@@ -2455,6 +2458,7 @@ public final class APIConstants {
         public static final String CLIENT_REGISTRATION_ENDPOINT = "client_registration_endpoint";
         public static final String KEY_MANAGER_OPERATIONS_DCR_ENDPOINT = "/keymanager-operations/dcr/register";
         public static final String KEY_MANAGER_OPERATIONS_USERINFO_ENDPOINT = "/keymanager-operations/user-info";
+        public static final String KEY_MANAGER_OPERATIONS_REVOKE_TOKEN_ENDPOINT = "/keymanager-operations/revoke-one-time-token";
         public static final String TOKEN_ENDPOINT = "token_endpoint";
         public static final String DISPLAY_TOKEN_ENDPOINT = "display_token_endpoint";
         public static final String REVOKE_ENDPOINT = "revoke_endpoint";
@@ -2473,6 +2477,7 @@ public final class APIConstants {
         public static final String ISSUER = "issuer";
         public static final String JWKS_ENDPOINT = "jwks_endpoint";
         public static final String USERINFO_ENDPOINT = "userinfo_endpoint";
+        public static final String REVOKE_TOKEN_ENDPOINT = "revoke_token_endpoint";
         public static final String AUTHORIZE_ENDPOINT = "authorize_endpoint";
         public static final String EVENT_HUB_CONFIGURATIONS = "EventHubConfigurations";
         public static final String KEY_MANAGER = "KeyManager";
@@ -2614,7 +2619,6 @@ public final class APIConstants {
         public static final String RETRY_DUARTION = "RetryDuration";
         public static final String PUBLISH_DIRECTLY_TO_GW_CONFIG = "PublishDirectlyToGW";
         public static final String GATEWAY_LABELS_CONFIG = "GatewayLabels";
-        public static final String EVENT_WAITING_TIME_CONFIG = "EventWaitingTime";
         public static final String LABEL_CONFIG = "Label";
         public static final String DB_SAVER_NAME = "DBSaver";
         public static final String DB_RETRIEVER_NAME = "DBRetriever";
@@ -2705,6 +2709,8 @@ public final class APIConstants {
         public static final String SUBSCRIBER_TOPIC_PROPERTY = "SUBSCRIBER_TOPIC";
         public static final String SUBSCRIBER_APPLICATION_ID_PROPERTY = "SUBSCRIBER_APPLICATION_ID";
         public static final String PAYLOAD_PROPERTY = "ORIGINAL_PAYLOAD";
+
+        public static final String SUBSCRIPTION_PARAMETER_PROPERTY = "SUBSCRIPTION_PARAMETERS";
     }
 
     public enum PolicyType {
@@ -2886,6 +2892,9 @@ public final class APIConstants {
             + "resources" + File.separator + "operation_policies" + File.separator + "definitions";
     public static final String OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE = "Synapse";
     public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP = "HTTP";
+    public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_SOAP = "SOAP";
+    public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_SOAPTOREST = "SOAPTOREST";
+    public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_GRAPHQL = "GRAPHQL";
     public static final String DEFAULT_POLICY_VERSION = "v1";
 
 

@@ -71,11 +71,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
     public RecommenderDetailsExtractor(API api, String tenantDomain, String eventType) {
 
-        if (APIConstants.ADD_API.equals(eventType)) {
-            this.publishingDetailType = APIConstants.ADD_API;
-        } else if (APIConstants.DELETE_API.equals(eventType)) {
-            this.publishingDetailType = APIConstants.DELETE_API;
-        }
+        this.publishingDetailType = eventType;
         this.api = api;
         this.tenantDomain = tenantDomain;
     }
@@ -171,7 +167,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
         String apiName = api.getId().getApiName();
         String apiStatus = api.getStatus();
-        String apiId = api.getUUID();
+        String apiId = api.getUuid();
 
         if (apiStatus == null) {
             apiStatus = APIConstants.DELETED_STATUS;

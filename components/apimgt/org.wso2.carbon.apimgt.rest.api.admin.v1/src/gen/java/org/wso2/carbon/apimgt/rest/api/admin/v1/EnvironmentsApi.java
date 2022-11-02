@@ -3,26 +3,16 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.impl.EnvironmentsApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.inject.Inject;
 
 import io.swagger.annotations.*;
-import java.io.InputStream;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.Multipart;
-
-import java.util.Map;
-import java.util.List;
-import javax.validation.constraints.*;
 @Path("/environments")
 
 @Api(description = "the environments API")
@@ -92,7 +82,7 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add an Environment", notes = "Add a new geteway environment ", response = EnvironmentDTO.class, authorizations = {
+    @ApiOperation(value = "Add an Environment", notes = "Add a new gateway environment ", response = EnvironmentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")

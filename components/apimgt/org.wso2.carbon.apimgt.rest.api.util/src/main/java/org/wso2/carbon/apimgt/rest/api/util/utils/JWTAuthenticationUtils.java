@@ -16,8 +16,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.utils;
 
-import org.apache.cxf.message.*;
-import java.util.HashMap;
+import org.apache.cxf.message.Message;
+import java.util.Map;
 
 /**
  *  JWTAuthenticationContext is for conversion purposes. Convert the cxf message context to HashMap and vise versa.
@@ -31,21 +31,10 @@ public class JWTAuthenticationUtils {
      * @param authContext - current map that contains authentication properties
      * @return updated cxf Message instance
      */
-    public static Message addToMessageContext(Message inMessage, HashMap<String,Object> authContext) {
+    public static Message addToMessageContext(Message inMessage, Map<String,Object> authContext) {
         for (String key : authContext.keySet()) {
             inMessage.put(key, authContext.get(key));
         }
         return inMessage;
-    }
-
-    /**
-     * To getting a message properties as a Map
-     * @param message - current inbound message
-     * @return Map object that contains all properties of cxf inbound message
-     */
-    public static HashMap<String,Object> addToJWTAuthenticationContext(Message message) {
-        HashMap<String,Object> hashMap = new HashMap<>();
-        message.forEach(hashMap::put);
-        return hashMap;
     }
 }

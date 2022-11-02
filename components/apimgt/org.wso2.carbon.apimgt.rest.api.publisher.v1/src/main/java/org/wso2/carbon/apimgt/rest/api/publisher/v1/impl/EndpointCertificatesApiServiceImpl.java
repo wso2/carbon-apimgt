@@ -28,16 +28,20 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.model.APISearchResult;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.EndpointCertificatesApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateRestApiUtils;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateValidityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificatesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateRestApiUtils;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.MediaType;
@@ -51,6 +55,7 @@ import java.util.List;
 public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesApiService {
 
     private static Log log = LogFactory.getLog(EndpointCertificatesApiServiceImpl.class);
+
     public Response getEndpointCertificateContentByAlias(String alias, MessageContext messageContext) {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -71,7 +76,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
                 RestApiUtil.handleResourceNotFoundError(message, log);
             }
 
-            Object certificate = apiProvider.getCertificateContent(alias);
+            Object certificate = apiProvider.getCertificateContent(tenantDomain, alias);
             if (certificate != null) {
                 Response.ResponseBuilder responseBuilder = Response.ok().entity(certificate);
                 responseBuilder.header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
@@ -144,18 +149,9 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
                 RestApiUtil.handleResourceNotFoundError(message, log);
             }
 
-            CertificateInformationDTO certificateInformationDTO = apiProvider.getCertificateStatus(alias);
-
-            CertificateValidityDTO certificateValidityDTO = new CertificateValidityDTO();
-            certificateValidityDTO.setFrom(certificateInformationDTO.getFrom());
-            certificateValidityDTO.setTo(certificateInformationDTO.getTo());
-
-            CertificateInfoDTO certificateInfoDTO = new CertificateInfoDTO();
-            certificateInfoDTO.setValidity(certificateValidityDTO);
-            certificateInfoDTO.setStatus(certificateInformationDTO.getStatus());
-            certificateInfoDTO.setSubject(certificateInformationDTO.getSubject());
-            certificateInfoDTO.setVersion(certificateInformationDTO.getVersion());
-
+            CertificateInformationDTO certificateInformationDTO = apiProvider.getCertificateStatus(tenantDomain, alias);
+            CertificateInfoDTO certificateInfoDTO =
+                    CertificateMappingUtil.fromCertificateInformationToDTO(certificateInformationDTO);
             return Response.ok().entity(certificateInfoDTO).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving the certificate status.", e, log);
@@ -164,7 +160,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
     }
 
     public Response updateEndpointCertificateByAlias(String alias, InputStream certificateInputStream,
-                                                 Attachment certificateDetail, MessageContext messageContext) {
+                                                     Attachment certificateDetail, MessageContext messageContext) {
         try {
             if (StringUtils.isEmpty(alias)) {
                 RestApiUtil.handleBadRequest("The alias should not be empty", log);
@@ -196,10 +192,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode && updatedCertificate.size() > 0) {
 
                 CertificateMetadataDTO certificateMetadata = updatedCertificate.get(0);
-
-                CertMetadataDTO certificateDTO = new CertMetadataDTO();
-                certificateDTO.setAlias(certificateMetadata.getAlias());
-                certificateDTO.setEndpoint(certificateMetadata.getEndpoint());
+                CertMetadataDTO certificateDTO = CertificateMappingUtil.fromCertificateMetadataToDTO(certificateMetadata);
 
                 URI updatedCertUri = new URI(RestApiConstants.CERTS_BASE_PATH + "?alias=" + alias);
 
@@ -226,8 +219,35 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         return null;
     }
 
+    @Override
+    public Response getCertificateUsageByAlias(String alias, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException {
+
+        limit = (limit != null) ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = (offset != null) ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
+        APIMetadataListDTO apiMetadataListDTO;
+        CertificateMetadataDTO certificateMetadataDTO;
+        String fqdn;
+        APISearchResult searchResult;
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        certificateMetadataDTO = apiProvider.getCertificate(alias);
+
+        if(certificateMetadataDTO != null) {
+            String endpoint = certificateMetadataDTO.getEndpoint();
+            searchResult = apiProvider.searchPaginatedAPIsByFQDN(endpoint, organization, offset, limit);
+        }else{
+            searchResult = new APISearchResult();
+        }
+
+        apiMetadataListDTO = APIMappingUtil.fromAPIListToAPIMetadataListDTO(searchResult.getApis());
+        APIMappingUtil.setPaginationParamsForAPIMetadataListDTO(apiMetadataListDTO, alias, offset, limit, searchResult.getApiCount());
+
+        return Response.status(Response.Status.OK).entity(apiMetadataListDTO).build();
+    }
+
     public Response getEndpointCertificates(Integer limit, Integer offset, String alias, String endpoint,
-            MessageContext messageContext) {
+                                            MessageContext messageContext) {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
@@ -263,7 +283,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
     }
 
     public Response addEndpointCertificate(InputStream certificateInputStream, Attachment certificateDetail,
-            String alias, String endpoint, MessageContext messageContext) {
+                                           String alias, String endpoint, MessageContext messageContext) {
         try {
             if (StringUtils.isEmpty(alias) || StringUtils.isEmpty(endpoint)) {
                 RestApiUtil.handleBadRequest("The alias and/ or endpoint should not be empty", log);

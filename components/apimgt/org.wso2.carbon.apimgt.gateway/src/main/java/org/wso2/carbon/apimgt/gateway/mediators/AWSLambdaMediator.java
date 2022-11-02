@@ -17,12 +17,15 @@
  */
 package org.wso2.carbon.apimgt.gateway.mediators;
 
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.InvocationType;
@@ -165,6 +168,13 @@ public class AWSLambdaMediator extends AbstractMediator {
      */
     private InvokeResult invokeLambda(String payload) {
         try {
+            // Validate resource timeout and set client configuration
+            if (resourceTimeout < 1000 || resourceTimeout > 900000) {
+                setResourceTimeout(APIConstants.AWS_DEFAULT_CONNECTION_TIMEOUT);
+            }
+            ClientConfiguration clientConfig = new ClientConfiguration();
+            clientConfig.setSocketTimeout(resourceTimeout);
+
             AWSLambda awsLambdaClient;
             if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
                 if (log.isDebugEnabled()) {
@@ -174,17 +184,20 @@ public class AWSLambdaMediator extends AbstractMediator {
                         && StringUtils.isEmpty(roleRegion)) {
                     awsLambdaClient = AWSLambdaClientBuilder.standard()
                             .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+                            .withClientConfiguration(clientConfig)
                             .build();
                 } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
                         && StringUtils.isNotEmpty(roleRegion)) {
                     Credentials sessionCredentials = getSessionCredentials(
-                            DefaultAWSCredentialsProviderChain.getInstance(), roleArn, roleSessionName, "");
+                            DefaultAWSCredentialsProviderChain.getInstance(), roleArn, roleSessionName,
+                            String.valueOf(Regions.getCurrentRegion()));
                     BasicSessionCredentials basicSessionCredentials = new BasicSessionCredentials(
                             sessionCredentials.getAccessKeyId(),
                             sessionCredentials.getSecretAccessKey(),
                             sessionCredentials.getSessionToken());
                     awsLambdaClient = AWSLambdaClientBuilder.standard()
                             .withCredentials(new AWSStaticCredentialsProvider(basicSessionCredentials))
+                            .withClientConfiguration(clientConfig)
                             .withRegion(roleRegion)
                             .build();
                 } else {
@@ -201,6 +214,7 @@ public class AWSLambdaMediator extends AbstractMediator {
                         && StringUtils.isEmpty(roleRegion)) {
                     awsLambdaClient = AWSLambdaClientBuilder.standard()
                             .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+                            .withClientConfiguration(clientConfig)
                             .withRegion(region)
                             .build();
                 } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
@@ -213,6 +227,7 @@ public class AWSLambdaMediator extends AbstractMediator {
                             sessionCredentials.getSessionToken());
                     awsLambdaClient = AWSLambdaClientBuilder.standard()
                             .withCredentials(new AWSStaticCredentialsProvider(basicSessionCredentials))
+                            .withClientConfiguration(clientConfig)
                             .withRegion(roleRegion)
                             .build();
                 } else {
@@ -222,9 +237,6 @@ public class AWSLambdaMediator extends AbstractMediator {
             } else {
                 log.error("Missing AWS Credentials");
                 return null;
-            }
-            if (resourceTimeout < 1000 || resourceTimeout > 900000) {
-                setResourceTimeout(APIConstants.AWS_DEFAULT_CONNECTION_TIMEOUT);
             }
             InvokeRequest invokeRequest = new InvokeRequest()
                     .withFunctionName(resourceName)
@@ -266,7 +278,8 @@ public class AWSLambdaMediator extends AbstractMediator {
         } else {
             awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
                     .withCredentials(credentialsProvider)
-                    .withRegion(region)
+                    .withEndpointConfiguration(new EndpointConfiguration("https://sts." + region + ".amazonaws.com",
+                            region))
                     .build();
         }
         AssumeRoleRequest roleRequest = new AssumeRoleRequest()
@@ -283,14 +296,17 @@ public class AWSLambdaMediator extends AbstractMediator {
         return sessionCredentials;
     }
 
+    @Override
     public String getType() {
         return null;
     }
 
+    @Override
     public void setTraceState(int traceState) {
         traceState = 0;
     }
 
+    @Override
     public int getTraceState() {
         return 0;
     }

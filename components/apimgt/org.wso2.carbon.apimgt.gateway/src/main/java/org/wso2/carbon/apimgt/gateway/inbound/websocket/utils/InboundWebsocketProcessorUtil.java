@@ -28,11 +28,11 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.api.API;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.DataPublisherUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketWSClient;
-import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -458,6 +458,7 @@ public class InboundWebsocketProcessorUtil {
                 // Find the authentication scheme based on the token type
                 if (isJwtToken) {
                     log.debug("The token was identified as a JWT token");
+                    inboundMessageContext.setJWTToken(true);
                     if (APIConstants.GRAPHQL_API.equals(inboundMessageContext.getElectedAPI().getApiType())) {
                         return InboundWebsocketProcessorUtil.authenticateGraphQLJWTToken(inboundMessageContext);
                     } else {
@@ -675,10 +676,13 @@ public class InboundWebsocketProcessorUtil {
         InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
         try {
             //validate token and subscriptions
-            if (!InboundWebsocketProcessorUtil.authenticateGraphQLJWTToken(inboundMessageContext)) {
+            if (inboundMessageContext.isJWTToken() && !InboundWebsocketProcessorUtil.authenticateGraphQLJWTToken(
+                    inboundMessageContext)) {
                 inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
                         WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS,
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, true);
+            } else {
+                log.debug("Authentication not supported for Opaque tokens");
             }
         } catch (APIManagementException e) {
             log.error(WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_MESSAGE, e);
