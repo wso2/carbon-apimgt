@@ -8,94 +8,17 @@ servers:
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/SanojPunchihewa/BackOfficeAPI/1.0.0
 paths:
-  /runtimes:
+  /apis:
     get:
       tags:
-        - Runtime APIs
+        - APIs
       summary: |
-        Retrieve/Search Runtimes
+        Retrieve/Search APIs
       description: |
-        This operation provides you a list of available Runtimes qualifying under a given search condition.
-
-        Each retrieved Runtime is represented with a minimal amount of attributes. If you want to get complete details of an Runtime, you need to use **Get details of a Runtime** operation.
-      parameters:
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/Accept'
-      responses:
-        200:
-          description: |
-            OK.
-            List of Runtimes is returned.
-          headers:
-            Content-Type:
-              description: The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RuntimeList'
-        406:
-          $ref: '#/components/responses/NotAcceptable'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-            - apim:api_list_view
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/runtimes"'
-      operationId: getAllRuntimes
-
-  /runtimes/{runtimeId}:
-    get:
-      tags:
-        - Runtime APIs
-      summary: |
-        Get details of a Runtime
-      description: |
-        Using this operation, you can retrieve complete details of a single Runtime. You need to provide the Id of the Runtime to retrive it.
-      parameters:
-        - $ref: '#/components/parameters/runtimeId'
-        - $ref: '#/components/parameters/If-None-Match'
-      responses:
-        200:
-          description: |
-            OK.
-            Requested Runtime is returned
-          headers:
-            Content-Type:
-              description: The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Runtime'
-        406:
-          $ref: '#/components/responses/NotAcceptable'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-            - apim:api_list_view
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/runtime/7a2298c4-c905-403f-8fac-38c73301631f"'
-      operationId: getRuntime
-  /runtimes/{runtimeId}/apis:
-    get:
-      tags:
-        - Runtime APIs
-      summary: |
-        Retrieve/Search Runtime APIs
-      description: |
-        This operation provides you a list of available Runtime APIs qualifying under a given search condition.
+        This operation provides you a list of available APIs qualifying under a given search condition.
 
         Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
       parameters:
-        - $ref: '#/components/parameters/runtimeId'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/sortBy'
@@ -119,7 +42,7 @@ paths:
             Supported attribute modifiers are [**version, context, name, status,
             description, provider, api-category, tags, doc, contexttemplate,
             lcstate, content, type, label, enablestore, thirdparty**]
-            
+
             If no advanced attribute modifier has been specified,  the API names containing
             the search term will be returned as a result.
 
@@ -132,7 +55,7 @@ paths:
         200:
           description: |
             OK.
-            List of qualifying Runtime APIs is returned.
+            List of qualifying APIs is returned.
           headers:
             ETag:
               description: |
@@ -146,7 +69,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RuntimeAPIList'
+                $ref: '#/components/schemas/APIList'
         304:
           description: |
             Not Modified.
@@ -161,21 +84,20 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/runtimes/7a2298c4-c905-403f-8fac-38c73301631f/apis"'
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/apis"'
       operationId: getAllAPIs
 
   ######################################################
-  # The "Individual API" resource Runtime APIs
+  # The "Individual API" resource APIs
   ######################################################
-  /runtimes/{runtimeId}/apis/{apiId}:
+  /apis/{apiId}:
     get:
       tags:
-        - Runtime APIs
+        - APIs
       summary: Get Details of an API
       description: |
         Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API to retrive it.
       parameters:
-        - $ref: '#/components/parameters/runtimeId'
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-None-Match'
       responses:
@@ -203,7 +125,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RuntimeAPI'
+                $ref: '#/components/schemas/API'
         304:
           description: |
             Not Modified.
@@ -216,22 +138,85 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
-            - apim:api_product_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/runtimes/7a2298c4-c905-403f-8fac-38c73301631f/apis/7a2298c4-c905-403f-8fac-38c73301631f"'
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f"'
       operationId: getAPI
+    put:
+      tags:
+        - APIs
+      summary: Update an API
+      description: |
+        This operation can be used to update an existing API.
+        But the properties `name`, `provider` and `version` cannot be changed.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/If-None-Match'
+      requestBody:
+        description: API object that needs to be updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModifiableAPI'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated API object
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Location:
+              description: |
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/API'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/5bca47e1-8233-46a5-9295-525dca337f33"'
+      operationId: updateAPI
 
-  /runtimes/{runtimeId}/apis/{apiId}/definition:
+  /apis/{apiId}/definition:
     get:
       tags:
-        - Runtime APIs
+        - APIs
       summary: Get the API Definition
       description: |
         This operation can be used to retrieve the definition of an API.
       parameters:
-        - $ref: '#/components/parameters/runtimeId'
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-None-Match'
       responses:
@@ -259,7 +244,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RuntimeAPIDefinition'
+                $ref: '#/components/schemas/APIDefinition'
         304:
           description: |
             Not Modified.
@@ -276,18 +261,17 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/runtimes/7a2298c4-c905-403f-8fac-38c73301631f/apis/7a2298c4-c905-403f-8fac-38c73301631f/definition"'
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f/definition"'
       operationId: getAPIDefinition
 
-  /runtimes/{runtimeId}/apis/{apiId}/resource-paths:
+  /apis/{apiId}/resource-paths:
     get:
       tags:
-        - Runtime APIs
+        - APIs
       summary: Get Resource Paths of an API
       description: |
         This operation can be used to retrieve resource paths defined for a specific API.
       parameters:
-        - $ref: '#/components/parameters/runtimeId'
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
@@ -335,289 +319,18 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/runtimes/7a2298c4-c905-403f-8fac-38c73301631f/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/resource-paths"'
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/resource-paths"'
       operationId: getAPIResourcePaths
 
-  ######################################################
-  # The "Back Office API Collection" resource APIs
-  ######################################################
-  /backoffice-apis:
+  /apis/{apiId}/thumbnail:
     get:
       tags:
-        - Back Office APIs
-      summary: |
-        Retrieve/Search Back Office APIs
-      description: |
-        This operation provides you a list of available Back Office APIs qualifying under a given search condition.
-
-        Each retrieved Back Office API is represented with a minimal amount of attributes. If you want to get complete details of an Back Office API, you need to use **Get details of an Back Office API** operation.
-      parameters:
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/offset'
-        - name: query
-          in: query
-          schema:
-            type: string
-        - $ref: '#/components/parameters/Accept'
-        - $ref: '#/components/parameters/If-None-Match'
-      responses:
-        200:
-          description: |
-            OK.
-            List of qualifying Back Office APIs is returned.
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Content-Type:
-              description: The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BackOfficeAPIList'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
-        406:
-          $ref: '#/components/responses/NotAcceptable'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis?query=PizzaBackOfficeAPI"'
-      operationId: getAllBackOfficeAPIs
-
-    post:
-      tags:
-        - Back Office APIs
-      summary: Create a New Back Office API
-      description: |
-        This operation can be used to create a new Back Office API specifying the details of the Back Office API in the payload.
-      requestBody:
-        description: BackOffice API object that needs to be added
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BackOfficeAPI'
-        required: true
-      responses:
-        201:
-          description: |
-            'Created.
-            Successful response with the newly created object as entity in the body.
-            Location header contains URL of newly created entity.'
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Location:
-              description: |
-                The URL of the newly created resource.
-              schema:
-                type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BackOfficeAPI'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        415:
-          $ref: '#/components/responses/UnsupportedMediaType'
-      security:
-        - OAuth2Security:
-            - apim:api_publish
-            - apim:api_manage
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis"'
-      operationId: createBackOfficeAPI
-
-  ################################################################
-  # The "Individual Back Office API" resource APIs
-  ################################################################
-  /backoffice-apis/{backofficeApiId}:
-    get:
-      tags:
-        - Back Office APIs
-      summary: Get Details of an Back Office API
-      description: |
-        Using this operation, you can retrieve complete details of a single Back Office API. You need to provide the Id of the API to retrive it.
-      parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
-        - $ref: '#/components/parameters/Accept'
-        - $ref: '#/components/parameters/If-None-Match'
-      responses:
-        200:
-          description: |
-            OK.
-            Requested Back Office API is returned
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BackOfficeAPI'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
-        404:
-          $ref: '#/components/responses/NotFound'
-        406:
-          $ref: '#/components/responses/NotAcceptable'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-            - apim:api_publish
-            - apim:api_manage
-            - apim:api_product_import_export
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33"'
-      operationId: getBackOfficeAPI
-
-    put:
-      tags:
-        - Back Office APIs
-      summary: Update an Back Office API
-      description: |
-        This operation can be used to update an existing Back Office API.
-        But the properties `name`, `provider` and `version` cannot be changed.
-      parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
-        - $ref: '#/components/parameters/If-Match'
-      requestBody:
-        description: BackOffice API object that needs to be updated
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BackOfficeAPI'
-        required: true
-      responses:
-        200:
-          description: |
-            OK.
-            Successful response with updated Back Office API object
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Location:
-              description: |
-                The URL of the newly created resource.
-              schema:
-                type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BackOfficeAPI'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        403:
-          $ref: '#/components/responses/Forbidden'
-        404:
-          $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
-      security:
-        - OAuth2Security:
-            - apim:api_publish
-            - apim:api_manage
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33"'
-      operationId: updateBackOfficeAPI
-
-
-    delete:
-      tags:
-        - Back Office APIs
-      summary: Delete an Back Office API
-      description: |
-        This operation can be used to delete an existing Back Office API proving the Id of the Back Office API.
-      parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
-        - $ref: '#/components/parameters/If-Match'
-      responses:
-        200:
-          description: |
-            OK.
-            Resource successfully deleted.
-          content: {}
-        403:
-          $ref: '#/components/responses/Forbidden'
-        404:
-          $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
-      security:
-        - OAuth2Security:
-            - apim:api_publish
-            - apim:api_manage
-            - apim:api_product_import_export
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33"'
-      operationId: deleteBackOfficeAPI
-
-  /backoffice-apis/{backofficeApiId}/thumbnail:
-    get:
-      tags:
-        - Back Office APIs
+        - APIs
       summary: Get Thumbnail Image
       description: |
-        This operation can be used to download a thumbnail image of an Back Office API.
+        This operation can be used to download a thumbnail image of an API.
       parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/Accept'
         - $ref: '#/components/parameters/If-None-Match'
       responses:
@@ -661,18 +374,18 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33/thumbnail"
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/5bca47e1-8233-46a5-9295-525dca337f33/thumbnail"
           > image.jpeg'
-      operationId: getBackOfficeAPIThumbnail
+      operationId: getAPIThumbnail
 
     put:
       tags:
-        - Back Office APIs
+        - APIs
       summary: Upload a Thumbnail Image
       description: |
-        This operation can be used to upload a thumbnail image of an Back Office API. The thumbnail to be uploaded should be given as a form data parameter `file`.
+        This operation can be used to upload a thumbnail image of an API. The thumbnail to be uploaded should be given as a form data parameter `file`.
       parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-Match'
       requestBody:
         content:
@@ -706,7 +419,7 @@ paths:
                 type: string
             Location:
               description: |
-                The URL of the uploaded thumbnail image of the Back Office API.
+                The URL of the uploaded thumbnail image of the API.
               schema:
                 type: string
             Content-Type:
@@ -731,18 +444,18 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: multipart/form-data" -F file=@image.jpeg "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/d48a3412-1b85-49be-99f4-b81a3722ae73/thumbnail"'
-      operationId: updateBackOfficeAPIThumbnail
+          -H "Content-Type: multipart/form-data" -F file=@image.jpeg "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/thumbnail"'
+      operationId: updateAPIThumbnail
 
-  /backoffice-apis/{backofficeApiId}/documents:
+  /apis/{apiId}/documents:
     get:
       tags:
-        - Back Office API Documents
-      summary: Get a List of Documents of an Back Office API
+        - API Documents
+      summary: Get a List of Documents of an API
       description: |
-        This operation can be used to retrive a list of documents belonging to an Back Office API by providing the ID of the Back Office API.
+        This operation can be used to retrive a list of documents belonging to an API by providing the ID of the API.
       parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/Accept'
@@ -783,17 +496,17 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33/documents"'
-      operationId: getBackOfficeAPIDocuments
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/5bca47e1-8233-46a5-9295-525dca337f33/documents"'
+      operationId: getAPIDocuments
 
     post:
       tags:
-        - Back Office API Documents
-      summary: Add a New Document to an Back Office API
+        - API Documents
+      summary: Add a New Document to an API
       description: |
-        This operation can be used to add a new documentation to an Back Office API. This operation only adds the metadata of a document. To add the actual content we need to use **Upload the content of an Back Office API document ** API once we obtain a document Id by this operation.
+        This operation can be used to add a new documentation to an API. This operation only adds the metadata of a document. To add the actual content we need to use **Upload the content of an API document ** API once we obtain a document Id by this operation.
       parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/apiId'
       requestBody:
         description: Document object that needs to be added
         content:
@@ -839,18 +552,18 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33/documents"'
-      operationId: addBackOfficeAPIDocument
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/5bca47e1-8233-46a5-9295-525dca337f33/documents"'
+      operationId: addAPIDocument
 
-  /backoffice-apis/{backofficeApiId}/documents/{documentId}:
+  /apis/{apiId}/documents/{documentId}:
     get:
       tags:
-        - Back Office API Documents
-      summary: Get a Document of an Back Office API
+        - API Documents
+      summary: Get a Document of an API
       description: |
         This operation can be used to retrieve a particular document's metadata associated with an API.
       parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/documentId'
         - $ref: '#/components/parameters/Accept'
         - $ref: '#/components/parameters/If-None-Match'
@@ -897,17 +610,17 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
-      operationId: getBackOfficeAPIDocument
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
+      operationId: getAPIDocument
 
     put:
       tags:
-        - Back Office API Documents
-      summary: Update a Document of an Back Office API
+        - API Documents
+      summary: Update a Document of an API
       description: |
         This operation can be used to update metadata of an API's document.
       parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/documentId'
         - $ref: '#/components/parameters/If-Match'
       requestBody:
@@ -962,17 +675,17 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
-      operationId: updateBackOfficeAPIDocument
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
+      operationId: updateAPIDocument
 
     delete:
       tags:
-        - Back Office API Documents
-      summary: Delete a Document of an Back Office API
+        - API Documents
+      summary: Delete a Document of an API
       description: |
-        This operation can be used to delete a document associated with an Back Office API.
+        This operation can be used to delete a document associated with an API.
       parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/documentId'
         - $ref: '#/components/parameters/If-Match'
       responses:
@@ -992,14 +705,14 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
-      operationId: deleteBackOfficeAPIDocument
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
+      operationId: deleteAPIDocument
 
-  /backoffice-apis/{backofficeApiId}/documents/{documentId}/content:
+  /apis/{apiId}/documents/{documentId}/content:
     get:
       tags:
-        - Back Office API Documents
-      summary: Get the Content of an Back Office API Document
+        - API Documents
+      summary: Get the Content of an API Document
       description: |
         This operation can be used to retrive the content of an API's document.
 
@@ -1014,7 +727,7 @@ paths:
         3. **URL type**:
             The client will recieve the URL of the document as the Location header with the response with - `303 See Other`
       parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/documentId'
         - $ref: '#/components/parameters/Accept'
         - $ref: '#/components/parameters/If-None-Match'
@@ -1069,22 +782,22 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3/content"'
-      operationId: getBackOfficeAPIDocumentContent
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3/content"'
+      operationId: getAPIDocumentContent
 
     post:
       tags:
-        - Back Office API Documents
-      summary: Upload the Content of an Back Office API Document
+        - API Documents
+      summary: Upload the Content of an API Document
       description: |
-        Thid operation can be used to upload a file or add inline content to an Back Office API document.
+        Thid operation can be used to upload a file or add inline content to an API document.
 
         **IMPORTANT:**
         * Either **file** or **inlineContent** form data parameters should be specified at one time.
         * Document's source type should be **FILE** in order to upload a file to the document using **file** parameter.
         * Document's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter.
       parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/documentId'
         - $ref: '#/components/parameters/If-Match'
       requestBody:
@@ -1144,24 +857,24 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: multipart/form-data" -F file=@sample.pdf "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3/content"'
-      operationId: addBackOfficeAPIDocumentContent
+          -H "Content-Type: multipart/form-data" -F file=@sample.pdf "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3/content"'
+      operationId: addAPIDocumentContent
 
-  /backoffice-apis/{backofficeApiId}/monetize:
+  /apis/{apiId}/monetize:
     post:
       tags:
-        - Back Office API Monetization
+        - API Monetization
       summary: Configure Monetization for a Given API
       description: |
         This operation can be used to configure monetization for a given API.
       parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/apiId'
       requestBody:
         description: Monetization data object
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BackOfficeAPIMonetizationInfo'
+              $ref: '#/components/schemas/APIMonetizationInfo'
         required: true
       responses:
         201:
@@ -1182,18 +895,18 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetize'
+          -H "Content-Type: application/json" -d @data.json https://127.0.0.1:9443/api/apk/backoffice/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetize'
       operationId: addAPIMonetization
 
-  /backoffice-apis/{backofficeApiId}/monetization:
+  /apis/{apiId}/monetization:
     get:
       tags:
-        - Back Office API Monetization
+        - API Monetization
       summary: Get Monetization Status for each Tier in a Given API
       description: |
         This operation can be used to get monetization status for each tier in a given API
       parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/apiId'
       responses:
         200:
           description: |
@@ -1214,18 +927,18 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetization"'
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetization"'
       operationId: getAPIMonetization
 
-  /backoffice-apis/{backofficeApiId}/revenue:
+  /apis/{apiId}/revenue:
     get:
       tags:
-        - Back Office API Monetization
+        - API Monetization
       summary: Get Total Revenue Details of a Given Monetized API with Meterd Billing
       description: |
         This operation can be used to get details of total revenue details of a given monetized API with meterd billing.
       parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/apiId'
       responses:
         200:
           description: |
@@ -1265,10 +978,10 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/96077508-fd01-4fae-bc64-5de0e2baf43c/revenue"'
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/revenue"'
       operationId: getAPIRevenue
 
-  /backoffice-apis/{backofficeApiId}/external-stores:
+  /apis/{apiId}/external-stores:
     get:
       tags:
         - External Stores
@@ -1277,7 +990,7 @@ paths:
         This operation can be used to retrieve a list of external stores which an API is published to by providing the ID of the API.
       operationId: getAllPublishedExternalStoresByAPI
       parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
@@ -1310,9 +1023,9 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/96077508-fd01-4fae-bc64-5de0e2baf43c/external-stores"'
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/external-stores"'
 
-  /backoffice-apis/{backofficeApiId}/publish-to-external-stores:
+  /apis/{apiId}/publish-to-external-stores:
     post:
       tags:
         - External Stores
@@ -1321,7 +1034,7 @@ paths:
         This operation can be used to publish an API to a list of external stores.
       operationId: publishAPIToExternalStores
       parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/apiId'
         - name: externalStoreIds
           in: query
           description: External Store Ids of stores which the API needs to be published
@@ -1362,7 +1075,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/96077508-fd01-4fae-bc64-5de0e2baf43c/publish-to-external-stores?externalStoreId=Store123#"'
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/publish-to-external-stores?externalStoreId=Store123#"'
 
   ######################################################
   # The "Subscription Collection" resource APIs
@@ -1436,7 +1149,7 @@ paths:
   /subscriptions/{subscriptionId}/usage:
     get:
       tags:
-        - Back Office API Monetization
+        - API Monetization
       summary: Get Details of a Pending Invoice for a Monetized Subscription with Metered Billing.
       description: |
         This operation can be used to get details of a pending invoice for a monetized subscription with meterd billing.
@@ -1735,166 +1448,6 @@ paths:
           "https://127.0.0.1:9443/api/apk/backoffice/v1/search?query=pizza"'
       operationId: search
 
-  /backoffice-apis/export:
-    get:
-      tags:
-        - Import Export
-      summary: Export an Back Office API
-      description: |
-        This operation can be used to export the details of a particular Back Office API as a zip file.
-      parameters:
-        - name: name
-          in: query
-          description: |
-            Back Office API Name
-          schema:
-            type: string
-        - name: version
-          in: query
-          description: |
-            Version of the Back Office API
-          schema:
-            type: string
-        - name: providerName
-          in: query
-          description: |
-            Provider name of the Back Office API
-          schema:
-            type: string
-        - name: revisionNumber
-          in: query
-          description: |
-            Revision number of the Back Office API
-          schema:
-            type: string
-        - name: format
-          in: query
-          description: |
-            Format of output documents. Can be YAML or JSON.
-          schema:
-            type: string
-            enum:
-              - JSON
-              - YAML
-        - name: preserveStatus
-          in: query
-          description: |
-            Preserve Back Office API Status on export
-          schema:
-            type: boolean
-        - name: latestRevision
-          in: query
-          description: |
-            Export the latest revision of the Back Office API
-          schema:
-            type: boolean
-            default: false
-      responses:
-        200:
-          description: |
-            OK.
-            Export Successful.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/zip:
-              schema:
-                type: string
-                format: binary
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-            - apim:api_product_import_export
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/export?name=LeasingBackOfficeAPI&version=1.0.0&revisionNumber=2&provider=admin&format=YAML"
-          > exportBackOfficeAPI.zip'
-      operationId: exportBackOfficeAPI
-
-  /backoffice-apis/import:
-    post:
-      tags:
-        - Import Export
-      summary: Import an Back Office API
-      description: |
-        This operation can be used to import an Back Office API.
-      parameters:
-        - name: preserveProvider
-          in: query
-          description: |
-            Preserve Original Provider of the Back Office API. This is the user choice to keep or replace the Back Office API provider
-          required: false
-          schema:
-            type: boolean
-        - name: rotateRevision
-          in: query
-          description: |
-            Once the revision max limit reached, undeploy and delete the earliest revision and create a new revision
-          required: false
-          schema:
-            type: boolean
-        - name: importAPIs
-          in: query
-          description: |
-            Whether to import the dependent APIs or not.
-          schema:
-            type: boolean
-        - name: overwriteBackOfficeAPI
-          in: query
-          description: |
-            Whether to update the Back Office API or not. This is used when updating already existing Back Office APIs.
-          schema:
-            type: boolean
-        - name: overwriteAPIs
-          in: query
-          description: |
-            Whether to update the dependent APIs or not. This is used when updating already existing dependent APIs of an Back Office API.
-          schema:
-            type: boolean
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              required:
-                - file
-              properties:
-                file:
-                  type: string
-                  description: |
-                    Zip archive consisting on exported Back Office API configuration
-                  format: binary
-      responses:
-        200:
-          description: |
-            Created.
-            Back Office API Imported Successfully.
-          content: {}
-        403:
-          $ref: '#/components/responses/Forbidden'
-        404:
-          $ref: '#/components/responses/NotFound'
-        409:
-          $ref: '#/components/responses/Conflict'
-        500:
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - OAuth2Security:
-            - apim:api_product_import_export
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            -F file=@admin-PizzaShackBackOfficeAPI.zip "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/import?preserveProvider=false&overwriteBackOfficeAPI=false&overwriteAPIs=false&importAPIs=false"'
-      operationId: importBackOfficeAPI
-
   ######################################################
   # The "ExternalStore Collection" resource APIs
   ######################################################
@@ -1954,7 +1507,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/backoffice/v3/settings"'
+          "https://127.0.0.1:9443/api/am/backoffice/v1/settings"'
       operationId: getSettings
 
   ######################################################
@@ -1986,23 +1539,23 @@ paths:
           "https://127.0.0.1:9443/api/apk/backoffice/v1/api-categories"'
       operationId: getAllAPICategories
 
-  /backoffice-apis/change-lifecycle:
+  /apis/change-lifecycle:
     post:
       tags:
-        - Back Office API Lifecycle
-      summary: Change Back Office API LC Status
+        - API Lifecycle
+      summary: Change API LC Status
       description: |
-        This operation is used to change the lifecycle of an Back Office API.
-        Eg: Publish an Back Office API which is in `CREATED` state. In order to change the lifecycle, we need to provide the
+        This operation is used to change the lifecycle of an API.
+        Eg: Publish an API which is in `CREATED` state. In order to change the lifecycle, we need to provide the
         lifecycle `action` as a query parameter.
 
-        For example, to Publish an Back Office API, `action` should be `Publish`.
+        For example, to Publish an API, `action` should be `Publish`.
 
       parameters:
         - name: action
           in: query
           description: |
-            The action to demote or promote the state of the Back Office API.
+            The action to demote or promote the state of the API.
 
             Supported actions are [ **Publish**, **Demote to Created**]
           required: true
@@ -2011,7 +1564,7 @@ paths:
             enum:
               - Publish
               - Demote to Created
-        - $ref: '#/components/parameters/backofficeApiId-Q'
+        - $ref: '#/components/parameters/apiId-Q'
         - $ref: '#/components/parameters/If-Match'
       responses:
         200:
@@ -2036,22 +1589,21 @@ paths:
         - OAuth2Security:
             - apim:api_publish
             - apim:api_manage
-            - apim:api_product_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish"'
-      operationId: changeBackOfficeAPILifecycle
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish"'
+      operationId: changeAPILifecycle
 
-  /backoffice-apis/{backofficeApiId}/lifecycle-history:
+  /apis/{apiId}/lifecycle-history:
     get:
       tags:
-        - Back Office API Lifecycle
-      summary: Get Lifecycle State Change History of the Back Office APIs.
+        - API Lifecycle
+      summary: Get Lifecycle State Change History of the APIs.
       description: |
-        This operation can be used to retrieve Lifecycle state change history of the Back Office APIs.
+        This operation can be used to retrieve Lifecycle state change history of the APIs.
       parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
@@ -2075,18 +1627,18 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-history"'
-      operationId: getBackOfficeAPILifecycleHistory
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-history"'
+      operationId: getAPILifecycleHistory
 
-  /backoffice-apis/{backofficeApiId}/lifecycle-state:
+  /apis/{apiId}/lifecycle-state:
     get:
       tags:
-        - Back Office API Lifecycle
-      summary: Get Lifecycle State Data of the Back Office API.
+        - API Lifecycle
+      summary: Get Lifecycle State Data of the API.
       description: |
-        This operation can be used to retrieve Lifecycle state data of the Back Office API.
+        This operation can be used to retrieve Lifecycle state data of the API.
       parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
@@ -2111,18 +1663,18 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state"'
-      operationId: getBackOfficeAPILifecycleState
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state"'
+      operationId: getAPILifecycleState
 
-  /backoffice-apis/{backofficeApiId}/lifecycle-state/pending-tasks:
+  /apis/{apiId}/lifecycle-state/pending-tasks:
     delete:
       tags:
-        - Back Office API Lifecycle
+        - API Lifecycle
       summary: Delete Pending Lifecycle State Change Tasks
       description: |
         This operation can be used to remove pending lifecycle state change requests that are in pending state
       parameters:
-        - $ref: '#/components/parameters/backofficeApiId'
+        - $ref: '#/components/parameters/apiId'
       responses:
         200:
           description: |
@@ -2142,13 +1694,13 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/apk/backoffice/v1/backoffice-apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
-      operationId: deleteBackOfficeAPILifecycleStatePendingTasks
+          "https://127.0.0.1:9443/api/apk/backoffice/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
+      operationId: deleteAPILifecycleStatePendingTasks
 
 components:
   schemas:
-    RuntimeAPIDefinition:
-      title: Runtime API Schema
+    APIDefinition:
+      title: API Schema
       required:
         - type
       type: object
@@ -2234,49 +1786,8 @@ components:
         fullName:
           type: string
           example: John David
-    RuntimeList:
-      title: Runtime List
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            Number of Runtimes returned.
-          example: 1
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/RuntimeInfo'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-    RuntimeInfo:
-      title: Runtime Info object with basic Runtime details.
-      type: object
-      properties:
-        id:
-          type: string
-          example: 01234567-0123-0123-0123-012345678901
-        name:
-          type: string
-          example: RuntimeDev1
-        description:
-          type: string
-          example: Runtime 1 used for dev
-    Runtime:
-      title: Runtime object.
-      type: object
-      properties:
-        id:
-          type: string
-          example: 01234567-0123-0123-0123-012345678901
-        name:
-          type: string
-          example: RuntimeDev1
-        description:
-          type: string
-          example: Runtime 1 used for dev
-    RuntimeAPIList:
-      title: RuntimeAPI List
+    APIList:
+      title: API List
       type: object
       properties:
         count:
@@ -2292,7 +1803,7 @@ components:
           $ref: '#/components/schemas/Pagination'
 
     APIInfo:
-      title: Runtime API Info object with basic API details.
+      title: API Info object with basic API details.
       type: object
       properties:
         id:
@@ -2319,9 +1830,19 @@ components:
         updatedTime:
           type: string
           example : 2021-02-11 09:57:25
+        hasThumbnail:
+          type: boolean
+          example: true
+        state:
+          type: string
+          description: |
+            State of the API. Only published APIs are visible on the Developer Portal
+          enum:
+            - CREATED
+            - PUBLISHED
 
-    RuntimeAPI:
-      title: Runtime API object
+    API:
+      title: API object
       required:
         - context
         - name
@@ -2331,7 +1852,7 @@ components:
         id:
           type: string
           description: |
-            UUID of the runtime api
+            UUID of the API
           readOnly: true
           example: 01234567-0123-0123-0123-012345678901
         name:
@@ -2378,6 +1899,31 @@ components:
           example:
             - http
             - https
+          items:
+            type: string
+        hasThumbnail:
+          type: boolean
+          example: false
+        state:
+          type: string
+          description: |
+            State of the API. Only published APIs are visible on the Developer Portal
+          default: CREATED
+          enum:
+            - CREATED
+            - PUBLISHED
+        tags:
+          type: array
+          example:
+            - pizza
+            - food
+          items:
+            type: string
+        categories:
+          type: array
+          description: |
+            API categories
+          example: []
           items:
             type: string
         additionalProperties:
@@ -2436,8 +1982,12 @@ components:
           x-otherScopes:
             - apim:api_publish
             - apim:api_manage
+        monetization:
+          $ref: '#/components/schemas/APIMonetizationInfo'
+        businessInformation:
+          $ref: '#/components/schemas/APIBusinessInformation'
         revision:
-          $ref: '#/components/schemas/RuntimeAPIRevision'
+          $ref: '#/components/schemas/APIRevision'
         deployments:
           type: array
           readOnly: true
@@ -2447,7 +1997,7 @@ components:
             - name: Europe
               deployedTime: 2022-10-28T06:13:35.024Z
           items:
-            $ref: '#/components/schemas/RuntimeAPIDeployment'
+            $ref: '#/components/schemas/APIDeployment'
       x-scopes:
         - apim:api_create
         - apim:api_manage
@@ -2455,8 +2005,8 @@ components:
     #-----------------------------------------------------
     # The API Revision resource
     #-----------------------------------------------------
-    RuntimeAPIRevision:
-      title: Object with basic Runtime API Revision details
+    APIRevision:
+      title: Object with basic API Revision details
       properties:
         displayName:
           type: string
@@ -2478,8 +2028,8 @@ components:
     #-----------------------------------------------------
     # The API Revision Deployment resource
     #-----------------------------------------------------
-    RuntimeAPIDeployment:
-      title: Basic Runtime API deployment details
+    APIDeployment:
+      title: Basic API deployment details
       properties:
         name:
           maxLength: 255
@@ -2490,54 +2040,8 @@ components:
           readOnly: true
           type: string
           format: date-time
-    BackOfficeAPIList:
-      title: Back Office API List
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            Number of Back Office APIs returned.
-          example: 1
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/BackOfficeAPIInfo'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-    BackOfficeAPIInfo:
-      title: API Info object with basic BackOffice API details.
-      type: object
-      properties:
-        id:
-          type: string
-          description: |
-            UUID of the Back Office API
-          readOnly: true
-          example: 01234567-0123-0123-0123-012345678901
-        name:
-          type: string
-          description: Name of the Back Office API
-          example: PizzaShackBackOfficeAPI
-        context:
-          type: string
-          example: pizzaproduct
-        description:
-          type: string
-          description: A brief description about the API
-          example: This is a simple API for Pizza Shack online pizza delivery store
-        hasThumbnail:
-          type: boolean
-          example: true
-        state:
-          type: string
-          description: |
-            State of the Back Office API. Only published Back Office APIs are visible on the Developer Portal
-          enum:
-            - CREATED
-            - PUBLISHED
-    BackOfficeAPI:
-      title: Back Office API object
+    ModifiableAPI:
+      title: Modifiable API object
       required:
         - name
       type: object
@@ -2545,15 +2049,15 @@ components:
         id:
           type: string
           description: |
-            UUID of the Back Office API
+            UUID of the API
           readOnly: true
           example: 01234567-0123-0123-0123-012345678901
         name:
           maxLength: 50
           minLength: 1
           type: string
-          description: Name of the Back Office API
-          example: PizzaShackBackOfficeAPI
+          description: Name of the API
+          example: PizzaShackAPI
         context:
           maxLength: 60
           minLength: 1
@@ -2569,7 +2073,7 @@ components:
         state:
           type: string
           description: |
-            State of the Back Office API. Only published Back Office APIs are visible on the Developer Portal
+            State of the API. Only published APIs are visible on the Developer Portal
           default: CREATED
           enum:
             - CREATED
@@ -2606,22 +2110,9 @@ components:
                 type: boolean
                 default: false
         monetization:
-          $ref: '#/components/schemas/BackOfficeAPIMonetizationInfo'
+          $ref: '#/components/schemas/APIMonetizationInfo'
         businessInformation:
-          $ref: '#/components/schemas/BackOfficeAPIBusinessInformation'
-        createdTime:
-          type: string
-        lastUpdatedTime:
-          type: string
-        runtimeApis:
-          type: array
-          description: |
-            Runtime APIs and resources in the Back Office API.
-          example:
-            - apiId: 01234567-0123-0123-0123-012345678901
-              runtimeId: 01234567-765-0765-0123-012345678901
-          items:
-            $ref: '#/components/schemas/ProductAPI'
+          $ref: '#/components/schemas/APIBusinessInformation'
         categories:
           type: array
           description: |
@@ -2629,19 +2120,6 @@ components:
           example: []
           items:
             type: string
-    ProductAPI:
-      title: ProductAPI
-      required:
-        - runtimeId
-        - apiId
-      type: object
-      properties:
-        runtimeId:
-          type: string
-          example: 01234567-765-0765-0123-012345678901
-        apiId:
-          type: string
-          example: 01234567-0123-0123-0123-012345678901
     ResourcePath:
       title: ResourcePath
       required:
@@ -2672,7 +2150,7 @@ components:
             $ref: '#/components/schemas/ResourcePath'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    BackOfficeAPIBusinessInformation:
+    APIBusinessInformation:
       type: object
       properties:
         businessOwner:
@@ -3397,8 +2875,8 @@ components:
             type: object
         pagination:
           $ref: '#/components/schemas/Pagination'
-    BackOfficeAPIMonetizationInfo:
-      title: Back Office API monetization object
+    APIMonetizationInfo:
+      title: API monetization object
       required:
         - enabled
       type: object
@@ -3702,14 +3180,6 @@ components:
       required: true
       schema:
         type: string
-    runtimeId:
-      name: runtimeId
-      in: path
-      description: |
-        **Runtime ID** consisting of the **UUID** of the Runtime.
-      required: true
-      schema:
-        type: string
     endpointId:
       name: endpointId
       in: path
@@ -4009,16 +3479,6 @@ components:
       required: true
       schema:
         type: string
-    backofficeApiId:
-      name: backofficeApiId
-      in: path
-      description: |
-        **Back Office API ID** consisting of the **UUID** of the Back Office API. Using the **UUID** in the API call is recommended.
-      required: true
-      schema:
-        type: string
-        x-encoded: true
-      x-encoded: true
     alertType:
       name: alertType
       in: path
@@ -4044,16 +3504,6 @@ components:
       in: path
       description: |
         **Env ID** consisting of the **UUID** of the gateway environment.
-      required: true
-      schema:
-        type: string
-    backofficeApiId-Q:
-      name: backofficeApiId
-      in: query
-      description: |
-        **Back Office API ID** consisting of the **UUID** of the Back Office API.
-        The combination of the provider, name and the version of the Back Office API is also accepted as a valid Back Office API ID.
-        Should be formatted as **provider-name-version**.
       required: true
       schema:
         type: string
@@ -4085,7 +3535,6 @@ components:
             apim:document_manage: Create, update and delete API documents
             apim:backoffice_settings: Retrieve BackOffice settings
             apim:app_import_export: Import and export applications related operations
-            apim:api_product_import_export: Import and export Back Office APIs related operations
             apim:admin: Manage all admin operations
             apim:comment_view: Read permission to comments
             apim:comment_write: Write permission to comments
