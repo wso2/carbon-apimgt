@@ -99,6 +99,7 @@
     <!-- Out interceptors -->
     <bean id="gZipInterceptor" class="org.apache.cxf.transport.common.gzip.GZIPOutInterceptor" />
     <bean id="responseInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.response.ResponseOutInterceptor" />
+    <bean id="cleanUpInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.response.CleanUpInterceptor" />
 
     <cxf:bus>
         <cxf:inInterceptors>
@@ -114,6 +115,7 @@
         <cxf:outInterceptors>
             <ref bean="gZipInterceptor"/>
             <ref bean="responseInterceptor"/>
+            <ref bean="cleanUpInterceptor"/>
         </cxf:outInterceptors>
     </cxf:bus>
 </beans>

@@ -2929,6 +2929,20 @@ public final class APIConstants {
         public static final String FULL = "FULL";
     }
 
+    public static class OperationPolicyConstants {
+        public static final String CONFIG_KEY_PROVIDER = "provider";
+        public static final String CONFIG_VALUE_BCENTRAL = "bcentral";
+        public static final String ORGANIZATION = "organization";
+        public static final String HANDLE = "handle";
+    }
+
+    public static class ApiManagerConfigurationConstants {
+        public static final String PROPERTIES = "Properties";
+        public static final String PROPERTY = "Property";
+        public static final String OPERATION_POLICY_CONFIGS = "OperationPolicyConfigs";
+        public static final String NAME = "name";
+    }
+
     // Constants related to basic health check APIs
     public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
 }

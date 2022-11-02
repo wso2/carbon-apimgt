@@ -22,6 +22,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -31,6 +32,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
@@ -41,6 +43,7 @@ import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeployedEnvInfoDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.OperationPolicyAttachmentStatusDTO;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -141,6 +144,34 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         apiProvider.removeUnDeployedAPIRevision(unDeployedAPIRevisionDTO.getApiUUID(), unDeployedAPIRevisionDTO.getRevisionUUID(),
                 unDeployedAPIRevisionDTO.getEnvironment());
+        return Response.ok().build();
+    }
+
+    @Override
+    public Response apisApiIdOperationPolicyIsAttachedGet(String xWSO2Tenant, String apiId, String organizationId,
+                                                          MessageContext messageContext) throws APIManagementException {
+        try {
+            String organization = organizationId == null ?
+                    SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext) : organizationId;
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPIbyUUID(apiId, organization);
+            boolean isAttached = false;
+            Set<URITemplate> uriTemplates = api.getUriTemplates();
+            for (URITemplate uriTemplate : uriTemplates) {
+                if (uriTemplate.getOperationPolicies().size() > 0) {
+                    isAttached = true;
+                    break;
+                }
+            }
+            OperationPolicyAttachmentStatusDTO result = new OperationPolicyAttachmentStatusDTO();
+            result.isAttached(isAttached);
+            return Response.ok().entity(result).build();
+
+        } catch (APIManagementException e) {
+            RestApiUtil.handleBadRequest(
+                    "An error has occurred while getting API for the given organization/tenantDomain " +
+                            "and apiId combination.", e, log);
+        }
         return Response.ok().build();
     }
 }

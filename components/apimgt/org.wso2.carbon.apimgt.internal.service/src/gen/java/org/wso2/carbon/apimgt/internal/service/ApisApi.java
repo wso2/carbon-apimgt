@@ -4,6 +4,7 @@ import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 import java.util.List;
+import org.wso2.carbon.apimgt.internal.service.dto.OperationPolicyAttachmentStatusDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.ApisApiService;
 import org.wso2.carbon.apimgt.internal.service.impl.ApisApiServiceImpl;
@@ -38,6 +39,18 @@ public class ApisApi  {
 
 ApisApiService delegate = new ApisApiServiceImpl();
 
+
+    @GET
+    @Path("/{apiId}/operation-policy/is-attached")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get policy attachment status of an API.", notes = "If at least one policy is attached to an API this resource returns true, otherwise returns false. ", response = OperationPolicyAttachmentStatusDTO.class, tags={ "Operation Policy",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "True or False", response = OperationPolicyAttachmentStatusDTO.class),
+        @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
+    public Response apisApiIdOperationPolicyIsAttachedGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant, @ApiParam(value = "ID of the API",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Organization Id ")  @QueryParam("organizationId") String organizationId) throws APIManagementException{
+        return delegate.apisApiIdOperationPolicyIsAttachedGet(xWSO2Tenant, apiId, organizationId, securityContext);
+    }
 
     @GET
     

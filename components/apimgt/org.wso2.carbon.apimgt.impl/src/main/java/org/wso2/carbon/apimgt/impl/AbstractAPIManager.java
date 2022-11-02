@@ -56,6 +56,7 @@ import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
+import org.wso2.carbon.apimgt.api.OperationPolicyProvider;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.exceptions.*;
@@ -90,6 +91,7 @@ public abstract class AbstractAPIManager implements APIManager {
     // Property to indicate whether access control restriction feature is enabled.
     protected boolean isAccessControlRestrictionEnabled = false;
     APIPersistence apiPersistenceInstance;
+    OperationPolicyProvider operationPolicyProviderInstance;
 
     public AbstractAPIManager() throws APIManagementException {
 
@@ -124,6 +126,7 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(msg, e);
         }
         apiPersistenceInstance = PersistenceFactory.getAPIPersistenceInstance();
+        operationPolicyProviderInstance  = OperationPolicyProviderManager.getPolicyProviderInstance();
     }
 
     public void cleanup() {

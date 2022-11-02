@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIEndpointUrlExtractor;
+import org.wso2.carbon.apimgt.api.OperationPolicyProvider;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
@@ -76,6 +77,7 @@ public class ServiceReferenceHolder {
     private Map<String, ExternalGatewayDeployer> externalGatewayDeployers = new HashMap<>();
     private Map<String, ExternalEnvironment> externalEnvironmentsMap = new HashMap<>();
     private Map<String, APIDefinition> apiDefinitionMap = new HashMap<>();
+    private OperationPolicyProvider operationPolicyProvider;
     private APIEndpointUrlExtractor apiEndpointUrlExtractor;
 
     private ServiceReferenceHolder() {
@@ -371,5 +373,12 @@ public class ServiceReferenceHolder {
 
     public void setApiEndpointUrlExtractor(APIEndpointUrlExtractor apiEndpointUrlExtractor) {
         this.apiEndpointUrlExtractor = apiEndpointUrlExtractor;
+    }
+    public OperationPolicyProvider getPolicyProvider() {
+        return operationPolicyProvider;
+    }
+
+    public void setApiPolicyProvider(OperationPolicyProvider operationPolicyProvider) {
+        this.operationPolicyProvider = operationPolicyProvider;
     }
 }
