@@ -2932,6 +2932,8 @@ public final class APIConstants {
     public static class OperationPolicyConstants {
         public static final String CONFIG_KEY_PROVIDER = "provider";
         public static final String CONFIG_VALUE_BCENTRAL = "bcentral";
+        public static final String ORGANIZATION = "organization";
+        public static final String HANDLE = "handle";
     }
 
     public static class ApiManagerConfigurationConstants {
