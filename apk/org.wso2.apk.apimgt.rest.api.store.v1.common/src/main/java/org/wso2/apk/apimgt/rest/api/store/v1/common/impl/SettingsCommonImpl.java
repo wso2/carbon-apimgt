@@ -32,6 +32,7 @@ import org.wso2.apk.apimgt.rest.api.store.v1.common.mappings.SettingsMappingUtil
 import org.wso2.apk.apimgt.rest.api.store.v1.dto.ApplicationAttributeDTO;
 import org.wso2.apk.apimgt.rest.api.store.v1.dto.ApplicationAttributeListDTO;
 import org.wso2.apk.apimgt.rest.api.store.v1.dto.SettingsDTO;
+import org.wso2.apk.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,13 +48,12 @@ public class SettingsCommonImpl {
 
     /**
      *
-     * @param organization
-     * @param requestedTenantDomain
-     * @param anonymousEnabled
-     * @return
-     * @throws APIManagementException
+     * @param organization Organization of the user
+     * @param requestedTenantDomain requested tenant Domain
+     * @return settings DTO
+     * @throws APIManagementException API Manager Exception if an error occurred when retrieving the settings
      */
-    public static SettingsDTO getSettings(String organization, String requestedTenantDomain, boolean anonymousEnabled)
+    public static SettingsDTO getSettings(String organization, String requestedTenantDomain)
             throws APIManagementException {
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -61,13 +61,14 @@ public class SettingsCommonImpl {
 
             boolean monetizationEnabled = apiConsumer.isMonetizationEnabled(requestedTenantDomain);
             boolean recommendationEnabled = apiConsumer.isRecommendationEnabled(requestedTenantDomain);
+            boolean anonymousEnabled = RestApiUtil.isDevPortalAnonymousEnabled(requestedTenantDomain);
             boolean isUserAvailable = false;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
                 isUserAvailable = true;
             }
             SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
-            return settingsMappingUtil.fromSettingstoDTO(isUserAvailable, monetizationEnabled,
-                    recommendationEnabled, anonymousEnabled, organization);
+            return settingsMappingUtil.fromSettingstoDTO(isUserAvailable, monetizationEnabled, recommendationEnabled,
+                    anonymousEnabled, organization);
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Store Settings";
             throw new APIManagementException(errorMessage, e.getErrorHandler());
@@ -90,8 +91,7 @@ public class SettingsCommonImpl {
                         .fromApplicationAttributeJsonToDTO(obj);
                 applicationAttributeDTOList.add(applicationAttributeDTO);
             }
-            return ApplicationMappingUtil
-                    .fromApplicationAttributeListToDTO(applicationAttributeDTOList);
+            return ApplicationMappingUtil.fromApplicationAttributeListToDTO(applicationAttributeDTOList);
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred in reading application attributes from config";
             throw new APIManagementException(errorMessage, e.getErrorHandler());

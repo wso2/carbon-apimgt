@@ -148,4 +148,21 @@ public class ConfigurationHolder {
     public JSONArray getApplicationAttributes() {
         return applicationAttributes;
     }
+
+    /**
+     * Returns the configuration of the Identity Provider.
+     *
+     * @return configuration of the Identity Provider from the api-manager configuration
+     */
+    public IDPConfiguration getIdentityProviderConfig() {
+        //TODO: need to check if this is required
+        if (getFirstProperty(APIConstants.IDENTITY_PROVIDER_AUTHORIZE_ENDPOINT) != null) {
+            return new IDPConfiguration.Builder()
+                    .authorizeEndpoint(getFirstProperty(APIConstants.IDENTITY_PROVIDER_AUTHORIZE_ENDPOINT))
+                    .oidcLogoutEndpoint(getFirstProperty(APIConstants.IDENTITY_PROVIDER_OIDC_LOGOUT_ENDPOINT))
+                    .build();
+        } else {
+            return null;
+        }
+    }
 }
