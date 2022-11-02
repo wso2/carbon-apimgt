@@ -39,9 +39,9 @@ import java.util.Map;
 /**
  * This is the service implementation class for search API
  */
-public class SearchServiceImpl {
+public class SearchCommonImpl {
 
-    private SearchServiceImpl() {
+    private SearchCommonImpl() {
     }
 
     public static SearchResultListDTO search(Integer limit, Integer offset, String query, String organization)

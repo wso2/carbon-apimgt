@@ -37,9 +37,9 @@ import static org.wso2.apk.apimgt.impl.APIConstants.TENANT_STATE_INACTIVE;
 /**
  * This is the rest api implementation class for tenant related operations
  */
-public class TenantsServiceImpl {
+public class TenantsCommonImpl {
 
-    private TenantsServiceImpl() {
+    private TenantsCommonImpl() {
     }
 
     /**

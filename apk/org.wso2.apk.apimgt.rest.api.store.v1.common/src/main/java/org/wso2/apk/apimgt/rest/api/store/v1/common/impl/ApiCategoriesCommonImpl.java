@@ -28,9 +28,9 @@ import java.util.List;
 /**
  * This is the service implementation class for api categories api service operations
  */
-public class ApiCategoryServiceImpl {
+public class ApiCategoriesCommonImpl {
 
-    private ApiCategoryServiceImpl() {
+    private ApiCategoriesCommonImpl() {
     }
 
     /**

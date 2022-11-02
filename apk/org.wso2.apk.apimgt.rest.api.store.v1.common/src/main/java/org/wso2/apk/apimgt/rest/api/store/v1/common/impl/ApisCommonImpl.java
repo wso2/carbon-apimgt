@@ -676,7 +676,7 @@ public class ApisCommonImpl {
      */
     public static List<Tier> getSubscriptionPolicies(String apiId, String organization) throws APIManagementException {
         APIDTO apiInfo = getAPIByAPIId(apiId, organization);
-        List<Tier> availableThrottlingPolicyList = ThrottlingPoliciesServiceImpl.getThrottlingPolicyList(
+        List<Tier> availableThrottlingPolicyList = ThrottlingPoliciesCommonImpl.getThrottlingPolicyList(
                 ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), organization);
         List<Tier> tierList = null;
 

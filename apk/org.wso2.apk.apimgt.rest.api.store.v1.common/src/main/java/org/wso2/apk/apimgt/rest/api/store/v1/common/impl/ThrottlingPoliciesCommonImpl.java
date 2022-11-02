@@ -36,9 +36,9 @@ import java.util.List;
 /**
  * This is the service implementation class for throttling policies operations
  */
-public class ThrottlingPoliciesServiceImpl {
+public class ThrottlingPoliciesCommonImpl {
 
-    private ThrottlingPoliciesServiceImpl() {
+    private ThrottlingPoliciesCommonImpl() {
     }
 
     /**
