@@ -33,7 +33,7 @@ import org.wso2.apk.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.apk.apimgt.impl.restapi.CommonUtils;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.mappings.OperationPolicyMappingUtil;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings.OperationPolicyMappingUtil;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.OperationPolicyDataDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.OperationPolicyDataListDTO;
 

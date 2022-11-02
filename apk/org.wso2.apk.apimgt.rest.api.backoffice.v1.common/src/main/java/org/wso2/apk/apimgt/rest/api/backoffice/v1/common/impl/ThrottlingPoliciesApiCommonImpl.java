@@ -31,7 +31,7 @@ import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.mappings.ThrottlingPolicyMappingUtil;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings.ThrottlingPolicyMappingUtil;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.SubscriptionPolicyDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.SubscriptionPolicyListDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.ThrottlingPolicyDTO;

@@ -18,7 +18,7 @@
 
 package org.wso2.apk.apimgt.rest.api.backoffice.v1.common.impl;
 
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.mappings.APICategoryMappingUtil;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings.APICategoryMappingUtil;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.APICategoryListDTO;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.model.APICategory;

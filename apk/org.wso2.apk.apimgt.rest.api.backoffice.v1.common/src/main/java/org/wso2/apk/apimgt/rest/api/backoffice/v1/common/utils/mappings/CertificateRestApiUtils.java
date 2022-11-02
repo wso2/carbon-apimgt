@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.apk.apimgt.rest.api.backoffice.v1.common.mappings;
+package org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings;
 
 import com.nimbusds.jose.util.StandardCharset;
 import org.apache.commons.codec.binary.Base64;

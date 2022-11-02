@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.apk.apimgt.rest.api.backoffice.v1.common.mappings;
+package org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

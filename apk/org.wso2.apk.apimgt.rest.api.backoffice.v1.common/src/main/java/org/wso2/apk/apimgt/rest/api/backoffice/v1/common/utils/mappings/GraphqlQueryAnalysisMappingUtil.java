@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.apk.apimgt.rest.api.backoffice.v1.common.mappings;
+package org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings;
 
 import graphql.schema.idl.SchemaParser;
 import org.apache.commons.logging.Log;
