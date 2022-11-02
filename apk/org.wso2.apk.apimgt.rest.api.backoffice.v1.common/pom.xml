@@ -17,12 +17,12 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-        <groupId>org.wso2.carbon.apimgt</groupId>
+        <groupId>org.wso2.apk</groupId>
         <artifactId>apk</artifactId>
-        <version>9.26.10-SNAPSHOT</version>
+        <version>0.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -49,11 +49,6 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-models</artifactId>
             <exclusions>
@@ -64,33 +59,41 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.apk.apimgt.api</artifactId>
-            <scope>provided</scope>
-            <version>9.26.10-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.apk</groupId>
             <artifactId>org.wso2.apk.apimgt.impl</artifactId>
-            <version>9.26.10-SNAPSHOT</version>
-            <scope>provided</scope>
+            <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.apk</groupId>
+            <artifactId>org.wso2.apk.apimgt.api</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.apk</groupId>
+            <artifactId>org.wso2.apk.apimgt.rest.api.util</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.apk</groupId>
             <artifactId>org.wso2.apk.apimgt.rest.api.common</artifactId>
-            <version>9.26.10-SNAPSHOT</version>
-            <scope>provided</scope>
+            <version>0.1.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.solace</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.rest.api.common</artifactId>
-            <scope>provided</scope>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>org.wso2.apk.apimgt</groupId>-->
+        <!--            <artifactId>org.wso2.apk.apimgt.rest.api.common</artifactId>-->
+        <!--            <version>0.1.0-SNAPSHOT</version>-->
+        <!--            <scope>provided</scope>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.wso2.apk.apimgt</groupId>-->
+        <!--            <artifactId>org.wso2.apk.apimgt.solace</artifactId>-->
+        <!--            <scope>provided</scope>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.wso2.apk.apimgt</groupId>-->
+        <!--            <artifactId>org.wso2.apk.apimgt.rest.api.common</artifactId>-->
+        <!--            <scope>provided</scope>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
@@ -131,11 +134,11 @@
             <classifier>runtime</classifier>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.hubspot.jinjava</groupId>
-            <artifactId>jinjava</artifactId>
-            <version>${jinjava.version}</version>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.hubspot.jinjava</groupId>-->
+        <!--            <artifactId>jinjava</artifactId>-->
+        <!--            <version>${jinjava.version}</version>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>org.wso2.orbit.com.amazonaws</groupId>
             <artifactId>awslambda</artifactId>
@@ -190,17 +193,17 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-junit47</artifactId>
-                        <version>${maven.surefire.plugin.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
+            <!--            <plugin>-->
+            <!--                <groupId>org.apache.maven.plugins</groupId>-->
+            <!--                <artifactId>maven-surefire-plugin</artifactId>-->
+            <!--                <dependencies>-->
+            <!--                    <dependency>-->
+            <!--                        <groupId>org.apache.maven.surefire</groupId>-->
+            <!--                        <artifactId>surefire-junit47</artifactId>-->
+            <!--                        <version>${maven.surefire.plugin.version}</version>-->
+            <!--                    </dependency>-->
+            <!--                </dependencies>-->
+            <!--            </plugin>-->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -219,10 +222,10 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-            </plugin>
+            <!--            <plugin>-->
+            <!--                <groupId>org.apache.maven.plugins</groupId>-->
+            <!--                <artifactId>maven-checkstyle-plugin</artifactId>-->
+            <!--            </plugin>-->
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -238,9 +241,9 @@
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>
-                            org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.*;version="${carbon.apimgt.version}",
-                            org.wso2.apk.apimgt.rest.api.backoffice.v1.common.mappings.*;version="${carbon.apimgt.version}",
-                            org.wso2.apk.apimgt.rest.api.backoffice.v1.common.impl.*;version="${carbon.apimgt.version}"
+                            org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.*;version="${apk.apimgt.version}",
+                            org.wso2.apk.apimgt.rest.api.backoffice.v1.common.mappings.*;version="${apk.apimgt.version}",
+                            org.wso2.apk.apimgt.rest.api.backoffice.v1.common.impl.*;version="${apk.apimgt.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>
