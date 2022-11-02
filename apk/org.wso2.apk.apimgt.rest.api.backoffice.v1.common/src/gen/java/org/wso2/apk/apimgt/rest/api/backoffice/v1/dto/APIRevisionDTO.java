@@ -11,14 +11,14 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.apk.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
 
 
-public class RuntimeAPIRevisionDTO   {
+public class APIRevisionDTO   {
   
     private String displayName = null;
     private String id = null;
@@ -27,7 +27,7 @@ public class RuntimeAPIRevisionDTO   {
 
   /**
    **/
-  public RuntimeAPIRevisionDTO displayName(String displayName) {
+  public APIRevisionDTO displayName(String displayName) {
     this.displayName = displayName;
     return this;
   }
@@ -44,7 +44,7 @@ public class RuntimeAPIRevisionDTO   {
 
   /**
    **/
-  public RuntimeAPIRevisionDTO id(String id) {
+  public APIRevisionDTO id(String id) {
     this.id = id;
     return this;
   }
@@ -61,7 +61,7 @@ public class RuntimeAPIRevisionDTO   {
 
   /**
    **/
-  public RuntimeAPIRevisionDTO description(String description) {
+  public APIRevisionDTO description(String description) {
     this.description = description;
     return this;
   }
@@ -78,7 +78,7 @@ public class RuntimeAPIRevisionDTO   {
 
   /**
    **/
-  public RuntimeAPIRevisionDTO createdTime(java.util.Date createdTime) {
+  public APIRevisionDTO createdTime(java.util.Date createdTime) {
     this.createdTime = createdTime;
     return this;
   }
@@ -102,11 +102,11 @@ public class RuntimeAPIRevisionDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RuntimeAPIRevisionDTO runtimeAPIRevision = (RuntimeAPIRevisionDTO) o;
-    return Objects.equals(displayName, runtimeAPIRevision.displayName) &&
-        Objects.equals(id, runtimeAPIRevision.id) &&
-        Objects.equals(description, runtimeAPIRevision.description) &&
-        Objects.equals(createdTime, runtimeAPIRevision.createdTime);
+    APIRevisionDTO apIRevision = (APIRevisionDTO) o;
+    return Objects.equals(displayName, apIRevision.displayName) &&
+        Objects.equals(id, apIRevision.id) &&
+        Objects.equals(description, apIRevision.description) &&
+        Objects.equals(createdTime, apIRevision.createdTime);
   }
 
   @Override
@@ -117,7 +117,7 @@ public class RuntimeAPIRevisionDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class RuntimeAPIRevisionDTO {\n");
+    sb.append("class APIRevisionDTO {\n");
     
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    id: ").append(toIndentedString(id)).append("\n");

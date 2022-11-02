@@ -8,11 +8,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.APIAdditionalPropertiesDTO;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.APIAdditionalPropertiesMapDTO;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.APIBusinessInformationDTO;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.APIDeploymentDTO;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.APIOperationsDTO;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.RuntimeAPIAdditionalPropertiesDTO;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.RuntimeAPIAdditionalPropertiesMapDTO;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.RuntimeAPIDeploymentDTO;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.RuntimeAPIRevisionDTO;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.APIRevisionDTO;
 import javax.validation.constraints.*;
 
 
@@ -20,7 +22,7 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.apk.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
@@ -29,7 +31,7 @@ import javax.validation.Valid;
 
 @Scope(name = "apim:api_create", description="", value ="")
 @Scope(name = "apim:api_manage", description="", value ="")
-public class RuntimeAPIDTO   {
+public class APIDTO   {
   
     private String id = null;
     private String name = null;
@@ -76,12 +78,47 @@ return null;
     }
     private TypeEnum type = TypeEnum.HTTP;
     private List<String> transport = new ArrayList<String>();
+    private Boolean hasThumbnail = null;
+
+    @XmlType(name="StateEnum")
+    @XmlEnum(String.class)
+    public enum StateEnum {
+        CREATED("CREATED"),
+        PUBLISHED("PUBLISHED");
+        private String value;
+
+        StateEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static StateEnum fromValue(String v) {
+            for (StateEnum b : StateEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private StateEnum state = StateEnum.CREATED;
+    private List<String> tags = new ArrayList<String>();
+    private List<String> categories = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
     @Scope(name = "apim:api_manage", description="", value ="")
-    private List<RuntimeAPIAdditionalPropertiesDTO> additionalProperties = new ArrayList<RuntimeAPIAdditionalPropertiesDTO>();
+    private List<APIAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIAdditionalPropertiesDTO>();
     @Scope(name = "apim:api_publish", description="", value ="")
     @Scope(name = "apim:api_manage", description="", value ="")
-    private Map<String, RuntimeAPIAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<String, RuntimeAPIAdditionalPropertiesMapDTO>();
+    private Map<String, APIAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<String, APIAdditionalPropertiesMapDTO>();
     private String createdTime = null;
     @Scope(name = "apim:api_publish", description="", value ="")
     @Scope(name = "apim:api_manage", description="", value ="")
@@ -90,19 +127,21 @@ return null;
     @Scope(name = "apim:api_publish", description="", value ="")
     @Scope(name = "apim:api_manage", description="", value ="")
     private String apiUsagePolicy = null;
-    private RuntimeAPIRevisionDTO revision = null;
-    private List<RuntimeAPIDeploymentDTO> deployments = new ArrayList<RuntimeAPIDeploymentDTO>();
+    private APIMonetizationInfoDTO monetization = null;
+    private APIBusinessInformationDTO businessInformation = null;
+    private APIRevisionDTO revision = null;
+    private List<APIDeploymentDTO> deployments = new ArrayList<APIDeploymentDTO>();
 
   /**
-   * UUID of the runtime api 
+   * UUID of the API 
    **/
-  public RuntimeAPIDTO id(String id) {
+  public APIDTO id(String id) {
     this.id = id;
     return this;
   }
 
   
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the runtime api ")
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the API ")
   @JsonProperty("id")
   public String getId() {
     return id;
@@ -113,7 +152,7 @@ return null;
 
   /**
    **/
-  public RuntimeAPIDTO name(String name) {
+  public APIDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -131,7 +170,7 @@ return null;
 
   /**
    **/
-  public RuntimeAPIDTO description(String description) {
+  public APIDTO description(String description) {
     this.description = description;
     return this;
   }
@@ -148,7 +187,7 @@ return null;
 
   /**
    **/
-  public RuntimeAPIDTO context(String context) {
+  public APIDTO context(String context) {
     this.context = context;
     return this;
   }
@@ -166,7 +205,7 @@ return null;
 
   /**
    **/
-  public RuntimeAPIDTO version(String version) {
+  public APIDTO version(String version) {
     this.version = version;
     return this;
   }
@@ -185,7 +224,7 @@ return null;
   /**
    * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC
    **/
-  public RuntimeAPIDTO type(TypeEnum type) {
+  public APIDTO type(TypeEnum type) {
     this.type = type;
     return this;
   }
@@ -203,7 +242,7 @@ return null;
   /**
    * Supported transports for the API (http and/or https). 
    **/
-  public RuntimeAPIDTO transport(List<String> transport) {
+  public APIDTO transport(List<String> transport) {
     this.transport = transport;
     return this;
   }
@@ -219,9 +258,79 @@ return null;
   }
 
   /**
+   **/
+  public APIDTO hasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("hasThumbnail")
+  public Boolean isHasThumbnail() {
+    return hasThumbnail;
+  }
+  public void setHasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
+  }
+
+  /**
+   * State of the API. Only published APIs are visible on the Developer Portal 
+   **/
+  public APIDTO state(StateEnum state) {
+    this.state = state;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "State of the API. Only published APIs are visible on the Developer Portal ")
+  @JsonProperty("state")
+  public StateEnum getState() {
+    return state;
+  }
+  public void setState(StateEnum state) {
+    this.state = state;
+  }
+
+  /**
+   **/
+  public APIDTO tags(List<String> tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "[\"pizza\",\"food\"]", value = "")
+  @JsonProperty("tags")
+  public List<String> getTags() {
+    return tags;
+  }
+  public void setTags(List<String> tags) {
+    this.tags = tags;
+  }
+
+  /**
+   * API categories 
+   **/
+  public APIDTO categories(List<String> categories) {
+    this.categories = categories;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "[]", value = "API categories ")
+  @JsonProperty("categories")
+  public List<String> getCategories() {
+    return categories;
+  }
+  public void setCategories(List<String> categories) {
+    this.categories = categories;
+  }
+
+  /**
    * Map of custom properties of API
    **/
-  public RuntimeAPIDTO additionalProperties(List<RuntimeAPIAdditionalPropertiesDTO> additionalProperties) {
+  public APIDTO additionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
@@ -230,16 +339,16 @@ return null;
   @ApiModelProperty(value = "Map of custom properties of API")
       @Valid
   @JsonProperty("additionalProperties")
-  public List<RuntimeAPIAdditionalPropertiesDTO> getAdditionalProperties() {
+  public List<APIAdditionalPropertiesDTO> getAdditionalProperties() {
     return additionalProperties;
   }
-  public void setAdditionalProperties(List<RuntimeAPIAdditionalPropertiesDTO> additionalProperties) {
+  public void setAdditionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
   }
 
   /**
    **/
-  public RuntimeAPIDTO additionalPropertiesMap(Map<String, RuntimeAPIAdditionalPropertiesMapDTO> additionalPropertiesMap) {
+  public APIDTO additionalPropertiesMap(Map<String, APIAdditionalPropertiesMapDTO> additionalPropertiesMap) {
     this.additionalPropertiesMap = additionalPropertiesMap;
     return this;
   }
@@ -248,16 +357,16 @@ return null;
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("additionalPropertiesMap")
-  public Map<String, RuntimeAPIAdditionalPropertiesMapDTO> getAdditionalPropertiesMap() {
+  public Map<String, APIAdditionalPropertiesMapDTO> getAdditionalPropertiesMap() {
     return additionalPropertiesMap;
   }
-  public void setAdditionalPropertiesMap(Map<String, RuntimeAPIAdditionalPropertiesMapDTO> additionalPropertiesMap) {
+  public void setAdditionalPropertiesMap(Map<String, APIAdditionalPropertiesMapDTO> additionalPropertiesMap) {
     this.additionalPropertiesMap = additionalPropertiesMap;
   }
 
   /**
    **/
-  public RuntimeAPIDTO createdTime(String createdTime) {
+  public APIDTO createdTime(String createdTime) {
     this.createdTime = createdTime;
     return this;
   }
@@ -274,7 +383,7 @@ return null;
 
   /**
    **/
-  public RuntimeAPIDTO lastUpdatedTime(String lastUpdatedTime) {
+  public APIDTO lastUpdatedTime(String lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
     return this;
   }
@@ -291,7 +400,7 @@ return null;
 
   /**
    **/
-  public RuntimeAPIDTO operations(List<APIOperationsDTO> operations) {
+  public APIDTO operations(List<APIOperationsDTO> operations) {
     this.operations = operations;
     return this;
   }
@@ -310,7 +419,7 @@ return null;
   /**
    * The API level usage policy selected for the particular Runtime API
    **/
-  public RuntimeAPIDTO apiUsagePolicy(String apiUsagePolicy) {
+  public APIDTO apiUsagePolicy(String apiUsagePolicy) {
     this.apiUsagePolicy = apiUsagePolicy;
     return this;
   }
@@ -327,7 +436,43 @@ return null;
 
   /**
    **/
-  public RuntimeAPIDTO revision(RuntimeAPIRevisionDTO revision) {
+  public APIDTO monetization(APIMonetizationInfoDTO monetization) {
+    this.monetization = monetization;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("monetization")
+  public APIMonetizationInfoDTO getMonetization() {
+    return monetization;
+  }
+  public void setMonetization(APIMonetizationInfoDTO monetization) {
+    this.monetization = monetization;
+  }
+
+  /**
+   **/
+  public APIDTO businessInformation(APIBusinessInformationDTO businessInformation) {
+    this.businessInformation = businessInformation;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("businessInformation")
+  public APIBusinessInformationDTO getBusinessInformation() {
+    return businessInformation;
+  }
+  public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
+    this.businessInformation = businessInformation;
+  }
+
+  /**
+   **/
+  public APIDTO revision(APIRevisionDTO revision) {
     this.revision = revision;
     return this;
   }
@@ -336,16 +481,16 @@ return null;
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("revision")
-  public RuntimeAPIRevisionDTO getRevision() {
+  public APIRevisionDTO getRevision() {
     return revision;
   }
-  public void setRevision(RuntimeAPIRevisionDTO revision) {
+  public void setRevision(APIRevisionDTO revision) {
     this.revision = revision;
   }
 
   /**
    **/
-  public RuntimeAPIDTO deployments(List<RuntimeAPIDeploymentDTO> deployments) {
+  public APIDTO deployments(List<APIDeploymentDTO> deployments) {
     this.deployments = deployments;
     return this;
   }
@@ -354,10 +499,10 @@ return null;
   @ApiModelProperty(example = "[{\"name\":\"US\",\"deployedTime\":\"2022-10-28T06:13:35.024Z\"},{\"name\":\"Europe\",\"deployedTime\":\"2022-10-28T06:13:35.024Z\"}]", value = "")
       @Valid
   @JsonProperty("deployments")
-  public List<RuntimeAPIDeploymentDTO> getDeployments() {
+  public List<APIDeploymentDTO> getDeployments() {
     return deployments;
   }
-  public void setDeployments(List<RuntimeAPIDeploymentDTO> deployments) {
+  public void setDeployments(List<APIDeploymentDTO> deployments) {
     this.deployments = deployments;
   }
 
@@ -370,33 +515,39 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RuntimeAPIDTO runtimeAPI = (RuntimeAPIDTO) o;
-    return Objects.equals(id, runtimeAPI.id) &&
-        Objects.equals(name, runtimeAPI.name) &&
-        Objects.equals(description, runtimeAPI.description) &&
-        Objects.equals(context, runtimeAPI.context) &&
-        Objects.equals(version, runtimeAPI.version) &&
-        Objects.equals(type, runtimeAPI.type) &&
-        Objects.equals(transport, runtimeAPI.transport) &&
-        Objects.equals(additionalProperties, runtimeAPI.additionalProperties) &&
-        Objects.equals(additionalPropertiesMap, runtimeAPI.additionalPropertiesMap) &&
-        Objects.equals(createdTime, runtimeAPI.createdTime) &&
-        Objects.equals(lastUpdatedTime, runtimeAPI.lastUpdatedTime) &&
-        Objects.equals(operations, runtimeAPI.operations) &&
-        Objects.equals(apiUsagePolicy, runtimeAPI.apiUsagePolicy) &&
-        Objects.equals(revision, runtimeAPI.revision) &&
-        Objects.equals(deployments, runtimeAPI.deployments);
+    APIDTO API = (APIDTO) o;
+    return Objects.equals(id, API.id) &&
+        Objects.equals(name, API.name) &&
+        Objects.equals(description, API.description) &&
+        Objects.equals(context, API.context) &&
+        Objects.equals(version, API.version) &&
+        Objects.equals(type, API.type) &&
+        Objects.equals(transport, API.transport) &&
+        Objects.equals(hasThumbnail, API.hasThumbnail) &&
+        Objects.equals(state, API.state) &&
+        Objects.equals(tags, API.tags) &&
+        Objects.equals(categories, API.categories) &&
+        Objects.equals(additionalProperties, API.additionalProperties) &&
+        Objects.equals(additionalPropertiesMap, API.additionalPropertiesMap) &&
+        Objects.equals(createdTime, API.createdTime) &&
+        Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
+        Objects.equals(operations, API.operations) &&
+        Objects.equals(apiUsagePolicy, API.apiUsagePolicy) &&
+        Objects.equals(monetization, API.monetization) &&
+        Objects.equals(businessInformation, API.businessInformation) &&
+        Objects.equals(revision, API.revision) &&
+        Objects.equals(deployments, API.deployments);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, type, transport, additionalProperties, additionalPropertiesMap, createdTime, lastUpdatedTime, operations, apiUsagePolicy, revision, deployments);
+    return Objects.hash(id, name, description, context, version, type, transport, hasThumbnail, state, tags, categories, additionalProperties, additionalPropertiesMap, createdTime, lastUpdatedTime, operations, apiUsagePolicy, monetization, businessInformation, revision, deployments);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class RuntimeAPIDTO {\n");
+    sb.append("class APIDTO {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
@@ -405,12 +556,18 @@ return null;
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
+    sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
+    sb.append("    state: ").append(toIndentedString(state)).append("\n");
+    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
+    sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("    additionalPropertiesMap: ").append(toIndentedString(additionalPropertiesMap)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("    apiUsagePolicy: ").append(toIndentedString(apiUsagePolicy)).append("\n");
+    sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
+    sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    revision: ").append(toIndentedString(revision)).append("\n");
     sb.append("    deployments: ").append(toIndentedString(deployments)).append("\n");
     sb.append("}");

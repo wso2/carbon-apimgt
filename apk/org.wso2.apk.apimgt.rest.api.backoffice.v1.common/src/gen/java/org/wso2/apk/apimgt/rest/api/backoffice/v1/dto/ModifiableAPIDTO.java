@@ -8,11 +8,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.BackOfficeAPIBusinessInformationDTO;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.BackOfficeAPIMonetizationInfoDTO;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.ProductAPIDTO;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.RuntimeAPIAdditionalPropertiesDTO;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.RuntimeAPIAdditionalPropertiesMapDTO;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.APIAdditionalPropertiesDTO;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.APIAdditionalPropertiesMapDTO;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.APIBusinessInformationDTO;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.APIMonetizationInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -20,14 +19,14 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.apk.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
 
 
-public class BackOfficeAPIDTO   {
+public class ModifiableAPIDTO   {
   
     private String id = null;
     private String name = null;
@@ -67,25 +66,22 @@ return null;
     }
     private StateEnum state = StateEnum.CREATED;
     private List<String> tags = new ArrayList<String>();
-    private List<RuntimeAPIAdditionalPropertiesDTO> additionalProperties = new ArrayList<RuntimeAPIAdditionalPropertiesDTO>();
-    private Map<String, RuntimeAPIAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<String, RuntimeAPIAdditionalPropertiesMapDTO>();
-    private BackOfficeAPIMonetizationInfoDTO monetization = null;
-    private BackOfficeAPIBusinessInformationDTO businessInformation = null;
-    private String createdTime = null;
-    private String lastUpdatedTime = null;
-    private List<ProductAPIDTO> runtimeApis = new ArrayList<ProductAPIDTO>();
+    private List<APIAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIAdditionalPropertiesDTO>();
+    private Map<String, APIAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<String, APIAdditionalPropertiesMapDTO>();
+    private APIMonetizationInfoDTO monetization = null;
+    private APIBusinessInformationDTO businessInformation = null;
     private List<String> categories = new ArrayList<String>();
 
   /**
-   * UUID of the Back Office API 
+   * UUID of the API 
    **/
-  public BackOfficeAPIDTO id(String id) {
+  public ModifiableAPIDTO id(String id) {
     this.id = id;
     return this;
   }
 
   
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the Back Office API ")
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the API ")
   @JsonProperty("id")
   public String getId() {
     return id;
@@ -95,15 +91,15 @@ return null;
   }
 
   /**
-   * Name of the Back Office API
+   * Name of the API
    **/
-  public BackOfficeAPIDTO name(String name) {
+  public ModifiableAPIDTO name(String name) {
     this.name = name;
     return this;
   }
 
   
-  @ApiModelProperty(example = "PizzaShackBackOfficeAPI", required = true, value = "Name of the Back Office API")
+  @ApiModelProperty(example = "PizzaShackAPI", required = true, value = "Name of the API")
   @JsonProperty("name")
   @NotNull
  @Size(min=1,max=50)  public String getName() {
@@ -115,7 +111,7 @@ return null;
 
   /**
    **/
-  public BackOfficeAPIDTO context(String context) {
+  public ModifiableAPIDTO context(String context) {
     this.context = context;
     return this;
   }
@@ -133,7 +129,7 @@ return null;
   /**
    * A brief description about the API
    **/
-  public BackOfficeAPIDTO description(String description) {
+  public ModifiableAPIDTO description(String description) {
     this.description = description;
     return this;
   }
@@ -150,7 +146,7 @@ return null;
 
   /**
    **/
-  public BackOfficeAPIDTO hasThumbnail(Boolean hasThumbnail) {
+  public ModifiableAPIDTO hasThumbnail(Boolean hasThumbnail) {
     this.hasThumbnail = hasThumbnail;
     return this;
   }
@@ -166,15 +162,15 @@ return null;
   }
 
   /**
-   * State of the Back Office API. Only published Back Office APIs are visible on the Developer Portal 
+   * State of the API. Only published APIs are visible on the Developer Portal 
    **/
-  public BackOfficeAPIDTO state(StateEnum state) {
+  public ModifiableAPIDTO state(StateEnum state) {
     this.state = state;
     return this;
   }
 
   
-  @ApiModelProperty(value = "State of the Back Office API. Only published Back Office APIs are visible on the Developer Portal ")
+  @ApiModelProperty(value = "State of the API. Only published APIs are visible on the Developer Portal ")
   @JsonProperty("state")
   public StateEnum getState() {
     return state;
@@ -185,7 +181,7 @@ return null;
 
   /**
    **/
-  public BackOfficeAPIDTO tags(List<String> tags) {
+  public ModifiableAPIDTO tags(List<String> tags) {
     this.tags = tags;
     return this;
   }
@@ -203,7 +199,7 @@ return null;
   /**
    * Map of custom properties of API
    **/
-  public BackOfficeAPIDTO additionalProperties(List<RuntimeAPIAdditionalPropertiesDTO> additionalProperties) {
+  public ModifiableAPIDTO additionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
@@ -212,16 +208,16 @@ return null;
   @ApiModelProperty(value = "Map of custom properties of API")
       @Valid
   @JsonProperty("additionalProperties")
-  public List<RuntimeAPIAdditionalPropertiesDTO> getAdditionalProperties() {
+  public List<APIAdditionalPropertiesDTO> getAdditionalProperties() {
     return additionalProperties;
   }
-  public void setAdditionalProperties(List<RuntimeAPIAdditionalPropertiesDTO> additionalProperties) {
+  public void setAdditionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
   }
 
   /**
    **/
-  public BackOfficeAPIDTO additionalPropertiesMap(Map<String, RuntimeAPIAdditionalPropertiesMapDTO> additionalPropertiesMap) {
+  public ModifiableAPIDTO additionalPropertiesMap(Map<String, APIAdditionalPropertiesMapDTO> additionalPropertiesMap) {
     this.additionalPropertiesMap = additionalPropertiesMap;
     return this;
   }
@@ -230,16 +226,16 @@ return null;
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("additionalPropertiesMap")
-  public Map<String, RuntimeAPIAdditionalPropertiesMapDTO> getAdditionalPropertiesMap() {
+  public Map<String, APIAdditionalPropertiesMapDTO> getAdditionalPropertiesMap() {
     return additionalPropertiesMap;
   }
-  public void setAdditionalPropertiesMap(Map<String, RuntimeAPIAdditionalPropertiesMapDTO> additionalPropertiesMap) {
+  public void setAdditionalPropertiesMap(Map<String, APIAdditionalPropertiesMapDTO> additionalPropertiesMap) {
     this.additionalPropertiesMap = additionalPropertiesMap;
   }
 
   /**
    **/
-  public BackOfficeAPIDTO monetization(BackOfficeAPIMonetizationInfoDTO monetization) {
+  public ModifiableAPIDTO monetization(APIMonetizationInfoDTO monetization) {
     this.monetization = monetization;
     return this;
   }
@@ -248,16 +244,16 @@ return null;
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("monetization")
-  public BackOfficeAPIMonetizationInfoDTO getMonetization() {
+  public APIMonetizationInfoDTO getMonetization() {
     return monetization;
   }
-  public void setMonetization(BackOfficeAPIMonetizationInfoDTO monetization) {
+  public void setMonetization(APIMonetizationInfoDTO monetization) {
     this.monetization = monetization;
   }
 
   /**
    **/
-  public BackOfficeAPIDTO businessInformation(BackOfficeAPIBusinessInformationDTO businessInformation) {
+  public ModifiableAPIDTO businessInformation(APIBusinessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
     return this;
   }
@@ -266,70 +262,17 @@ return null;
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("businessInformation")
-  public BackOfficeAPIBusinessInformationDTO getBusinessInformation() {
+  public APIBusinessInformationDTO getBusinessInformation() {
     return businessInformation;
   }
-  public void setBusinessInformation(BackOfficeAPIBusinessInformationDTO businessInformation) {
+  public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
-  }
-
-  /**
-   **/
-  public BackOfficeAPIDTO createdTime(String createdTime) {
-    this.createdTime = createdTime;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("createdTime")
-  public String getCreatedTime() {
-    return createdTime;
-  }
-  public void setCreatedTime(String createdTime) {
-    this.createdTime = createdTime;
-  }
-
-  /**
-   **/
-  public BackOfficeAPIDTO lastUpdatedTime(String lastUpdatedTime) {
-    this.lastUpdatedTime = lastUpdatedTime;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("lastUpdatedTime")
-  public String getLastUpdatedTime() {
-    return lastUpdatedTime;
-  }
-  public void setLastUpdatedTime(String lastUpdatedTime) {
-    this.lastUpdatedTime = lastUpdatedTime;
-  }
-
-  /**
-   * Runtime APIs and resources in the Back Office API. 
-   **/
-  public BackOfficeAPIDTO runtimeApis(List<ProductAPIDTO> runtimeApis) {
-    this.runtimeApis = runtimeApis;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "[{\"apiId\":\"01234567-0123-0123-0123-012345678901\",\"runtimeId\":\"01234567-765-0765-0123-012345678901\"}]", value = "Runtime APIs and resources in the Back Office API. ")
-      @Valid
-  @JsonProperty("runtimeApis")
-  public List<ProductAPIDTO> getRuntimeApis() {
-    return runtimeApis;
-  }
-  public void setRuntimeApis(List<ProductAPIDTO> runtimeApis) {
-    this.runtimeApis = runtimeApis;
   }
 
   /**
    * API categories 
    **/
-  public BackOfficeAPIDTO categories(List<String> categories) {
+  public ModifiableAPIDTO categories(List<String> categories) {
     this.categories = categories;
     return this;
   }
@@ -353,33 +296,30 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    BackOfficeAPIDTO backOfficeAPI = (BackOfficeAPIDTO) o;
-    return Objects.equals(id, backOfficeAPI.id) &&
-        Objects.equals(name, backOfficeAPI.name) &&
-        Objects.equals(context, backOfficeAPI.context) &&
-        Objects.equals(description, backOfficeAPI.description) &&
-        Objects.equals(hasThumbnail, backOfficeAPI.hasThumbnail) &&
-        Objects.equals(state, backOfficeAPI.state) &&
-        Objects.equals(tags, backOfficeAPI.tags) &&
-        Objects.equals(additionalProperties, backOfficeAPI.additionalProperties) &&
-        Objects.equals(additionalPropertiesMap, backOfficeAPI.additionalPropertiesMap) &&
-        Objects.equals(monetization, backOfficeAPI.monetization) &&
-        Objects.equals(businessInformation, backOfficeAPI.businessInformation) &&
-        Objects.equals(createdTime, backOfficeAPI.createdTime) &&
-        Objects.equals(lastUpdatedTime, backOfficeAPI.lastUpdatedTime) &&
-        Objects.equals(runtimeApis, backOfficeAPI.runtimeApis) &&
-        Objects.equals(categories, backOfficeAPI.categories);
+    ModifiableAPIDTO modifiableAPI = (ModifiableAPIDTO) o;
+    return Objects.equals(id, modifiableAPI.id) &&
+        Objects.equals(name, modifiableAPI.name) &&
+        Objects.equals(context, modifiableAPI.context) &&
+        Objects.equals(description, modifiableAPI.description) &&
+        Objects.equals(hasThumbnail, modifiableAPI.hasThumbnail) &&
+        Objects.equals(state, modifiableAPI.state) &&
+        Objects.equals(tags, modifiableAPI.tags) &&
+        Objects.equals(additionalProperties, modifiableAPI.additionalProperties) &&
+        Objects.equals(additionalPropertiesMap, modifiableAPI.additionalPropertiesMap) &&
+        Objects.equals(monetization, modifiableAPI.monetization) &&
+        Objects.equals(businessInformation, modifiableAPI.businessInformation) &&
+        Objects.equals(categories, modifiableAPI.categories);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, hasThumbnail, state, tags, additionalProperties, additionalPropertiesMap, monetization, businessInformation, createdTime, lastUpdatedTime, runtimeApis, categories);
+    return Objects.hash(id, name, context, description, hasThumbnail, state, tags, additionalProperties, additionalPropertiesMap, monetization, businessInformation, categories);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class BackOfficeAPIDTO {\n");
+    sb.append("class ModifiableAPIDTO {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
@@ -392,9 +332,6 @@ return null;
     sb.append("    additionalPropertiesMap: ").append(toIndentedString(additionalPropertiesMap)).append("\n");
     sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
-    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
-    sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
-    sb.append("    runtimeApis: ").append(toIndentedString(runtimeApis)).append("\n");
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
     sb.append("}");
     return sb.toString();

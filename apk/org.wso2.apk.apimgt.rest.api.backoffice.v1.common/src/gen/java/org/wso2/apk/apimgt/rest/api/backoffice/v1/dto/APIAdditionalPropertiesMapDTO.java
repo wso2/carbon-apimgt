@@ -11,29 +11,30 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.apk.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
 
 
-public class RuntimeAPIDeploymentDTO   {
+public class APIAdditionalPropertiesMapDTO   {
   
     private String name = null;
-    private java.util.Date deployedTime = null;
+    private String value = null;
+    private Boolean display = false;
 
   /**
    **/
-  public RuntimeAPIDeploymentDTO name(String name) {
+  public APIAdditionalPropertiesMapDTO name(String name) {
     this.name = name;
     return this;
   }
 
   
-  @ApiModelProperty(example = "Europe", value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("name")
- @Size(min=1,max=255)  public String getName() {
+  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -42,19 +43,36 @@ public class RuntimeAPIDeploymentDTO   {
 
   /**
    **/
-  public RuntimeAPIDeploymentDTO deployedTime(java.util.Date deployedTime) {
-    this.deployedTime = deployedTime;
+  public APIAdditionalPropertiesMapDTO value(String value) {
+    this.value = value;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("deployedTime")
-  public java.util.Date getDeployedTime() {
-    return deployedTime;
+  @JsonProperty("value")
+  public String getValue() {
+    return value;
   }
-  public void setDeployedTime(java.util.Date deployedTime) {
-    this.deployedTime = deployedTime;
+  public void setValue(String value) {
+    this.value = value;
+  }
+
+  /**
+   **/
+  public APIAdditionalPropertiesMapDTO display(Boolean display) {
+    this.display = display;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("display")
+  public Boolean isDisplay() {
+    return display;
+  }
+  public void setDisplay(Boolean display) {
+    this.display = display;
   }
 
 
@@ -66,23 +84,25 @@ public class RuntimeAPIDeploymentDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RuntimeAPIDeploymentDTO runtimeAPIDeployment = (RuntimeAPIDeploymentDTO) o;
-    return Objects.equals(name, runtimeAPIDeployment.name) &&
-        Objects.equals(deployedTime, runtimeAPIDeployment.deployedTime);
+    APIAdditionalPropertiesMapDTO apIAdditionalPropertiesMap = (APIAdditionalPropertiesMapDTO) o;
+    return Objects.equals(name, apIAdditionalPropertiesMap.name) &&
+        Objects.equals(value, apIAdditionalPropertiesMap.value) &&
+        Objects.equals(display, apIAdditionalPropertiesMap.display);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, deployedTime);
+    return Objects.hash(name, value, display);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class RuntimeAPIDeploymentDTO {\n");
+    sb.append("class APIAdditionalPropertiesMapDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    deployedTime: ").append(toIndentedString(deployedTime)).append("\n");
+    sb.append("    value: ").append(toIndentedString(value)).append("\n");
+    sb.append("    display: ").append(toIndentedString(display)).append("\n");
     sb.append("}");
     return sb.toString();
   }

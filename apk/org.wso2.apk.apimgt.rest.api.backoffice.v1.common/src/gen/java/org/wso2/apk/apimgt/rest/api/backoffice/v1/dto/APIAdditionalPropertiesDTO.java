@@ -11,22 +11,22 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.apk.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
 
 
-public class RuntimeAPIAdditionalPropertiesMapDTO   {
+public class APIAdditionalPropertiesDTO   {
   
     private String name = null;
     private String value = null;
-    private Boolean display = false;
+    private Boolean display = null;
 
   /**
    **/
-  public RuntimeAPIAdditionalPropertiesMapDTO name(String name) {
+  public APIAdditionalPropertiesDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -43,7 +43,7 @@ public class RuntimeAPIAdditionalPropertiesMapDTO   {
 
   /**
    **/
-  public RuntimeAPIAdditionalPropertiesMapDTO value(String value) {
+  public APIAdditionalPropertiesDTO value(String value) {
     this.value = value;
     return this;
   }
@@ -60,7 +60,7 @@ public class RuntimeAPIAdditionalPropertiesMapDTO   {
 
   /**
    **/
-  public RuntimeAPIAdditionalPropertiesMapDTO display(Boolean display) {
+  public APIAdditionalPropertiesDTO display(Boolean display) {
     this.display = display;
     return this;
   }
@@ -84,10 +84,10 @@ public class RuntimeAPIAdditionalPropertiesMapDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RuntimeAPIAdditionalPropertiesMapDTO runtimeAPIAdditionalPropertiesMap = (RuntimeAPIAdditionalPropertiesMapDTO) o;
-    return Objects.equals(name, runtimeAPIAdditionalPropertiesMap.name) &&
-        Objects.equals(value, runtimeAPIAdditionalPropertiesMap.value) &&
-        Objects.equals(display, runtimeAPIAdditionalPropertiesMap.display);
+    APIAdditionalPropertiesDTO apIAdditionalProperties = (APIAdditionalPropertiesDTO) o;
+    return Objects.equals(name, apIAdditionalProperties.name) &&
+        Objects.equals(value, apIAdditionalProperties.value) &&
+        Objects.equals(display, apIAdditionalProperties.display);
   }
 
   @Override
@@ -98,7 +98,7 @@ public class RuntimeAPIAdditionalPropertiesMapDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class RuntimeAPIAdditionalPropertiesMapDTO {\n");
+    sb.append("class APIAdditionalPropertiesDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    value: ").append(toIndentedString(value)).append("\n");

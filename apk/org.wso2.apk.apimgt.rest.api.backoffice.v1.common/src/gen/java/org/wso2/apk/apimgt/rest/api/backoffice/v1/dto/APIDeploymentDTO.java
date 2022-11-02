@@ -11,47 +11,29 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.apk.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
 
 
-public class RuntimeInfoDTO   {
+public class APIDeploymentDTO   {
   
-    private String id = null;
     private String name = null;
-    private String description = null;
+    private java.util.Date deployedTime = null;
 
   /**
    **/
-  public RuntimeInfoDTO id(String id) {
-    this.id = id;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
-  @JsonProperty("id")
-  public String getId() {
-    return id;
-  }
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  /**
-   **/
-  public RuntimeInfoDTO name(String name) {
+  public APIDeploymentDTO name(String name) {
     this.name = name;
     return this;
   }
 
   
-  @ApiModelProperty(example = "RuntimeDev1", value = "")
+  @ApiModelProperty(example = "Europe", value = "")
   @JsonProperty("name")
-  public String getName() {
+ @Size(min=1,max=255)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -60,19 +42,19 @@ public class RuntimeInfoDTO   {
 
   /**
    **/
-  public RuntimeInfoDTO description(String description) {
-    this.description = description;
+  public APIDeploymentDTO deployedTime(java.util.Date deployedTime) {
+    this.deployedTime = deployedTime;
     return this;
   }
 
   
-  @ApiModelProperty(example = "Runtime 1 used for dev", value = "")
-  @JsonProperty("description")
-  public String getDescription() {
-    return description;
+  @ApiModelProperty(value = "")
+  @JsonProperty("deployedTime")
+  public java.util.Date getDeployedTime() {
+    return deployedTime;
   }
-  public void setDescription(String description) {
-    this.description = description;
+  public void setDeployedTime(java.util.Date deployedTime) {
+    this.deployedTime = deployedTime;
   }
 
 
@@ -84,25 +66,23 @@ public class RuntimeInfoDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RuntimeInfoDTO runtimeInfo = (RuntimeInfoDTO) o;
-    return Objects.equals(id, runtimeInfo.id) &&
-        Objects.equals(name, runtimeInfo.name) &&
-        Objects.equals(description, runtimeInfo.description);
+    APIDeploymentDTO apIDeployment = (APIDeploymentDTO) o;
+    return Objects.equals(name, apIDeployment.name) &&
+        Objects.equals(deployedTime, apIDeployment.deployedTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description);
+    return Objects.hash(name, deployedTime);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class RuntimeInfoDTO {\n");
+    sb.append("class APIDeploymentDTO {\n");
     
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    deployedTime: ").append(toIndentedString(deployedTime)).append("\n");
     sb.append("}");
     return sb.toString();
   }

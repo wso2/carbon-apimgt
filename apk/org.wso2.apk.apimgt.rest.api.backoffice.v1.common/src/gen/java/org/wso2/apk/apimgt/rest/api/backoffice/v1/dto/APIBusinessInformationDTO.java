@@ -11,14 +11,14 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.apk.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
 
 
-public class BackOfficeAPIBusinessInformationDTO   {
+public class APIBusinessInformationDTO   {
   
     private String businessOwner = null;
     private String businessOwnerEmail = null;
@@ -27,7 +27,7 @@ public class BackOfficeAPIBusinessInformationDTO   {
 
   /**
    **/
-  public BackOfficeAPIBusinessInformationDTO businessOwner(String businessOwner) {
+  public APIBusinessInformationDTO businessOwner(String businessOwner) {
     this.businessOwner = businessOwner;
     return this;
   }
@@ -44,7 +44,7 @@ public class BackOfficeAPIBusinessInformationDTO   {
 
   /**
    **/
-  public BackOfficeAPIBusinessInformationDTO businessOwnerEmail(String businessOwnerEmail) {
+  public APIBusinessInformationDTO businessOwnerEmail(String businessOwnerEmail) {
     this.businessOwnerEmail = businessOwnerEmail;
     return this;
   }
@@ -61,7 +61,7 @@ public class BackOfficeAPIBusinessInformationDTO   {
 
   /**
    **/
-  public BackOfficeAPIBusinessInformationDTO technicalOwner(String technicalOwner) {
+  public APIBusinessInformationDTO technicalOwner(String technicalOwner) {
     this.technicalOwner = technicalOwner;
     return this;
   }
@@ -78,7 +78,7 @@ public class BackOfficeAPIBusinessInformationDTO   {
 
   /**
    **/
-  public BackOfficeAPIBusinessInformationDTO technicalOwnerEmail(String technicalOwnerEmail) {
+  public APIBusinessInformationDTO technicalOwnerEmail(String technicalOwnerEmail) {
     this.technicalOwnerEmail = technicalOwnerEmail;
     return this;
   }
@@ -102,11 +102,11 @@ public class BackOfficeAPIBusinessInformationDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    BackOfficeAPIBusinessInformationDTO backOfficeAPIBusinessInformation = (BackOfficeAPIBusinessInformationDTO) o;
-    return Objects.equals(businessOwner, backOfficeAPIBusinessInformation.businessOwner) &&
-        Objects.equals(businessOwnerEmail, backOfficeAPIBusinessInformation.businessOwnerEmail) &&
-        Objects.equals(technicalOwner, backOfficeAPIBusinessInformation.technicalOwner) &&
-        Objects.equals(technicalOwnerEmail, backOfficeAPIBusinessInformation.technicalOwnerEmail);
+    APIBusinessInformationDTO apIBusinessInformation = (APIBusinessInformationDTO) o;
+    return Objects.equals(businessOwner, apIBusinessInformation.businessOwner) &&
+        Objects.equals(businessOwnerEmail, apIBusinessInformation.businessOwnerEmail) &&
+        Objects.equals(technicalOwner, apIBusinessInformation.technicalOwner) &&
+        Objects.equals(technicalOwnerEmail, apIBusinessInformation.technicalOwnerEmail);
   }
 
   @Override
@@ -117,7 +117,7 @@ public class BackOfficeAPIBusinessInformationDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class BackOfficeAPIBusinessInformationDTO {\n");
+    sb.append("class APIBusinessInformationDTO {\n");
     
     sb.append("    businessOwner: ").append(toIndentedString(businessOwner)).append("\n");
     sb.append("    businessOwnerEmail: ").append(toIndentedString(businessOwnerEmail)).append("\n");

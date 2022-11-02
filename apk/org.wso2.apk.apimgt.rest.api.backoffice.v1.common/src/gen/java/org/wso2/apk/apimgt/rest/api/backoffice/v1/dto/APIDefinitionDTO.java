@@ -11,14 +11,14 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.apk.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
 
 
-public class RuntimeAPIDefinitionDTO   {
+public class APIDefinitionDTO   {
   
 
     @XmlType(name="TypeEnum")
@@ -58,7 +58,7 @@ return null;
 
   /**
    **/
-  public RuntimeAPIDefinitionDTO type(TypeEnum type) {
+  public APIDefinitionDTO type(TypeEnum type) {
     this.type = type;
     return this;
   }
@@ -76,7 +76,7 @@ return null;
 
   /**
    **/
-  public RuntimeAPIDefinitionDTO schemaDefinition(String schemaDefinition) {
+  public APIDefinitionDTO schemaDefinition(String schemaDefinition) {
     this.schemaDefinition = schemaDefinition;
     return this;
   }
@@ -100,9 +100,9 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RuntimeAPIDefinitionDTO runtimeAPIDefinition = (RuntimeAPIDefinitionDTO) o;
-    return Objects.equals(type, runtimeAPIDefinition.type) &&
-        Objects.equals(schemaDefinition, runtimeAPIDefinition.schemaDefinition);
+    APIDefinitionDTO apIDefinition = (APIDefinitionDTO) o;
+    return Objects.equals(type, apIDefinition.type) &&
+        Objects.equals(schemaDefinition, apIDefinition.schemaDefinition);
   }
 
   @Override
@@ -113,7 +113,7 @@ return null;
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class RuntimeAPIDefinitionDTO {\n");
+    sb.append("class APIDefinitionDTO {\n");
     
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    schemaDefinition: ").append(toIndentedString(schemaDefinition)).append("\n");

@@ -15,14 +15,14 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.apk.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
 
 
-public class RuntimeAPIListDTO   {
+public class APIListDTO   {
   
     private Integer count = null;
     private List<APIInfoDTO> list = new ArrayList<APIInfoDTO>();
@@ -31,7 +31,7 @@ public class RuntimeAPIListDTO   {
   /**
    * Number of APIs returned. 
    **/
-  public RuntimeAPIListDTO count(Integer count) {
+  public APIListDTO count(Integer count) {
     this.count = count;
     return this;
   }
@@ -48,7 +48,7 @@ public class RuntimeAPIListDTO   {
 
   /**
    **/
-  public RuntimeAPIListDTO list(List<APIInfoDTO> list) {
+  public APIListDTO list(List<APIInfoDTO> list) {
     this.list = list;
     return this;
   }
@@ -66,7 +66,7 @@ public class RuntimeAPIListDTO   {
 
   /**
    **/
-  public RuntimeAPIListDTO pagination(PaginationDTO pagination) {
+  public APIListDTO pagination(PaginationDTO pagination) {
     this.pagination = pagination;
     return this;
   }
@@ -91,10 +91,10 @@ public class RuntimeAPIListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RuntimeAPIListDTO runtimeAPIList = (RuntimeAPIListDTO) o;
-    return Objects.equals(count, runtimeAPIList.count) &&
-        Objects.equals(list, runtimeAPIList.list) &&
-        Objects.equals(pagination, runtimeAPIList.pagination);
+    APIListDTO apIList = (APIListDTO) o;
+    return Objects.equals(count, apIList.count) &&
+        Objects.equals(list, apIList.list) &&
+        Objects.equals(pagination, apIList.pagination);
   }
 
   @Override
@@ -105,7 +105,7 @@ public class RuntimeAPIListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class RuntimeAPIListDTO {\n");
+    sb.append("class APIListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");

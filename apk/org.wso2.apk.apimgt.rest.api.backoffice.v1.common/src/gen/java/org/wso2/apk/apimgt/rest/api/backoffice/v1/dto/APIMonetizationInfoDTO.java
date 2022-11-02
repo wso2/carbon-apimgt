@@ -14,14 +14,14 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.apk.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
 
 
-public class BackOfficeAPIMonetizationInfoDTO   {
+public class APIMonetizationInfoDTO   {
   
     private Boolean enabled = null;
     private Map<String, String> properties = new HashMap<String, String>();
@@ -29,7 +29,7 @@ public class BackOfficeAPIMonetizationInfoDTO   {
   /**
    * Flag to indicate the monetization status
    **/
-  public BackOfficeAPIMonetizationInfoDTO enabled(Boolean enabled) {
+  public APIMonetizationInfoDTO enabled(Boolean enabled) {
     this.enabled = enabled;
     return this;
   }
@@ -48,7 +48,7 @@ public class BackOfficeAPIMonetizationInfoDTO   {
   /**
    * Map of custom properties related to monetization
    **/
-  public BackOfficeAPIMonetizationInfoDTO properties(Map<String, String> properties) {
+  public APIMonetizationInfoDTO properties(Map<String, String> properties) {
     this.properties = properties;
     return this;
   }
@@ -72,9 +72,9 @@ public class BackOfficeAPIMonetizationInfoDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    BackOfficeAPIMonetizationInfoDTO backOfficeAPIMonetizationInfo = (BackOfficeAPIMonetizationInfoDTO) o;
-    return Objects.equals(enabled, backOfficeAPIMonetizationInfo.enabled) &&
-        Objects.equals(properties, backOfficeAPIMonetizationInfo.properties);
+    APIMonetizationInfoDTO apIMonetizationInfo = (APIMonetizationInfoDTO) o;
+    return Objects.equals(enabled, apIMonetizationInfo.enabled) &&
+        Objects.equals(properties, apIMonetizationInfo.properties);
   }
 
   @Override
@@ -85,7 +85,7 @@ public class BackOfficeAPIMonetizationInfoDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class BackOfficeAPIMonetizationInfoDTO {\n");
+    sb.append("class APIMonetizationInfoDTO {\n");
     
     sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
     sb.append("    properties: ").append(toIndentedString(properties)).append("\n");

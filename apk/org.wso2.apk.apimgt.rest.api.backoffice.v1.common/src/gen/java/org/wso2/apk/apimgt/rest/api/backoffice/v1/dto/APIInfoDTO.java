@@ -11,7 +11,7 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.apk.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
@@ -28,6 +28,39 @@ public class APIInfoDTO   {
     private String type = null;
     private String createdTime = null;
     private String updatedTime = null;
+    private Boolean hasThumbnail = null;
+
+    @XmlType(name="StateEnum")
+    @XmlEnum(String.class)
+    public enum StateEnum {
+        CREATED("CREATED"),
+        PUBLISHED("PUBLISHED");
+        private String value;
+
+        StateEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static StateEnum fromValue(String v) {
+            for (StateEnum b : StateEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private StateEnum state = null;
 
   /**
    **/
@@ -165,6 +198,41 @@ public class APIInfoDTO   {
     this.updatedTime = updatedTime;
   }
 
+  /**
+   **/
+  public APIInfoDTO hasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("hasThumbnail")
+  public Boolean isHasThumbnail() {
+    return hasThumbnail;
+  }
+  public void setHasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
+  }
+
+  /**
+   * State of the API. Only published APIs are visible on the Developer Portal 
+   **/
+  public APIInfoDTO state(StateEnum state) {
+    this.state = state;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "State of the API. Only published APIs are visible on the Developer Portal ")
+  @JsonProperty("state")
+  public StateEnum getState() {
+    return state;
+  }
+  public void setState(StateEnum state) {
+    this.state = state;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -182,12 +250,14 @@ public class APIInfoDTO   {
         Objects.equals(version, apIInfo.version) &&
         Objects.equals(type, apIInfo.type) &&
         Objects.equals(createdTime, apIInfo.createdTime) &&
-        Objects.equals(updatedTime, apIInfo.updatedTime);
+        Objects.equals(updatedTime, apIInfo.updatedTime) &&
+        Objects.equals(hasThumbnail, apIInfo.hasThumbnail) &&
+        Objects.equals(state, apIInfo.state);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, type, createdTime, updatedTime);
+    return Objects.hash(id, name, description, context, version, type, createdTime, updatedTime, hasThumbnail, state);
   }
 
   @Override
@@ -203,6 +273,8 @@ public class APIInfoDTO   {
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
+    sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
+    sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("}");
     return sb.toString();
   }
