@@ -640,18 +640,14 @@ public class APIMappingUtil {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
         }
         apiInfoDTO.setContext(context);
-        apiInfoDTO.setId(api.getUUID());
+        apiInfoDTO.setId(api.getUuid());
         APIIdentifier apiId = api.getId();
         apiInfoDTO.setName(apiId.getApiName());
         apiInfoDTO.setVersion(apiId.getVersion());
         apiInfoDTO.setType(api.getType());
-        String providerName = api.getId().getProviderName();
-        apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
-        apiInfoDTO.setLifeCycleStatus(api.getStatus());
         apiInfoDTO.setHasThumbnail(!StringUtils.isBlank(api.getThumbnailUrl()));
-        if (api.getAudience() != null) {
-            apiInfoDTO.setAudience(APIInfoDTO.AudienceEnum.valueOf(api.getAudience()));
-        }
+        apiInfoDTO.setState(APIInfoDTO.StateEnum.valueOf(api.getStatus()));
+
         if (api.getCreatedTime() != null) {
             Date createdTime = new Date(Long.parseLong(api.getCreatedTime()));
             apiInfoDTO.setCreatedTime(String.valueOf(createdTime.getTime()));
@@ -659,36 +655,6 @@ public class APIMappingUtil {
         if (api.getLastUpdated() != null) {
             Date lastUpdatedTime = api.getLastUpdated();
             apiInfoDTO.setUpdatedTime(String.valueOf(lastUpdatedTime.getTime()));
-        }
-        apiInfoDTO.setAdvertiseOnly(api.isAdvertiseOnly());
-        if (api.getAdditionalProperties() != null) {
-            JSONObject additionalProperties = api.getAdditionalProperties();
-            List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
-            Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<>();
-            for (Object propertyKey : additionalProperties.keySet()) {
-                APIInfoAdditionalPropertiesDTO additionalPropertiesDTO = new APIInfoAdditionalPropertiesDTO();
-                APIInfoAdditionalPropertiesMapDTO apiInfoAdditionalPropertiesMapDTO =
-                        new APIInfoAdditionalPropertiesMapDTO();
-                String key = (String) propertyKey;
-                int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
-                additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
-                apiInfoAdditionalPropertiesMapDTO.setValue((String) additionalProperties.get(key));
-                if (index > 0) {
-                    additionalPropertiesDTO.setName(key.substring(0, index));
-                    apiInfoAdditionalPropertiesMapDTO.setName(key.substring(0, index));
-                    additionalPropertiesDTO.setDisplay(true);
-                } else {
-                    additionalPropertiesDTO.setName(key);
-                    apiInfoAdditionalPropertiesMapDTO.setName(key);
-                    additionalPropertiesDTO.setDisplay(false);
-                }
-                apiInfoAdditionalPropertiesMapDTO.setDisplay(false);
-                additionalPropertiesMap.put(key, apiInfoAdditionalPropertiesMapDTO);
-                additionalPropertiesList.add(additionalPropertiesDTO);
-            }
-            apiInfoDTO.setAdditionalProperties(additionalPropertiesList);
-            apiInfoDTO.setAdditionalPropertiesMap(additionalPropertiesMap);
-            apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
         }
         return apiInfoDTO;
     }
