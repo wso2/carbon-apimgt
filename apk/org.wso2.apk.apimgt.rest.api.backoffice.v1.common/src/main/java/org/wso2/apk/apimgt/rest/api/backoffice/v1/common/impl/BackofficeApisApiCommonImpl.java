@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.APIProvider;
 import org.wso2.apk.apimgt.api.model.API;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.mappings.APIMappingUtil;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings.APIMappingUtil;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.APIDTO;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 

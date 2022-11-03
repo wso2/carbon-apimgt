@@ -32,7 +32,7 @@ import org.wso2.apk.apimgt.api.model.SubscribedAPI;
 import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.mappings.SubscriptionMappingUtil;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings.SubscriptionMappingUtil;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.SubscriberInfoDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.SubscriptionDTO;

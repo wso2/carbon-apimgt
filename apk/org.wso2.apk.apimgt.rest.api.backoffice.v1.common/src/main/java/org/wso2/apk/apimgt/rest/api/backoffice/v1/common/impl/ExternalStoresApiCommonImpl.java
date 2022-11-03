@@ -22,7 +22,7 @@ import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.model.APIStore;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.mappings.ExternalStoreMappingUtil;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings.ExternalStoreMappingUtil;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.ExternalStoreListDTO;
 
 import java.util.Set;

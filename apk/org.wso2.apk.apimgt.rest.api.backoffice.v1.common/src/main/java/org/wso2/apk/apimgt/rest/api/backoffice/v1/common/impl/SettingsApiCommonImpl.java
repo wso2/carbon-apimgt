@@ -23,7 +23,7 @@ import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.model.Scope;
 import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.mappings.SettingsMappingUtil;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings.SettingsMappingUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.SettingsDTO;
 

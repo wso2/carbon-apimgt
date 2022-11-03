@@ -26,7 +26,7 @@ import org.wso2.apk.apimgt.api.model.Documentation;
 import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.mappings.SearchResultMappingUtil;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings.SearchResultMappingUtil;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.SearchResultDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.SearchResultListDTO;
 

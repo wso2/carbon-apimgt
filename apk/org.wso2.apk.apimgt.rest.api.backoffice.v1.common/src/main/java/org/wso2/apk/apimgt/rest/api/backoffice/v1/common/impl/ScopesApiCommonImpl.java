@@ -27,7 +27,7 @@ import org.wso2.apk.apimgt.api.model.SharedScopeUsage;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.mappings.SharedScopeMappingUtil;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings.SharedScopeMappingUtil;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.ScopeDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.ScopeListDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.SharedScopeUsageDTO;
