@@ -58,8 +58,8 @@ import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.ResourcePathListDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.WorkflowResponseDTO;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+//import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+//import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -99,12 +99,12 @@ public class APIMappingUtil {
         }
 
         context = context.startsWith("/") ? context : ("/" + context);
-        String providerDomain = MultitenantUtils.getTenantDomain(provider);
-        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain) && dto.getId() == null
-                && !context.contains("/t/" + providerDomain)) {
-            //Create tenant aware context for API
-            context = "/t/" + providerDomain + context;
-        }
+//        String providerDomain = MultitenantUtils.getTenantDomain(provider);
+//        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain) && dto.getId() == null
+//                && !context.contains("/t/" + providerDomain)) {
+//            //Create tenant aware context for API
+//            context = "/t/" + providerDomain + context;
+//        }
 
         // This is to support the pluggable version strategy
         // if the context does not contain any {version} segment, we use the default version strategy.
@@ -482,8 +482,9 @@ public class APIMappingUtil {
 
         model.getId().setUuid(model.getUuid());
 
-        String organization = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(model.getId()
-                .getProviderName()));
+//        String organization = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(model.getId()
+//                .getProviderName()));
+        String organization = "mock";
 
         if (!isAsyncAPI) {
             // Get from swagger definition

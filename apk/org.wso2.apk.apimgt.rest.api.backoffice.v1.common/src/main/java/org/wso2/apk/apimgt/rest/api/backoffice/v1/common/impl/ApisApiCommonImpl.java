@@ -123,10 +123,10 @@ public class ApisApiCommonImpl {
         RestApiCommonUtil.validateAPIExistence(apiId);
 
         // validate web socket api endpoint configurations
-        if (isWSAPI && !PublisherCommonUtils.isValidWSAPI(body)) {
-            throw new APIManagementException("Endpoint URLs should be valid web socket URLs",
-                    ExceptionCodes.INVALID_ENDPOINT_URL);
-        }
+//        if (isWSAPI && !PublisherCommonUtils.isValidWSAPI(body)) {
+//            throw new APIManagementException("Endpoint URLs should be valid web socket URLs",
+//                    ExceptionCodes.INVALID_ENDPOINT_URL);
+//        }
 
         // validate sandbox and production endpoints
         if (!PublisherCommonUtils.validateEndpoints(body)) {

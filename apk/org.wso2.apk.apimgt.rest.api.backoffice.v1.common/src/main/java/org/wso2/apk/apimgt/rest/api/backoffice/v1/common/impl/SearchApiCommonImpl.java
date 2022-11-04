@@ -45,95 +45,95 @@ public class SearchApiCommonImpl {
         //to hide default constructor
     }
 
-    public static SearchResultListDTO search(Integer limit, Integer offset, String query, String organization)
-            throws APIManagementException {
-
-        SearchResultListDTO resultListDTO = new SearchResultListDTO();
-
-        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
-        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        query = query == null ? "*" : query;
-
-        if (!query.contains(":")) {
-            query = (APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":" + query);
-        }
-
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        Map<String, Object> result;
-        if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
-            result = apiProvider.searchPaginatedContent(query, organization, offset, limit);
-        } else {
-            result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit,
-                    RestApiConstants.DEFAULT_SORT_CRITERION, RestApiConstants.DEFAULT_SORT_ORDER);
-        }
-
-        /* Above searchPaginatedAPIs method underneath calls searchPaginatedAPIsByContent method,searchPaginatedAPIs
-        method and searchAPIDoc method in AbstractApiManager. And those methods respectively returns ArrayList,
-        TreeSet and a HashMap.
-        Hence the below logic.
-        */
-        List<Object> apis = getAPIListFromAPISearchResult(result);
-
-        List<SearchResultDTO> allMatchedResults = getAllMatchedResults(apis);
-
-        Object totalLength = result.get("length");
-        int length = 0;
-        if (totalLength != null) {
-            length = (Integer) totalLength;
-        }
-
-        List<Object> allMatchedObjectResults = new ArrayList<>(allMatchedResults);
-        resultListDTO.setList(allMatchedObjectResults);
-        resultListDTO.setCount(allMatchedResults.size());
-        SearchResultMappingUtil.setPaginationParams(resultListDTO, query, offset, limit, length);
-        return resultListDTO;
-    }
-
-    /**
-     * @param resultsMap API search result map
-     * @return API List
-     */
-    private static List<Object> getAPIListFromAPISearchResult(Map<String, Object> resultsMap) {
-
-        List<Object> apis;
-        Object apiSearchResults = resultsMap.get("apis");
-        if (apiSearchResults instanceof List<?>) {
-            apis = (List<Object>) apiSearchResults;
-        } else if (apiSearchResults instanceof HashMap) {
-            Collection<String> values = ((HashMap) apiSearchResults).values();
-            apis = new ArrayList<>(values);
-        } else {
-            apis = new ArrayList<>((Collection<?>) apiSearchResults);
-        }
-        return apis;
-    }
-
-    private static List<SearchResultDTO> getAllMatchedResults(List<Object> apis) throws APIManagementException {
-
-        List<SearchResultDTO> allMatchedResults = new ArrayList<>();
-        for (Object searchResult : apis) {
-            if (searchResult instanceof API) {
-                API api = (API) searchResult;
-                SearchResultDTO apiResult = SearchResultMappingUtil.fromAPIToAPIResultDTO(api);
-                allMatchedResults.add(apiResult);
-            } else if (searchResult instanceof APIProduct) {
-                APIProduct apiproduct = (APIProduct) searchResult;
-                SearchResultDTO apiResult = SearchResultMappingUtil.fromAPIProductToAPIResultDTO(apiproduct);
-                allMatchedResults.add(apiResult);
-            } else if (searchResult instanceof Map.Entry) {
-                Map.Entry<Object, Object> pair = (Map.Entry) searchResult;
-                SearchResultDTO docResult;
-                if (pair.getValue() instanceof API) {
-                    docResult = SearchResultMappingUtil.fromDocumentationToDocumentResultDTO(
-                            (Documentation) pair.getKey(), (API) pair.getValue());
-                } else {
-                    docResult = SearchResultMappingUtil.fromDocumentationToProductDocumentResultDTO(
-                            (Documentation) pair.getKey(), (APIProduct) pair.getValue());
-                }
-                allMatchedResults.add(docResult);
-            }
-        }
-        return allMatchedResults;
-    }
+//    public static SearchResultListDTO search(Integer limit, Integer offset, String query, String organization)
+//            throws APIManagementException {
+//
+//        SearchResultListDTO resultListDTO = new SearchResultListDTO();
+//
+//        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+//        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+//        query = query == null ? "*" : query;
+//
+//        if (!query.contains(":")) {
+//            query = (APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":" + query);
+//        }
+//
+//        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+//        Map<String, Object> result;
+//        if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+//            result = apiProvider.searchPaginatedContent(query, organization, offset, limit);
+//        } else {
+//            result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit,
+//                    RestApiConstants.DEFAULT_SORT_CRITERION, RestApiConstants.DEFAULT_SORT_ORDER);
+//        }
+//
+//        /* Above searchPaginatedAPIs method underneath calls searchPaginatedAPIsByContent method,searchPaginatedAPIs
+//        method and searchAPIDoc method in AbstractApiManager. And those methods respectively returns ArrayList,
+//        TreeSet and a HashMap.
+//        Hence the below logic.
+//        */
+//        List<Object> apis = getAPIListFromAPISearchResult(result);
+//
+//        List<SearchResultDTO> allMatchedResults = getAllMatchedResults(apis);
+//
+//        Object totalLength = result.get("length");
+//        int length = 0;
+//        if (totalLength != null) {
+//            length = (Integer) totalLength;
+//        }
+//
+//        List<Object> allMatchedObjectResults = new ArrayList<>(allMatchedResults);
+//        resultListDTO.setList(allMatchedObjectResults);
+//        resultListDTO.setCount(allMatchedResults.size());
+//        SearchResultMappingUtil.setPaginationParams(resultListDTO, query, offset, limit, length);
+//        return resultListDTO;
+//    }
+//
+//    /**
+//     * @param resultsMap API search result map
+//     * @return API List
+//     */
+//    private static List<Object> getAPIListFromAPISearchResult(Map<String, Object> resultsMap) {
+//
+//        List<Object> apis;
+//        Object apiSearchResults = resultsMap.get("apis");
+//        if (apiSearchResults instanceof List<?>) {
+//            apis = (List<Object>) apiSearchResults;
+//        } else if (apiSearchResults instanceof HashMap) {
+//            Collection<String> values = ((HashMap) apiSearchResults).values();
+//            apis = new ArrayList<>(values);
+//        } else {
+//            apis = new ArrayList<>((Collection<?>) apiSearchResults);
+//        }
+//        return apis;
+//    }
+//
+//    private static List<SearchResultDTO> getAllMatchedResults(List<Object> apis) throws APIManagementException {
+//
+//        List<SearchResultDTO> allMatchedResults = new ArrayList<>();
+//        for (Object searchResult : apis) {
+//            if (searchResult instanceof API) {
+//                API api = (API) searchResult;
+//                SearchResultDTO apiResult = SearchResultMappingUtil.fromAPIToAPIResultDTO(api);
+//                allMatchedResults.add(apiResult);
+//            } else if (searchResult instanceof APIProduct) {
+//                APIProduct apiproduct = (APIProduct) searchResult;
+//                SearchResultDTO apiResult = SearchResultMappingUtil.fromAPIProductToAPIResultDTO(apiproduct);
+//                allMatchedResults.add(apiResult);
+//            } else if (searchResult instanceof Map.Entry) {
+//                Map.Entry<Object, Object> pair = (Map.Entry) searchResult;
+//                SearchResultDTO docResult;
+//                if (pair.getValue() instanceof API) {
+//                    docResult = SearchResultMappingUtil.fromDocumentationToDocumentResultDTO(
+//                            (Documentation) pair.getKey(), (API) pair.getValue());
+//                } else {
+//                    docResult = SearchResultMappingUtil.fromDocumentationToProductDocumentResultDTO(
+//                            (Documentation) pair.getKey(), (APIProduct) pair.getValue());
+//                }
+//                allMatchedResults.add(docResult);
+//            }
+//        }
+//        return allMatchedResults;
+//    }
 
 }

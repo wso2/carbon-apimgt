@@ -27,7 +27,6 @@ import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.ApplicationInfoDTO;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.ClaimDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.PaginationDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.SubscriberInfoDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.SubscriptionDTO;
@@ -54,10 +53,10 @@ public class SubscriptionMappingUtil {
 
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
-        subscriptionDTO.setApplicationInfo(fromApplicationToApplicationInfoDTO(subscription.getApplication()));
+        //subscriptionDTO.setApplicationInfo(fromApplicationToApplicationInfoDTO(subscription.getApplication()));
         subscriptionDTO.setSubscriptionStatus(
                 SubscriptionDTO.SubscriptionStatusEnum.valueOf(subscription.getSubStatus()));
-        subscriptionDTO.setThrottlingPolicy(subscription.getTier().getName());
+        //subscriptionDTO.setThrottlingPolicy(subscription.getTier().getName());
 
         return subscriptionDTO;
     }
@@ -114,8 +113,7 @@ public class SubscriptionMappingUtil {
         for (SubscribedAPI sub : subscriptions) {
             SubscriptionDTO subscription = fromSubscriptionToDTO(sub);
             if (subscription.getApplicationInfo().getName().toLowerCase().contains(query) ||
-                    subscription.getApplicationInfo().getSubscriber().toLowerCase().contains(query) ||
-                    subscription.getThrottlingPolicy().toLowerCase().contains(query)) {
+                    subscription.getApplicationInfo().getSubscriber().toLowerCase().contains(query)) {
                 subscriptionDTOs.add(subscription);
             }
         }
@@ -212,21 +210,21 @@ public class SubscriptionMappingUtil {
         return subscribedAPIs;
     }
 
-    /**
-     * Convert Application to an ApplicationInfoDTO
-     *
-     * @param application the application to be converted
-     * @return ApplicationInfoDTO corresponding to the application
-     * @throws APIManagementException If an error occurs when getting logged in provider or when getting lightweight API
-     */
-    private static ApplicationInfoDTO fromApplicationToApplicationInfoDTO(Application application)
-            throws APIManagementException {
-
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
-        application = apiProvider.getLightweightApplicationByUUID(application.getUUID());
-        return ApplicationMappingUtil.fromApplicationToInfoDTO(application);
-    }
+//    /**
+//     * Convert Application to an ApplicationInfoDTO
+//     *
+//     * @param application the application to be converted
+//     * @return ApplicationInfoDTO corresponding to the application
+//     * @throws APIManagementException If an error occurs when getting logged in provider or when getting lightweight API
+//     */
+//    private static ApplicationInfoDTO fromApplicationToApplicationInfoDTO(Application application)
+//            throws APIManagementException {
+//
+//        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+//
+//        application = apiProvider.getLightweightApplicationByUUID(application.getUUID());
+//        return ApplicationMappingUtil.fromApplicationToInfoDTO(application);
+//    }
 
     /**
      * Convert Subscriber claims information into SubscriberInfoDTO
@@ -240,16 +238,16 @@ public class SubscriptionMappingUtil {
                                                               String subscriberName) throws APIManagementException {
 
         SubscriberInfoDTO subscriberInfoDTO = new SubscriberInfoDTO();
-        subscriberInfoDTO.setName(subscriberName);
-        List<ClaimDTO> claimDTOList = new ArrayList<>();
-        for (String key : subscriberClaims.keySet()) {
-            ClaimDTO claimDTO = new ClaimDTO();
-            claimDTO.setName(APIUtil.getClaimDisplayName(key, subscriberName));
-            claimDTO.setURI(key);
-            claimDTO.setValue(subscriberClaims.get(key));
-            claimDTOList.add(claimDTO);
-        }
-        subscriberInfoDTO.setClaims(claimDTOList);
+//        subscriberInfoDTO.setName(subscriberName);
+//        List<ClaimDTO> claimDTOList = new ArrayList<>();
+//        for (String key : subscriberClaims.keySet()) {
+//            ClaimDTO claimDTO = new ClaimDTO();
+//            claimDTO.setName(APIUtil.getClaimDisplayName(key, subscriberName));
+//            claimDTO.setURI(key);
+//            claimDTO.setValue(subscriberClaims.get(key));
+//            claimDTOList.add(claimDTO);
+//        }
+//        subscriberInfoDTO.setClaims(claimDTOList);
         return subscriberInfoDTO;
     }
 }

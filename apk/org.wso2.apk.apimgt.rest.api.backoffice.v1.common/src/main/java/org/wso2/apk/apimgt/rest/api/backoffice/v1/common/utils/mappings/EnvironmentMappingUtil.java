@@ -27,9 +27,8 @@ import org.wso2.apk.apimgt.impl.ExternalEnvironment;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.AdditionalPropertyDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.EnvironmentDTO;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.EnvironmentListDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.GatewayEnvironmentProtocolURIDTO;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.VHostDTO;
+
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,8 +57,7 @@ public class EnvironmentMappingUtil {
         environmentDTO.setServerUrl(environment.getServerURL());
         environmentDTO.setShowInApiConsole(environment.isShowInConsole());
         environmentDTO.setProvider(environment.getProvider());
-        environmentDTO.setVhosts(environment.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostToVHostDTO)
-                .collect(Collectors.toList()));
+
         environmentDTO.setAdditionalProperties(fromAdditionalPropertiesToAdditionalPropertiesDTO
                 (environment.getAdditionalProperties()));
 
@@ -81,47 +79,28 @@ public class EnvironmentMappingUtil {
         return environmentDTO;
     }
 
-    /**
-     * Converts a List object of SubscribedAPIs into a DTO.
-     *
-     * @param environmentCollection a collection of Environment objects
-     * @return EnvironmentListDTO object containing EnvironmentDTOs
-     */
-    public static EnvironmentListDTO fromEnvironmentCollectionToDTO(Collection<Environment> environmentCollection) {
+//    /**
+//     * Converts a List object of SubscribedAPIs into a DTO.
+//     *
+//     * @param environmentCollection a collection of Environment objects
+//     * @return EnvironmentListDTO object containing EnvironmentDTOs
+//     */
+//    public static EnvironmentListDTO fromEnvironmentCollectionToDTO(Collection<Environment> environmentCollection) {
+//
+//        EnvironmentListDTO environmentListDTO = new EnvironmentListDTO();
+//        List<EnvironmentDTO> environmentDTOs = environmentListDTO.getList();
+//        if (environmentDTOs == null) {
+//            environmentDTOs = new ArrayList<>();
+//            environmentListDTO.setList(environmentDTOs);
+//        }
+//
+//        for (Environment environment : environmentCollection) {
+//            environmentDTOs.add(fromEnvironmentToDTO(environment));
+//        }
+//        environmentListDTO.setCount(environmentDTOs.size());
+//        return environmentListDTO;
+//    }
 
-        EnvironmentListDTO environmentListDTO = new EnvironmentListDTO();
-        List<EnvironmentDTO> environmentDTOs = environmentListDTO.getList();
-        if (environmentDTOs == null) {
-            environmentDTOs = new ArrayList<>();
-            environmentListDTO.setList(environmentDTOs);
-        }
-
-        for (Environment environment : environmentCollection) {
-            environmentDTOs.add(fromEnvironmentToDTO(environment));
-        }
-        environmentListDTO.setCount(environmentDTOs.size());
-        return environmentListDTO;
-    }
-
-    /**
-     * Converts VHost into a VHostDTO.
-     *
-     * @param vHost VHost object
-     * @return VHostDTO
-     */
-    public static VHostDTO fromVHostToVHostDTO(VHost vHost) {
-
-        VHostDTO vHostDTO = new VHostDTO();
-        vHostDTO.setHost(vHost.getHost());
-        vHostDTO.setHttpContext(vHost.getHttpContext());
-        vHostDTO.setHttpPort(vHost.getHttpPort());
-        vHostDTO.setHttpsPort(vHost.getHttpsPort());
-        vHostDTO.setWsPort(vHost.getWsPort());
-        vHostDTO.setWssPort(vHost.getWssPort());
-        vHostDTO.setWebsubHttpPort(vHost.getWebsubHttpPort());
-        vHostDTO.setWebsubHttpsPort(vHost.getWebsubHttpsPort());
-        return vHostDTO;
-    }
 
     /**
      * Converts AdditionalProperties into a AdditionalPropertiesDTO.
