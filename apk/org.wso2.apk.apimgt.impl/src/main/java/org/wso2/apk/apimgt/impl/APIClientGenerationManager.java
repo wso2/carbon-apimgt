@@ -162,9 +162,7 @@ public class APIClientGenerationManager {
      */
     public String getSupportedSDKLanguages() {
         ConfigurationHolder config = getAPIManagerConfiguration();
-        String supportedLanguages = config.getFirstProperty(APIConstants.CLIENT_CODEGEN_SUPPORTED_LANGUAGES);
-        return supportedLanguages;
-
+        return config.getFirstProperty(APIConstants.CLIENT_CODEGEN_SUPPORTED_LANGUAGES);
     }
 
     /**
@@ -176,7 +174,6 @@ public class APIClientGenerationManager {
      * @param temporaryOutputPath temporary location where the SDK archive is saved until downloaded
      */
     private void generateClient(String apiName, String specLocation, String sdkLanguage, String temporaryOutputPath) {
-
         ConfigurationHolder config = getAPIManagerConfiguration();
         CodegenConfigurator codegenConfigurator = new CodegenConfigurator();
         codegenConfigurator.setGroupId(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_GROUPID));
@@ -190,7 +187,6 @@ public class APIClientGenerationManager {
         codegenConfigurator.setValidateSpec(false);
         final ClientOptInput clientOptInput = codegenConfigurator.toClientOptInput();
         new DefaultGenerator().opts(clientOptInput).generate();
-
     }
 
     /**
