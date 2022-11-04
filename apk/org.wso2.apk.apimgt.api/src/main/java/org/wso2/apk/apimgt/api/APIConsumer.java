@@ -637,8 +637,6 @@ public interface APIConsumer extends APIManager {
 
     String[] getGroupIds(String response) throws APIManagementException;
 
-    JSONObject resumeWorkflow(Object[] args);
-
     boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException;
 
     /**
@@ -742,8 +740,6 @@ public interface APIConsumer extends APIManager {
 
     APIKey getApplicationKeyByAppIDAndKeyMapping(int applicationId, String keyMappingId)
             throws APIManagementException;
-
-    void changeUserPassword(String currentPassword, String newPassword) throws APIManagementException;
 
     /**
      * Returns the AsyncAPI definition of the API for the given microgateway gateway label as a string

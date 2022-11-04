@@ -32,6 +32,7 @@ import org.wso2.apk.apimgt.api.model.APICategory;
 import org.wso2.apk.apimgt.api.model.APIIdentifier;
 import org.wso2.apk.apimgt.api.model.APIInfo;
 import org.wso2.apk.apimgt.api.model.APIKey;
+import org.wso2.apk.apimgt.api.model.APIProduct;
 import org.wso2.apk.apimgt.api.model.APIProductIdentifier;
 import org.wso2.apk.apimgt.api.model.APIProductResource;
 import org.wso2.apk.apimgt.api.model.AccessTokenInfo;
@@ -50,6 +51,7 @@ import org.wso2.apk.apimgt.api.model.URITemplate;
 import org.wso2.apk.apimgt.impl.dao.dto.DocumentContent;
 import org.wso2.apk.apimgt.impl.dao.dto.DocumentSearchResult;
 import org.wso2.apk.apimgt.impl.dao.dto.Organization;
+import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPI;
 import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPIInfo;
 import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPISearchResult;
 import org.wso2.apk.apimgt.impl.dao.dto.UserContext;
@@ -79,9 +81,14 @@ import org.wso2.apk.apimgt.impl.dao.ScopesDAO;
 import org.wso2.apk.apimgt.impl.dao.impl.*;
 import org.wso2.apk.apimgt.impl.dao.mapper.DocumentMapper;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.apk.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.apk.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.apk.apimgt.impl.utils.APINameComparator;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
 import org.wso2.apk.apimgt.impl.utils.TierNameComparator;
+import org.wso2.apk.apimgt.impl.workflow.WorkflowConstants;
+import org.wso2.apk.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.apk.apimgt.user.exceptions.UserException;
 import org.wso2.apk.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.apk.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
@@ -722,7 +729,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
+     * Returns a list of pre-defined # {@link Tier} in the system.
      *
      * @return Set<Tier>
      */
@@ -737,7 +744,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
+     * Returns a list of pre-defined # {@link Tier} in the system.
      *
      * @return Set<Tier>
      */
@@ -750,7 +757,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
+     * Returns a list of pre-defined # {@link Tier} in the system.
      *
      * @param tierType type of the tiers (api,resource ot application)
      * @param username current logged user
@@ -778,7 +785,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
+     * Returns a list of pre-defined # {@link Tier} in the system.
      *
      * @return Map<String, String>
      */
@@ -936,12 +943,11 @@ public abstract class AbstractAPIManager implements APIManager {
             }
             KeyManager keyManager = null;
 
-            // TODO : check keyManagerConfigurationDTO.isEnabled()
-//            if (keyManagerConfigurationDTO.isEnabled()) {
-//                keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
-//            } else {
-//                continue;
-//            }
+            if (keyManagerConfigurationDTO.isEnabled()) {
+                keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+            } else {
+                continue;
+            }
             apiKey.setKeyManager(keyManagerConfigurationDTO.getName());
             if (StringUtils.isNotEmpty(consumerKey)) {
                 if (keyManager != null) {
@@ -958,8 +964,7 @@ public abstract class AbstractAPIManager implements APIManager {
                         }
                         if (StringUtils.isNotEmpty(apiKey.getAppMetaData())) {
                             OAuthApplicationInfo storedOAuthApplicationInfo =
-                                    new Gson().fromJson(apiKey.getAppMetaData()
-                                            , OAuthApplicationInfo.class);
+                                    new Gson().fromJson(apiKey.getAppMetaData(), OAuthApplicationInfo.class);
                             if (oAuthApplicationInfo == null) {
                                 oAuthApplicationInfo = storedOAuthApplicationInfo;
                             } else {
@@ -1200,6 +1205,132 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
+    protected void populateAPIProductInformation(String uuid, String organization, APIProduct apiProduct)
+            throws APIManagementException, OASPersistenceException, ParseException {
+        Organization org = new Organization(organization);
+        apiProduct.setOrganization(organization);
+        ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
+        apiProduct.setRating(Float.toString(APIUtil.getAverageRating(apiProduct.getProductId())));
+
+        List<APIProductResource> resources = ApiMgtDAO.getInstance().getAPIProductResourceMappings(apiProduct.getId());
+
+        Map<String, Scope> uniqueAPIProductScopeKeyMappings = new LinkedHashMap<>();
+        for (APIProductResource resource : resources) {
+            List<Scope> resourceScopes = resource.getUriTemplate().retrieveAllScopes();
+            ListIterator it = resourceScopes.listIterator();
+            while (it.hasNext()) {
+                Scope resourceScope = (Scope) it.next();
+                String scopeKey = resourceScope.getKey();
+                if (!uniqueAPIProductScopeKeyMappings.containsKey(scopeKey)) {
+                    resourceScope = APIUtil.getScopeByName(scopeKey, organization);
+                    uniqueAPIProductScopeKeyMappings.put(scopeKey, resourceScope);
+                } else {
+                    resourceScope = uniqueAPIProductScopeKeyMappings.get(scopeKey);
+                }
+                it.set(resourceScope);
+            }
+        }
+
+        for (APIProductResource resource : resources) {
+            String resourceAPIUUID = resource.getApiIdentifier().getUUID();
+            resource.setApiId(resourceAPIUUID);
+            PublisherAPI publisherAPI = apiDAOImpl.getPublisherAPI(org, resourceAPIUUID);
+            API api = APIMapper.INSTANCE.toApi(publisherAPI);
+            if (api.isAdvertiseOnly()) {
+                resource.setEndpointConfig(APIUtil.generateEndpointConfigForAdvertiseOnlyApi(api));
+            } else {
+                resource.setEndpointConfig(api.getEndpointConfig());
+            }
+            resource.setEndpointSecurityMap(APIUtil.setEndpointSecurityForAPIProduct(api));
+
+        }
+        apiProduct.setProductResources(resources);
+
+        //UUID
+        if (apiProduct.getUuid() == null) {
+            apiProduct.setUuid(uuid);
+        }
+        // environment
+        String environmentString = null;
+        if (apiProduct.getEnvironments() != null) {
+            environmentString = String.join(",", apiProduct.getEnvironments());
+        }
+        apiProduct.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
+
+        // workflow status
+        APIProductIdentifier productIdentifier = apiProduct.getId();
+        WorkflowDTO workflow;
+        String currentApiProductUuid = uuid;
+        if (apiProduct.isRevision() && apiProduct.getRevisionedApiProductId() != null) {
+            currentApiProductUuid = apiProduct.getRevisionedApiProductId();
+        }
+        workflow = APIUtil.getAPIWorkflowStatus(currentApiProductUuid, WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE);
+        if (workflow != null) {
+            WorkflowStatus status = workflow.getStatus();
+            apiProduct.setWorkflowStatus(status.toString());
+        }
+
+        // available tier
+        String tiers = null;
+        Set<Tier> tiersSet = apiProduct.getAvailableTiers();
+        Set<String> tierNameSet = new HashSet<String>();
+        for (Tier t : tiersSet) {
+            tierNameSet.add(t.getName());
+        }
+        if (apiProduct.getAvailableTiers() != null) {
+            tiers = String.join("||", tierNameSet);
+        }
+        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+        Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, apiProduct.getId().getName());
+        apiProduct.setAvailableTiers(availableTier);
+
+        //Scopes
+        /*
+        Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(api.getId(), requestedTenantDomain);
+        apiProduct.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
+        */
+        //templates
+        String resourceConfigsString = null;
+        if (apiProduct.getDefinition() != null) {
+            resourceConfigsString = apiProduct.getDefinition();
+        } else {
+            resourceConfigsString = apiDAOImpl.getOASDefinition(org, uuid);
+            apiProduct.setDefinition(resourceConfigsString);
+        }
+        //CORS . if null is returned, set default config from the configuration
+        if (apiProduct.getCorsConfiguration() == null) {
+            apiProduct.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
+        }
+
+        // set category
+        List<APICategory> categories = apiProduct.getApiCategories();
+        if (categories != null) {
+            List<String> categoriesOfAPI = new ArrayList<String>();
+            for (APICategory apiCategory : categories) {
+                categoriesOfAPI.add(apiCategory.getName());
+            }
+            List<APICategory> categoryList = new ArrayList<>();
+
+            if (!categoriesOfAPI.isEmpty()) {
+                // category array retrieved from artifact has only the category name, therefore we need to fetch
+                // categories
+                // and fill out missing attributes before attaching the list to the api
+                List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfOrganization(organization);
+
+                // todo-category: optimize this loop with breaks
+                for (String categoryName : categoriesOfAPI) {
+                    for (APICategory category : allCategories) {
+                        if (categoryName.equals(category.getName())) {
+                            categoryList.add(category);
+                            break;
+                        }
+                    }
+                }
+            }
+            apiProduct.setApiCategories(categoryList);
+        }
+    }
+
     @Override
     public ResourceFile getIcon(String apiId, String organization) throws APIManagementException {
 
@@ -1217,13 +1348,9 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     protected boolean isOauthAppValidation() {
-
-        // TODO : Read from  config
-//        String oauthAppValidation = null;
-//        String oauthAppValidation = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-//                .getAPIManagerConfiguration()
-//                .getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION);
-        String oauthAppValidation = null;
+        String oauthAppValidation = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration()
+                .getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION);
         if (StringUtils.isNotEmpty(oauthAppValidation)) {
             return Boolean.parseBoolean(oauthAppValidation);
         }

@@ -29,33 +29,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.apk.apimgt.api.model.webhooks.Subscription;
-import org.wso2.apk.apimgt.api.model.webhooks.Topic;
-import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPI;
-import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPIInfo;
-import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPISearchResult;
-import org.wso2.apk.apimgt.impl.dao.dto.DevPortalContentSearchResult;
-import org.wso2.apk.apimgt.impl.dao.dto.DevPortalSearchContent;
-import org.wso2.apk.apimgt.impl.dao.dto.DocumentSearchContent;
-import org.wso2.apk.apimgt.impl.dao.dto.Documentation;
-import org.wso2.apk.apimgt.impl.dao.dto.DocumentationType;
-import org.wso2.apk.apimgt.impl.dao.dto.DocumentContent;
-import org.wso2.apk.apimgt.impl.dao.dto.DocumentSearchResult;
-import org.wso2.apk.apimgt.impl.dao.dto.Organization;
-import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPI;
-import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPIInfo;
-import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPISearchResult;
-import org.wso2.apk.apimgt.impl.dao.dto.PublisherContentSearchResult;
-import org.wso2.apk.apimgt.impl.dao.dto.PublisherSearchContent;
-import org.wso2.apk.apimgt.impl.dao.dto.SearchContent;
-import org.wso2.apk.apimgt.impl.dao.dto.UserContext;
-import org.wso2.apk.apimgt.impl.dao.exceptions.APIPersistenceException;
-import org.wso2.apk.apimgt.impl.dao.exceptions.AsyncSpecPersistenceException;
-import org.wso2.apk.apimgt.impl.dao.exceptions.DocumentationPersistenceException;
-import org.wso2.apk.apimgt.impl.dao.exceptions.GraphQLPersistenceException;
-import org.wso2.apk.apimgt.impl.dao.exceptions.OASPersistenceException;
-import org.wso2.apk.apimgt.impl.dao.exceptions.ThumbnailPersistenceException;
-import org.wso2.apk.apimgt.impl.dao.exceptions.WSDLPersistenceException;
 import org.wso2.apk.apimgt.api.APIManagementException;
 import org.wso2.apk.apimgt.api.ErrorHandler;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
@@ -82,7 +55,6 @@ import org.wso2.apk.apimgt.api.model.OperationPolicyData;
 import org.wso2.apk.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.apk.apimgt.api.model.OperationPolicySpecAttribute;
 import org.wso2.apk.apimgt.api.model.OperationPolicySpecification;
-import org.wso2.apk.apimgt.impl.dao.dto.ResourceFile;
 import org.wso2.apk.apimgt.api.model.ResourcePath;
 import org.wso2.apk.apimgt.api.model.Scope;
 import org.wso2.apk.apimgt.api.model.SubscribedAPI;
@@ -90,6 +62,8 @@ import org.wso2.apk.apimgt.api.model.Subscriber;
 import org.wso2.apk.apimgt.api.model.Tier;
 import org.wso2.apk.apimgt.api.model.URITemplate;
 import org.wso2.apk.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
+import org.wso2.apk.apimgt.api.model.webhooks.Subscription;
+import org.wso2.apk.apimgt.api.model.webhooks.Topic;
 import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.impl.APIConstants.ResourceCategory;
 import org.wso2.apk.apimgt.impl.dao.ApiDAO;
@@ -97,6 +71,32 @@ import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.apk.apimgt.impl.dao.ResourceCategoryDAO;
 import org.wso2.apk.apimgt.impl.dao.constants.PostgreSQLConstants;
 import org.wso2.apk.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPI;
+import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPIInfo;
+import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPISearchResult;
+import org.wso2.apk.apimgt.impl.dao.dto.DevPortalContentSearchResult;
+import org.wso2.apk.apimgt.impl.dao.dto.DevPortalSearchContent;
+import org.wso2.apk.apimgt.impl.dao.dto.DocumentContent;
+import org.wso2.apk.apimgt.impl.dao.dto.DocumentSearchContent;
+import org.wso2.apk.apimgt.impl.dao.dto.DocumentSearchResult;
+import org.wso2.apk.apimgt.impl.dao.dto.Documentation;
+import org.wso2.apk.apimgt.impl.dao.dto.DocumentationType;
+import org.wso2.apk.apimgt.impl.dao.dto.Organization;
+import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPI;
+import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPIInfo;
+import org.wso2.apk.apimgt.impl.dao.dto.PublisherAPISearchResult;
+import org.wso2.apk.apimgt.impl.dao.dto.PublisherContentSearchResult;
+import org.wso2.apk.apimgt.impl.dao.dto.PublisherSearchContent;
+import org.wso2.apk.apimgt.impl.dao.dto.ResourceFile;
+import org.wso2.apk.apimgt.impl.dao.dto.SearchContent;
+import org.wso2.apk.apimgt.impl.dao.dto.UserContext;
+import org.wso2.apk.apimgt.impl.dao.exceptions.APIPersistenceException;
+import org.wso2.apk.apimgt.impl.dao.exceptions.AsyncSpecPersistenceException;
+import org.wso2.apk.apimgt.impl.dao.exceptions.DocumentationPersistenceException;
+import org.wso2.apk.apimgt.impl.dao.exceptions.GraphQLPersistenceException;
+import org.wso2.apk.apimgt.impl.dao.exceptions.OASPersistenceException;
+import org.wso2.apk.apimgt.impl.dao.exceptions.ThumbnailPersistenceException;
+import org.wso2.apk.apimgt.impl.dao.exceptions.WSDLPersistenceException;
 import org.wso2.apk.apimgt.impl.dao.mapper.APIMapper;
 import org.wso2.apk.apimgt.impl.dao.util.DBUtils;
 import org.wso2.apk.apimgt.impl.utils.APIMgtDBUtil;
@@ -3108,23 +3108,30 @@ public class ApiDAOImpl implements ApiDAO {
                 String mediaType = resultSet.getString("MEDIA_TYPE");
                 InputStream apiDefinitionBlob = resultSet.getBinaryStream("API_DEFINITION");
                 if (apiDefinitionBlob != null) {
-                    if (StringUtils.equals("swagger.json",mediaType)) {
+                    if (StringUtils.equals("swagger.json", mediaType)) {
                         api.setSwaggerDefinition(APIMgtDBUtil.getStringFromInputStream(apiDefinitionBlob));
-                    } else if (StringUtils.equals("asyncapi.json",mediaType)) {
+                    } else if (StringUtils.equals("asyncapi.json", mediaType)) {
                         api.setAsyncApiDefinition(APIMgtDBUtil.getStringFromInputStream(apiDefinitionBlob));
                     }
                 }
                 API apiObject = APIMapper.INSTANCE.toApi(api);
                 devPortalAPI = APIMapper.INSTANCE.toDevPortalApi(apiObject);
+                if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) {
+                    return devPortalAPI;
+                }
+                String apiOrganization = APIUtil.getTenantDomain(APIUtil.replaceEmailDomainBack(apiObject.getId()
+                        .getProviderName()));
+                if (!organization.equals(apiOrganization)) {
+                    throw new APIPersistenceException("User does not have permission to view API : "
+                            + apiObject.getId().getApiName());
+                }
             }
         } catch (SQLException e) {
             if (log.isDebugEnabled()) {
                 log.debug("Error while retrieving api artefact for API uuid: " + apiId);
-                throw new APIPersistenceException("Error while retrieving api artefact for API uuid: " + apiId, e);
-            } else {
-                throw new APIPersistenceException("Error while retrieving api artefact for API uuid: " + apiId, e);
             }
-        } catch (JsonProcessingException e) {
+            throw new APIPersistenceException("Error while retrieving api artefact for API uuid: " + apiId, e);
+        } catch (JsonProcessingException | APIManagementException e) {
             throw new RuntimeException(e);
         } finally {
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
@@ -3135,8 +3142,22 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public DevPortalAPISearchResult searchAPIsForDevPortal(Organization organization, String searchQuery, int start,
                                                            int offset, UserContext ctx) throws APIPersistenceException {
+        String requestedOrganizationName = organization.getName();
         DevPortalAPISearchResult result = null;
+        //TODO: implement search functionality if required
+//        log.debug("Requested query for devportal search: " + searchQuery);
+//        String modifiedQuery = DBSearchUtils.getDevPortalSearchQuery(searchQuery, ctx,
+//                APIUtil.isAllowDisplayAPIsWithMultipleStatus(), APIUtil.isAllowDisplayMultipleVersions());
         String searchAllQuery = PostgreSQLConstants.SEARCH_ALL_DEVPORTAL_SQL;
+//        log.debug("Modified query for devportal search: " + modifiedQuery);
+
+//        if (searchQuery != null && searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
+//            result = searchPaginatedDevPortalAPIsByDoc(userRegistry, tenantIDLocal, searchQuery.split(":")[1],
+//                    userNameLocal, start, offset);
+//        } else {
+//            result = searchPaginatedDevPortalAPIs(userRegistry, tenantIDLocal, modifiedQuery, start, offset);
+//        }
+
         if (StringUtils.isEmpty(searchQuery)) {
             result = searchPaginatedDevportalAPIs(organization.getName(), searchAllQuery, start, offset);
         }

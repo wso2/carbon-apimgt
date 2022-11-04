@@ -26,9 +26,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-//import org.apache.axiom.om.OMElement;
-//import org.apache.axiom.om.util.AXIOMUtil;
-//import org.apache.axis2.Constants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -68,7 +65,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.xerces.util.SecurityManager;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
-import org.everit.json.schema.loader.SchemaLoader;
+import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -78,16 +75,10 @@ import org.wso2.apk.apimgt.api.ErrorHandler;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.LoginPostExecutor;
 import org.wso2.apk.apimgt.api.NewPostLoginExecutor;
-import org.wso2.apk.apimgt.api.PasswordResolver;
-import org.wso2.apk.apimgt.api.doc.model.APIDefinition;
-import org.wso2.apk.apimgt.api.doc.model.APIResource;
-import org.wso2.apk.apimgt.api.doc.model.Operation;
-import org.wso2.apk.apimgt.api.doc.model.Parameter;
 import org.wso2.apk.apimgt.api.model.API;
 import org.wso2.apk.apimgt.api.model.APICategory;
 import org.wso2.apk.apimgt.api.model.APIIdentifier;
 import org.wso2.apk.apimgt.api.model.APIProductIdentifier;
-import org.wso2.apk.apimgt.api.model.APIPublisher;
 import org.wso2.apk.apimgt.api.model.APIRevision;
 import org.wso2.apk.apimgt.api.model.APIStatus;
 import org.wso2.apk.apimgt.api.model.APIStore;
@@ -103,7 +94,6 @@ import org.wso2.apk.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.apk.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.apk.apimgt.api.model.Scope;
 import org.wso2.apk.apimgt.api.model.Tier;
-import org.wso2.apk.apimgt.api.model.URITemplate;
 import org.wso2.apk.apimgt.api.model.VHost;
 import org.wso2.apk.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.apk.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -114,41 +104,64 @@ import org.wso2.apk.apimgt.api.model.policy.Policy;
 import org.wso2.apk.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.apk.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.apk.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.apk.apimgt.impl.APIAdminImpl;
 import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.apk.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.apk.apimgt.impl.ConfigurationHolder;
 import org.wso2.apk.apimgt.impl.ExternalEnvironment;
-import org.wso2.apk.apimgt.impl.PasswordResolverFactory;
+import org.wso2.apk.apimgt.impl.IDPConfiguration;
 import org.wso2.apk.apimgt.impl.config.APIMConfigService;
 import org.wso2.apk.apimgt.impl.config.APIMConfigServiceImpl;
 import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.apk.apimgt.impl.dao.ScopesDAO;
 import org.wso2.apk.apimgt.impl.dao.WorkflowDAO;
+import org.wso2.apk.apimgt.impl.dao.dto.UserContext;
 import org.wso2.apk.apimgt.impl.dao.impl.WorkflowDAOImpl;
+import org.wso2.apk.apimgt.impl.dto.APISubscriptionInfoDTO;
+import org.wso2.apk.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
+import org.wso2.apk.apimgt.impl.dto.ApplicationWorkflowDTO;
+import org.wso2.apk.apimgt.impl.dto.JwtTokenInfoDTO;
+import org.wso2.apk.apimgt.impl.dto.SubscribedApiDTO;
+import org.wso2.apk.apimgt.impl.dto.SubscriptionPolicyDTO;
+import org.wso2.apk.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.apk.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.apk.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.apk.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.apk.apimgt.impl.proxy.ExtendedProxyRoutePlanner;
+import org.wso2.apk.apimgt.impl.recommendationmgt.RecommendationEnvironment;
+import org.wso2.apk.apimgt.impl.workflow.APIStateWorkflowDTO;
+import org.wso2.apk.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.apk.apimgt.user.exceptions.UserException;
 import org.wso2.apk.apimgt.user.mgt.internal.UserManagerHolder;
 
+import javax.cache.Cache;
+import javax.net.ssl.SSLContext;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.security.InvalidKeyException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -162,19 +175,9 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.cache.Cache;
-//import javax.cache.CacheConfiguration;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.net.ssl.SSLContext;
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLStreamException;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -665,6 +668,7 @@ public final class APIUtil {
             //TODO fix tenant flow
 //            PrivilegedCarbonContext.startTenantFlow();
 //            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            //TODO: handle user store functionality
             int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
             authorized = UserManagerHolder.getUserManager().isUserAuthorized(tenantId,
                     getTenantAwareUsername(userNameWithoutChange), permission,
@@ -719,6 +723,7 @@ public final class APIUtil {
         }
         try {
             String tenantDomain = getTenantDomain(username);
+            // TODO: remove tenant id and handle user store functionalities
             int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
             roles = UserManagerHolder.getUserManager().getRoleListOfUser(tenantId,
                     getTenantAwareUsername(username));
@@ -1977,8 +1982,7 @@ public final class APIUtil {
     public static boolean isEnabledUnlimitedTier() {
 
         ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                .getThrottleProperties();
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties();
         return throttleProperties.isEnableUnlimitedTier();
     }
 
@@ -3662,5 +3666,661 @@ public final class APIUtil {
         return map;
     }
 
+    public static boolean isAllowDisplayAPIsWithMultipleStatus() {
 
+        ConfigurationHolder config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        String displayAllAPIs = config.getFirstProperty(APIConstants.API_STORE_DISPLAY_ALL_APIS);
+        if (displayAllAPIs == null) {
+            log.warn("The configurations related to show deprecated APIs in API Developer Portal are missing in the "
+                    + "configuration file.");
+            return false;
+        }
+        return Boolean.parseBoolean(displayAllAPIs);
+    }
+
+    public static boolean isAllowDisplayMultipleVersions() {
+
+        ConfigurationHolder config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+
+        String displayMultiVersions = config.getFirstProperty(APIConstants.API_STORE_DISPLAY_MULTIPLE_VERSIONS);
+        if (displayMultiVersions == null) {
+            log.warn("The configurations related to show multiple versions of API in API Developer Portal " +
+                    "are missing in the configuration file.");
+            return false;
+        }
+        return Boolean.parseBoolean(displayMultiVersions);
+    }
+
+
+    public static boolean isAdminUser(UserContext userContext) {
+        boolean isAdmin = false;
+        Map<String, Object> properties = userContext.getProperties();
+        if (properties != null && properties.containsKey(APIConstants.USER_CTX_PROPERTY_ISADMIN)) {
+            isAdmin = (Boolean) properties.get(APIConstants.USER_CTX_PROPERTY_ISADMIN);
+        }
+        return isAdmin;
+    }
+
+    public static String getSkipRoles(UserContext userContext) {
+        String skipRoles = "";
+        Map<String, Object> properties = userContext.getProperties();
+        if (properties != null && properties.containsKey(APIConstants.USER_CTX_PROPERTY_SKIP_ROLES)) {
+            skipRoles = (String) properties.get(APIConstants.USER_CTX_PROPERTY_SKIP_ROLES);
+        }
+        return skipRoles;
+    }
+
+    /**
+     * To check whether the API recommendation is enabled. It can be either enabled globally or tenant vice.
+     *
+     * @param tenantDomain Tenant domain
+     * @return whether recommendation is enabled or not
+     */
+    public static boolean isRecommendationEnabled(String tenantDomain) {
+
+        RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
+        if (recommendationEnvironment != null) {
+            if (recommendationEnvironment.isApplyForAllTenants()) {
+                return true;
+            } else {
+                try {
+                    org.json.simple.JSONObject tenantConfig = getTenantConfig(tenantDomain);
+                    Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
+                    return Boolean.parseBoolean(value.toString());
+                } catch (APIManagementException e) {
+                    log.debug("Error while retrieving Recommendation config from registry", e);
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Removes x-wso2-request-interceptor and x-wso2-response-interceptor from swagger as they should not be provided
+     * to store consumers
+     *
+     * @param apiSwagger swagger definition of API
+     * @return swagger which exclude x-wso2-request-interceptor and x-wso2-response-interceptor elements
+     */
+    public static String removeInterceptorsFromSwagger(String apiSwagger) {
+        // Removes x-wso2-request-interceptor key:values
+        String requestInterceptorScriptRegex = "\"x-wso2-request-interceptor\" ?: ?\\{([^}]*)}";
+        Pattern pattern = Pattern.compile("[,\\n ]*" + requestInterceptorScriptRegex);
+        Matcher matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+        pattern = Pattern.compile(requestInterceptorScriptRegex + ",?");
+        matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+
+        // Removes x-wso2-response-interceptor key:values
+        String responseInterceptorScriptRegex = "[,\\n ]*\"x-wso2-response-interceptor\" ?: ?\\{([^}]*)}";
+        pattern = Pattern.compile("[,\\n ]*" + responseInterceptorScriptRegex);
+        matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+        pattern = Pattern.compile(responseInterceptorScriptRegex + ",?");
+        matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+
+        return apiSwagger;
+    }
+
+    /**
+     * Removes x-mediation-scripts from swagger as they should not be provided to store consumers
+     *
+     * @param apiSwagger swagger definition of API
+     * @return swagger which exclude x-mediation-script elements
+     */
+    public static String removeXMediationScriptsFromSwagger(String apiSwagger) {
+        //removes x-mediation-script key:values
+        String mediationScriptRegex = "\"x-mediation-script\":\".*?(?<!\\\\)\"";
+        Pattern pattern = Pattern.compile("," + mediationScriptRegex);
+        Matcher matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+        pattern = Pattern.compile(mediationScriptRegex + ",");
+        matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+        return apiSwagger;
+    }
+
+    /**
+     * This method used to get the currently published gateway environments of an API .
+     *
+     * @param api API object with the attributes value
+     */
+    public static List<Environment> getEnvironmentsOfAPI(API api) throws APIManagementException {
+
+        String organization = api.getOrganization();
+        Map<String, Environment> gatewayEnvironments = getEnvironments(organization);
+        Set<String> apiEnvironments = api.getEnvironments();
+        List<Environment> returnEnvironments = new ArrayList<Environment>();
+
+        for (Environment environment : gatewayEnvironments.values()) {
+            for (String apiEnvironment : apiEnvironments) {
+                if (environment.getName().equals(apiEnvironment)) {
+                    returnEnvironments.add(environment);
+                    break;
+                }
+            }
+        }
+        return returnEnvironments;
+    }
+
+    /**
+     * Read the GateWay Endpoint from the APIConfiguration. If multiple Gateway
+     * environments defined, get the gateway endpoint according to the environment type
+     *
+     * @param transports      transports allowed for gateway endpoint
+     * @param environmentName gateway environment name
+     * @param environmentType gateway environment type
+     * @return Gateway URL
+     */
+    public static String getGatewayEndpoint(String transports, String environmentName, String environmentType,
+                                            String organization)
+            throws APIManagementException {
+
+        String gatewayURLs;
+        String gatewayEndpoint = "";
+
+        Map<String, Environment> gatewayEnvironments = getEnvironments(organization);
+        Environment environment = gatewayEnvironments.get(environmentName);
+        if (environment.getType().equals(environmentType)) {
+            gatewayURLs = environment.getApiGatewayEndpoint();
+            gatewayEndpoint = extractHTTPSEndpoint(gatewayURLs, transports);
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway urls are: " + gatewayURLs + " and the url with the correct transport is: "
+                        + gatewayEndpoint);
+            }
+        } else {
+            handleException("Environment type mismatch for environment: " + environmentName +
+                    " for the environment types: " + environment.getType() + " and " + environmentType);
+        }
+        return gatewayEndpoint;
+    }
+
+    private static String extractHTTPSEndpoint(String gatewayURLs, String transports) {
+
+        String gatewayURL;
+        String gatewayHTTPURL = null;
+        String gatewayHTTPSURL = null;
+        boolean httpsEnabled = false;
+        String[] gatewayURLsArray = gatewayURLs.split(",");
+        String[] transportsArray = transports.split(",");
+
+        for (String transport : transportsArray) {
+            if (transport.startsWith(APIConstants.HTTPS_PROTOCOL)) {
+                httpsEnabled = true;
+            }
+        }
+        if (gatewayURLsArray.length > 1) {
+            for (String url : gatewayURLsArray) {
+                if (url.startsWith("https:")) {
+                    gatewayHTTPSURL = url;
+                } else {
+                    if (!url.startsWith("ws:")) {
+                        gatewayHTTPURL = url;
+                    }
+                }
+            }
+
+            if (httpsEnabled) {
+                gatewayURL = gatewayHTTPSURL;
+            } else {
+                gatewayURL = gatewayHTTPURL;
+            }
+        } else {
+            gatewayURL = gatewayURLs;
+        }
+        return gatewayURL;
+    }
+
+    /**
+     * Returns whether the provided URL content contains the string to match
+     *
+     * @param url   URL
+     * @param match string to match
+     * @return whether the provided URL content contains the string to match
+     */
+    public static boolean isURLContentContainsString(URL url, String match, int maxLines) {
+
+        try (BufferedReader in =
+                     new BufferedReader(new InputStreamReader(url.openStream(), Charset.defaultCharset()))) {
+            String inputLine;
+            StringBuilder urlContent = new StringBuilder();
+            while ((inputLine = in.readLine()) != null && maxLines > 0) {
+                maxLines--;
+                urlContent.append(inputLine);
+                if (urlContent.indexOf(match) > 0) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            log.error("Error Reading Input from Stream from " + url, e);
+
+        }
+        return false;
+    }
+
+    public static String getGatewayendpoint(String transports, String organization) throws APIManagementException {
+
+        String gatewayURLs;
+
+        Map<String, Environment> gatewayEnvironments = getEnvironments(organization);
+        if (gatewayEnvironments.size() > 1) {
+            for (Environment environment : gatewayEnvironments.values()) {
+                if (APIConstants.GATEWAY_ENV_TYPE_HYBRID.equals(environment.getType())) {
+                    gatewayURLs = environment.getApiGatewayEndpoint(); // This might have http,https
+                    // pick correct endpoint
+                    return APIUtil.extractHTTPSEndpoint(gatewayURLs, transports);
+                }
+            }
+            for (Environment environment : gatewayEnvironments.values()) {
+                if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
+                    gatewayURLs = environment.getApiGatewayEndpoint(); // This might have http,https
+                    // pick correct endpoint
+                    return APIUtil.extractHTTPSEndpoint(gatewayURLs, transports);
+                }
+            }
+            for (Environment environment : gatewayEnvironments.values()) {
+                if (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())) {
+                    gatewayURLs = environment.getApiGatewayEndpoint(); // This might have http,https
+                    // pick correct endpoint
+                    return APIUtil.extractHTTPSEndpoint(gatewayURLs, transports);
+                }
+            }
+        } else {
+            gatewayURLs = ((Environment) gatewayEnvironments.values().toArray()[0]).getApiGatewayEndpoint();
+            return extractHTTPSEndpoint(gatewayURLs, transports);
+        }
+
+        return null;
+    }
+
+    /**
+     * Get if there are any tenant-specific application configurations from the tenant
+     * registry
+     *
+     * @param organization The organization name.
+     * @return JSONObject The Application Attributes read from tenant registry or else null
+     * @throws APIManagementException Throws if the registry resource doesn't exist
+     *                                or the content cannot be parsed to JSON
+     */
+    public static JSONObject getAppAttributeKeysFromRegistry(String organization) throws APIManagementException {
+        JSONObject tenantConfigs = getTenantConfig(organization);
+        String property = APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS;
+        if (tenantConfigs.containsKey(property)) {
+            return (JSONObject) tenantConfigs.get(APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS);
+        }
+        return null;
+    }
+
+    public static Tier findTier(Collection<Tier> tiers, String tierName) {
+        for (Tier tier : tiers) {
+            if (tier.getName() != null && tier.getName().equals(tierName)) {
+                return tier;
+            }
+        }
+        return null;
+    }
+
+    // moved from UserCoreUtil
+    public static String extractDomainFromName(String nameWithDomain) {
+        //TODO: implement user store functionality
+//        if (nameWithDomain.indexOf(UserConstants.DOMAIN_SEPARATOR) > 0) {
+//            String[] names = nameWithDomain.split(UserConstants.DOMAIN_SEPARATOR);
+//            return names[0];
+//        } else if (UserStoreMgtDSComponent.getRealmService() != null) {
+//
+//            RealmConfiguration realmConfiguration = UserStoreMgtDSComponent.getRealmService().getBootstrapRealmConfiguration();
+//            return realmConfiguration.getUserStoreProperty("DomainName") != null ? realmConfiguration.getUserStoreProperty("DomainName") : "PRIMARY";
+//        } else {
+//            return "PRIMARY";
+//        }
+        return "PRIMARY";
+    }
+
+    public static String retrieveDefaultReservedUsername() {
+        ConfigurationHolder apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String defaultReservedUsername = apiManagerConfiguration
+                .getFirstProperty(APIConstants.API_DEVPORTAL_DEFAULT_RESERVED_USERNAME);
+        return defaultReservedUsername;
+    }
+
+    /**
+     * Create a DTO object related to a given workflow type.
+     * @param wfType Type of the workflow.
+     */
+    public static WorkflowDTO createWorkflowDTO(String wfType) {
+
+        WorkflowDTO workflowDTO = null;
+        if (WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equals(wfType) ||
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(wfType)) {
+            workflowDTO = new ApplicationWorkflowDTO();
+            workflowDTO.setWorkflowType(wfType);
+        } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION.equals(wfType)) {
+            workflowDTO = new ApplicationRegistrationWorkflowDTO();
+            ((ApplicationRegistrationWorkflowDTO) workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+            workflowDTO.setWorkflowType(wfType);
+        } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX.equals(wfType)) {
+            workflowDTO = new ApplicationRegistrationWorkflowDTO();
+            ((ApplicationRegistrationWorkflowDTO) workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
+            workflowDTO.setWorkflowType(wfType);
+        } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(wfType) ||
+                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE.equals(wfType) ||
+                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION.equals(wfType)) {
+            workflowDTO = new SubscriptionWorkflowDTO();
+            workflowDTO.setWorkflowType(wfType);
+        } else if (WorkflowConstants.WF_TYPE_AM_USER_SIGNUP.equals(wfType)) {
+            workflowDTO = new WorkflowDTO();
+            workflowDTO.setWorkflowType(wfType);
+        } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equals(wfType) ||
+                WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE.equals(wfType)) {
+            workflowDTO = new APIStateWorkflowDTO();
+            workflowDTO.setWorkflowType(wfType);
+        }
+        return workflowDTO;
+    }
+
+    public static JwtTokenInfoDTO getJwtTokenInfoDTO(Application application, String userName, String tenantDomain)
+            throws APIManagementException {
+
+        int applicationId = application.getId();
+
+        String appOwner = application.getOwner();
+        APISubscriptionInfoDTO[] apis = ApiMgtDAO.getInstance()
+                .getSubscribedAPIsForAnApp(appOwner, applicationId);
+
+        JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
+        jwtTokenInfoDTO.setSubscriber("sub");
+        jwtTokenInfoDTO.setEndUserName(userName);
+        jwtTokenInfoDTO.setContentAware(true);
+
+        Set<String> subscriptionTiers = new HashSet<>();
+        List<SubscribedApiDTO> subscribedApiDTOList = new ArrayList<SubscribedApiDTO>();
+        for (APISubscriptionInfoDTO api : apis) {
+            subscriptionTiers.add(api.getSubscriptionTier());
+
+            SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
+            subscribedApiDTO.setName(api.getApiName());
+            subscribedApiDTO.setContext(api.getContext());
+            subscribedApiDTO.setVersion(api.getVersion());
+            subscribedApiDTO.setPublisher(APIUtil.replaceEmailDomainBack(api.getProviderId()));
+            subscribedApiDTO.setSubscriptionTier(api.getSubscriptionTier());
+            subscribedApiDTO.setSubscriberTenantDomain(tenantDomain);
+            subscribedApiDTOList.add(subscribedApiDTO);
+        }
+        jwtTokenInfoDTO.setSubscribedApiDTOList(subscribedApiDTOList);
+
+        if (subscriptionTiers.size() > 0) {
+            SubscriptionPolicy[] subscriptionPolicies = ApiMgtDAO.getInstance()
+                    .getSubscriptionPolicies(subscriptionTiers.toArray(new String[0]), APIUtil.getTenantId(appOwner));
+
+            Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<>();
+            for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies) {
+                SubscriptionPolicyDTO subscriptionPolicyDTO = new SubscriptionPolicyDTO();
+                subscriptionPolicyDTO.setSpikeArrestLimit(subscriptionPolicy.getRateLimitCount());
+                subscriptionPolicyDTO.setSpikeArrestUnit(subscriptionPolicy.getRateLimitTimeUnit());
+                subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicy.isStopOnQuotaReach());
+                subscriptionPolicyDTO.setTierQuotaType(subscriptionPolicy.getTierQuotaType());
+                subscriptionPolicyDTO.setGraphQLMaxDepth(subscriptionPolicy.getGraphQLMaxDepth());
+                subscriptionPolicyDTO.setGraphQLMaxComplexity(subscriptionPolicy.getGraphQLMaxComplexity());
+                subscriptionPolicyDTOList.put(subscriptionPolicy.getPolicyName(), subscriptionPolicyDTO);
+            }
+            jwtTokenInfoDTO.setSubscriptionPolicyDTOList(subscriptionPolicyDTOList);
+        }
+        return jwtTokenInfoDTO;
+    }
+
+    /**
+     * Helper method to get username with tenant domain.
+     *
+     * @param username username
+     * @return userName with tenant domain
+     */
+    public static String getUserNameWithTenantSuffix(String username) throws APIManagementException {
+        String usernameWithTenantPrefix = username;
+        String tenantDomain = APIUtil.getTenantDomain(username);
+        if (username != null && !username.endsWith("@" + APIConstants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)
+                && APIConstants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            usernameWithTenantPrefix = username + "@" + tenantDomain;
+        }
+        return usernameWithTenantPrefix;
+    }
+
+    /**
+     * Utility method to sign a JWT assertion with a particular signature algorithm
+     *
+     * @param assertion          valid JWT assertion
+     * @param privateKey         private key which use to sign the JWT assertion
+     * @param signatureAlgorithm signature algorithm which use to sign the JWT assertion
+     * @return byte array of the JWT signature
+     * @throws APIManagementException API Manager Exception
+     */
+    public static byte[] signJwt(String assertion, PrivateKey privateKey, String signatureAlgorithm)
+            throws APIManagementException {
+
+        try {
+            //initialize signature with private key and algorithm
+            Signature signature = Signature.getInstance(signatureAlgorithm);
+            signature.initSign(privateKey);
+
+            //update signature with data to be signed
+            byte[] dataInBytes = assertion.getBytes(Charset.defaultCharset());
+            signature.update(dataInBytes);
+
+            //sign the assertion and return the signature
+            return signature.sign();
+        } catch (NoSuchAlgorithmException e) {
+            //do not log
+            throw new APIManagementException("Signature algorithm not found", e);
+        } catch (InvalidKeyException e) {
+            //do not log
+            throw new APIManagementException("Invalid private key provided for signing", e);
+        } catch (SignatureException e) {
+            //do not log
+            throw new APIManagementException("Error while signing JWT", e);
+        }
+    }
+
+    public static String getApiKeyGeneratorImpl() {
+        ConfigurationHolder config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String keyGeneratorClassName = config.getFirstProperty(APIConstants.API_STORE_API_KEY_GENERATOR_IMPL);
+        if (keyGeneratorClassName == null) {
+            log.warn("The configurations related to Api Key Generator Impl class in APIStore " +
+                    "is missing in api-manager.xml. Hence returning the default value.");
+            return APIConstants.DEFAULT_API_KEY_GENERATOR_IMPL;
+        }
+        return keyGeneratorClassName;
+    }
+
+    /**
+     * Checks whether the given token is a valid JWT by parsing header and validating the
+     * header,payload,signature format
+     *
+     * @param token the token to be validated
+     * @return true if valid JWT
+     */
+    public static boolean isValidJWT(String token) {
+
+        boolean isJwtToken = false;
+        try {
+            // Check if the decoded header contains type as 'JWT'.
+            if (StringUtils.countMatches(token, APIConstants.DOT) == 2) {
+                isJwtToken = true;
+            } else {
+                log.debug("Not a valid JWT token. " + getMaskedToken(token));
+            }
+        } catch (JSONException | IllegalArgumentException e) {
+            isJwtToken = false;
+            log.debug("Not a valid JWT token. " + getMaskedToken(token), e);
+        }
+        return isJwtToken;
+    }
+
+    /**
+     * Retrieve the signature algorithm specified in the token header.
+     *
+     * @param splitToken The JWT token which is split into [header, payload, signature]
+     * @return whether the signature algorithm
+     * @throws APIManagementException in case of signature algorithm extraction failure
+     */
+    public static String getSignatureAlgorithm(String[] splitToken) throws APIManagementException {
+
+        String signatureAlgorithm;
+        org.json.JSONObject decodedHeader;
+        try {
+            decodedHeader = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().decode(splitToken[0])));
+            signatureAlgorithm = decodedHeader.getString(APIConstants.JwtTokenConstants.SIGNATURE_ALGORITHM);
+            if (APIConstants.SIGNATURE_ALGORITHM_RS256.equals(signatureAlgorithm)) {
+                signatureAlgorithm = APIConstants.SIGNATURE_ALGORITHM_SHA256_WITH_RSA;
+            }
+            return signatureAlgorithm;
+        } catch (JSONException | IllegalArgumentException e) {
+            String msg = "Unable to find signature algorithm in the token";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Retrieve the signature algorithm specified in the token header.
+     *
+     * @param splitToken The JWT token which is split into [header, payload, signature]
+     * @return whether the signature algorithm
+     * @throws APIManagementException in case of signature algorithm extraction failure
+     */
+    public static String getSigningAlias(String[] splitToken) throws APIManagementException {
+
+        String signCertAlias;
+        org.json.JSONObject decodedHeader;
+        try {
+            decodedHeader = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().decode(splitToken[0])));
+            signCertAlias = decodedHeader.getString(APIConstants.JwtTokenConstants.JWT_KID);
+            return signCertAlias;
+        } catch (JSONException | IllegalArgumentException e) {
+            String msg = "Unable to signing certificate alias in the token";
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    public static Certificate getCertificateFromParentTrustStore(String certAlias) throws APIManagementException {
+
+        Certificate publicCert = null;
+        //Read the client-truststore.jks into a KeyStore
+        try {
+            KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
+            if (trustStore != null) {
+                // Read public certificate from trust store
+                publicCert = trustStore.getCertificate(certAlias);
+            }
+        } catch (KeyStoreException e) {
+            String msg = "Error in retrieving public certificate from the trust store with alias : " + certAlias;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return publicCert;
+    }
+
+    /**
+     * Verify the JWT token signature.
+     * This method only used for API Key revocation which contains some duplicate logic in GatewayUtils class.
+     *
+     * @param splitToken The JWT token which is split into [header, payload, signature]
+     * @return whether the signature is verified or not
+     */
+    public static boolean verifyTokenSignature(String[] splitToken, Certificate certificate,
+                                               String signatureAlgorithm) throws APIManagementException {
+        // Retrieve public key from the certificate
+        PublicKey publicKey = certificate.getPublicKey();
+        try {
+            // Verify token signature
+            Signature signatureInstance = Signature.getInstance(signatureAlgorithm);
+            signatureInstance.initVerify(publicKey);
+            String assertion = splitToken[0] + "." + splitToken[1];
+            signatureInstance.update(assertion.getBytes());
+            byte[] decodedSignature = java.util.Base64.getUrlDecoder().decode(splitToken[2]);
+            return signatureInstance.verify(decodedSignature);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | IllegalArgumentException e) {
+            String msg = "Error while verifying JWT signature with signature algorithm " + signatureAlgorithm;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Get expiry time of a given jwt token. This method should be called only after validating whether the token is
+     * JWT via isValidJWT method.
+     *
+     * @param token jwt token.
+     * @return the expiry time.
+     */
+    public static Long getExpiryOfJWT(String token) {
+
+        String[] jwtParts = token.split("\\.");
+        org.json.JSONObject jwtPayload = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().
+                decode(jwtParts[1])));
+        return jwtPayload.getLong("exp"); // extract expiry time and return
+    }
+
+    /**
+     * Check whether given application , group combination exists
+     *
+     * @param subscriber      subscriber name
+     * @param applicationName application name
+     * @param groupId         group of the subscriber
+     * @return true if application group combination exist
+     * @throws APIManagementException if failed to get applications for given subscriber
+     */
+    public static boolean isApplicationGroupCombinationExist(String subscriber, String applicationName, String groupId)
+            throws APIManagementException {
+        return ApiMgtDAO.getInstance().isApplicationGroupCombinationExists(applicationName, subscriber, groupId);
+    }
+
+    /**
+     * Used to check whether Provisioning Out-of-Band OAuth Clients feature is enabled
+     *
+     * @return true if feature is enabled
+     */
+    public static boolean isMapExistingAuthAppsEnabled() {
+
+        ConfigurationHolder config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        String mappingEnabled = config.getFirstProperty(APIConstants.API_STORE_MAP_EXISTING_AUTH_APPS);
+        if (mappingEnabled == null) {
+            return false;
+        }
+        return Boolean.parseBoolean(mappingEnabled);
+    }
+
+    /**
+     * Returns the configuration of the Identity Provider. This is used for login/logout operation of API Publisher and
+     * API Developer Portal. By default, this is not defined in the configuration hence this returns null. In that
+     * case, local server will be used as the IDP.
+     *
+     * @return configuration of the Identity Provider from the api-manager configuration
+     */
+    public static IDPConfiguration getIdentityProviderConfig() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getIdentityProviderConfig();
+    }
+
+    public static KeyManagerConnectorConfiguration getKeyManagerConnectorConfigurationsByConnectorType(String type) {
+        return ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfiguration(type);
+    }
 }
