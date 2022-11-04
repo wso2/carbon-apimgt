@@ -156,8 +156,7 @@ public class KeyManagerMappingUtil {
 
         List<KeyManagerApplicationConfigurationDTO> keyManagerApplicationConfigurationDTOS = new ArrayList<>();
         KeyManagerConnectorConfiguration keyManagerConnectorConfiguration =
-                APIUtil.getKeyManagerConnectorConfigurationsByConnectorType(
-                type);
+                APIUtil.getKeyManagerConnectorConfigurationsByConnectorType(type);
         if (keyManagerConnectorConfiguration != null &&
                 keyManagerConnectorConfiguration.getApplicationConfigurations() != null) {
             for (ConfigurationDto configurationDto : keyManagerConnectorConfiguration.getApplicationConfigurations()) {

@@ -1,30 +1,42 @@
 package org.wso2.apk.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.apk.apimgt.rest.api.store.v1.dto.APIInfoDTO;
+import org.wso2.apk.apimgt.rest.api.store.v1.dto.PaginationDTO;
+import javax.validation.constraints.*;
+
+
+import io.swagger.annotations.*;
 import java.util.Objects;
+
+import javax.xml.bind.annotation.*;
+import org.wso2.apk.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
 
 
 public class APIListDTO   {
-
-  private Integer count = null;
-  private List<APIInfoDTO> list = new ArrayList<APIInfoDTO>();
-  private PaginationDTO pagination = null;
+  
+    private Integer count = null;
+    private List<APIInfoDTO> list = new ArrayList<APIInfoDTO>();
+    private PaginationDTO pagination = null;
 
   /**
-   * Number of APIs returned.
+   * Number of APIs returned. 
    **/
   public APIListDTO count(Integer count) {
     this.count = count;
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "1", value = "Number of APIs returned. ")
   @JsonProperty("count")
   public Integer getCount() {
@@ -41,9 +53,9 @@ public class APIListDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "")
-  @Valid
+      @Valid
   @JsonProperty("list")
   public List<APIInfoDTO> getList() {
     return list;
@@ -59,9 +71,9 @@ public class APIListDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "")
-  @Valid
+      @Valid
   @JsonProperty("pagination")
   public PaginationDTO getPagination() {
     return pagination;
@@ -81,8 +93,8 @@ public class APIListDTO   {
     }
     APIListDTO apIList = (APIListDTO) o;
     return Objects.equals(count, apIList.count) &&
-            Objects.equals(list, apIList.list) &&
-            Objects.equals(pagination, apIList.pagination);
+        Objects.equals(list, apIList.list) &&
+        Objects.equals(pagination, apIList.pagination);
   }
 
   @Override
@@ -94,7 +106,7 @@ public class APIListDTO   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIListDTO {\n");
-
+    
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
     sb.append("    pagination: ").append(toIndentedString(pagination)).append("\n");
