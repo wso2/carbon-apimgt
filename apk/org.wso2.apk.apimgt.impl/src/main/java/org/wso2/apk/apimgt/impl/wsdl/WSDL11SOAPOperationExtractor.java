@@ -52,7 +52,6 @@ import org.wso2.apk.apimgt.impl.wsdl.model.WSDLSOAPOperation;
 import org.wso2.apk.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
 import org.wso2.apk.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.apk.apimgt.impl.wsdl.util.SwaggerFieldsExcludeStrategy;
-import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.wsdl.Binding;
 import javax.wsdl.BindingOperation;
@@ -1267,9 +1266,11 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
      * @return Collection of xsd files
      */
     private Collection<File> getStandardBaseXSDs() {
-        String baseStandardXSDLocation =
-                CarbonUtils.getCarbonHome() + File.separator + SOAPToRESTConstants.REPOSITORY + File.separator +
-                        SOAPToRESTConstants.REP_RESOURCES + File.separator + SOAPToRESTConstants.XSDS;
+        //TODO: get from config
+        String baseStandardXSDLocation = null;
+//        String baseStandardXSDLocation =
+//                CarbonUtils.getCarbonHome() + File.separator + SOAPToRESTConstants.REPOSITORY + File.separator +
+//                        SOAPToRESTConstants.REP_RESOURCES + File.separator + SOAPToRESTConstants.XSDS;
         File folderToImport = new File(baseStandardXSDLocation);
         Collection<File> foundXSDFiles = APIFileUtil.searchFilesWithMatchingExtension(folderToImport,
                 SOAPToRESTConstants.XSD, false);

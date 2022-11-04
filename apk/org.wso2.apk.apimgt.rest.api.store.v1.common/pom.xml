@@ -21,9 +21,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon.apimgt</groupId>
+        <groupId>org.wso2.apk</groupId>
         <artifactId>apk</artifactId>
-        <version>9.26.10-SNAPSHOT</version>
+        <version>0.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -36,98 +36,29 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.apk.apimgt.api</artifactId>
-            <scope>provided</scope>
-            <version>9.26.10-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.apk.apimgt.rest.api.util</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.apk.apimgt.rest.api.common</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.apk</groupId>
             <artifactId>org.wso2.apk.apimgt.impl</artifactId>
-            <scope>provided</scope>
+            <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito2</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.uri.template</groupId>
-            <artifactId>wso2-uri-templates</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.com.amazonaws</groupId>
-            <artifactId>awslambda</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jacoco</groupId>
-            <artifactId>org.jacoco.agent</artifactId>
-            <classifier>runtime</classifier>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.solace</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.apk</groupId>
             <artifactId>org.wso2.apk.apimgt.api</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.apk</groupId>
             <artifactId>org.wso2.apk.apimgt.rest.api.util</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.apk</groupId>
+            <artifactId>org.wso2.apk.apimgt.rest.api.common</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.apk</groupId>
             <artifactId>org.wso2.apk.apimgt.user</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.apk.apimgt.rest.api.util</artifactId>
-            <version>9.26.10-SNAPSHOT</version>
-            <scope>provided</scope>
+            <version>0.1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>
@@ -157,7 +88,9 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>../org.wso2.apk.apimgt.rest.api.util/src/main/resources/devportal-api.yaml</inputSpec>
+                            <inputSpec>
+                                ${project.basedir}/src/main/resources/devportal-api.yaml
+                            </inputSpec>
                             <language>jaxrs-cxf-cdi</language>
                             <configOptions>
                                 <apiPackage>org.wso2.apk.apimgt.rest.api.store.v1</apiPackage>
@@ -170,24 +103,13 @@
                             <generateApis>false</generateApis>
                             <output>.</output>
                             <templateDirectory>
-                                ../org.wso2.apk.apimgt.rest.api.util/src/main/resources/server-templates
+                                ${project.parent.basedir}/org.wso2.apk.apimgt.rest.api.util/src/main/resources/server-templates
                             </templateDirectory>
                             <skipOverwrite>true</skipOverwrite>
                             <modelNameSuffix>DTO</modelNameSuffix>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-junit47</artifactId>
-                        <version>${maven.surefire.plugin.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -209,8 +131,11 @@
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>
-                            org.wso2.apk.apimgt.rest.api.store.v1.dto.*;version="${carbon.apimgt.version}",
-                            org.wso2.apk.apimgt.rest.api.store.v1.common.mappings.*;version="${carbon.apimgt.version}"
+                            org.wso2.apk.apimgt.rest.api.store.v1.dto.*;version="${apk.apimgt.version}",
+                            org.wso2.apk.apimgt.rest.api.store.v1.common.impl.*;version="${apk.apimgt.version}",
+                            org.wso2.apk.apimgt.rest.api.store.v1.common.mappings.*;version="${apk.apimgt.version}",
+                            org.wso2.apk.apimgt.rest.api.store.v1.common.models.*;version="${apk.apimgt.version}"
+                            org.wso2.apk.apimgt.rest.api.store.v1.common.utils.*;version="${apk.apimgt.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>
@@ -223,14 +148,6 @@
                         <exclude>*</exclude>
                         <exclude>org/wso2/carbon/apimgt/rest/api/store/v1/dto/**/*</exclude>
                     </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>8</source>
-                    <target>8</target>
                 </configuration>
             </plugin>
         </plugins>

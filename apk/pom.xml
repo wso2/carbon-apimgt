@@ -38,7 +38,7 @@
         <module>org.wso2.apk.apimgt.impl</module>
         <module>org.wso2.apk.apimgt.rest.api.admin.v1.common</module>
 <!--        <module>org.wso2.apk.apimgt.rest.api.backoffice.v1.common</module>-->
-<!--        <module>org.wso2.apk.apimgt.rest.api.store.v1.common</module>-->
+        <module>org.wso2.apk.apimgt.rest.api.store.v1.common</module>
         <module>org.wso2.apk.apimgt.rest.api.common</module>
         <module>org.wso2.apk.apimgt.rest.api.util</module>
         <module>org.wso2.apk.apimgt.init</module>
@@ -699,6 +699,11 @@
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-slf4j-impl</artifactId>
                 <version>${log4j2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.woden.wso2</groupId>
+                <artifactId>woden</artifactId>
+                <version>${apache.woden.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.poi.wso2</groupId>

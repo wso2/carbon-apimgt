@@ -18,7 +18,6 @@
 
 package org.wso2.apk.apimgt.impl;
 
-import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -1721,62 +1720,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         workflowDTO.setProperties("userName", appRegDTO.getUserName());
         workflowDTO.setProperties("applicationTier", application.getTier());
 
-        apiMgtDAO.createApplicationRegistrationEntry(appRegDTO,false);
-    }
-
-
-    private static List<Scope> getAllowedScopesForUserApplication(String username,
-                                                                  Set<Scope> reqScopeSet) {
-        String[] userRoles = null;
-        String preservedCaseSensitiveValue = System.getProperty(PRESERVED_CASE_SENSITIVE_VARIABLE);
-        boolean preservedCaseSensitive = JavaUtils.isTrueExplicitly(preservedCaseSensitiveValue);
-
-        List<Scope> authorizedScopes = new ArrayList<Scope>();
-        try {
-            int tenantId = APIUtil.getTenantId(APIUtil.getTenantDomain(username));
-            userRoles = APIUtil.getListOfRoles(APIUtil.getTenantAwareUsername(username));
-        } catch (APIManagementException e) {
-            log.error("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
-        }
-
-        List<String> userRoleList;
-        if (userRoles != null) {
-            if (preservedCaseSensitive) {
-                userRoleList = Arrays.asList(userRoles);
-            } else {
-                userRoleList = new ArrayList<String>();
-                for (String userRole : userRoles) {
-                    userRoleList.add(userRole.toLowerCase());
-                }
-            }
-        } else {
-            userRoleList = Collections.emptyList();
-        }
-
-        //Iterate the requested scopes list.
-        for (Scope scope : reqScopeSet) {
-            //Get the set of roles associated with the requested scope.
-            String roles = scope.getRoles();
-
-            //If the scope has been defined in the context of the App and if roles have been defined for the scope
-            if (roles != null && roles.length() != 0) {
-                List<String> roleList = new ArrayList<String>();
-                for (String scopeRole : roles.split(",")) {
-                    if (preservedCaseSensitive) {
-                        roleList.add(scopeRole.trim());
-                    } else {
-                        roleList.add(scopeRole.trim().toLowerCase());
-                    }
-                }
-                //Check if user has at least one of the roles associated with the scope
-                roleList.retainAll(userRoleList);
-                if (!roleList.isEmpty()) {
-                    authorizedScopes.add(scope);
-                }
-            }
-        }
-
-        return authorizedScopes;
+        apiMgtDAO.createApplicationRegistrationEntry(appRegDTO, false);
     }
 
     /**

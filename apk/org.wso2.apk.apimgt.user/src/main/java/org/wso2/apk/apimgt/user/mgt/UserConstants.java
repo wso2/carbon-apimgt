@@ -27,4 +27,7 @@ public class UserConstants {
     public static final String INTERNAL_DOMAIN = "Internal";
     public static final String PROP_ADMIN_USERNAME = "admin.username";
     public static final String PROP_ADMIN_PASSWORD = "admin.password";
+    public static final String PRIMARY_DEFAULT_DOMAIN_NAME = "PRIMARY";
+    public static final String DOMAIN_SEPARATOR = "";
+
 }

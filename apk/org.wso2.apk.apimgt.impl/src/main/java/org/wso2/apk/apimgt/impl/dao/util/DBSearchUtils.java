@@ -18,7 +18,6 @@ package org.wso2.apk.apimgt.impl.dao.util;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.impl.dao.dto.UserContext;
 import org.wso2.apk.apimgt.impl.dao.exceptions.APIPersistenceException;
@@ -280,7 +279,7 @@ public class DBSearchUtils {
         if (userRoles != null) {
             for (String userRole : userRoles) {
                 rolesQuery.append(" OR ");
-                rolesQuery.append(ClientUtils.escapeQueryChars(sanitizeUserRole(userRole.toLowerCase())));
+//                rolesQuery.append(ClientUtils.escapeQueryChars(sanitizeUserRole(userRole.toLowerCase())));
             }
         }
         rolesQuery.append(")");

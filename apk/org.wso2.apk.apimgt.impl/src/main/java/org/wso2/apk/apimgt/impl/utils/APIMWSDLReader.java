@@ -21,13 +21,9 @@ import com.ibm.wsdl.extensions.http.HTTPAddressImpl;
 import com.ibm.wsdl.extensions.soap.SOAPAddressImpl;
 import com.ibm.wsdl.extensions.soap12.SOAP12AddressImpl;
 import com.ibm.wsdl.xml.WSDLReaderImpl;
-import org.apache.axiom.om.OMElement;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.woden.WSDLSource;
-import org.apache.woden.wsdl20.Endpoint;
-import org.apache.woden.wsdl20.xml.EndpointElement;
 import org.apache.xerces.impl.Constants;
 import org.apache.xerces.util.SecurityManager;
 import org.w3c.dom.Document;
@@ -411,59 +407,6 @@ public class APIMWSDLReader {
     }
 
     /**
-	 * Read the wsdl and clean the actual service endpoint instead of that set
-	 * the gateway endpoint.
-	 *
-	 * @return {@link OMElement} - the OMElemnt of the new WSDL content
-	 * @throws APIManagementException
-	 *
-	 */
-    @Deprecated
-	public OMElement readAndCleanWsdl(API api) throws APIManagementException {
-
-		try {
-			Definition wsdlDefinition = readWSDLFile();
-
-			setServiceDefinition(wsdlDefinition, api);
-
-			WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
-
-			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-			writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
-
-			ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream( byteArrayOutputStream.toByteArray());
-
-			return APIUtil.buildOMElement(byteArrayInputStream);
-
-
-		} catch (Exception e) {
-			String msg = " Error occurs when change the addres URL of the WSDL";
-			log.error(msg);
-			throw new APIManagementException(msg, e);
-		}
-	}
-
-	@Deprecated
-    public OMElement readAndCleanWsdl2(API api) throws APIManagementException {
-
-        try {
-            org.apache.woden.wsdl20.Description wsdlDefinition = readWSDL2File();
-            setServiceDefinitionForWSDL2(wsdlDefinition, api);
-            org.apache.woden.WSDLWriter writer = org.apache.woden.WSDLFactory.newInstance().newWSDLWriter();
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            writer.writeWSDL(wsdlDefinition.toElement(), byteArrayOutputStream);
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream( byteArrayOutputStream.toByteArray());
-            return APIUtil.buildOMElement(byteArrayInputStream);
-        } catch (Exception e) {
-            String msg = " Error occurs when change the addres URL of the WSDL";
-            log.error(msg);
-            throw new APIManagementException(msg, e);
-        }
-
-    }
-
-    /**
      * Gets WSDL definition as a byte array
      *
      * @return converted WSDL definition as byte array
@@ -510,169 +453,6 @@ public class APIMWSDLReader {
         }
     }
 
-//    /**
-//     * Validate the base URI of the WSDL reader
-//     *
-//     * @throws APIManagementException When error occurred while parsing the content from the URL
-//     */
-//    @Deprecated
-//    public void validateBaseURI() throws APIManagementException {
-//        if (baseURI.startsWith(APIConstants.WSDL_REGISTRY_LOCATION_PREFIX)) {
-//            baseURI = APIUtil.getServerURL() + baseURI;
-//        }
-//
-//        boolean isWsdl20 = false;
-//        boolean isWsdl11 = false;
-//
-//        BufferedReader in = null;
-//        try {
-//            String inputLine;
-//            StringBuilder urlContent = new StringBuilder();
-//            URL wsdl = new URL(baseURI);
-//            in = new BufferedReader(new InputStreamReader(wsdl.openStream(), Charset.defaultCharset()));
-//            while ((inputLine = in.readLine()) != null) {
-//                urlContent.append(inputLine);
-//                isWsdl20 = urlContent.indexOf(WSDL20_NAMESPACE) > 0;
-//                isWsdl11 = urlContent.indexOf(WSDL11_NAMESPACE) > 0;
-//            }
-//        } catch (IOException e) {
-//            throw new APIManagementException("Error while reading WSDL from base URI " + baseURI, e);
-//        } finally {
-//            IOUtils.closeQuietly(in);
-//        }
-//
-//        try {
-//            if (isWsdl11) {
-//                readAndValidateWSDL11();
-//            } else if (isWsdl20) {
-//                readAndValidateWSDL20();
-//            } else {
-//                throw new APIManagementException("URL is not in format of wsdl1.1 or wsdl2.0");
-//            }
-//        } catch (WSDLException e) {
-//            throw new APIManagementException("Error while parsing WSDL content", e);
-//        } catch (org.apache.woden.WSDLException e) {
-//            throw new APIManagementException("Error while parsing WSDL content", e);
-//        }
-//    }
-
-    /**
-     * Given a URL, this method checks if the underlying document is a WSDL2
-     *
-     * @return true if the underlying document is a WSDL2
-     * @throws APIManagementException if error occurred while checking whether baseURI is WSDL2.0
-     */
-    @Deprecated
-    public boolean isWSDL2BaseURI() throws APIManagementException {
-        URL wsdl;
-        boolean isWsdl2 = false;
-        BufferedReader in = null;
-        try {
-            wsdl = new URL(baseURI);
-            in = new BufferedReader(new InputStreamReader(wsdl.openStream(), Charset.defaultCharset()));
-
-            String inputLine;
-            StringBuilder urlContent = new StringBuilder();
-            while ((inputLine = in.readLine()) != null) {
-                urlContent.append(inputLine);
-                isWsdl2 = urlContent.indexOf(WSDL20_NAMESPACE) > 0;
-            }
-        } catch (MalformedURLException e) {
-            throw new APIManagementException("Malformed URL encountered", e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error Reading Input from Stream from " + baseURI, e);
-        } finally {
-            IOUtils.closeQuietly(in);
-        }
-
-        try {
-            if (isWsdl2) {
-                readAndValidateWSDL20();
-            }
-        } catch (org.apache.woden.WSDLException e) {
-            throw new APIManagementException("Error while reading WSDL Document from " + baseURI, e);
-        }
-        return isWsdl2;
-    }
-
-    /**
-     * Update WSDL 1.0 service definitions saved in registry
-     *
-     * @param wsdl 	byte array of registry content
-	 * @param api 	API object
-	 * @return 		the OMElemnt of the new WSDL content
-	 * @throws APIManagementException
-     */
-	public OMElement updateWSDL(byte[] wsdl, API api) throws APIManagementException {
-
-		try {
-			// Generate wsdl document from registry data
-			WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
-			// switch off the verbose mode
-			wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
-			wsdlReader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
-
-			if (wsdlReader instanceof WSDLReaderImpl) {
-			    ((WSDLReaderImpl) wsdlReader).setIgnoreSchemaContent(true);
-			}
-
-			Definition wsdlDefinition = wsdlReader.readWSDL(null, getSecuredParsedDocumentFromContent(wsdl));
-
-			// Update transports
-			setServiceDefinition(wsdlDefinition, api);
-
-			WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
-			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
-			ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream( byteArrayOutputStream.toByteArray());
-			return APIUtil.buildOMElement(byteArrayInputStream);
-
-		} catch (Exception e) {
-			String msg = " Error occurs when updating WSDL ";
-			log.error(msg);
-			throw new APIManagementException(msg, e);
-		}
-	}
-
-	/**
-	 * Update WSDL 2.0 service definitions saved in registry
-	 *
-	 * @param wsdl 	byte array of wsdl definition saved in registry
-	 * @param api 	API object
-	 * @return 		the OMElemnt of the new WSDL content
-	 * @throws APIManagementException
-	 */
-	public OMElement updateWSDL2(byte[] wsdl, API api) throws APIManagementException {
-
-		try {
-			// Generate wsdl document from registry data
-			DocumentBuilderFactory factory = getSecuredDocumentBuilder();
-			DocumentBuilder builder = factory.newDocumentBuilder();
-			org.apache.woden.WSDLFactory wsdlFactory = org.apache.woden.WSDLFactory.newInstance();
-			org.apache.woden.WSDLReader reader = wsdlFactory.newWSDLReader();
-			reader.setFeature(org.apache.woden.WSDLReader.FEATURE_VALIDATION, false);
-			Document dom = builder.parse(new ByteArrayInputStream(wsdl));
-			Element domElement = dom.getDocumentElement();
-			WSDLSource wsdlSource = reader.createWSDLSource();
-			wsdlSource.setSource(domElement);
-			org.apache.woden.wsdl20.Description wsdlDefinition = reader.readWSDL(wsdlSource);
-
-			// Update transports
-			setServiceDefinitionForWSDL2(wsdlDefinition, api);
-
-			org.apache.woden.WSDLWriter writer = org.apache.woden.WSDLFactory.newInstance().newWSDLWriter();
-			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			writer.writeWSDL(wsdlDefinition.toElement(), byteArrayOutputStream);
-			ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-			return APIUtil.buildOMElement(byteArrayInputStream);
-
-		} catch (Exception e) {
-			String msg = " Error occurs when updating WSDL ";
-			log.error(msg, e);
-			throw new APIManagementException(msg, e);
-		}
-	}
-
     /**
      * Handles the provided exception occurred during validation and return a validation response or the exception.
      *
@@ -711,58 +491,6 @@ public class APIMWSDLReader {
         securityManager.setEntityExpansionLimit(ENTITY_EXPANSION_LIMIT);
         dbf.setAttribute(Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY, securityManager);
         return dbf;
-    }
-
-    @Deprecated
-    private org.apache.woden.wsdl20.Description readWSDL2File() throws APIManagementException, WSDLException {
-        WSDLReader reader = getWsdlFactoryInstance().newWSDLReader();
-        reader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
-        reader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
-        try {
-            org.apache.woden.WSDLFactory wFactory = org.apache.woden.WSDLFactory.newInstance();
-            org.apache.woden.WSDLReader wReader = wFactory.newWSDLReader();
-            wReader.setFeature(org.apache.woden.WSDLReader.FEATURE_VALIDATION, true);
-            Document document = getSecuredParsedDocumentFromURL(baseURI);
-            Element domElement = document.getDocumentElement();
-            WSDLSource wsdlSource = wReader.createWSDLSource();
-            wsdlSource.setSource(domElement);
-            return wReader.readWSDL(wsdlSource);
-        } catch (org.apache.woden.WSDLException e) {
-            String error = "Error occurred reading wsdl document.";
-            log.error(error, e);
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("Reading  the WSDL. Base uri is " + baseURI);
-        }
-        return null;
-    }
-
-    private void setServiceDefinitionForWSDL2(org.apache.woden.wsdl20.Description definition, API api)
-            throws APIManagementException {
-        org.apache.woden.wsdl20.Service[] serviceMap = definition.getServices();
-        String organization = api.getOrganization();
-        // URL addressURI;
-        try {
-            for (org.apache.woden.wsdl20.Service svc : serviceMap) {
-                Endpoint[] portMap = svc.getEndpoints();
-                for (Endpoint endpoint : portMap) {
-                    EndpointElement element = endpoint.toElement();
-                    // addressURI = endpoint.getAddress().toURL();
-                    // if (addressURI == null) {
-                    //    break;
-                    // } else {
-                    String endpointTransport = determineURLTransport(endpoint.getAddress().getScheme(),
-                                                                     api.getTransports());
-                    setAddressUrl(element, new URI(APIUtil.getGatewayendpoint(endpointTransport, organization) +
-                                                   api.getContext() + '/' + api.getId().getVersion()));
-                    //}
-                }
-            }
-        } catch (Exception e) {
-            String errorMsg = "Error occurred while getting the wsdl address location";
-            log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e);
-        }
     }
 
     /**
@@ -845,21 +573,6 @@ public class APIMWSDLReader {
         } finally {
             IOUtils.closeQuietly(inputStream);
         }
-    }
-
-    /**
-     * Reads baseURI and validate if it is WSDL 2.0 resource.
-     *
-     * @throws org.apache.woden.WSDLException When error occurred while parsing/validating base URI
-     * @throws APIManagementException When error occurred while parsing/validating base URI
-     */
-    private void readAndValidateWSDL20() throws org.apache.woden.WSDLException, APIManagementException {
-        org.apache.woden.WSDLReader wsdlReader20 = org.apache.woden.WSDLFactory.newInstance().newWSDLReader();
-        Document document = getSecuredParsedDocumentFromURL(baseURI);
-        Element domElement = document.getDocumentElement();
-        WSDLSource wsdlSource = wsdlReader20.createWSDLSource();
-        wsdlSource.setSource(domElement);
-        wsdlReader20.readWSDL(wsdlSource);
     }
 
     /**
@@ -1066,10 +779,6 @@ public class APIMWSDLReader {
             throw new APIManagementException("WSDL address element type is not supported for WSDL element type:" +
                     exElement.getElementType().toString());
         }
-    }
-
-	private void setAddressUrl(EndpointElement endpoint,URI uri) throws APIManagementException {
-        endpoint.setAddress(uri);
     }
 
     public static String toString(ByteArrayInputStream is) {

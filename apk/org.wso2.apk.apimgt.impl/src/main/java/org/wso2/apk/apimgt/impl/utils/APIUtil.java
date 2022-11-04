@@ -26,10 +26,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.om.util.AXIOMUtil;
-import org.apache.axis2.Constants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -66,13 +62,9 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
-import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.DeprecatedRuntimeConstants;
-import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.xerces.util.SecurityManager;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
-import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -83,16 +75,10 @@ import org.wso2.apk.apimgt.api.ErrorHandler;
 import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.LoginPostExecutor;
 import org.wso2.apk.apimgt.api.NewPostLoginExecutor;
-import org.wso2.apk.apimgt.api.PasswordResolver;
-import org.wso2.apk.apimgt.api.doc.model.APIDefinition;
-import org.wso2.apk.apimgt.api.doc.model.APIResource;
-import org.wso2.apk.apimgt.api.doc.model.Operation;
-import org.wso2.apk.apimgt.api.doc.model.Parameter;
 import org.wso2.apk.apimgt.api.model.API;
 import org.wso2.apk.apimgt.api.model.APICategory;
 import org.wso2.apk.apimgt.api.model.APIIdentifier;
 import org.wso2.apk.apimgt.api.model.APIProductIdentifier;
-import org.wso2.apk.apimgt.api.model.APIPublisher;
 import org.wso2.apk.apimgt.api.model.APIRevision;
 import org.wso2.apk.apimgt.api.model.APIStatus;
 import org.wso2.apk.apimgt.api.model.APIStore;
@@ -108,7 +94,6 @@ import org.wso2.apk.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.apk.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.apk.apimgt.api.model.Scope;
 import org.wso2.apk.apimgt.api.model.Tier;
-import org.wso2.apk.apimgt.api.model.URITemplate;
 import org.wso2.apk.apimgt.api.model.VHost;
 import org.wso2.apk.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.apk.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -119,14 +104,12 @@ import org.wso2.apk.apimgt.api.model.policy.Policy;
 import org.wso2.apk.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.apk.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.apk.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.apk.apimgt.impl.APIAdminImpl;
 import org.wso2.apk.apimgt.impl.APIConstants;
 import org.wso2.apk.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.apk.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.apk.apimgt.impl.ConfigurationHolder;
 import org.wso2.apk.apimgt.impl.ExternalEnvironment;
 import org.wso2.apk.apimgt.impl.IDPConfiguration;
-import org.wso2.apk.apimgt.impl.PasswordResolverFactory;
 import org.wso2.apk.apimgt.impl.config.APIMConfigService;
 import org.wso2.apk.apimgt.impl.config.APIMConfigServiceImpl;
 import org.wso2.apk.apimgt.impl.dao.ApiMgtDAO;
@@ -151,6 +134,10 @@ import org.wso2.apk.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.apk.apimgt.user.exceptions.UserException;
 import org.wso2.apk.apimgt.user.mgt.internal.UserManagerHolder;
 
+import javax.cache.Cache;
+import javax.net.ssl.SSLContext;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -188,21 +175,9 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.cache.Cache;
-//import javax.cache.CacheConfiguration;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.net.ssl.SSLContext;
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -3845,12 +3820,6 @@ public final class APIUtil {
         return returnEnvironments;
     }
 
-    public static void initializeVelocityContext(VelocityEngine velocityEngine){
-        velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
-        velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");
-        velocityEngine.setProperty("runtime.conversion.handler", "none");
-    }
-
     /**
      * Read the GateWay Endpoint from the APIConfiguration. If multiple Gateway
      * environments defined, get the gateway endpoint according to the environment type
@@ -3917,31 +3886,6 @@ public final class APIUtil {
             gatewayURL = gatewayURLs;
         }
         return gatewayURL;
-    }
-
-    /**
-     * Build OMElement from inputstream
-     *
-     * @param inputStream
-     * @return
-     * @throws Exception
-     */
-    public static OMElement buildOMElement(InputStream inputStream) throws Exception {
-
-        XMLStreamReader parser;
-        StAXOMBuilder builder;
-        try {
-            XMLInputFactory factory = XMLInputFactory.newInstance();
-            factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
-            parser = factory.createXMLStreamReader(inputStream);
-            builder = new StAXOMBuilder(parser);
-        } catch (XMLStreamException e) {
-            String msg = "Error in initializing the parser.";
-            log.error(msg, e);
-            throw new Exception(msg, e);
-        }
-
-        return builder.getDocumentElement();
     }
 
     /**
@@ -4374,5 +4318,9 @@ public final class APIUtil {
     public static IDPConfiguration getIdentityProviderConfig() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getIdentityProviderConfig();
+    }
+
+    public static KeyManagerConnectorConfiguration getKeyManagerConnectorConfigurationsByConnectorType(String type) {
+        return ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfiguration(type);
     }
 }
