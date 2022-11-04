@@ -90,6 +90,7 @@ public abstract class AbstractAPIManager implements APIManager {
     // Property to indicate whether access control restriction feature is enabled.
     protected boolean isAccessControlRestrictionEnabled = false;
     APIPersistence apiPersistenceInstance;
+    String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
 
     public AbstractAPIManager() throws APIManagementException {
 
@@ -1064,11 +1065,16 @@ public abstract class AbstractAPIManager implements APIManager {
 
     protected void populateAPIInformation(String uuid, String organization, API api)
             throws APIManagementException, OASPersistenceException, ParseException, AsyncSpecPersistenceException {
-        Organization org = new Organization(organization);
         //UUID
         if (api.getUuid() == null) {
             api.setUuid(uuid);
         }
+        if (organization == null) {
+            APIIdentifier identifier = api.getId();
+            String tenantDomain = getTenantDomain(identifier);
+            organization = tenantDomain;
+        }
+        Organization org = new Organization(organization);
         api.setOrganization(organization);
         // environment
         String environmentString = null;
@@ -1205,8 +1211,10 @@ public abstract class AbstractAPIManager implements APIManager {
                 // category array retrieved from artifact has only the category name, therefore we need to fetch
                 // categories
                 // and fill out missing attributes before attaching the list to the api
-                List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfOrganization(organization);
-
+                List<APICategory> allCategories = new ArrayList<>();
+                if (migrationEnabled == null) {
+                    allCategories = APIUtil.getAllAPICategoriesOfOrganization(organization);
+                }
                 // todo-category: optimize this loop with breaks
                 for (String categoryName : categoriesOfAPI) {
                     for (APICategory category : allCategories) {

@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -101,6 +102,7 @@ public class ExportUtils {
     private static final String IN = "in";
     private static final String OUT = "out";
     private static final String SOAPTOREST = "SoapToRest";
+    private static String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
 
     /**
      * Validate name, version and provider before exporting an API/API Product.
@@ -216,6 +218,9 @@ public class ExportUtils {
                 api, currentApiUuid);
         addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
 
+        if (migrationEnabled != null) {
+            addRuntimeSequencesToArchive(archivePath, api);
+        }
         if (!ImportUtils.isAdvertiseOnlyAPI(apiDtoToReturn)) {
             addEndpointCertificatesToArchive(archivePath, apiDtoToReturn, tenantId, exportFormat);
             // Export mTLS authentication related certificates
@@ -676,9 +681,9 @@ public class ExportUtils {
                     }
                 }
             }
-            if (APIUtil.isSequenceDefined(api.getInSequence())
+            if ((APIUtil.isSequenceDefined(api.getInSequence())
                     || APIUtil.isSequenceDefined(api.getOutSequence())
-                    || APIUtil.isSequenceDefined(api.getFaultSequence())) {
+                    || APIUtil.isSequenceDefined(api.getFaultSequence())) && migrationEnabled == null) {
                 api.setInSequence(null);
                 api.setInSequenceMediation(null);
                 api.setOutSequence(null);
@@ -866,7 +871,8 @@ public class ExportUtils {
     public static void addAPIMetaInformationToArchive(String archivePath, APIDTO apiDtoToReturn,
             ExportFormat exportFormat, APIProvider apiProvider, APIIdentifier apiIdentifier, String organization,
             String currentApiUuid) throws APIImportExportException {
-
+        String apiTenantDomain = null;
+        String schemaContent;
         CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.DEFINITIONS_DIRECTORY);
 
         try {
@@ -874,12 +880,21 @@ public class ExportUtils {
             // Therefore swagger export is only required for REST or SOAP based APIs
             String apiType = apiDtoToReturn.getType().toString();
             API api = APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider());
-            api.setOrganization(organization);
+            if (organization != null) {
+                api.setOrganization(organization);
+            } else {
+                apiTenantDomain = getTenantDomain(apiIdentifier);
+                api.setOrganization(apiTenantDomain);
+            }            api.setId(apiIdentifier);
             api.setId(apiIdentifier);
             if (!PublisherCommonUtils.isStreamingAPI(apiDtoToReturn)) {
                 // For Graphql APIs, the graphql schema definition should be exported.
                 if (StringUtils.equals(apiType, APIConstants.APITransportType.GRAPHQL.toString())) {
-                    String schemaContent = apiProvider.getGraphqlSchemaDefinition(currentApiUuid, organization);
+                    if (organization != null) {
+                        schemaContent = apiProvider.getGraphqlSchemaDefinition(currentApiUuid, organization);
+                    } else {
+                        schemaContent = apiProvider.getGraphqlSchemaDefinition(currentApiUuid, apiTenantDomain);
+                    }
                     CommonUtil.writeFile(archivePath + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION,
                             schemaContent);
                     GraphqlComplexityInfo graphqlComplexityInfo = apiProvider
@@ -951,7 +966,11 @@ public class ExportUtils {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             JsonElement apiObj = gson.toJsonTree(apiDtoToReturn);
             JsonObject apiJson = (JsonObject) apiObj;
-            apiJson.addProperty("organizationId", organization);
+            if (organization != null) {
+                apiJson.addProperty("organizationId", organization);
+            } else {
+                apiJson.addProperty("organizationId", apiTenantDomain);
+            }
 
             CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
                     ImportExportConstants.TYPE_API, apiJson);
@@ -1115,6 +1134,86 @@ public class ExportUtils {
             File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, api, userName, exportFormat,
                     isStatusPreserved, preserveDocs, StringUtils.EMPTY, organization);
             CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);
+        }
+    }
+
+    protected static String getTenantDomain(Identifier identifier) {
+
+        return MultitenantUtils.getTenantDomain(
+                APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+    }
+
+    /**
+     * Retrieve available custom sequences and API specific sequences for API export, and store it in the archive
+     * directory.
+     *
+     * @param archivePath File path to export the sequences
+     * @throws APIImportExportException If an error occurs while exporting sequences
+     */
+    public static void addRuntimeSequencesToArchive(String archivePath, API api)
+            throws APIImportExportException, APIManagementException {
+
+        String seqArchivePath = archivePath.concat(File.separator + ImportExportConstants.SEQUENCES_RESOURCE);
+        Mediation inSequenceMediation = api.getInSequenceMediation();
+        Mediation outSequenceMediation = api.getOutSequenceMediation();
+        Mediation faultSequenceMediation = api.getFaultSequenceMediation();
+        if (inSequenceMediation != null || outSequenceMediation != null || faultSequenceMediation != null) {
+            CommonUtil.createDirectory(seqArchivePath);
+            if (inSequenceMediation != null) {
+                String individualSequenceExportPath;
+                if (inSequenceMediation.isGlobal()) {
+                    individualSequenceExportPath =
+                            seqArchivePath + File.separator + ImportExportConstants.IN_SEQUENCE_PREFIX +
+                                    ImportExportConstants.SEQUENCE_LOCATION_POSTFIX;
+                } else {
+                    individualSequenceExportPath =
+                            seqArchivePath + File.separator + ImportExportConstants.IN_SEQUENCE_PREFIX
+                                    + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
+                                    + ImportExportConstants.CUSTOM_TYPE;
+                }
+                if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
+                    CommonUtil.createDirectory(individualSequenceExportPath);
+                }
+                writeSequenceToArchive(inSequenceMediation.getConfig(), individualSequenceExportPath,
+                        inSequenceMediation.getName());
+            }
+            if (outSequenceMediation != null) {
+                String individualSequenceExportPath;
+                if (outSequenceMediation.isGlobal()) {
+                    individualSequenceExportPath =
+                            seqArchivePath + File.separator + ImportExportConstants.OUT_SEQUENCE_PREFIX +
+                                    ImportExportConstants.SEQUENCE_LOCATION_POSTFIX;
+                } else {
+                    individualSequenceExportPath =
+                            seqArchivePath + File.separator + ImportExportConstants.OUT_SEQUENCE_PREFIX
+                                    + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
+                                    + ImportExportConstants.CUSTOM_TYPE;
+                }
+                if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
+                    CommonUtil.createDirectory(individualSequenceExportPath);
+                }
+                writeSequenceToArchive(outSequenceMediation.getConfig(), individualSequenceExportPath,
+                        outSequenceMediation.getName());
+            }
+            if (faultSequenceMediation != null) {
+                String individualSequenceExportPath;
+                if (faultSequenceMediation.isGlobal()) {
+                    individualSequenceExportPath =
+                            seqArchivePath + File.separator + ImportExportConstants.FAULT_SEQUENCE_PREFIX +
+                                    ImportExportConstants.SEQUENCE_LOCATION_POSTFIX;
+                } else {
+                    individualSequenceExportPath =
+                            seqArchivePath + File.separator + ImportExportConstants.FAULT_SEQUENCE_PREFIX
+                                    + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
+                                    + ImportExportConstants.CUSTOM_TYPE;
+
+                }
+                if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
+                    CommonUtil.createDirectory(individualSequenceExportPath);
+                }
+                writeSequenceToArchive(faultSequenceMediation.getConfig(), individualSequenceExportPath,
+                        faultSequenceMediation.getName());
+            }
         }
     }
 }

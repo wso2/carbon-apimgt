@@ -192,12 +192,6 @@ public class APIManagerComponent {
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             configuration.load(filePath);
-            CommonConfigDeployer configDeployer = new CommonConfigDeployer();
-            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
-            TenantLoadMessageSender tenantLoadMessageSender = new TenantLoadMessageSender();
-            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), tenantLoadMessageSender, null);
-            KeyMgtConfigDeployer keyMgtConfigDeployer = new KeyMgtConfigDeployer();
-            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), keyMgtConfigDeployer, null);
 
             //Registering Notifiers
             bundleContext.registerService(Notifier.class.getName(), new SubscriptionsNotifier(), null);
@@ -212,27 +206,38 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(),new ExternalGatewayNotifier(),null);
             bundleContext.registerService(Notifier.class.getName(),new ExternallyDeployedApiNotifier(),null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
+            String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
+            if (migrationEnabled == null) {
+                CommonConfigDeployer configDeployer = new CommonConfigDeployer();
+                bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
+                TenantLoadMessageSender tenantLoadMessageSender = new TenantLoadMessageSender();
+                bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), tenantLoadMessageSender, null);
+                KeyMgtConfigDeployer keyMgtConfigDeployer = new KeyMgtConfigDeployer();
+                bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), keyMgtConfigDeployer, null);
+            }
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             APIMgtDBUtil.initialize();
-            APIMConfigService apimConfigService = new APIMConfigServiceImpl();
-            bundleContext.registerService(APIMConfigService.class.getName(), apimConfigService, null);
-            APIUtil.loadAndSyncTenantConf(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            APIUtil.loadTenantWorkFlowExtensions(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            APIUtil.loadCommonOperationPolicies(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
-            analyticsConfiguration.setAPIManagerConfiguration(configuration);
-            registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
-            KeyManagerConfigurationServiceImpl keyManagerConfigurationService = new KeyManagerConfigurationServiceImpl();
-            registration = componentContext.getBundleContext().registerService(KeyManagerConfigurationService.class,
-                    keyManagerConfigurationService,null);
-            JWTValidationService jwtValidationService = new JWTValidationServiceImpl();
-            registration = componentContext.getBundleContext().registerService(JWTValidationService.class,
-                    jwtValidationService, null);
-            ServiceReferenceHolder.getInstance().setKeyManagerConfigurationService(keyManagerConfigurationService);
-            APIStatusObserverList.getInstance().init(configuration);
-            MonetizationDataHolder.getInstance().init();
+            if (migrationEnabled == null) {
+                APIUtil.loadAndSyncTenantConf(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                APIUtil.loadTenantWorkFlowExtensions(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                APIUtil.loadCommonOperationPolicies(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
+                analyticsConfiguration.setAPIManagerConfiguration(configuration);
+                registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
+                KeyManagerConfigurationServiceImpl keyManagerConfigurationService = new KeyManagerConfigurationServiceImpl();
+                registration = componentContext.getBundleContext().registerService(KeyManagerConfigurationService.class,
+                        keyManagerConfigurationService, null);
+                JWTValidationService jwtValidationService = new JWTValidationServiceImpl();
+                registration = componentContext.getBundleContext().registerService(JWTValidationService.class,
+                        jwtValidationService, null);
+                ServiceReferenceHolder.getInstance().setKeyManagerConfigurationService(keyManagerConfigurationService);
+                APIStatusObserverList.getInstance().init(configuration);
+                MonetizationDataHolder.getInstance().init();
+            }
+            registration = componentContext.getBundleContext()
+                    .registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
             log.debug("Reading Analytics Configuration from file...");
             // This method is called in two places. Mostly by the time activate hits,
             // ServiceDataPublisherAdmin is not activated. Therefore, this same method is run,
@@ -259,31 +264,34 @@ public class APIManagerComponent {
                     contextCache.put(context, Boolean.TRUE);
                 }
             }
-            try {
-                APIUtil.createDefaultRoles(MultitenantConstants.SUPER_TENANT_ID);
-            } catch (APIManagementException e) {
-                log.error("Failed create default roles for tenant " + MultitenantConstants.SUPER_TENANT_ID, e);
-            } catch (Exception e) {
-                // The generic Exception is handled explicitly so execution does not stop during config deployment
-                log.error("Exception when creating default roles for tenant " + MultitenantConstants.SUPER_TENANT_ID, e);
-            }
-            // Adding default throttle policies
-            addDefaultAdvancedThrottlePolicies(tenantDomain,tenantId);
-            // Update all NULL THROTTLING_TIER values to Unlimited
-            boolean isNullThrottlingTierConversionEnabled = APIUtil.updateNullThrottlingTierAtStartup();
-            try {
-                if (isNullThrottlingTierConversionEnabled) {
-                    ApiMgtDAO.getInstance().convertNullThrottlingTiers();
+            if (migrationEnabled == null) {
+                try {
+                    APIUtil.createDefaultRoles(MultitenantConstants.SUPER_TENANT_ID);
+                } catch (APIManagementException e) {
+                    log.error("Failed create default roles for tenant " + MultitenantConstants.SUPER_TENANT_ID, e);
+                } catch (Exception e) {
+                    // The generic Exception is handled explicitly so execution does not stop during config deployment
+                    log.error("Exception when creating default roles for tenant " + MultitenantConstants.SUPER_TENANT_ID, e);
                 }
-            } catch (APIManagementException e) {
-                log.error("Failed to convert NULL THROTTLING_TIERS to Unlimited");
-            }
+                // Adding default throttle policies
+                addDefaultAdvancedThrottlePolicies(tenantDomain, tenantId);
+                // Update all NULL THROTTLING_TIER values to Unlimited
+                boolean isNullThrottlingTierConversionEnabled = APIUtil.updateNullThrottlingTierAtStartup();
+                try {
+                    if (isNullThrottlingTierConversionEnabled) {
+                        ApiMgtDAO.getInstance().convertNullThrottlingTiers();
+                    }
+                } catch (APIManagementException e) {
+                    log.error("Failed to convert NULL THROTTLING_TIERS to Unlimited");
+                }
+
 //            // Initialise KeyManager.
 //            KeyManagerHolder.initializeKeyManager(configuration);
-            // Initialise sql constants
-            SQLConstantManagerFactory.initializeSQLConstantManager();
-            // Initialize PasswordResolver
-            PasswordResolverFactory.initializePasswordResolver();
+                // Initialise sql constants
+                SQLConstantManagerFactory.initializeSQLConstantManager();
+                // Initialize PasswordResolver
+                PasswordResolverFactory.initializePasswordResolver();
+            }
 
             APIUtil.init();
 
