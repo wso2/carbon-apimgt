@@ -8943,7 +8943,7 @@ components:
                 "amznRegion":"access_method==stored?<region>:<empty>",
                 "amznRoleArn":"assume_role==true?<roleArn>:<empty>",
                 "amznRoleSessionName":"assume_role==true?<roleSessionName>:<empty>",
-                "amznRoleRegion":"assume_role==true?<roleRoleRegion>:<empty>"
+                "amznRoleRegion":"assume_role==true?<roleRegion>:<empty>"
               }
           example:
             endpoint_type: http
