@@ -210,7 +210,15 @@ public class API implements Serializable {
      * Property to hold revision id
      */
     private int revisionId;
-    
+
+    private String revisionName;
+
+    private String revisionDescription;
+
+    private String revisionCreatedTime;
+
+    private List<APIDeploymentInfo> deploymentInfoList;
+
     private String audience;
 
     public String getAudience() {
@@ -1333,5 +1341,45 @@ public class API implements Serializable {
 
     public void setAsyncTransportProtocols(String asyncTransportProtocols) {
         this.asyncTransportProtocols = asyncTransportProtocols;
+    }
+
+    public String getRevisionName() {
+
+        return revisionName;
+    }
+
+    public void setRevisionName(String revisionName) {
+
+        this.revisionName = revisionName;
+    }
+
+    public String getRevisionDescription() {
+
+        return revisionDescription;
+    }
+
+    public void setRevisionDescription(String revisionDescription) {
+
+        this.revisionDescription = revisionDescription;
+    }
+
+    public String getRevisionCreatedTime() {
+
+        return revisionCreatedTime;
+    }
+
+    public void setRevisionCreatedTime(String revisionCreatedTime) {
+
+        this.revisionCreatedTime = revisionCreatedTime;
+    }
+
+    public List<APIDeploymentInfo> getDeploymentInfoList() {
+
+        return deploymentInfoList;
+    }
+
+    public void setDeploymentInfoList(List<APIDeploymentInfo> deploymentInfoList) {
+
+        this.deploymentInfoList = deploymentInfoList;
     }
 }
