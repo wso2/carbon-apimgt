@@ -38,29 +38,29 @@ public class MeApiCommonImpl {
     private MeApiCommonImpl() {
 
     }
-
-    /**
-     * @param roleId Base64 URL encoded form of role name -Base64URLEncode{user-store-name/role-name}
-     * @throws APIManagementException when UserStoreException is caught
-     */
-    public static void validateUserRole(String roleId) throws APIManagementException {
-
-        if (roleId == null) {
-            throw new APIManagementException(ExceptionCodes.ROLE_ID_EMPTY);
-        }
-        String userName = RestApiCommonUtil.getLoggedInUsername();
-
-        String roleName = new String(Base64.getUrlDecoder().decode(roleId));
-        log.debug("Checking whether user :" + userName.replaceAll("[\n\r\t]", "_") + " has role : "
-                + roleName.replaceAll("[\n\r\t]", "_"));
-        try {
-            boolean isUserInRole = APIUtil.checkIfUserInRole(userName, roleName);
-            if (!isUserInRole) {
-                throw new APIManagementException(ExceptionCodes.ROLE_DOES_NOT_EXIST);
-            }
-        } catch (UserException e) {
-            throw new APIManagementException("Error while validating user role", e,
-                    ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
-        }
-    }
+//
+//    /**
+//     * @param roleId Base64 URL encoded form of role name -Base64URLEncode{user-store-name/role-name}
+//     * @throws APIManagementException when UserStoreException is caught
+//     */
+//    public static void validateUserRole(String roleId) throws APIManagementException {
+//
+//        if (roleId == null) {
+//            throw new APIManagementException(ExceptionCodes.ROLE_ID_EMPTY);
+//        }
+//        String userName = RestApiCommonUtil.getLoggedInUsername();
+//
+//        String roleName = new String(Base64.getUrlDecoder().decode(roleId));
+//        log.debug("Checking whether user :" + userName.replaceAll("[\n\r\t]", "_") + " has role : "
+//                + roleName.replaceAll("[\n\r\t]", "_"));
+//        try {
+//            boolean isUserInRole = APIUtil.checkIfUserInRole(userName, roleName);
+//            if (!isUserInRole) {
+//                throw new APIManagementException(ExceptionCodes.ROLE_DOES_NOT_EXIST);
+//            }
+//        } catch (UserException e) {
+//            throw new APIManagementException("Error while validating user role", e,
+//                    ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
+//        }
+//    }
 }

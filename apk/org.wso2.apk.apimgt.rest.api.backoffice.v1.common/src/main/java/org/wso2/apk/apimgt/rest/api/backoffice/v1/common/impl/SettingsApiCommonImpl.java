@@ -40,28 +40,28 @@ public class SettingsApiCommonImpl {
         //To hide default constructor
     }
 
-    public static SettingsDTO getSettings(String organization) throws APIManagementException {
-
-        String username = RestApiCommonUtil.getLoggedInUsername();
-        boolean isUserAvailable = !APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username);
-        SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
-        return settingsMappingUtil.fromSettingstoDTO(isUserAvailable, organization);
-    }
-
-    /**
-     * @param definition Swagger Definition
-     * @return List of scopes
-     * @throws APIManagementException If error in parsing the scopes from the definition
-     */
-    public static List<String> getScopeListForSwaggerDefinition(String definition) throws APIManagementException {
-
-        APIDefinition parser = OASParserUtil.getOASParser(definition);
-        Set<Scope> scopeSet = parser.getScopes(definition);
-        List<String> scopeList = new ArrayList<>();
-        for (Scope entry : scopeSet) {
-            scopeList.add(entry.getKey());
-        }
-        return scopeList;
-    }
+//    public static SettingsDTO getSettings(String organization) throws APIManagementException {
+//
+//        String username = RestApiCommonUtil.getLoggedInUsername();
+//        boolean isUserAvailable = !APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username);
+//        SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
+//        return settingsMappingUtil.fromSettingstoDTO(isUserAvailable, organization);
+//    }
+//
+//    /**
+//     * @param definition Swagger Definition
+//     * @return List of scopes
+//     * @throws APIManagementException If error in parsing the scopes from the definition
+//     */
+//    public static List<String> getScopeListForSwaggerDefinition(String definition) throws APIManagementException {
+//
+//        APIDefinition parser = OASParserUtil.getOASParser(definition);
+//        Set<Scope> scopeSet = parser.getScopes(definition);
+//        List<String> scopeList = new ArrayList<>();
+//        for (Scope entry : scopeSet) {
+//            scopeList.add(entry.getKey());
+//        }
+//        return scopeList;
+//    }
 
 }

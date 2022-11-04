@@ -2990,6 +2990,12 @@ components:
         - name
       type: object
       properties:
+        id:
+          type: string
+          description: |
+            UUID of the Scope. Valid only for shared scopes.
+          readOnly: true
+          example: 01234567-0123-0123-0123-012345678901
         name:
           maxLength: 255
           minLength: 1
@@ -3100,6 +3106,19 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/APIExternalStore'
+    ExternalStoreList:
+      title: External Store List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of external stores returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalStore'
     LifecycleState:
       title: Lifecycle State
       type: object
@@ -3189,6 +3208,29 @@ components:
         policy:
           type: string
           description: policy as a json string
+    SearchResult:
+      title: Search Result
+      required:
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          type: string
+          example: TestAPI
+        type:
+          type: string
+          example: API
+          enum:
+            - DOC
+            - API
+        transportType:
+          type: string
+          description: Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
+      discriminator:
+        propertyName: name
     SearchResultList:
       title: Unified Search Result List
       type: object
