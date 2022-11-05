@@ -163,7 +163,8 @@ public abstract class AbstractAPIManager implements APIManager {
                 this.tenantDomain = tenantDomainName;
                 this.organization = organization;
                 this.username = tenantUserName;
-
+                //TODO: remove this
+                this.tenantDomain = "carbon.super";
             }
         } catch (UserException e) {
             String msg = "Error while getting user registry for user:" + username;

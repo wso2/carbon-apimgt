@@ -58,7 +58,7 @@ public class APIManagerFactory {
         }
         //TODO: APK
 //        return new UserAwareAPIConsumer(username);
-        return null;
+        return new APIConsumerImpl(username);
 
     }
 
@@ -68,7 +68,7 @@ public class APIManagerFactory {
         }
         //TODO: APK
 //        return new UserAwareAPIConsumer(username, organization);
-        return null;
+        return new APIConsumerImpl(username, organization);
     }
 
     public APIProvider getAPIProvider(String username) throws APIManagementException {
