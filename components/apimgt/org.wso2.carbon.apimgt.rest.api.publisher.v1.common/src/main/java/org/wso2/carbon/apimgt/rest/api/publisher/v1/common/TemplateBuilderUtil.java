@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebSocketTopicMappingConfiguration;
+import org.wso2.carbon.apimgt.common.gateway.graphql.GraphQLSchemaDefinitionUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
@@ -658,7 +659,7 @@ public class TemplateBuilderUtil {
             api.setUriTemplates(uriTemplates);
 
             GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
-            if (graphql.isSubscriptionAvailable(api.getGraphQLSchema())) {
+            if (GraphQLSchemaDefinitionUtil.isSubscriptionAvailable(api.getGraphQLSchema())) {
                 isGraphQLSubscriptionAPI = true;
                 // if subscriptions are available add new URI template with wild card resource without http verb.
                 template = new URITemplate();

@@ -310,7 +310,6 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.net.ssl.SSLContext;
-import javax.security.cert.CertificateEncodingException;
 import javax.security.cert.X509Certificate;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -7134,6 +7133,8 @@ public final class APIUtil {
 
         if (role.contains("&")) {
             return role.replaceAll("&", "%26");
+        } else if (role.contains(" ")) {
+            return role.replaceAll(" ", "%20");
         } else {
             return role;
         }
@@ -8108,6 +8109,21 @@ public final class APIUtil {
         return properties;
     }
 
+    public static JSONObject getSubscriberAttributes() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getSubscriberAttributes();
+    }
+
+    public static String getSubscriberRecipient() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.SUBSCRIBER_CONFIGURATION_RECIPIENT);
+    }
+
+    public static String getSubscriberDelimeter() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.SUBSCRIBER_CONFIGURATION_DELIMITER);
+    }
+
     /**
      * append the tenant domain to the username when an email is used as the username and EmailUserName is not enabled
      * in the super tenant
@@ -8367,7 +8383,7 @@ public final class APIUtil {
      * @return true if certificate exist in truststore
      * @throws APIManagementException
      */
-    public static boolean isCertificateExistsInListenerTrustStore(X509Certificate certificate) throws APIManagementException {
+    public static boolean isCertificateExistsInListenerTrustStore(Certificate certificate) throws APIManagementException {
 
         if (certificate != null) {
             try {
@@ -8384,7 +8400,7 @@ public final class APIUtil {
                         }
                     }
                 }
-            } catch (KeyStoreException | CertificateException | CertificateEncodingException | IOException e) {
+            } catch (KeyStoreException | CertificateException | IOException e) {
                 String msg = "Error in validating certificate existence";
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
@@ -9679,6 +9695,9 @@ public final class APIUtil {
 
         ArrayList<String> supportedAPIList = new ArrayList<>();
         supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP);
+        supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_SOAP);
+        supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_SOAPTOREST);
+        supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_GRAPHQL);
         policySpecification.setSupportedApiTypes(supportedAPIList);
 
         ArrayList<String> applicableFlows = new ArrayList<>();

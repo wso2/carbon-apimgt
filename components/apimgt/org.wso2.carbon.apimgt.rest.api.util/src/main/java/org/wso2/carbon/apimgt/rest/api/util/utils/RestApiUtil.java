@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.message.Message;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
@@ -39,13 +38,10 @@ import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -74,7 +70,6 @@ import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -1118,42 +1113,6 @@ public class RestApiUtil {
     public static boolean checkIfAnonymousAPI(Message inMessage) {
         return (inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED) != null &&
                 !((Boolean) inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED)));
-    }
-
-    /**
-     * This method is used to get the scope list from the yaml file
-     *
-     * @return MAP of scope list for all portal
-     */
-    public static  Map<String, List<String>> getScopesInfoFromAPIYamlDefinitions() throws APIManagementException {
-
-        Map<String, List<String>>   portalScopeList = new HashMap<>();
-        String [] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/devportal-api.yaml", "/service-catalog-api.yaml"};
-        for (String fileName : fileNameArray) {
-            String definition = null;
-            try {
-                definition = IOUtils
-                        .toString(RestApiUtil.class.getResourceAsStream(fileName), "UTF-8");
-            } catch (IOException  e) {
-                throw new APIManagementException("Error while reading the swagger definition ,",
-                        ExceptionCodes.DEFINITION_EXCEPTION);
-            }
-            APIDefinition oasParser = OASParserUtil.getOASParser(definition);
-            Set<Scope> scopeSet = oasParser.getScopes(definition);
-            for (Scope entry : scopeSet) {
-                List<String> list = new ArrayList<>();
-                list.add(entry.getDescription());
-                list.add((fileName.replaceAll("-api.yaml", "").replace("/", "")));
-                if (("/service-catalog-api.yaml".equals(fileName))) {
-                    if (!entry.getKey().contains("apim:api_view")) {
-                        portalScopeList.put(entry.getName(), list);
-                    }
-                } else {
-                    portalScopeList.put(entry.getName(), list);
-                }
-            }
-        }
-        return portalScopeList;
     }
 
     /**

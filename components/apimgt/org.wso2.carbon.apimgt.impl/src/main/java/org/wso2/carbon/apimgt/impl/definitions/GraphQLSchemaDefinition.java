@@ -26,7 +26,6 @@ import graphql.language.SchemaDefinition;
 import graphql.language.TypeDefinition;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
-import io.swagger.models.Swagger;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.io.IOUtils;
@@ -52,8 +51,13 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Optional;
 
 public class GraphQLSchemaDefinition {
 
@@ -63,7 +67,7 @@ public class GraphQLSchemaDefinition {
      * Extract GraphQL Operations from given schema.
      *
      * @param typeRegistry graphQL Schema Type Registry
-     * @param type operation type string
+     * @param type         operation type string
      * @return the arrayList of APIOperationsDTO
      */
     public List<URITemplate> extractGraphQLOperationList(TypeDefinitionRegistry typeRegistry, String type) {
@@ -74,47 +78,24 @@ public class GraphQLSchemaDefinition {
             if (schemaDefinition.isPresent()) {
                 List<OperationTypeDefinition> operationTypeList = schemaDefinition.get().getOperationTypeDefinitions();
                 for (OperationTypeDefinition operationTypeDefinition : operationTypeList) {
-                    if (entry.getValue().getName().equalsIgnoreCase(operationTypeDefinition.getTypeName().getName())) {
-                        if (type == null) {
-                            addOperations(entry, operationTypeDefinition.getName().toUpperCase(), operationArray);
-                        } else if (type.equals(operationTypeDefinition.getName().toUpperCase())) {
-                            addOperations(entry, operationTypeDefinition.getName().toUpperCase(), operationArray);
-                        }
+                    boolean canAddOperation = entry.getValue().getName()
+                            .equalsIgnoreCase(operationTypeDefinition.getTypeName().getName()) &&
+                            (type == null || type.equals(operationTypeDefinition.getName().toUpperCase()));
+                    if (canAddOperation) {
+                        addOperations(entry, operationTypeDefinition.getName().toUpperCase(), operationArray);
                     }
                 }
             } else {
-                if (entry.getValue().getName().equalsIgnoreCase(APIConstants.GRAPHQL_QUERY) ||
+                boolean canAddOperation = (entry.getValue().getName().equalsIgnoreCase(APIConstants.GRAPHQL_QUERY) ||
                         entry.getValue().getName().equalsIgnoreCase(APIConstants.GRAPHQL_MUTATION)
-                        || entry.getValue().getName().equalsIgnoreCase(APIConstants.GRAPHQL_SUBSCRIPTION)) {
-                    if (type == null) {
-                        addOperations(entry, entry.getKey(), operationArray);
-                    } else if (type.equals(entry.getValue().getName().toUpperCase())) {
-                        addOperations(entry, entry.getKey(), operationArray);
-                    }
+                        || entry.getValue().getName().equalsIgnoreCase(APIConstants.GRAPHQL_SUBSCRIPTION)) &&
+                        (type == null || type.equals(entry.getValue().getName().toUpperCase()));
+                if (canAddOperation) {
+                    addOperations(entry, entry.getKey(), operationArray);
                 }
             }
         }
         return operationArray;
-    }
-
-    /**
-     * Check subscription operation availability from given graphql schema.
-     *
-     * @param schema graphQL Schema
-     * @return the boolean value of subscription operation availability
-     */
-    public boolean isSubscriptionAvailable(String schema) {
-        boolean isSubscriptionAvailable = false;
-        SchemaParser schemaParser = new SchemaParser();
-        TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
-        Map<java.lang.String, TypeDefinition> operationList = typeRegistry.types();
-        for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
-            if (entry.getValue().getName().equals(APIConstants.GRAPHQL_SUBSCRIPTION)) {
-                isSubscriptionAvailable = true;
-                break;
-            }
-        }
-        return isSubscriptionAvailable;
     }
 
     /**
@@ -164,7 +145,6 @@ public class GraphQLSchemaDefinition {
      * @return schemaDefinition
      */
     public String buildSchemaWithAdditionalInfo(API api, GraphqlComplexityInfo graphqlComplexityInfo) {
-        Swagger swagger = null;
         Map<String, String> scopeRoleMap = new HashMap<>();
         Map<String, String> operationScopeMap = new HashMap<>();
         Map<String, String> operationAuthSchemeMap = new HashMap<>();

@@ -919,11 +919,12 @@ public interface APIProvider extends APIManager {
      * Method to get the status of the certificate which matches the given alias.
      * This method can me modified to get other necessary information as well. Such as CN etc.
      *
+     * @param tenantDomain tenant domain
      * @param alias : The alias of the certificate.
      * @return : The status and the expiry date as a parameter map.
      * @throws APIManagementException :
      */
-    CertificateInformationDTO getCertificateStatus(String alias) throws APIManagementException;
+    CertificateInformationDTO getCertificateStatus(String tenantDomain, String alias) throws APIManagementException;
 
     /**
      * Method to update an existing certificate.
@@ -956,11 +957,12 @@ public interface APIProvider extends APIManager {
     /**
      * Retrieve the certificate which matches the given alias.
      *
+     * @param tenantDomain tenant domain
      * @param alias : The alias of the certificate.
      * @return : The certificate input stream.
      * @throws APIManagementException :
      */
-    ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException;
+    ByteArrayInputStream getCertificateContent(String tenantDomain, String alias) throws APIManagementException;
 
     /**
      * Create API product
@@ -1682,4 +1684,14 @@ public interface APIProvider extends APIManager {
      */
     boolean isValidContext(String providerName, String apiName, String contextTemplate, String userName,
                            String organization) throws APIManagementException;
+    /***
+     * Validate the policies with spec
+     * @param policySpecification policy spec
+     * @param appliedPolicy policyID
+     * @param apiType API Type
+     * @return validation status
+     * @throws APIManagementException
+     */
+    boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification, OperationPolicy
+            appliedPolicy, String apiType) throws APIManagementException;
 }

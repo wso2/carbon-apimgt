@@ -430,13 +430,14 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public CertificateInformationDTO getCertificateInformation(String alias) throws APIManagementException {
+    public CertificateInformationDTO getCertificateInformation(int tenantId, String alias) throws APIManagementException {
 
         if (log.isDebugEnabled()) {
             log.debug(String.format("Get Certificate information for alias %s", alias));
         }
         try {
-            return certificateMgtUtils.getCertificateInformation(alias);
+            CertificateMetadataDTO metadataDTO = certificateMgtDAO.getCertificate(alias, tenantId);
+            return certificateMgtUtils.getCertificateInfo(metadataDTO.getCertificate());
         } catch (CertificateManagementException e) {
             throw new APIManagementException(e);
         }
@@ -504,13 +505,14 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException {
+    public ByteArrayInputStream getCertificateContent(int tenantId, String alias) throws APIManagementException {
 
         if (log.isDebugEnabled()) {
             log.debug(String.format("Get the contents of the certificate for alias %s", alias));
         }
         try {
-            return certificateMgtUtils.getCertificateContent(alias);
+            CertificateMetadataDTO metadataDTO = certificateMgtDAO.getCertificate(alias, tenantId);
+            return certificateMgtUtils.getCertificateContentFromDB(metadataDTO.getCertificate());
         } catch (CertificateManagementException e) {
             throw new APIManagementException(e);
         }

@@ -167,7 +167,7 @@ public class ApisApiServiceImplUtils {
                 AWSLambda awsLambdaClient = getAWSLambdaClient(accessKey, secretKey, region,
                         roleArn, roleSessionName, roleRegion);
                 if (awsLambdaClient == null) {
-                    return (JSONObject) Collections.emptyMap();
+                    return new JSONObject();
                 }
                 ListFunctionsResult listFunctionsResult = awsLambdaClient.listFunctions();
                 List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
@@ -180,7 +180,7 @@ public class ApisApiServiceImplUtils {
                 return arns;
             }
         }
-        return (JSONObject) Collections.emptyMap();
+        return new JSONObject();
     }
 
     /**

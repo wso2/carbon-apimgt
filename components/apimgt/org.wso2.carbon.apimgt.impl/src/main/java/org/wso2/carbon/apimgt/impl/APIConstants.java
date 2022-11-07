@@ -566,6 +566,7 @@ public final class APIConstants {
     public static final String DEFAULT_ORGANIZATION_CLAIM_NAME = "http://wso2.org/claims/organization";
     public static final String DEFAULT_TOKEN_TYPE = "DEFAULT";
     public static final String TOKEN_TYPE_OAUTH = "OAUTH";
+    public static final String TOKEN_TYPE_DEFAULT = "Default";
     public static final String TOKEN_TYPE_JWT = "JWT";
 
     public static final String PASSWORD_RESOLVER_IMPL_CLASS = "PasswordResolverImpl";
@@ -874,6 +875,10 @@ public final class APIConstants {
 
     public static final String STATUS_OBSERVERS = "StatusObservers.";
     public static final String OBSERVER = STATUS_OBSERVERS + "Observer";
+
+    public static final String SUBSCRIBER_CONFIGURATION = "SubscriberContactConfiguration";
+    public static final String SUBSCRIBER_CONFIGURATION_RECIPIENT = "EmailRecipientField";
+    public static final String SUBSCRIBER_CONFIGURATION_DELIMITER= "EmailAddressDelimiter";
 
     public static final String CORS_CONFIGURATION = "CORSConfiguration.";
     public static final String CORS_CONFIGURATION_ENABLED = CORS_CONFIGURATION + "Enabled";
@@ -1283,10 +1288,6 @@ public final class APIConstants {
     public static final String GRAPHQL_SCHEMA = "GRAPHQL_SCHEMA";
     public static final String GRAPHQL_ACCESS_CONTROL_POLICY = "WSO2GraphQLAccessControlPolicy";
     public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
-    public static final String MAXIMUM_QUERY_COMPLEXITY = "max_query_complexity";
-    public static final String MAXIMUM_QUERY_DEPTH = "max_query_depth";
-    public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
-    public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
     public static final String GRAPHQL_ADDITIONAL_TYPE_PREFIX = "WSO2";
 
     public static final String VELOCITY_GRAPHQL_API_SUBSCRIPTION_AVAILABLE = "isSubscriptionAvailable";
@@ -1850,6 +1851,7 @@ public final class APIConstants {
     public static final String REVOKED_TOKEN_KEY = "revokedToken";
     public static final String REVOKED_TOKEN_EXPIRY_TIME = "expiryTime";
     public static final String EVENT_TYPE = "eventType";
+    public static final String EVENT_WAITING_TIME_CONFIG = "EventWaitingTime";
     public static final String EVENT_TIMESTAMP = "timestamp";
     public static final String EVENT_PAYLOAD = "event";
     public static final String EVENT_PAYLOAD_DATA = "payloadData";
@@ -2617,7 +2619,6 @@ public final class APIConstants {
         public static final String RETRY_DUARTION = "RetryDuration";
         public static final String PUBLISH_DIRECTLY_TO_GW_CONFIG = "PublishDirectlyToGW";
         public static final String GATEWAY_LABELS_CONFIG = "GatewayLabels";
-        public static final String EVENT_WAITING_TIME_CONFIG = "EventWaitingTime";
         public static final String LABEL_CONFIG = "Label";
         public static final String DB_SAVER_NAME = "DBSaver";
         public static final String DB_RETRIEVER_NAME = "DBRetriever";
@@ -2708,6 +2709,8 @@ public final class APIConstants {
         public static final String SUBSCRIBER_TOPIC_PROPERTY = "SUBSCRIBER_TOPIC";
         public static final String SUBSCRIBER_APPLICATION_ID_PROPERTY = "SUBSCRIBER_APPLICATION_ID";
         public static final String PAYLOAD_PROPERTY = "ORIGINAL_PAYLOAD";
+
+        public static final String SUBSCRIPTION_PARAMETER_PROPERTY = "SUBSCRIPTION_PARAMETERS";
     }
 
     public enum PolicyType {
@@ -2889,6 +2892,9 @@ public final class APIConstants {
             + "resources" + File.separator + "operation_policies" + File.separator + "definitions";
     public static final String OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE = "Synapse";
     public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP = "HTTP";
+    public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_SOAP = "SOAP";
+    public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_SOAPTOREST = "SOAPTOREST";
+    public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_GRAPHQL = "GRAPHQL";
     public static final String DEFAULT_POLICY_VERSION = "v1";
 
 

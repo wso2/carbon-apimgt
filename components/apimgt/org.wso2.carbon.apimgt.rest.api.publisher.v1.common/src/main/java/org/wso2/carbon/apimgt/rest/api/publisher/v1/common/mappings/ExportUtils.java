@@ -776,7 +776,8 @@ public class ExportUtils {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonArray certificatesList = new JsonArray();
         certificateMetadataDTOS.forEach(metadataDTO -> {
-            try (ByteArrayInputStream certificate = certificateManager.getCertificateContent(metadataDTO.getAlias())) {
+            try (ByteArrayInputStream certificate = certificateManager.getCertificateContent(tenantId,
+                    metadataDTO.getAlias())) {
                 byte[] certificateContent = IOUtils.toByteArray(certificate);
                 String certificateContentEncoded = APIConstants.BEGIN_CERTIFICATE_STRING.concat(System.lineSeparator())
                         .concat(new String(Base64.encodeBase64(certificateContent))).concat(System.lineSeparator())
