@@ -19,7 +19,7 @@ package org.wso2.carbon.apimgt.gateway.inbound.websocket.response;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.dto.GraphQLOperationDTO;

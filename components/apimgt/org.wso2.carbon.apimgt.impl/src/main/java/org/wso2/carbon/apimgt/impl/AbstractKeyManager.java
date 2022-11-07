@@ -214,7 +214,7 @@ public abstract class AbstractKeyManager implements KeyManager {
                                 StringUtils.isNotEmpty(String.valueOf(tokenHandler.getValue()))) {
                             Pattern pattern = Pattern.compile((String) tokenHandler.getValue());
                             Matcher matcher = pattern.matcher(accessToken);
-                            canHandle = matcher.find();
+                            canHandle = matcher.matches();
                         }
                     } else if (TokenHandlingDto.TypeEnum.JWT.equals(tokenHandler.getType()) &&
                             accessToken.contains(APIConstants.DOT)) {

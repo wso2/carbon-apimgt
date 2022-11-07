@@ -41,7 +41,6 @@ import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
 import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -96,11 +95,11 @@ public class JWTValidatorImpl implements JWTValidator {
     private boolean isValidCertificateBoundAccessToken(SignedJWTInfo signedJWTInfo) { //Holder of Key token
 
         if (isCertificateBoundAccessTokenEnabled()) {
-            if (signedJWTInfo.getX509ClientCertificate() == null ||
-                    StringUtils.isEmpty(signedJWTInfo.getX509ClientCertificateHash())) {
+            if (signedJWTInfo.getClientCertificate() == null ||
+                    StringUtils.isEmpty(signedJWTInfo.getClientCertificateHash())) {
                 return true; // If cnf is not available - 200 success
             }
-            if (signedJWTInfo.getX509ClientCertificateHash().equals(signedJWTInfo.getCertificateThumbprint())) {
+            if (signedJWTInfo.getClientCertificateHash().equals(signedJWTInfo.getCertificateThumbprint())) {
                 return true; // if cnf matches with truststore cert - 200 success
             }
             return false; // if cert is not in truststore or thumbprint does not match with the cert

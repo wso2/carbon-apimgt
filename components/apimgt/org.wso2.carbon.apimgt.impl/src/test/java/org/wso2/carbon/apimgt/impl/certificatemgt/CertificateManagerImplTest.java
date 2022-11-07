@@ -382,14 +382,21 @@ public class CertificateManagerImplTest {
     }
 
     @Test
-    public void testGetCertificateInformation() throws APIManagementException {
+    public void testGetCertificateInformation() throws Exception {
 
-        CertificateInformationDTO certificateInformation = generateCertificateInformationDTO();
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "getCertificateInformation", String.class))
-                .toReturn(certificateInformation);
+        CertificateMetadataDTO dto = generateMetadata();
+        dto.setCertificate(BASE64_ENCODED_CERT);
 
-        CertificateInformationDTO certificateInformationDTO = certificateManager.getCertificateInformation(ALIAS);
+        Mockito.when(certificateMgtDAO.getCertificate(ALIAS, MultitenantConstants.SUPER_TENANT_ID)).thenReturn(dto);
+        CertificateInformationDTO certificateInformationDTO =
+                certificateManager.getCertificateInformation(MultitenantConstants.SUPER_TENANT_ID, ALIAS);
         Assert.assertNotNull(certificateInformationDTO);
+        CertificateInformationDTO expected = CertificateMgtUtils.getInstance().getCertificateInfo(dto.getCertificate());
+        Assert.assertEquals(expected.getFrom(), certificateInformationDTO.getFrom());
+        Assert.assertEquals(expected.getStatus(), certificateInformationDTO.getStatus());
+        Assert.assertEquals(expected.getSubject(), certificateInformationDTO.getSubject());
+        Assert.assertEquals(expected.getTo(), certificateInformationDTO.getTo());
+        Assert.assertEquals(expected.getVersion(), certificateInformationDTO.getVersion());
 
     }
 

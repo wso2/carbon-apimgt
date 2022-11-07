@@ -27,7 +27,7 @@ import graphql.schema.idl.TypeDefinitionRegistry;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.wso2.carbon.apimgt.gateway.handlers.graphQL.utils.GraphQLProcessorUtil;
+import org.wso2.carbon.apimgt.common.gateway.graphql.GraphQLProcessorUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ public class GraphQLProcessorUtilTest {
         String schema = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath));
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry registry = schemaParser.parse(schema);
-        String subscriptionOperation = GraphQLProcessorUtil.getOperationList(operation, registry);
+        String subscriptionOperation = GraphQLProcessorUtil.getOperationListAsString(operation, registry);
         Assert.assertEquals(subscriptionOperation, "liftStatusChange");
     }
 }

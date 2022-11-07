@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.throttling;
 
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class APIThrottleConstants {
@@ -31,8 +32,8 @@ public class APIThrottleConstants {
     public static final int CONNECTIONS_COUNT_THROTTLE_OUT_ERROR_CODE = 900808;
     public static final int EVENTS_COUNT_THROTTLE_OUT_ERROR_CODE = 900808;
 
-    public static final int GRAPHQL_QUERY_TOO_DEEP = 900820;
-    public static final int GRAPHQL_QUERY_TOO_COMPLEX = 900821;
+    public static final int GRAPHQL_QUERY_TOO_DEEP = GraphQLConstants.GRAPHQL_QUERY_TOO_DEEP;
+    public static final int GRAPHQL_QUERY_TOO_COMPLEX = GraphQLConstants.GRAPHQL_QUERY_TOO_COMPLEX;
 
     public static final String API_LIMIT_EXCEEDED = APIConstants.THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED;
     public static final String RESOURCE_LIMIT_EXCEEDED = APIConstants.THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;

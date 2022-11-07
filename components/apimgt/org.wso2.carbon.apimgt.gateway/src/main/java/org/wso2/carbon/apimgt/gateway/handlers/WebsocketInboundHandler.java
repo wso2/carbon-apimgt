@@ -44,7 +44,6 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketAnalyticsMetricsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
@@ -169,6 +168,19 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 if (responseDTO.isCloseConnection()) {
                     //remove inbound message context from data holder
                     InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().remove(channelId);
+                    Attribute<Object> attributes = ctx.channel().attr(AttributeKey.valueOf(API_PROPERTIES));
+                    if (attributes != null) {
+                        try {
+                            HashMap apiProperties = (HashMap) attributes.get();
+                            if (apiProperties != null && !apiProperties.containsKey(WEB_SC_API_UT)) {
+                                apiProperties.put(WEB_SC_API_UT, responseDTO.getErrorCode());
+                            }
+                        } catch (ClassCastException e) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Unable to cast attributes to a map", e);
+                            }
+                        }
+                    }
                     if (log.isDebugEnabled()) {
                         log.debug("Error while handling Outbound Websocket frame. Closing connection for "
                                 + ctx.channel().toString());
@@ -289,6 +301,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             return;
         }
         String requestOrigin = req.headers().get(HttpHeaderNames.ORIGIN);
+        // Don't validate the 'origin' header if it's not present in the request
+        if (requestOrigin == null) {
+            return;
+        }
         String allowedOrigin = assessAndGetAllowedOrigin(requestOrigin);
         if (allowedOrigin == null) {
             FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN);

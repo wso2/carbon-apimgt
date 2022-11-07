@@ -28,6 +28,8 @@ public class EventHubConfigurationDto {
     private char[] password;
     private EventHubReceiverConfiguration eventHubReceiverConfiguration;
     private EventHubPublisherConfiguration eventHubPublisherConfiguration ;
+    private long eventWaitingTime = 0;
+
     public boolean isEnabled() {
 
         return enabled;
@@ -69,7 +71,20 @@ public class EventHubConfigurationDto {
         this.eventHubReceiverConfiguration = eventHubReceiverConfiguration;
     }
 
+    public long getEventWaitingTime() {
 
+        return eventWaitingTime;
+    }
+
+    public void setEventWaitingTime(long eventWaitingTime) {
+
+        this.eventWaitingTime = eventWaitingTime;
+    }
+
+    public boolean hasEventWaitingTime() {
+
+        return eventWaitingTime > 0;
+    }
 
     public String getUsername() {
 

@@ -60,35 +60,39 @@ public class SearchApiServiceImpl implements SearchApiService {
             query = (APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":" + query);
         }
 
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String organization = RestApiUtil.getOrganization(messageContext);
-        Map<String, Object> result;
-        if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
-            result = apiProvider.searchPaginatedContent(query, organization, offset, limit);
-        } else {
-            result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit,
-                    RestApiConstants.DEFAULT_SORT_CRITERION, RestApiConstants.DEFAULT_SORT_ORDER);
-        }
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String organization = RestApiUtil.getOrganization(messageContext);
+            Map<String, Object> result;
+            if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                result = apiProvider.searchPaginatedContent(query, organization, offset, limit);
+            } else {
+                result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit,
+                        RestApiConstants.DEFAULT_SORT_CRITERION, RestApiConstants.DEFAULT_SORT_ORDER);
+            }
 
         /* Above searchPaginatedAPIs method underneath calls searchPaginatedAPIsByContent method,searchPaginatedAPIs
         method and searchAPIDoc method in AbstractApiManager. And those methods respectively returns ArrayList,
         TreeSet and a HashMap.
         Hence the below logic.
         */
-        List<Object> apis = SearchApiServiceImplUtil.getAPIListFromAPISearchResult(result);
+            List<Object> apis = SearchApiServiceImplUtil.getAPIListFromAPISearchResult(result);
 
-        List<SearchResultDTO> allMatchedResults = getAllMatchedResults(apis);
+            List<SearchResultDTO> allMatchedResults = getAllMatchedResults(apis);
 
-        Object totalLength = result.get("length");
-        Integer length = 0;
-        if (totalLength != null) {
-            length = (Integer) totalLength;
+            Object totalLength = result.get("length");
+            Integer length = 0;
+            if (totalLength != null) {
+                length = (Integer) totalLength;
+            }
+
+            List<Object> allmatchedObjectResults = new ArrayList<>(allMatchedResults);
+            resultListDTO.setList(allmatchedObjectResults);
+            resultListDTO.setCount(allMatchedResults.size());
+            SearchResultMappingUtil.setPaginationParams(resultListDTO, query, offset, limit, length);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError(e.getMessage(), e, log);
         }
-
-        List<Object> allmatchedObjectResults = new ArrayList<>(allMatchedResults);
-        resultListDTO.setList(allmatchedObjectResults);
-        resultListDTO.setCount(allMatchedResults.size());
-        SearchResultMappingUtil.setPaginationParams(resultListDTO, query, offset, limit, length);
 
         return Response.ok().entity(resultListDTO).build();
     }

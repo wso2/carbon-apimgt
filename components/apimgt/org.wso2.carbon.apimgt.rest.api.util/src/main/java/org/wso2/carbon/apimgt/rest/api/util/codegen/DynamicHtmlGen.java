@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.codegen;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.codegen.CodegenOperation;

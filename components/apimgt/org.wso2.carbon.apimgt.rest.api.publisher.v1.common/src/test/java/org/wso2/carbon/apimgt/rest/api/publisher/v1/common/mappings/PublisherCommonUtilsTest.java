@@ -35,9 +35,13 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,9 +50,12 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.mockito.Mockito.when;
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_DATA_PRODUCTION_ENDPOINTS;
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_DATA_SANDBOX_ENDPOINTS;
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({RestApiCommonUtil.class, WorkflowExecutorFactory.class})
+@PrepareForTest({RestApiCommonUtil.class, WorkflowExecutorFactory.class, APIUtil.class})
 public class PublisherCommonUtilsTest {
 
     private static final String PROVIDER = "admin";
@@ -101,5 +108,289 @@ public class PublisherCommonUtilsTest {
                 UUID));
         product.setState(APIConstants.PUBLISHED);
         return new ApiTypeWrapper(product);
+    }
+
+    @Test
+    public void testValidateEndpointsDefaultType() {
+
+        // endpointConfig
+        APIDTO apiDto = Mockito.mock(APIDTO.class);
+        String productionEndpointString = "https://productionendpoint.test";
+        String sandboxEndpointString = "sandboxendpoint.test";
+        HashMap<String, Object> endpointConfig = new HashMap<>();
+        endpointConfig.put(API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "default");
+        HashMap<String, Object> productionEndpoint = new HashMap<>();
+        productionEndpoint.put("url", productionEndpointString);
+        HashMap<String, Object> sandboxEndpoint = new HashMap<>();
+        sandboxEndpoint.put("url", sandboxEndpointString);
+        endpointConfig.put(API_DATA_PRODUCTION_ENDPOINTS, productionEndpoint);
+        endpointConfig.put(API_DATA_SANDBOX_ENDPOINTS, sandboxEndpoint);
+
+        Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
+        Assert.assertTrue(PublisherCommonUtils.validateEndpoints(apiDto));
+    }
+
+    @Test
+    public void testValidateValidEndpoints() {
+
+        // endpointConfig
+        APIDTO apiDto = Mockito.mock(APIDTO.class);
+        String productionEndpointString = "https://productionendpoint.test";
+        String sandboxEndpointString = "https://sandboxendpoint.test";
+        HashMap<String, Object> endpointConfig = new HashMap<>();
+        endpointConfig.put(API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
+        HashMap<String, Object> productionEndpoint = new HashMap<>();
+        productionEndpoint.put("url", productionEndpointString);
+        HashMap<String, Object> sandboxEndpoint = new HashMap<>();
+        sandboxEndpoint.put("url", sandboxEndpointString);
+        endpointConfig.put(API_DATA_PRODUCTION_ENDPOINTS, productionEndpoint);
+        endpointConfig.put(API_DATA_SANDBOX_ENDPOINTS, sandboxEndpoint);
+
+        // advertiseInfo
+        AdvertiseInfoDTO advertiseInfoDto = Mockito.mock(AdvertiseInfoDTO.class);
+
+        // extracted endpoints
+        ArrayList<String> endpoints = new ArrayList<>();
+        endpoints.add(sandboxEndpointString);
+        endpoints.add(productionEndpointString);
+
+        Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
+        Mockito.when(advertiseInfoDto.isAdvertised()).thenReturn(false);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
+        Assert.assertTrue(PublisherCommonUtils.validateEndpoints(apiDto));
+    }
+
+    @Test
+    public void testValidateInvalidProductionEndpoint() {
+
+        // endpointConfig
+        APIDTO apiDto = Mockito.mock(APIDTO.class);
+        String productionEndpointString = "https//productionendpoint.test";
+        String sandboxEndpointString = "https://sandboxendpoint.test";
+        HashMap<String, Object> endpointConfig = new HashMap<>();
+        endpointConfig.put(API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
+        HashMap<String, Object> productionEndpoint = new HashMap<>();
+        productionEndpoint.put("url", productionEndpointString);
+        HashMap<String, Object> sandboxEndpoint = new HashMap<>();
+        sandboxEndpoint.put("url", sandboxEndpointString);
+        endpointConfig.put(API_DATA_PRODUCTION_ENDPOINTS, productionEndpoint);
+        endpointConfig.put(API_DATA_SANDBOX_ENDPOINTS, sandboxEndpoint);
+
+        // advertiseInfo
+        AdvertiseInfoDTO advertiseInfoDto = Mockito.mock(AdvertiseInfoDTO.class);
+
+        // extracted endpoints
+        ArrayList<String> endpoints = new ArrayList<>();
+        endpoints.add(sandboxEndpointString);
+        endpoints.add(productionEndpointString);
+
+        Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
+        Mockito.when(advertiseInfoDto.isAdvertised()).thenReturn(false);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(false);
+        Assert.assertFalse(PublisherCommonUtils.validateEndpoints(apiDto));
+    }
+
+    @Test
+    public void testValidateInvalidSandboxEndpoint() {
+
+        // endpointConfig
+        APIDTO apiDto = Mockito.mock(APIDTO.class);
+        String productionEndpointString = "https://productionendpoint.test";
+        String sandboxEndpointString = "sandboxendpoint.test";
+        HashMap<String, Object> endpointConfig = new HashMap<>();
+        endpointConfig.put(API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
+        HashMap<String, Object> productionEndpoint = new HashMap<>();
+        productionEndpoint.put("url", productionEndpointString);
+        HashMap<String, Object> sandboxEndpoint = new HashMap<>();
+        sandboxEndpoint.put("url", sandboxEndpointString);
+        endpointConfig.put(API_DATA_PRODUCTION_ENDPOINTS, productionEndpoint);
+        endpointConfig.put(API_DATA_SANDBOX_ENDPOINTS, sandboxEndpoint);
+
+        // advertiseInfo
+        AdvertiseInfoDTO advertiseInfoDto = Mockito.mock(AdvertiseInfoDTO.class);
+
+        // extracted endpoints
+        ArrayList<String> endpoints = new ArrayList<>();
+        endpoints.add(sandboxEndpointString);
+        endpoints.add(productionEndpointString);
+
+        Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
+        Mockito.when(advertiseInfoDto.isAdvertised()).thenReturn(false);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(false);
+        Assert.assertFalse(PublisherCommonUtils.validateEndpoints(apiDto));
+    }
+
+    @Test
+    public void testValidateValidExternalEndpoints() {
+
+        // endpointConfig
+        APIDTO apiDto = Mockito.mock(APIDTO.class);
+        String productionEndpointString = "https://productionendpoint.test";
+        String sandboxEndpointString = "https://sandboxendpoint.test";
+        HashMap<String, Object> endpointConfig = new HashMap<>();
+        endpointConfig.put(API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
+        HashMap<String, Object> productionEndpoint = new HashMap<>();
+        productionEndpoint.put("url", productionEndpointString);
+        HashMap<String, Object> sandboxEndpoint = new HashMap<>();
+        sandboxEndpoint.put("url", sandboxEndpointString);
+        endpointConfig.put(API_DATA_PRODUCTION_ENDPOINTS, productionEndpoint);
+        endpointConfig.put(API_DATA_SANDBOX_ENDPOINTS, sandboxEndpoint);
+
+        // advertiseInfo
+        AdvertiseInfoDTO advertiseInfoDto = Mockito.mock(AdvertiseInfoDTO.class);
+        String externalProductionEndpointString = "https://exproductionendpoint.test";
+        String externalSandboxEndpointString = "https://exsandboxendpoint.test";
+        String originalDevPortalUrl = "https://devportal.test";
+
+        // extracted endpoints
+        ArrayList<String> endpoints = new ArrayList<>();
+        endpoints.add(sandboxEndpointString);
+        endpoints.add(productionEndpointString);
+        endpoints.add(externalProductionEndpointString);
+        endpoints.add(externalSandboxEndpointString);
+        endpoints.add(originalDevPortalUrl);
+
+        Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
+        Mockito.when(apiDto.getAdvertiseInfo()).thenReturn(advertiseInfoDto);
+        Mockito.when(advertiseInfoDto.isAdvertised()).thenReturn(true);
+        Mockito.when(advertiseInfoDto.getApiExternalProductionEndpoint()).thenReturn(externalProductionEndpointString);
+        Mockito.when(advertiseInfoDto.getApiExternalSandboxEndpoint()).thenReturn(externalSandboxEndpointString);
+        Mockito.when(advertiseInfoDto.getOriginalDevPortalUrl()).thenReturn(originalDevPortalUrl);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
+        Assert.assertTrue(PublisherCommonUtils.validateEndpoints(apiDto));
+    }
+
+    @Test
+    public void testValidateInvalidExternalEndpoints() {
+
+        // endpointConfig
+        APIDTO apiDto = Mockito.mock(APIDTO.class);
+        String productionEndpointString = "https://productionendpoint.test";
+        String sandboxEndpointString = "https://sandboxendpoint.test";
+        HashMap<String, Object> endpointConfig = new HashMap<>();
+        endpointConfig.put(API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
+        HashMap<String, Object> productionEndpoint = new HashMap<>();
+        productionEndpoint.put("url", productionEndpointString);
+        HashMap<String, Object> sandboxEndpoint = new HashMap<>();
+        sandboxEndpoint.put("url", sandboxEndpointString);
+        endpointConfig.put(API_DATA_PRODUCTION_ENDPOINTS, productionEndpoint);
+        endpointConfig.put(API_DATA_SANDBOX_ENDPOINTS, sandboxEndpoint);
+
+        // advertiseInfo
+        AdvertiseInfoDTO advertiseInfoDto = Mockito.mock(AdvertiseInfoDTO.class);
+        String externalProductionEndpointString = "exproductionendpoint.test";
+        String externalSandboxEndpointString = "https://exsandboxendpoint.test";
+        String originalDevPortalUrl = "https://devportal.test";
+
+        // extracted endpoints
+        ArrayList<String> endpoints = new ArrayList<>();
+        endpoints.add(sandboxEndpointString);
+        endpoints.add(productionEndpointString);
+        endpoints.add(externalProductionEndpointString);
+        endpoints.add(externalSandboxEndpointString);
+        endpoints.add(originalDevPortalUrl);
+
+        Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
+        Mockito.when(apiDto.getAdvertiseInfo()).thenReturn(advertiseInfoDto);
+        Mockito.when(advertiseInfoDto.isAdvertised()).thenReturn(true);
+        Mockito.when(advertiseInfoDto.getApiExternalProductionEndpoint()).thenReturn(externalProductionEndpointString);
+        Mockito.when(advertiseInfoDto.getApiExternalSandboxEndpoint()).thenReturn(externalSandboxEndpointString);
+        Mockito.when(advertiseInfoDto.getOriginalDevPortalUrl()).thenReturn(originalDevPortalUrl);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(false);
+        Assert.assertFalse(PublisherCommonUtils.validateEndpoints(apiDto));
+    }
+
+    @Test
+    public void testValidateEndpointsNullEndpointConfig() {
+
+        APIDTO apiDto = Mockito.mock(APIDTO.class);
+
+        // advertiseInfo
+        AdvertiseInfoDTO advertiseInfoDto = Mockito.mock(AdvertiseInfoDTO.class);
+        String externalProductionEndpointString = "https://exproductionendpoint.test";
+
+        // extracted endpoints
+        ArrayList<String> endpoints = new ArrayList<>();
+        endpoints.add(externalProductionEndpointString);
+
+        Mockito.when(apiDto.getEndpointConfig()).thenReturn(null);
+        Mockito.when(apiDto.getAdvertiseInfo()).thenReturn(advertiseInfoDto);
+        Mockito.when(advertiseInfoDto.isAdvertised()).thenReturn(true);
+        Mockito.when(advertiseInfoDto.getApiExternalProductionEndpoint()).thenReturn(externalProductionEndpointString);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
+        Assert.assertTrue(PublisherCommonUtils.validateEndpoints(apiDto));
+    }
+
+    @Test
+    public void testValidateEndpointsNullAdvertiseInfo() {
+
+        // endpointConfig
+        APIDTO apiDto = Mockito.mock(APIDTO.class);
+        String productionEndpointString = "https://productionendpoint.test";
+        String sandboxEndpointString = "https://sandboxendpoint.test";
+        HashMap<String, Object> endpointConfig = new HashMap<>();
+        endpointConfig.put(API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
+        HashMap<String, Object> productionEndpoint = new HashMap<>();
+        productionEndpoint.put("url", productionEndpointString);
+        HashMap<String, Object> sandboxEndpoint = new HashMap<>();
+        sandboxEndpoint.put("url", sandboxEndpointString);
+        endpointConfig.put(API_DATA_PRODUCTION_ENDPOINTS, productionEndpoint);
+        endpointConfig.put(API_DATA_SANDBOX_ENDPOINTS, sandboxEndpoint);
+
+        // extracted endpoints
+        ArrayList<String> endpoints = new ArrayList<>();
+        endpoints.add(sandboxEndpointString);
+        endpoints.add(productionEndpointString);
+
+        Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
+        Mockito.when(apiDto.getAdvertiseInfo()).thenReturn(null);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
+        Assert.assertTrue(PublisherCommonUtils.validateEndpoints(apiDto));
+    }
+
+    @Test
+    public void testValidateEndpointsNullExternalEndpoint() {
+
+        // endpointConfig
+        APIDTO apiDto = Mockito.mock(APIDTO.class);
+        String productionEndpointString = "https://productionendpoint.test";
+        String sandboxEndpointString = "https://sandboxendpoint.test";
+        HashMap<String, Object> endpointConfig = new HashMap<>();
+        endpointConfig.put(API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
+        HashMap<String, Object> productionEndpoint = new HashMap<>();
+        productionEndpoint.put("url", productionEndpointString);
+        HashMap<String, Object> sandboxEndpoint = new HashMap<>();
+        sandboxEndpoint.put("url", sandboxEndpointString);
+        endpointConfig.put(API_DATA_PRODUCTION_ENDPOINTS, productionEndpoint);
+        endpointConfig.put(API_DATA_SANDBOX_ENDPOINTS, sandboxEndpoint);
+
+        // advertiseInfo
+        AdvertiseInfoDTO advertiseInfoDto = Mockito.mock(AdvertiseInfoDTO.class);
+        String externalSandboxEndpointString = "https://exsandboxendpoint.test";
+        String originalDevPortalUrl = "https://devportal.test";
+
+        // extracted endpoints
+        ArrayList<String> endpoints = new ArrayList<>();
+        endpoints.add(sandboxEndpointString);
+        endpoints.add(productionEndpointString);
+        endpoints.add(externalSandboxEndpointString);
+        endpoints.add(originalDevPortalUrl);
+
+        Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
+        Mockito.when(apiDto.getAdvertiseInfo()).thenReturn(advertiseInfoDto);
+        Mockito.when(advertiseInfoDto.isAdvertised()).thenReturn(true);
+        Mockito.when(advertiseInfoDto.getApiExternalProductionEndpoint()).thenReturn(null);
+        Mockito.when(advertiseInfoDto.getApiExternalSandboxEndpoint()).thenReturn(externalSandboxEndpointString);
+        Mockito.when(advertiseInfoDto.getOriginalDevPortalUrl()).thenReturn(originalDevPortalUrl);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
+        Assert.assertTrue(PublisherCommonUtils.validateEndpoints(apiDto));
     }
 }

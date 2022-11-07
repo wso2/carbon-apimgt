@@ -135,10 +135,12 @@ public interface CertificateManager {
     /**
      * Method to retrieve the properties (expiry date etc) of the certificate which matches the given alias.
      *
+     * @param tenantId : The id of the tenant.
+     * @param alias       : The alias of the certificate
      * @return : The common information of the certificate.
      * @throws APIManagementException :
      */
-    CertificateInformationDTO getCertificateInformation(String alias) throws APIManagementException;
+    CertificateInformationDTO getCertificateInformation(int tenantId, String alias) throws APIManagementException;
 
     /**
      * Method to update an existing certificate.
@@ -160,10 +162,11 @@ public interface CertificateManager {
     /**
      * Get the certificate which matches the provided alias from the trust store.
      *
+     * @param tenantId : The id of the tenant.
      * @param alias : The alias of the certificate.
      * @return : The Certificate object.
      */
-    ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException;
+    ByteArrayInputStream getCertificateContent(int tenantId, String alias) throws APIManagementException;
 
     /**
      * Method to add client certificate (i.e. Client certificate that can be used to connect the client with gateway)

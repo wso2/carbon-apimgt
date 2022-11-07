@@ -38,8 +38,6 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.impl.*;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -127,8 +125,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 subscriptionListDTO = SubscriptionMappingUtil
                         .fromSubscriptionListToDTO(subscribedAPIList, limit, offset, organization);
 
-                SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, "", limit,
-                        offset, subscribedAPIList.size());
+                SubscriptionMappingUtil
+                        .setPaginationParams(subscriptionListDTO, apiId, applicationId, groupId, limit, offset,
+                                subscribedAPIList.size());
 
                 return Response.ok().entity(subscriptionListDTO).build();
             } else if (!StringUtils.isEmpty(applicationId)) {
@@ -143,12 +142,15 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 }
 
+                int total = apiConsumer.getSubscriptionCount(subscriber, application.getName(), groupId);
                 subscriptions = apiConsumer.getPaginatedSubscribedAPIsByApplication(application, offset, limit,
                         organization);
                 subscribedAPIList.addAll(subscriptions);
 
                 subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedAPIList, limit,
                         offset, organization);
+                SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, applicationId, groupId, limit,
+                        offset, total);
                 return Response.ok().entity(subscriptionListDTO).build();
 
             } else {

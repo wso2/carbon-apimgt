@@ -28,6 +28,11 @@ public class GatewayArtifactSynchronizerProperties {
         return eventWaitingTime;
     }
 
+    public boolean hasEventWaitingTime() {
+
+        return eventWaitingTime > 1;
+    }
+
     public void setEventWaitingTime(long eventWaitingTime) {
 
         this.eventWaitingTime = eventWaitingTime;
