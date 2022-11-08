@@ -27,6 +27,7 @@ import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.model.Documentation;
 import org.wso2.apk.apimgt.api.model.DocumentationContent;
 import org.wso2.apk.apimgt.impl.utils.APIUtil;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.BackofficeAPIUtils;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings.DocumentationMappingUtil;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings.PublisherCommonUtils;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.DocumentDTO;
@@ -45,7 +46,7 @@ public class ApiDocumentsAPICommonImpl {
 
     private static final Log log = LogFactory.getLog(ApiDocumentsAPICommonImpl.class);
 
-    public static DocumentDTO addAPIDocumentContent(String apiId, String documentId, InputStream inputStream,
+    public static String addAPIDocumentContent(String apiId, String documentId, InputStream inputStream,
                                                     String inlineContent, String organization, String fileName,
                                                     String mediaType) throws APIManagementException {
 
@@ -87,7 +88,7 @@ public class ApiDocumentsAPICommonImpl {
 
         //retrieving the updated doc and the URI
         Documentation updatedDoc = apiProvider.getDocumentation(apiId, documentId, organization);
-        return DocumentationMappingUtil.fromDocumentationToDTO(updatedDoc);
+        return BackofficeAPIUtils.getJsonFromDTO(DocumentationMappingUtil.fromDocumentationToDTO(updatedDoc));
     }
 
     public static DocumentationContent getAPIDocumentContentByDocumentId(String apiId, String documentId,
@@ -106,16 +107,16 @@ public class ApiDocumentsAPICommonImpl {
         apiProvider.removeDocumentation(apiId, documentId, organization);
     }
 
-    public static DocumentDTO getAPIDocumentByDocumentId(String apiId, String documentId, String organization)
+    public static String getAPIDocumentByDocumentId(String apiId, String documentId, String organization)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         Documentation documentation = apiProvider.getDocumentation(apiId, documentId, organization);
 
-        return DocumentationMappingUtil.fromDocumentationToDTO(documentation);
+        return BackofficeAPIUtils.getJsonFromDTO(DocumentationMappingUtil.fromDocumentationToDTO(documentation));
     }
 
-    public static DocumentDTO updateAPIDocument(String apiId, String documentId, DocumentDTO body, String organization)
+    public static String updateAPIDocument(String apiId, String documentId, DocumentDTO body, String organization)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -142,10 +143,10 @@ public class ApiDocumentsAPICommonImpl {
         newDocumentation.setId(documentId);
         newDocumentation = apiProvider.updateDocumentation(apiId, newDocumentation, organization);
 
-        return DocumentationMappingUtil.fromDocumentationToDTO(newDocumentation);
+        return BackofficeAPIUtils.getJsonFromDTO(DocumentationMappingUtil.fromDocumentationToDTO(newDocumentation));
     }
 
-    public static DocumentListDTO getAPIDocuments(String apiId, Integer limit, Integer offset, String organization)
+    public static String getAPIDocuments(String apiId, Integer limit, Integer offset, String organization)
             throws APIManagementException {
 
         RestApiCommonUtil.validateAPIExistence(apiId);
@@ -162,14 +163,14 @@ public class ApiDocumentsAPICommonImpl {
                 offset, limit);
         DocumentationMappingUtil
                 .setPaginationParams(documentListDTO, apiId, offset, limit, allDocumentation.size());
-        return documentListDTO;
+        return BackofficeAPIUtils.getJsonFromDTO(documentListDTO);
     }
 
-    public static DocumentDTO addAPIDocument(String apiId, DocumentDTO body, String organization)
+    public static String addAPIDocument(String apiId, DocumentDTO body, String organization)
             throws APIManagementException {
 
         Documentation documentation = PublisherCommonUtils.addDocumentationToAPI(body, apiId, organization);
-        return DocumentationMappingUtil.fromDocumentationToDTO(documentation);
+        return BackofficeAPIUtils.getJsonFromDTO(DocumentationMappingUtil.fromDocumentationToDTO(documentation));
     }
 
     public static void validateDocument(String apiId, String name, String organization) throws APIManagementException {

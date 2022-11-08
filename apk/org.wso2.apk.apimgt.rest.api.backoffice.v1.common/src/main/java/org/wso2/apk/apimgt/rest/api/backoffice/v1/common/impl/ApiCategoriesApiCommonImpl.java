@@ -18,6 +18,7 @@
 
 package org.wso2.apk.apimgt.rest.api.backoffice.v1.common.impl;
 
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.BackofficeAPIUtils;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings.APICategoryMappingUtil;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.APICategoryListDTO;
 import org.wso2.apk.apimgt.api.APIManagementException;
@@ -36,11 +37,13 @@ public class ApiCategoriesApiCommonImpl {
         //To hide the default constructor
     }
 
-    public static APICategoryListDTO getAllAPICategories() throws APIManagementException {
+    public static String getAllAPICategories() throws APIManagementException {
 
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         List<APICategory> categoryList = APIUtil.getAllAPICategoriesOfOrganization(tenantDomain);
-        return APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);
+        return BackofficeAPIUtils.getJsonFromDTO(APICategoryMappingUtil.
+                fromCategoryListToCategoryListDTO(categoryList));
+
     }
 
 }
