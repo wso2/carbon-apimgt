@@ -30,7 +30,6 @@ import org.wso2.apk.apimgt.api.model.CommentList;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.BackofficeAPIUtils;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings.CommentMappingUtil;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.CommentDTO;
-import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.CommentListDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.PatchRequestBodyDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.PostRequestBodyDTO;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
@@ -102,7 +101,7 @@ public class ApiCommentsAPICommonImpl {
         CommentDTO commentDTO = null;
         String username = RestApiCommonUtil.getLoggedInUsername();
         PatchRequestBodyDTO patchRequestBodyDTO = BackofficeAPIUtils.getDTOFromJson(patchRequestBodyJson,
-                PatchRequestBodyDTO.class)
+                PatchRequestBodyDTO.class);
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
