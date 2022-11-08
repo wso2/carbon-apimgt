@@ -94,10 +94,14 @@ public class SQLConstantManagerFactory {
 
             field = clazz.getDeclaredField(sql);
             field.setAccessible(true);
+            sqlString = (String) field.get(sqlConstantPostgreSQL);
         } catch (NoSuchFieldException e) {
             log.error("No such a field found in sql constant class" + sql);
             throw new APIManagementException("No such a field found in sql constant class " + sql, e);
+        } catch (IllegalAccessException e) {
+            log.error("Illegal Access attempt to sql constant class");
+            throw new APIManagementException("Illegal Access attempt to sql constant class", e);
         }
-        return null;
+        return sqlString;
     }
 }

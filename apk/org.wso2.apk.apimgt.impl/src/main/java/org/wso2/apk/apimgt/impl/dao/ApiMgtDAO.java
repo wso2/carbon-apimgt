@@ -1888,7 +1888,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public Set<TierPermissionDTO> getThrottleTierPermissions(int tenantId) throws APIManagementException {
+    public Set<TierPermissionDTO> getThrottleTierPermissions(String organization) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -1901,7 +1901,7 @@ public class ApiMgtDAO {
 
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(getTierPermissionQuery);
-            ps.setInt(1, tenantId);
+            ps.setString(1, organization);
 
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
@@ -8853,11 +8853,12 @@ public class ApiMgtDAO {
      */
     private String getLoginUserName(String userID) throws APIManagementException {
 
-        String primaryLogin = userID;
-        if (isSecondaryLogin(userID)) {
-            primaryLogin = getPrimaryLoginFromSecondary(userID);
-        }
-        return primaryLogin;
+        return "apkuser";
+//        String primaryLogin = userID;
+//        if (isSecondaryLogin(userID)) {
+//            primaryLogin = getPrimaryLoginFromSecondary(userID);
+//        }
+//        return primaryLogin;
     }
 
     /**
@@ -10677,7 +10678,7 @@ public class ApiMgtDAO {
      * @return APIPolicy ArrayList
      * @throws APIManagementException
      */
-    public APIPolicy[] getAPIPolicies(int tenantID) throws APIManagementException {
+    public APIPolicy[] getAPIPolicies(String organization) throws APIManagementException {
 
         List<APIPolicy> policies = new ArrayList<APIPolicy>();
         Connection conn = null;
@@ -10692,7 +10693,7 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, tenantID);
+            ps.setString(1, organization);
             rs = ps.executeQuery();
             while (rs.next()) {
                 APIPolicy apiPolicy = new APIPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
@@ -10712,10 +10713,10 @@ public class ApiMgtDAO {
     /**
      * Get application level polices
      *
-     * @param tenantID polices are selected only belong to specific tenantID
+     * @param organization polices are selected only belong to specific organization
      * @return AppilicationPolicy array list
      */
-    public ApplicationPolicy[] getApplicationPolicies(int tenantID) throws APIManagementException {
+    public ApplicationPolicy[] getApplicationPolicies(String organization) throws APIManagementException {
 
         List<ApplicationPolicy> policies = new ArrayList<ApplicationPolicy>();
         Connection conn = null;
@@ -10730,7 +10731,7 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, tenantID);
+            ps.setString(1, organization);
             rs = ps.executeQuery();
             while (rs.next()) {
                 ApplicationPolicy appPolicy = new ApplicationPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
@@ -10751,7 +10752,7 @@ public class ApiMgtDAO {
      * @param tenantID tenantID filters the polices belongs to specific tenant
      * @return subscriptionPolicy array list
      */
-    public SubscriptionPolicy[] getSubscriptionPolicies(int tenantID) throws APIManagementException {
+    public SubscriptionPolicy[] getSubscriptionPolicies(String organization) throws APIManagementException {
 
         List<SubscriptionPolicy> policies = new ArrayList<SubscriptionPolicy>();
         Connection conn = null;
@@ -10766,7 +10767,7 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, tenantID);
+            ps.setString(1, organization);
             rs = ps.executeQuery();
             while (rs.next()) {
                 SubscriptionPolicy subPolicy = new SubscriptionPolicy(
@@ -10884,7 +10885,7 @@ public class ApiMgtDAO {
      * @return
      * @throws APIManagementException
      */
-    public GlobalPolicy[] getGlobalPolicies(int tenantID) throws APIManagementException {
+    public GlobalPolicy[] getGlobalPolicies(String organization) throws APIManagementException {
 
         List<GlobalPolicy> policies = new ArrayList<GlobalPolicy>();
         Connection conn = null;
@@ -10899,7 +10900,7 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, tenantID);
+            ps.setString(1, organization);
             rs = ps.executeQuery();
             while (rs.next()) {
                 String siddhiQuery = null;
@@ -12043,8 +12044,7 @@ public class ApiMgtDAO {
         policy.setDescription(resultSet.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
         policy.setDisplayName(resultSet.getString(ThrottlePolicyConstants.COLUMN_DISPLAY_NAME));
         policy.setPolicyId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
-        policy.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
-        policy.setTenantDomain(APIUtil.getTenantDomainFromTenantId(policy.getTenantId()));
+        policy.setTenantDomain(resultSet.getString(ThrottlePolicyConstants.COLUMN_ORGANIZATION));
         policy.setDefaultQuotaPolicy(quotaPolicy);
         policy.setDeployed(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
     }
