@@ -2,27 +2,6 @@
   "EnableMonetization" : false,
   "EnableRecommendation" : false,
   "IsUnlimitedTierPaid" : false,
-  "ContainerMgt": [
-    {
-      "Type": "Kubernetes",
-      "ContainerMgtInfo": [
-        {
-          "ClusterName": "",
-          "DisplayName": "",
-          "Properties": {
-            "MasterURL": "",
-            "AccessURL": "",
-            "SAToken": "",
-            "Namespace": "default",
-            "Replicas": 1,
-            "BasicSecurityCustomResourceName": "",
-            "OauthSecurityCustomResourceName": "",
-            "JWTSecurityCustomResourceName": ""
-          }
-        }
-      ]
-    }
-  ],
   "ExtensionHandlerPosition": "bottom",
   "RESTAPIScopes": {
     "Scope": [
@@ -100,6 +79,10 @@
       },
       {
         "Name": "apim:api_import_export",
+        "Roles": "admin,Internal/devops"
+      },
+      {
+        "Name": "apim:policies_import_export",
         "Roles": "admin,Internal/devops"
       },
       {
@@ -315,6 +298,15 @@
     "DevOpsRole" : {
       "CreateOnTenantLoad" : true,
       "RoleName" : "Internal/devops"
+    },
+    "IntegrationDeveloperRole" : {
+      "CreateOnTenantLoad" : true,
+      "RoleName" : "Internal/integration_dev"
     }
+  },
+  "SelfSignUp": {
+    "SignUpRoles": [
+      "Internal/subscriber"
+    ]
   }
 }

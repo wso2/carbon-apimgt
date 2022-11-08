@@ -19,9 +19,6 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axis2.util.JavaUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -37,6 +34,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
@@ -64,6 +62,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
@@ -77,11 +76,11 @@ import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -102,7 +101,6 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -110,6 +108,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
+import org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionApprovalWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -118,7 +117,6 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
-import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
@@ -133,42 +131,19 @@ import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
-import org.wso2.carbon.governance.api.exception.GovernanceException;
-import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
-import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
-import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.registry.core.ActionConstants;
-import org.wso2.carbon.registry.core.Association;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.config.RegistryContext;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.pagination.PaginationContext;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.registry.core.utils.RegistryUtils;
-import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.UserAdmin;
 import org.wso2.carbon.user.mgt.common.UserAdminException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -187,8 +162,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.cache.Cache;
-import javax.cache.Caching;
-import javax.wsdl.Definition;
 
 /**
  * This class provides the core API store functionality. It is implemented in a very
@@ -217,6 +190,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public static final String API_PROVIDER = "apiProvider";
     private static final String PRESERVED_CASE_SENSITIVE_VARIABLE = "preservedCaseSensitive";
 
+    private static final String GET_SUB_WORKFLOW_REF_FAILED = "Failed to get external workflow reference for subscription ";
+    public static final String CLEAN_PENDING_SUB_APPROVAL_TASK_FAILED = "Failed to clean pending subscription approval task: ";
+
     /* Map to Store APIs against Tag */
     private ConcurrentMap<String, Set<API>> taggedAPIs = new ConcurrentHashMap<String, Set<API>>();
     private boolean isTenantModeStoreView;
@@ -225,10 +201,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private Set<Tag> tagSet;
     private long tagCacheValidityTime;
     private volatile long lastUpdatedTime;
-    private volatile long lastUpdatedTimeForTagApi;
     private final Object tagCacheMutex = new Object();
-    private final Object tagWithAPICacheMutex = new Object();
-    protected APIMRegistryService apimRegistryService;
     protected String userNameWithoutChange;
 
     public APIConsumerImpl() throws APIManagementException {
@@ -236,12 +209,21 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         readTagCacheConfigs();
     }
 
-    public APIConsumerImpl(String username, APIMRegistryService apimRegistryService) throws APIManagementException {
+    public APIConsumerImpl(String username) throws APIManagementException {
         super(username);
         userNameWithoutChange = username;
         readTagCacheConfigs();
-        this.apimRegistryService = apimRegistryService;
+        readRecommendationConfigs();
+    }
 
+    public APIConsumerImpl(String username, String organization) throws APIManagementException {
+        super(username, organization);
+        userNameWithoutChange = username;
+        readTagCacheConfigs();
+        readRecommendationConfigs();
+    }
+
+    private void readRecommendationConfigs() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         recommendationEnvironment = config.getApiRecommendationEnvironment();
@@ -271,93 +253,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
 
-    /**
-     * Returns the set of APIs with the given tag from the taggedAPIs Map
-     *
-     * @param tagName The name of the tag
-     * @return Set of {@link API} with the given tag
-     * @throws APIManagementException
-     */
-    @Override
-	public Set<API> getAPIsWithTag(String tagName, String requestedTenantDomain) throws APIManagementException {
-
-    	 /* We keep track of the lastUpdatedTime of the TagCache to determine its freshness.
-         */
-        long lastUpdatedTimeAtStart = lastUpdatedTimeForTagApi;
-        long currentTimeAtStart = System.currentTimeMillis();
-        if(isTagCacheEnabled && ( (currentTimeAtStart- lastUpdatedTimeAtStart) < tagCacheValidityTime)){
-        	if (taggedAPIs != null && taggedAPIs.containsKey(tagName)) {
-    			return taggedAPIs.get(tagName);
-    		}
-        }else{
-        	synchronized (tagWithAPICacheMutex) {
-        		lastUpdatedTimeForTagApi = System.currentTimeMillis();
-                taggedAPIs = new ConcurrentHashMap<String, Set<API>>();
-            }
-
-        }
-
-        boolean isTenantMode = requestedTenantDomain != null && !"null".equalsIgnoreCase(requestedTenantDomain);
-		this.isTenantModeStoreView = isTenantMode;
-
-		if (requestedTenantDomain != null && !"null".equals(requestedTenantDomain)) {
-			this.requestedTenant = requestedTenantDomain;
-		}
-
-		Registry userRegistry;
-		boolean isTenantFlowStarted = false;
-		Set<API> apisWithTag = null;
-		try {
-            //start the tenant flow prior to loading registry
-            if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
-                isTenantFlowStarted = startTenantFlowForTenantDomain(requestedTenantDomain);
-            }
-
-            if ((isTenantMode && this.tenantDomain == null) ||
-                (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant store anonymous mode
-                int tenantId = getTenantId(requestedTenantDomain);
-                // explicitly load the tenant's registry
-                APIUtil.loadTenantRegistry(tenantId);
-                userRegistry = getGovernanceUserRegistry(tenantId);
-                setUsernameToThreadLocalCarbonContext(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
-            } else {
-                userRegistry = registry;
-                setUsernameToThreadLocalCarbonContext(this.username);
-            }
-
-            apisWithTag = getAPIsWithTag(userRegistry, tagName);
-
-			/* Add the APIs against the tag name */
-			if (!apisWithTag.isEmpty()) {
-				if (taggedAPIs.containsKey(tagName)) {
-					for (API api : apisWithTag) {
-						taggedAPIs.get(tagName).add(api);
-					}
-				} else {
-					taggedAPIs.putIfAbsent(tagName, apisWithTag);
-				}
-			}
-
-		} catch (RegistryException e) {
-			handleException("Failed to get api by the tag", e);
-		} catch (UserStoreException e) {
-			handleException("Failed to get api by the tag", e);
-		} finally {
-            if (isTenantFlowStarted) {
-                endTenantFlow();
-            }
-        }
-
-		return apisWithTag;
-	}
-
     protected void setUsernameToThreadLocalCarbonContext(String username) {
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
-    }
-
-    protected UserRegistry getGovernanceUserRegistry(int tenantId) throws RegistryException {
-        return ServiceReferenceHolder.getInstance().getRegistryService().
-                getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
     }
 
     protected int getTenantId(String requestedTenantDomain) throws UserStoreException {
@@ -365,500 +262,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                              .getTenantId(requestedTenantDomain);
     }
 
-    /**
-     * Returns the set of APIs with the given tag from the taggedAPIs Map.
-     *
-     * @param tag   The name of the tag
-     * @param start The starting index of the return result set
-     * @param end   The end index of the return result set
-     * @return A {@link Map} of APIs(between the given indexes) and the total number indicating all the available
-     * APIs count
-     * @throws APIManagementException
-     */
-    @Override
-    public Map<String, Object> getPaginatedAPIsWithTag(String tag, int start, int end, String tenantDomain) throws APIManagementException {
-        List<API> apiList = new ArrayList<API>();
-        Set<API> resultSet = new TreeSet<API>(new APIVersionComparator());
-        Map<String, Object> results = new HashMap<String, Object>();
-        Set<API> taggedAPISet = this.getAPIsWithTag(tag,tenantDomain);
-        if (taggedAPISet != null) {
-            if (taggedAPISet.size() < end) {
-                end = taggedAPISet.size();
-            }
-            int totalLength;
-
-            apiList.addAll(taggedAPISet);
-            totalLength = apiList.size();
-            if (totalLength <= ((start + end) - 1)) {
-                end = totalLength;
-            } else {
-                end = start + end;
-            }
-            for (int i = start; i < end; i++) {
-                resultSet.add(apiList.get(i));
-            }
-
-            results.put("apis", resultSet);
-            results.put("length", taggedAPISet.size());
-        } else {
-            results.put("apis", null);
-            results.put("length", 0);
-
-        }
-        return results;
-    }
-
-
-    /**
-     * Returns the set of APIs with the given tag, retrieved from registry
-     *
-     * @param registry - Current registry; tenant/SuperTenant
-     * @param tag - The tag name
-     * @return A {@link Set} of {@link API} objects.
-     * @throws APIManagementException
-     */
-    private Set<API> getAPIsWithTag(Registry registry, String tag)
-            throws APIManagementException {
-        Set<API> apiSet = new TreeSet<API>(new APINameComparator());
-        try {
-            List<GovernanceArtifact> genericArtifacts =
-                    GovernanceUtils.findGovernanceArtifacts(getSearchQuery(APIConstants.TAGS_EQ_SEARCH_TYPE_PREFIX + tag), registry,
-                                                            APIConstants.API_RXT_MEDIA_TYPE);
-            for (GovernanceArtifact genericArtifact : genericArtifacts) {
-                try {
-                    String apiStatus = APIUtil.getLcStateFromArtifact(genericArtifact);
-                    if (genericArtifact != null && (APIConstants.PUBLISHED.equals(apiStatus)
-                         || APIConstants.PROTOTYPED.equals(apiStatus))) {
-                        API api = APIUtil.getAPI(genericArtifact);
-                        if (api != null) {
-                            apiSet.add(api);
-                        }
-                    }
-                } catch (RegistryException e) {
-                    log.warn("User is not authorized to get an API with tag " + tag, e);
-                }
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to get API for tag " + tag, e);
-        }
-        return apiSet;
-    }
-
-    /**
-     * The method to get APIs to Store view      *
-     *
-     * @return Set<API>  Set of APIs
-     * @throws APIManagementException
-     */
-    @Override
-    @Deprecated
-    public Map<String,Object> getAllPaginatedPublishedAPIs(String tenantDomain,int start,int end)
-            throws APIManagementException {
-        Boolean displayAPIsWithMultipleStatus = false;
-        try {
-            if (tenantDomain != null) {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-        }finally {
-            endTenantFlow();
-        }
-    	Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-        //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
-        if (!displayAPIsWithMultipleStatus) {
-            //Create the search attribute map
-            listMap.put(APIConstants.API_OVERVIEW_STATUS, new ArrayList<String>() {{
-                add(APIConstants.PUBLISHED);
-            }});
-        } else{
-            return getAllPaginatedAPIs(tenantDomain, start, end);
-        }
-
-        Map<String, Object> result = new HashMap<String, Object>();
-        SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
-        int totalLength = 0;
-        try {
-            Registry userRegistry;
-            boolean isTenantMode = (tenantDomain != null);
-            if ((isTenantMode && this.tenantDomain == null) ||
-                (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
-                int tenantId = getTenantId(tenantDomain);
-                // explicitly load the tenant's registry
-                APIUtil.loadTenantRegistry(tenantId);
-                userRegistry = getGovernanceUserRegistry(tenantId);
-                setUsernameToThreadLocalCarbonContext(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
-            } else {
-                userRegistry = registry;
-                setUsernameToThreadLocalCarbonContext(this.username);
-            }
-            this.isTenantModeStoreView = isTenantMode;
-            this.requestedTenant = tenantDomain;
-
-            Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
-            List<API> multiVersionedAPIs = new ArrayList<API>();
-            Comparator<API> versionComparator = new APIVersionComparator();
-            Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
-
-            PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
-
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
-            if (artifactManager != null) {
-                GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
-                totalLength = PaginationContext.getInstance().getLength();
-                if (genericArtifacts == null || genericArtifacts.length == 0) {
-                    result.put("apis", apiSortedSet);
-                    result.put("totalLength", totalLength);
-                    return result;
-                }
-
-                for (GenericArtifact artifact : genericArtifacts) {
-                    if (artifact == null) {
-                        log.error("Failed to retrieve artifact when getting paginated published API.");
-                        continue;
-                    }
-                    // adding the API provider can mark the latest API .
-                    API api = APIUtil.getAPI(artifact);
-                    if (api != null) {
-                        String key;
-                        //Check the configuration to allow showing multiple versions of an API true/false
-                        if (!displayMultipleVersions) { //If allow only showing the latest version of an API
-                            key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
-                            API existingAPI = latestPublishedAPIs.get(key);
-                            if (existingAPI != null) {
-                                // If we have already seen an API with the same name, make sure
-                                // this one has a higher version number
-                                if (versionComparator.compare(api, existingAPI) > 0) {
-                                    latestPublishedAPIs.put(key, api);
-                                }
-                            } else {
-                                // We haven't seen this API before
-                                latestPublishedAPIs.put(key, api);
-                            }
-                        } else { //If allow showing multiple versions of an API
-                            multiVersionedAPIs.add(api);
-                        }
-                    }
-                }
-                if (!displayMultipleVersions) {
-                    apiSortedSet.addAll(latestPublishedAPIs.values());
-                    result.put("apis", apiSortedSet);
-                    result.put("totalLength", totalLength);
-                    return result;
-                } else {
-                    apiVersionsSortedSet.addAll(multiVersionedAPIs);
-                    result.put("apis", apiVersionsSortedSet);
-                    result.put("totalLength", totalLength);
-                    return result;
-                }
-            } else {
-                String errorMessage = "Artifact manager is null for tenant domain " + tenantDomain
-                        + " when retrieving all Published APIs.";
-                log.error(errorMessage);
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to get all published APIs", e);
-        } catch (UserStoreException e) {
-            handleException("Failed to get all published APIs", e);
-        } finally {
-            PaginationContext.destroy();
-        }
-        result.put("apis", apiSortedSet);
-        result.put("totalLength", totalLength);
-        return result;
-    }
-
-    /**
-     * The method to get Light Weight APIs to Store view
-     * @param tenantDomain tenant domain
-     * @param start start limit
-     * @param end end limit
-     * @return Set<API>  Set of APIs
-     * @throws APIManagementException
-     */
-    public Map<String, Object> getAllPaginatedPublishedLightWeightAPIs(String tenantDomain, int start, int end)
-            throws APIManagementException {
-        Boolean displayAPIsWithMultipleStatus = false;
-        try {
-            if (tenantDomain != null) {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-        } finally {
-            endTenantFlow();
-        }
-        Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-        //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
-        if (!displayAPIsWithMultipleStatus) {
-            //Create the search attribute map
-            listMap.put(APIConstants.API_OVERVIEW_STATUS, new ArrayList<String>() {{
-                add(APIConstants.PUBLISHED);
-            }});
-        } else {
-            return getAllPaginatedAPIs(tenantDomain, start, end);
-        }
-        Map<String, Object> result = new HashMap<String, Object>();
-        SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
-        int totalLength = 0;
-        try {
-            Registry userRegistry;
-            boolean isTenantMode = (tenantDomain != null);
-            if ((isTenantMode && this.tenantDomain == null) ||
-                    (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
-                int tenantId = getTenantId(tenantDomain);
-                // explicitly load the tenant's registry
-                APIUtil.loadTenantRegistry(tenantId);
-                userRegistry = getGovernanceUserRegistry(tenantId);
-                setUsernameToThreadLocalCarbonContext(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
-            } else {
-                userRegistry = registry;
-                setUsernameToThreadLocalCarbonContext(this.username);
-            }
-            this.isTenantModeStoreView = isTenantMode;
-            this.requestedTenant = tenantDomain;
-
-            Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
-            List<API> multiVersionedAPIs = new ArrayList<API>();
-            Comparator<API> versionComparator = new APIVersionComparator();
-            Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
-
-            PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
-
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
-            if (artifactManager != null) {
-                GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
-                totalLength = PaginationContext.getInstance().getLength();
-                if (genericArtifacts == null || genericArtifacts.length == 0) {
-                    result.put("apis", apiSortedSet);
-                    result.put("totalLength", totalLength);
-                    return result;
-                }
-
-                for (GenericArtifact artifact : genericArtifacts) {
-                    if (artifact == null) {
-                        log.error("Failed to retrieve artifact when getting paginated published API.");
-                        continue;
-                    }
-                    // adding the API provider can mark the latest API .
-                    API api = APIUtil.getLightWeightAPI(artifact);
-                    if (api != null) {
-                        String key;
-                        //Check the configuration to allow showing multiple versions of an API true/false
-                        if (!displayMultipleVersions) { //If allow only showing the latest version of an API
-                            key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
-                            API existingAPI = latestPublishedAPIs.get(key);
-                            if (existingAPI != null) {
-                                // If we have already seen an API with the same name, make sure
-                                // this one has a higher version number
-                                if (versionComparator.compare(api, existingAPI) > 0) {
-                                    latestPublishedAPIs.put(key, api);
-                                }
-                            } else {
-                                // We haven't seen this API before
-                                latestPublishedAPIs.put(key, api);
-                            }
-                        } else { //If allow showing multiple versions of an API
-                            multiVersionedAPIs.add(api);
-                        }
-                    }
-                }
-                if (!displayMultipleVersions) {
-                    apiSortedSet.addAll(latestPublishedAPIs.values());
-                    result.put("apis", apiSortedSet);
-                    result.put("totalLength", totalLength);
-                    return result;
-                } else {
-                    apiVersionsSortedSet.addAll(multiVersionedAPIs);
-                    result.put("apis", apiVersionsSortedSet);
-                    result.put("totalLength", totalLength);
-                    return result;
-                }
-            } else {
-                String errorMessage = "Artifact manager is null for tenant domain " + tenantDomain +
-                        " when retrieving all Published APIs.";
-                log.error(errorMessage);
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to get all published APIs", e);
-        } catch (UserStoreException e) {
-            handleException("Failed to get all published APIs", e);
-        } finally {
-            PaginationContext.destroy();
-        }
-        result.put("apis", apiSortedSet);
-        result.put("totalLength", totalLength);
-        return result;
-    }
-
-    /**
-     * The method to get APIs in any of the given LC status array
-     *
-     * @return Map<String, Object>  API result set with pagination information
-     * @throws APIManagementException
-     */
-    @Override
-    public Map<String, Object> getAllPaginatedLightWeightAPIsByStatus(String tenantDomain,
-                                                                      int start, int end, final String[] apiStatus,
-                                                                      boolean returnAPITags)
-            throws APIManagementException {
-
-        Map<String, Object> result = new HashMap<String, Object>();
-        SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
-        int totalLength = 0;
-        boolean isMore = false;
-        String criteria = "lcState=";
-
-        try {
-            Registry userRegistry;
-            boolean isTenantMode = (tenantDomain != null);
-            if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {
-                //Tenant store anonymous mode
-                int tenantId = getTenantId(tenantDomain);
-                // explicitly load the tenant's registry
-                APIUtil.loadTenantRegistry(tenantId);
-                userRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
-                        getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-                setUsernameToThreadLocalCarbonContext(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
-            } else {
-                userRegistry = registry;
-                setUsernameToThreadLocalCarbonContext(this.username);
-            }
-            this.isTenantModeStoreView = isTenantMode;
-            this.requestedTenant = tenantDomain;
-
-            Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
-            List<API> multiVersionedAPIs = new ArrayList<API>();
-            Comparator<API> versionComparator = new APIVersionComparator();
-            Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
-            String paginationLimit = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
-
-            // If the Config exists use it to set the pagination limit
-            final int maxPaginationLimit;
-            if (paginationLimit != null) {
-                // The additional 1 added to the maxPaginationLimit is to help us determine if more
-                // APIs may exist so that we know that we are unable to determine the actual total
-                // API count. We will subtract this 1 later on so that it does not interfere with
-                // the logic of the rest of the application
-                int pagination = Integer.parseInt(paginationLimit);
-
-                // Because the store jaggery pagination logic is 10 results per a page we need to set pagination
-                // limit to at least 11 or the pagination done at this level will conflict with the store pagination
-                // leading to some of the APIs not being displayed
-                if (pagination < 11) {
-                    pagination = 11;
-                    log.warn("Value of '" + APIConstants.API_STORE_APIS_PER_PAGE + "' is too low, defaulting to 11");
-                }
-
-                maxPaginationLimit = start + pagination + 1;
-            }
-            // Else if the config is not specified we go with default functionality and load all
-            else {
-                maxPaginationLimit = Integer.MAX_VALUE;
-            }
-
-            PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
-            criteria = criteria + APIUtil.getORBasedSearchCriteria(apiStatus);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
-            if (artifactManager != null) {
-                if (apiStatus != null && apiStatus.length > 0) {
-                    List<GovernanceArtifact> genericArtifacts = GovernanceUtils.findGovernanceArtifacts
-                            (getSearchQuery(criteria), userRegistry, APIConstants.API_RXT_MEDIA_TYPE);
-                    totalLength = PaginationContext.getInstance().getLength();
-                    if (genericArtifacts == null || genericArtifacts.size() == 0) {
-                        result.put("apis", apiSortedSet);
-                        result.put("totalLength", totalLength);
-                        result.put("isMore", isMore);
-                        return result;
-                    }
-
-                    // Check to see if we can speculate that there are more APIs to be loaded
-                    if (maxPaginationLimit == totalLength) {
-                        isMore = true;  // More APIs exist so we cannot determine the total API count without
-                        // incurring a performance hit
-                        --totalLength; // Remove the additional 1 we added earlier when setting max pagination limit
-                    }
-                    int tempLength = 0;
-                    for (GovernanceArtifact artifact : genericArtifacts) {
-                        API api = null;
-                        try {
-                            api = APIUtil.getLightWeightAPI(artifact);
-                        } catch (APIManagementException e) {
-                            //log and continue since we want to load the rest of the APIs.
-                            log.error("Error while loading API " + artifact.getAttribute(
-                                    APIConstants.API_OVERVIEW_NAME),
-                                    e);
-                        }
-                        if (api != null) {
-                            if (returnAPITags) {
-                                String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-                                Set<String> tags = new HashSet<String>();
-                                org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
-                                for (org.wso2.carbon.registry.core.Tag tag1 : tag) {
-                                    tags.add(tag1.getTagName());
-                                }
-                                api.addTags(tags);
-                            }
-
-                            String key;
-                            //Check the configuration to allow showing multiple versions of an API true/false
-                            if (!displayMultipleVersions) { //If allow only showing the latest version of an API
-                                key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
-                                API existingAPI = latestPublishedAPIs.get(key);
-                                if (existingAPI != null) {
-                                    // If we have already seen an API with the same name, make sure
-                                    // this one has a higher version number
-                                    if (versionComparator.compare(api, existingAPI) > 0) {
-                                        latestPublishedAPIs.put(key, api);
-                                    }
-                                } else {
-                                    // We haven't seen this API before
-                                    latestPublishedAPIs.put(key, api);
-                                }
-                            } else { //If allow showing multiple versions of an API
-                                multiVersionedAPIs.add(api);
-                            }
-                        }
-                        tempLength++;
-                        if (tempLength >= totalLength) {
-                            break;
-                        }
-                    }
-                    if (!displayMultipleVersions) {
-                        apiSortedSet.addAll(latestPublishedAPIs.values());
-                        result.put("apis", apiSortedSet);
-                        result.put("totalLength", totalLength);
-                        result.put("isMore", isMore);
-                        return result;
-                    } else {
-                        apiVersionsSortedSet.addAll(multiVersionedAPIs);
-                        result.put("apis", apiVersionsSortedSet);
-                        result.put("totalLength", totalLength);
-                        result.put("isMore", isMore);
-                        return result;
-                    }
-                }
-            } else {
-                String errorMessage = "Artifact manager is null for tenant domain " + tenantDomain +
-                        " when retrieving all paginated APIs by status.";
-                log.error(errorMessage);
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to get all published APIs", e);
-        } catch (UserStoreException e) {
-            handleException("Failed to get all published APIs", e);
-        } finally {
-            PaginationContext.destroy();
-        }
-        result.put("apis", apiSortedSet);
-        result.put("totalLength", totalLength);
-        result.put("isMore", isMore);
-        return result;
-    }
 
     /**
      * Regenerate consumer secret.
@@ -873,362 +276,22 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(clientId);
 
-        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain,keyManagerName);
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO =
+                apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+        if (keyManagerConfigurationDTO == null) {
+            keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
+            if (keyManagerConfigurationDTO != null) {
+                keyManagerName = keyManagerConfigurationDTO.getName();
+            } else {
+                log.error("Key Manager: " + keyManagerName + " not found in database.");
+                throw new APIManagementException("Key Manager " + keyManagerName + " not found in database.",
+                        ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+            }
+        }
+
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
         return keyManager.getNewApplicationConsumerSecret(tokenRequest);
     }
-
-    /**
-     * The method to get APIs in any of the given LC status array
-     *
-     * @return Map<String, Object>  API result set with pagination information
-     * @throws APIManagementException
-     */
-    @Override
-    public Map<String, Object> getAllPaginatedAPIsByStatus(String tenantDomain,
-                                                           int start, int end, final String[] apiStatus, boolean returnAPITags) throws APIManagementException {
-
-        Map<String, Object> result = new HashMap<String, Object>();
-        SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
-        int totalLength = 0;
-        boolean isMore = false;
-        String criteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
-
-        try {
-            Registry userRegistry;
-            boolean isTenantMode = (tenantDomain != null);
-            if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
-                int tenantId = getTenantId(tenantDomain);
-                // explicitly load the tenant's registry
-                APIUtil.loadTenantRegistry(tenantId);
-                userRegistry = getGovernanceUserRegistry(tenantId);
-                setUsernameToThreadLocalCarbonContext(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
-            } else {
-                userRegistry = registry;
-                setUsernameToThreadLocalCarbonContext(this.username);
-            }
-            this.isTenantModeStoreView = isTenantMode;
-            this.requestedTenant = tenantDomain;
-
-            Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
-            List<API> multiVersionedAPIs = new ArrayList<API>();
-            Comparator<API> versionComparator = new APIVersionComparator();
-            Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
-            String paginationLimit = getAPIManagerConfiguration().
-                    getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
-
-            // If the Config exists use it to set the pagination limit
-            final int maxPaginationLimit;
-            if (paginationLimit != null) {
-                // The additional 1 added to the maxPaginationLimit is to help us determine if more
-                // APIs may exist so that we know that we are unable to determine the actual total
-                // API count. We will subtract this 1 later on so that it does not interfere with
-                // the logic of the rest of the application
-                int pagination = Integer.parseInt(paginationLimit);
-
-                // Because the store jaggery pagination logic is 10 results per a page we need to set pagination
-                // limit to at least 11 or the pagination done at this level will conflict with the store pagination
-                // leading to some of the APIs not being displayed
-                if (pagination < 11) {
-                    pagination = 11;
-                    log.warn("Value of '" + APIConstants.API_STORE_APIS_PER_PAGE + "' is too low, defaulting to 11");
-                }
-
-                maxPaginationLimit = start + pagination + 1;
-            }
-            // Else if the config is not specified we go with default functionality and load all
-            else {
-                maxPaginationLimit = Integer.MAX_VALUE;
-            }
-
-            PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
-
-            criteria = criteria + APIUtil.getORBasedSearchCriteria(apiStatus);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
-            if (artifactManager != null) {
-                if (apiStatus != null && apiStatus.length > 0) {
-                    List<GovernanceArtifact> genericArtifacts = GovernanceUtils.findGovernanceArtifacts
-                            (getSearchQuery(criteria), userRegistry, APIConstants.API_RXT_MEDIA_TYPE);
-                    totalLength = PaginationContext.getInstance().getLength();
-                    if (genericArtifacts == null || genericArtifacts.size() == 0) {
-                        result.put("apis", apiSortedSet);
-                        result.put("totalLength", totalLength);
-                        result.put("isMore", isMore);
-                        return result;
-                    }
-
-                    // Check to see if we can speculate that there are more APIs to be loaded
-                    if (maxPaginationLimit == totalLength) {
-                        isMore = true;  // More APIs exist so we cannot determine the total API count without incurring a
-                        // performance hit
-                        --totalLength; // Remove the additional 1 we added earlier when setting max pagination limit
-                    }
-                    int tempLength = 0;
-                    for (GovernanceArtifact artifact : genericArtifacts) {
-
-                        API api = null;
-                        try {
-                            api = APIUtil.getAPI(artifact);
-                        } catch (APIManagementException e) {
-                            //log and continue since we want to load the rest of the APIs.
-                            log.error("Error while loading API " + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
-                                    e);
-                        }
-                        if (api != null) {
-                            if (returnAPITags) {
-                                String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-                                Set<String> tags = new HashSet<String>();
-                                org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
-                                for (org.wso2.carbon.registry.core.Tag tag1 : tag) {
-                                    tags.add(tag1.getTagName());
-                                }
-                                api.addTags(tags);
-                            }
-
-                            String key;
-                            //Check the configuration to allow showing multiple versions of an API true/false
-                            if (!displayMultipleVersions) { //If allow only showing the latest version of an API
-                                key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
-                                API existingAPI = latestPublishedAPIs.get(key);
-                                if (existingAPI != null) {
-                                    // If we have already seen an API with the same name, make sure
-                                    // this one has a higher version number
-                                    if (versionComparator.compare(api, existingAPI) > 0) {
-                                        latestPublishedAPIs.put(key, api);
-                                    }
-                                } else {
-                                    // We haven't seen this API before
-                                    latestPublishedAPIs.put(key, api);
-                                }
-                            } else { //If allow showing multiple versions of an API
-                                multiVersionedAPIs.add(api);
-                            }
-                        }
-                        tempLength++;
-                        if (tempLength >= totalLength) {
-                            break;
-                        }
-                    }
-                    if (!displayMultipleVersions) {
-                        apiSortedSet.addAll(latestPublishedAPIs.values());
-                        result.put("apis", apiSortedSet);
-                        result.put("totalLength", totalLength);
-                        result.put("isMore", isMore);
-                        return result;
-                    } else {
-                        apiVersionsSortedSet.addAll(multiVersionedAPIs);
-                        result.put("apis", apiVersionsSortedSet);
-                        result.put("totalLength", totalLength);
-                        result.put("isMore", isMore);
-                        return result;
-                    }
-                }
-            } else {
-                String errorMessage = "Artifact manager is null for tenant domain " + tenantDomain
-                        + " when retrieving all paginated APIs by status.";
-                log.error(errorMessage);
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to get all published APIs", e);
-        } catch (UserStoreException e) {
-            handleException("Failed to get all published APIs", e);
-        } finally {
-            PaginationContext.destroy();
-        }
-        result.put("apis", apiSortedSet);
-        result.put("totalLength", totalLength);
-        result.put("isMore", isMore);
-        return result;
-
-    }
-
-    /**
-     * The method to get APIs by given status to Store view
-     *
-     * @return Set<API>  Set of APIs
-     * @throws APIManagementException
-     */
-    @Override
-    @Deprecated
-	public Map<String, Object> getAllPaginatedAPIsByStatus(String tenantDomain,
-			int start, int end, final String apiStatus, boolean returnAPITags) throws APIManagementException {
-        try {
-            if (tenantDomain != null) {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-        }finally {
-            endTenantFlow();
-        }
-    	Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-    	Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-        //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
-        if (APIConstants.PROTOTYPED.equals(apiStatus)) {
-            listMap.put(APIConstants.API_OVERVIEW_STATUS, new ArrayList<String>() {{
-                add(apiStatus);
-            }});
-        } else {
-            if (!displayAPIsWithMultipleStatus) {
-                //Create the search attribute map
-                listMap.put(APIConstants.API_OVERVIEW_STATUS, new ArrayList<String>() {{
-                    add(apiStatus);
-                }});
-            } else {
-                return getAllPaginatedAPIs(tenantDomain, start, end);
-            }
-        }
-
-        Map<String,Object> result=new HashMap<String, Object>();
-        SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
-        int totalLength=0;
-        boolean isMore = false;
-        try {
-            Registry userRegistry;
-            boolean isTenantMode=(tenantDomain != null);
-            if ((isTenantMode && this.tenantDomain==null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
-                int tenantId = getTenantId(tenantDomain);
-                // explicitly load the tenant's registry
-                APIUtil.loadTenantRegistry(tenantId);
-                userRegistry = getGovernanceUserRegistry(tenantId);
-                setUsernameToThreadLocalCarbonContext(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
-            } else {
-                userRegistry = registry;
-                setUsernameToThreadLocalCarbonContext(this.username);
-            }
-            this.isTenantModeStoreView = isTenantMode;
-            this.requestedTenant = tenantDomain;
-
-            Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
-            List<API> multiVersionedAPIs = new ArrayList<API>();
-            Comparator<API> versionComparator = new APIVersionComparator();
-            Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
-            String paginationLimit = getAPIManagerConfiguration()
-                    .getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
-
-            // If the Config exists use it to set the pagination limit
-            final int maxPaginationLimit;
-            if (paginationLimit != null) {
-                // The additional 1 added to the maxPaginationLimit is to help us determine if more
-                // APIs may exist so that we know that we are unable to determine the actual total
-                // API count. We will subtract this 1 later on so that it does not interfere with
-                // the logic of the rest of the application
-                int pagination = Integer.parseInt(paginationLimit);
-
-                // Because the store jaggery pagination logic is 10 results per a page we need to set pagination
-                // limit to at least 11 or the pagination done at this level will conflict with the store pagination
-                // leading to some of the APIs not being displayed
-                if (pagination < 11) {
-                    pagination = 11;
-                    log.warn("Value of '" + APIConstants.API_STORE_APIS_PER_PAGE + "' is too low, defaulting to 11");
-                }
-
-                maxPaginationLimit = start + pagination + 1;
-            }
-            // Else if the config is not specified we go with default functionality and load all
-            else {
-                maxPaginationLimit = Integer.MAX_VALUE;
-            }
-
-            PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
-            if (artifactManager != null) {
-
-                GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
-                totalLength=PaginationContext.getInstance().getLength();
-                if (genericArtifacts == null || genericArtifacts.length == 0) {
-                    result.put("apis",apiSortedSet);
-                    result.put("totalLength",totalLength);
-                    result.put("isMore", isMore);
-                    return result;
-                }
-
-                // Check to see if we can speculate that there are more APIs to be loaded
-                if (maxPaginationLimit == totalLength) {
-                    isMore = true;  // More APIs exist so we cannot determine the total API count without incurring a
-                            // performance hit
-                    --totalLength; // Remove the additional 1 we added earlier when setting max pagination limit
-                }
-                int tempLength=0;
-                for (GenericArtifact artifact : genericArtifacts) {
-
-                    if (artifact == null) {
-                        log.error("Failed to retrieve artifact when getting all paginated APIs by status.");
-                        continue;
-                    }
-                    API api  = null;
-                    try {
-                        api = APIUtil.getAPI(artifact);
-                    } catch (APIManagementException e) {
-                        //log and continue since we want to load the rest of the APIs.
-                        log.error("Error while loading API " + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
-                                e);
-                    }
-                    if (api != null) {
-                        if (returnAPITags) {
-                            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-                            Set<String> tags = new HashSet<String>();
-                            org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
-                            for (org.wso2.carbon.registry.core.Tag tag1 : tag) {
-                                tags.add(tag1.getTagName());
-                            }
-                            api.addTags(tags);
-                        }
-
-                        String key;
-                        //Check the configuration to allow showing multiple versions of an API true/false
-                        if (!displayMultipleVersions) { //If allow only showing the latest version of an API
-                            key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
-                            API existingAPI = latestPublishedAPIs.get(key);
-                            if (existingAPI != null) {
-                                // If we have already seen an API with the same name, make sure
-                                // this one has a higher version number
-                                if (versionComparator.compare(api, existingAPI) > 0) {
-                                    latestPublishedAPIs.put(key, api);
-                                }
-                            } else {
-                                // We haven't seen this API before
-                                latestPublishedAPIs.put(key, api);
-                            }
-                        } else { //If allow showing multiple versions of an API
-                            multiVersionedAPIs.add(api);
-                        }
-                    }
-                    tempLength++;
-                    if (tempLength >= totalLength){
-                        break;
-                    }
-                }
-                if (!displayMultipleVersions) {
-                    apiSortedSet.addAll(latestPublishedAPIs.values());
-                    result.put("apis",apiSortedSet);
-                    result.put("totalLength",totalLength);
-                    result.put("isMore", isMore);
-                    return result;
-                } else {
-                    apiVersionsSortedSet.addAll(multiVersionedAPIs);
-                    result.put("apis",apiVersionsSortedSet);
-                    result.put("totalLength",totalLength);
-                    result.put("isMore", isMore);
-                    return result;
-                }
-            } else {
-                String errorMessage = "Artifact manager is null for tenant domain " + tenantDomain
-                        + " when retrieving APIs by status.";
-                log.error(errorMessage);
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to get all published APIs", e);
-        } catch (UserStoreException e) {
-            handleException("Failed to get all published APIs", e);
-        } finally {
-            PaginationContext.destroy();
-        }
-        result.put("apis", apiSortedSet);
-        result.put("totalLength", totalLength);
-        result.put("isMore", isMore);
-        return result;
-	}
 
     /**
      * Re-generates the access token.
@@ -1271,7 +334,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
                 if (keyManagerConfiguration == null) {
                     throw new APIManagementException("Key Manager " + keyManagerName + " couldn't found.",
-                            ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                            ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
                 }
             }
             if (keyManagerConfiguration.isEnabled()) {
@@ -1327,11 +390,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         jwtTokenInfoDTO.setPermittedReferer(permittedReferer);
 
         ApiKeyGenerator apiKeyGenerator = loadApiKeyGenerator();
-        return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+        if (apiKeyGenerator != null) {
+            return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+        } else {
+            throw new APIManagementException("Failed to generate the API key");
+        }
     }
 
-    private ApiKeyGenerator loadApiKeyGenerator() {
-        ApiKeyGenerator apiKeyGenerator = null;
+    private ApiKeyGenerator loadApiKeyGenerator() throws APIManagementException {
+        ApiKeyGenerator apiKeyGenerator;
         String keyGeneratorClassName = APIUtil.getApiKeyGeneratorImpl();
 
         try {
@@ -1340,367 +407,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiKeyGenerator = (ApiKeyGenerator) constructor.newInstance();
         } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |
                 InvocationTargetException e) {
-            log.error("Error while loading the api key generator class: " + keyGeneratorClassName, e);
+            throw new APIManagementException("Error while loading the api key generator class: "
+                    + keyGeneratorClassName, e);
         }
         return apiKeyGenerator;
-    }
-
-    /**
-     * The method to get All PUBLISHED and DEPRECATED APIs, to Store view
-     *
-     * @return Set<API>  Set of APIs
-     * @throws APIManagementException
-     */
-    @Deprecated
-    public Map<String,Object> getAllPaginatedAPIs(String tenantDomain,int start,int end) throws APIManagementException {
-        Map<String,Object> result=new HashMap<String, Object>();
-        SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
-        int totalLength=0;
-        try {
-            Registry userRegistry;
-            boolean isTenantMode=(tenantDomain != null);
-            if ((isTenantMode && this.tenantDomain==null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
-                int tenantId = getTenantId(tenantDomain);
-                userRegistry = getGovernanceUserRegistry(tenantId);
-                setUsernameToThreadLocalCarbonContext(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
-            } else {
-                userRegistry = registry;
-                setUsernameToThreadLocalCarbonContext(this.username);
-            }
-            this.isTenantModeStoreView = isTenantMode;
-            this.requestedTenant = tenantDomain;
-
-            Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
-            List<API> multiVersionedAPIs = new ArrayList<API>();
-            Comparator<API> versionComparator = new APIVersionComparator();
-            Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
-
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
-
-            PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
-
-
-            boolean noPublishedAPIs = false;
-            if (artifactManager != null) {
-
-            	//Create the search attribute map for PUBLISHED APIs
-            	Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-                listMap.put(APIConstants.API_OVERVIEW_STATUS, new ArrayList<String>() {{
-                        add(APIConstants.PUBLISHED);
-                    }});
-
-                GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
-                totalLength = PaginationContext.getInstance().getLength();
-                if (genericArtifacts == null || genericArtifacts.length == 0) {
-                	noPublishedAPIs = true;
-                }
-                int publishedAPICount;
-                if (genericArtifacts != null) {
-                    for (GenericArtifact artifact : genericArtifacts) {
-                        if (artifact == null) {
-                            log.error("Failed to retrieve artifact when getting all paginated APIs.");
-                            continue;
-                        }
-                        // adding the API provider can mark the latest API .
-//                        String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-                        API api  = APIUtil.getAPI(artifact);
-                        if (api != null) {
-                            String key;
-                            //Check the configuration to allow showing multiple versions of an API true/false
-                            if (!displayMultipleVersions) { //If allow only showing the latest version of an API
-                                key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
-                                API existingAPI = latestPublishedAPIs.get(key);
-                                if (existingAPI != null) {
-                                    // If we have already seen an API with the same name, make sure
-                                    // this one has a higher version number
-                                    if (versionComparator.compare(api, existingAPI) > 0) {
-                                        latestPublishedAPIs.put(key, api);
-                                    }
-                                } else {
-                                    // We haven't seen this API before
-                                    latestPublishedAPIs.put(key, api);
-                                }
-                            } else { //If allow showing multiple versions of an API
-    //                            key = api.getId().getProviderName() + ":" + api.getId().getApiName() + ":" + api.getId()
-    //                                    .getVersion();
-                                multiVersionedAPIs.add(api);
-                            }
-                        }
-                    }
-                }
-                if (!displayMultipleVersions) {
-                	publishedAPICount = latestPublishedAPIs.size();
-                } else {
-                	publishedAPICount = multiVersionedAPIs.size();
-                }
-                if ((start + end) > publishedAPICount) {
-                	if (publishedAPICount > 0) {
-                		/*Starting to retrieve DEPRECATED APIs*/
-                		start = 0;
-                		/* publishedAPICount is always less than end*/
-                		end = end - publishedAPICount;
-                	} else {
-                		start = start - totalLength;
-                	}
-                	PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
-	                //Create the search attribute map for DEPRECATED APIs
-	                Map<String, List<String>> listMapForDeprecatedAPIs = new HashMap<String, List<String>>();
-	                listMapForDeprecatedAPIs.put(APIConstants.API_OVERVIEW_STATUS, new ArrayList<String>() {{
-	                        add(APIConstants.DEPRECATED);
-	                    }});
-
-	                GenericArtifact[] genericArtifactsForDeprecatedAPIs = artifactManager.findGenericArtifacts(listMapForDeprecatedAPIs);
-	                totalLength = totalLength + PaginationContext.getInstance().getLength();
-	                if ((genericArtifactsForDeprecatedAPIs == null || genericArtifactsForDeprecatedAPIs.length == 0) && noPublishedAPIs) {
-	                	result.put("apis",apiSortedSet);
-	                    result.put("totalLength",totalLength);
-	                    return result;
-	                }
-
-                    if (genericArtifactsForDeprecatedAPIs != null) {
-                        for (GenericArtifact artifact : genericArtifactsForDeprecatedAPIs) {
-                            if (artifact == null) {
-                                log.error("Failed to retrieve artifact when getting deprecated APIs.");
-                                continue;
-                            }
-                            // adding the API provider can mark the latest API .
-
-                            API api  = APIUtil.getAPI(artifact);
-
-                            if (api != null) {
-                                String key;
-                                //Check the configuration to allow showing multiple versions of an API true/false
-                                if (!displayMultipleVersions) { //If allow only showing the latest version of an API
-                                    key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
-                                    API existingAPI = latestPublishedAPIs.get(key);
-                                    if (existingAPI != null) {
-                                        // If we have already seen an API with the same name, make sure
-                                        // this one has a higher version number
-                                        if (versionComparator.compare(api, existingAPI) > 0) {
-                                            latestPublishedAPIs.put(key, api);
-                                        }
-                                    } else {
-                                        // We haven't seen this API before
-                                        latestPublishedAPIs.put(key, api);
-                                    }
-                                } else { //If allow showing multiple versions of an API
-                                    multiVersionedAPIs.add(api);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (!displayMultipleVersions) {
-                    for (API api : latestPublishedAPIs.values()) {
-                        apiSortedSet.add(api);
-                    }
-                    result.put("apis",apiSortedSet);
-                    result.put("totalLength",totalLength);
-                    return result;
-                } else {
-                    apiVersionsSortedSet.addAll(multiVersionedAPIs);
-                    result.put("apis",apiVersionsSortedSet);
-                    result.put("totalLength",totalLength);
-                    return result;
-                }
-            } else {
-                String errorMessage = "Artifact manager is null for tenant domain " + tenantDomain
-                        + " when retrieving all paginated APIs.";
-                log.error(errorMessage);
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to get all published APIs", e);
-        } catch (UserStoreException e) {
-            handleException("Failed to get all published APIs", e);
-        }finally {
-            PaginationContext.destroy();
-        }
-        result.put("apis", apiSortedSet);
-        result.put("totalLength", totalLength);
-        return result;
-    }
-
-    @Override
-    public Set<API> getTopRatedAPIs(int limit) throws APIManagementException {
-        int returnLimit = 0;
-        SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        try {
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            if (artifactManager == null) {
-                String errorMessage = "Artifact manager is null when retrieving top rated APIs.";
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-            GenericArtifact[] genericArtifacts = artifactManager.getAllGenericArtifacts();
-            if (genericArtifacts == null || genericArtifacts.length == 0) {
-                return apiSortedSet;
-            }
-            for (GenericArtifact genericArtifact : genericArtifacts) {
-                String status = APIUtil.getLcStateFromArtifact(genericArtifact);
-                if (APIConstants.PUBLISHED.equals(status)) {
-                    String artifactPath = genericArtifact.getPath();
-
-                    float rating = registry.getAverageRating(artifactPath);
-                    if (rating > APIConstants.TOP_TATE_MARGIN && (returnLimit < limit)) {
-                        returnLimit++;
-                        API api = APIUtil.getAPI(genericArtifact, registry);
-                        if (api != null) {
-                            apiSortedSet.add(api);
-                        }
-                    }
-                }
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to get top rated API", e);
-        }
-        return apiSortedSet;
-    }
-
-    /**
-     * Get the recently added APIs set
-     *
-     * @param limit no limit. Return everything else, limit the return list to specified value.
-     * @return Set<API>
-     * @throws APIManagementException
-     */
-    @Override
-    public Set<API> getRecentlyAddedAPIs(int limit, String tenantDomain)
-            throws APIManagementException {
-        SortedSet<API> recentlyAddedAPIs = new TreeSet<API>(new APINameComparator());
-        SortedSet<API> recentlyAddedAPIsWithMultipleVersions = new TreeSet<API>(new APIVersionComparator());
-        Registry userRegistry;
-        APIManagerConfiguration config = getAPIManagerConfiguration();
-        boolean isRecentlyAddedAPICacheEnabled =
-              Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE));
-
-        PrivilegedCarbonContext.startTenantFlow();
-        boolean isTenantFlowStarted ;
-        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            isTenantFlowStarted = true;
-        } else {
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            isTenantFlowStarted = true;
-        }
-
-        try {
-            boolean isTenantMode = (tenantDomain != null);
-            if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant based store anonymous mode
-                int tenantId = getTenantId(tenantDomain);
-                // explicitly load the tenant's registry
-      	      	APIUtil.loadTenantRegistry(tenantId);
-                setUsernameToThreadLocalCarbonContext(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
-                isTenantFlowStarted = true;
-                userRegistry = getGovernanceUserRegistry(tenantId);
-            } else {
-                userRegistry = registry;
-                setUsernameToThreadLocalCarbonContext(this.username);
-                isTenantFlowStarted = true;
-            }
-            if (isRecentlyAddedAPICacheEnabled) {
-                boolean isStatusChanged = false;
-                Set<API> recentlyAddedAPI = (Set<API>) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                        .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).get(username + COLON_CHAR + tenantDomain);
-                if (recentlyAddedAPI != null) {
-                    for (API api : recentlyAddedAPI) {
-                        try {
-                            if (!APIConstants.PUBLISHED.equalsIgnoreCase(userRegistry.get(APIUtil.getAPIPath(api.getId())).getProperty(APIConstants.API_STATUS))) {
-                                isStatusChanged = true;
-                                break;
-                            }
-                        } catch (Exception ex) {
-                            log.error("Error while checking API status for APP " + api.getId().getApiName() + '-' +
-                                      api.getId().getVersion(), ex);
-                        }
-                    }
-                    if (!isStatusChanged) {
-                        return recentlyAddedAPI;
-                    }
-                }
-            }
-
-            PaginationContext.init(0, limit, APIConstants.REGISTRY_ARTIFACT_SEARCH_DESC_ORDER,
-                    APIConstants.CREATED_DATE, Integer.MAX_VALUE);
-            Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-        	listMap.put(APIConstants.API_OVERVIEW_STATUS, new ArrayList<String>() {{
-        		add(APIConstants.PUBLISHED);
-        	}});
-            listMap.put(APIConstants.STORE_VIEW_ROLES, getUserRoleList());
-            String searchCriteria = APIConstants.LCSTATE_SEARCH_KEY + "= (" + APIConstants.PUBLISHED + ")";
-
-        	//Find UUID
-        	GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
-        	if (artifactManager != null) {
-                GenericArtifact[] genericArtifacts = artifactManager.findGovernanceArtifacts(getSearchQuery(searchCriteria));
-        		SortedSet<API> allAPIs = new TreeSet<API>(new APINameComparator());
-        		for (GenericArtifact artifact : genericArtifacts) {
-
-                    API api = null;
-                    try {
-                        api = APIUtil.getAPI(artifact);
-                    } catch (APIManagementException e) {
-                        //just log and continue since we want to go through the other APIs as well.
-                        log.error("Error loading API " + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME), e);
-                    }
-                    if (api != null) {
-                        allAPIs.add(api);
-                    }
-                }
-
-				if (!APIUtil.isAllowDisplayMultipleVersions()) {
-					Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
-					Comparator<API> versionComparator = new APIVersionComparator();
-					String key;
-					for (API api : allAPIs) {
-						key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
-						API existingAPI = latestPublishedAPIs.get(key);
-						if (existingAPI != null) {
-							// If we have already seen an API with the same
-							// name, make sure this one has a higher version
-							// number
-							if (versionComparator.compare(api, existingAPI) > 0) {
-								latestPublishedAPIs.put(key, api);
-							}
-						} else {
-							// We haven't seen this API before
-							latestPublishedAPIs.put(key, api);
-						}
-					}
-
-                    recentlyAddedAPIs.addAll(latestPublishedAPIs.values());
-					if (isRecentlyAddedAPICacheEnabled) {
-						Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-						       .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME)
-						       .put(username + COLON_CHAR + tenantDomain, allAPIs);
-					}
-					return recentlyAddedAPIs;
-				} else {
-        			recentlyAddedAPIsWithMultipleVersions.addAll(allAPIs);
-					if (isRecentlyAddedAPICacheEnabled) {
-						Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-						       .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME)
-						       .put(username + COLON_CHAR + tenantDomain, allAPIs);
-					}
-        			return recentlyAddedAPIsWithMultipleVersions;
-        		}
-            } else {
-                String errorMessage = "Artifact manager is null when retrieving recently added APIs for tenant domain "
-                        + tenantDomain;
-                log.error(errorMessage);
-            }
-        } catch (RegistryException e) {
-        	handleException("Failed to get all published APIs", e);
-        } catch (UserStoreException e) {
-        	handleException("Failed to get all published APIs", e);
-        } finally {
-        	PaginationContext.destroy();
-        	if (isTenantFlowStarted) {
-                endTenantFlow();
-            }
-        }
-        return recentlyAddedAPIs;
     }
 
     @Override
@@ -1729,84 +439,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (APIPersistenceException e) {
             String msg = "Failed to get API tags";
             throw new APIManagementException(msg, e);
-        } 
+        }
         return tagSet;
-    }
-
-    @Override
-    public Set<Tag> getTagsWithAttributes(String tenantDomain) throws APIManagementException {
-        // Fetch the all the tags first.
-        Set<Tag> tags = getAllTags(tenantDomain);
-        // For each and every tag get additional attributes from the registry.
-        String descriptionPathPattern = APIConstants.TAGS_INFO_ROOT_LOCATION + "/%s/description.txt";
-        String thumbnailPathPattern = APIConstants.TAGS_INFO_ROOT_LOCATION + "/%s/thumbnail.png";
-
-        //if the tenantDomain is not specified super tenant domain is used
-        if (StringUtils.isBlank(tenantDomain)) {
-            try {
-                tenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getSuperTenantDomain();
-            } catch (org.wso2.carbon.user.core.UserStoreException e) {
-                handleException("Cannot get super tenant domain name", e);
-            }
-        }
-
-        //get the registry instance related to the tenant domain
-        UserRegistry govRegistry = null;
-        try {
-            int tenantId = getTenantId(tenantDomain);
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            govRegistry = registryService.getGovernanceSystemRegistry(tenantId);
-        } catch (UserStoreException e) {
-            handleException("Cannot get tenant id for tenant domain name:" + tenantDomain, e);
-        } catch (RegistryException e) {
-            handleException("Cannot get registry for tenant domain name:" + tenantDomain, e);
-        }
-
-        if (govRegistry != null) {
-            for (Tag tag : tags) {
-                // Get the description.
-                Resource descriptionResource = null;
-                String descriptionPath = String.format(descriptionPathPattern, tag.getName());
-                try {
-                    if (govRegistry.resourceExists(descriptionPath)) {
-                        descriptionResource = govRegistry.get(descriptionPath);
-                    }
-                } catch (RegistryException e) {
-                    //warn and proceed to the next tag
-                    log.warn(String.format("Error while querying the existence of the description for the tag '%s'",
-                            tag.getName()), e);
-                }
-                // The resource is assumed to be a byte array since its the content
-                // of a text file.
-                if (descriptionResource != null) {
-                    try {
-                        String description = new String((byte[]) descriptionResource.getContent(),
-                                                        Charset.defaultCharset());
-                        tag.setDescription(description);
-                    } catch (ClassCastException e) {
-                        //added warnings as it can then proceed to load rest of resources/tags
-                        log.warn(String.format("Cannot cast content of %s to byte[]", descriptionPath), e);
-                    } catch (RegistryException e) {
-                        //added warnings as it can then proceed to load rest of resources/tags
-                        log.warn(String.format("Cannot read content of %s", descriptionPath), e);
-                    }
-                }
-                // Checks whether the thumbnail exists.
-                String thumbnailPath = String.format(thumbnailPathPattern, tag.getName());
-                try {
-                    boolean isThumbnailExists = govRegistry.resourceExists(thumbnailPath);
-                    tag.setThumbnailExists(isThumbnailExists);
-                    if (isThumbnailExists) {
-                        tag.setThumbnailUrl(APIUtil.getRegistryResourcePathForUI(
-                                APIConstants.RegistryResourceTypesForUI.TAG_THUMBNAIL, tenantDomain, thumbnailPath));
-                    }
-                } catch (RegistryException e) {
-                    //warn and then proceed to load rest of tags
-                    log.warn(String.format("Error while querying the existence of %s", thumbnailPath), e);
-                }
-            }
-        }
-        return tags;
     }
 
     @Override
@@ -1846,361 +480,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Set<API> getPublishedAPIsByProvider(String providerId, int limit)
-            throws APIManagementException {
-        SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
-        try {
-            Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
-            List<API> multiVersionedAPIs = new ArrayList<API>();
-            Comparator<API> versionComparator = new APIVersionComparator();
-            Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
-            Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-            String providerPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + providerId;
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            if (artifactManager == null) {
-                String errorMessage =
-                        "Artifact manager is null when retrieving published APIs by provider ID " + providerId;
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-            Association[] associations = registry.getAssociations(providerPath, APIConstants.PROVIDER_ASSOCIATION);
-            if (associations.length < limit || limit == -1) {
-                limit = associations.length;
-            }
-            for (int i = 0; i < limit; i++) {
-                Association association = associations[i];
-                String apiPath = association.getDestinationPath();
-                Resource resource = registry.get(apiPath);
-                String apiArtifactId = resource.getUUID();
-                if (apiArtifactId != null) {
-                    GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
-                    // check the API status
-                    String status = APIUtil.getLcStateFromArtifact(artifact);
-
-                    API api = null;
-                    //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
-                    if (!displayAPIsWithMultipleStatus) {
-                        // then we are only interested in published APIs here...
-                        if (APIConstants.PUBLISHED.equals(status)) {
-                            api = APIUtil.getAPI(artifact);
-                        }
-                    } else {   // else we are interested in both deprecated/published APIs here...
-                        if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status)) {
-                            api = APIUtil.getAPI(artifact);
-                        }
-                    }
-                    if (api != null) {
-                        String key;
-                        //Check the configuration to allow showing multiple versions of an API true/false
-                        if (!displayMultipleVersions) { //If allow only showing the latest version of an API
-                            key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
-                            API existingAPI = latestPublishedAPIs.get(key);
-                            if (existingAPI != null) {
-                                // If we have already seen an API with the same name, make sure
-                                // this one has a higher version number
-                                if (versionComparator.compare(api, existingAPI) > 0) {
-                                    latestPublishedAPIs.put(key, api);
-                                }
-                            } else {
-                                // We haven't seen this API before
-                                latestPublishedAPIs.put(key, api);
-                            }
-                        } else { //If allow showing multiple versions of an API
-                            multiVersionedAPIs.add(api);
-                        }
-                    }
-                } else {
-                    throw new GovernanceException("artifact id is null of " + apiPath);
-                }
-            }
-            if (!displayMultipleVersions) {
-                apiSortedSet.addAll(latestPublishedAPIs.values());
-                return apiSortedSet;
-            } else {
-                apiVersionsSortedSet.addAll(multiVersionedAPIs);
-                return apiVersionsSortedSet;
-            }
-
-        } catch (RegistryException e) {
-            handleException("Failed to get Published APIs for provider : " + providerId, e);
-        }
-        return null;
-    }
-
-    @Override
-    public Set<API> getPublishedAPIsByProvider(String providerId, String loggedUsername, int limit, String apiOwner,
-                                               String apiBizOwner) throws APIManagementException {
-        try {
-            Boolean allowMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
-            Boolean showAllAPIs = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-
-            String providerDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerId));
-            int tenantId = getTenantId(providerDomain);
-            final Registry registry = ServiceReferenceHolder.getInstance().
-                    getRegistryService().getGovernanceSystemRegistry(tenantId);
-
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
-            if (artifactManager == null) {
-                String errorMessage =
-                        "Artifact manager is null when retrieving all published APIs by provider ID " + providerId;
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-            int publishedAPICount = 0;
-            Map<String, API> apiCollection = new HashMap<String, API>();
-
-            if(apiBizOwner != null && !apiBizOwner.isEmpty()){
-                try {
-                    final String bizOwner = apiBizOwner;
-                    Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-                    listMap.put(APIConstants.API_OVERVIEW_BUSS_OWNER, new ArrayList<String>() {{
-                        add(bizOwner);
-                    }});
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
-                    GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
-
-                    if(genericArtifacts != null && genericArtifacts.length > 0){
-                        for(GenericArtifact artifact : genericArtifacts){
-                            if (publishedAPICount >= limit) {
-                                break;
-                            }
-                            if(isCandidateAPI(artifact.getPath(), loggedUsername, artifactManager, tenantId, showAllAPIs,
-                                              allowMultipleVersions, apiOwner, providerId, registry, apiCollection)){
-                                publishedAPICount += 1;
-                            }
-                        }
-                    }
-                } catch (GovernanceException e) {
-                    log.error("Error while finding APIs by business owner " + apiBizOwner, e);
-                    return null;
-                }
-            }
-            else{
-                String providerPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + providerId;
-                Association[] associations = registry.getAssociations(providerPath, APIConstants.PROVIDER_ASSOCIATION);
-
-                for (Association association : associations) {
-                    if (publishedAPICount >= limit) {
-                        break;
-                    }
-                    String apiPath = association.getDestinationPath();
-
-                    if(isCandidateAPI(apiPath, loggedUsername, artifactManager, tenantId, showAllAPIs,
-                            allowMultipleVersions, apiOwner, providerId, registry, apiCollection)){
-
-                        publishedAPICount += 1;
-                    }
-                }
-            }
-
-            return new HashSet<API>(apiCollection.values());
-
-        } catch (RegistryException e) {
-            handleException("Failed to get Published APIs for provider : " + providerId, e);
-            return null;
-        } catch (org.wso2.carbon.user.core.UserStoreException e) {
-            handleException("Failed to get Published APIs for provider : " + providerId, e);
-            return null;
-        } catch (UserStoreException e) {
-            handleException("Failed to get Published APIs for provider : " + providerId, e);
-            return null;
-        }
-    }
-
-    private boolean isCandidateAPI(String apiPath, String loggedUsername, GenericArtifactManager artifactManager,
-                                   int tenantId, boolean showAllAPIs, boolean allowMultipleVersions,
-                                   String apiOwner, String providerId, Registry registry, Map<String, API> apiCollection)
-            throws UserStoreException, RegistryException, APIManagementException {
-
-        AuthorizationManager manager = ServiceReferenceHolder.getInstance().getRealmService().
-                                                getTenantUserRealm(tenantId).getAuthorizationManager();
-        Comparator<API> versionComparator = new APIVersionComparator();
-
-        Resource resource;
-        String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                        apiPath);
-        boolean checkAuthorized;
-        String userNameWithoutDomain = loggedUsername;
-
-        if (!loggedUsername.isEmpty() && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(super.tenantDomain)) {
-            String[] nameParts = loggedUsername.split("@");
-            userNameWithoutDomain = nameParts[0];
-        }
-
-        int loggedInUserTenantDomain = -1;
-        if(!StringUtils.isEmpty(loggedUsername)) {
-            loggedInUserTenantDomain = APIUtil.getTenantId(loggedUsername);
-        }
-
-        if (loggedUsername.isEmpty()) {
-            // Anonymous user is viewing.
-            checkAuthorized = manager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
-        } else if (tenantId != loggedInUserTenantDomain) {
-            //Cross tenant scenario
-            providerId = APIUtil.replaceEmailDomainBack(providerId);
-            String[] nameParts = providerId.split("@");
-            String provideNameWithoutDomain = nameParts[0];
-            checkAuthorized = manager.isUserAuthorized(provideNameWithoutDomain, path, ActionConstants.GET);
-        } else {
-            // Some user is logged in also user and api provider tenant domain are same.
-            checkAuthorized = manager.isUserAuthorized(userNameWithoutDomain, path, ActionConstants.GET);
-        }
-
-        String apiArtifactId = null;
-        if (checkAuthorized) {
-            resource = registry.get(apiPath);
-            apiArtifactId = resource.getUUID();
-        }
-
-        if (apiArtifactId != null) {
-            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
-
-            // check the API status
-            String status = APIUtil.getLcStateFromArtifact(artifact);
-
-            API api = null;
-            //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
-            if (!showAllAPIs) {
-                // then we are only interested in published APIs here...
-                if (APIConstants.PUBLISHED.equals(status)) {
-                    api = APIUtil.getAPI(artifact);
-                }
-            } else {   // else we are interested in both deprecated/published APIs here...
-                if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status)) {
-                    api = APIUtil.getAPI(artifact);
-                }
-
-            }
-            if (api != null) {
-                String apiVisibility = api.getVisibility();
-                if(!StringUtils.isEmpty(apiVisibility) && !APIConstants.API_GLOBAL_VISIBILITY.equalsIgnoreCase(apiVisibility)) {
-                    String providerDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerId));
-                    String loginUserDomain = MultitenantUtils.getTenantDomain(loggedUsername);
-                    if(!StringUtils.isEmpty(providerDomain) && !StringUtils.isEmpty(loginUserDomain)
-                            && !providerDomain.equals(loginUserDomain)){
-                        return false;
-                    }
-                }
-                // apiOwner is the value coming from front end and compared against the API instance
-                if (apiOwner != null && !apiOwner.isEmpty()) {
-                    if (APIUtil.replaceEmailDomainBack(providerId).equals(APIUtil.replaceEmailDomainBack(apiOwner)) &&
-                        api.getApiOwner() != null && !api.getApiOwner().isEmpty() &&
-                        !APIUtil.replaceEmailDomainBack(apiOwner)
-                                .equals(APIUtil.replaceEmailDomainBack(api.getApiOwner()))) {
-                        return false; // reject remote APIs when local admin user's API selected
-                    } else if (!APIUtil.replaceEmailDomainBack(providerId).equals(APIUtil.replaceEmailDomainBack(apiOwner)) &&
-                               !APIUtil.replaceEmailDomainBack(apiOwner)
-                                       .equals(APIUtil.replaceEmailDomainBack(api.getApiOwner()))) {
-                        return false; // reject local admin's APIs when remote API selected
-                    }
-                }
-                String key;
-                //Check the configuration to allow showing multiple versions of an API true/false
-                if (!allowMultipleVersions) { //If allow only showing the latest version of an API
-                    key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
-                    API existingAPI = apiCollection.get(key);
-                    if (existingAPI != null) {
-                        // If we have already seen an API with the same name, make sure
-                        // this one has a higher version number
-                        if (versionComparator.compare(api, existingAPI) > 0) {
-                            apiCollection.put(key, api);
-                            return true;
-                        }
-                    } else {
-                        // We haven't seen this API before
-                        apiCollection.put(key, api);
-                        return true;
-                    }
-                } else { //If allow showing multiple versions of an API
-                    key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName() + COLON_CHAR + api.getId()
-                            .getVersion();
-                    //we're not really interested in the key, so generate one for the sake of adding this element to
-                    //the map.
-                    key = key + '_' + apiCollection.size();
-                    apiCollection.put(key, api);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType, String requestedTenantDomain,int start,int end, boolean isLazyLoad)
-            throws APIManagementException {
-        Map<String,Object> result = new HashMap<String,Object>();
-        boolean isTenantFlowStarted = false;
-        try {
-            boolean isTenantMode=(requestedTenantDomain != null);
-            if (isTenantMode && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenantDomain, true);
-            } else {
-                requestedTenantDomain = org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenantDomain, true);
-
-            }
-
-            Registry userRegistry;
-            int tenantIDLocal = 0;
-            String userNameLocal = this.username;
-            if ((isTenantMode && this.tenantDomain==null) || (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant store anonymous mode
-            	tenantIDLocal = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(requestedTenantDomain);
-                userRegistry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantIDLocal);
-                userNameLocal = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
-            } else {
-                userRegistry = this.registry;
-                tenantIDLocal = tenantId;
-            }
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
-
-            if (APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchType)) {
-                Map<Documentation, API> apiDocMap =
-                        APIUtil.searchAPIsByDoc(userRegistry, tenantIDLocal, userNameLocal, searchTerm,
-                                                APIConstants.STORE_CLIENT);
-                result.put("apis", apiDocMap);
-            	/*Pagination for Document search results is not supported yet, hence length is sent as end-start*/
-            	if (apiDocMap.isEmpty()) {
-            		result.put("length", 0);
-            	} else {
-            		result.put("length", end-start);
-            	}
-        	} else {
-            	result = searchPaginatedAPIs(userRegistry, searchTerm, searchType,start,end,isLazyLoad);
-            }
-
-        } catch (Exception e) {
-            handleException("Failed to Search APIs", e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-        return result;
-    }
-
-    @Deprecated
-    @Override
-    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String requestedTenantDomain, int start, int end,
-            boolean isLazyLoad) throws APIManagementException {
-        Map<String, Object> searchResults =
-                super.searchPaginatedAPIs(searchQuery, requestedTenantDomain, start, end, isLazyLoad);
-        if (APIUtil.isAllowDisplayMultipleVersions()) {
-            return searchResults;
-        }
-        return filterMultipleVersionedAPIs(searchResults);
-    }
-
-    @Override
     public boolean isSubscribedToApp(APIIdentifier apiIdentifier, String userId, int applicationId) throws
             APIManagementException {
         boolean isSubscribed;
@@ -2215,174 +494,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return isSubscribed;
     }
 
-    /**
-	 * Pagination API search based on solr indexing
-	 *
-	 * @param registry
-	 * @param searchTerm
-	 * @param searchType
-	 * @return
-	 * @throws APIManagementException
-	 */
-
-    public Map<String,Object> searchPaginatedAPIs(Registry registry, String searchTerm, String searchType,int start,int end, boolean limitAttributes) throws APIManagementException {
-        SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
-        List<API> apiList = new ArrayList<API>();
-
-        searchTerm = searchTerm.trim();
-        Map<String,Object> result=new HashMap<String, Object>();
-        int totalLength=0;
-        boolean isMore = false;
-        String criteria=APIConstants.API_OVERVIEW_NAME;
-        try {
-            String paginationLimit = getAPIManagerConfiguration()
-                    .getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
-
-            // If the Config exists use it to set the pagination limit
-            final int maxPaginationLimit;
-            if (paginationLimit != null) {
-                // The additional 1 added to the maxPaginationLimit is to help us determine if more
-                // APIs may exist so that we know that we are unable to determine the actual total
-                // API count. We will subtract this 1 later on so that it does not interfere with
-                // the logic of the rest of the application
-                int pagination = Integer.parseInt(paginationLimit);
-
-                // Because the store jaggery pagination logic is 10 results per a page we need to set pagination
-                // limit to at least 11 or the pagination done at this level will conflict with the store pagination
-                // leading to some of the APIs not being displayed
-                if (pagination < 11) {
-                    pagination = 11;
-                    log.warn("Value of '" + APIConstants.API_STORE_APIS_PER_PAGE + "' is too low, defaulting to 11");
-                }
-                maxPaginationLimit = start + pagination + 1;
-            }
-            // Else if the config is not specified we go with default functionality and load all
-            else {
-                maxPaginationLimit = Integer.MAX_VALUE;
-            }
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
-            if (artifactManager != null) {
-
-                if (APIConstants.API_PROVIDER.equalsIgnoreCase(searchType)) {
-                    criteria = APIConstants.API_OVERVIEW_PROVIDER;
-                    searchTerm = searchTerm.replaceAll("@", "-AT-");
-                } else if (APIConstants.API_VERSION_LABEL.equalsIgnoreCase(searchType)) {
-                    criteria = APIConstants.API_OVERVIEW_VERSION;
-                } else if (APIConstants.API_CONTEXT.equalsIgnoreCase(searchType)) {
-                    criteria = APIConstants.API_OVERVIEW_CONTEXT;
-                } else if (APIConstants.API_DESCRIPTION.equalsIgnoreCase(searchType)) {
-                    criteria = APIConstants.API_OVERVIEW_DESCRIPTION;
-                } else if (APIConstants.API_TAG.equalsIgnoreCase(searchType)) {
-                    criteria = APIConstants.API_OVERVIEW_TAG;
-                }
-
-                //Create the search attribute map for PUBLISHED APIs
-                final String searchValue = searchTerm;
-                Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-                listMap.put(criteria, new ArrayList<String>() {{
-                    add(searchValue);
-                }});
-
-                boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-
-                //This is due to take only the published APIs from the search if there is no need to return APIs with
-                //multiple status. This is because pagination is breaking when we do a another filtering with the API Status
-                if (!displayAPIsWithMultipleStatus) {
-                    listMap.put(APIConstants.API_OVERVIEW_STATUS, new ArrayList<String>() {{
-                        add(APIConstants.PUBLISHED);
-                    }});
-                }
-
-                GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
-                totalLength = PaginationContext.getInstance().getLength();
-
-                boolean isFound = true;
-                if (genericArtifacts == null || genericArtifacts.length == 0) {
-
-                    if (APIConstants.API_OVERVIEW_PROVIDER.equals(criteria)) {
-                        genericArtifacts = searchAPIsByOwner(artifactManager, searchValue);
-                        if (genericArtifacts == null || genericArtifacts.length == 0) {
-                            isFound = false;
-                        }
-                    }
-                    else {
-                        isFound = false;
-                    }
-                }
-
-                if (!isFound) {
-                    result.put("apis", apiSet);
-                    result.put("length", 0);
-                    result.put("isMore", isMore);
-                    return result;
-                }
-
-                // Check to see if we can speculate that there are more APIs to be loaded
-                if (maxPaginationLimit == totalLength) {
-                    isMore = true;  // More APIs exist, cannot determine total API count without incurring perf hit
-                    --totalLength; // Remove the additional 1 added earlier when setting max pagination limit
-                }
-
-                int tempLength =0;
-                for (GenericArtifact artifact : genericArtifacts) {
-                    String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-
-                    if (APIUtil.isAllowDisplayAPIsWithMultipleStatus()) {
-                        if (APIConstants.PROTOTYPED.equals(status) || APIConstants.PUBLISHED.equals(status)
-                            || APIConstants.DEPRECATED.equals(status)) {
-                            API resultAPI;
-                            if (limitAttributes) {
-                                resultAPI = APIUtil.getAPI(artifact);
-                            } else {
-                                resultAPI = APIUtil.getAPI(artifact, registry);
-                            }
-                            if (resultAPI != null) {
-                                apiList.add(resultAPI);
-                            }
-                        }
-                    } else {
-                        if (APIConstants.PROTOTYPED.equals(status) || APIConstants.PUBLISHED.equals(status)) {
-                            API resultAPI;
-                            if (limitAttributes) {
-                                resultAPI = APIUtil.getAPI(artifact);
-                            } else {
-                                resultAPI = APIUtil.getAPI(artifact, registry);
-                            }
-                            if (resultAPI != null) {
-                                apiList.add(resultAPI);
-                            }
-                        }
-                    }
-                    // Ensure the APIs returned matches the length, there could be an additional API
-                    // returned due incrementing the pagination limit when getting from registry
-                    tempLength++;
-                    if (tempLength >= totalLength){
-                        break;
-                    }
-                }
-
-                apiSet.addAll(apiList);
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to search APIs with type", e);
-        }
-        result.put("apis",apiSet);
-        result.put("length",totalLength);
-        result.put("isMore", isMore);
-        return result;
-    }
-
-
-    private  GenericArtifact[] searchAPIsByOwner(GenericArtifactManager artifactManager, final String searchValue) throws GovernanceException {
-        Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-        listMap.put(APIConstants.API_OVERVIEW_OWNER, new ArrayList<String>() {
-            {
-                add(searchValue);
-            }
-        });
-        return artifactManager.findGenericArtifacts(listMap);
-    }
 
     /**
      *This method will delete application key mapping table and application registration table.
@@ -2453,7 +564,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (keyManagerConfiguration == null || !keyManagerConfiguration.isEnabled()) {
             throw new APIManagementException(
                     "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
-                    ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                    ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
+        }
+        if (KeyManagerConfiguration.TokenType.EXCHANGED.toString().equals(keyManagerConfiguration.getTokenType())) {
+            throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
+                    " Client Application", ExceptionCodes.KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION);
         }
         OAuthAppRequest oauthAppRequest = ApplicationUtils
                 .createOauthAppRequest(applicationName, clientId, callBackURL, "default", jsonString, tokenType,
@@ -2467,24 +582,30 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (keyManager == null) {
             throw new APIManagementException(
                     "Key Manager " + keyManagerName + "Couldn't initialized in tenant " + tenantDomain + ".",
-                    ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                    ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
         }
-        // Checking if clientId is mapped with another application.
-        if (apiMgtDAO.isMappingExistsforConsumerKey(keyManagerId, clientId)) {
-            String message = "Consumer Key " + clientId + " is used for another Application.";
-            log.error(message);
-            throw new APIManagementException(message);
-        }
-        log.debug("Client ID not mapped previously with another application.");
 
+        //Get application ID
+        int applicationId = apiMgtDAO.getApplicationId(applicationName, userName);
+
+        // Checking if clientId is mapped with another application.
+        if (apiMgtDAO.isKeyMappingExistsForConsumerKeyOrApplication(applicationId, keyManagerName, keyManagerId,
+                keyType, clientId)) {
+            throw new APIManagementException("Key Mappings already exists for application " + applicationName
+                    + " or consumer key " + clientId, ExceptionCodes.KEY_MAPPING_ALREADY_EXIST);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Client ID " + clientId + " not mapped previously with another application. No existing "
+                    + "key mappings available for application " + applicationName);
+        }
         //createApplication on oAuthorization server.
         OAuthApplicationInfo oAuthApplication = isOauthAppValidation() ?
                 keyManager.mapOAuthApplication(oauthAppRequest) : oauthAppRequest.getOAuthApplicationInfo();
 
         //Do application mapping with consumerKey.
         String keyMappingId = UUID.randomUUID().toString();
-        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationName, userName, clientId,
-                keyManagerId, keyMappingId);
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationId, clientId, keyManagerId,
+                keyMappingId);
         Object enableTokenGeneration =
                 keyManager.getKeyManagerConfiguration().getParameter(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION);
 
@@ -2538,7 +659,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         try {
             originalSubscribedAPIs = apiMgtDAO.getSubscribedAPIs(organization, subscriber, groupingId);
             if (originalSubscribedAPIs != null && !originalSubscribedAPIs.isEmpty()) {
-                Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
+                Map<String, Tier> tiers = APIUtil.getTiers(organization);
                 for (SubscribedAPI subscribedApi : originalSubscribedAPIs) {
                     Tier tier = tiers.get(subscribedApi.getTier().getName());
                     subscribedApi.getTier().setDisplayName(tier != null ? tier.getDisplayName() : subscribedApi.getTier().getName());
@@ -2605,63 +726,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return new LinkedHashSet<>(APIUtil.getScopes(scopeKeySet, organization).values());
     }
 
-    @Override
-    public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName,
-                                                         int startSubIndex, int endSubIndex, String groupingId,
-                                                         String organization) throws APIManagementException {
-        Set<SubscribedAPI> subscribedAPIs = null;
-        try {
-            subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, applicationName, startSubIndex,
-                                                                  endSubIndex, groupingId, organization);
-            if (subscribedAPIs != null && !subscribedAPIs.isEmpty()) {
-                Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
-                for (SubscribedAPI subscribedApi : subscribedAPIs) {
-                    Tier tier = tiers.get(subscribedApi.getTier().getName());
-                    subscribedApi.getTier().setDisplayName(tier != null ? tier.getDisplayName() : subscribedApi
-                            .getTier().getName());
-                    // We do not need to add the modified object again.
-                    // subscribedAPIs.add(subscribedApi);
-                }
-            }
-        } catch (APIManagementException e) {
-            handleException("Failed to get APIs of " + subscriber.getName() + " under application " + applicationName, e);
-        }
-        return subscribedAPIs;
-    }
-
-    @Override
-    public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, int applicationId, int startSubIndex,
-            int endSubIndex, String groupingId) throws APIManagementException {
-        Set<SubscribedAPI> subscribedAPIs = null;
-        try {
-            subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, applicationId, startSubIndex,
-                    endSubIndex, groupingId);
-            if (subscribedAPIs != null && !subscribedAPIs.isEmpty()) {
-                Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
-                for (SubscribedAPI subscribedApi : subscribedAPIs) {
-                    Tier tier = tiers.get(subscribedApi.getTier().getName());
-                    subscribedApi.getTier().setDisplayName(tier != null ? tier.getDisplayName() : subscribedApi
-                            .getTier().getName());
-                    // We do not need to add the modified object again.
-                    // subscribedAPIs.add(subscribedApi);
-                }
-            }
-        } catch (APIManagementException e) {
-            String msg = "Failed to get APIs of " + subscriber.getName() + " under application " + applicationId;
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        }
-        return subscribedAPIs;
-    }
-
     public Integer getSubscriptionCount(Subscriber subscriber,String applicationName,String groupingId)
             throws APIManagementException {
         return apiMgtDAO.getSubscriptionCount(subscriber,applicationName,groupingId);
-    }
-
-    public Integer getSubscriptionCountByApplicationId(Subscriber subscriber, int applicationId, String groupingId)
-            throws APIManagementException {
-        return apiMgtDAO.getSubscriptionCountByApplicationId(subscriber, applicationId, groupingId);
     }
 
     @Override
@@ -2691,12 +758,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (configuration == null) {
             log.error("API Manager configuration is not initialized.");
         } else {
-            String monetizationImplClass = configuration.getFirstProperty(APIConstants.Monetization.MONETIZATION_IMPL);
+            String monetizationImplClass = configuration.getMonetizationConfigurationDto().getMonetizationImpl();
             if (monetizationImplClass == null) {
                 monetizationImpl = new DefaultMonetizationImpl();
             } else {
                 try {
-                    monetizationImpl = (Monetization) APIUtil.getClassForName(monetizationImplClass).newInstance();
+                    monetizationImpl = (Monetization) APIUtil.getClassInstance(monetizationImplClass);
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                     APIUtil.handleException("Failed to load monetization implementation class.", e);
                 }
@@ -2717,6 +784,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         final boolean isApiProduct = apiTypeWrapper.isAPIProduct();
         String state;
         String apiContext;
+        String apiOrgId;
 
         if (isApiProduct) {
             product = apiTypeWrapper.getApiProduct();
@@ -2725,6 +793,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiId = product.getProductId();
             apiUUID = product.getUuid();
             apiContext = product.getContext();
+            apiOrgId = product.getOrganization();
         } else {
             api = apiTypeWrapper.getApi();
             state = api.getStatus();
@@ -2732,12 +801,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiId = api.getId().getId();
             apiUUID = api.getUuid();
             apiContext = api.getContext();
+            apiOrgId = api.getOrganization();
         }
 
         WorkflowResponse workflowResponse = null;
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
+        checkSubscriptionAllowed(apiTypeWrapper);
         int subscriptionId;
-        if (APIConstants.PUBLISHED.equals(state)) {
+        if (APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state)) {
             subscriptionId = apiMgtDAO.addSubscription(apiTypeWrapper, application,
                     APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername);
 
@@ -2867,14 +938,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                             System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId,
-                            tenantDomain, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
+                            apiOrgId, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
                             application.getId(), application.getUUID(), identifier.getTier(), subscriptionStatus);
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                 }
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId,
-                        tenantDomain, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
+                        apiOrgId, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
                         application.getId(), application.getUUID(), identifier.getTier(), subscriptionStatus);
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
@@ -2906,6 +977,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         final boolean isApiProduct = apiTypeWrapper.isAPIProduct();
         String state;
         String apiContext;
+        String apiOrgId;
 
         if (isApiProduct) {
             product = apiTypeWrapper.getApiProduct();
@@ -2914,6 +986,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiUUId = product.getUuid();
             identifier = product.getId();
             apiContext = product.getContext();
+            apiOrgId = product.getOrganization();
         } else {
             api = apiTypeWrapper.getApi();
             state = api.getStatus();
@@ -2921,8 +994,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiId = identifier.getId();
             apiUUId = api.getUuid();
             apiContext = api.getContext();
+            apiOrgId = api.getOrganization();
         }
-
+        checkSubscriptionAllowed(apiTypeWrapper);
         WorkflowResponse workflowResponse = null;
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state)) {
@@ -3050,14 +1124,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                             System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
-                            tenantDomain, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId,
+                            apiOrgId, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId,
                             application.getId(), application.getUUID(), requestedThrottlingPolicy, subscriptionStatus);
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                 }
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
-                        tenantDomain, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId, application.getId(),
+                        apiOrgId, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId, application.getId(),
                         application.getUUID(), requestedThrottlingPolicy, subscriptionStatus);
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
@@ -3163,6 +1237,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 status = apiMgtDAO.getSubscriptionStatus(apiProdIdentifier.getUUID(), applicationId);
             }
 
+            String subId = null;
             if (APIConstants.SubscriptionStatus.ON_HOLD.equals(status)) {
                 try {
                     createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
@@ -3171,6 +1246,41 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     // failed cleanup processes are ignored to prevent failing the deletion process
                     log.warn("Failed to clean pending subscription approval task");
                 }
+            } else if (APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING.equals(status)) {
+                try {
+                    if (apiIdentifier != null) {
+                        subId = apiMgtDAO.getSubscriptionId(apiIdentifier.getUUID(), applicationId);
+                    } else if (apiProdIdentifier != null) {
+                        subId = apiMgtDAO.getSubscriptionId(apiProdIdentifier.getUUID(), applicationId);
+                    }
+                    if (subId != null) {
+                        WorkflowDTO wf = apiMgtDAO.retrieveWorkflowFromInternalReference(subId,
+                                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+                        WorkflowExecutor updateSubscriptionWFExecutor = getWorkflowExecutor(
+                                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+                        updateSubscriptionWFExecutor.cleanUpPendingTask(wf.getExternalWorkflowReference());
+                    }
+
+                } catch (WorkflowException ex) {
+                    // failed cleanup processes are ignored to prevent failing the deletion process
+                    log.warn("Failed to clean pending subscription update approval task");
+                }
+            } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(status)){
+                try {
+                    if (apiIdentifier != null) {
+                        subId = apiMgtDAO.getSubscriptionId(apiIdentifier.getUUID(), applicationId);
+                    } else if (apiProdIdentifier != null) {
+                        subId = apiMgtDAO.getSubscriptionId(apiProdIdentifier.getUUID(), applicationId);
+                    }
+
+                } catch (APIManagementException ex) {
+                    // failed cleanup processes are ignored to prevent failing the deletion process
+                    log.warn("Failed to retrive subscription id");
+                }
+            }
+            if (subId != null) {
+                apiMgtDAO.updateSubscriptionStatus(Integer.parseInt(subId), APIConstants.SubscriptionStatus.DELETE_PENDING);
+                workflowDTO.setWorkflowReference(subId);
             }
 
             // update attributes of the new remove workflow to be created
@@ -3259,14 +1369,30 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     @Override
     public void removeSubscription(SubscribedAPI subscription, String organization) throws APIManagementException {
-        String uuid = subscription.getUUID();
         if (subscription != null) {
+            String uuid = subscription.getUUID();
+            String deleteWorkflowExtRef = apiMgtDAO
+                    .getExternalWorkflowReferenceForSubscriptionAndWFType(subscription.getSubscriptionId(),
+                            WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+            if (deleteWorkflowExtRef != null) {
+                WorkflowDTO deleteWorkflow = apiMgtDAO.retrieveWorkflow(deleteWorkflowExtRef);
+                if (deleteWorkflow != null && WorkflowStatus.CREATED.equals(deleteWorkflow.getStatus())) {
+                    subscription.setSubscriptionId(-1);
+                    subscription.setSubStatus(APIConstants.SubscriptionStatus.DELETE_PENDING);
+                    return;
+                }
+            }
             Application application = subscription.getApplication();
-            Identifier identifier = subscription.getApiId() != null ? subscription.getApiId()
+            Identifier identifier = subscription.getAPIIdentifier() != null ? subscription.getAPIIdentifier()
                     : subscription.getProductId();
             String userId = application.getSubscriber().getName();
             removeSubscription(identifier, userId, application.getId(), organization);
-            if (log.isDebugEnabled()) {
+            SubscribedAPI subscriptionAfterDeletion = apiMgtDAO.getSubscriptionById(subscription.getSubscriptionId());
+            if (subscriptionAfterDeletion != null
+                    && APIConstants.SubscriptionStatus.DELETE_PENDING.equals(subscriptionAfterDeletion.getSubStatus())) {
+                subscription.setSubStatus(APIConstants.SubscriptionStatus.DELETE_PENDING);
+            }
+            else if (log.isDebugEnabled()) {
                 String appName = application.getName();
                 String logMessage = "Identifier:  " + identifier.toString() + " subscription (uuid : " + uuid
                         + ") removed from app " + appName;
@@ -3285,7 +1411,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                             System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId,
-                            tenantDomain, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
+                            organization, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
                             identifier.getUUID(), application.getId(), application.getUUID(), identifier.getTier(),
                             subscription.getSubStatus());
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
@@ -3293,14 +1419,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId,
-                        tenantDomain, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
+                        organization, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
                         identifier.getUUID(), application.getId(), application.getUUID(), identifier.getTier(),
                         subscription.getSubStatus());
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
         } else {
-            throw new APIManagementException(String.format("Subscription for UUID:%s does not exist.",
-                    subscription.getUUID()));
+            throw new APIManagementException("Subscription does not exists.");
         }
     }
 
@@ -3370,11 +1495,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public int addApplication(Application application, String userId, String organization)
             throws APIManagementException {
-
+        if (APIUtil.isOnPremResolver()) {
+            organization = tenantDomain;
+        }
         if (application.getName() != null && (application.getName().length() != application.getName().trim().length())) {
             handleApplicationNameContainSpacesException("Application name " +
                                                             "cannot contain leading or trailing white spaces");
         }
+        validateApplicationPolicy(application, organization);
 
         JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(userId);
         Map<String, String> applicationAttributes = application.getApplicationAttributes();
@@ -3480,7 +1608,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appWFDto.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
             appWFDto.setCallbackUrl(appCreationWFExecutor.getCallbackURL());
             appWFDto.setStatus(WorkflowStatus.CREATED);
-            appWFDto.setTenantDomain(tenantDomain);
+            appWFDto.setTenantDomain(organization);
             appWFDto.setTenantId(tenantId);
             appWFDto.setUserName(userId);
             appWFDto.setCreatedTime(System.currentTimeMillis());
@@ -3504,7 +1632,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
             RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application, userId, applicationId,
-                    requestedTenant);
+                    organization);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -3517,7 +1645,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                 ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
-                        tenantDomain, applicationId, application.getUUID(), application.getName(),
+                        organization, applicationId, application.getUUID(), application.getName(),
                         application.getTokenType(),
                         application.getTier(), application.getGroupId(), application.getApplicationAttributes(), userId);
                 APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
@@ -3525,12 +1653,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } else {
             ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
-                    tenantDomain, applicationId, application.getUUID(), application.getName(),
+                    organization, applicationId, application.getUUID(), application.getName(),
                     application.getTokenType(), application.getTier(), application.getGroupId(),
                     application.getApplicationAttributes(), userId);
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
         return applicationId;
+    }
+
+    private void validateApplicationPolicy(Application application, String organization) throws APIManagementException {
+        Map<String, Tier> appTierMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, organization);
+        if (APIUtil.findTier(appTierMap.values(), application.getTier()) == null) {
+            throw new APIManagementException("Specified tier " + application.getTier() + " is invalid",
+                    ExceptionCodes.TIER_NAME_INVALID);
+        }
     }
 
     /** Updates an Application identified by its id
@@ -3553,7 +1689,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (existingApp != null && APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(existingApp.getStatus())) {
             throw new APIManagementException("Cannot update the application while it is INACTIVE");
         }
-
         boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
 
@@ -3573,6 +1708,34 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (application.getName() != null && (application.getName().length() != application.getName().trim().length())) {
             handleApplicationNameContainSpacesException("Application name " +
                     "cannot contain leading or trailing white spaces");
+        }
+
+        String processedIds;
+
+        if (!existingApp.getName().equals(application.getName())) {
+            processedIds = application.getGroupId();
+        } else {
+            processedIds = getUpdatedGroupIds(existingApp.getGroupId(), application.getGroupId());
+        }
+
+        if (application.getGroupId() != null && APIUtil.isApplicationGroupCombinationExist(
+                application.getSubscriber().getName(), application.getName(), processedIds)) {
+            handleResourceAlreadyExistsException(
+                    "A duplicate application already exists by the name - " + application.getName());
+        }
+
+        // Retain the 'DEFAULT' token type of migrated applications unless the token type is changed to 'JWT'.
+        if (APIConstants.DEFAULT_TOKEN_TYPE.equals(existingApp.getTokenType()) &&
+                APIConstants.TOKEN_TYPE_OAUTH.equals(application.getTokenType())) {
+            application.setTokenType(APIConstants.DEFAULT_TOKEN_TYPE);
+        }
+
+        // Prevent the change of token type of applications having 'JWT' token type.
+        if (APIConstants.TOKEN_TYPE_JWT.equals(existingApp.getTokenType()) &&
+                !APIConstants.TOKEN_TYPE_JWT.equals(application.getTokenType())) {
+            throw new APIManagementException(
+                    "Cannot change application token type from " + APIConstants.TOKEN_TYPE_JWT + " to " +
+                            application.getTokenType());
         }
 
         Subscriber subscriber = application.getSubscriber();
@@ -3640,7 +1803,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } else {
             application.setApplicationAttributes(null);
         }
-
+        validateApplicationPolicy(application, existingApp.getOrganization());
         apiMgtDAO.updateApplication(application);
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the Application: " + application.getId() +" in the database.");
@@ -3665,14 +1828,35 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
-        
-        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+
         ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId, tenantDomain,
-                application.getId(), application.getUUID(), application.getName(), application.getTokenType(),
-                application.getTier(), application.getGroupId(), application.getApplicationAttributes(),
-                existingApp.getSubscriber().getName());
+                System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
+                existingApp.getOrganization(), application.getId(), application.getUUID(), application.getName(),
+                application.getTokenType(), application.getTier(), application.getGroupId(),
+                application.getApplicationAttributes(), existingApp.getSubscriber().getName());
         APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+    }
+
+    /**
+     * Function to find newly added group Ids
+     * 
+     * @param existingGroupIds existing GroupIds
+     * @param updatedGroupIds updated GroupIds
+     * @return
+     */
+    private String getUpdatedGroupIds(String existingGroupIds, String updatedGroupIds) {
+        if (StringUtils.isEmpty(updatedGroupIds)) {
+            return updatedGroupIds;
+        }
+        Set<String> existingGroupIdSet = new HashSet<>();
+        if (existingGroupIds != null && !existingGroupIds.isEmpty()) {
+            existingGroupIdSet.addAll(Arrays.asList(existingGroupIds.split(",")));
+        }
+        Set<String> updatedGroupIdSet = new HashSet<>();
+        updatedGroupIdSet.addAll(Arrays.asList(updatedGroupIds.split(",")));
+        updatedGroupIdSet.removeAll(existingGroupIdSet);
+        updatedGroupIds = String.join(",", updatedGroupIdSet);
+        return updatedGroupIds;
     }
 
     /**
@@ -3717,105 +1901,44 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
 
-            WorkflowExecutor createApplicationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-            WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-            WorkflowExecutor createProductionRegistrationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
-            WorkflowExecutor createSandboxRegistrationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+            String deletePendingWorkflowRef = apiMgtDAO.getExternalWorkflowRefByInternalRefWorkflowType(applicationId, WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
+            if (deletePendingWorkflowRef != null) {
+                WorkflowDTO deletePendingWorkflow = apiMgtDAO.retrieveWorkflow(deletePendingWorkflowRef);
+                if (deletePendingWorkflow != null && WorkflowStatus.CREATED.equals(deletePendingWorkflow.getStatus())) {
+                    application.setId(-1);
+                    return;
+                }
+            }
+
             WorkflowExecutor removeApplicationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
 
-            workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceByApplicationID(application.getId());
+            apiMgtDAO.updateApplicationStatus(applicationId, APIConstants.ApplicationStatus.DELETE_PENDING);
 
-            // in a normal flow workflowExtRef is null when workflows are not enabled
-            if (workflowExtRef == null) {
-                workflowDTO = new ApplicationWorkflowDTO();
-            } else {
-                workflowDTO = (ApplicationWorkflowDTO) apiMgtDAO.retrieveWorkflow(workflowExtRef);
-            }
+            workflowDTO = new ApplicationWorkflowDTO();
             workflowDTO.setApplication(application);
+            workflowDTO.setWorkflowReference(String.valueOf(applicationId));
+            workflowDTO.setExternalWorkflowReference(removeApplicationWFExecutor.generateUUID());
             workflowDTO.setCallbackUrl(removeApplicationWFExecutor.getCallbackURL());
             workflowDTO.setUserName(this.username);
             workflowDTO.setTenantDomain(tenantDomain);
             workflowDTO.setTenantId(tenantId);
-
-
-            // clean up pending subscription tasks
-            Set<Integer> pendingSubscriptions = apiMgtDAO.getPendingSubscriptionsByApplicationId(applicationId);
-            for (int subscription : pendingSubscriptions) {
-                try {
-                    workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(subscription);
-                    createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
-                } catch (APIManagementException ex) {
-
-                    // failed cleanup processes are ignored to prevent failing the application removal process
-                    log.warn("Failed to get external workflow reference for subscription " + subscription);
-                } catch (WorkflowException ex) {
-
-                    // failed cleanup processes are ignored to prevent failing the application removal process
-                    log.warn("Failed to clean pending subscription approval task: " + subscription);
-                }
-            }
-
-            // cleanup pending application registration tasks
-            Map<String, String> keyManagerWiseProductionKeyStatus = apiMgtDAO
-                    .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
-            Map<String, String> keyManagerWiseSandboxKeyStatus = apiMgtDAO
-                    .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
-            keyManagerWiseProductionKeyStatus.forEach((keyManagerName, state) -> {
-                if (WorkflowStatus.CREATED.toString().equals(state)) {
-                    try {
-                        String applicationRegistrationExternalRef = apiMgtDAO
-                                .getRegistrationWFReference(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION,
-                                        keyManagerName);
-                        createProductionRegistrationWFExecutor.cleanUpPendingTask(applicationRegistrationExternalRef);
-                    } catch (APIManagementException ex) {
-
-                        // failed cleanup processes are ignored to prevent failing the application removal process
-                        log.warn("Failed to get external workflow reference for production key of application "
-                                + applicationId);
-                    } catch (WorkflowException ex) {
-
-                        // failed cleanup processes are ignored to prevent failing the application removal process
-                        log.warn("Failed to clean pending production key approval task of " + applicationId);
-                    }
-                }
-
-            });
-            keyManagerWiseSandboxKeyStatus.forEach((keyManagerName, state) -> {
-                if (WorkflowStatus.CREATED.toString().equals(state)) {
-                    try {
-                        String applicationRegistrationExternalRef = apiMgtDAO
-                                .getRegistrationWFReference(applicationId, APIConstants.API_KEY_TYPE_SANDBOX,
-                                        keyManagerName);
-                        createSandboxRegistrationWFExecutor.cleanUpPendingTask(applicationRegistrationExternalRef);
-                    } catch (APIManagementException ex) {
-
-                        // failed cleanup processes are ignored to prevent failing the application removal process
-                        log.warn("Failed to get external workflow reference for sandbox key of application "
-                                + applicationId);
-                    } catch (WorkflowException ex) {
-
-                        // failed cleanup processes are ignored to prevent failing the application removal process
-                        log.warn("Failed to clean pending sandbox key approval task of " + applicationId);
-                    }
-                }
-            });
-
-            if (workflowExtRef != null) {
-                try {
-                    createApplicationWFExecutor.cleanUpPendingTask(workflowExtRef);
-                } catch (WorkflowException ex) {
-
-                    // failed cleanup processes are ignored to prevent failing the application removal process
-                    log.warn("Failed to clean pending application approval task of " + applicationId);
-                }
-            }
 
             // update attributes of the new remove workflow to be created
             workflowDTO.setStatus(WorkflowStatus.CREATED);
             workflowDTO.setCreatedTime(System.currentTimeMillis());
             workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
             workflowDTO.setExternalWorkflowReference(removeApplicationWFExecutor.generateUUID());
+
+            if (!(removeApplicationWFExecutor instanceof ApplicationDeletionApprovalWorkflowExecutor)) {
+                cleanupPendingTasksForApplicationDeletion(applicationId);
+            }
+
             removeApplicationWFExecutor.execute(workflowDTO);
+
+            Application applicationAfterDeletion = apiMgtDAO.getApplicationById(applicationId);
+            if (applicationAfterDeletion != null) {
+                application.setStatus(applicationAfterDeletion.getStatus());
+            }
 
             JSONObject appLogObject = new JSONObject();
             appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
@@ -3858,7 +1981,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus()) || wfDTO.getStatus() == null) {
                 ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.APPLICATION_DELETE.name(), tenantId,
-                        tenantDomain, applicationId, application.getUUID(), application.getName(),
+                        application.getOrganization(), applicationId, application.getUUID(), application.getName(),
                         application.getTokenType(),
                         application.getTier(), application.getGroupId(), Collections.EMPTY_MAP, username);
                 APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
@@ -3866,7 +1989,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } else {
             ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.APPLICATION_DELETE.name(), tenantId,
-                    tenantDomain, applicationId, application.getUUID(), application.getName(),
+                    application.getOrganization(), applicationId, application.getUUID(), application.getName(),
                     application.getTokenType(),
                     application.getTier(), application.getGroupId(), Collections.EMPTY_MAP, username);
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
@@ -3879,11 +2002,120 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 ApplicationRegistrationEvent removeEntryTrigger = new ApplicationRegistrationEvent(
                         UUID.randomUUID().toString(), System.currentTimeMillis(),
                         APIConstants.EventType.REMOVE_APPLICATION_KEYMAPPING.name(),
-                        APIUtil.getTenantIdFromTenantDomain(keyManagerTenantDomain), keyManagerTenantDomain,
+                        APIUtil.getTenantIdFromTenantDomain(keyManagerTenantDomain), application.getOrganization(),
                         application.getId(), application.getUUID(), consumerKey, application.getKeyType(),
                         keyManagerName);
                 APIUtil.sendNotification(removeEntryTrigger, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
             }
+        }
+    }
+
+    /**
+     * Cleans the pending approval tasks associated with the given application subjected to be deleted
+     * Pending approvals for Application creation, Subscription Creation, Subscription Deletion, Subscription Update will be deleted
+     * @param applicationId ID of the application which the associated pending tasks should be removed
+     * @throws APIManagementException IF any issue occurred in retrieving workflow references for the given applicationId
+     */
+    @Override
+    public void cleanupPendingTasksForApplicationDeletion(int applicationId) throws APIManagementException {
+
+        try {
+            WorkflowExecutor createApplicationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+            WorkflowExecutor deleteSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+            WorkflowExecutor updateSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+            WorkflowExecutor createProductionRegistrationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+            WorkflowExecutor createSandboxRegistrationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+
+            // clean up pending subscription tasks
+            Map<String, Set<Integer>> pendingSubscriptionsByStatus = apiMgtDAO
+                    .getPendingSubscriptionsByAppId(applicationId);
+            for (int subscription : pendingSubscriptionsByStatus.get(APIConstants.SubscriptionStatus.ON_HOLD)) {
+                cleanupPendingSubscriptionTask(subscription, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION,
+                        createSubscriptionWFExecutor);
+            }
+
+            for (int subscription : pendingSubscriptionsByStatus.get(APIConstants.SubscriptionStatus.DELETE_PENDING)) {
+                cleanupPendingSubscriptionTask(subscription, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION,
+                        deleteSubscriptionWFExecutor);
+            }
+
+            for (int subscription : pendingSubscriptionsByStatus.get(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING)) {
+                cleanupPendingSubscriptionTask(subscription, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE,
+                        updateSubscriptionWFExecutor);
+            }
+
+            // cleanup pending application registration tasks
+            Map<String, String> keyManagerWiseProductionKeyStatus = apiMgtDAO
+                    .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
+            Map<String, String> keyManagerWiseSandboxKeyStatus = apiMgtDAO
+                    .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
+            keyManagerWiseProductionKeyStatus.forEach((keyManagerName, state) ->
+                    cleanupPendingApplicationRegistrationTask(state, applicationId, APIConstants.API_KEY_TYPE_PRODUCTION,
+                            keyManagerName, createProductionRegistrationWFExecutor));
+
+            keyManagerWiseSandboxKeyStatus.forEach((keyManagerName, state) ->
+                    cleanupPendingApplicationRegistrationTask(state, applicationId, APIConstants.API_KEY_TYPE_SANDBOX,
+                            keyManagerName, createSandboxRegistrationWFExecutor));
+
+            //cleanup pending application creation task
+            String appCreationWorkflowExtRef = apiMgtDAO.getExternalWorkflowRefByInternalRefWorkflowType(applicationId,
+                    WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            if (appCreationWorkflowExtRef != null) {
+                cleanupAppCreationPendingTask(applicationId, createApplicationWFExecutor, appCreationWorkflowExtRef);
+            }
+        } catch (WorkflowException ex) {
+            log.warn("Failed to load workflow executors");
+        }
+    }
+
+    private void cleanupAppCreationPendingTask(int applicationId, WorkflowExecutor workflowExecutor, String workflowRef) {
+
+        try {
+            workflowExecutor.cleanUpPendingTask(workflowRef);
+        } catch (WorkflowException ex) {
+
+            // failed cleanup processes are ignored to prevent failing the application removal process
+            log.warn("Failed to clean pending application approval task of " + applicationId);
+        }
+    }
+
+    private void cleanupPendingApplicationRegistrationTask(String state, int applicationId, String apiKeyType,
+                                                           String keyManagerName,
+                                                           WorkflowExecutor applicationRegistrationWFExecutor) {
+
+        final String keyType = apiKeyType.toLowerCase();
+        if (WorkflowStatus.CREATED.toString().equals(state)) {
+            try {
+                String applicationRegistrationExternalRef = apiMgtDAO
+                        .getRegistrationWFReference(applicationId, apiKeyType,
+                                keyManagerName);
+                applicationRegistrationWFExecutor.cleanUpPendingTask(applicationRegistrationExternalRef);
+            } catch (APIManagementException ex) {
+
+                // failed cleanup processes are ignored to prevent failing the application removal process
+                log.warn("Failed to get external workflow reference for " + keyType + " key of application "
+                        + applicationId);
+            } catch (WorkflowException ex) {
+
+                // failed cleanup processes are ignored to prevent failing the application removal process
+                log.warn("Failed to clean pending " + keyType + " key approval task of " + applicationId);
+            }
+        }
+    }
+
+    private void cleanupPendingSubscriptionTask(int subscriptionId, String wfType, WorkflowExecutor subscriptionWFExecutor) {
+
+        try {
+            String workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscriptionAndWFType(subscriptionId,
+                    wfType);
+            subscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
+        } catch (APIManagementException ex) {
+            // failed cleanup processes are ignored to prevent failing the application removal process
+            log.warn(GET_SUB_WORKFLOW_REF_FAILED + subscriptionId);
+        } catch (WorkflowException ex) {
+            // failed cleanup processes are ignored to prevent failing the application removal process
+            log.warn(CLEAN_PENDING_SUB_APPROVAL_TASK_FAILED + subscriptionId);
         }
     }
 
@@ -3921,8 +2153,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             tenantDomain = MultitenantUtils.getTenantDomain(userId);
         } else {
             int tenantId = APIUtil.getInternalOrganizationId(tenantDomain);
-            
-            // To handle choreo scenario. 
+
+            // To handle choreo scenario.
             if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
                 tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
             }
@@ -3944,7 +2176,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (keyManagerConfiguration == null || !keyManagerConfiguration.isEnabled()) {
                 throw new APIManagementException(
                         "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
-                        ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                        ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
+            }
+            if (KeyManagerConfiguration.TokenType.EXCHANGED.toString().equals(keyManagerConfiguration.getTokenType())) {
+                throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
+                        " Client Application", ExceptionCodes.KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION);
             }
             Object enableOauthAppCreation =
                     keyManagerConfiguration.getProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION);
@@ -3965,6 +2201,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
             }
+
+            //check if there are any existing key mappings set for the application and the key manager.
+            if (apiMgtDAO.isKeyMappingExistsForApplication(application.getId(), keyManagerName, keyManagerId,
+                    tokenType)) {
+                throw new APIManagementException("Key Mappings already exists for application " + application.getName(),
+                        ExceptionCodes.KEY_MAPPING_ALREADY_EXIST);
+            }
+
             // initiate WorkflowExecutor
             WorkflowExecutor appRegistrationWorkflow = null;
             // initiate ApplicationRegistrationWorkflowDTO
@@ -3998,11 +2242,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                 .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
 
             }// if it is a sandBox application.
-            else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) { // if
-                // its
-                // a
-                // SANDBOX
-                // application.
+            else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) {
+                // if its a SANDBOX application.
                 appRegistrationWorkflow =
                         getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
                 appRegWFDto =
@@ -4084,6 +2325,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
                     APIConstants.AuditLogConstants.UPDATED, this.username);
 
+            String orgId = application.getOrganization();
             // if its a PRODUCTION application.
             if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
                 // get the workflow state once the executor is executed.
@@ -4095,7 +2337,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                         ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                                 UUID.randomUUID().toString(), System.currentTimeMillis(),
-                                APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
+                                APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, orgId,
                                 application.getId(), application.getUUID(), applicationInfo.getClientId(), tokenType,
                                 keyManagerName);
                         APIUtil.sendNotification(applicationRegistrationEvent,
@@ -4104,7 +2346,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 } else {
                     ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                             UUID.randomUUID().toString(), System.currentTimeMillis(),
-                            APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
+                            APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, orgId,
                             application.getId(), application.getUUID(), applicationInfo.getClientId(), tokenType,
                             keyManagerName);
                     APIUtil.sendNotification(applicationRegistrationEvent,
@@ -4120,7 +2362,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                         ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                                 UUID.randomUUID().toString(), System.currentTimeMillis(),
-                                APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
+                                APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, orgId,
                                 application.getId(), application.getUUID(), applicationInfo.getClientId(), tokenType,
                                 keyManagerName);
                         APIUtil.sendNotification(applicationRegistrationEvent,
@@ -4129,7 +2371,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 } else {
                     ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                             UUID.randomUUID().toString(), System.currentTimeMillis(),
-                            APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
+                            APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, orgId,
                             application.getId(), application.getUUID(), applicationInfo.getClientId(), tokenType,
                             keyManagerName);
                     APIUtil.sendNotification(applicationRegistrationEvent,
@@ -4209,32 +2451,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
-     *
-     * @param userId APIM subscriber user ID.
-     * @param ApplicationName APIM application name.
-     * @return
-     * @throws APIManagementException
-     */
-    @Override
-    public Application getApplicationsByName(String userId, String ApplicationName, String groupingId) throws
-            APIManagementException {
-
-        Application application = apiMgtDAO.getApplicationByName(ApplicationName, userId,groupingId);
-        if (application != null) {
-            checkAppAttributes(application, userId);
-        }
-        if (application != null) {
-            Set<APIKey> keys = getApplicationKeys(application.getId());
-
-            for (APIKey key : keys) {
-                application.addKey(key);
-            }
-        }
-
-        return application;
-    }
-
-    /**
      * Returns the corresponding application given the Id
      * @param id Id of the Application
      * @return it will return Application corresponds to the id.
@@ -4269,29 +2485,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return application;
     }
 
-    /** get the status of the Application creation process given the application Id
-     *
-     * @param applicationId Id of the Application
-     * @return
-     * @throws APIManagementException
-     */
-    @Override
-    public String getApplicationStatusById(int applicationId) throws APIManagementException {
-        return apiMgtDAO.getApplicationStatusById(applicationId);
-    }
-
-    @Override
-    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
-        return getGraphqlSchemaDefinition(apiId);
-    }
-
     @Override
     public Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber, Identifier identifier, String groupingId,
                                                        String organization) throws APIManagementException {
         Set<SubscribedAPI> subscribedAPISet = new HashSet<>();
         Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(organization, subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
-            if (identifier instanceof APIIdentifier && identifier.equals(api.getApiId())) {
+            if (identifier instanceof APIIdentifier && identifier.equals(api.getAPIIdentifier())) {
                 Set<APIKey> keys = getApplicationKeys(api.getApplication().getId());
                 for (APIKey key : keys) {
                     api.addKey(key);
@@ -4328,15 +2528,25 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Set<String> getDeniedTiers(int apiProviderTenantId) throws APIManagementException {
         Set<String> deniedTiers = new HashSet<String>();
         String[] currentUserRoles;
+        Set<TierPermissionDTO> tierPermissions = apiMgtDAO.getThrottleTierPermissions(apiProviderTenantId);
         if (apiProviderTenantId == 0) {
             apiProviderTenantId = tenantId;
         }
         if (apiProviderTenantId != 0) {
+            if (APIUtil.isOnPremResolver()){
+                if (tenantId != apiProviderTenantId){
+                    // if OnPrem Cross Tenant Scenario we will not able to validate roles allow or deny to policy
+                    // therefore any POLICY that have a permission attached marked as deny policy.
+                    for (TierPermissionDTO tierPermission : tierPermissions) {
+                        deniedTiers.add(tierPermission.getTierName());
+                    }
+                    return deniedTiers;                }
+            }
+
             /* Get the roles of the Current User */
             String userName = (userNameWithoutChange != null)? userNameWithoutChange: username;
             currentUserRoles = APIUtil.getListOfRoles(userName);
 
-            Set<TierPermissionDTO> tierPermissions = apiMgtDAO.getThrottleTierPermissions(apiProviderTenantId);
 
             for (TierPermissionDTO tierPermission : tierPermissions) {
                 String type = tierPermission.getPermissionType();
@@ -4366,6 +2576,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
+    public Set<String> getDeniedTiers(String organization) throws APIManagementException {
+        int tenantId = APIUtil.getInternalOrganizationId(organization);
+        return getDeniedTiers(tenantId);
+    }
+
+    @Override
     public Set<TierPermission> getTierPermissions() throws APIManagementException {
 
         Set<TierPermission> tierPermissions = new HashSet<TierPermission>();
@@ -4380,47 +2596,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return tierPermissions;
-    }
-
-    /**
-     * Check whether given Tier is denied for the user
-     *
-     * @param tierName
-     * @return
-     * @throws APIManagementException if failed to get the tiers
-     */
-    @Override
-    public boolean isTierDeneid(String tierName) throws APIManagementException {
-        String[] currentUserRoles;
-        try {
-            if (tenantId != 0) {
-                /* Get the roles of the Current User */
-                currentUserRoles = ((UserRegistry) ((UserAwareAPIConsumer) this).registry).
-                        getUserRealm().getUserStoreManager().getRoleListOfUser(((UserRegistry) this.registry).getUserName());
-
-                TierPermissionDTO tierPermission = apiMgtDAO.getThrottleTierPermission(tierName, tenantId);
-
-                if (tierPermission == null) {
-                    return false;
-                } else {
-                    List<String> currentRolesList = new ArrayList<String>(Arrays.asList(currentUserRoles));
-                    List<String> roles = new ArrayList<String>(Arrays.asList(tierPermission.getRoles()));
-                    currentRolesList.retainAll(roles);
-                    if (APIConstants.TIER_PERMISSION_ALLOW.equals(tierPermission.getPermissionType())) {
-                        if (currentRolesList.isEmpty()) {
-                            return true;
-                        }
-                    } else {
-                        if (currentRolesList.size() > 0) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            log.error("cannot retrieve user role list for tenant" + tenantDomain, e);
-        }
-        return false;
     }
 
     private boolean isTenantDomainNotMatching(String tenantDomain) {
@@ -4470,6 +2645,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start, int offset
             , String search, String sortColumn, String sortOrder, String organization)
             throws APIManagementException {
+
+        if (APIUtil.isOnPremResolver()) {
+            organization = tenantDomain;
+        }
         return apiMgtDAO.getApplicationsWithPagination(subscriber, groupingId, start, offset,
                 search, sortColumn, sortOrder, organization);
     }
@@ -4485,12 +2664,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     private String getScopeString(String[] scopes) {
         return StringUtils.join(scopes, " ");
-    }
-
-    @Override
-    public Application[] getLightWeightApplications(Subscriber subscriber, String groupingId) throws
-            APIManagementException {
-        return apiMgtDAO.getLightWeightApplications(subscriber, groupingId);
     }
 
     /**
@@ -4552,7 +2725,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerID);
                 if (keyManagerConfiguration == null) {
                     throw new APIManagementException("Key Manager " + keyManagerID + " couldn't found.",
-                            ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                            ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
                 } else {
                     keyManagerName = keyManagerID;
                     keyManagerID = keyManagerConfiguration.getUuid();
@@ -4563,6 +2736,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (!keyManagerConfiguration.isEnabled()) {
                 throw new APIManagementException("Key Manager " + keyManagerName + " not activated in the requested " +
                         "Tenant", ExceptionCodes.KEY_MANAGER_NOT_ENABLED);
+            }
+            if (KeyManagerConfiguration.TokenType.EXCHANGED.toString().equals(keyManagerConfiguration.getTokenType())) {
+                throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
+                        " Client Application", ExceptionCodes.KEY_MANAGER_NOT_SUPPORTED_TOKEN_GENERATION);
             }
             //Create OauthAppRequest object by passing json String.
             OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(application.getName(), null,
@@ -4602,11 +2779,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     }
 
-    @Override
-    public Application[] getApplicationsByOwner(String userId, int limit, int offset) throws APIManagementException {
-        return apiMgtDAO.getApplicationsByOwner(userId, limit, offset);
-    }
-
     public boolean isSubscriberValid(String userId)
             throws APIManagementException {
         boolean isSubscribeValid = false;
@@ -4618,45 +2790,58 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return isSubscribeValid;
     }
 
-    public boolean updateApplicationOwner(String userId, Application application) throws APIManagementException {
+    public boolean updateApplicationOwner(String userId, String organization, Application application) throws APIManagementException {
         boolean isAppUpdated;
         String consumerKey;
         String oldUserName = application.getSubscriber().getName();
         String oldTenantDomain = MultitenantUtils.getTenantDomain(oldUserName);
         String newTenantDomain = MultitenantUtils.getTenantDomain(userId);
         if (oldTenantDomain.equals(newTenantDomain)) {
-            if (isSubscriberValid(userId)) {
-                String applicationName = application.getName();
-                if (!APIUtil.isApplicationOwnedBySubscriber(userId, applicationName)) {
-                    for (APIKey apiKey : application.getKeys()) {
-                        KeyManager keyManager =
-                                KeyManagerHolder.getKeyManagerInstance(tenantDomain, apiKey.getKeyManager());
-                             /* retrieving OAuth application information for specific consumer key */
-                        consumerKey = apiKey.getConsumerKey();
-                        OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
-                        if (oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME) != null) {
-                            OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(oAuthApplicationInfo.
-                                            getParameter(ApplicationConstants.OAUTH_CLIENT_NAME).toString(), null,
-                                    oAuthApplicationInfo.getCallBackURL(), null,
-                                    null, application.getTokenType(), this.tenantDomain, apiKey.getKeyManager());
-                            oauthAppRequest.getOAuthApplicationInfo().setAppOwner(userId);
-                            oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
-                             /* updating the owner of the OAuth application with userId */
-                            OAuthApplicationInfo updatedAppInfo = keyManager.updateApplicationOwner(oauthAppRequest,
-                                    oldUserName);
-                            isAppUpdated = true;
-                            audit.info("Successfully updated the owner of application " + application.getName() +
-                                    " from " + oldUserName + " to " + userId + ".");
-                        } else {
-                            throw new APIManagementException("Unable to retrieve OAuth application information.");
+            if (!isSubscriberValid(userId)) {
+                RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+                try {
+                    int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                            .getTenantId(newTenantDomain);
+                    UserStoreManager userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
+                    if (userStoreManager.isExistingUser(userId)) {
+                        if (apiMgtDAO.getSubscriber(userId) == null){
+                            addSubscriber(userId, "");
                         }
+                    } else {
+                        throw new APIManagementException("User " + userId + " doesn't exist in user store");
                     }
-                } else {
-                    throw new APIManagementException("Unable to update application owner to " + userId +
-                            " as this user has an application with the same name. Update owner to another user.");
+                } catch (UserStoreException e) {
+                    throw new APIManagementException("Error while adding user " + userId + " as a subscriber");
+                }
+            }
+            String applicationName = application.getName();
+            if (!APIUtil.isApplicationOwnedBySubscriber(userId, applicationName, organization)) {
+                for (APIKey apiKey : application.getKeys()) {
+                    KeyManager keyManager =
+                            KeyManagerHolder.getKeyManagerInstance(tenantDomain, apiKey.getKeyManager());
+                    /* retrieving OAuth application information for specific consumer key */
+                    consumerKey = apiKey.getConsumerKey();
+                    OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+                    if (oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME) != null) {
+                        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(oAuthApplicationInfo.
+                                        getParameter(ApplicationConstants.OAUTH_CLIENT_NAME).toString(), null,
+                                oAuthApplicationInfo.getCallBackURL(), null,
+                                null, application.getTokenType(), this.tenantDomain, apiKey.getKeyManager());
+                        oauthAppRequest.getOAuthApplicationInfo().setAppOwner(userId);
+                        oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
+                        /* updating the owner of the OAuth application with userId */
+                        OAuthApplicationInfo updatedAppInfo = keyManager.updateApplicationOwner(oauthAppRequest,
+                                userId);
+                        isAppUpdated = true;
+                        audit.info("Successfully updated the owner of application " + application.getName() +
+                                " from " + oldUserName + " to " + userId + ".");
+                    } else {
+                        throw new APIManagementException("Unable to retrieve OAuth application information.");
+                    }
                 }
             } else {
-                throw new APIManagementException(userId + " is not a subscriber");
+                throw new APIManagementException("Unable to update application owner to " + userId +
+                        " as this user has an application with the same name. Update owner to another user.");
             }
         } else {
             throw new APIManagementException("Unable to update application owner to " +
@@ -4766,28 +2951,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     @Override
     public boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException {
-        JSONObject apiTenantConfig = null;
-        try {
-            String content = apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
-
-            if (content != null) {
-                JSONParser parser = new JSONParser();
-                apiTenantConfig = (JSONObject) parser.parse(content);
-            }
-
-        } catch (UserStoreException e) {
-            handleException("UserStoreException thrown when getting API tenant config from registry", e);
-        } catch (RegistryException e) {
-            handleException("RegistryException thrown when getting API tenant config from registry", e);
-        } catch (ParseException e) {
-            handleException("ParseException thrown when passing API tenant config from registry", e);
-        }
-
+        JSONObject apiTenantConfig = APIUtil.getTenantConfig(tenantDomain);
         return getTenantConfigValue(tenantDomain, apiTenantConfig, APIConstants.API_TENANT_CONF_ENABLE_MONITZATION_KEY);
     }
 
     private boolean getTenantConfigValue(String tenantDomain, JSONObject apiTenantConfig, String configKey) throws APIManagementException {
-        if (apiTenantConfig != null) {
+        if (apiTenantConfig.size() != 0 ) {
             Object value = apiTenantConfig.get(configKey);
 
             if (value != null) {
@@ -4873,90 +3042,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return criteria;
     }
 
-    @Deprecated // Remove this method once the jaggery store app is removed.
-    @Override
-    public String getWSDLDocument(String username, String tenantDomain, String resourceUrl,
-            Map environmentDetails, Map apiDetails) throws APIManagementException {
-
-        if (username == null) {
-            username = APIConstants.END_USER_ANONYMOUS;
-        }
-        if (tenantDomain == null) {
-            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-
-        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resourceUrl, tenantDomain);
-        String wsdlContent = "";
-        if (log.isDebugEnabled()) {
-            log.debug("WSDL document resource availability: " + docResourceMap.isEmpty());
-        }
-        if (!docResourceMap.isEmpty()) {
-            try {
-                ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
-                IOUtils.copy((InputStream) docResourceMap.get("Data"), arrayOutputStream);
-                String apiName = (String) apiDetails.get(API_NAME);
-                String apiVersion = (String) apiDetails.get(API_VERSION);
-                String apiProvider = (String) apiDetails.get(API_PROVIDER);
-                String environmentName = (String) environmentDetails.get(ENVIRONMENT_NAME);
-                String environmentType = (String) environmentDetails.get(ENVIRONMENT_TYPE);
-                if (log.isDebugEnabled()) {
-                    log.debug("Published SOAP api gateway environment name: " + environmentName + " environment type: "
-                            + environmentType);
-                }
-                if (resourceUrl.endsWith(APIConstants.ZIP_FILE_EXTENSION)) {
-                    WSDLArchiveInfo archiveInfo = APIMWSDLReader
-                            .extractAndValidateWSDLArchive((InputStream) docResourceMap.get("Data"))
-                            .getWsdlArchiveInfo();
-                    File folderToImport = new File(
-                            archiveInfo.getLocation() + File.separator + APIConstants.API_WSDL_EXTRACTED_DIRECTORY);
-                    Collection<File> wsdlFiles = APIFileUtil
-                            .searchFilesWithMatchingExtension(folderToImport, APIFileUtil.WSDL_FILE_EXTENSION);
-                    Collection<File> xsdFiles = APIFileUtil
-                            .searchFilesWithMatchingExtension(folderToImport, APIFileUtil.XSD_FILE_EXTENSION);
-                    if (wsdlFiles != null) {
-                        for (File foundWSDLFile : wsdlFiles) {
-                            Path fileLocation = Paths.get(foundWSDLFile.getAbsolutePath());
-                            byte[] updatedWSDLContent = this
-                                    .getUpdatedWSDLByEnvironment(resourceUrl, Files.readAllBytes(fileLocation),
-                                            environmentName, environmentType, apiName, apiVersion, apiProvider);
-                            File updatedWSDLFile = new File(foundWSDLFile.getPath());
-                            wsdlFiles.remove(foundWSDLFile);
-                            FileUtils.writeByteArrayToFile(updatedWSDLFile, updatedWSDLContent);
-                            wsdlFiles.add(updatedWSDLFile);
-                        }
-                        wsdlFiles.addAll(xsdFiles);
-                        ZIPUtils.zipFiles(folderToImport.getCanonicalPath() + APIConstants.UPDATED_WSDL_ZIP,
-                                wsdlFiles);
-                        wsdlContent = folderToImport.getCanonicalPath() + APIConstants.UPDATED_WSDL_ZIP;
-                    }
-                } else {
-                    arrayOutputStream = new ByteArrayOutputStream();
-                    IOUtils.copy((InputStream) docResourceMap.get("Data"), arrayOutputStream);
-                    byte[] updatedWSDLContent = this
-                            .getUpdatedWSDLByEnvironment(resourceUrl, arrayOutputStream.toByteArray(), environmentName,
-                                    environmentType, apiName, apiVersion, apiProvider);
-                    wsdlContent = new String(updatedWSDLContent);
-                }
-            } catch (IOException e) {
-                handleException("Error occurred while copying wsdl content into byte array stream for resource: "
-                        + resourceUrl, e);
-            }
-        } else {
-            handleException("No wsdl resource found for resource path: " + resourceUrl);
-        }
-        JSONObject data = new JSONObject();
-        data.put(APIConstants.DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE,
-                docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE));
-        data.put(APIConstants.DOCUMENTATION_RESOURCE_MAP_NAME,
-                docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_NAME));
-        data.put(APIConstants.DOCUMENTATION_RESOURCE_MAP_DATA, wsdlContent);
-        if (log.isDebugEnabled()) {
-            log.debug("Updated wsdl content details for wsdl resource: " + docResourceMap.get("name") + " is " +
-                    data.toJSONString());
-        }
-        return data.toJSONString();
-    }
-
     @Override
     public ResourceFile getWSDL(API api, String environmentName, String environmentType, String organization)
             throws APIManagementException {
@@ -4984,7 +3069,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Set<SubscribedAPI> subscribedAPISet = new HashSet<SubscribedAPI>();
         Set<SubscribedAPI> subscribedAPIs = getLightWeightSubscribedAPIs(organization, subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
-            if (api.getApiId().equals(apiIdentifier)) {
+            if (api.getAPIIdentifier().equals(apiIdentifier)) {
                 subscribedAPISet.add(api);
             }
         }
@@ -4999,88 +3084,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Set<APIKey> getApplicationKeysOfApplication(int applicationId, String xWso2Tenant)
             throws APIManagementException {
         return getApplicationKeys(applicationId, xWso2Tenant);
-    }
-
-    /**
-     * This method is used to get the updated wsdl with the respective environment apis are published
-     *
-     * @param wsdlResourcePath registry resource path to the wsdl
-     * @param wsdlContent      wsdl resource content as byte array
-     * @param environmentType  gateway environment type
-     * @return updated wsdl content with environment endpoints
-     * @throws APIManagementException
-     */
-    private byte[] getUpdatedWSDLByEnvironment(String wsdlResourcePath, byte[] wsdlContent, String environmentName,
-            String environmentType, String apiName, String apiVersion, String apiProvider)
-            throws APIManagementException {
-        APIMWSDLReader apimwsdlReader = new APIMWSDLReader(wsdlResourcePath);
-        Definition definition = apimwsdlReader.getWSDLDefinitionFromByteContent(wsdlContent, false);
-
-        byte[] updatedWSDLContent = null;
-        boolean isTenantFlowStarted = false;
-        try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiProvider));
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            int tenantId;
-            UserRegistry registry;
-
-            try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-                APIUtil.loadTenantRegistry(tenantId);
-                registry = registryService.getGovernanceSystemRegistry(tenantId);
-                API api = null;
-                if (!StringUtils.isEmpty(apiName) && !StringUtils.isEmpty(apiVersion)) {
-                    APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(apiProvider), apiName, apiVersion);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Api identifier for the soap api artifact: " + apiIdentifier + "for api name: "
-                                          + apiName + ", version: " + apiVersion);
-                    }
-                    GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
-                    api = APIUtil.getAPI(apiArtifact);
-                    if (log.isDebugEnabled()) {
-                        if (api != null) {
-                            log.debug(
-                                    "Api context for the artifact with id:" + api.getId() + " is " + api.getContext());
-                        } else {
-                            log.debug("Api does not exist for api name: " + apiIdentifier.getApiName());
-                        }
-                    }
-                } else {
-                    handleException("Artifact does not exist in the registry for api name: " + apiName +
-                                            " and version: " + apiVersion);
-                }
-
-                if (api != null) {
-                    try {
-                        apimwsdlReader.setServiceDefinition(definition, api, environmentName, environmentType);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Soap api with context:" + api.getContext() + " in " + environmentName
-                                              + " with environment type" + environmentType);
-                        }
-                        updatedWSDLContent = apimwsdlReader.getWSDL(definition);
-                    } catch (APIManagementException e) {
-                        handleException("Error occurred while processing the wsdl for api: [" + api.getId() + "]", e);
-                    }
-                } else {
-                    handleException("Error while getting API object for wsdl artifact");
-                }
-            } catch (UserStoreException e) {
-                handleException("Error while reading tenant information", e);
-            } catch (RegistryException e) {
-                handleException("Error when create registry instance", e);
-            }
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-        return updatedWSDLContent;
     }
 
     /**
@@ -5100,7 +3103,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("Error in getting tenantId of " + tenantDomain, e);
         }
         JSONArray applicationAttributes = null;
-        JSONObject applicationConfig = APIUtil.getAppAttributeKeysFromRegistry(tenantId);
+        JSONObject applicationConfig = APIUtil.getAppAttributeKeysFromRegistry(tenantDomain);
         if (applicationConfig != null) {
             applicationAttributes = (JSONArray) applicationConfig.get(APIConstants.ApplicationAttributes.ATTRIBUTES);
         } else {
@@ -5154,29 +3157,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiMgtDAO.addApplicationAttributes(newApplicationAttributes, applicationId, tenantId);
     }
 
-    /**
-     * Store specific implementation of search paginated apis by content
-     * @param registry
-     * @param searchQuery
-     * @param start
-     * @param end
-     * @return
-     * @throws APIManagementException
-     */
-    public Map<String, Object> searchPaginatedAPIsByContent(Registry registry, int tenantId, String searchQuery,
-            int start, int end, boolean limitAttributes) throws APIManagementException {
-
-        Map<String, Object> searchResults = super
-                .searchPaginatedAPIsByContent(registry, tenantId, searchQuery, start, end, limitAttributes);
-        return filterMultipleVersionedAPIs(searchResults);
-    }
-
-
-    @Override
-    public String getOpenAPIDefinition(Identifier apiId, String organization) throws APIManagementException {
-        String definition = super.getOpenAPIDefinition(apiId, organization);
-        return APIUtil.removeXMediationScriptsFromSwagger(definition);
-    }
 
     @Override
     public String getOpenAPIDefinition(String apiId, String organization) throws APIManagementException {
@@ -5243,6 +3223,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } else {
             apiSet = (ArrayList<Object>) apiObj;
         }
+        int apiSetLengthWithVersionedApis = apiSet.size(); // Store the length of the APIs list with the versioned APIs
+        int totalLength = Integer.parseInt(searchResults.get("length").toString());
 
         //filter store results if displayMultipleVersions is set to false
         Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
@@ -5307,6 +3289,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                 }
             }
+
+            // Store the length of the APIs list without the versioned APIs
+            int apiSetLengthWithoutVersionedApis = tempApiSet.size();
+
             apiSet = tempApiSet;
             ArrayList<Object> resultAPIandProductSet = new ArrayList<>();
             resultAPIandProductSet.addAll(apiSet);
@@ -5318,6 +3304,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             } else {
                 searchResults.put("apis", resultAPIandProductSet);
             }
+            searchResults.put("length",
+                    totalLength - (apiSetLengthWithVersionedApis - (apiSetLengthWithoutVersionedApis + apiProductSet
+                            .size())));
         }
         return searchResults;
     }
@@ -5356,6 +3345,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         Map<String, String> domains = getTenantDomainMappings(apiTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
         Map<String, String> hostsWithSchemes = new HashMap<>();
+        String organization = api.getOrganization();
         if (!domains.isEmpty()) {
             String customUrl = domains.get(APIConstants.CUSTOM_URL);
             if (customUrl.startsWith(APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
@@ -5364,7 +3354,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, customUrl);
             }
         } else {
-            Map<String, Environment> allEnvironments = APIUtil.getEnvironments();
+            Map<String, Environment> allEnvironments = APIUtil.getEnvironments(organization);
             Environment environment = allEnvironments.get(environmentName);
 
             if (environment == null) {
@@ -5388,10 +3378,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             VHost vhost = VHostUtils.getVhostFromEnvironment(environment, host);
-            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)) {
+            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)
+                    && vhost.getHttpPort() != null) {
                 hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, vhost.getHttpUrl());
             }
-            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)) {
+            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)
+                    && vhost.getHttpsPort() != null) {
                 hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, vhost.getHttpsUrl());
             }
         }
@@ -5407,17 +3399,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return basePath;
     }
 
-    public void publishSearchQuery(String query, String username) {
+    public void publishSearchQuery(String query, String username, String organization) {
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(query, username, requestedTenant);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(query, username, organization);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
     }
 
-    public void publishClickedAPI(ApiTypeWrapper clickedApi, String username) {
+    public void publishClickedAPI(ApiTypeWrapper clickedApi, String username, String organization) {
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(clickedApi, username, requestedTenant);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(clickedApi, username, organization);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -5450,9 +3442,30 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-    @Override
-    public APIKey getApplicationKeyByAppIDAndKeyMapping(int applicationId, String keyMappingId) throws APIManagementException {
-        return apiMgtDAO.getKeyMappingFromApplicationIdAndKeyMappingId(applicationId, keyMappingId);
+    @Override public APIKey getApplicationKeyByAppIDAndKeyMapping(int applicationId, String keyMappingId)
+            throws APIManagementException {
+        APIKey apiKey = apiMgtDAO.getKeyMappingFromApplicationIdAndKeyMappingId(applicationId, keyMappingId);
+        String keyManagerId = apiKey.getKeyManager();
+        String consumerKey = apiKey.getConsumerKey();
+
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerId);
+        String keyManagerTenantDomain = keyManagerConfigurationDTO.getOrganization();
+        if (keyManagerConfigurationDTO != null) {
+            String keyManagerName = keyManagerConfigurationDTO.getName();
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerTenantDomain, keyManagerName);
+            if (keyManager != null) {
+                OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+                if (oAuthApplicationInfo != null) {
+                    apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
+                    apiKey.setGrantTypes((String) oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
+                    apiKey.setCallbackUrl(oAuthApplicationInfo.getCallBackURL());
+                    apiKey.setAdditionalProperties(
+                            oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES));
+                }
+            }
+        }
+
+        return apiKey;
     }
 
     @Override
@@ -5537,8 +3550,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end)
-            throws APIManagementException {
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end,
+            String sortBy, String sortOrder) throws APIManagementException {
         Map<String, Object> result = new HashMap<String, Object>();
         if (log.isDebugEnabled()) {
             log.debug("Original search query received : " + searchQuery);
@@ -5561,6 +3574,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 for (DevPortalAPIInfo devPortalAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(devPortalAPIInfo);
                     mappedAPI.setRating(APIUtil.getAverageRating(mappedAPI.getUuid()));
+                    Set<String> tierNameSet = devPortalAPIInfo.getAvailableTierNames();
+                    String tiers = null;
+                    if (tierNameSet != null) {
+                        tiers = String.join("||", tierNameSet);
+                    }
+                    Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+                    Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers,
+                            mappedAPI.getId().getApiName());
+                    mappedAPI.removeAllTiers();
+                    mappedAPI.setAvailableTiers(availableTiers);
                     apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);
@@ -5576,11 +3599,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching the api ", e);
         }
-        if (APIUtil.isAllowDisplayMultipleVersions()) {
-            return result;
-        }
-        return filterMultipleVersionedAPIs(result);
+        return result;
     }
+
 
     @Override
     public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
@@ -5597,6 +3618,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             devPortalApi.getApiName(), devPortalApi.getVersion()));
                     populateAPIProductInformation(uuid, organization, apiProduct);
                     populateAPIStatus(apiProduct);
+                    apiProduct = addTiersToAPI(apiProduct, organization);
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
@@ -5667,17 +3689,40 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
 
         Set<Tier> availableTiers = new HashSet<Tier>();
+        Set<String> deniedTiers = getDeniedTiers(tenantId);
+
         for (Tier tierName : tierNames) {
             Tier definedTier = definedTiers.get(tierName.getName());
-            if (definedTier != null) {
+            if (definedTier != null && (!deniedTiers.contains(definedTier.getName()))) {
                 availableTiers.add(definedTier);
             } else {
                 log.warn("Unknown tier: " + tierName + " found on API: ");
             }
         }
+        availableTiers.removeIf(tier -> deniedTiers.contains(tier.getName()));
         api.removeAllTiers();
         api.addAvailableTiers(availableTiers);
         return api;
+    }
+
+    private APIProduct addTiersToAPI(APIProduct apiProduct, String organization) throws APIManagementException {
+        int tenantId = APIUtil.getInternalIdFromTenantDomainOrOrganization(organization);
+        Set<Tier> tierNames = apiProduct.getAvailableTiers();
+        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+
+        Set<Tier> availableTiers = new HashSet<>();
+        Set<String> deniedTiers = getDeniedTiers(tenantId);
+
+        for (Tier tierName : tierNames) {
+            Tier definedTier = definedTiers.get(tierName.getName());
+            if (definedTier != null) {
+                availableTiers.add(definedTier);
+            }
+        }
+        availableTiers.removeIf(tier -> deniedTiers.contains(tier.getName()));
+        apiProduct.removeAllTiers();
+        apiProduct.setAvailableTiers(availableTiers);
+        return apiProduct;
     }
 
     /**
@@ -5704,11 +3749,25 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (api.getEnvironments() != null) {
                     environmentString = String.join(",", api.getEnvironments());
                 }
-                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
+                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
                 //CORS . if null is returned, set default config from the configuration
                 if(api.getCorsConfiguration() == null) {
                     api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
                 }
+                String tiers = null;
+                Set<Tier> apiTiers = api.getAvailableTiers();
+                Set<String> tierNameSet = new HashSet<String>();
+                for (Tier t : apiTiers) {
+                    tierNameSet.add(t.getName());
+                }
+                if (api.getAvailableTiers() != null) {
+                    tiers = String.join("||", tierNameSet);
+                }
+                Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+                Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
+                api.removeAllTiers();
+                api.setAvailableTiers(availableTiers);
+                api.setOrganization(organization);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -5779,19 +3838,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid );
             if (devPortalApi != null) {
                 API api = APIMapper.INSTANCE.toApi(devPortalApi);
-
-                /// populate relavant external info
-                /*
-                // environment
-                String environmentString = null;
-                if (api.getEnvironments() != null) {
-                    environmentString = String.join(",", api.getEnvironments());
+                api.setOrganization(orgId);
+                String tiers = null;
+                Set<Tier> apiTiers = api.getAvailableTiers();
+                Set<String> tierNameSet = new HashSet<String>();
+                for (Tier t : apiTiers) {
+                    tierNameSet.add(t.getName());
                 }
-                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
-                //CORS . if null is returned, set default config from the configuration
-                if(api.getCorsConfiguration() == null) {
-                    api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
-                }*/
+                if (api.getAvailableTiers() != null) {
+                    tiers = String.join("||", tierNameSet);
+                }
+                Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+                Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
+                api.removeAllTiers();
+                api.setAvailableTiers(availableTiers);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -5802,6 +3862,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIManagementException(msg, e);
         }
     }
+
     @Override
     public Map<String, Object> searchPaginatedContent(String searchQuery, String organization, int start, int end)
             throws APIManagementException {
@@ -5921,6 +3982,78 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return apiMgtDAO.getAPIRevisionDeploymentByApiUUID(apiUUID);
     }
 
+    @Override
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIsByApplication(Application application, Integer offset,
+                                                                      Integer limit, String organization)
+            throws APIManagementException {
+
+        Set<SubscribedAPI> subscribedAPIs = null;
+        try {
+                subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIsByApplication(application, offset,
+                    limit, organization);
+            if (subscribedAPIs != null && !subscribedAPIs.isEmpty()) {
+                Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
+                for (SubscribedAPI subscribedApi : subscribedAPIs) {
+                    Tier tier = tiers.get(subscribedApi.getTier().getName());
+                    subscribedApi.getTier().setDisplayName(tier != null ? tier.getDisplayName() : subscribedApi
+                            .getTier().getName());
+                }
+            }
+        } catch (APIManagementException e) {
+            handleException("Failed to get subscribed APIs of application " + application.getUUID(), e);
+        }
+        return subscribedAPIs;
+    }
+
+    @Override
+    public List<Tier> getThrottlePolicies(int tierLevel, String organization) throws APIManagementException {
+
+        List<Tier> tierList = new ArrayList<>();
+        Map<String, Tier> tiers = null;
+        if (tierLevel == APIConstants.TIER_API_TYPE) {
+            tiers = APIUtil.getTiers(tierLevel, organization);
+            Set<TierPermission> tierPermissions = getTierPermissions();
+            for (TierPermission tierPermission : tierPermissions) {
+                Tier tier = tiers.get(tierPermission.getTierName());
+                if (tier != null) {
+                    tier.setTierPermission(tierPermission);
+                    tiers.put(tierPermission.getTierName(), tier);
+                }
+            }
+
+            // Removing denied Tiers
+            Set<String> deniedTiers = getDeniedTiers();
+            for (String tierName : deniedTiers) {
+                tiers.remove(tierName);
+            }
+        } else if (tierLevel == APIConstants.TIER_APPLICATION_TYPE) {
+            if (APIUtil.isOnPremResolver()) {
+                organization = tenantDomain;
+            }
+            tiers = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, organization);
+        }
+        if (tiers != null) {
+            tierList.addAll(tiers.values());
+        }
+        return tierList;
+    }
+
+    @Override
+    public Tier getThrottlePolicyByName(String policyId, int policyType, String organization)
+            throws APIManagementException {
+
+        Tier tier = null;
+        if (policyType == APIConstants.TIER_API_TYPE) {
+            tier = APIUtil.getPolicyByName(PolicyConstants.POLICY_LEVEL_SUB, policyId, organization);
+        } else if (policyType == APIConstants.TIER_APPLICATION_TYPE) {
+            if (APIUtil.isOnPremResolver()) {
+                organization = tenantDomain;
+            }
+            tier = APIUtil.getPolicyByName(PolicyConstants.POLICY_LEVEL_APP, policyId, organization);
+        }
+        return tier;
+    }
+
     /**
      * Get host names with transport scheme mapping from Gateway Environments in api-manager.xml or from the tenant
      * custom url config in registry. (For WebSockets)
@@ -5930,7 +4063,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return Host name to transport scheme mapping
      * @throws APIManagementException if an error occurs when getting host names with schemes
      */
-    private Map<String, String> getHostWithSchemeMappingForEnvironmentWS(String apiTenantDomain, String environmentName)
+    private Map<String, String> getHostWithSchemeMappingForEnvironmentWS(String apiTenantDomain, String environmentName,
+                                                                         String organization)
             throws APIManagementException {
 
         Map<String, String> domains = getTenantDomainMappings(apiTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
@@ -5943,7 +4077,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 hostsWithSchemes.put(APIConstants.WSS_PROTOCOL, customUrl);
             }
         } else {
-            Map<String, Environment> allEnvironments = APIUtil.getEnvironments();
+            Map<String, Environment> allEnvironments = APIUtil.getEnvironments(organization);
             Environment environment = allEnvironments.get(environmentName);
 
             if (environment == null) {
@@ -5999,5 +4133,80 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return hostsWithSchemes;
+    }
+    /**
+     * Check if the specified subscription is allowed for the logged in user
+     *
+     * @param apiTypeWrapper Api Type wrapper that contains either an API or API Product
+     * @throws APIManagementException if the subscription allow check was failed. If the user is not allowed to add the
+     *                                subscription, this will throw an instance of APIMgtAuthorizationFailedException with the reason as the message
+     */
+    private void checkSubscriptionAllowed(ApiTypeWrapper apiTypeWrapper)
+            throws APIManagementException {
+        Set<Tier> tiers;
+        String subscriptionAvailability;
+        String subscriptionAllowedTenants;
+
+        if (apiTypeWrapper.isAPIProduct()) {
+            APIProduct product = apiTypeWrapper.getApiProduct();
+            tiers = product.getAvailableTiers();
+            subscriptionAvailability = product.getSubscriptionAvailability();
+            subscriptionAllowedTenants = product.getSubscriptionAvailableTenants();
+        } else {
+            API api = apiTypeWrapper.getApi();
+            String apiSecurity = api.getApiSecurity();
+            if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
+                    !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
+                String msg = "Subscription is not allowed for API " + apiTypeWrapper.toString() + ". To access the API, "
+                        + "please use the client certificate";
+                throw new APIMgtAuthorizationFailedException(msg);
+            }
+            tiers = api.getAvailableTiers();
+            subscriptionAvailability = api.getSubscriptionAvailability();
+            subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
+        }
+
+        String apiOrganization = apiTypeWrapper.getOrganization();
+
+        //Tenant based validation for subscription
+        boolean subscriptionAllowed = false;
+        if (!organization.equals(apiOrganization)) {
+            if (APIConstants.SUBSCRIPTION_TO_ALL_TENANTS.equals(subscriptionAvailability)) {
+                subscriptionAllowed = true;
+            } else if (APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS.equals(subscriptionAvailability)) {
+                if (subscriptionAllowedTenants != null) {
+                    String[] allowedTenants = subscriptionAllowedTenants.split(",");
+                    for (String tenant : allowedTenants) {
+                        if (tenant != null && tenantDomain.equals(tenant.trim())) {
+                            subscriptionAllowed = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else {
+            subscriptionAllowed = true;
+        }
+        if (!subscriptionAllowed) {
+            throw new APIMgtAuthorizationFailedException("Subscription is not allowed for " + userNameWithoutChange);
+        }
+
+        //check whether the specified tier is within the allowed tiers for the API
+        Iterator<Tier> iterator = tiers.iterator();
+        boolean isTierAllowed = false;
+        List<String> allowedTierList = new ArrayList<>();
+        while (iterator.hasNext()) {
+            Tier t = iterator.next();
+            if (t.getName() != null && (t.getName()).equals(apiTypeWrapper.getTier())) {
+                isTierAllowed = true;
+            }
+            allowedTierList.add(t.getName());
+        }
+        if (!isTierAllowed) {
+            String msg = "Tier " + apiTypeWrapper.getTier() + " is not allowed for API/API Product " + apiTypeWrapper + ". Only "
+                    + Arrays.toString(allowedTierList.toArray()) + " Tiers are allowed.";
+            throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_TIER_NOT_ALLOWED,
+                    apiTypeWrapper.getTier(), username));
+        }
     }
 }

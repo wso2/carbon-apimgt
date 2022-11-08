@@ -45,9 +45,9 @@ public class ServiceCatalogUtils {
         service.setServiceUrl(serviceDTO.getServiceUrl());
         service.setDefinitionType(ServiceEntry.DefinitionType.valueOf(serviceDTO.getDefinitionType().value()));
         service.setSecurityType(ServiceEntry.SecurityType.valueOf(serviceDTO.getSecurityType().value()));
-        String key = StringUtils.isNotEmpty(serviceDTO.getServiceKey()) ? serviceDTO.getServiceKey() :
+        String serviceKey = StringUtils.isNotEmpty(serviceDTO.getServiceKey()) ? serviceDTO.getServiceKey() :
                 ServiceEntryMappingUtil.generateServiceKey(service);
-        service.setKey(key);
+        service.setServiceKey(serviceKey);
         service.setMutualSSLEnabled(serviceDTO.isMutualSSLEnabled());
         service.setEndpointDef(new ByteArrayInputStream(definitionFileByteArray));
         service.setMd5(Md5HashGenerator.calculateMD5Hash(serviceDTO.toString().getBytes()) + Md5HashGenerator

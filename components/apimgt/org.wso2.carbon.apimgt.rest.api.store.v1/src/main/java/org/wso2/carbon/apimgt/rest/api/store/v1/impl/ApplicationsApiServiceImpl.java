@@ -46,7 +46,6 @@ import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -142,6 +141,31 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             applications = apiConsumer
                     .getApplicationsWithPagination(new Subscriber(username), groupId, offset, limit, query, sortBy,
                             sortOrder, organization);
+            if (applications != null) {
+                JSONArray applicationAttributesFromConfig = apiConsumer.getAppAttributesFromConfig(username);
+                for (Application application : applications) {
+                    // Remove hidden attributes and set the rest of the attributes from config
+                    Map<String, String> existingApplicationAttributes = application.getApplicationAttributes();
+                    Map<String, String> applicationAttributes = new HashMap<>();
+                    if (existingApplicationAttributes != null && applicationAttributesFromConfig != null) {
+                        for (Object object : applicationAttributesFromConfig) {
+                            JSONObject attribute = (JSONObject) object;
+                            Boolean hidden = (Boolean) attribute.get(APIConstants.ApplicationAttributes.HIDDEN);
+                            String attributeName = (String) attribute.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
+
+                            if (!BooleanUtils.isTrue(hidden)) {
+                                String attributeVal = existingApplicationAttributes.get(attributeName);
+                                if (attributeVal != null) {
+                                    applicationAttributes.put(attributeName, attributeVal);
+                                } else {
+                                    applicationAttributes.put(attributeName, "");
+                                }
+                            }
+                        }
+                    }
+                    application.setApplicationAttributes(applicationAttributes);
+                }
+            }
             ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             int applicationCount = apiMgtDAO.getAllApplicationCount(subscriber, groupId, query);
 
@@ -281,7 +305,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return 201 response if successful
      */
     @Override
-    public Response applicationsPost(ApplicationDTO body, MessageContext messageContext){
+    public Response applicationsPost(ApplicationDTO body, MessageContext messageContext) throws APIManagementException {
+
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -292,7 +317,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
                     createdApplicationDTO.getApplicationId());
             return Response.created(location).entity(createdApplicationDTO).build();
-        } catch (APIManagementException | URISyntaxException e) {
+        } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
                 RestApiUtil.handleResourceAlreadyExistsError(
                         "An application already exists with name " + body.getName(), e,
@@ -302,9 +327,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             } else if (RestApiUtil.isDueToApplicationNameWithInvalidCharacters(e)) {
                 RestApiUtil.handleBadRequest("Application name cannot contain invalid characters", log);
             } else {
-                RestApiUtil.handleInternalServerError("Error while adding a new application for the user " + username,
-                        e, log);
+                throw e;
             }
+        } catch (URISyntaxException e) {
+            RestApiUtil.handleInternalServerError(e.getLocalizedMessage(), log);
         }
         return null;
     }
@@ -325,11 +351,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String tierName = applicationDto.getThrottlingPolicy();
         if (tierName == null) {
             RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
-        }
-
-        Map<String, Tier> appTierMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, organization);
-        if (appTierMap == null || RestApiUtil.findTier(appTierMap.values(), tierName) == null) {
-            RestApiUtil.handleBadRequest("Specified tier " + tierName + " is invalid", log);
         }
 
         Object applicationAttributesFromUser = applicationDto.getAttributes();
@@ -442,6 +463,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 RestApiUtil.handleBadRequest("Application name cannot contains leading or trailing white spaces", log);
             } else if (RestApiUtil.isDueToApplicationNameWithInvalidCharacters(e)) {
                 RestApiUtil.handleBadRequest("Application name cannot contain invalid characters", log);
+            } else if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
+                RestApiUtil.handleResourceAlreadyExistsError(
+                        "An application already exists with name " + body.getName(), e, log);
             } else {
                 RestApiUtil.handleInternalServerError("Error while updating application " + applicationId, e, log);
             }
@@ -467,12 +491,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         if (applicationAttributes != null) {
             applicationDto.setAttributes(applicationAttributes);
-        }
-
-        //we do not honor tokenType sent in the body and all the applications are considered of 'JWT' token type
-        //unless the current application is already of 'OAUTH' type
-        if (!ApplicationDTO.TokenTypeEnum.OAUTH.toString().equals(oldApplication.getTokenType())) {
-            applicationDto.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
         }
 
         //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
@@ -681,6 +699,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (application != null) {
                 if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
                     apiConsumer.removeApplication(application, username);
+                    if (APIConstants.ApplicationStatus.DELETE_PENDING.equals(application.getStatus())) {
+                        if (application.getId() == -1) {
+                            return Response.status(Response.Status.BAD_REQUEST).build();
+                        }
+                        return Response.status(Response.Status.CREATED).build();
+                    }
                     return Response.ok().build();
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);

@@ -70,6 +70,8 @@ return null;
     private List<ScopeInfoDTO> subscriptionScopes = new ArrayList<ScopeInfoDTO>();
     private String owner = null;
     private Boolean hashEnabled = null;
+    private String createdTime = null;
+    private String updatedTime = null;
 
   /**
    **/
@@ -298,6 +300,40 @@ return null;
     this.hashEnabled = hashEnabled;
   }
 
+  /**
+   **/
+  public ApplicationDTO createdTime(String createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1651555310208", value = "")
+  @JsonProperty("createdTime")
+  public String getCreatedTime() {
+    return createdTime;
+  }
+  public void setCreatedTime(String createdTime) {
+    this.createdTime = createdTime;
+  }
+
+  /**
+   **/
+  public ApplicationDTO updatedTime(String updatedTime) {
+    this.updatedTime = updatedTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1651555310208", value = "")
+  @JsonProperty("updatedTime")
+  public String getUpdatedTime() {
+    return updatedTime;
+  }
+  public void setUpdatedTime(String updatedTime) {
+    this.updatedTime = updatedTime;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -320,12 +356,14 @@ return null;
         Objects.equals(attributes, application.attributes) &&
         Objects.equals(subscriptionScopes, application.subscriptionScopes) &&
         Objects.equals(owner, application.owner) &&
-        Objects.equals(hashEnabled, application.hashEnabled);
+        Objects.equals(hashEnabled, application.hashEnabled) &&
+        Objects.equals(createdTime, application.createdTime) &&
+        Objects.equals(updatedTime, application.updatedTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner, hashEnabled);
+    return Objects.hash(applicationId, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner, hashEnabled, createdTime, updatedTime);
   }
 
   @Override
@@ -346,6 +384,8 @@ return null;
     sb.append("    subscriptionScopes: ").append(toIndentedString(subscriptionScopes)).append("\n");
     sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
     sb.append("    hashEnabled: ").append(toIndentedString(hashEnabled)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -32,7 +32,7 @@ public class ApplicationPolicy extends Policy {
     }
 
     public void setApplicationId(int applicationId) {
-        applicationId = applicationId;
+        this.applicationId = applicationId;
     }
     
     public byte[] getCustomAttributes() {

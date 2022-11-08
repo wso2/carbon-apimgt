@@ -35,6 +35,8 @@ public class SQLConstantsDB2 extends SQLConstants{
                     "   NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME,  " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME,  " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -53,7 +55,7 @@ public class SQLConstantsDB2 extends SQLConstants{
                     "   APP.ORGANIZATION = ? " +
                     " And " +
                     "    NAME like ?" +
-                    " ) a )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
+                    " ) a )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) " +
                     " ORDER BY $1 $2 limit ? , ? ";
 
 
@@ -68,6 +70,8 @@ public class SQLConstantsDB2 extends SQLConstants{
                     "   NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -86,7 +90,7 @@ public class SQLConstantsDB2 extends SQLConstants{
                     "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    NAME like ?" +
-                    " ) a )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
+                    " ) a )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) " +
                     " ORDER BY $1 $2 limit ? , ? ";
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE =
@@ -98,6 +102,8 @@ public class SQLConstantsDB2 extends SQLConstants{
                     "   NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -116,7 +122,7 @@ public class SQLConstantsDB2 extends SQLConstants{
                     "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    NAME like ?" +
-                    " ) a )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
+                    " ) a )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) " +
                     " ORDER BY $1 $2 limit ? , ? ";
 
 
@@ -129,6 +135,8 @@ public class SQLConstantsDB2 extends SQLConstants{
                     "   NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -147,7 +155,7 @@ public class SQLConstantsDB2 extends SQLConstants{
                     "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    NAME like ?" +
-                    " ) a )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
+                    " ) a )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) " +
                     " ORDER BY $1 $2 limit ? , ? ";
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITH_MULTIGROUPID =
@@ -157,6 +165,8 @@ public class SQLConstantsDB2 extends SQLConstants{
                     "   NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -182,9 +192,43 @@ public class SQLConstantsDB2 extends SQLConstants{
                     "    NAME like ?"+
                     " ORDER BY $1 $2 " +
                     " limit ? , ? "+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) ";
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
 
-
+    public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE_WITH_MULTIGROUPID =
+            "select distinct x.*,bl.ENABLED from (" +
+                    " SELECT " +
+                    "   APPLICATION_ID, " +
+                    "   NAME," +
+                    "   APPLICATION_TIER," +
+                    "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
+                    "   CALLBACK_URL,  " +
+                    "   DESCRIPTION, " +
+                    "   APPLICATION_STATUS, " +
+                    "   USER_ID, " +
+                    "   GROUP_ID, " +
+                    "   UUID, " +
+                    "   APP.CREATED_BY AS CREATED_BY " +
+                    " FROM" +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIBER SUB  " +
+                    " WHERE " +
+                    "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    " AND (" +
+                    "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID " +
+                    " IN ($params) AND TENANT = ? ))" +
+                    "           OR " +
+                    "    (SUB.USER_ID = ?)" +
+                    "           OR " +
+                    "     (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
+                    " )" +
+                    " AND " +
+                    "   APP.ORGANIZATION = ? " +
+                    " And " +
+                    "    NAME like ?"+
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) " +
+                    " ORDER BY $1 $2 limit ? , ?";
 
     public static final String GET_APPLICATIONS_BY_TENANT_ID =
             "(" +
@@ -194,6 +238,8 @@ public class SQLConstantsDB2 extends SQLConstants{
                     "   APP.APPLICATION_ID as APPLICATION_ID, " +
                     "   SUB.CREATED_BY AS CREATED_BY, " +
                     "   APP.GROUP_ID AS GROUP_ID, " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   SUB.TENANT_ID AS TENANT_ID, " +
                     "   SUB.SUBSCRIBER_ID AS SUBSCRIBER_ID, " +
                     "   APP.UUID AS UUID," +

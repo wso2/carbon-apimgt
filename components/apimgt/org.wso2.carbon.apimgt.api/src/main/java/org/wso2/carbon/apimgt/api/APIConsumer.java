@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
@@ -61,69 +62,6 @@ public interface APIConsumer extends APIManager {
     Subscriber getSubscriber(String subscriberId) throws APIManagementException;
 
     /**
-     * Returns a list of #{@link org.wso2.carbon.apimgt.api.model.API} bearing the selected tag
-     *
-     * @param tag name of the tag
-     * @return set of API having the given tag name
-     * @throws APIManagementException if failed to get set of API
-     */
-    Set<API> getAPIsWithTag(String tag, String tenantDomain) throws APIManagementException;
-
-    /**
-     * Returns a paginated list of #{@link org.wso2.carbon.apimgt.api.model.API} bearing the selected tag
-     *
-     * @param tag name of the tag
-     * @param start starting number
-     * @param end ending number
-     * @return set of API having the given tag name
-     * @throws APIManagementException if failed to get set of API
-     */
-    Map<String,Object> getPaginatedAPIsWithTag(String tag, int start, int end, String tenantDomain) throws APIManagementException;
-
-    /**
-     * Returns a paginated list of all published APIs. If a given API has multiple APIs,
-     * only the latest version will be included
-     * in this list.
-     * @param tenantDomain tenant domain
-     * @param start starting number
-     * @param end ending number
-     * @return set of API
-     * @throws APIManagementException if failed to API set
-     */
-    Map<String,Object> getAllPaginatedPublishedAPIs(String tenantDomain, int start, int end) throws APIManagementException;
-
-    /**
-     * Returns a paginated list of all published APIs. If a given API has multiple APIs,
-     * only the latest version will be included in this list.
-     * Light weight implementation of getAllPaginatedPublishesAPIs.
-     * @param tenantDomain tenant domain
-     * @param start starting number
-     * @param end ending number
-     * @return set of API
-     * @throws APIManagementException if failed to API set
-     */
-    Map<String,Object> getAllPaginatedPublishedLightWeightAPIs(String tenantDomain, int start, int end)
-            throws APIManagementException;
-
-    /**
-     * Returns top rated APIs
-     *
-     * @param limit if -1, no limit. Return everything else, limit the return list to specified value.
-     * @return Set of API
-     * @throws APIManagementException if failed to get top rated APIs
-     */
-    Set<API> getTopRatedAPIs(int limit) throws APIManagementException;
-
-    /**
-     * Get recently added APIs to the store
-     *
-     * @param limit if -1, no limit. Return everything else, limit the return list to specified value.
-     * @return set of API
-     * @throws APIManagementException if failed to get recently added APIs
-     */
-    Set<API> getRecentlyAddedAPIs(int limit,String tenantDomain) throws APIManagementException;
-
-    /**
      * Get all tags of published APIs
      *
      * @param organization organization of the API
@@ -131,22 +69,6 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get All the tags
      */
     Set<Tag> getAllTags(String organization) throws APIManagementException;
-
-    /**
-     * Returns all tags with their descriptions.
-     *
-     * NOTE : The reason for having a separate method to get the tags with their attributes is,
-     * because of the implementation of addition tag attributes.
-     * Tag attributes are saved in a registry location with convention.
-     * e.g.  governance/apimgt/applicationdata/tags/{tag_name}/description.txt.
-     * In most of the use cases these attributes are not needed.
-     * So not fetching the description if it is not needed is healthy for performance.
-     *
-     * @param tenantDomain Tenant domain.
-     * @return The description of the tag.
-     * @throws APIManagementException if there is a failure in getting the description.
-     */
-    Set<Tag> getTagsWithAttributes(String tenantDomain)throws APIManagementException;
 
     /**
      * Rate a particular API. This will be called when subscribers rate an API
@@ -231,33 +153,13 @@ public interface APIConsumer extends APIManager {
     void cleanUpApplicationRegistrationByApplicationId(int applicationId, String tokenType) throws APIManagementException;
 
     /**
-     * Returns a set of SubscribedAPIs filtered by the given application name and in between starting and ending indexes.
-     *
-     * @param subscriber Subscriber
-     * @param applicationName Application needed to find subscriptions
-     * @param startSubIndex Starting index of subscriptions to be listed
-     * @param endSubIndex Ending index of Subscriptions to be listed
-     * @param groupingId the group id of the application
-     * @param organization organization of the API
-     * @return
+     * This method will delete pending subscription tasks
+     * @param applicationId
      * @throws APIManagementException
      */
-    Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex,
-                                                  int endSubIndex, String groupingId, String organization) throws APIManagementException;
-
-    /**
-     * Returns a set of SubscribedAPIs filtered by the given application name and in between starting and ending indexes.
-     *
-     * @param subscriber Subscriber
-     * @param applicationId Application needed to find subscriptions
-     * @param startSubIndex Starting index of subscriptions to be listed
-     * @param endSubIndex Ending index of Subscriptions to be listed
-     * @param groupingId the group id of the application
-     * @return
-     * @throws APIManagementException
-     */
-    Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, int applicationId, int startSubIndex, int endSubIndex, String groupingId)
-            throws APIManagementException;
+    default void cleanupPendingTasksForApplicationDeletion(int applicationId) throws APIManagementException {
+        //no default implementation
+    }
 
     /**
      * Returns true if a given user has subscribed to the API
@@ -289,17 +191,6 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to count the number of subscriptions.
      */
     Integer getSubscriptionCount(Subscriber subscriber,String applicationName,String groupingId) throws APIManagementException;
-
-    /**
-     * Returns the number of subscriptions for the given subscriber and app.
-     *
-     * @param subscriber Subscriber
-     * @param applicationId Application id
-     * @return The number of subscriptions
-     * @throws APIManagementException if failed to count the number of subscriptions.
-     */
-    Integer getSubscriptionCountByApplicationId(Subscriber subscriber, int applicationId, String groupingId)
-            throws APIManagementException;
 
     /**
      * Add new Subscriber
@@ -472,14 +363,6 @@ public interface APIConsumer extends APIManager {
      */
     void removeApplication(Application application, String username) throws APIManagementException;
 
-    /** get the status of the Application creation process given the application Id
-     *
-     * @param applicationId Id of the Application
-     * @return
-     * @throws APIManagementException
-     */
-    String getApplicationStatusById(int applicationId) throws APIManagementException;
-
     /**
      * Creates a request for getting Approval for Application Registration.
      *
@@ -559,32 +442,13 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
-     * Returns a list of applications created by the given user
-     * @param userId
-     * @return
-     * @throws APIManagementException
-     */
-    Application[] getApplicationsByOwner(String userId, int limit, int offset) throws APIManagementException;
-
-    /**
      * Updates the application owner of a given application
      * @param newUserId the new user ID which will be updated
      * @param application the application which should be updated
      * @return
      * @throws APIManagementException
      */
-    boolean updateApplicationOwner(String newUserId , Application application ) throws APIManagementException;
-
-
-    /**
-     * Returns a list of applications for a given subscriber without application keys for the Rest API.
-     *
-     * @param subscriber Subscriber
-     * @param groupingId the groupId to which the applications must belong.
-     * @return Applications
-     * @throws APIManagementException if failed to applications for given subscriber
-     */
-    Application[] getLightWeightApplications(Subscriber subscriber, String groupingId) throws APIManagementException;
+    boolean updateApplicationOwner(String newUserId , String organization, Application application ) throws APIManagementException;
 
     /**
      * Returns a list of applications for a given subscriber
@@ -602,17 +466,6 @@ public interface APIConsumer extends APIManager {
     Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start, int offset,
                                                 String search, String sortColumn, String sortOrder, String organization)
             throws APIManagementException;
-
-
-    /**
-     * This will return APIM application by giving name and subscriber
-     * @param userId APIM subscriber ID.
-     * @param ApplicationName APIM application name.
-     * @param groupId Group id.
-     * @return it will return Application.
-     * @throws APIManagementException
-     */
-    Application getApplicationsByName(String userId , String ApplicationName , String groupId) throws APIManagementException;
 
     /**
      * Returns the corresponding application given the Id
@@ -646,8 +499,6 @@ public interface APIConsumer extends APIManager {
 
     Set<API> searchAPI(String searchTerm, String searchType,String tenantDomain) throws APIManagementException;
 
-    Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType,String tenantDomain,int start,int end, boolean limitAttributes) throws APIManagementException;
-
     int getUserRating(String apiId, String user) throws APIManagementException;
 
     JSONObject getUserRatingInfo(String id, String user) throws APIManagementException;
@@ -655,28 +506,6 @@ public interface APIConsumer extends APIManager {
     float getAverageAPIRating(String apiId) throws APIManagementException;
 
     JSONArray getAPIRatings(String apiId) throws APIManagementException;
-
-    /**
-     * Get a list of published APIs by the given provider.
-     *
-     * @param providerId , provider id
-     * @param loggedUser logged user
-     * @param limit Maximum number of results to return. Pass -1 to get all.
-     * @param apiOwner Owner name which is used to filter APIs
-     * @return set of API
-     * @throws APIManagementException if failed to get set of API
-     */
-    Set<API> getPublishedAPIsByProvider(String providerId, String loggedUser, int limit, String apiOwner,
-                                        String apiBizOwner) throws APIManagementException;
-
-    /** Get a list of published APIs by the given provider.
-     *
-     * @param providerId , provider id
-     * @param limit Maximum number of results to return. Pass -1 to get all.
-     * @return set of API
-     * @throws APIManagementException if failed to get set of API
-     */
-    Set<API> getPublishedAPIsByProvider(String providerId, int limit) throws APIManagementException;
 
     /**
      * Returns a list of Tiers denied for the current user
@@ -693,7 +522,17 @@ public interface APIConsumer extends APIManager {
      * @return Set<String>
      * @throws APIManagementException if failed to get the tiers
      */
+    @Deprecated
     Set<String> getDeniedTiers(int providerTenantId) throws APIManagementException;
+
+    /**
+     * Returns a list of Tiers denied based on restrictions defined for API provider tenant domain
+     *
+     * @param organization organization of API provider
+     * @return Set<String>
+     * @throws APIManagementException if failed to get the tiers
+     */
+    Set<String> getDeniedTiers(String organization) throws APIManagementException;
 
     /**
      * Returns a list of TierPermissions
@@ -701,14 +540,6 @@ public interface APIConsumer extends APIManager {
      * @return Set<TierPermission>
      */
     Set<TierPermission> getTierPermissions() throws APIManagementException;
-
-    /**
-     * Check whether given Tier is denied for the user
-     * @param tierName
-     * @return
-     * @throws APIManagementException if failed to get the tiers
-     */
-    boolean isTierDeneid(String tierName)throws APIManagementException;
 
     /**
      * Returns details of an API information in low profile
@@ -719,48 +550,6 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed get API from APIIdentifier
      */
     API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException;
-
-    /**
-     * Returns a paginated list of all APIs in given Status. If a given API has multiple APIs,
-     * only the latest version will be included
-     * in this list.
-     * @param tenantDomain tenant domain
-     * @param start starting number
-     * @param end ending number
-     * @param returnAPITags If true, tags of each API is returned
-     * @return set of API
-     * @throws APIManagementException if failed to API set
-     */
-
-    Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String Status,
-                                                   boolean returnAPITags) throws APIManagementException;
-
-    /**
-     * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
-     * only the latest version will be included in this list.
-     * @param tenantDomain tenant domain
-     * @param start starting number
-     * @param end ending number
-     * @param Status One or more Statuses
-     * @param returnAPITags If true, tags of each API is returned
-     * @return set of API
-     * @throws APIManagementException if failed to API set
-     */
-    Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String[] Status,
-                                                   boolean returnAPITags) throws APIManagementException;
-    /**
-     * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
-     * only the latest version will be included in this list.
-     * Light wieght implementation of getAllPaginatedAPIsByStatus
-     * @param tenantDomain tenant domain
-     * @param start starting number
-     * @param end ending numbeer
-     * @param returnAPITags If true, tags of each API is returned
-     * @return set of API
-     * @throws APIManagementException if failed to API set
-     */
-    Map<String,Object> getAllPaginatedLightWeightAPIsByStatus(String tenantDomain,int start,int end, String[] Status,
-                                                              boolean returnAPITags) throws APIManagementException;
 
     /**
      * Returns the swagger definition of the API for the given gateway environment as a string
@@ -861,20 +650,6 @@ public interface APIConsumer extends APIManager {
     Monetization getMonetizationImplClass() throws APIManagementException;
 
     /**
-     * Returns wsdl document resource to be downloaded from the API store for a SOAP api
-     *
-     * @param username           user name of the logged in user
-     * @param tenantDomain       tenant domain
-     * @param resourceUrl        registry resource url to the wsdl
-     * @param environmentDetails map of gateway names and types
-     * @param apiDetails         api details
-     * @return converted wsdl document to be download
-     * @throws APIManagementException
-     */
-    String getWSDLDocument(String username, String tenantDomain, String resourceUrl, Map environmentDetails,
-                           Map apiDetails) throws APIManagementException;
-
-    /**
      * Returns the WSDL ResourceFile (Single WSDL or ZIP) for the provided API and environment details
      *
      * @param api               API
@@ -910,7 +685,7 @@ public interface APIConsumer extends APIManager {
      * @param username Name of the user typing the search query
      * @throws APIManagementException If an error occurs while updating the application
      */
-    void publishSearchQuery(String query, String username) throws APIManagementException;
+    void publishSearchQuery(String query, String username, String organization) throws APIManagementException;
 
     /**
      * Publish the clicked APIs for the use of API recommendation system.
@@ -919,7 +694,7 @@ public interface APIConsumer extends APIManager {
      * @param username Name of the user who clicked the API
      * @throws APIManagementException If an error occurs while publishing clicked API
      */
-    void publishClickedAPI(ApiTypeWrapper api, String username) throws APIManagementException;
+    void publishClickedAPI(ApiTypeWrapper api, String username, String organization) throws APIManagementException;
 
     /**
      * Checks whether the API recommendation feature is enabled.
@@ -989,4 +764,37 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get the related API revision Deployment Mapping details
      */
     List<APIRevisionDeployment> getAPIRevisionDeploymentListOfAPI(String apiUUID) throws APIManagementException;
+
+    /**
+     * Retrieve Subscribed APIS by Application.
+     *
+     * @param application The Application Object that represents the Application.
+     * @param offset starting index.
+     * @param limit no of entries to retrieve.
+     * @param organization organization to retrieve.
+     * @return SubscribedAPI set of application.
+     * @throws APIManagementException if failed to retrieve Subscriptions of Application.
+     */
+    Set<SubscribedAPI> getPaginatedSubscribedAPIsByApplication(Application application, Integer offset, Integer limit
+            , String organization) throws APIManagementException;
+
+    /**
+     *Retrieves the ThrottlePolicies From organization.
+     *
+     * @param policyType type of Policies to retrieve
+     * @param organization organization to retrieve.
+     * @return List of {@link Tier}
+     * @throws APIManagementException if failed to Retrieve throttling Policies.
+     */
+    List<Tier> getThrottlePolicies(int policyType, String organization) throws APIManagementException;
+
+    /**
+     * Retrieve the Policy by Id,type and organization.
+     * @param name name of policy.
+     * @param policyType type of Policy.
+     * @param organization organization organization to retrieve.
+     * @return Tier.
+     * @throws APIManagementException if failed to retrieve policy.
+     */
+    Tier getThrottlePolicyByName(String name, int policyType, String organization) throws APIManagementException;
 }

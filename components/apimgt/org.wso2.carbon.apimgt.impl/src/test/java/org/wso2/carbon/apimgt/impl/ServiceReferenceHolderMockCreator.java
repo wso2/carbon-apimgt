@@ -47,7 +47,7 @@ public class ServiceReferenceHolderMockCreator {
     private RealmServiceMockCreator realmServiceMockCreator;
     private RegistryServiceMockCreator registryServiceMockCreator;
 
-    public ServiceReferenceHolderMockCreator(int tenantId) throws RegistryException, UserStoreException {
+    public ServiceReferenceHolderMockCreator(int tenantId) throws UserStoreException {
         serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         realmServiceMockCreator = new RealmServiceMockCreator(tenantId);
 
@@ -66,11 +66,6 @@ public class ServiceReferenceHolderMockCreator {
 
     public void initRegistryServiceMockCreator(boolean isResourceExists, Object content) throws RegistryException {
         registryServiceMockCreator = new RegistryServiceMockCreator(isResourceExists, content);
-        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryServiceMockCreator.getMock());
-    }
-
-    public void initRegistryServiceMockCreator(boolean isResourceExists, Object content, int tenantId) throws RegistryException {
-        registryServiceMockCreator = new RegistryServiceMockCreator(isResourceExists, content, tenantId);
         Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryServiceMockCreator.getMock());
     }
 

@@ -24,9 +24,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
+import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
 import org.wso2.carbon.apimgt.gateway.throttling.util.BlockingConditionRetriever;
@@ -39,6 +41,7 @@ import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
+import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.base.CarbonBaseUtils;
@@ -54,13 +57,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 /**
  * Class for loading synapse artifacts to memory on initial server startup
  */
 
 public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObserver
-        implements ServerStartupObserver, ServerShutdownHandler {
+        implements ServerStartupObserver, ServerShutdownHandler, JMSListenerShutDownService {
 
     private static final Log log = LogFactory.getLog(GatewayStartupListener.class);
     private boolean debugEnabled = log.isDebugEnabled();
@@ -107,9 +111,10 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         } catch (CertificateManagementException e) {
             log.error("Error while Backup Truststore", e);
         }
-        log.debug("Registering ServerStartupListener for SubscriptionStore for the tenant domain : " + org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        log.debug("Registered ServerStartupListener for SubscriptionStore for the tenant domain : " + org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        log.debug("Registering ServerStartupListener for SubscriptionStore for the tenant domain : " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        log.debug("Registered ServerStartupListener for SubscriptionStore for the tenant domain : " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        SubscriptionDataHolder.getInstance().initializeSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         cleanDeployment(CarbonUtils.getCarbonRepository());
     }
 
@@ -118,11 +123,26 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
                 ServiceReferenceHolder.getInstance()
                         .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
+
         boolean flag = false;
+        long waitTime = System.currentTimeMillis() + 60 * 1000;
+        long retryDuration = 5000;
+
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             InMemoryAPIDeployer inMemoryAPIDeployer = new InMemoryAPIDeployer();
-            flag = inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(gatewayArtifactSynchronizerProperties
-                    .getGatewayLabels(), tenantDomain);
+
+            while (waitTime > System.currentTimeMillis() && !flag) {
+                flag = inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(
+                        gatewayArtifactSynchronizerProperties.getGatewayLabels(), tenantDomain);
+                if (!flag) {
+                    log.error("Unable to deploy synapse artifacts at gateway. Next retry in " + (retryDuration / 1000)
+                            + " seconds");
+                    try {
+                        Thread.sleep(retryDuration);
+                    } catch (InterruptedException ignore) {
+                    }
+                }
+            }
         }
         return flag;
     }
@@ -159,21 +179,26 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 new APIMgtGatewayCacheMessageListener());
         jmsTransportHandlerForEventHub
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION, new GatewayJMSMessageListener());
+        jmsTransportHandlerForEventHub
+                .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_THROTTLE_DATA, new JMSMessageListener());
         jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_ASYNC_WEBHOOKS_DATA,
                 new GatewayJMSMessageListener());
         copyTenantArtifacts();
+        APILoggerManager.getInstance().initializeAPILoggerList();
     }
 
     private void copyTenantArtifacts() {
+
         Path directory = Paths.get(tenantsRootPath);
-        try {
-            Files.walk(directory, 1).filter(entry -> !entry.equals(directory))
+
+        try (Stream<Path> files = Files.walk(directory, 1)) {
+            files.filter(entry -> !entry.equals(directory))
                     .filter(Files::isDirectory).forEach(subdirectory ->
             {
                 try {
                     FileUtils.copyFile(new File(synapseConfigRootPath + securedWebSocketInboundEp + ".xml"),
-                            new File( subdirectory.toAbsolutePath().toString() + File.separator +
-                                    synapseDeploymentPath+ File.separator + MultiXMLConfigurationBuilder.
+                            new File(subdirectory.toAbsolutePath().toString() + File.separator +
+                                    synapseDeploymentPath + File.separator + MultiXMLConfigurationBuilder.
                                     INBOUND_ENDPOINT_DIR + File.separator + securedWebSocketInboundEp + ".xml"));
                     FileUtils.copyFile(new File(synapseConfigRootPath + webHookServerHTTPS + ".xml"),
                             new File(subdirectory.toAbsolutePath().toString() + File.separator +
@@ -211,6 +236,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         }
         syncModeDeploymentCount++;
         isAPIsDeployedInSyncMode = deployArtifactsAtStartup(tenantDomain);
+        DataHolder.getInstance().setAllApisDeployed(isAPIsDeployedInSyncMode);
         if (!isAPIsDeployedInSyncMode) {
             log.error("Deployment attempt : " + syncModeDeploymentCount + " was unsuccessful");
             if (!(syncModeDeploymentCount > retryCount)) {
@@ -255,6 +281,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
 
         while (true) {
             boolean isArtifactsDeployed = deployArtifactsAtStartup(tenantDomain);
+            DataHolder.getInstance().setAllApisDeployed(isArtifactsDeployed);
             if (isArtifactsDeployed) {
                 log.info("Synapse Artifacts deployed Successfully in the Gateway");
                 break;
@@ -329,6 +356,20 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     public void terminatingConfigurationContext(ConfigurationContext configCtx) {
 
         cleanDeployment(configCtx.getAxisConfiguration().getRepository().getPath());
+    }
+
+    @Override
+    public void shutDownListener() {
+
+        if (jmsTransportHandlerForTrafficManager != null) {
+            // This method will make shutdown the Listener.
+            log.debug("Unsubscribe from JMS Events...");
+            jmsTransportHandlerForTrafficManager.unSubscribeFromEvents();
+        }
+        if (jmsTransportHandlerForEventHub != null) {
+            log.debug("Unsubscribe from JMS Events...");
+            jmsTransportHandlerForEventHub.unSubscribeFromEvents();
+        }
     }
 
     class AsyncAPIDeployment implements Runnable {

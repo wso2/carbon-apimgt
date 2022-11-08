@@ -38,17 +38,25 @@ public final class RestApiConstants {
     public static final String AUTHENTICATION_REQUIRED = "authentication_required";
     public static final String HEADER_X_WSO2_TENANT = "x-wso2-tenant";
     public static final String ORGANIZATION = "organization";
+    public static final String SUB_ORGANIZATION = "sub_organization";
+    public static final String MASKED_TOKEN = "maskedToken";
 
     public static final String REQUEST_AUTHENTICATION_SCHEME = "request_authentication_scheme";
-    public static final String OAUTH2_AUTHENTICATION = "oauth2";
+    public static final String OPAQUE_AUTHENTICATION = "oauth2";
     public static final String BASIC_AUTHENTICATION = "basic_auth";
+    public static final String JWT_AUTHENTICATION = "jwt";
+    public static final String JWT_TOKEN = "JWT_TOKEN";
+    public static final String DOT = ".";
+    public static final long TIMESTAMP_SKEW_INSECONDS = 0;
 
     public static final String USER_REST_API_SCOPES = "user_rest_api_scopes";
 
     public static final String API_IMPORT_EXPORT_SCOPE = "apim:api_import_export";
+    public static final String API_MANAGE_SCOPE = "apim:api_manage";
     public static final String CREATOR_SCOPE = "apim:api_create";
     public static final String ADMIN_SCOPE = "apim:admin";
     public static final String PUBLISHER_SCOPE = "apim:api_publish";
+
 
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
 
@@ -65,7 +73,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_APP_CONSUMER_KEY = "application consumer key";
     public static final String RESOURCE_ADVANCED_POLICY = "advanced policy";
     public static final String RESOURCE_KEY_MANAGER = "key manager";
-    public static final String RESOURCE_SUBSCRIPTION_POLICY = "subcription policy";
+    public static final String RESOURCE_SUBSCRIPTION_POLICY = "subscription policy";
     public static final String RESOURCE_CUSTOM_RULE = "custom rule";
     public static final String RESOURCE_BLOCK_CONDITION = "block condition";
     public static final String RESOURCE_TIER = "tier";
@@ -79,6 +87,7 @@ public final class RestApiConstants {
 
     public static final String API_ID_DELIMITER = "-";
     public static final String QUERY_PARAM = "{query}";
+    public static final String ALIAS_PARAM = "{alias}";
     public static final String LIMIT_PARAM = "{limit}";
     public static final String OFFSET_PARAM = "{offset}";
     public static final String SORTBY_PARAM = "{sortBy}";
@@ -99,6 +108,8 @@ public final class RestApiConstants {
 
     //todo better to take from cxf level
     public static final String RESOURCE_PATH_APIS = "/apis";
+    public static final String RESOURCE_PATH_ENDPOINT_CERTIFICATE_USAGE = "/endpoint-certificates/"
+            + ALIAS_PARAM + "/usage";
     public static final String RESOURCE_PATH_API_PRODUCTS = "/api-products";
     public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
     public static final String RESOURCE_PATH_THROTTLING = "/throttling";
@@ -160,7 +171,7 @@ public final class RestApiConstants {
     public static final String REST_API_DEVELOPER_PORTAL_CONTEXT_FULL = REST_API_DEVELOPER_PORTAL_CONTEXT +
             REST_API_DEVELOPER_PORTAL_VERSION;
     public static final String REST_API_PUBLISHER_VERSION_0 ="v0.16";
-    public static final String REST_API_PUBLISHER_VERSION = "v2";
+    public static final String REST_API_PUBLISHER_VERSION = "v3";
     public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
     public static final String REST_API_PUBLISHER_CONTEXT_FULL_0 =
             REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_0;
@@ -168,18 +179,28 @@ public final class RestApiConstants {
             REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION;
     public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
     public static final String REST_API_ADMIN_VERSION_0 = "v0.16";
-    public static final String REST_API_ADMIN_VERSION = "v2";
+    public static final String REST_API_ADMIN_VERSION = "v3";
+    public static final String REST_API_DCR_CONTEXT_FULL = "/client-registration/v0.17";
+    public static final String REST_API_DCR_CONTEXT = "/client-registration";
+    public static final String REST_API_DCR_VERSION = "v0.17";
     public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION_0;
     public static final String REST_API_ADMIN_CONTEXT_FULL = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION;
     public static final String REST_API_SERVICE_CATALOG_CONTEXT_FULL = "/api/am/service-catalog";
     public static final String REST_API_PROVIDER = "admin";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
     public static final String AUTH_HEADER_NAME = "Authorization";
+    public static final String BACKEND_JWT_HEADER_NAME = "X-JWT-Assertion";
     public static final Pattern REGEX_BEARER_PATTERN = Pattern.compile("Bearer\\s");
     public static final String COOKIE_HEADER_NAME = "cookie";
     public static final String AUTH_COOKIE_NAME = "AM_ACC_TOKEN_DEFAULT_P2"; // This cookie name should be used when setting the cookie for SPA app in SPA app user authentication response to REST API context as path directive
 
     public static final String API_VERSION = "API_VERSION";
+    public static final String REQUEST_URL = "org.apache.cxf.request.uri";
+    public static final String REQUEST_METHOD = "org.apache.cxf.request.method";
+    public static final String BASE_PATH = "org.apache.cxf.message.Message.BASE_PATH";
+    public static final String PROTOCOL_HEADERS = "org.apache.cxf.message.Message.PROTOCOL_HEADERS";
+    public static final String URI_TEMPLATES = "TEMPLATES";
+    public static final String ORG_ID = "ORG_ID";
 
     public static final int PAGINATION_LIMIT_DEFAULT = 25;
     public static final int PAGINATION_OFFSET_DEFAULT = 0;
@@ -187,10 +208,15 @@ public final class RestApiConstants {
     public static final String PAGINATION_NEXT_LIMIT = "next_limit";
     public static final String PAGINATION_PREVIOUS_OFFSET = "previous_offset";
     public static final String PAGINATION_PREVIOUS_LIMIT = "previous_limit";
+    public static final String DEFAULT_SORT_CRITERION = "createdTime";
     public static final String DEFAULT_SORT_ORDER = "asc";
+    public static final String DESCENDING_SORT_ORDER = "desc";
 
     public static final String APIS_GET_PAGINATION_URL =
             RESOURCE_PATH_APIS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&query=" + QUERY_PARAM;
+
+    public static final String ENDPOINT_CERTIFICATE_USAGE_GET_PAGINATION_URL =
+            RESOURCE_PATH_ENDPOINT_CERTIFICATE_USAGE + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
     public static final String APPLICATIONS_GET_PAGINATION_URL =
             RESOURCE_PATH_APPLICATIONS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&groupId="
@@ -307,6 +333,10 @@ public final class RestApiConstants {
     public static final Set<String> ALLOWED_THUMBNAIL_EXTENSIONS = new HashSet<String>(
             Arrays.asList("jpg", "png", "jpeg", "gif", "svg"));
 
-    public static final String JWKS_URI = "jwksUri";
+    public static final int TAG_LIMIT_DEFAULT = 1000;
+    public static final int TAG_OFFSET_DEFAULT = 0;
 
+    public static final String RESOURCE_PATH_OPERATION_POLICIES = "operation-policies";
+
+    public static final String AUTH_TOKEN_INFO = "AUTH_TOKEN_INFO";
 }

@@ -31,7 +31,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.RecommendationsApiService;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -54,12 +53,10 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
         try {
             String userName = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            String requestedTenantDomain = apiConsumer.getRequestedTenant();
-
-            if (apiConsumer.isRecommendationEnabled(requestedTenantDomain) &&
+            if (apiConsumer.isRecommendationEnabled(organization) &&
                     !APIConstants.WSO2_ANONYMOUS_USER.equals(userName)) {
                 int maxRecommendations = recommendationEnvironment.getMaxRecommendations();
-                String recommendations = apiConsumer.getApiRecommendations(userName, requestedTenantDomain);
+                String recommendations = apiConsumer.getApiRecommendations(userName, organization);
 
                 if (recommendations != null) {
                     JSONObject jsonResponse = new JSONObject(recommendations);

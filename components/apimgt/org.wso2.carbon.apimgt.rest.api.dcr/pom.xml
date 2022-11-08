@@ -21,13 +21,13 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.0.294-SNAPSHOT</version>
+        <version>9.26.68-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.rest.api.dcr</artifactId>
-    <name>WSO2 Carbon API Manager- Dynamic Client Registration Web Service</name>
+    <name>WSO2 Carbon - Dynamic Client Registration Web Service</name>
     <description>WSO2 Carbon API Manager- Dynamic Client Registration Web</description>
     <packaging>war</packaging>
 
@@ -59,6 +59,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-rs-security-cors</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
             <scope>provided</scope>
@@ -84,7 +89,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
             <exclusions>
                 <exclusion>

@@ -1,0 +1,12 @@
+<component xmlns="http://products.wso2.org/carbon">
+    <ManagementPermissions>
+        <ManagementPermission>
+            <DisplayName>Configure</DisplayName>
+            <ResourceId>/permission/protected/configure</ResourceId>
+        </ManagementPermission>
+        <ManagementPermission>
+            <DisplayName>Logging</DisplayName>
+            <ResourceId>/permission/protected/configure/logging</ResourceId>
+        </ManagementPermission>
+    </ManagementPermissions>
+</component>

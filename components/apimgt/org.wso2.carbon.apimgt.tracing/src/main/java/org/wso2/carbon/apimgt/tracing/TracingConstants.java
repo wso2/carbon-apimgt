@@ -17,7 +17,12 @@
  */
 
 package org.wso2.carbon.apimgt.tracing;
+/**
+ * @deprecated
+ * <p> Use {@link org.wso2.carbon.apimgt.tracing.telemetry.TelemetryConstants} instead</p>
+ */
 
+@Deprecated
 class TracingConstants {
 
     /**
@@ -33,6 +38,8 @@ class TracingConstants {
     static final String TRACER = "tracer";
     static final String CONFIG_TRACER_LOG_ENABLED = "OpenTracer.LogTracer.Enabled";
     static final String DEFAULT_TRACER_LOG_ENABLED = "false";
+    static final String REMOTE_TRACER_ENABLED = "OpenTracer.RemoteTracer.Enabled";
+    static final String LOG_TRACER_ENABLED = "OpenTracer.LogTracer.Enabled";
 
     /**
      * Jaeger Tracer Constants
@@ -69,4 +76,7 @@ class TracingConstants {
      * */
     static final String LOG_ENABLED = "OpenTracer.LogTracer.Enabled";
     static final String LOG = "log";
+
+    private TracingConstants() {
+    }
 }

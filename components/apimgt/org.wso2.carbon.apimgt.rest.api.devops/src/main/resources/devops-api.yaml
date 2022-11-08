@@ -1,0 +1,219 @@
+#   Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+################################################################################
+openapi: 3.0.1
+info:
+  version: v0
+  title: WSO2 API Manager - DevOps
+  description: |
+    This document specifies a **RESTful API** for WSO2 **API Manager** - DevOps.
+  contact:
+    name: WSO2
+    url: http://wso2.com/products/api-manager/
+    email: architecture@wso2.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+paths:
+  "/tenant-logs/{tenantId}/apis/":
+    get:
+      summary: |
+        GET log level of APIs
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/logLevel'
+      responses:
+        "200":
+          description: Log level of APIs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoggingApiOutputList"
+        "404":
+          description: |
+            Not Found.
+            Request API resource or external store Ids not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error while retrieving API data to be logged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  "/tenant-logs/{tenantId}/apis/{apiId}":
+    get:
+      summary: |
+        GET log enabled API data
+      responses:
+        "200":
+          description: Logs enabled API details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoggingApiOutputList"
+        "404":
+          description: |
+            Not Found.
+            Request API resource or external store Ids not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error while retrieving API data to be logged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      parameters:
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/apiId'
+    put:
+      summary: |
+        Set logging levels of the API with its api ID
+      description: >
+        This operation enables you to provide the API context
+        template(context/version) with the log level (OFF|BASIC|STANDARD|FULL).
+        You should either provide the api ID and the api log level.
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/apiId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoggingApiInput"
+        description: |
+          The logLeve is provided as a payload.
+      responses:
+        "200":
+          description: Successfully Enabled the logs for the API
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoggingApiOutputList"
+        "404":
+          description: |
+            Not Found.
+            Request API resource or external store Ids not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error while configuring API to be logged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+servers:
+  - url: https://apis.wso2.com/api/am/devops/v1
+components:
+  schemas:
+    LoggingApiOutputList:
+      title: apis
+      properties:
+        apis:
+          type: array
+          items:
+            $ref: "#/components/schemas/LoggingApiOutput"
+    LoggingApiInput:
+      title: API Info object with log details
+      properties:
+        logLevel:
+          type: string
+          example: FULL
+    LoggingApiOutput:
+      title: API Info object with log details
+      properties:
+        context:
+          type: string
+          example: pizashack/v1.0.0
+        logLevel:
+          type: string
+          example: FULL
+        apiId:
+          type: string
+          example: 12d6e73c-778d-45ac-b57d-117c6c5092a4
+    Error:
+      title: Error object returned with 4XX HTTP Status
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+          description: Error message.
+        description:
+          type: string
+          description: |
+            A detail description about the error message.
+        moreInfo:
+          type: string
+          description: |
+            Preferably an url with more details about the error.
+        error:
+          type: array
+          description: |
+            If there are more than one error list them out.
+            For example, list out validation errors by each field.
+          items:
+            $ref: "#/components/schemas/ErrorListItem"
+    ErrorListItem:
+      title: Description of individual errors that may have occurred during a request.
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+          description: |
+            Description about individual errors occurred
+        description:
+          type: string
+          description: |
+            A detail description about the error message.
+  parameters:
+    tenantId:
+      name: tenantId
+      in: path
+      description: |
+        Tenant ID
+      required: true
+      schema:
+        type: string
+    apiId:
+      name: apiId
+      in: path
+      description: |
+        The API ID for the logging operation
+      required: true
+      schema:
+        type: string
+    logLevel:
+      name: log-level
+      in: query
+      description: |
+        Log level of the APIs
+      required: false
+      schema:
+        type: string

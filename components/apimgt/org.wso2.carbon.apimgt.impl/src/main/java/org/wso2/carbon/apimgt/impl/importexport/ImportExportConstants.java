@@ -29,6 +29,7 @@ public final class ImportExportConstants {
 
     // System independent file separator for zip files
     public static final char ZIP_FILE_SEPARATOR = '/';
+    public static final char WIN_ZIP_FILE_SEPARATOR = '\\';
 
     //length of the name of the temporary directory
     public static final int TEMP_FILENAME_LENGTH = 5;
@@ -93,6 +94,8 @@ public final class ImportExportConstants {
     public static final Map<String, String> fileExtensionMapping = new HashMap<>();
 
     public static final String UPLOAD_API_FILE_NAME = "APIArchive.zip";
+
+    public static final String UPLOAD_POLICY_FILE_NAME = "PolicyArchive.zip";
 
     // Location of the API swagger definition file
     public static final String JSON_SWAGGER_DEFINITION_LOCATION =
@@ -195,7 +198,9 @@ public final class ImportExportConstants {
 
     public static final String TYPE_DEPLOYMENT_ENVIRONMENTS = "deployment_environments";
 
-    public static final String APIM_VERSION = "v4.0.0";
+    public static final String TYPE_POLICY_SPECIFICATION = "operation_policy_specification";
+
+    public static final String APIM_VERSION = "v4.2.0";
 
     public static final String ENDPOINT_CONFIG = "endpointConfig";
 
@@ -230,8 +235,8 @@ public final class ImportExportConstants {
 
     //Default values for Endpoints
     public static final String ENDPOINT_URL = "url";
-    public static final String DEFAULT_PRODUCTION_ENDPOINT_URL = "localhost";
-    public static final String DEFAULT_SANDBOX_ENDPOINT_URL = "localhost";
+    public static final String DEFAULT_PRODUCTION_ENDPOINT_URL = "https://localhost";
+    public static final String DEFAULT_SANDBOX_ENDPOINT_URL = "https://localhost";
     public static final String DEFAULT_DYNAMIC_ENDPOINT_URL = "default";
     public static final String DEFAULT_ALGORITHM_CLASS = "org.apache.synapse.endpoints.algorithms.RoundRobin";
     public static final String SOAP_ENDPOINT_TYPE_FOR_JSON = "address";
@@ -295,4 +300,11 @@ public final class ImportExportConstants {
     public static final String DEPLOYMENT_VHOST = "deploymentVhost";
     public static final String DISPLAY_ON_DEVPORTAL_OPTION = "displayOnDevportal";
 
+    public static final String POLICIES_DIRECTORY = "Policies";
+    public static final String SWAGGER_X_WSO2_APICTL_INIT = "x-wso2-apictl-init";
+
+    public static final String EXPORT_POLICY_TYPE_YAML = "YAML";
+    public static final String EXPORT_POLICY_TYPE_JSON = "JSON";
+
+    public static final String POLICY_NAME = "name";
 }

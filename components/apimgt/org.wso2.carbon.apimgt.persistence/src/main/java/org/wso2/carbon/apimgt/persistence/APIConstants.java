@@ -87,6 +87,8 @@ public final class APIConstants {
     public static final String API_OVERVIEW_CACHE_TIMEOUT = "overview_cacheTimeout";
 
     public static final String PROTOTYPE_OVERVIEW_IMPLEMENTATION = "overview_implementation";
+    public static final String API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT = "overview_apiExternalProductionEndpoint";
+    public static final String API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT = "overview_apiExternalSandboxEndpoint";
     public static final String API_OVERVIEW_REDIRECT_URL = "overview_redirectURL";
     public static final String API_OVERVIEW_OWNER = "overview_apiOwner";
     public static final String API_OVERVIEW_ADVERTISE_ONLY = "overview_advertiseOnly";
@@ -101,6 +103,7 @@ public final class APIConstants {
 
     //This constant is used in Json schema validator
     public static final String API_OVERVIEW_ENABLE_JSON_SCHEMA = "overview_enableSchemaValidation";
+    public static final String API_OVERVIEW_ENABLE_SUB_VERIFICATION = "overview_enableSubscriberVerification";
 
     public static final String API_OVERVIEW_ENABLE_STORE = "overview_enableStore";
 
@@ -120,6 +123,8 @@ public final class APIConstants {
     public static final String API_OVERVIEW_CORS_CONFIGURATION = "overview_corsConfiguration";
     public static final String API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION
             = "overview_websubSubscriptionConfiguration";
+    public static final String API_OVERVIEW_VERSION_COMPARABLE = "overview_versionComparable";
+
 
     public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
 
@@ -167,18 +172,6 @@ public final class APIConstants {
     // registry location of the governance component
     public static final String GOVERNANCE_COMPONENT_REGISTRY_LOCATION = "/repository/components/org.wso2.carbon" +
                                     ".governance";
-
-    public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
-
-    public static final String APP_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/app-tiers.xml";
-
-    public static final String RES_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/res-tiers.xml";
-
-    public static final String DEFAULT_API_TIER_FILE_NAME = "default-tiers.xml";
-
-    public static final String DEFAULT_APP_TIER_FILE_NAME = "default-app-tiers.xml";
-
-    public static final String DEFAULT_RES_TIER_FILE_NAME = "default-res-tiers.xml";
 
     public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
 
@@ -238,8 +231,10 @@ public final class APIConstants {
 
     public static final String SEARCH_AND_TAG = "&";
     public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
+    public static final String API_OVERVIEW_STATUS_SEARCH_TYPE_KEY = "status=";
     public static final String ENABLE_STORE_SEARCH_TYPE_KEY = "enableStore=(true OR null)";
     public static final String LCSTATE_SEARCH_KEY = "lcState";
+    public static final String API_OVERVIEW_STATUS_SEARCH_KEY = "overview_status";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "doc";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS = "doc=";
     public static final String TAGS_SEARCH_TYPE_PREFIX = "tags";
@@ -305,7 +300,7 @@ public final class APIConstants {
     public static final String TYPE_SEARCH_TYPE_KEY = "type=";
 
     public static final String[] API_SUPPORTED_TYPE_LIST =
-            {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "SSE", "WEBSUB", "WEBHOOK"};
+            {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "SSE", "WEBSUB", "WEBHOOK", "ASYNC"};
 
     public static class AuditLogConstants {
         public static final String API_PRODUCT = "APIProduct";
@@ -372,8 +367,16 @@ public final class APIConstants {
     public static final String GRAPHQL_LOCAL_ENTRY_EXTENSION = "_graphQL";
     public static final String GRAPHQL_SCHEMA_PROVIDER_SEPERATOR = "--";
     public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
-    
+    public static final String ALLOW_MULTIPLE_VERSIONS = "allowMultipleVersions";
+
     public static final String API_TYPE_SOAPTOREST = "SOAPTOREST";
+    public static final String API_TYPE_WEBSUB = "WEBSUB";
+    public static final String API_TYPE_SSE = "SSE";
+    public static final String API_TYPE_WEBHOOK = "WEBHOOK";
+    public static final String API_TYPE_WS = "WS";
 
     public static final String API_ASYNC_API_DEFINITION_RESOURCE_NAME = "asyncapi.json";
+
+    public static final String API_OVERVIEW_GATEWAY_VENDOR = "overview_gatewayVendor";
+    public static final String ASYNC_API_TRANSPORT_PROTOCOLS = "overview_asyncTransportProtocols";
 }

@@ -57,6 +57,10 @@ public class SubscriptionDataHolder {
 
     public void unregisterTenantSubscriptionStore(String tenantDomain) {
 
+        SubscriptionDataStore subscriptionDataStore = subscriptionStore.get(tenantDomain);
+        if (subscriptionDataStore!= null){
+            subscriptionDataStore.destroy();
+        }
         subscriptionStore.remove(tenantDomain);
     }
 

@@ -9,14 +9,11 @@
 	  <property name="environment">
 	    <bean class="org.springframework.web.context.support.StandardServletEnvironment" />
 	  </property> 
-    </bean> 
+    </bean>
     <bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer"/>
     <jaxrs:server id="services" address="/">
         <jaxrs:serviceBeans>
-            <bean class="org.wso2.carbon.apimgt.internal.service.ThrottleAsStringApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.KeyTemplatesApi"/>
-            <bean class="org.wso2.carbon.apimgt.internal.service.ThrottleApi"/>
-            <bean class="org.wso2.carbon.apimgt.internal.service.IsThrottledApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.BlockApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.RevokedjwtApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.ApisApi"/>
@@ -36,6 +33,7 @@
             <bean class="org.wso2.carbon.apimgt.internal.service.WebhooksSubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.EndpointCertificatesApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.GaConfigApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.ApiLoggingConfigsApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
@@ -45,6 +43,7 @@
     <bean id="AuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor" />
     <bean id="PreAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor" />
     <bean id="PostAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PostAuthenticationInterceptor" />
+    <bean id="OrganizationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor"/>
     <!-- Out interceptors -->
     <bean id="gZipInterceptor" class="org.apache.cxf.transport.common.gzip.GZIPOutInterceptor" />
 
@@ -53,6 +52,7 @@
             <ref bean="PreAuthenticationInterceptor"/>
             <ref bean="AuthenticationInterceptor"/>
             <ref bean="PostAuthenticationInterceptor"/>
+            <ref bean="OrganizationInterceptor"/>
         </cxf:inInterceptors>
         <cxf:outInterceptors>
             <ref bean="gZipInterceptor"/>

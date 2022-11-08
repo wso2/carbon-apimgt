@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.apimgt.persistence.dto;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -37,7 +38,16 @@ public class DevPortalAPIInfo {
     private String subscriptionAvailableOrgs;
     private String createdTime;
     private String description;
+    private String gatewayVendor;
+    private Map<String, String> additionalProperties;
 
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
+
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
 
     public String getDescription() {
         return description;
@@ -127,6 +137,12 @@ public class DevPortalAPIInfo {
     }
     public void setSubscriptionAvailability(String subscriptionAvailability) {
         this.subscriptionAvailability = subscriptionAvailability;
+    }
+    public Map<String, String> getAdditionalProperties() {
+        return additionalProperties;
+    }
+    public void setAdditionalProperties(Map<String, String> additionalProperties) {
+        this.additionalProperties = additionalProperties;
     }
 
     @Override

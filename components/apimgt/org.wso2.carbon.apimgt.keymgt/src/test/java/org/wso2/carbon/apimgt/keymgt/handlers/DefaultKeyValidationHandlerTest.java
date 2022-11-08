@@ -44,7 +44,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 
@@ -144,6 +144,33 @@ public class DefaultKeyValidationHandlerTest extends DefaultKeyValidationHandler
 
         Assert.assertTrue("Scope validation fails for API " + API_NAME, isScopeValidated);
         Assert.assertTrue("Scope validation fails for default API " + API_NAME, isScopeValidated_default);
+
+    }
+    
+    @Test
+    public void testInvalidSubscription() throws APIKeyMgtException {
+        DefaultKeyValidationHandler defaultKeyValidationHandler = new DefaultKeyValidationHandler();
+        API api = new API();
+        api.setApiId(1);
+        api.setApiProvider(USER_NAME);
+        api.setApiName(API_NAME);
+        api.setApiVersion(API_VERSION);
+        api.setContext(API_CONTEXT);
+        URLMapping urlMapping = new URLMapping();
+        urlMapping.addScope(SCOPES);
+        urlMapping.setHttpMethod(HTTP_VERB);
+        urlMapping.setUrlPattern(RESOURCE);
+        api.addResource(urlMapping);
+        Mockito.when(SubscriptionDataHolder.getInstance()).thenReturn(subscriptionDataHolder);
+        Mockito.when(privilegedCarbonContext.getTenantDomain()).thenReturn(TENANT_DOMAIN);
+        Mockito.when(subscriptionDataHolder.getTenantSubscriptionStore(eq(TENANT_DOMAIN)))
+                .thenReturn(tenantSubscriptionStore);
+        Mockito.when(tenantSubscriptionStore.getApiByContextAndVersion(eq(API_CONTEXT), eq(API_VERSION)))
+        .thenReturn(api);
+        APIKeyValidationInfoDTO info = defaultKeyValidationHandler.validateSubscription(API_CONTEXT, API_VERSION,
+                "xxxxxx", "default");
+        Assert.assertEquals("Invalid error message status code ",
+                APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN, info.getValidationStatus());
 
     }
 }

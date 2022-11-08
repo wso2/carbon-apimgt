@@ -42,7 +42,7 @@ import java.util.Set;
 
 public class ApplicationMappingUtil {
 
-    public static ApplicationDTO fromApplicationtoDTO (Application application) {
+    public static ApplicationDTO fromApplicationtoDTO(Application application) throws APIManagementException {
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setApplicationId(application.getUUID());
         applicationDTO.setThrottlingPolicy(application.getTier());
@@ -52,6 +52,8 @@ public class ApplicationMappingUtil {
         applicationDTO.setName(application.getName());
         applicationDTO.setStatus(application.getStatus());
         applicationDTO.setOwner(application.getOwner());
+        applicationDTO.setCreatedTime(application.getCreatedTime());
+        applicationDTO.setUpdatedTime(application.getLastUpdatedTime());
 
         if (StringUtils.isNotEmpty(application.getGroupId())) {
             applicationDTO.setGroups(Arrays.asList(application.getGroupId().split(",")));
@@ -80,7 +82,6 @@ public class ApplicationMappingUtil {
         application.setTier(applicationDTO.getThrottlingPolicy());
         application.setDescription(applicationDTO.getDescription());
         application.setUUID(applicationDTO.getApplicationId());
-        application.setTokenType(APIConstants.DEFAULT_TOKEN_TYPE);
 
         //Check if the token type is not set in the request.
         if (StringUtils.isEmpty(applicationDTO.getTokenType().toString())) {
@@ -186,6 +187,8 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setAttributes(applicationAttributes);
         applicationInfoDTO.setSubscriptionCount(application.getSubscriptionCount());
         applicationInfoDTO.setOwner(application.getOwner());
+        applicationInfoDTO.setCreatedTime(application.getCreatedTime());
+        applicationInfoDTO.setUpdatedTime(application.getLastUpdatedTime());
         return applicationInfoDTO;
     }
 

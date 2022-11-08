@@ -306,7 +306,7 @@ public class ThrottleHandlerTest {
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         matchingConditions.add(conditionGroupDTO);
         String subscriptionLevelThrottleKey = authenticationContext.getApplicationId() + ":" + apiContext + ":"
-                + apiVersion;
+                + apiVersion + ":" + authenticationContext.getTier();
         throttleDataHolder.addThrottleData(subscriptionLevelThrottleKey, System.currentTimeMillis() + 10000);
         //Should throttle out and discontinue message flow, when subscription level is throttled out
         //and stop on quota reach is enabled
@@ -433,39 +433,6 @@ public class ThrottleHandlerTest {
 //        Mockito.when(accessInformation.isAccessAllowed()).thenReturn(false);
 
         //Should discontinue message flow if SANDBOX hard throttling limits are exceeded
-        Assert.assertFalse(throttleHandler.handleRequest(messageContext));
-    }
-
-
-    @Test
-    public void testMsgThrottleOutWhenHardThrottlingFailedWithThrottleException() {
-        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
-
-        ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator,
-                accessInformation);
-        throttleHandler.setProductionMaxCount("100");
-        SynapseEnvironment synapseEnvironment = Mockito.mock(SynapseEnvironment.class);
-        throttleHandler.init(synapseEnvironment);
-        MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
-        messageContext.setProperty(VERB_INFO_DTO, verbInfoDTO);
-        ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
-                .MessageContext.TRANSPORT_HEADERS);
-        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty
-                (API_AUTH_CONTEXT);
-        authenticationContext.setApiTier(throttlingTier);
-        authenticationContext.setKeyType("SANDBOX");
-        authenticationContext.setSpikeArrestLimit(0);
-        messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
-
-        verbInfo.setConditionGroups(conditionGroupDTOs);
-        ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
-        matchingConditions.add(conditionGroupDTO);
-
-
-        //Throw ThrottleException while retrieving access information
-        Mockito.doThrow(ThrottleException.class).when(accessInformation).isAccessAllowed();
-        //Should discontinue message flow, when an exception is thrown during hard limit throttling information
-        //process time
         Assert.assertFalse(throttleHandler.handleRequest(messageContext));
     }
 
@@ -610,6 +577,32 @@ public class ThrottleHandlerTest {
         messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
         throttleDataHolder.addThrottledAPIKey(resourceLevelThrottleKey, System.currentTimeMillis() + 10000);
         Assert.assertTrue(throttleHandler.handleRequest(messageContext));
+    }
+
+    /**
+     * This method will test request flow when "isGraphqlSubscriptionRequest" property is set in axis2 message context
+     * when incoming transport is websocket. This occurs during Graphql Subscription request flow.
+     */
+    @Test
+    public void testHandleRequestForGraphQLSubscriptions() {
+
+        ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, new ThrottleDataHolder(),
+                throttleEvaluator, accessInformation);
+        Axis2MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                Mockito.mock(org.apache.axis2.context.MessageContext.class);
+        Mockito.when(messageContext.
+                getAxis2MessageContext()).thenReturn(axis2MessageContext);
+        Mockito.when(axis2MessageContext.getIncomingTransportName()).thenReturn("ws");
+        Mockito.when(messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)).thenReturn(true);
+        Assert.assertTrue(throttleHandler.handleRequest(messageContext));
+
+        Mockito.when(axis2MessageContext.getIncomingTransportName()).thenReturn("wss");
+        Assert.assertTrue(throttleHandler.handleRequest(messageContext));
+
+        // clean up message context
+        Mockito.when(messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)).thenReturn(false);
+        Mockito.when(axis2MessageContext.getIncomingTransportName()).thenReturn("http");
     }
 
 }

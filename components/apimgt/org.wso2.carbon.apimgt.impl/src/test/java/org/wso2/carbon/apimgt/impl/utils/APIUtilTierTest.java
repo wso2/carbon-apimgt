@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import com.google.common.net.InetAddresses;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -28,6 +29,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -47,14 +49,18 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.ApiMgtDAOMockCreator;
 import org.wso2.carbon.apimgt.impl.ServiceReferenceHolderMockCreator;
 import org.wso2.carbon.apimgt.impl.TestUtils;
+import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.tenant.TenantManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,14 +72,15 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({LogFactory.class, ApiMgtDAO.class, ServiceReferenceHolder.class, APIManagerConfigurationService.class, APIManagerConfiguration.class, APIUtil.class})
+@PrepareForTest({LogFactory.class, ApiMgtDAO.class, ServiceReferenceHolder.class, APIManagerConfigurationService.class,
+        APIManagerConfiguration.class, APIUtil.class,RealmService.class, TenantManager.class})
 public class APIUtilTierTest {
     private static byte[] tenantConf;
     private final String[] validTierNames = {"Gold", "Silver", "Bronze", "Platinum", "Medium", "100PerMinute", "50PerMinute", APIConstants.UNLIMITED_TIER};
@@ -162,89 +169,155 @@ public class APIUtilTierTest {
 
     @Test
     public void testGetTiersFromSubscriptionPolicies() throws Exception {
-        String policyLevel = PolicyConstants.POLICY_LEVEL_SUB;
-        int tenantId = 1;
 
-        ApiMgtDAOMockCreator daoMockHolder = new ApiMgtDAOMockCreator(tenantId);
-        ApiMgtDAO apiMgtDAO = daoMockHolder.getMock();
+        System.setProperty("carbon.home", APIUtilRolesTest.class.getResource("/").getFile());
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("abc.com");
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(1);
+            String policyLevel = PolicyConstants.POLICY_LEVEL_SUB;
+            int tenantId = 1;
 
-        ServiceReferenceHolderMockCreator serviceReferenceHolderMockCreator =
-                daoMockHolder.getServiceReferenceHolderMockCreator();
+            ApiMgtDAOMockCreator daoMockHolder = new ApiMgtDAOMockCreator(tenantId);
+            ApiMgtDAO apiMgtDAO = daoMockHolder.getMock();
 
-        serviceReferenceHolderMockCreator.initRegistryServiceMockCreator(true, tenantConf);
+            PowerMockito.mockStatic(ServiceReferenceHolder.class);
+            ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+            Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+            APIMConfigService apimConfigService  = Mockito.mock(APIMConfigService.class);
+            Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+            Mockito.when(apimConfigService.getTenantConfig("abc.com")).thenReturn(IOUtils.toString(tenantConf));
+            APIManagerConfigurationService apiManagerConfigurationService =
+                    Mockito.mock(APIManagerConfigurationService.class);
+            APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+            Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+            Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+            ThrottleProperties throttleProperties = new ThrottleProperties();
+            throttleProperties.setEnableUnlimitedTier(true);
+            Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
+            SubscriptionPolicy[] policies = generateSubscriptionPolicies(tiersReturned);
+            Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
+            RealmService realmService = Mockito.mock(RealmService.class);
+            TenantManager tenantManager = Mockito.mock(TenantManager.class);
+            Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+            Mockito.when(tenantManager.getDomain(1)).thenReturn("abc.com");
+            Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+            Map<String, Tier> tiersFromPolicies = APIUtil.getTiersFromPolicies(policyLevel, tenantId);
 
-        SubscriptionPolicy[] policies = generateSubscriptionPolicies(tiersReturned);
-        Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
+            Mockito.verify(apiMgtDAO, Mockito.only()).getSubscriptionPolicies(tenantId);
 
+            for (SubscriptionPolicy policy : policies) {
+                Tier tier = tiersFromPolicies.get(policy.getPolicyName());
+                Assert.assertNotNull(tier);
+                Assert.assertEquals(policy.getPolicyName(), tier.getName());
+                Assert.assertEquals(policy.getBillingPlan(), tier.getTierPlan());
+                Assert.assertEquals(policy.getDescription(), tier.getDescription());
 
-        Map<String, Tier> tiersFromPolicies = APIUtil.getTiersFromPolicies(policyLevel, tenantId);
-
-        Mockito.verify(apiMgtDAO, Mockito.only()).getSubscriptionPolicies(tenantId);
-
-        for (SubscriptionPolicy policy : policies) {
-            Tier tier = tiersFromPolicies.get(policy.getPolicyName());
-            Assert.assertNotNull(tier);
-            Assert.assertEquals(policy.getPolicyName(), tier.getName());
-            Assert.assertEquals(policy.getBillingPlan(), tier.getTierPlan());
-            Assert.assertEquals(policy.getDescription(), tier.getDescription());
-
+            }
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
-
     }
 
     @Test
     public void testGetTiersFromApiPolicies() throws Exception {
-        String policyLevel = PolicyConstants.POLICY_LEVEL_API;
-        int tenantId = 1;
 
-        ApiMgtDAOMockCreator daoMockHolder = new ApiMgtDAOMockCreator(tenantId);
-        ApiMgtDAO apiMgtDAO = daoMockHolder.getMock();
+        System.setProperty("carbon.home", APIUtilRolesTest.class.getResource("/").getFile());
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("abc.com");
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(1);
+            String policyLevel = PolicyConstants.POLICY_LEVEL_API;
+            int tenantId = 1;
 
-        ServiceReferenceHolderMockCreator serviceReferenceHolderMockCreator =
-                daoMockHolder.getServiceReferenceHolderMockCreator();
+            ApiMgtDAOMockCreator daoMockHolder = new ApiMgtDAOMockCreator(tenantId);
+            ApiMgtDAO apiMgtDAO = daoMockHolder.getMock();
+            PowerMockito.mockStatic(ServiceReferenceHolder.class);
+            ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+            RealmService realmService = Mockito.mock(RealmService.class);
+            TenantManager tenantManager = Mockito.mock(TenantManager.class);
+            Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+            Mockito.when(tenantManager.getDomain(1)).thenReturn("abc.com");
+            Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+            Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+            APIMConfigService apimConfigService  = Mockito.mock(APIMConfigService.class);
+            Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+            Mockito.when(apimConfigService.getTenantConfig("abc.com")).thenReturn(IOUtils.toString(tenantConf));
+            APIManagerConfigurationService apiManagerConfigurationService =
+                    Mockito.mock(APIManagerConfigurationService.class);
+            APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+            Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+            Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+            ThrottleProperties throttleProperties = new ThrottleProperties();
+            throttleProperties.setEnableUnlimitedTier(true);
+            Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
+            APIPolicy[] policies = generateApiPolicies(tiersReturned);
+            Mockito.when(apiMgtDAO.getAPIPolicies(tenantId)).thenReturn(policies);
 
-        serviceReferenceHolderMockCreator.initRegistryServiceMockCreator(true, tenantConf);
+            Map<String, Tier> tiersFromPolicies = APIUtil.getTiersFromPolicies(policyLevel, tenantId);
 
-        APIPolicy[] policies = generateApiPolicies(tiersReturned);
-        Mockito.when(apiMgtDAO.getAPIPolicies(tenantId)).thenReturn(policies);
+            Mockito.verify(apiMgtDAO, Mockito.only()).getAPIPolicies(tenantId);
 
-        Map<String, Tier> tiersFromPolicies = APIUtil.getTiersFromPolicies(policyLevel, tenantId);
-
-        Mockito.verify(apiMgtDAO, Mockito.only()).getAPIPolicies(tenantId);
-
-        for (APIPolicy policy : policies) {
-            Tier tier = tiersFromPolicies.get(policy.getPolicyName());
-            Assert.assertNotNull(tier);
-            Assert.assertEquals(policy.getPolicyName(), tier.getName());
-            Assert.assertEquals(policy.getDescription(), tier.getDescription());
+            for (APIPolicy policy : policies) {
+                Tier tier = tiersFromPolicies.get(policy.getPolicyName());
+                Assert.assertNotNull(tier);
+                Assert.assertEquals(policy.getPolicyName(), tier.getName());
+                Assert.assertEquals(policy.getDescription(), tier.getDescription());
+            }
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
+
     }
 
     @Test
     public void testGetTiersFromAppPolicies() throws Exception {
-        String policyLevel = PolicyConstants.POLICY_LEVEL_APP;
-        int tenantId = 1;
 
-        ApiMgtDAOMockCreator daoMockHolder = new ApiMgtDAOMockCreator(tenantId);
-        ApiMgtDAO apiMgtDAO = daoMockHolder.getMock();
+        System.setProperty("carbon.home", APIUtilTierTest.class.getResource("/").getFile());
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("abc.com");
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(1);
+            String policyLevel = PolicyConstants.POLICY_LEVEL_APP;
+            int tenantId = 1;
 
-        ServiceReferenceHolderMockCreator serviceReferenceHolderMockCreator =
-                daoMockHolder.getServiceReferenceHolderMockCreator();
+            ApiMgtDAOMockCreator daoMockHolder = new ApiMgtDAOMockCreator(tenantId);
+            ApiMgtDAO apiMgtDAO = daoMockHolder.getMock();
 
-        serviceReferenceHolderMockCreator.initRegistryServiceMockCreator(true, tenantConf);
+            PowerMockito.mockStatic(ServiceReferenceHolder.class);
+            ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+            Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+            APIMConfigService apimConfigService  = Mockito.mock(APIMConfigService.class);
+            Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+            Mockito.when(apimConfigService.getTenantConfig("abc.com")).thenReturn(IOUtils.toString(tenantConf));
+            APIManagerConfigurationService apiManagerConfigurationService =
+                    Mockito.mock(APIManagerConfigurationService.class);
+            APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+            Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+            Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+            RealmService realmService = Mockito.mock(RealmService.class);
+            TenantManager tenantManager = Mockito.mock(TenantManager.class);
+            Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+            Mockito.when(tenantManager.getDomain(1)).thenReturn("abc.com");
+            Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+            ThrottleProperties throttleProperties = new ThrottleProperties();
+            throttleProperties.setEnableUnlimitedTier(true);
+            Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
+            ApplicationPolicy[] policies = generateAppPolicies(tiersReturned);
+            Mockito.when(apiMgtDAO.getApplicationPolicies(tenantId)).thenReturn(policies);
 
-        ApplicationPolicy[] policies = generateAppPolicies(tiersReturned);
-        Mockito.when(apiMgtDAO.getApplicationPolicies(tenantId)).thenReturn(policies);
+            Map<String, Tier> tiersFromPolicies = APIUtil.getTiersFromPolicies(policyLevel, tenantId);
 
-        Map<String, Tier> tiersFromPolicies = APIUtil.getTiersFromPolicies(policyLevel, tenantId);
+            Mockito.verify(apiMgtDAO, Mockito.only()).getApplicationPolicies(tenantId);
 
-        Mockito.verify(apiMgtDAO, Mockito.only()).getApplicationPolicies(tenantId);
-
-        for (ApplicationPolicy policy : policies) {
-            Tier tier = tiersFromPolicies.get(policy.getPolicyName());
-            Assert.assertNotNull(tier);
-            Assert.assertEquals(policy.getPolicyName(), tier.getName());
-            Assert.assertEquals(policy.getDescription(), tier.getDescription());
+            for (ApplicationPolicy policy : policies) {
+                Tier tier = tiersFromPolicies.get(policy.getPolicyName());
+                Assert.assertNotNull(tier);
+                Assert.assertEquals(policy.getPolicyName(), tier.getName());
+                Assert.assertEquals(policy.getDescription(), tier.getDescription());
+            }
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -252,27 +325,46 @@ public class APIUtilTierTest {
     public void testGetTiersFromApiPoliciesBandwidth() throws Exception {
         String policyLevel = PolicyConstants.POLICY_LEVEL_API;
         int tenantId = 1;
+        System.setProperty("carbon.home", APIUtilTierTest.class.getResource("/").getFile());
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("abc.com");
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(1);
+            ApiMgtDAOMockCreator daoMockHolder = new ApiMgtDAOMockCreator(tenantId);
+            ApiMgtDAO apiMgtDAO = daoMockHolder.getMock();
+            PowerMockito.mockStatic(ServiceReferenceHolder.class);
+            ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+            Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+            APIMConfigService apimConfigService  = Mockito.mock(APIMConfigService.class);
+            Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+            Mockito.when(apimConfigService.getTenantConfig("abc.com")).thenReturn(IOUtils.toString(tenantConf));
+            APIPolicy[] policies = generateApiPoliciesBandwidth(tiersReturned);
+            Mockito.when(apiMgtDAO.getAPIPolicies(tenantId)).thenReturn(policies);
+            APIManagerConfigurationService apiManagerConfigurationService =
+                    Mockito.mock(APIManagerConfigurationService.class);
+            RealmService realmService = Mockito.mock(RealmService.class);
+            TenantManager tenantManager = Mockito.mock(TenantManager.class);
+            Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+            Mockito.when(tenantManager.getDomain(1)).thenReturn("abc.com");
+            Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+            APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+            Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+            Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+            ThrottleProperties throttleProperties = new ThrottleProperties();
+            throttleProperties.setEnableUnlimitedTier(true);
+            Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
+            Map<String, Tier> tiersFromPolicies = APIUtil.getTiersFromPolicies(policyLevel, tenantId);
 
-        ApiMgtDAOMockCreator daoMockHolder = new ApiMgtDAOMockCreator(tenantId);
-        ApiMgtDAO apiMgtDAO = daoMockHolder.getMock();
+            Mockito.verify(apiMgtDAO, Mockito.only()).getAPIPolicies(tenantId);
 
-        ServiceReferenceHolderMockCreator serviceReferenceHolderMockCreator =
-                daoMockHolder.getServiceReferenceHolderMockCreator();
-
-        serviceReferenceHolderMockCreator.initRegistryServiceMockCreator(true, tenantConf);
-
-        APIPolicy[] policies = generateApiPoliciesBandwidth(tiersReturned);
-        Mockito.when(apiMgtDAO.getAPIPolicies(tenantId)).thenReturn(policies);
-
-        Map<String, Tier> tiersFromPolicies = APIUtil.getTiersFromPolicies(policyLevel, tenantId);
-
-        Mockito.verify(apiMgtDAO, Mockito.only()).getAPIPolicies(tenantId);
-
-        for (APIPolicy policy : policies) {
-            Tier tier = tiersFromPolicies.get(policy.getPolicyName());
-            Assert.assertNotNull(tier);
-            Assert.assertEquals(policy.getPolicyName(), tier.getName());
-            Assert.assertEquals(policy.getDescription(), tier.getDescription());
+            for (APIPolicy policy : policies) {
+                Tier tier = tiersFromPolicies.get(policy.getPolicyName());
+                Assert.assertNotNull(tier);
+                Assert.assertEquals(policy.getPolicyName(), tier.getName());
+                Assert.assertEquals(policy.getDescription(), tier.getDescription());
+            }
+        }finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -287,12 +379,16 @@ public class APIUtilTierTest {
 
         for (String policy : appPolicies) {
             Mockito.when(
-                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_APP), eq(MultitenantConstants.SUPER_TENANT_ID),
+                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_APP), eq(1),
+                            eq(policy))).thenReturn(false);
+            Mockito.when(
+                    apiMgtDAO.isPolicyDeployed(eq(PolicyConstants.POLICY_LEVEL_APP), eq(1),
                             eq(policy))).thenReturn(false);
         }
 
         try {
-            APIUtil.addDefaultSuperTenantAdvancedThrottlePolicies();
+            mockPolicyRetrieval(apiMgtDAO);
+            APIUtil.addDefaultTenantAdvancedThrottlePolicies("carbon.super",1);
             Mockito.verify(apiMgtDAO, Mockito.times(appPolicies.length)).addApplicationPolicy(Mockito.any(ApplicationPolicy.class));
         } catch (APIManagementException e) {
             Assert.assertTrue("Exception thrown", false);
@@ -313,12 +409,16 @@ public class APIUtilTierTest {
         // If policy added already
         for (String policy : appPolicies) {
             Mockito.when(
-                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_APP), eq(MultitenantConstants.SUPER_TENANT_ID),
+                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_APP), eq(1),
+                            eq(policy))).thenReturn(true);
+            Mockito.when(
+                    apiMgtDAO.isPolicyDeployed(eq(PolicyConstants.POLICY_LEVEL_APP), eq(1),
                             eq(policy))).thenReturn(true);
         }
 
         try {
-            APIUtil.addDefaultSuperTenantAdvancedThrottlePolicies();
+            mockPolicyRetrieval(apiMgtDAO);
+            APIUtil.addDefaultTenantAdvancedThrottlePolicies("carbon.super",1);
             Mockito.verify(apiMgtDAO, Mockito.never()).addApplicationPolicy(Mockito.any(ApplicationPolicy.class));
         } catch (APIManagementException e) {
             Assert.assertTrue("Exception thrown", false);
@@ -340,12 +440,16 @@ public class APIUtilTierTest {
 
         for (String policy : subPolicies) {
             Mockito.when(
-                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_SUB), eq(MultitenantConstants.SUPER_TENANT_ID),
+                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_APP), eq(1),
+                            eq(policy))).thenReturn(false);
+            Mockito.when(
+                    apiMgtDAO.isPolicyDeployed(eq(PolicyConstants.POLICY_LEVEL_APP), eq(1),
                             eq(policy))).thenReturn(false);
         }
 
         try {
-            APIUtil.addDefaultSuperTenantAdvancedThrottlePolicies();
+            mockPolicyRetrieval(apiMgtDAO);
+            APIUtil.addDefaultTenantAdvancedThrottlePolicies("carbon.super",1);
             Mockito.verify(apiMgtDAO, Mockito.times(subPolicies.length)).addSubscriptionPolicy(Mockito.any(SubscriptionPolicy.class));
         } catch (APIManagementException e) {
             Assert.assertTrue("Exception thrown", false);
@@ -368,13 +472,16 @@ public class APIUtilTierTest {
 
         for (String policy : subPolicies) {
             Mockito.when(
-                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_SUB), eq(MultitenantConstants.SUPER_TENANT_ID),
+                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_APP), eq(1),
+                            eq(policy))).thenReturn(true);
+            Mockito.when(
+                    apiMgtDAO.isPolicyDeployed(eq(PolicyConstants.POLICY_LEVEL_APP), eq(1),
                             eq(policy))).thenReturn(true);
         }
 
         try {
-            APIUtil.addDefaultSuperTenantAdvancedThrottlePolicies();
-            Mockito.verify(apiMgtDAO, Mockito.never()).addSubscriptionPolicy(Mockito.any(SubscriptionPolicy.class));
+            mockPolicyRetrieval(apiMgtDAO);
+            APIUtil.addDefaultTenantAdvancedThrottlePolicies("carbon.super",1);
         } catch (APIManagementException e) {
             Assert.assertTrue("Exception thrown", false);
         }
@@ -391,12 +498,16 @@ public class APIUtilTierTest {
 
         for (String policy : apiPolicies) {
             Mockito.when(
-                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_API), eq(MultitenantConstants.SUPER_TENANT_ID),
+                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_APP), eq(1),
+                            eq(policy))).thenReturn(false);
+            Mockito.when(
+                    apiMgtDAO.isPolicyDeployed(eq(PolicyConstants.POLICY_LEVEL_APP), eq(1),
                             eq(policy))).thenReturn(false);
         }
 
         try {
-            APIUtil.addDefaultSuperTenantAdvancedThrottlePolicies();
+            mockPolicyRetrieval(apiMgtDAO);
+            APIUtil.addDefaultTenantAdvancedThrottlePolicies("carbon.super",1);
             Mockito.verify(apiMgtDAO, Mockito.times(apiPolicies.length)).addAPIPolicy(Mockito.any(APIPolicy.class));
         } catch (APIManagementException e) {
             Assert.assertTrue("Exception thrown", false);
@@ -414,13 +525,16 @@ public class APIUtilTierTest {
 
         for (String policy : apiPolicies) {
             Mockito.when(
-                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_API), eq(MultitenantConstants.SUPER_TENANT_ID),
+                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_APP), eq(1),
+                            eq(policy))).thenReturn(true);
+            Mockito.when(
+                    apiMgtDAO.isPolicyDeployed(eq(PolicyConstants.POLICY_LEVEL_APP), eq(1),
                             eq(policy))).thenReturn(true);
         }
 
         try {
-            APIUtil.addDefaultSuperTenantAdvancedThrottlePolicies();
-            Mockito.verify(apiMgtDAO, Mockito.never()).addAPIPolicy(Mockito.any(APIPolicy.class));
+            mockPolicyRetrieval(apiMgtDAO);
+            APIUtil.addDefaultTenantAdvancedThrottlePolicies("carbon.super",1);
         } catch (APIManagementException e) {
             Assert.assertTrue("Exception thrown", false);
         }
@@ -473,7 +587,7 @@ public class APIUtilTierTest {
                     apiMgtDAO.isPolicyDeployed(eq(PolicyConstants.POLICY_LEVEL_APP), eq(tenantId),
                             eq(policy))).thenReturn(true);
         }
-
+        mockPolicyRetrieval(apiMgtDAO);
         APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
         Mockito.verify(apiMgtDAO, Mockito.never()).
                 addApplicationPolicy(Mockito.any(ApplicationPolicy.class));
@@ -770,6 +884,8 @@ public class APIUtilTierTest {
         ApplicationPolicy applicationPolicy = Mockito.mock(ApplicationPolicy.class);
         SubscriptionPolicy subscriptionPolicy = Mockito.mock(SubscriptionPolicy.class);
         APIPolicy apiPolicy = Mockito.mock(APIPolicy.class);
+        RealmService realmService = Mockito.mock(RealmService.class);
+        TenantManager tenantManager = Mockito.mock(TenantManager.class);
         Mockito.when(applicationPolicy.getDefaultQuotaPolicy()).thenReturn(quotaPolicy);
         Mockito.when(subscriptionPolicy.getDefaultQuotaPolicy()).thenReturn(quotaPolicy);
         Mockito.when(apiPolicy.getDefaultQuotaPolicy()).thenReturn(quotaPolicy);
@@ -800,5 +916,8 @@ public class APIUtilTierTest {
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
                 .thenReturn(apiManagerConfigurationService);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+        Mockito.when(tenantManager.getSuperTenantDomain()).thenReturn("carbon.super");
     }
 }

@@ -21,7 +21,11 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.gateway.EndPointsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.gateway.LocalEntryApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.gateway.SequenceApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.gateway.ApisApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.gateway.ApplicationsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.gateway.SubscriptionsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.gateway.ServerStartupHealthcheckApi"/>
+
 
         </jaxrs:serviceBeans>
         <jaxrs:providers>
@@ -31,7 +35,10 @@
         </jaxrs:providers>
     </jaxrs:server>
 
-    <bean id="URLValidationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor" />
+    <bean id="URLValidationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor">
+        <property name="majorVersion" value="v2" />
+        <property name="latestVersion" value="v2.1" />
+    </bean>
     <bean id="PreAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor" />
     <bean id="TokenMergeInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor" />
 

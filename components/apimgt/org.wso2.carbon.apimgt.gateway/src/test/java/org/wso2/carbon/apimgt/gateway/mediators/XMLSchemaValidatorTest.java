@@ -30,7 +30,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.threatprotection.analyzer.APIMThreatAnalyzer;
 import org.wso2.carbon.apimgt.gateway.threatprotection.analyzer.XMLAnalyzer;
-import org.wso2.carbon.apimgt.gateway.threatprotection.configuration.ConfigurationHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.configuration.XMLConfig;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
 
@@ -41,7 +40,7 @@ import static org.junit.Assert.assertEquals;
  */
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ThreatProtectorConstants.class,XMLAnalyzer.class, ConfigurationHolder.class})
+@PrepareForTest({ThreatProtectorConstants.class,XMLAnalyzer.class})
 public class XMLSchemaValidatorTest {
 
     private static final Log log = LogFactory.getLog(XMLSchemaValidatorTest.class);
@@ -51,7 +50,6 @@ public class XMLSchemaValidatorTest {
     private XMLConfig xmlConfig;
     @Before
     public void init() {
-        PowerMockito.mock(ConfigurationHolder.class);
         PowerMockito.mock(APIMThreatAnalyzer.class);
         Mockito.mock(ThreatProtectorConstants.class);
         xmlConfig = new XMLConfig();

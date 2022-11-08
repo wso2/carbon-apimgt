@@ -18,6 +18,8 @@
 package org.wso2.carbon.apimgt.gateway.throttling.util;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.ProtocolVersion;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.BasicHttpEntity;
@@ -51,6 +53,9 @@ public class BlockingConditionRetrieverTest {
         BasicHttpEntity httpEntity = new BasicHttpEntity();
         httpEntity.setContent(new ByteArrayInputStream(content.getBytes()));
         Mockito.when(httpResponse.getEntity()).thenReturn(httpEntity);
+        StatusLine status = Mockito.mock(StatusLine.class);
+        Mockito.when(status.getStatusCode()).thenReturn(200);
+        Mockito.when(httpResponse.getStatusLine()).thenReturn(status);
         Mockito.when(httpClient.execute(Mockito.any(HttpGet.class))).thenReturn(httpResponse);
         BDDMockito.given(APIUtil.getHttpClient(Mockito.anyInt(), Mockito.anyString())).willReturn(httpClient);
         EventHubConfigurationDto eventHubConfigurationDto = new EventHubConfigurationDto();

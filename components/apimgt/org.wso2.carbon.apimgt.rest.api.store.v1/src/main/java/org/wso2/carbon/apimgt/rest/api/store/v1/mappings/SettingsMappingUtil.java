@@ -55,7 +55,8 @@ public class SettingsMappingUtil {
     private static final Log log = LogFactory.getLog(SettingsMappingUtil.class);
 
     public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable, Boolean moneatizationEnabled,
-                                         boolean recommendationEnabled, boolean anonymousEnabled) throws APIManagementException {
+                                         boolean recommendationEnabled, boolean anonymousEnabled, String organization)
+            throws APIManagementException {
         SettingsDTO settingsDTO = new SettingsDTO();
         settingsDTO.setScopes(GetScopeList());
         settingsDTO.setApplicationSharingEnabled(APIUtil.isMultiGroupAppSharingEnabled());
@@ -126,7 +127,7 @@ public class SettingsMappingUtil {
 
         if (isUserAvailable) {
             settingsDTO.setGrantTypes(APIUtil.getGrantTypes());
-            Map<String, Environment> environments = APIUtil.getEnvironments();
+            Map<String, Environment> environments = APIUtil.getEnvironments(organization);
             if (environments.isEmpty()) {
                 settingsDTO.apiGatewayEndpoint("http://localhost:8280, https://localhost:8243");
             } else {

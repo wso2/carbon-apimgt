@@ -341,6 +341,12 @@
         <Observer>org.wso2.carbon.apimgt.impl.observers.SimpleLoggingObserver</Observer>
     </StatusObservers-->
 
+    <!-- Configuration to configure the email recipient field (To/cc/bcc) and delimeter(, or ;)-->
+    <SubscriberContactConfiguration>
+        <Email-Recipient-Field>To</Email-Recipient-Field>
+        <EmailAddressDelimiter>;</EmailAddressDelimiter>
+    </SubscriberContactConfiguration>
+
     <!-- Configuration to enable/disable sending CORS headers in the Gateway response
          and define the Access-Control-Allow-Origin header value.-->
     <CORSConfiguration>
@@ -730,6 +736,12 @@
         <EnableClientCertificateValidation>true</EnableClientCertificateValidation>
     </MutualSSL>
 
+    <MediatorConfigs>
+        <OAuth>
+            <!-- If the access token expires, the server should reply with the duration of time the access token is granted for. -->
+            <ExpiresIn>3600</ExpiresIn>
+        </OAuth>
+    </MediatorConfigs>
     <!--This parameter is used to Enable the password changing feature in devportal. When this is enabled, a user can
      change his/her password via devportal. By default this feature is enabled.-->
     <EnableChangePassword>true</EnableChangePassword>

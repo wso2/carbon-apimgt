@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
@@ -29,12 +30,14 @@ import org.wso2.carbon.core.ServerStartupObserver;
 /**
  * This Class used to properly start and Close Throttle Policy JMS listeners
  */
-public class ThrottlePolicyStartupListener implements ServerStartupObserver, ServerShutdownHandler, Runnable {
+public class ThrottlePolicyStartupListener implements ServerStartupObserver, ServerShutdownHandler, Runnable,
+        JMSListenerShutDownService {
 
     private final Log log = LogFactory.getLog(ThrottlePolicyStartupListener.class);
     private JMSTransportHandler jmsTransportHandlerForEventHub;
 
     public ThrottlePolicyStartupListener() {
+
         EventHubConfigurationDto.EventHubReceiverConfiguration eventHubReceiverConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIMConfiguration().getEventHubConfigurationDto()
                         .getEventHubReceiverConfiguration();
@@ -46,10 +49,12 @@ public class ThrottlePolicyStartupListener implements ServerStartupObserver, Ser
 
     @Override
     public void completingServerStartup() {
+
     }
 
     @Override
     public void completedServerStartup() {
+
         deployPoliciesInAsyncMode();
         jmsTransportHandlerForEventHub
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION,
@@ -58,6 +63,7 @@ public class ThrottlePolicyStartupListener implements ServerStartupObserver, Ser
 
     @Override
     public void invoke() {
+
         if (jmsTransportHandlerForEventHub != null) {
             log.debug("Unsubscribe from JMS Events...");
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();
@@ -66,10 +72,21 @@ public class ThrottlePolicyStartupListener implements ServerStartupObserver, Ser
 
     @Override
     public void run() {
+
         PolicyUtil.deployAllPolicies();
     }
 
     private void deployPoliciesInAsyncMode() {
+
         new Thread(this).start();
+    }
+
+    @Override
+    public void shutDownListener() {
+
+        if (jmsTransportHandlerForEventHub != null) {
+            log.debug("Unsubscribe from JMS Events...");
+            jmsTransportHandlerForEventHub.unSubscribeFromEvents();
+        }
     }
 }

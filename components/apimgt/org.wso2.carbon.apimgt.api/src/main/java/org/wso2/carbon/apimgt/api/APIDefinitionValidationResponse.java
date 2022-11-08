@@ -33,6 +33,7 @@ public class APIDefinitionValidationResponse {
     private Info info;
     private APIDefinition parser;
     private ArrayList<ErrorHandler> errorItems = new ArrayList<>();
+    private boolean isInit = false;
 
     public boolean isValid() {
         return isValid;
@@ -72,6 +73,14 @@ public class APIDefinitionValidationResponse {
 
     public Info getInfo() {
         return info;
+    }
+
+    public boolean isInit() {
+        return isInit;
+    }
+
+    public void setInit(boolean init) {
+        isInit = init;
     }
 
     public static class Info {

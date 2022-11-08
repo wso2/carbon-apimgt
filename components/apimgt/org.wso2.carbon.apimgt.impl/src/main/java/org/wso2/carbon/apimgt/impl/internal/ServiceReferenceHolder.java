@@ -16,10 +16,17 @@
 
 package org.wso2.carbon.apimgt.impl.internal;
 
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
+import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
+import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
+import org.wso2.carbon.apimgt.impl.config.APIMConfigServiceImpl;
+import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
@@ -62,6 +69,12 @@ public class ServiceReferenceHolder {
     private ImportExportAPI importExportService;
     private Map<String, GatewayArtifactGenerator> gatewayArtifactGeneratorMap = new HashMap<>();
     private OrganizationResolver organizationResolver;
+    private ResourceQuotaLimiter resourceQuotaLimiter;
+    private EventPublisherFactory eventPublisherFactory;
+    private APIMConfigService apimConfigService;
+    private Map<String, ExternalGatewayDeployer> externalGatewayDeployers = new HashMap<>();
+    private Map<String, ExternalEnvironment> externalEnvironmentsMap = new HashMap<>();
+    private Map<String, APIDefinition> apiDefinitionMap = new HashMap<>();
 
     private ServiceReferenceHolder() {
 
@@ -80,16 +93,6 @@ public class ServiceReferenceHolder {
     public static ServiceReferenceHolder getInstance() {
 
         return instance;
-    }
-
-    public static UserRealm getUserRealm() {
-
-        return userRealm;
-    }
-
-    public static void setUserRealm(UserRealm realm) {
-
-        userRealm = realm;
     }
 
     public RegistryService getRegistryService() {
@@ -286,4 +289,78 @@ public class ServiceReferenceHolder {
     public void setOrganizationResolver(OrganizationResolver organizationResolver) {
         this.organizationResolver = organizationResolver;
     }
+
+    public ResourceQuotaLimiter getResourceQuotaLimiter() {
+        return resourceQuotaLimiter;
+    }
+
+    public void setResourceQuotaLimiter(ResourceQuotaLimiter resourceQuotaLimiter) {
+        this.resourceQuotaLimiter = resourceQuotaLimiter;
+    }
+
+    public EventPublisherFactory getEventPublisherFactory() {
+        return eventPublisherFactory;
+    }
+
+    public void setEventPublisherFactory(EventPublisherFactory eventPublisherFactory) {
+        this.eventPublisherFactory = eventPublisherFactory;
+    }
+
+    public void setAPIMConfigService(APIMConfigService apimConfigService) {
+        this.apimConfigService = apimConfigService;
+    }
+
+    public APIMConfigService getApimConfigService() {
+        if (apimConfigService != null){
+            return apimConfigService;
+        }
+        return new APIMConfigServiceImpl();
+    }
+
+
+    public void addExternalGatewayDeployer(String type, ExternalGatewayDeployer deployer) {
+
+        externalGatewayDeployers.put(type, deployer);
+    }
+
+    public void removeExternalGatewayDeployer(String type) {
+
+        externalGatewayDeployers.remove(type);
+    }
+
+    public ExternalGatewayDeployer getExternalGatewayDeployer(String type) {
+
+        return externalGatewayDeployers.get(type);
+    }
+
+    public void addExternalEnvironment(String type, ExternalEnvironment externalEnvironment) {
+
+        externalEnvironmentsMap.put(type, externalEnvironment);
+    }
+
+    public ExternalEnvironment getExternalEnvironment(String type) {
+
+        return externalEnvironmentsMap.get(type);
+    }
+
+    public void removeExternalEnvironments(String type) {
+
+        externalEnvironmentsMap.remove(type);
+    }
+
+    public void addAPIDefinitionParser(String type, APIDefinition apiDefinition) {
+
+        apiDefinitionMap.put(type, apiDefinition);
+    }
+
+    public Map<String, APIDefinition> getApiDefinitionMap() {
+
+        return apiDefinitionMap;
+    }
+
+    public void removeAPIDefinitionParser(String type) {
+
+        apiDefinitionMap.remove(type);
+    }
+
 }

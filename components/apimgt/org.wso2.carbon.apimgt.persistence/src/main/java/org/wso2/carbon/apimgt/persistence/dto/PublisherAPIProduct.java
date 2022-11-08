@@ -40,7 +40,8 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
     private String businessOwnerEmail;
     private String subscriptionAvailability; // e.g. "CURRENT_TENANT";who is allowed for subscriptions
     private String subscriptionAvailableOrgs; // subscriptionAvailableTenants;    
-    private int cacheTimeout;    
+    private int cacheTimeout;
+    private String responseCache;
     private Set<String> availableTierNames;    
     private Set<String> environments;    
     private String transports;    
@@ -60,7 +61,10 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
     private String accessControl; // publisher accessControl : 'restricted', 'all'
     private Set<String> accessControlRoles; // reg has a just String
     private Map<String, String> additionalProperties;
-    
+    private String gatewayVendor;
+
+    private String versionTimestamp;
+
     public String getDescription() {
         return description;
     }
@@ -246,8 +250,32 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
         this.additionalProperties = additionalProperties;
     }
 
-    
-    /*
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
+
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
+
+    public String getVersionTimestamp() {
+
+        return versionTimestamp;
+    }
+
+    public void setVersionTimestamp(String versionTimestamp) {
+
+        this.versionTimestamp = versionTimestamp;
+    }
+
+    public String getResponseCache() {
+        return responseCache;
+    }
+
+    public void setResponseCache(String responseCache) {
+        this.responseCache = responseCache;
+    }
+/*
     private String inSequence;
     private String outSequence;
     private String faultSequence;

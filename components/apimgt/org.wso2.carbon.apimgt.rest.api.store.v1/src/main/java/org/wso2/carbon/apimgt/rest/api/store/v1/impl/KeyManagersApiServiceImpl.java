@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;

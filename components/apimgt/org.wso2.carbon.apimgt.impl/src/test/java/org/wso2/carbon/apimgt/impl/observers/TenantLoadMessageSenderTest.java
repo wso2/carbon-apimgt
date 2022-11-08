@@ -30,7 +30,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -74,7 +74,7 @@ public class TenantLoadMessageSenderTest {
         List<ClusteringCommand> commandList = new ArrayList<ClusteringCommand>();
         commandList.add(command);
         ClusteringFault clusteringFault = PowerMockito.mock(ClusteringFault.class);
-        PowerMockito.when(clusteringAgent.sendMessage(Matchers.any(TenantLoadMessage.class), Matchers.anyBoolean())).
+        PowerMockito.when(clusteringAgent.sendMessage(ArgumentMatchers.any(TenantLoadMessage.class), ArgumentMatchers.anyBoolean())).
                 thenThrow(clusteringFault);
         tenantLoadMessageSender.sendTenantLoadMessage(clusteringAgent, 1, "a.com", 2);
     }

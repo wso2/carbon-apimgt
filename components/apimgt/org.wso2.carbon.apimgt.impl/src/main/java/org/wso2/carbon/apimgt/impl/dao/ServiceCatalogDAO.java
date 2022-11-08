@@ -150,7 +150,7 @@ public class ServiceCatalogDAO {
         boolean isValid = true;
         for (int i = 0; i < services.size(); i++) {
             ServiceEntry service = services.get(i);
-            ServiceEntry existingService = getServiceByKey(service.getKey(), tenantId);
+            ServiceEntry existingService = getServiceByKey(service.getServiceKey(), tenantId);
             if (existingService != null && StringUtils.isNotEmpty(existingService.getMd5())) {
                 if (!existingService.getVersion().equals(service.getVersion())) {
                     isValid = false;
@@ -160,7 +160,7 @@ public class ServiceCatalogDAO {
                     isValid = false;
                     break;
                 }
-                if (!existingService.getKey().equals(service.getKey())) {
+                if (!existingService.getServiceKey().equals(service.getServiceKey())) {
                     isValid = false;
                     break;
                 }
@@ -687,7 +687,7 @@ public class ServiceCatalogDAO {
         ps.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
         ps.setString(10, username);
         ps.setBinaryStream(11, service.getEndpointDef());
-        ps.setString(12, service.getKey());
+        ps.setString(12, service.getServiceKey());
         ps.setInt(13, tenantId);
     }
 
@@ -695,7 +695,7 @@ public class ServiceCatalogDAO {
             throws SQLException {
         String uuid = UUID.randomUUID().toString();
         ps.setString(1, uuid);
-        ps.setString(2, service.getKey());
+        ps.setString(2, service.getServiceKey());
         ps.setString(3, service.getMd5());
         ps.setString(4, service.getName());
         ps.setString(5, service.getVersion());
@@ -719,7 +719,7 @@ public class ServiceCatalogDAO {
         try {
             service.setUuid(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_UUID));
             service.setName(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_NAME));
-            service.setKey(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_KEY));
+            service.setServiceKey(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_KEY));
             service.setMd5(resultSet.getString(APIConstants.ServiceCatalogConstants.MD5));
             service.setVersion(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_VERSION));
             if (!shrink) {

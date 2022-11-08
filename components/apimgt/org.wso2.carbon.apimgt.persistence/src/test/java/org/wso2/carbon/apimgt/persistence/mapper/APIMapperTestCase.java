@@ -15,7 +15,7 @@
  */
 package org.wso2.carbon.apimgt.persistence.mapper;
 
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +27,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
@@ -40,6 +41,7 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.Tag;
@@ -88,8 +90,11 @@ public class APIMapperTestCase {
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PrivilegedCarbonContext privilegedContext = Mockito.mock(PrivilegedCarbonContext.class);
         PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedContext);
-        
+
         GenericArtifact genericArtifact = PersistenceHelper.getSampleAPIArtifact();
+        Mockito.when(GovernanceUtils.getArtifactPath(registry, genericArtifact.getId()))
+                .thenReturn(generateArtifactPath(genericArtifact));
+
         api = RegistryPersistenceUtil.getAPI(genericArtifact, registry);
         GenericArtifact productGenericArtifact = PersistenceHelper.getSampleAPIProductArtifact();
         product = RegistryPersistenceUtil.getAPIProduct(productGenericArtifact, registry);
@@ -161,5 +166,14 @@ public class APIMapperTestCase {
 
         APIProduct mappedProduct = APIProductMapper.INSTANCE.toApiProduct(pubAPI);
         Assert.assertEquals("Mapped product uuid does not match", mappedProduct.getUuid(), product.getUuid());
+    }
+
+    private String generateArtifactPath(GenericArtifact artifact) throws GovernanceException {
+        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+        String apiProviderName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
+                + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
+                + RegistryConstants.PATH_SEPARATOR + "api";
     }
 }

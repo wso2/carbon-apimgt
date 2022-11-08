@@ -33,6 +33,9 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -40,12 +43,12 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.DocumentationContent.ContentSourceType;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
+import org.wso2.carbon.apimgt.impl.restapi.publisher.ApiProductsApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -62,6 +65,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -97,19 +102,20 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProductIdentifier apiProductIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
             if (log.isDebugEnabled()) {
-                log.debug("Delete API Product request: Id " +apiProductId + " by " + username);
+                log.debug("Delete API Product request: Id " + apiProductId + " by " + username);
             }
             APIProduct apiProduct = apiProvider.getAPIProductbyUUID(apiProductId, organization);
             if (apiProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
+            } else {
+                boolean isAPIPublishedOrDeprecated = APIStatus.PUBLISHED.getStatus().equals(apiProduct.getState()) ||
+                        APIStatus.DEPRECATED.getStatus().equals(apiProduct.getState());
+                List<SubscribedAPI> apiUsages = apiProvider.getAPIProductUsageByAPIProductId(apiProductIdentifier);
+                if (isAPIPublishedOrDeprecated && (apiUsages != null && apiUsages.size() > 0)) {
+                    RestApiUtil.handleConflict("Cannot remove the API " + apiProductIdentifier + " as active subscriptions exist", log);
+                }
+                apiProduct.setOrganization(organization);
             }
-
-            List<SubscribedAPI> apiUsages = apiProvider.getAPIProductUsageByAPIProductId(apiProductIdentifier);
-            if (apiUsages != null && apiUsages.size() > 0) {
-                RestApiUtil.handleConflict("Cannot remove the API " + apiProductIdentifier + " as active subscriptions exist", log);
-            }
-
-            apiProduct.setOrganization(organization);
             apiProvider.deleteAPIProduct(apiProduct);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -650,11 +656,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + file.getName() + "\"")
                     .build();
-        } catch (APIManagementException | APIImportExportException e) {
-            RestApiUtil.handleInternalServerError("Error while exporting " +
-                    RestApiConstants.RESOURCE_API_PRODUCT, e, log);
+        } catch (APIImportExportException e) {
+            throw new APIManagementException("Error while exporting " + RestApiConstants.RESOURCE_API_PRODUCT, e);
         }
-        return null;
     }
 
     @Override
@@ -671,12 +675,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             if (log.isDebugEnabled()) {
                 log.debug("API Product list request by " + username);
             }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            Map<String, Object> result = apiProvider.searchPaginatedAPIProducts(query, tenantDomain, offset, limit);
+            Map<String, Object> result = apiProvider.searchPaginatedAPIProducts(query, organization, offset, limit);
 
             Set<APIProduct> apiProducts = (Set<APIProduct>) result.get("products");
             allMatchedProducts.addAll(apiProducts);
@@ -729,7 +733,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 .get(RestApiConstants.USER_REST_API_SCOPES);
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
 
-        // Validate if the USER_REST_API_SCOPES is not set in WebAppAuthenticator when scopes are validated
+        // Validate if the USER_REST_API_SCOPES is not set in AbstractOAuthAuthenticator when scopes are validated
         // If the user need to import dependent APIs and the user has the required scope for that, allow the user to do it
         if (tokenScopes == null) {
             RestApiUtil.handleInternalServerError("Error occurred while importing the API Product", log);
@@ -839,7 +843,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                                              List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO,
                                              MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        Map<String, Environment> environments = APIUtil.getEnvironments();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTO) {
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
@@ -909,25 +914,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIRevisionListDTO apiRevisionListDTO;
             List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiProductId);
-            if (StringUtils.equalsIgnoreCase(query, "deployed:true")) {
-                List<APIRevision> apiDeployedRevisions = new ArrayList<>();
-                for (APIRevision apiRevision : apiRevisions) {
-                    if (!apiRevision.getApiRevisionDeploymentList().isEmpty()) {
-                        apiDeployedRevisions.add(apiRevision);
-                    }
-                }
-                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiDeployedRevisions);
-            } else if (StringUtils.equalsIgnoreCase(query, "deployed:false")) {
-                List<APIRevision> apiProductNotDeployedRevisions = new ArrayList<>();
-                for (APIRevision apiRevision : apiRevisions) {
-                    if (apiRevision.getApiRevisionDeploymentList().isEmpty()) {
-                        apiProductNotDeployedRevisions.add(apiRevision);
-                    }
-                }
-                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiProductNotDeployedRevisions);
-            } else {
-                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
-            }
+            apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(
+                    ApiProductsApiServiceImplUtils.getAPIRevisionListDTO(query, apiRevisions));
             return Response.ok().entity(apiRevisionListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding retrieving API Revision for API Product id : " + apiProductId
@@ -960,7 +948,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
             }
         }
-        Map<String, Environment> environments = APIUtil.getEnvironments();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (allEnvironments) {
             apiRevisionDeployments = apiProvider.getAPIRevisionDeploymentList(revisionId);
@@ -1040,5 +1029,101 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 fromAPIRevisionDeploymenttoDTO(apiRevisionDeploymentsResponse);
         Response.Status status = Response.Status.OK;
         return Response.status(status).entity(apiRevisionDeploymentDTO).build();
+    }
+
+    @Override
+    public Response changeAPIProductLifecycle(String action, String apiProductId, String lifecycleChecklist,
+                                              String ifMatch, MessageContext messageContext)
+            throws APIManagementException {
+
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        ApiTypeWrapper productWrapper = new ApiTypeWrapper(apiProvider.getAPIProductbyUUID(apiProductId, organization));
+        APIStateChangeResponse stateChangeResponse = PublisherCommonUtils.changeApiOrApiProductLifecycle(action,
+                productWrapper, lifecycleChecklist, organization);
+
+        LifecycleStateDTO stateDTO = getLifecycleState(apiProductId, organization);
+        WorkflowResponseDTO workflowResponseDTO = APIMappingUtil.toWorkflowResponseDTO(stateDTO, stateChangeResponse);
+        return Response.ok().entity(workflowResponseDTO).build();
+    }
+
+    @Override
+    public Response getAPIProductLifecycleHistory(String apiProductId, String ifNoneMatch,
+                                                  MessageContext messageContext) {
+        try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIProduct product;
+            APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiProductId);
+            if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                product = apiProvider.getAPIProductbyUUID(apiRevision.getApiUUID(), organization);
+            } else {
+                product = apiProvider.getAPIProductbyUUID(apiProductId, organization);
+            }
+            return Response.ok().entity(PublisherCommonUtils.getLifecycleHistoryDTO(product.getUuid(), apiProvider))
+                    .build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving the " +
+                        "lifecycle history of the API Product with id : " + apiProductId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving the lifecycle history of  API Product with id : "
+                        + apiProductId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Response getAPIProductLifecycleState(String apiProductId, String ifNoneMatch,
+                                                MessageContext messageContext) throws APIManagementException {
+
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        LifecycleStateDTO lifecycleStateDTO = getLifecycleState(apiProductId, organization);
+        return Response.ok().entity(lifecycleStateDTO).build();
+    }
+
+    private LifecycleStateDTO getLifecycleState(String apiProductId, String organization) {
+
+        try {
+            APIProductIdentifier productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId,
+                    organization);
+            return PublisherCommonUtils.getLifecycleStateInformation(productIdentifier, organization);
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving the lifecycle " +
+                        "state information of API Product with id : " + apiProductId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving the lifecycle state information of the API Product with" +
+                        " " + "id : " + apiProductId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Response deleteAPIProductLifecycleStatePendingTasks(String apiProductId, MessageContext messageContext)
+            throws APIManagementException {
+
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIProductIdentifier productIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
+            if (productIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with UUID: "
+                        + apiProductId, ExceptionCodes.from(ExceptionCodes.API_PRODUCT_NOT_FOUND, apiProductId));
+            }
+            apiProvider.deleteWorkflowTask(productIdentifier);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while deleting task ";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 }

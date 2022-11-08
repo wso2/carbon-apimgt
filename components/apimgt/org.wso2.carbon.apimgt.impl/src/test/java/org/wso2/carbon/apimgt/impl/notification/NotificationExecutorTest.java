@@ -16,21 +16,29 @@
 
 package org.wso2.carbon.apimgt.impl.notification;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.notification.util.NotificationExecutorWrapper;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 import java.util.Properties;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({APIUtil.class})
 public class NotificationExecutorTest {
     private Registry registry;
-    private Resource resource;
     private NotificationExecutor notificationExecutor;
     private final String TENANT_DOMAIN = "carbon.super";
     private final int TENANT_ID = -1234;
@@ -54,23 +62,21 @@ public class NotificationExecutorTest {
     public void setup() {
         registry = Mockito.mock(Registry.class);
         notificationExecutor = new NotificationExecutorWrapper(registry);
+        PowerMockito.mockStatic(APIUtil.class);
     }
 
 
     @Test
-    public void testShouldSendNotificationWhenConfigurationExists() throws RegistryException {
+    public void testShouldSendNotificationWhenConfigurationExists() throws Exception {
         NotificationDTO notificationDTO = new NotificationDTO(new Properties(), NotifierConstants
                 .NOTIFICATION_TYPE_NEW_VERSION);
         notificationDTO.setTenantDomain(TENANT_DOMAIN);
         notificationDTO.setTenantID(TENANT_ID);
         Notifier notifier = Mockito.mock(Notifier.class);
-        resource = Mockito.mock(Resource.class);
-
         Mockito.doNothing().when(notifier).run();
-        Mockito.when(registry.resourceExists(Mockito.anyString())).thenReturn(true);
-        Mockito.when(resource.getContent()).thenReturn(validNotifierConf.getBytes());
-        Mockito.when(registry.get(Mockito.anyString())).thenReturn(resource);
-
+        PowerMockito.when(APIUtil.class, "getTenantConfig", TENANT_DOMAIN).thenReturn(new JSONParser().parse(validNotifierConf));
+        PowerMockito.when(APIUtil.class,"getClassInstance","org.wso2.carbon.apimgt.impl.notification" +
+                ".NewAPIVersionEmailNotifier").thenReturn(notifier);
         try {
             notificationExecutor.sendAsyncNotifications(notificationDTO);
         } catch (NotificationException e) {
@@ -79,13 +85,14 @@ public class NotificationExecutorTest {
     }
 
     @Test
-    public void testShouldNotThrowExceptionWhenConfigurationNotFound() throws RegistryException {
+    public void testShouldNotThrowExceptionWhenConfigurationNotFound() throws Exception {
         NotificationDTO notificationDTO = new NotificationDTO(new Properties(), NotifierConstants
                 .NOTIFICATION_TYPE_NEW_VERSION);
         notificationDTO.setTenantID(TENANT_ID);
-
-        Mockito.when(registry.resourceExists(Mockito.anyString())).thenReturn(false);
-
+        notificationDTO.setTenantDomain(TENANT_DOMAIN);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(NotifierConstants.Notifications_KEY,new JSONArray());
+        PowerMockito.when(APIUtil.class, "getTenantConfig", TENANT_DOMAIN).thenReturn(jsonObject);
         try {
             notificationExecutor.sendAsyncNotifications(notificationDTO);
         } catch (NotificationException e) {
@@ -94,18 +101,16 @@ public class NotificationExecutorTest {
     }
 
     @Test
-    public void testShouldNotThrowExceptionWhenNotificationTypeNotRegistered() throws RegistryException {
+    public void testShouldNotThrowExceptionWhenNotificationTypeNotRegistered() throws Exception {
         NotificationDTO notificationDTO = new NotificationDTO(new Properties(), "new_subscription");
         notificationDTO.setTenantDomain(TENANT_DOMAIN);
         notificationDTO.setTenantID(TENANT_ID);
         Notifier notifier = Mockito.mock(Notifier.class);
-        resource = Mockito.mock(Resource.class);
 
         Mockito.doNothing().when(notifier).run();
-        Mockito.when(registry.resourceExists(Mockito.anyString())).thenReturn(true);
-        Mockito.when(resource.getContent()).thenReturn(validNotifierConf.getBytes());
-        Mockito.when(registry.get(Mockito.anyString())).thenReturn(resource);
-
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(NotifierConstants.Notifications_KEY,new JSONArray());
+        PowerMockito.when(APIUtil.class, "getTenantConfig", TENANT_DOMAIN).thenReturn(jsonObject);
         try {
             notificationExecutor.sendAsyncNotifications(notificationDTO);
         } catch (NotificationException e) {
@@ -114,18 +119,15 @@ public class NotificationExecutorTest {
     }
 
     @Test
-    public void testShouldNotThrowExceptionWhenNotifierNotDefined() throws RegistryException {
+    public void testShouldNotThrowExceptionWhenNotifierNotDefined() throws Exception {
         NotificationDTO notificationDTO = new NotificationDTO(new Properties(), NotifierConstants
                 .NOTIFICATION_TYPE_NEW_VERSION);
         notificationDTO.setTenantDomain(TENANT_DOMAIN);
         notificationDTO.setTenantID(TENANT_ID);
         Notifier notifier = Mockito.mock(Notifier.class);
-        resource = Mockito.mock(Resource.class);
 
         Mockito.doNothing().when(notifier).run();
-        Mockito.when(registry.resourceExists(Mockito.anyString())).thenReturn(true);
-        Mockito.when(resource.getContent()).thenReturn(invalidNotifierConf.getBytes());
-        Mockito.when(registry.get(Mockito.anyString())).thenReturn(resource);
+        PowerMockito.when(APIUtil.class, "getTenantConfig", TENANT_DOMAIN).thenReturn(new JSONParser().parse(invalidNotifierConf));
 
         try {
             notificationExecutor.sendAsyncNotifications(notificationDTO);
@@ -135,18 +137,15 @@ public class NotificationExecutorTest {
     }
 
     @Test(expected = NotificationException.class)
-    public void testShouldThrowExceptionsWhenRegistryErrorOccurs() throws RegistryException, NotificationException {
+    public void testShouldThrowExceptionsWhenRegistryErrorOccurs() throws Exception {
         NotificationDTO notificationDTO = new NotificationDTO(new Properties(), NotifierConstants
                 .NOTIFICATION_TYPE_NEW_VERSION);
         notificationDTO.setTenantDomain(TENANT_DOMAIN);
         notificationDTO.setTenantID(TENANT_ID);
         Notifier notifier = Mockito.mock(Notifier.class);
-        resource = Mockito.mock(Resource.class);
 
         Mockito.doNothing().when(notifier).run();
-        Mockito.when(registry.resourceExists(Mockito.anyString())).thenThrow(RegistryException.class);
-        Mockito.when(resource.getContent()).thenReturn(validNotifierConf.getBytes());
-        Mockito.when(registry.get(Mockito.anyString())).thenReturn(resource);
+        PowerMockito.when(APIUtil.class, "getTenantConfig", TENANT_DOMAIN).thenThrow(APIManagementException.class);
 
         notificationExecutor.sendAsyncNotifications(notificationDTO);
         Assert.fail("Should throw an exception");

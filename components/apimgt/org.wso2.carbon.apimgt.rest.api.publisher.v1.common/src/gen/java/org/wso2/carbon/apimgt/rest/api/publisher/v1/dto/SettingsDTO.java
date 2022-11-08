@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberContactAttributeDTO;
 import javax.validation.constraints.*;
 
 
@@ -28,10 +29,12 @@ public class SettingsDTO   {
     private List<EnvironmentDTO> environment = new ArrayList<EnvironmentDTO>();
     private List<String> scopes = new ArrayList<String>();
     private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<MonetizationAttributeDTO>();
+    private List<SubscriberContactAttributeDTO> subscriberContactAttributes = new ArrayList<SubscriberContactAttributeDTO>();
     private Object securityAuditProperties = null;
     private Boolean externalStoresEnabled = null;
     private Boolean docVisibilityEnabled = null;
     private Boolean crossTenantSubscriptionEnabled = false;
+    private String authorizationHeader = null;
 
   /**
    * The Developer Portal URL
@@ -106,6 +109,24 @@ public class SettingsDTO   {
 
   /**
    **/
+  public SettingsDTO subscriberContactAttributes(List<SubscriberContactAttributeDTO> subscriberContactAttributes) {
+    this.subscriberContactAttributes = subscriberContactAttributes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("subscriberContactAttributes")
+  public List<SubscriberContactAttributeDTO> getSubscriberContactAttributes() {
+    return subscriberContactAttributes;
+  }
+  public void setSubscriberContactAttributes(List<SubscriberContactAttributeDTO> subscriberContactAttributes) {
+    this.subscriberContactAttributes = subscriberContactAttributes;
+  }
+
+  /**
+   **/
   public SettingsDTO securityAuditProperties(Object securityAuditProperties) {
     this.securityAuditProperties = securityAuditProperties;
     return this;
@@ -176,6 +197,24 @@ public class SettingsDTO   {
     this.crossTenantSubscriptionEnabled = crossTenantSubscriptionEnabled;
   }
 
+  /**
+   * Authorization Header
+   **/
+  public SettingsDTO authorizationHeader(String authorizationHeader) {
+    this.authorizationHeader = authorizationHeader;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "authorization", value = "Authorization Header")
+  @JsonProperty("authorizationHeader")
+  public String getAuthorizationHeader() {
+    return authorizationHeader;
+  }
+  public void setAuthorizationHeader(String authorizationHeader) {
+    this.authorizationHeader = authorizationHeader;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -190,15 +229,17 @@ public class SettingsDTO   {
         Objects.equals(environment, settings.environment) &&
         Objects.equals(scopes, settings.scopes) &&
         Objects.equals(monetizationAttributes, settings.monetizationAttributes) &&
+        Objects.equals(subscriberContactAttributes, settings.subscriberContactAttributes) &&
         Objects.equals(securityAuditProperties, settings.securityAuditProperties) &&
         Objects.equals(externalStoresEnabled, settings.externalStoresEnabled) &&
         Objects.equals(docVisibilityEnabled, settings.docVisibilityEnabled) &&
-        Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled);
+        Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled) &&
+        Objects.equals(authorizationHeader, settings.authorizationHeader);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled);
+    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, authorizationHeader);
   }
 
   @Override
@@ -210,10 +251,12 @@ public class SettingsDTO   {
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    monetizationAttributes: ").append(toIndentedString(monetizationAttributes)).append("\n");
+    sb.append("    subscriberContactAttributes: ").append(toIndentedString(subscriberContactAttributes)).append("\n");
     sb.append("    securityAuditProperties: ").append(toIndentedString(securityAuditProperties)).append("\n");
     sb.append("    externalStoresEnabled: ").append(toIndentedString(externalStoresEnabled)).append("\n");
     sb.append("    docVisibilityEnabled: ").append(toIndentedString(docVisibilityEnabled)).append("\n");
     sb.append("    crossTenantSubscriptionEnabled: ").append(toIndentedString(crossTenantSubscriptionEnabled)).append("\n");
+    sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
     sb.append("}");
     return sb.toString();
   }

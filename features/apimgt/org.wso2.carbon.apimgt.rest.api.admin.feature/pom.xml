@@ -21,14 +21,14 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.0.294-SNAPSHOT</version>
+        <version>9.26.68-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.rest.api.admin.feature</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - API Manager Admin Rest API Feature</name>
+    <name>WSO2 Carbon - API Admin Rest API Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains required bundles for API Manager Rest API for API Admin Portal functionality
     </description>
@@ -66,7 +66,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
-            <artifactId>jempbox</artifactId>
+            <artifactId>xmpbox</artifactId>
         </dependency>
         <dependency>
             <groupId>net.sf.ehcache.wso2</groupId>
@@ -288,7 +288,7 @@
                                 <importBundleDef>org.wso2.orbit.io.swagger.v3:swagger-parser:${swagger.parser.v3.version}</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:pdfbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:fontbox:${pdfbox.version}</importBundleDef>
-                                <importBundleDef>org.apache.pdfbox:jempbox:${pdfbox.version}</importBundleDef>
+                                <importBundleDef>org.apache.pdfbox:xmpbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>
                                     org.wso2.orbit.com.github.dblock.waffle:waffle-jna:${waffle-jna.version}
                                 </importBundleDef>

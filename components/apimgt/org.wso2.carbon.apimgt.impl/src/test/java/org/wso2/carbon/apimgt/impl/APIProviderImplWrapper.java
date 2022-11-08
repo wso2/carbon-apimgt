@@ -21,10 +21,7 @@ package org.wso2.carbon.apimgt.impl;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
@@ -34,9 +31,6 @@ import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.List;
 import java.util.Map;
@@ -99,40 +93,9 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     }
 
     @Override
-    protected void registerCustomQueries(UserRegistry registry, String username)
-            throws RegistryException, APIManagementException {
-        // do nothing
-    }
-
-    @Override
-    protected String createAPI(API api) throws APIManagementException {
-
-        this.api = api;
-        return super.createAPI(api);
-    }
-
-    @Override
-    public void makeAPIKeysForwardCompatible(API api) throws APIManagementException {
-        //do nothing
-    }
-
-    @Override
-    public List<Documentation> getAllDocumentation(Identifier apiId) throws APIManagementException {
-
-        return documentationList;
-    }
-
-    @Override
     protected int getTenantId(String tenantDomain) {
 
         return -1234;
-    }
-
-    @Override
-    public String addResourceFile(Identifier identifier, String resourcePath, ResourceFile resourceFile)
-            throws APIManagementException {
-
-        return null;
     }
 
     @Override
@@ -155,39 +118,6 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     public boolean hasValidLength(String field, int maxLength) {
 
         return true;
-    }
-
-    @Override
-    public void updateWsdlFromUrl(API api) throws APIManagementException {
-        // do nothing
-    }
-
-    protected String getTenantConfigContent() throws RegistryException, UserStoreException {
-
-        return "{\"EnableMonetization\":false,\"IsUnlimitedTierPaid\":false,\"ExtensionHandlerPosition\":\"bottom\","
-                +
-                "\"RESTAPIScopes\":{\"Scope\":[{\"Name\":\"apim:api_publish\",\"Roles\":\"admin,Internal/publisher\"},"
-                + "{\"Name\":\"apim:api_create\",\"Roles\":\"admin,Internal/creator\"},{\"Name\":\"apim:api_view\","
-                + "\"Roles\":\"admin,Internal/publisher,Internal/creator\"},{\"Name\":\"apim:subscribe\",\"Roles\":"
-                + "\"admin,Internal/subscriber\"},{\"Name\":\"apim:tier_view\",\"Roles\":\"admin,Internal/publisher,"
-                + "Internal/creator\"},{\"Name\":\"apim:tier_manage\",\"Roles\":\"admin\"},{\"Name\":\"apim:bl_view\","
-                + "\"Roles\":\"admin\"},{\"Name\":\"apim:bl_manage\",\"Roles\":\"admin\"},{\"Name\":"
-                + "\"apim:subscription_view\",\"Roles\":\"admin,Internal/creator\"},{\"Name\":"
-                + "\"apim:subscription_block\",\"Roles\":\"admin,Internal/creator\"},{\"Name\":"
-                + "\"apim:mediation_policy_view\",\"Roles\":\"admin\"},{\"Name\":\"apim:mediation_policy_create\","
-                + "\"Roles\":\"admin\"},{\"Name\":\"apim:api_workflow_approve\",\"Roles\":\"admin\"},{\"Name\":"
-                + "\"apim:api_workflow_view\",\"Roles\":\"admin\"}]},\"NotificationsEnabled\":"
-                + "\"false\",\"Notifications\":[{\"Type\":\"new_api_version\",\"Notifiers\":[{\"Class\":"
-                +
-                "\"org.wso2.carbon.apimgt.impl.notification.NewAPIVersionEmailNotifier\",\"ClaimsRetrieverImplClass\":"
-                +
-                "\"org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever\",\"Title\":\"Version $2 of $1 Released\","
-                + "\"Template\":\" <html> <body> <h3 style=\\\"color:Black;\\\">We’re happy to announce the arrival of"
-                + " the next major version $2 of $1 API which is now available in Our API Store.</h3><a href=\\\"https:"
-                + "//localhost:9443/store\\\">Click here to Visit WSO2 API Store</a></body></html>\"}]}],"
-                + "\"DefaultRoles\":{\"PublisherRole\":{\"CreateOnTenantLoad\":true,\"RoleName\":"
-                + "\"Internal/publisher\"},\"CreatorRole\":{\"CreateOnTenantLoad\":true,\"RoleName\":"
-                + "\"Internal/creator\"},\"SubscriberRole\":{\"CreateOnTenantLoad\":true}}}";
     }
 
 }

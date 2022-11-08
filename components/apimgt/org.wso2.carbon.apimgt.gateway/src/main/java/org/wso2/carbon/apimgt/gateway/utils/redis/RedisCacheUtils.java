@@ -26,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 
 import java.io.IOException;
 import java.util.Map;
@@ -38,37 +37,15 @@ public class RedisCacheUtils {
 
     private static final Log log = LogFactory.getLog(RedisCacheUtils.class);
 
-    private static JedisPool jedisPool;
+    private  JedisPool jedisPool;
 
     /**
-     * RedisCacheUtils constructor to create new JedisPool instance
-     * with a Redis Server
+     * Constructor to create Jedis Pool.
      *
-     * @param host Host name of the Redis Server
-     * @param port Port used by the Redis Server
+     * @param jedisPool
      */
-    public RedisCacheUtils(String host, int port) {
-
-        jedisPool = new JedisPool(new JedisPoolConfig(), host, port);
-    }
-
-    /**
-     * RedisCacheUtils constructor to create new JedisPool instance
-     * with a Redis Server requiring authorization
-     *
-     * @param host     Host name of the Redis Server
-     * @param port     Port used by the Redis Server
-     * @param timeout  Timeout of the Redis Server connection
-     * @param username Username of the user of the Redis Server
-     * @param password Password of the user of the Redis Server
-     * @param database Database ID in the Redis Server
-     * @param ssl      Boolean value to check if ssl is enabled or not
-     */
-    public RedisCacheUtils(String host, int port, int timeout, String username, char[] password,
-                           int database, boolean ssl) {
-
-        jedisPool = new JedisPool(new JedisPoolConfig(), host, port,
-                timeout, username, String.valueOf(password), database, ssl);
+    public RedisCacheUtils(JedisPool jedisPool) {
+        this.jedisPool = jedisPool;
     }
 
     /**
@@ -267,11 +244,4 @@ public class RedisCacheUtils {
         return null;
     }
 
-    /**
-     * Drop the Redis Server connection
-     */
-    public void stopRedisCacheSession() {
-
-        jedisPool.destroy();
-    }
 }

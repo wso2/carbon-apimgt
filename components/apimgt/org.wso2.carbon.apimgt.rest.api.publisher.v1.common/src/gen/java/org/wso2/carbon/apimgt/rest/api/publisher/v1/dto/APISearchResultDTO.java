@@ -24,10 +24,12 @@ public class APISearchResultDTO extends SearchResultDTO  {
   
     private String description = null;
     private String context = null;
+    private String contextTemplate = null;
     private String version = null;
     private String provider = null;
     private String status = null;
     private String thumbnailUri = null;
+    private Boolean advertiseOnly = null;
 
   /**
    * A brief description about the API
@@ -63,6 +65,24 @@ public class APISearchResultDTO extends SearchResultDTO  {
   }
   public void setContext(String context) {
     this.context = context;
+  }
+
+  /**
+   * The templated context of the API
+   **/
+  public APISearchResultDTO contextTemplate(String contextTemplate) {
+    this.contextTemplate = contextTemplate;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "CalculatorAPI/{version}", value = "The templated context of the API")
+  @JsonProperty("contextTemplate")
+  public String getContextTemplate() {
+    return contextTemplate;
+  }
+  public void setContextTemplate(String contextTemplate) {
+    this.contextTemplate = contextTemplate;
   }
 
   /**
@@ -136,6 +156,23 @@ public class APISearchResultDTO extends SearchResultDTO  {
     this.thumbnailUri = thumbnailUri;
   }
 
+  /**
+   **/
+  public APISearchResultDTO advertiseOnly(Boolean advertiseOnly) {
+    this.advertiseOnly = advertiseOnly;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("advertiseOnly")
+  public Boolean isAdvertiseOnly() {
+    return advertiseOnly;
+  }
+  public void setAdvertiseOnly(Boolean advertiseOnly) {
+    this.advertiseOnly = advertiseOnly;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -148,15 +185,17 @@ public class APISearchResultDTO extends SearchResultDTO  {
     APISearchResultDTO apISearchResult = (APISearchResultDTO) o;
     return Objects.equals(description, apISearchResult.description) &&
         Objects.equals(context, apISearchResult.context) &&
+        Objects.equals(contextTemplate, apISearchResult.contextTemplate) &&
         Objects.equals(version, apISearchResult.version) &&
         Objects.equals(provider, apISearchResult.provider) &&
         Objects.equals(status, apISearchResult.status) &&
-        Objects.equals(thumbnailUri, apISearchResult.thumbnailUri);
+        Objects.equals(thumbnailUri, apISearchResult.thumbnailUri) &&
+        Objects.equals(advertiseOnly, apISearchResult.advertiseOnly);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, version, provider, status, thumbnailUri);
+    return Objects.hash(description, context, contextTemplate, version, provider, status, thumbnailUri, advertiseOnly);
   }
 
   @Override
@@ -166,10 +205,12 @@ public class APISearchResultDTO extends SearchResultDTO  {
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
+    sb.append("    contextTemplate: ").append(toIndentedString(contextTemplate)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
+    sb.append("    advertiseOnly: ").append(toIndentedString(advertiseOnly)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -23,16 +23,13 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Tag;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.TagsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TagListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.TagMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -47,8 +44,8 @@ public class TagsApiServiceImpl implements TagsApiService {
     public Response tagsGet(Integer limit, Integer offset, String xWSO2Tenant, String ifNoneMatch,
             MessageContext messageContext) {
         //pre-processing
-        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
-        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        limit = limit != null ? limit : RestApiConstants.TAG_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.TAG_OFFSET_DEFAULT;
 
         Set<Tag> tagSet;
         List<Tag> tagList = new ArrayList<>();

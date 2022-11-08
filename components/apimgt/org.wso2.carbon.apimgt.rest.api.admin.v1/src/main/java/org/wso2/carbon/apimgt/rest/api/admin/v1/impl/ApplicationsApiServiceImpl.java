@@ -28,7 +28,6 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -63,7 +62,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         try {
             apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(owner);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
-            boolean applicationUpdated = apiConsumer.updateApplicationOwner(owner, application);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            boolean applicationUpdated = apiConsumer.updateApplicationOwner(owner, organization, application);
             if (applicationUpdated) {
                 return Response.ok().build();
             } else {
@@ -136,8 +136,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 if (StringUtils.isEmpty(tenantDomain)) {
                     tenantDomain = MultitenantUtils.getTenantDomain(user);
                 }
-                RestApiUtil.handleMigrationSpecificPermissionViolations(tenantDomain,
-                        RestApiCommonUtil.getLoggedInUsername());
                 APIAdmin apiAdmin = new APIAdminImpl();
                 allMatchedApps = apiAdmin.getAllApplicationsOfTenantForMigration(tenantDomain);
             }

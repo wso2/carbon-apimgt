@@ -31,6 +31,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.jms.listener.utils.JMSListenerStartupShutdownListener;
 import org.wso2.carbon.core.ServerShutdownHandler;
@@ -60,6 +61,8 @@ public class JMSListenerComponent {
                 .registerService(ServerStartupObserver.class, jmsListenerStartupShutdownListener, null);
         registration = context.getBundleContext()
                 .registerService(ServerShutdownHandler.class, jmsListenerStartupShutdownListener, null);
+        registration = context.getBundleContext().registerService(JMSListenerShutDownService.class,
+                jmsListenerStartupShutdownListener, null);
     }
 
 

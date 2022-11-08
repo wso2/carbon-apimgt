@@ -79,6 +79,11 @@ public class XMLAnalyzer implements APIMThreatAnalyzer {
         return enabled;
     }
 
+    @Override
+    public void clearConfiguration() {
+        factory = WstxInputFactory.newInstance();
+    }
+
     /**
      * @param in xml payload
      * @throws APIMThreatAnalyzerException

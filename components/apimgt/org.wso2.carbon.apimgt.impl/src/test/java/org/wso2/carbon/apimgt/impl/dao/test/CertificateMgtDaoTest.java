@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.impl.dao.test;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.tomcat.dbcp.dbcp2.BasicDataSource;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -82,7 +82,7 @@ public class CertificateMgtDaoTest {
                     "d7HmgeAeiDPvUpZWSvuJPg81G/rC1Gu9yFuiR8HjzcTDRVMepkefA3IpHwYvoQGjeNC/GFGAH/9jih" +
                     "rqw8anwwPALocNSvzwB148w/viIOaopfrmMqBlBWAwUf2wYCU6W3rhhg7H6Zf2cTweLe4v57GVlOWt" +
                     "YOXlgJzeUuc=";
-    private APIIdentifier apiIdentifier = new APIIdentifier("CERTIFICATE", "API1", "1.0.0");
+    private APIIdentifier apiIdentifier = new APIIdentifier("CERTIFICATE", "CERTAPI", "1.0.0");
 
     @Before
     public void setUp() throws APIManagerDatabaseException, APIManagementException, SQLException,

@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -54,7 +53,7 @@ public class TenantsApiServiceImpl implements TenantsApiService {
      */
     @Override
     public Response getTenantExistence(String tenantDomain, MessageContext messageContext) {
-        Boolean isTenantExist = false;
+        boolean isTenantExist = false;
         if (tenantDomain != null) {
             try {
                 isTenantExist = APIUtil.isTenantAvailable(tenantDomain);
@@ -88,15 +87,15 @@ public class TenantsApiServiceImpl implements TenantsApiService {
         paginationDTO.setOffset(paginationOffset);
         paginationDTO.setLimit(paginationLimit);
 
-        if (!state.equalsIgnoreCase(TENANT_STATE_ACTIVE) && !state.toString()
+        if (!state.equalsIgnoreCase(TENANT_STATE_ACTIVE) && !state
                 .equalsIgnoreCase(TENANT_STATE_INACTIVE)) {
             RestApiUtil.handleBadRequest("Invalid tenant state", log);
         }
 
-        String status = TENANT_STATE_ACTIVE.equalsIgnoreCase(state.toString()) ? TENANT_STATE_ACTIVE : TENANT_STATE_INACTIVE;
+        String status = TENANT_STATE_ACTIVE.equalsIgnoreCase(state) ? TENANT_STATE_ACTIVE : TENANT_STATE_INACTIVE;
         Set<String> tenantDomains = null;
         try {
-            tenantDomains = APIUtil.getTenantDomainsByState(state.toString());
+            tenantDomains = APIUtil.getTenantDomainsByState(state);
             for (String domain : tenantDomains) {
                 TenantDTO tenantDTO = new TenantDTO();
                 tenantDTO.setDomain(domain);

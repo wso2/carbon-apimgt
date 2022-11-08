@@ -8,7 +8,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
@@ -167,7 +166,10 @@ public class DataProcessAndPublishingAgent implements Runnable {
         }
 
         if (authenticationContext.isContentAwareTierPresent() || isVerbInfoContentAware) {
-            Object contentLength = transportHeaderMap.get(APIThrottleConstants.CONTENT_LENGTH);
+            Object contentLength = null;
+            if (transportHeaderMap != null) {
+                contentLength = transportHeaderMap.get(APIThrottleConstants.CONTENT_LENGTH);
+            }
             if (contentLength != null) {
                 log.debug("Content lenght found in the request. Using it as the message size..");
                 messageSizeInBytes  = Long.parseLong(contentLength.toString());

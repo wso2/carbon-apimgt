@@ -17,7 +17,14 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 /**
@@ -37,15 +44,22 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
 
     UserAwareAPIConsumer() throws APIManagementException {
         super();
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        isAccessControlRestrictionEnabled = Boolean
-                .parseBoolean(config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS));
+        readAccessControlConfig();
     }
 
-    UserAwareAPIConsumer(String username, APIMRegistryService registryService) throws APIManagementException {
-        super(username, registryService);
+    UserAwareAPIConsumer(String username) throws APIManagementException {
+        super(username);
         this.username = username;
+        readAccessControlConfig();
+    }
+
+    UserAwareAPIConsumer(String username, String organization) throws APIManagementException {
+        super(username, organization);
+        this.username = username;
+        readAccessControlConfig();
+    }
+
+    private void readAccessControlConfig() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         isAccessControlRestrictionEnabled = Boolean

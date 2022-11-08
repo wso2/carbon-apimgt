@@ -50,11 +50,12 @@ import javax.ws.rs.core.Response;
 public class ScopesApiServiceImpl implements ScopesApiService {
 
     private static final Log log = LogFactory.getLog(ScopesApiServiceImpl.class);
+    public static final String ID_CANNOT_BE_NULL_OR_EMPTY = "Scope Id cannot be null or empty";
 
     /**
      * Check whether the given scope already used in APIs.
      *
-     * @param name           Base64 URL encoded form of scope name -Base64URLEncode{scope name}
+     * @param name Base64 URL encoded form of scope name -Base64URLEncode{scope name}
      * @param messageContext
      * @return boolean to indicate existence
      */
@@ -136,7 +137,7 @@ public class ScopesApiServiceImpl implements ScopesApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (StringUtils.isEmpty(scopeId)) {
-            throw new APIManagementException("Scope Id cannot be null or empty",
+            throw new APIManagementException(ID_CANNOT_BE_NULL_OR_EMPTY,
                     ExceptionCodes.SHARED_SCOPE_ID_NOT_SPECIFIED);
         }
         Scope existingScope = apiProvider.getSharedScopeByUUID(scopeId, tenantDomain);
@@ -162,7 +163,7 @@ public class ScopesApiServiceImpl implements ScopesApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (StringUtils.isEmpty(scopeId)) {
-            throw new APIManagementException("Scope Id cannot be null or empty",
+            throw new APIManagementException(ID_CANNOT_BE_NULL_OR_EMPTY,
                     ExceptionCodes.SHARED_SCOPE_ID_NOT_SPECIFIED);
         }
         Scope scope = apiProvider.getSharedScopeByUUID(scopeId, tenantDomain);
@@ -177,7 +178,7 @@ public class ScopesApiServiceImpl implements ScopesApiService {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         if (StringUtils.isEmpty(scopeId)) {
-            throw new APIManagementException("Scope Id cannot be null or empty",
+            throw new APIManagementException(ID_CANNOT_BE_NULL_OR_EMPTY,
                     ExceptionCodes.SHARED_SCOPE_ID_NOT_SPECIFIED);
         }
         SharedScopeUsage sharedScopeUsage = apiProvider.getSharedScopeUsage(scopeId, tenantId);
@@ -226,7 +227,7 @@ public class ScopesApiServiceImpl implements ScopesApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (StringUtils.isEmpty(scopeId)) {
-            throw new APIManagementException("Shared Scope Id cannot be null or empty",
+            throw new APIManagementException("Shared " + ID_CANNOT_BE_NULL_OR_EMPTY,
                     ExceptionCodes.SHARED_SCOPE_ID_NOT_SPECIFIED);
         }
         if (StringUtils.isEmpty(body.getDisplayName())) {

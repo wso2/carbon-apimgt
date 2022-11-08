@@ -63,4 +63,20 @@ public interface Identifier {
      * @return id
      */
     int getId();
+
+    /**
+     * UUID of the identifier
+     * @return uuid
+     */
+    void setUuid(String uuid);
+
+    /**
+     * Internal API Id
+     * @return id
+     */
+    void setId(int id);
+
+    void setOrganization(String organization);
+
+    String getOrganization();
 }

@@ -18,9 +18,12 @@
 
 package org.wso2.carbon.apimgt.notification;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.keymgt.ExpiredJWTCleaner;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
 import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
 import org.wso2.carbon.apimgt.notification.event.TokenRevocationEvent;
@@ -44,14 +47,29 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
         Properties properties = new Properties();
         properties.setProperty(APIConstants.NotificationEvent.EVENT_ID, tokenRevocationEvent.getEventId());
         properties.put(APIConstants.NotificationEvent.CONSUMER_KEY, tokenRevocationEvent.getConsumerKey());
+        if (StringUtils.isBlank(tokenRevocationEvent.getTokenType())) {
+            tokenRevocationEvent.setTokenType(APIConstants.NotificationEvent.APPLICATION_TOKEN_TYPE_OAUTH2);
+        }
         properties.put(APIConstants.NotificationEvent.TOKEN_TYPE, tokenRevocationEvent.getTokenType());
         properties.put(APIConstants.NotificationEvent.TENANT_ID, tokenRevocationEvent.getTenantId());
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tokenRevocationEvent.getTenantDomain());
         ApiMgtDAO.getInstance().addRevokedJWTSignature(tokenRevocationEvent.getEventId(),
                 tokenRevocationEvent.getAccessToken(), tokenRevocationEvent.getTokenType(),
                 tokenRevocationEvent.getExpiryTime(), tokenRevocationEvent.getTenantId());
+        Application application = ApiMgtDAO.getInstance()
+                .getApplicationByClientId(tokenRevocationEvent.getConsumerKey());
+        if (application != null) {
+            String orgId = application.getOrganization();
+            properties.put(APIConstants.NotificationEvent.ORG_ID, orgId);
+        }
+
         revocationRequestPublisher.publishRevocationEvents(tokenRevocationEvent.getAccessToken(),
                 tokenRevocationEvent.getExpiryTime(), properties);
+
+        // Cleanup expired revoked tokens from db.
+        Runnable expiredJWTCleaner = new ExpiredJWTCleaner();
+        Thread cleanupThread = new Thread(expiredJWTCleaner);
+        cleanupThread.start();
         return true;
     }
 }

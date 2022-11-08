@@ -85,7 +85,7 @@ public class APIKeyMgtDataHolder {
                     } else {
                         try {
                             tokenGenerator = (TokenGenerator) APIUtil
-                                    .getClassForName(jwtConfigurationDto.getJwtGeneratorImplClass()).newInstance();
+                                    .getClassInstance(jwtConfigurationDto.getJwtGeneratorImplClass());
                         } catch (InstantiationException e) {
                             log.error(
                                     "Error while instantiating class " + jwtConfigurationDto.getJwtGeneratorImplClass(),

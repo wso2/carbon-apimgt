@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Contains some context information related to an authenticated request. This can be used
@@ -50,6 +51,19 @@ public class AuthenticationContext {
     private String apiPublisher;
     private String apiVersion;
     private String issuer;
+    private List<String> requestTokenScopes;
+    private int graphQLMaxDepth;
+    private int graphQLMaxComplexity;
+    private String accessToken;
+    private Set<String> applicationGroupIds;
+
+    public List<String> getRequestTokenScopes() {
+        return requestTokenScopes;
+    }
+
+    public void setRequestTokenScopes(List<String> requestTokenScopes) {
+        this.requestTokenScopes = requestTokenScopes;
+    }
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
@@ -58,7 +72,7 @@ public class AuthenticationContext {
     public void setThrottlingDataList(List<String> throttlingDataList) {
         this.throttlingDataList = throttlingDataList;
     }
-    //Following throttle data list can be use to hold throttle data and api level throttle key
+    //Following throttle data list can be used to hold throttle data and api level throttle key
     //should be its first element.
 
     public boolean isContentAwareTierPresent() {
@@ -252,5 +266,39 @@ public class AuthenticationContext {
 
     public void setApplicationUUID(String applicationUUID) {
         this.applicationUUID = applicationUUID;
+    }
+
+    public int getGraphQLMaxDepth() {
+        return graphQLMaxDepth;
+    }
+
+    public void setGraphQLMaxDepth(int graphQLMaxDepth) {
+        this.graphQLMaxDepth = graphQLMaxDepth;
+    }
+
+    public int getGraphQLMaxComplexity() {
+        return graphQLMaxComplexity;
+    }
+
+    public void setGraphQLMaxComplexity(int graphQLMaxComplexity) {
+        this.graphQLMaxComplexity = graphQLMaxComplexity;
+    }
+
+    public String getAccessToken() {
+
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+
+        this.accessToken = accessToken;
+    }
+
+    public Set<String> getApplicationGroupIds() {
+        return applicationGroupIds;
+    }
+
+    public void setApplicationGroupIds(Set<String> applicationGroupIds) {
+        this.applicationGroupIds = applicationGroupIds;
     }
 }

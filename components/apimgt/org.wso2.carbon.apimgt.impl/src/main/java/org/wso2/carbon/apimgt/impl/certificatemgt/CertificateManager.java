@@ -21,7 +21,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -84,6 +84,16 @@ public interface CertificateManager {
     boolean isConfigured();
 
     /**
+     * This method will return the Certificate Metadata object which maps to the alias and belongs to the provided
+     * tenant.
+     *
+     * @param alias : The alias to which the certificate is mapped.
+     * @param tenantId : The Id of the tenant that endpoint belongs to.
+     * @return CertificateMetadataDTO object which contains the certificate meta data.
+     */
+    CertificateMetadataDTO getCertificate(String alias, int tenantId);
+
+    /**
      * This method will return the Certificate Metadata object which maps to the endpoint and belongs to the provided
      * tenant.
      *
@@ -125,10 +135,12 @@ public interface CertificateManager {
     /**
      * Method to retrieve the properties (expiry date etc) of the certificate which matches the given alias.
      *
+     * @param tenantId : The id of the tenant.
+     * @param alias       : The alias of the certificate
      * @return : The common information of the certificate.
      * @throws APIManagementException :
      */
-    CertificateInformationDTO getCertificateInformation(String alias) throws APIManagementException;
+    CertificateInformationDTO getCertificateInformation(int tenantId, String alias) throws APIManagementException;
 
     /**
      * Method to update an existing certificate.
@@ -150,10 +162,11 @@ public interface CertificateManager {
     /**
      * Get the certificate which matches the provided alias from the trust store.
      *
+     * @param tenantId : The id of the tenant.
      * @param alias : The alias of the certificate.
      * @return : The Certificate object.
      */
-    ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException;
+    ByteArrayInputStream getCertificateContent(int tenantId, String alias) throws APIManagementException;
 
     /**
      * Method to add client certificate (i.e. Client certificate that can be used to connect the client with gateway)
@@ -168,8 +181,8 @@ public interface CertificateManager {
      * ALIAS_EXISTS_IN_TRUST_STORE : If the alias already present in the trust store,CERTIFICATE_EXPIRED : If the
      * certificate is expired.
      */
-    ResponseCode addClientCertificate(APIIdentifier apiIdentifier, String certificate, String alias, String tierName,
-            int tenantId, String organization);
+    ResponseCode addClientCertificate(Identifier apiIdentifier, String certificate, String alias, String tierName,
+                                      int tenantId, String organization);
 
     /**
      * Method to delete the client certificate from publisher node.
@@ -181,7 +194,7 @@ public interface CertificateManager {
      * INTERNAL_SERVER_ERROR: If any internal error occurred
      * CERTIFICATE_NOT_FOUND : If Certificate is not found in the trust store.
      */
-    ResponseCode deleteClientCertificateFromParentNode(APIIdentifier apiIdentifier, String alias, int tenantId);
+    ResponseCode deleteClientCertificateFromParentNode(Identifier apiIdentifier, String alias, int tenantId);
 
     /**
      * Method to add client certificate to gateway nodes.
@@ -210,7 +223,7 @@ public interface CertificateManager {
      * @return List of certificates that match the criteria.
      * @throws APIManagementException API Management Exception.
      */
-    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier,
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, Identifier apiIdentifier,
             String organization) throws APIManagementException;
 
     /**

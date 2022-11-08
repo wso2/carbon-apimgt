@@ -214,7 +214,7 @@ public abstract class AbstractKeyManager implements KeyManager {
                                 StringUtils.isNotEmpty(String.valueOf(tokenHandler.getValue()))) {
                             Pattern pattern = Pattern.compile((String) tokenHandler.getValue());
                             Matcher matcher = pattern.matcher(accessToken);
-                            canHandle = matcher.find();
+                            canHandle = matcher.matches();
                         }
                     } else if (TokenHandlingDto.TypeEnum.JWT.equals(tokenHandler.getType()) &&
                             accessToken.contains(APIConstants.DOT)) {
@@ -278,21 +278,24 @@ public abstract class AbstractKeyManager implements KeyManager {
             throws APIManagementException {
 
         String type = getType();
-        if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(type)) {
-
-            List<String> missedRequiredValues = new ArrayList<>();
-            KeyManagerConnectorConfiguration keyManagerConnectorConfiguration =
-                    ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfiguration(type);
-            if (keyManagerConnectorConfiguration != null) {
-                List<ConfigurationDto> applicationConfigurationDtoList =
-                        keyManagerConnectorConfiguration.getApplicationConfigurations();
-                Object additionalProperties =
-                        oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
+        List<String> missedRequiredValues = new ArrayList<>();
+        KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
+                .getKeyManagerConnectorConfiguration(type);
+        if (keyManagerConnectorConfiguration != null) {
+            List<ConfigurationDto> applicationConfigurationDtoList = keyManagerConnectorConfiguration
+                    .getApplicationConfigurations();
+            Object additionalProperties = oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
+            try {
                 if (additionalProperties != null) {
-                    JsonObject additionalPropertiesJson =
-                            (JsonObject) new JsonParser().parse((String) additionalProperties);
+                    JSONObject additionalPropertiesJson;
+                    if (additionalProperties instanceof JSONObject) {
+                        additionalPropertiesJson = (JSONObject) additionalProperties;
+                    } else {
+                        additionalPropertiesJson =
+                                (JSONObject) new JSONParser().parse((String) additionalProperties);
+                    }
                     for (ConfigurationDto configurationDto : applicationConfigurationDtoList) {
-                        JsonElement value = additionalPropertiesJson.get(configurationDto.getName());
+                        Object value = additionalPropertiesJson.get(configurationDto.getName());
                         if (value == null) {
                             if (configurationDto.isRequired()) {
                                 missedRequiredValues.add(configurationDto.getName());
@@ -305,10 +308,12 @@ public abstract class AbstractKeyManager implements KeyManager {
                                 ExceptionCodes.KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION);
                     }
                 }
-            } else {
-                throw new APIManagementException("Invalid Key Manager Type " + type,
-                        ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+            } catch (ParseException e) {
+                throw new APIManagementException("Error while parsing the addition properties of OAuth " +
+                        "application");
             }
+        } else {
+            throw new APIManagementException("Invalid Key Manager Type " + type, ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
         }
     }
 }

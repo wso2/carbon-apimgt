@@ -28,6 +28,9 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 
+import java.util.Collections;
+import java.util.Map;
+
 /**
  * Data provider interface to extract request data.
  */
@@ -64,4 +67,8 @@ public interface AnalyticsDataProvider {
     String getUserAgentHeader();
 
     String getEndUserIP();
+
+    default Map<String, Object> getProperties() {
+        return Collections.EMPTY_MAP;
+    }
 }

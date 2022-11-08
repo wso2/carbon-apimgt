@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.Gson;
-import org.apache.poi.ss.formula.functions.T;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
@@ -37,7 +36,6 @@ import org.mapstruct.factory.Mappers;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
@@ -57,6 +55,7 @@ public interface APIMapper {
     @Mapping(source = "availableTierNames", target = "availableTiers")
     @Mapping(source = "visibleOrganizations", target = "visibleTenants")
     @Mapping(source = "subscriptionAvailableOrgs", target = "subscriptionAvailableTenants")
+    @Mapping(source = "gatewayVendor", target = "gatewayVendor")
     API toApi(PublisherAPI api);
 
     @Mapping(source = "id.providerName", target = "providerName")
@@ -67,6 +66,7 @@ public interface APIMapper {
     @Mapping(source = "uuid", target = "id")
     @Mapping(source = "visibleTenants", target = "visibleOrganizations")
     @Mapping(source = "subscriptionAvailableTenants", target = "subscriptionAvailableOrgs")
+    @Mapping(source = "gatewayVendor", target = "gatewayVendor")
     PublisherAPI toPublisherApi(API api);
 
     @Mapping(source = "providerName", target = "id.providerName")

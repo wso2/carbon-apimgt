@@ -38,7 +38,8 @@ public class SubscriptionDTO   {
         UNBLOCKED("UNBLOCKED"),
         ON_HOLD("ON_HOLD"),
         REJECTED("REJECTED"),
-        TIER_UPDATE_PENDING("TIER_UPDATE_PENDING");
+        TIER_UPDATE_PENDING("TIER_UPDATE_PENDING"),
+        DELETE_PENDING("DELETE_PENDING");
         private String value;
 
         StatusEnum (String v) {

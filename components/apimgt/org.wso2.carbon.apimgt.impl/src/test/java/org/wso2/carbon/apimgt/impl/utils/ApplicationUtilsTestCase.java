@@ -20,7 +20,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -61,8 +61,8 @@ public class ApplicationUtilsTestCase {
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         ApplicationUtils.createAccessTokenRequest(keyManager, oAuthApplicationInfo, null);
         Mockito.verify(keyManager, Mockito.times(1))
-                .buildAccessTokenRequestFromOAuthApp(Matchers.any(OAuthApplicationInfo.class),
-                        Matchers.any(AccessTokenRequest.class));
+                .buildAccessTokenRequestFromOAuthApp(ArgumentMatchers.any(OAuthApplicationInfo.class),
+                        ArgumentMatchers.any(AccessTokenRequest.class));
     }
 
     @Test
@@ -73,8 +73,8 @@ public class ApplicationUtilsTestCase {
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         ApplicationUtils.createAccessTokenRequest(keyManager, oAuthApplicationInfo, accessTokenRequest);
         Mockito.verify(keyManager, Mockito.times(1))
-                .buildAccessTokenRequestFromOAuthApp(Matchers.any(OAuthApplicationInfo.class),
-                        Matchers.any(AccessTokenRequest.class));
+                .buildAccessTokenRequestFromOAuthApp(ArgumentMatchers.any(OAuthApplicationInfo.class),
+                        ArgumentMatchers.any(AccessTokenRequest.class));
     }
 
     @Test
@@ -87,8 +87,8 @@ public class ApplicationUtilsTestCase {
                 accessTokenRequest);
         Assert.assertNull(result);
         Mockito.verify(keyManager, Mockito.times(0))
-                .buildAccessTokenRequestFromOAuthApp(Matchers.any(OAuthApplicationInfo.class),
-                        Matchers.any(AccessTokenRequest.class));
+                .buildAccessTokenRequestFromOAuthApp(ArgumentMatchers.any(OAuthApplicationInfo.class),
+                        ArgumentMatchers.any(AccessTokenRequest.class));
     }
 
     @Test
@@ -97,8 +97,8 @@ public class ApplicationUtilsTestCase {
         PowerMockito.mockStatic(KeyManagerHolder.class);
         ApplicationUtils.populateTokenRequest(keyManager, "", null);
         Mockito.verify(keyManager, Mockito.times(1))
-                .buildAccessTokenRequestFromJSON(Matchers.anyString(),
-                        Matchers.any(AccessTokenRequest.class));
+                .buildAccessTokenRequestFromJSON(ArgumentMatchers.anyString(),
+                        ArgumentMatchers.any(AccessTokenRequest.class));
     }
 
     @Test
@@ -108,8 +108,8 @@ public class ApplicationUtilsTestCase {
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
         ApplicationUtils.populateTokenRequest(keyManager, "", accessTokenRequest);
         Mockito.verify(keyManager, Mockito.times(1))
-                .buildAccessTokenRequestFromJSON(Matchers.anyString(),
-                        Matchers.any(AccessTokenRequest.class));
+                .buildAccessTokenRequestFromJSON(ArgumentMatchers.anyString(),
+                        ArgumentMatchers.any(AccessTokenRequest.class));
     }
 
     @Test
@@ -119,7 +119,7 @@ public class ApplicationUtilsTestCase {
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
         ApplicationUtils.populateTokenRequest(null, "", accessTokenRequest);
         Mockito.verify(keyManager, Mockito.times(0))
-                .buildAccessTokenRequestFromJSON(Matchers.anyString(), Matchers.any(AccessTokenRequest.class));
+                .buildAccessTokenRequestFromJSON(ArgumentMatchers.anyString(), ArgumentMatchers.any(AccessTokenRequest.class));
     }
 
     @Test

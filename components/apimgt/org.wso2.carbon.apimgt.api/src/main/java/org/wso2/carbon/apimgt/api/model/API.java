@@ -17,15 +17,21 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +45,7 @@ import java.util.Set;
 public class API implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private static final Log log = LogFactory.getLog(API.class);
 
     private APIIdentifier id;
 
@@ -70,6 +77,7 @@ public class API implements Serializable {
     private AuthorizationPolicy authorizationPolicy;
     private Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
     private String organization;
+    private String versionTimestamp;
 
     //dirty pattern to identify which parts to be updated
     private boolean apiHeaderChanged;
@@ -109,6 +117,8 @@ public class API implements Serializable {
     private String oldFaultSequence;
 
     private boolean advertiseOnly;
+    private String apiExternalProductionEndpoint;
+    private String apiExternalSandboxEndpoint;
     private String apiOwner;
     private String redirectURL;
     private String vendor;
@@ -184,6 +194,11 @@ public class API implements Serializable {
      * Property to hold the enable/disable status of the json schema validation.
      */
     private boolean enableSchemaValidation = false;
+
+    /**
+     * Property to enable/disable WebSub intent verification
+     */
+    private boolean enableSubscriberVerification = false;
 
     private List<APICategory> apiCategories;
 
@@ -452,6 +467,22 @@ public class API implements Serializable {
         this.advertiseOnly = advertiseOnly;
     }
 
+    public String getApiExternalProductionEndpoint() {
+        return apiExternalProductionEndpoint;
+    }
+
+    public void setApiExternalProductionEndpoint(String apiExternalProductionEndpoint) {
+        this.apiExternalProductionEndpoint = apiExternalProductionEndpoint;
+    }
+
+    public String getApiExternalSandboxEndpoint() {
+        return apiExternalSandboxEndpoint;
+    }
+
+    public void setApiExternalSandboxEndpoint(String apiExternalSandboxEndpoint) {
+        this.apiExternalSandboxEndpoint = apiExternalSandboxEndpoint;
+    }
+
     public String getApiOwner() {
         return apiOwner;
     }
@@ -646,6 +677,7 @@ public class API implements Serializable {
     }
 
     public void setAvailableTiers(Set<Tier> availableTiers) {
+        this.availableTiers.removeAll(availableTiers);
         this.availableTiers.addAll(availableTiers);
     } 
     /**
@@ -885,6 +917,69 @@ public class API implements Serializable {
         if ((endpointConfig == null || StringUtils.isAllEmpty(endpointConfig) && endpoints.size() > 0)) {
             return getEndpointConfigString(endpoints);
         }
+
+        if (isEndpointSecured()) {
+            try {
+                JSONParser parser = new JSONParser();
+                ObjectMapper objectMapper = new ObjectMapper();
+                JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfig);
+                EndpointSecurity productionAndSandbox = new EndpointSecurity();
+                if (endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) == null) {
+                    JSONObject epSecurity = new JSONObject();
+                    productionAndSandbox.setEnabled(true);
+                    if (isEndpointAuthDigest()) {
+                        productionAndSandbox.setType(APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST);
+                    } else {
+                        productionAndSandbox.setType(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC);
+                    }
+                    productionAndSandbox.setUsername(getEndpointUTUsername());
+                    productionAndSandbox.setPassword(getEndpointUTPassword());
+                    Object productionAndSandboxSecurity = parser.parse(
+                            objectMapper.writeValueAsString(productionAndSandbox));
+                    epSecurity.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionAndSandboxSecurity);
+                    epSecurity.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, productionAndSandboxSecurity);
+                    endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, epSecurity);
+                } else {
+                    JSONObject endpointSecurity = (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY);
+                    if (endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) == null) {
+                        EndpointSecurity production = new EndpointSecurity();
+                        production.setEnabled(true);
+                        if (isEndpointAuthDigest()) {
+                            productionAndSandbox.setType(APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST);
+                        } else {
+                            productionAndSandbox.setType(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC);
+                        }
+                        production.setUsername(getEndpointUTUsername());
+                        production.setPassword(getEndpointUTPassword());
+                        String productionSecurity = objectMapper.writeValueAsString(production);
+                        endpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION,
+                                parser.parse(productionSecurity));
+                        endpointConfigJson.replace(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    }
+                    if (endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) == null) {
+                        EndpointSecurity sandbox = new EndpointSecurity();
+                        sandbox.setEnabled(true);
+                        if (isEndpointAuthDigest()) {
+                            productionAndSandbox.setType(APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST);
+                        } else {
+                            productionAndSandbox.setType(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC);
+                        }
+                        sandbox.setUsername(getEndpointUTUsername());
+                        sandbox.setPassword(getEndpointUTPassword());
+                        String sandboxSecurity = objectMapper.writeValueAsString(sandbox);
+                        endpointSecurity.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, parser.parse(sandboxSecurity));
+                        endpointConfigJson.replace(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    }
+                }
+                endpointConfig = objectMapper.writeValueAsString(endpointConfigJson);
+            } catch (ParseException e) {
+                log.error("Error while retrieving endpoint config for API : " + getUUID(), e);
+            } catch (JsonProcessingException e) {
+                log.error("Error while processing endpoint config JSON for API : " + getUUID(), e);
+            } catch (Exception e) {
+                log.error("Error while processing endpoint config for API : " + getUUID(), e);
+            }
+        }
         return endpointConfig;
     }
 
@@ -1062,6 +1157,24 @@ public class API implements Serializable {
      */
     public void setEnableSchemaValidation(boolean enableSchemaValidation) {
         this.enableSchemaValidation = enableSchemaValidation;
+    }
+
+    /**
+     * Check the status of the enableSubscriberVerification property
+     *
+     * @return status of the property
+     */
+    public boolean isEnableSubscriberVerification() {
+        return enableSubscriberVerification;
+    }
+
+    /**
+     * To set enableSubscriberVerification property
+     *
+     * @param enableSubscriberVerification Given status
+     */
+    public void setEnableSubscriberVerification(boolean enableSubscriberVerification) {
+        this.enableSubscriberVerification = enableSubscriberVerification;
     }
 
     /**
@@ -1247,6 +1360,16 @@ public class API implements Serializable {
         this.organization = organization;
     }
 
+    public String getVersionTimestamp() {
+
+        return versionTimestamp;
+    }
+
+    public void setVersionTimestamp(String versionTimestamp) {
+
+        this.versionTimestamp = versionTimestamp;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
@@ -1264,6 +1387,45 @@ public class API implements Serializable {
     }
 
     public boolean isAsync() {
-        return "WS".equals(type) || "WEBSUB".equals(type) || "SSE".equals(type);
+        return "WS".equals(type) || "WEBSUB".equals(type) || "SSE".equals(type) || "ASYNC".equals(type);
+    }
+
+    /**
+     * Property to indicate the gateway vendor to deploy API
+     */
+    private String gatewayVendor;
+
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
+
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
+
+    /**
+     * Property to hold the gateway type relevant to the policies
+     */
+    private String gatewayType;
+
+    public String getGatewayType() {
+        return gatewayType;
+    }
+
+    public void setGatewayType(String gatewayType) {
+        this.gatewayType = gatewayType;
+    }
+
+    /**
+     * Property to hold Async API transport protocols
+     */
+    private String asyncTransportProtocols;
+
+    public String getAsyncTransportProtocols() {
+        return asyncTransportProtocols;
+    }
+
+    public void setAsyncTransportProtocols(String asyncTransportProtocols) {
+        this.asyncTransportProtocols = asyncTransportProtocols;
     }
 }

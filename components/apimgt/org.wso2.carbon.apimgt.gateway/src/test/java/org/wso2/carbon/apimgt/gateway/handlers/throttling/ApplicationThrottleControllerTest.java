@@ -19,9 +19,11 @@
 package org.wso2.carbon.apimgt.gateway.handlers.throttling;
 
 import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.OMFactory;
 import org.apache.neethi.Policy;
+import org.apache.neethi.PolicyEngine;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.commons.throttle.core.ThrottleContext;
@@ -345,8 +347,6 @@ public class ApplicationThrottleControllerTest {
         PowerMockito.mockStatic(OMAbstractFactory.class);
         OMFactory omFactory = Mockito.mock(OMFactory.class);
         PowerMockito.when(OMAbstractFactory.getOMFactory()).thenReturn(omFactory);
-        Mockito.doThrow(IOException.class).when(omFactory).createOMText((DataHandler) Mockito.anyObject(), Mockito
-                .anyBoolean());
         ApplicationThrottleController.getApplicationThrottleContext(messageContext, throttleDataHolder,
                 applicationId, THROTTLE_POLICY_KEY);
     }

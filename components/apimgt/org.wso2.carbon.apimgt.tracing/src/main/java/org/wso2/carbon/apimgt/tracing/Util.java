@@ -22,19 +22,24 @@ import com.google.common.collect.ImmutableMap;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.propagation.Format;
-import io.opentracing.propagation.TextMapExtractAdapter;
-import io.opentracing.propagation.TextMapInjectAdapter;
+import io.opentracing.propagation.TextMapAdapter;
 import io.opentracing.util.GlobalTracer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
 import java.util.Map;
 
 /**
  * Span utility class
+ *
+ * @deprecated <p> Use {@link org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil} instead</p>
  */
+@Deprecated
 public class Util {
 
-    private static boolean isTraceEnabled = false;
-
+    private static final Log log = LogFactory.getLog(Util.class);
     /**
      * Start the tracing span
      *
@@ -79,6 +84,20 @@ public class Util {
         }
     }
 
+    /**
+     * Update operation to the span
+     *
+     * @param span
+     * @param name
+     */
+    public static void updateOperation(TracingSpan span, String name) {
+
+        Object sp = span.getSpan();
+        if (sp instanceof Span) {
+            ((Span) sp).setOperationName(name);
+        }
+    }
+
     public static void setLog(TracingSpan span, String key, String value) {
 
         Object sp = span.getSpan();
@@ -120,10 +139,10 @@ public class Util {
         Object sp = span.getSpan();
         if (sp instanceof Span) {
             tracer.getTracingTracer().inject(((Span) sp).context(), Format.Builtin.HTTP_HEADERS,
-                    new TextMapInjectAdapter(tracerSpecificCarrier));
+                    new TextMapAdapter(tracerSpecificCarrier));
         } else if (sp instanceof SpanContext) {
             tracer.getTracingTracer().inject((SpanContext) sp, Format.Builtin.HTTP_HEADERS,
-                    new TextMapInjectAdapter(tracerSpecificCarrier));
+                    new TextMapAdapter(tracerSpecificCarrier));
         }
     }
 
@@ -137,7 +156,7 @@ public class Util {
     public static TracingSpan extract(TracingTracer tracer, Map<String, String> headerMap) {
 
         return new TracingSpan(tracer.getTracingTracer().extract(Format.Builtin.HTTP_HEADERS,
-                new TextMapExtractAdapter(headerMap)));
+                new TextMapAdapter(headerMap)));
     }
 
     public static TracingTracer getGlobalTracer() {
@@ -183,13 +202,33 @@ public class Util {
         return null;
     }
 
-    public static void setTracingEnabled(boolean isTraceEnabled) {
-
-        Util.isTraceEnabled = isTraceEnabled;
-    }
-
+    /**
+     * Check whether OpenTracing is enabled.
+     **/
     public static boolean tracingEnabled() {
 
-        return isTraceEnabled;
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        if (apiManagerConfiguration != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("API Manager Configuration is set");
+            }
+            boolean remoteTracerEnabled =
+                    Boolean.parseBoolean(apiManagerConfiguration
+                            .getFirstProperty(TracingConstants.REMOTE_TRACER_ENABLED));
+            boolean logTracerEnabled =
+                    Boolean.parseBoolean(apiManagerConfiguration
+                            .getFirstProperty(TracingConstants.LOG_TRACER_ENABLED));
+            if (log.isDebugEnabled()) {
+                log.debug("Remote Tracer for OpenTracing Enabled: " + remoteTracerEnabled);
+                log.debug("Log Tracer for OpenTracing Enabled: " + logTracerEnabled);
+            }
+            return remoteTracerEnabled || logTracerEnabled;
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("API Manager Configuration is null");
+            }
+        }
+        return false;
     }
 }

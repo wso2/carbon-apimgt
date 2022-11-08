@@ -110,10 +110,17 @@ public enum ExceptionCodes implements ErrorHandler {
     DEPLOYMENT_ID_NOT_FOUND(900355, "Deployment Id Not Found", 400, "Deployment Id Not Found"),
     EXISTING_DEPLOYMENT_NOT_FOUND(900356, "Existing Deployment Not Found", 404, "Deployment with %s not found"),
     ORGANIZATION_NOT_FOUND(900357, "Organization Not Found", 400, "Organization is not found in the request"),
+    INVALID_ENV_API_PROP_CONFIG(900358, "Invalid environment specific api property config", 400,
+            "Environment specific api property config is not valid. %s", false),
+    API_OR_API_PRODUCT_NOT_FOUND(900359, "API or API Product Not Found", 404, "Requested API or API Product with id '%s' not found"),
+    API_PRODUCT_NOT_FOUND(900360, "API Product Not Found", 404, "Requested API Product with id '%s' not found"),
+    SUB_ORGANIZATION_NOT_IDENTIFIED(900361, "User's Organization Not Identified", 403, "User's Organization is not identified"),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
             "Updating the API is restricted as as it is %s."),
+    UNSUPPORTED_LIFECYCLE_ACTION(900381, "Unsupported state change action", 400, "Lifecycle state change action %s is not allowed"),
+    LIFECYCLE_STATE_INFORMATION_NOT_FOUND(900382, "Lifecycle state information not found", 500,"Lifecycle state change information for %s with %s cannot be found"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
@@ -154,6 +161,8 @@ public enum ExceptionCodes implements ErrorHandler {
             400, "A Gateway Environment cannot exists with duplicate virtual hosts"),
     READONLY_GATEWAY_ENVIRONMENT_NAME(900510, "Names of Gateway Environment cannot be changed",
             400, "Name of the gateway is read only"),
+    GATEWAY_ENVIRONMENT_VHOST_NOT_PROVIDED(900511, "Gateway Environment virtual hosts name not provided",
+            400, "Gateway Environment VHOST name not provided"),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
@@ -199,6 +208,8 @@ public enum ExceptionCodes implements ErrorHandler {
     IDP_DELETION_FAILED(900613, "Unable to delete the identity provider", 400, "Error while deleting the "
             + "identity provider"),
     INVALID_IDP_TYPE(900614, "Unsupported identity provider type", 400, "Invalid identity provider type. %s"),
+    USERSTORE_INITIALIZATION_FAILED(900615, "Unable to get the user store manager", 500,
+            "Error while getting the user store manager from the realm"),
 
 
     // Labels related codes
@@ -244,6 +255,11 @@ public enum ExceptionCodes implements ErrorHandler {
     NO_RESOURCES_FOUND(900763, "No resources found", 404, "API must have at least one resource defined"),
     ERROR_REMOVING_EXAMPLES(900764, "Internal Error While Processing Swagger Definition", 500, "Couldn't remove one or more examples from the swagger definition"),
 
+    //AsyncApi related error codes
+    ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),
+    ASYNCAPI_URL_NO_200(900757, "AsyncAPI specification retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
+
+    ERROR_READING_ASYNCAPI_SPECIFICATION(900765, "AsyncAPI specification read error", 500, "Exception occurred while reading the AsyncAPI Specification file"),
 
     // REST API related codes
     PARAMETER_NOT_PROVIDED(900700, "Parameter value missing", 400,
@@ -259,6 +275,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "%s property value of payload cannot be blank"),
     CONTAIN_SPECIAL_CHARACTERS(900706, "contain invalid characters", 400,
             "%s property value of payload cannot contain invalid characters"),
+    INVALID_SORT_CRITERIA(900707, "Invalid sort criteria", 400, "Sort criteria contain a non-allowable value"),
 
     //GraphQL API related codes
     API_NOT_GRAPHQL(900800, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
@@ -284,6 +301,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Please provide the Authorization : Bearer <> token to proceed."),
     MALFORMED_AUTHORIZATION_HEADER_BASIC(900913, "Malformed Authorization Header", 400,
             "Please provide the Authorization : Basic <> token to proceed."),
+    INVALID_PERMISSION(900915, "Invalid Permission", 403, " You are not authorized to access the resource."),
     OAUTH2_APP_CREATION_FAILED(900950, "Key Management Error", 500, "Error while creating the consumer application."),
     OAUTH2_APP_ALREADY_EXISTS(900951, "Key Management Error", 409, "OAuth2 application already created."),
     OAUTH2_APP_DELETION_FAILED(900952, "Key Management Error", 500, "Error while deleting the consumer application."),
@@ -300,8 +318,15 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_TOKEN_REQUEST(900965, "Key Management Error", 400, "Invalid access token request."),
     ACCESS_TOKEN_REVOKE_FAILED(900966, "Key Management Error", 500, "Error while revoking the access token."),
     INTERNAL_ERROR(900967, "General Error", 500, "Server Error Occurred"),
+    INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE(903006, "%s", 500, "Server Error Occurred"),
+
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
             + "valid"),
+
+    THROTTLING_POLICY_NOT_FOUND(903005, "Throttling Policy Not Found", 404,
+            "Requested throttling policy with name '%s' and type '%s' not found"),
+    INVALID_APPLICATION_ADDITIONAL_PROPERTIES(900970, "Invalid application additional properties", 400,
+            "Invalid additional properties. %s"),
     JWT_PARSING_FAILED(900986, "Key Management Error", 500, "Error while parsing JWT. Invalid Jwt."),
     TOKEN_SCOPES_NOT_SET(
             900987, "The token information has not been correctly set internally", 400,
@@ -388,7 +413,8 @@ public enum ExceptionCodes implements ErrorHandler {
     REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING(901401,"Required Key Manager configuration missing",400,"Missing " +
             "required configuration"),
     KEY_MANAGER_ALREADY_EXIST(901402, "Key Manager Already Exists", 409, "Key Manager Already Exists"),
-    KEY_MANAGER_NOT_FOUND(901403, "Key Manager not found", 400, "Key Manager not found"),
+    KEY_MANAGER_NOT_REGISTERED(901403, "Key Manager not Registered", 400, "Key Manager not Registered"),
+    KEY_MANAGER_NOT_FOUND(901411, "Key Manager not Found", 404, "Key Manager not found"),
     KEY_MANAGER_NAME_EMPTY(901404,
             "Key Manager name cannot be empty", 400,"Key Manager name cannot be empty"),
     KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION(901405, "Key Manager doesn't support generating OAuth applications", 400,
@@ -399,7 +425,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Key Manager is not enabled in the system"),
     KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION(901407, "Required application properties are missing", 400,
             "Required application properties are missing"),
-    KEY_MAPPING_ALREADY_EXIST(901408, "Application already Registered", 409, "Application already Registered"),
+    APPLICATION_ALREADY_REGISTERED(901408, "Application already Registered", 409, "Application already Registered"),
+    KEY_MAPPING_ALREADY_EXIST(901409, "Key Mappings already exists", 409, "Key Mappings already exists"),
     TENANT_MISMATCH(901409,"Tenant mismatch", 400, "Tenant mismatch"),
     INVALID_APPLICATION_PROPERTIES(901410, "Invalid additional properties", 400,
             "Invalid additional properties given for application"),
@@ -429,14 +456,6 @@ public enum ExceptionCodes implements ErrorHandler {
     TENANT_THEME_IMPORT_NOT_ALLOWED(901702, "Super Tenant not allowed to import tenant theme", 400,
             "Super Tenant %s is not allowed to import a tenant theme"),
 
-
-    //API mediation policies related
-    MEDIATION_POLICY_API_ALREADY_EXISTS(901800, "Mediation Policy Already Exists", 409,
-                                            "A mediation policy with the given name is already attached to the API"),
-
-    //mediation policies related common errors
-    MEDIATION_POLICY_NAME_TOO_LONG(900850, "Mediation Policy Name Too Long", 400,
-                                                "The name of the mediation policy exceeds the max length (%s)"),
     INVALID_API_IDENTIFIER(900851, "Provided API identifier (%s) is invalid", 400,
             "Provided API identifier (%s) is invalid"),
     API_NAME_OR_VERSION_NOT_NULL(900852, "name or version couldn't be null", 400, "name or version couldn't be null"),
@@ -458,11 +477,9 @@ public enum ExceptionCodes implements ErrorHandler {
     ERROR_UPLOADING_THUMBNAIL(900914,
             "Error while updating thumbnail of API/API Product", 500,
             "Error while updating thumbnail of API/API Product: %s-%s"),
-
-    //AsyncApi related error codes
-    ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),
-    ASYNCAPI_URL_NO_200(900757, "AsyncAPI specification retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
-
+    APICTL_OPENAPI_PARSE_EXCEPTION(
+            OPENAPI_PARSE_EXCEPTION.getErrorCode(), OPENAPI_PARSE_EXCEPTION.getErrorMessage(),
+            OPENAPI_PARSE_EXCEPTION.getHttpStatusCode(), "%s"),
     GATEWAY_TYPE_NOT_FOUND(900903, "Gateway type not found", 404,
             "Gateway type not found available Gateway types : " + "%s"),
 
@@ -472,11 +489,51 @@ public enum ExceptionCodes implements ErrorHandler {
             "Missing protocol in Async API Definition"),
     UNSUPPORTED_PROTOCOL_SPECIFIED_IN_ASYNC_API_DEFINITION(900912, "Unsupported protocol specified in Async API " +
                "Definition", 400, "Unsupported protocol specified in Async API Definition"),
+    API_CREATION_NOT_SUPPORTED_FOR_ASYNC_TYPE_APIS(900915, "API Creation is supported only for WebSocket, WebSub and SSE APIs", 400,
+            "API Creation is supported only for WebSocket, WebSub and SSE APIs"),
+    LOGGING_API_NOT_FOUND(901400, "Requested Resource Not Found", 404, "Request API Not Found for context: %s"),
+    LOGGING_API_INCORRECT_LOG_LEVEL(901401, "Bad Request", 400, "Log level should be either OFF, BASIC, STANDARD or FULL"),
+    LOGGING_API_MISSING_DATA(901402, "Missing data", 400, "API context or log level is missing"),
 
     //Service Catalog related error codes
     SERVICE_VERSION_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version"),
     INVALID_ENDPOINT_CREDENTIALS(902000, "Invalid Endpoint Security credentials", 400,
-            "Invalid Endpoint Security credentials. %s", false);
+            "Invalid Endpoint Security credentials. %s", false),
+    INVALID_TENANT_CONFIG(902001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
+
+    //Operation Policies related error codes
+    INVALID_OPERATION_POLICY(902005, "Cannot find the selected operation policy", 400,
+            "Selected operation policy is not found"),
+    INVALID_OPERATION_POLICY_SPECIFICATION(902006, "Invalid operation policy specification found", 400,
+            "Invalid operation policy specification. %s", false),
+
+    INVALID_OPERATION_POLICY_PARAMETERS(902007, "Missing required parameters for operation policy specification", 400,
+            "Required parameter(s) %s for operation policy specification %s are either missing or empty"),
+    OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW(902008, "Operation policy is not allowed in the applied flow", 400,
+            "%s policy is not allowed in response flow"),
+    MISSING_MANDATORY_POLICY_ATTRIBUTES(902009, "Missing mandatory operation policy attribute", 400,
+            "Required attributes(s) %s for operation policy specification %s are either missing or empty"),
+    OPERATION_POLICY_NOT_FOUND(902010, "Operation Policy Not Found", 404,
+            "Requested operation policy with id '%s' not found"),
+
+    OPERATION_POLICY_ALREADY_EXISTS(903001, "The Operation Policy already exists.", 409, "An Operation Policy with name '%s' and version '%s' already exists"),
+
+    OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION(903004, "Operation Policy Not Found with given name and version", 404,
+            "Requested operation policy with name '%s' and version '%s not found"),
+
+    OPERATION_POLICY_GATEWAY_ERROR(903008,
+            "Either Synapse or Choreo Gateway Definition files or both should be present", 400,
+            "Operation Policy cannot be imported due to the missing Gateway files."),
+    ERROR_VALIDATING_API_POLICY(902011, "Error while validating API policies enforced for the API", 400,
+            "Error while validating the API policies enforced for the API"),
+
+    SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
+            " not allowed for user %s ", false),
+    INVALID_KEY_MANAGER_REQUEST(902003, "Invalid Request sent to Key Manager.", 400, "Invalid Request sent to Key Manager.Error from Backend : %s", false),
+    INTERNAL_SERVER_ERROR_FROM_KEY_MANAGER(902004, "Internal Server Error from Key Manager", 500, "Internal Server Error from Key Manager.Error from Backend : %s", true),
+    REVISION_ALREADY_DEPLOYED(902005, "Revision deployment state conflicted", 409,
+            "Revision deployment request conflicted with the current deployment state of the revision %s. Please try again later", false),
+    INVALID_API_ID(902006, "Invalid API ID", 404, "The provided API ID is not found %s", false);
 
     private final long errorCode;
     private final String errorMessage;

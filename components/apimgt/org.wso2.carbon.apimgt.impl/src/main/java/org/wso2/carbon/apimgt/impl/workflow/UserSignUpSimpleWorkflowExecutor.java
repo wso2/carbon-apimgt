@@ -22,11 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -60,11 +57,6 @@ public class UserSignUpSimpleWorkflowExecutor extends UserSignUpWorkflowExecutor
         			workflowDTO.getExternalWorkflowReference() + "Workflow State : " +
         			workflowDTO.getStatus());
     	}
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-
-        String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
 
 		String tenantDomain = workflowDTO.getTenantDomain();
 
@@ -73,17 +65,10 @@ public class UserSignUpSimpleWorkflowExecutor extends UserSignUpWorkflowExecutor
 			UserRegistrationConfigDTO signupConfig =
 					SelfSignUpUtil.getSignupConfiguration(tenantDomain);
 			
-			if (serverURL == null || signupConfig.getAdminUserName() == null ||
-					signupConfig.getAdminPassword() == null) {
-				throw new WorkflowException("Required parameter missing to connect to the"
-						+ " authentication manager");
-			}
 
 			String tenantAwareUserName =
 					MultitenantUtils.getTenantAwareUsername(workflowDTO.getWorkflowReference());
-			updateRolesOfUser(serverURL, signupConfig.getAdminUserName(),
-			                  signupConfig.getAdminPassword(), tenantAwareUserName,
-			                  SelfSignUpUtil.getRoleNames(signupConfig), tenantDomain);
+			updateRolesOfUser(tenantAwareUserName, signupConfig.getRoles(), tenantDomain);
 		} catch (APIManagementException e) {
 			throw new WorkflowException("Error while accessing signup configuration", e);
 		} catch (Exception e) {

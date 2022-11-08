@@ -23,6 +23,8 @@ import com.ibm.wsdl.extensions.soap.SOAPAddressImpl;
 import com.ibm.wsdl.extensions.soap12.SOAP12AddressImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
@@ -53,6 +55,7 @@ import javax.wsdl.Port;
 import javax.wsdl.Service;
 import javax.wsdl.WSDLException;
 import javax.wsdl.extensions.ExtensibilityElement;
+import javax.wsdl.extensions.UnknownExtensibilityElement;
 import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.xml.WSDLReader;
 import javax.wsdl.xml.WSDLWriter;
@@ -239,6 +242,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
               Definition wsdlDefinition) throws APIMgtWSDLException {
         Map serviceMap = wsdlDefinition.getAllServices();
         URL addressURI;
+        String organization = api.getOrganization();
         for (Object entry : serviceMap.entrySet()) {
             Map.Entry svcEntry = (Map.Entry) entry;
             Service svc = (Service) svcEntry.getValue();
@@ -267,7 +271,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
                     }
                     try {
                         setAddressUrl(extensibilityElement, endpointTransport, api.getContext(), environmentName,
-                                environmentType);
+                                environmentType, organization);
                     } catch (APIManagementException e) {
                         throw new APIMgtWSDLException("Error while setting gateway access URLs in the WSDL", e);
                     }
@@ -433,6 +437,21 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
             return ((SOAPAddressImpl) exElement).getLocationURI();
         } else if (exElement instanceof HTTPAddressImpl) {
             return ((HTTPAddressImpl) exElement).getLocationURI();
+        } else if (exElement instanceof UnknownExtensibilityElement) {
+            Element unknownExtensibilityElement = ((UnknownExtensibilityElement) exElement).getElement();
+            if (unknownExtensibilityElement != null) {
+                NodeList nodeList = unknownExtensibilityElement.getElementsByTagNameNS(APIConstants.WSDL_NAMESPACE_URI,
+                        APIConstants.WSDL_ELEMENT_LOCAL_NAME);
+                String url = "";
+                if (nodeList != null && nodeList.getLength() > 0) {
+                    url = nodeList.item(0).getTextContent();
+                }
+                return url;
+            } else {
+                String msg = "WSDL errors! Extensibility Element is null";
+                log.error(msg);
+                throw new APIMgtWSDLException(msg);
+            }
         } else {
             throw new APIMgtWSDLException("Unsupported WSDL Extensibility element",
                     ExceptionCodes.UNSUPPORTED_WSDL_EXTENSIBILITY_ELEMENT);
@@ -450,27 +469,42 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
      * @throws APIManagementException when unsupported WSDL as a input
      */
     private void setAddressUrl(ExtensibilityElement exElement, String transports, String context,
-                               String environmentName, String environmentType) throws APIManagementException {
+                               String environmentName, String environmentType, String organization)
+            throws APIManagementException {
         if (exElement instanceof SOAP12AddressImpl) {
             ((SOAP12AddressImpl) exElement)
-                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType,
+                            organization) + context);
             if (log.isDebugEnabled()) {
                 log.debug("Gateway endpoint for environment:" + environmentName + " is: "
                         + ((SOAP12AddressImpl) exElement).getLocationURI());
             }
         } else if (exElement instanceof SOAPAddressImpl) {
             ((SOAPAddressImpl) exElement)
-                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType,
+                            organization) + context);
             if (log.isDebugEnabled()) {
                 log.debug("Gateway endpoint for environment:" + environmentName + " is: "
                         + ((SOAPAddressImpl) exElement).getLocationURI());
             }
         } else if (exElement instanceof HTTPAddressImpl) {
             ((HTTPAddressImpl) exElement)
-                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType,
+                            organization) + context);
             if (log.isDebugEnabled()) {
                 log.debug("Gateway endpoint for environment:" + environmentName + " is: "
                         + ((HTTPAddressImpl) exElement).getLocationURI());
+            }
+        } else if (exElement instanceof UnknownExtensibilityElement) {
+            Element unknownExtensibilityElement = ((UnknownExtensibilityElement) exElement).getElement();
+            if (unknownExtensibilityElement != null) {
+                NodeList nodeList = unknownExtensibilityElement.getElementsByTagNameNS(APIConstants.WSDL_NAMESPACE_URI,
+                        APIConstants.WSDL_ELEMENT_LOCAL_NAME);
+                if (nodeList != null && nodeList.getLength() > 0) {
+                    nodeList.item(0).setTextContent(
+                            APIUtil.getGatewayEndpoint(transports, environmentName, environmentType, organization)
+                                    + context);
+                }
             }
         } else {
             if (log.isDebugEnabled()) {

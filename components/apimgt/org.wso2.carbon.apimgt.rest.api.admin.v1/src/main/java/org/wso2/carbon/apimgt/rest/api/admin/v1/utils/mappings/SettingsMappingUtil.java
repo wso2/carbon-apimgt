@@ -72,7 +72,8 @@ public class SettingsMappingUtil {
                 list.add(fromKeyManagerConfigurationToSettingsKeyManagerConfigurationDTO(keyManagerName,
                         keyManagerConfiguration.getDisplayName(),keyManagerConfiguration.getDefaultScopesClaim(),
                         keyManagerConfiguration.getDefaultConsumerKeyClaim(),
-                        keyManagerConfiguration.getConnectionConfigurations()));
+                        keyManagerConfiguration.getConnectionConfigurations(),
+                        keyManagerConfiguration.getEndpointConfigurations()));
             }
         });
         return list;
@@ -97,7 +98,7 @@ public class SettingsMappingUtil {
 
     private static SettingsKeyManagerConfigurationDTO fromKeyManagerConfigurationToSettingsKeyManagerConfigurationDTO(
             String name, String displayName, String scopesClaim, String consumerKeyClaim,
-            List<ConfigurationDto> connectionConfigurationDtoList) {
+            List<ConfigurationDto> connectionConfigurationDtoList,List<ConfigurationDto> endpointConfigurations) {
 
         SettingsKeyManagerConfigurationDTO settingsKeyManagerConfigurationDTO =
                 new SettingsKeyManagerConfigurationDTO();
@@ -118,6 +119,21 @@ public class SettingsMappingUtil {
                 keyManagerConfigurationDTO.setDefault(configurationDto.getDefaultValue());
                 keyManagerConfigurationDTO.setValues(configurationDto.getValues());
                 settingsKeyManagerConfigurationDTO.getConfigurations().add(keyManagerConfigurationDTO);
+            }
+        }
+        if (endpointConfigurations != null) {
+            for (ConfigurationDto configurationDto : endpointConfigurations) {
+                KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+                keyManagerConfigurationDTO.setName(configurationDto.getName());
+                keyManagerConfigurationDTO.setLabel(configurationDto.getLabel());
+                keyManagerConfigurationDTO.setType(configurationDto.getType());
+                keyManagerConfigurationDTO.setRequired(configurationDto.isRequired());
+                keyManagerConfigurationDTO.setMask(configurationDto.isMask());
+                keyManagerConfigurationDTO.setMultiple(configurationDto.isMultiple());
+                keyManagerConfigurationDTO.setTooltip(configurationDto.getTooltip());
+                keyManagerConfigurationDTO.setDefault(configurationDto.getDefaultValue());
+                keyManagerConfigurationDTO.setValues(configurationDto.getValues());
+                settingsKeyManagerConfigurationDTO.getEndpointConfigurations().add(keyManagerConfigurationDTO);
             }
         }
         return settingsKeyManagerConfigurationDTO;

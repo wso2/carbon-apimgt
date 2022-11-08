@@ -1,0 +1,15 @@
+asyncapi: 2.0.0
+
+info:
+  title: Echo Server
+  version: "1.0"
+
+servers:
+  localhost:
+    url: wss://echo.websocket.org:443
+    protocol: ws
+
+channels:
+  /echo:
+    subscribe:
+      operationId: onEcho

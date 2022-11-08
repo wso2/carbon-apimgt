@@ -16,10 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.throttling;
 
-import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.clustering.ClusteringFault;
@@ -57,6 +54,7 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
@@ -64,6 +62,9 @@ import org.wso2.carbon.apimgt.impl.utils.APIDescriptionGenUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetrySpan;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
@@ -161,24 +162,33 @@ public class APIThrottleHandler extends AbstractHandler {
 
     public boolean handleRequest(MessageContext messageContext) {
 
-        if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
-            return true;
-        }
         Timer timer = getTimer();
         Timer.Context context = timer.start();
         long executionStartTime = System.nanoTime();
-        TracingSpan throttlingLatencySpan = null;
-        if (Util.tracingEnabled()) {
+        TracingSpan throttlingLatencyTracingSpan = null;
+        TelemetrySpan throttlingLatencySpan = null;
+        if (TelemetryUtil.telemetryEnabled()) {
+            TelemetrySpan responseLatencySpan =
+                    (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+            TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
+            throttlingLatencySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.THROTTLE_LATENCY,
+                    responseLatencySpan, tracer);
+        } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
-                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             TracingTracer tracer = Util.getGlobalTracer();
-            throttlingLatencySpan = Util.startSpan(APIMgtGatewayConstants.THROTTLE_LATENCY, responseLatencySpan, tracer);
+            throttlingLatencyTracingSpan = Util.startSpan(APIMgtGatewayConstants.THROTTLE_LATENCY,
+                    responseLatencySpan,
+                    tracer);
         }
         try {
             return doThrottle(messageContext);
         } catch (SynapseException e) {
-            if (Util.tracingEnabled()) {
-                Util.setTag(throttlingLatencySpan, APIMgtGatewayConstants.ERROR,
+            if (TelemetryUtil.telemetryEnabled()) {
+                TelemetryUtil.setTag(throttlingLatencySpan, APIMgtGatewayConstants.ERROR,
+                        APIMgtGatewayConstants.API_THROTTLE_HANDLER_ERROR);
+            } else if (Util.tracingEnabled()) {
+                Util.setTag(throttlingLatencyTracingSpan, APIMgtGatewayConstants.ERROR,
                         APIMgtGatewayConstants.API_THROTTLE_HANDLER_ERROR);
             }
             throw e;
@@ -186,8 +196,10 @@ public class APIThrottleHandler extends AbstractHandler {
             messageContext.setProperty(APIMgtGatewayConstants.THROTTLING_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             context.stop();
-            if (Util.tracingEnabled()) {
-                Util.finishSpan(throttlingLatencySpan);
+            if (TelemetryUtil.telemetryEnabled()) {
+                TelemetryUtil.finishSpan(throttlingLatencySpan);
+            } else if (Util.tracingEnabled()) {
+                Util.finishSpan(throttlingLatencyTracingSpan);
             }
         }
     }

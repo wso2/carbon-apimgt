@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.gateway.throttling.util;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.BasicHttpEntity;
@@ -56,6 +57,9 @@ public class KeyTemplateRetrieverTest {
         httpEntity.setContent(new ByteArrayInputStream(content.getBytes()));
         Mockito.when(httpResponse.getEntity()).thenReturn(httpEntity);
         Mockito.when(httpClient.execute(Mockito.any(HttpGet.class))).thenReturn(httpResponse);
+        StatusLine status = Mockito.mock(StatusLine.class);
+        Mockito.when(status.getStatusCode()).thenReturn(200);
+        Mockito.when(httpResponse.getStatusLine()).thenReturn(status);
         BDDMockito.given(APIUtil.getHttpClient(Mockito.anyInt(),Mockito.anyString())).willReturn(httpClient);
 
         EventHubConfigurationDto eventHubConfigurationDto = new EventHubConfigurationDto();

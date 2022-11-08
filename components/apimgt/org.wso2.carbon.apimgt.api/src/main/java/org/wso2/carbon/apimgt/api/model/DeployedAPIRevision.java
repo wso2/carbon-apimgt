@@ -28,6 +28,14 @@ public class DeployedAPIRevision implements Serializable {
     private String vhost;
     private String deployedTime;
 
+    public DeployedAPIRevision() {
+    }
+
+    public DeployedAPIRevision(String revisionUUID, String deployment) {
+        this.revisionUUID = revisionUUID;
+        this.deployment = deployment;
+    }
+
     public int getId() {
         return id;
     }

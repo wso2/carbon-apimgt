@@ -61,6 +61,14 @@ public class ApiTypeWrapper {
         }
     }
 
+    public String getTier() {
+        if (isAPIProduct) {
+            return apiProduct.getId().getTier();
+        } else {
+            return api.getId().getTier();
+        }
+    }
+
     public void setContext(String context) {
         if (isAPIProduct) {
             apiProduct.setContext(context);
@@ -89,6 +97,14 @@ public class ApiTypeWrapper {
         return isAPIProduct ? apiProduct.getId() : api.getId();
     }
 
+    public String getUuid() {
+        if (isAPIProduct) {
+            return apiProduct.getUuid();
+        } else {
+            return api.getUuid();
+        }
+    }
+
     public void setThumbnailUrl(String thumbnailUrl) {
         if (isAPIProduct) {
             apiProduct.setThumbnailUrl(thumbnailUrl);
@@ -103,5 +119,51 @@ public class ApiTypeWrapper {
 
     public String getVisibility() {
         return isAPIProduct ? apiProduct.getVisibility() : api.getVisibility();
+    }
+
+    public String getOrganization() {
+
+        if (isAPIProduct) {
+            return apiProduct.getOrganization();
+        } else {
+            return api.getOrganization();
+        }
+    }
+
+    public void setOrganization(String organization) {
+        if (isAPIProduct) {
+            apiProduct.setOrganization(organization);
+        } else {
+            api.setOrganization(organization);
+        }
+    }
+
+    public String getLifecycleState() {
+        if (isAPIProduct) {
+            return apiProduct.getState();
+        } else {
+            return api.getStatus();
+        }
+    }
+
+    public String getAccessControl() {
+        if (isAPIProduct) {
+            return apiProduct.getAccessControl();
+        }
+        return api.getAccessControl();
+    }
+
+    public String getAccessControlRoles() {
+        if (isAPIProduct) {
+            return apiProduct.getAccessControlRoles();
+        }
+        return api.getAccessControlRoles();
+    }
+
+    public String geType() {
+        if (isAPIProduct){
+            return apiProduct.getType();
+        }
+        return api.getType();
     }
 }

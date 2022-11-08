@@ -41,6 +41,9 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetrySpan;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
@@ -124,13 +127,26 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     public boolean handleRequest(MessageContext messageContext) {
 
         Timer.Context context = startMetricTimer();
-        TracingSpan CORSRequestHandlerSpan = null;
-        if (Util.tracingEnabled()) {
+        TelemetrySpan corsRequestHandlerSpan = null;
+        TracingSpan corsRequestHandlerTracingSpan = null;
+        if (TelemetryUtil.telemetryEnabled()) {
+            TelemetrySpan responseLatencySpan =
+                    (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+            TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
+            corsRequestHandlerSpan =
+                    TelemetryUtil.startSpan(APIMgtGatewayConstants.CORS_REQUEST_HANDLER, responseLatencySpan, tracer);
+        } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
-                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             TracingTracer tracer = Util.getGlobalTracer();
-            CORSRequestHandlerSpan =
+            corsRequestHandlerTracingSpan =
                     Util.startSpan(APIMgtGatewayConstants.CORS_REQUEST_HANDLER, responseLatencySpan, tracer);
+        }
+        if (Utils.isGraphQLSubscriptionRequest(messageContext)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping GraphQL subscription handshake request.");
+            }
+            return true;
         }
         try {
             if (!initializeHeaderValues) {
@@ -196,6 +212,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                     .getResourceInfoDTOCacheKey(apiContext, apiVersion, resourceString, httpMethod);
             messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
             messageContext.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
+            messageContext.setProperty(APIConstants.REST_METHOD, httpMethod);
 
             //If this is an OPTIONS request
             if (APIConstants.SupportedHTTPVerbs.OPTIONS.name().equalsIgnoreCase(httpMethod)) {
@@ -219,15 +236,20 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             setCORSHeaders(messageContext, selectedResource);
             return true;
         } catch (Exception e) {
-            if (Util.tracingEnabled() && CORSRequestHandlerSpan != null) {
-                Util.setTag(CORSRequestHandlerSpan, APIMgtGatewayConstants.ERROR,
+            if (TelemetryUtil.telemetryEnabled()) {
+                TelemetryUtil.setTag(corsRequestHandlerSpan, APIMgtGatewayConstants.ERROR,
+                        APIMgtGatewayConstants.CORS_REQUEST_HANDLER_ERROR);
+            } else if (Util.tracingEnabled()) {
+                Util.setTag(corsRequestHandlerTracingSpan, APIMgtGatewayConstants.ERROR,
                         APIMgtGatewayConstants.CORS_REQUEST_HANDLER_ERROR);
             }
             throw e;
         } finally {
             stopMetricTimer(context);
-            if (Util.tracingEnabled()) {
-                Util.finishSpan(CORSRequestHandlerSpan);
+            if (TelemetryUtil.telemetryEnabled()) {
+                TelemetryUtil.finishSpan(corsRequestHandlerSpan);
+            } else if (Util.tracingEnabled()) {
+                Util.finishSpan(corsRequestHandlerTracingSpan);
             }
         }
     }
@@ -323,11 +345,13 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             allowedMethods = this.allowedMethods;
         }
         if ("*".equals(allowHeaders)) {
-            allowHeaders = headers.get("Access-Control-Request-Headers");
+            String localHeaders = headers.get("Access-Control-Request-Headers");
+            messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, localHeaders);
+        } else {
+            messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, allowHeaders);
         }
         messageContext.setProperty(APIConstants.CORS_CONFIGURATION_ENABLED, isCorsEnabled());
         messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, allowedMethods);
-        messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, allowHeaders);
         messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, exposeHeaders);
     }
 

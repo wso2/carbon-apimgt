@@ -35,7 +35,11 @@ import zipkin2.reporter.okhttp3.OkHttpSender;
 
 /**
  * Class for getting Zipkin tracer from reading configuration file
+ * @deprecated
+ * <p> Use {@link org.wso2.carbon.apimgt.tracing.telemetry.ZipkinTelemetry} instead</p>
  */
+
+@Deprecated
 public class ZipkinTracer implements OpenTracer {
 
     private static final String NAME = "zipkin";

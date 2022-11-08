@@ -20,12 +20,12 @@ package org.wso2.carbon.apimgt.rest.api.dcr.web.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.RegistrationService;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.dto.FaultResponse;
@@ -54,14 +54,18 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
+import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -77,7 +81,10 @@ public class RegistrationServiceImpl implements RegistrationService {
     private static final Log log = LogFactory.getLog(RegistrationServiceImpl.class);
     private static final String APP_DISPLAY_NAME = "DisplayName";
 
+    @Context
+    MessageContext securityContext;
     @POST
+    @Path("/register")
     @Override
     public Response register(RegistrationProfile profile) {
         /**
@@ -122,17 +129,6 @@ public class RegistrationServiceImpl implements RegistrationService {
 
             //Validates if the application owner and logged in username is same.
             if (authUserName != null && ((authUserName.equals(owner))|| isUserSuperAdmin(authUserName))) {
-                if (!isUserAccessAllowed(authUserName)) {
-                    String errorMsg = "You do not have enough privileges to create an OAuth app";
-                    log.error("User " + authUserName +
-                            " does not have any of subscribe/create/publish privileges " +
-                            "to create an OAuth app");
-                    errorDTO =
-                            RestApiUtil.getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT,
-                                    403L, errorMsg);
-                    response = Response.status(Response.Status.FORBIDDEN).entity(errorDTO).build();
-                    return response;
-                }
                 //Getting client credentials from the profile
                 String grantTypes = profile.getGrantType();
                 oauthApplicationInfo.setClientName(profile.getClientName());
@@ -248,51 +244,6 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     /**
-     * Check whether user have any of create, publish or subscribe permissions
-     *
-     * @param username username
-     * @return true if user has any of create, publish or subscribe permissions
-     */
-    private boolean isUserAccessAllowed(String username) {
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("Checking 'subscribe' permission for user " + username);
-            }
-            APIUtil.checkPermission(username, APIConstants.Permissions.API_SUBSCRIBE);
-            return true;
-        } catch (APIManagementException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("User " + username + " does not have subscriber permission", e);
-            }
-        }
-
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("Checking 'api publish' permission for user " + username);
-            }
-            APIUtil.checkPermission(username, APIConstants.Permissions.API_PUBLISH);
-            return true;
-        } catch (APIManagementException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("User " + username + " does not have 'api publish' permission", e);
-            }
-        }
-
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("Checking 'api create' permission for user " + username);
-            }
-            APIUtil.checkPermission(username, APIConstants.Permissions.API_CREATE);
-            return true;
-        } catch (APIManagementException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("User " + username + " does not have 'api create' permission", e);
-            }
-        }
-        return false;
-    }
-
-    /**
      * Retrieve the existing application of given name
      *
      * @param applicationName application name
@@ -311,7 +262,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
             appToReturn = this.fromAppDTOToApplicationInfo(consumerAppDTO.getOauthConsumerKey(),
                     consumerAppDTO.getApplicationName(), consumerAppDTO.getCallbackUrl(),
-                    consumerAppDTO.getOauthConsumerSecret(), saasApp, null, valueMap);
+                    consumerAppDTO.getOauthConsumerSecret(), saasApp, null, consumerAppDTO.getTokenType(), valueMap);
 
         } catch (IdentityOAuthAdminException e) {
             log.error("error occurred while trying to get OAuth Application data", e);
@@ -353,26 +304,42 @@ public class RegistrationServiceImpl implements RegistrationService {
             serviceProvider.setApplicationName(applicationName);
             serviceProvider.setDescription("Service Provider for application " + appName);
             serviceProvider.setSaasApp(applicationInfo.getIsSaasApplication());
-            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[4];
+
+            List<ServiceProviderProperty> serviceProviderProperties = new ArrayList<>();
             ServiceProviderProperty serviceProviderProperty = new ServiceProviderProperty();
             serviceProviderProperty.setName(APP_DISPLAY_NAME);
             serviceProviderProperty.setValue(applicationName);
-            serviceProviderProperties[0] = serviceProviderProperty;
+            serviceProviderProperties.add(serviceProviderProperty);
             ServiceProviderProperty tokenTypeProviderProperty = new ServiceProviderProperty();
             tokenTypeProviderProperty.setName(APIConstants.APP_TOKEN_TYPE);
             tokenTypeProviderProperty.setValue(applicationInfo.getTokenType());
-            serviceProviderProperties[1] = tokenTypeProviderProperty;
+            serviceProviderProperties.add(tokenTypeProviderProperty);
             ServiceProviderProperty consentProperty = new ServiceProviderProperty();
             consentProperty.setDisplayName(APIConstants.APP_SKIP_CONSENT_DISPLAY);
             consentProperty.setName(APIConstants.APP_SKIP_CONSENT_NAME);
             consentProperty.setValue(APIConstants.APP_SKIP_CONSENT_VALUE);
-            serviceProviderProperties[2] = consentProperty;
+            serviceProviderProperties.add(consentProperty);
             ServiceProviderProperty logoutConsentProperty = new ServiceProviderProperty();
             logoutConsentProperty.setDisplayName(APIConstants.APP_SKIP_LOGOUT_CONSENT_DISPLAY);
             logoutConsentProperty.setName(APIConstants.APP_SKIP_LOGOUT_CONSENT_NAME);
             logoutConsentProperty.setValue(APIConstants.APP_SKIP_LOGOUT_CONSENT_VALUE);
-            serviceProviderProperties[3] = logoutConsentProperty;
-            serviceProvider.setSpProperties(serviceProviderProperties);
+            serviceProviderProperties.add(logoutConsentProperty);
+
+            String orgId = null;
+            try {
+                orgId = RestApiUtil.getValidatedOrganization(securityContext);
+            } catch (APIManagementException e) {
+                log.debug("Could not extract orgId from the request. Reason:" + e.getMessage());
+            }
+            if (StringUtils.isNotBlank(orgId)) {
+                ServiceProviderProperty orgIdProperty = new ServiceProviderProperty();
+                orgIdProperty.setDisplayName(APIConstants.APP_ORG_ID_DISPLAY);
+                orgIdProperty.setName(APIConstants.APP_ORG_ID_NAME);
+                orgIdProperty.setValue(orgId);
+                serviceProviderProperties.add(orgIdProperty);
+            }
+            ServiceProviderProperty[] spPropertyArr = serviceProviderProperties.toArray(new ServiceProviderProperty[0]);
+            serviceProvider.setSpProperties(spPropertyArr);
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
             appMgtService.createApplication(serviceProvider, tenantDomain, userName);
 
@@ -415,7 +382,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
             //Setting the SaasApplication attribute to created service provider
             createdServiceProvider.setSaasApp(applicationInfo.getIsSaasApplication());
-            createdServiceProvider.setSpProperties(serviceProviderProperties);
+            createdServiceProvider.setSpProperties(spPropertyArr);
 
             //Updating the service provider with Inbound Authentication Configs and SaasApplication
             appMgtService.updateApplication(createdServiceProvider, tenantDomain, userName);
@@ -427,7 +394,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
             return this.fromAppDTOToApplicationInfo(createdOauthApp.getOauthConsumerKey(),
                     applicationName, createdOauthApp.getCallbackUrl(), createdOauthApp.getOauthConsumerSecret(),
-                    createdServiceProvider.isSaasApp(), userId, valueMap);
+                    createdServiceProvider.isSaasApp(), userId, createdOauthApp.getTokenType(), valueMap);
 
         } catch (IdentityApplicationManagementException e) {
             log.error("Error occurred while creating the client application " + appName,e);
@@ -459,6 +426,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         oauthConsumerAppDTO.setUsername(userName);
         oauthConsumerAppDTO.setOAuthVersion(OAuthConstants.OAuthVersions.VERSION_2);
         oauthConsumerAppDTO.setGrantTypes(grantTypes.trim());
+        oauthConsumerAppDTO.setTokenType(applicationInfo.getTokenType());
         try {
             boolean isHashDisabled = OAuth2Util.isHashDisabled();
             if (isHashDisabled) {
@@ -494,7 +462,7 @@ public class RegistrationServiceImpl implements RegistrationService {
      */
     private OAuthApplicationInfo fromAppDTOToApplicationInfo(String clientId, String clientName,
             String callbackUrl, String clientSecret,
-            boolean saasApp, String appOwner,
+            boolean saasApp, String appOwner, String tokenType,
             Map<String, String> sampleMap) {
 
         OAuthApplicationInfo updatingApp = new OAuthApplicationInfo();
@@ -504,6 +472,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         updatingApp.setClientSecret(clientSecret);
         updatingApp.setIsSaasApplication(saasApp);
         updatingApp.setAppOwner(appOwner);
+        updatingApp.setTokenType(tokenType);
 
         Iterator it = sampleMap.entrySet().iterator();
         while (it.hasNext()) {

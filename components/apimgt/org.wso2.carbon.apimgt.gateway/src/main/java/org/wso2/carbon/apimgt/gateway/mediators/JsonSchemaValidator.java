@@ -28,7 +28,6 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.threatprotection.APIMThreatAnalyzerException;
 import org.wso2.carbon.apimgt.gateway.threatprotection.AnalyzerHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.analyzer.APIMThreatAnalyzer;
-import org.wso2.carbon.apimgt.gateway.threatprotection.configuration.ConfigurationHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.configuration.JSONConfig;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatExceptionHandler;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
@@ -64,14 +63,17 @@ public class JsonSchemaValidator extends AbstractMediator {
         org.apache.axis2.context.MessageContext axis2MC;
         String apiContext;
         String requestMethod;
-        String contentType;
+        String contentType = "";
         Boolean isValid = true;
         axis2MC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         Object contentTypeObject = axis2MC.getProperty(ThreatProtectorConstants.CONTENT_TYPE);
         if (contentTypeObject != null) {
             contentType = contentTypeObject.toString();
         } else {
-            contentType = axis2MC.getProperty(ThreatProtectorConstants.SOAP_CONTENT_TYPE).toString();
+            Object contentTypeProperty = axis2MC.getProperty(ThreatProtectorConstants.SOAP_CONTENT_TYPE);
+            if(contentTypeProperty != null) {
+                contentType = contentTypeProperty.toString();
+            }
         }
         apiContext = messageContext.getProperty(ThreatProtectorConstants.API_CONTEXT).toString();
         requestMethod = axis2MC.getProperty(ThreatProtectorConstants.HTTP_REQUEST_METHOD).toString();
@@ -80,8 +82,8 @@ public class JsonSchemaValidator extends AbstractMediator {
                 (ThreatProtectorConstants.APPLICATION_JSON.equals(contentType) ||
                         ThreatProtectorConstants.TEXT_JSON.equals(contentType))) {
             JSONConfig jsonConfig = configureSchemaProperties(messageContext);
-            ConfigurationHolder.addJsonConfig(jsonConfig);
             APIMThreatAnalyzer apimThreatAnalyzer = AnalyzerHolder.getAnalyzer(contentType);
+            apimThreatAnalyzer.configure(jsonConfig);
             try {
                 inputStreams = GatewayUtils.cloneRequestMessage(messageContext);
                 if (inputStreams != null) {

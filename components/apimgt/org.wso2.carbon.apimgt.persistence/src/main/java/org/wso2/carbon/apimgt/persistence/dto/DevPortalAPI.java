@@ -37,6 +37,8 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String businessOwnerEmail;
     private String transports;
     private String redirectURL;  // (originalStoreUrl)
+    private String apiExternalProductionEndpoint;
+    private String apiExternalSandboxEndpoint;
     private String apiOwner;
     private boolean advertiseOnly;
     private String vendor;
@@ -60,6 +62,8 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String apiSecurity;
     private String visibility;
     private String visibleRoles;
+    private String gatewayVendor;
+    private String asyncTransportProtocols;
 
     public String getContextTemplate() {
         return contextTemplate;
@@ -155,6 +159,22 @@ public class DevPortalAPI extends DevPortalAPIInfo {
 
     public void setRedirectURL(String redirectURL) {
         this.redirectURL = redirectURL;
+    }
+
+    public String getApiExternalProductionEndpoint() {
+        return apiExternalProductionEndpoint;
+    }
+
+    public void setApiExternalProductionEndpoint(String apiExternalProductionEndpoint) {
+        this.apiExternalProductionEndpoint = apiExternalProductionEndpoint;
+    }
+
+    public String getApiExternalSandboxEndpoint() {
+        return apiExternalSandboxEndpoint;
+    }
+
+    public void setApiExternalSandboxEndpoint(String apiExternalSandboxEndpoint) {
+        this.apiExternalSandboxEndpoint = apiExternalSandboxEndpoint;
     }
 
     public String getApiOwner() {
@@ -302,6 +322,20 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.swaggerDefinition = swaggerDefinition;
     }
 
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
+
+
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
+
+    public String getAsyncTransportProtocols() { return asyncTransportProtocols; }
+
+    public void setAsyncTransportProtocols(String asyncTransportProtocols) {
+        this.asyncTransportProtocols = asyncTransportProtocols;
+    }
 
 
     @Override
@@ -309,12 +343,14 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         return "DevPortalAPI [status=" + status + ", isDefaultVersion=" + isDefaultVersion + ", description="
                 + description + ", wsdlUrl=" + wsdlUrl + ", technicalOwner=" + technicalOwner + ", technicalOwnerEmail="
                 + technicalOwnerEmail + ", businessOwner=" + businessOwner + ", businessOwnerEmail="
-                + businessOwnerEmail + ", transports=" + transports + ", redirectURL=" + redirectURL + ", apiOwner="
-                + apiOwner + ", advertiseOnly=" + advertiseOnly + ", subscriptionAvailability="
-                + subscriptionAvailability + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs
-                + ", authorizationHeader=" + authorizationHeader + ", securityScheme=" + securityScheme
-                + ", environments=" + environments + ", apiCategories="
-                + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled + ", keyManagers=" + keyManagers
+                + businessOwnerEmail + ", transports=" + transports + ", redirectURL=" + redirectURL
+                + ", apiExternalProductionEndpoint=" + apiExternalProductionEndpoint + ", apiExternalSandboxEndpoint="
+                + apiExternalSandboxEndpoint + ", apiOwner=" + apiOwner + ", advertiseOnly=" + advertiseOnly
+                + ", subscriptionAvailability=" + subscriptionAvailability + ", subscriptionAvailableOrgs="
+                + subscriptionAvailableOrgs + ", authorizationHeader=" + authorizationHeader + ", securityScheme="
+                + securityScheme + ", environments=" + environments + ", gatewayVendor=" + gatewayVendor
+                +  ", asyncTransportProtocols=" + asyncTransportProtocols  + ", apiCategories=" + apiCategories
+                + ", isMonetizationEnabled=" + isMonetizationEnabled + ", keyManagers=" + keyManagers
                 + ", deploymentEnvironments=" + deploymentEnvironments + ", tags=" + tags + ", additionalProperties="
                 + additionalProperties + ", endpointConfig=" + endpointConfig + ", type=" + type + ", advertisedOnly="
                 + advertisedOnly + ", swaggerDefinition=" + swaggerDefinition + ", contextTemplate=" + contextTemplate

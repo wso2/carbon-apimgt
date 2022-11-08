@@ -33,6 +33,7 @@ public class Application implements CacheableEntity<Integer> {
     private String subName = null;
     private String policy = null;
     private String tokenType = null;
+    private String organization;
     private Set<String> groupIdList = new HashSet<>();
     private Map<String, String> attributes = new Hashtable<>();
 
@@ -121,5 +122,15 @@ public class Application implements CacheableEntity<Integer> {
     public void setUuid(String uuid) {
 
         this.uuid = uuid;
+    }
+
+    public String getOrganization() {
+
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+
+        this.organization = organization;
     }
 }

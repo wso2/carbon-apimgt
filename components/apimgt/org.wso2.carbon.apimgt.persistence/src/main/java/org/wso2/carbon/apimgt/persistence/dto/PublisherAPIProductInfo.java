@@ -32,6 +32,13 @@ public class PublisherAPIProductInfo {
     private String state;
     private String type;
     private String apiSecurity;
+    private String thumbnail;
+    public String getThumbnail() {
+        return thumbnail;
+    }
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
     public String getId() {
         return id;
     }
@@ -80,5 +87,6 @@ public class PublisherAPIProductInfo {
     public void setApiSecurity(String apiSecurity) {
         this.apiSecurity = apiSecurity;
     }
+    private String gatewayVendor;
     
 }

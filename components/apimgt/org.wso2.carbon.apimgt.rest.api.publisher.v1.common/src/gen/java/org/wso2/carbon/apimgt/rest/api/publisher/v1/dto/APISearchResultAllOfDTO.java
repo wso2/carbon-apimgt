@@ -22,10 +22,12 @@ public class APISearchResultAllOfDTO   {
   
     private String description = null;
     private String context = null;
+    private String contextTemplate = null;
     private String version = null;
     private String provider = null;
     private String status = null;
     private String thumbnailUri = null;
+    private Boolean advertiseOnly = null;
 
   /**
    * A brief description about the API
@@ -61,6 +63,24 @@ public class APISearchResultAllOfDTO   {
   }
   public void setContext(String context) {
     this.context = context;
+  }
+
+  /**
+   * The templated context of the API
+   **/
+  public APISearchResultAllOfDTO contextTemplate(String contextTemplate) {
+    this.contextTemplate = contextTemplate;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "CalculatorAPI/{version}", value = "The templated context of the API")
+  @JsonProperty("contextTemplate")
+  public String getContextTemplate() {
+    return contextTemplate;
+  }
+  public void setContextTemplate(String contextTemplate) {
+    this.contextTemplate = contextTemplate;
   }
 
   /**
@@ -134,6 +154,23 @@ public class APISearchResultAllOfDTO   {
     this.thumbnailUri = thumbnailUri;
   }
 
+  /**
+   **/
+  public APISearchResultAllOfDTO advertiseOnly(Boolean advertiseOnly) {
+    this.advertiseOnly = advertiseOnly;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("advertiseOnly")
+  public Boolean isAdvertiseOnly() {
+    return advertiseOnly;
+  }
+  public void setAdvertiseOnly(Boolean advertiseOnly) {
+    this.advertiseOnly = advertiseOnly;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -146,15 +183,17 @@ public class APISearchResultAllOfDTO   {
     APISearchResultAllOfDTO apISearchResultAllOf = (APISearchResultAllOfDTO) o;
     return Objects.equals(description, apISearchResultAllOf.description) &&
         Objects.equals(context, apISearchResultAllOf.context) &&
+        Objects.equals(contextTemplate, apISearchResultAllOf.contextTemplate) &&
         Objects.equals(version, apISearchResultAllOf.version) &&
         Objects.equals(provider, apISearchResultAllOf.provider) &&
         Objects.equals(status, apISearchResultAllOf.status) &&
-        Objects.equals(thumbnailUri, apISearchResultAllOf.thumbnailUri);
+        Objects.equals(thumbnailUri, apISearchResultAllOf.thumbnailUri) &&
+        Objects.equals(advertiseOnly, apISearchResultAllOf.advertiseOnly);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, version, provider, status, thumbnailUri);
+    return Objects.hash(description, context, contextTemplate, version, provider, status, thumbnailUri, advertiseOnly);
   }
 
   @Override
@@ -164,10 +203,12 @@ public class APISearchResultAllOfDTO   {
     
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
+    sb.append("    contextTemplate: ").append(toIndentedString(contextTemplate)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
+    sb.append("    advertiseOnly: ").append(toIndentedString(advertiseOnly)).append("\n");
     sb.append("}");
     return sb.toString();
   }

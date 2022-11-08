@@ -49,9 +49,6 @@ import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
-import org.wso2.carbon.apimgt.tracing.TracingSpan;
-import org.wso2.carbon.apimgt.tracing.TracingTracer;
-import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -132,7 +129,6 @@ public class APIKeyValidator {
      */
     public APIKeyValidationInfoDTO getKeyValidationInfo(String context, String apiKey,
                                                         String apiVersion, String authenticationScheme,
-                                                        String clientDomain,
                                                         String matchingResource, String httpVerb,
                                                         boolean defaultVersionInvoked, List<String> keyManagers)
             throws APISecurityException {
@@ -186,7 +182,7 @@ public class APIKeyValidator {
         }
 
         String tenantDomain = getTenantDomain();
-        APIKeyValidationInfoDTO info = doGetKeyValidationInfo(context, prefixedVersion, apiKey, authenticationScheme, clientDomain,
+        APIKeyValidationInfoDTO info = doGetKeyValidationInfo(context, prefixedVersion, apiKey, authenticationScheme,
                 matchingResource, httpVerb, tenantDomain, keyManagers);
         if (info != null) {
             if (gatewayKeyCacheEnabled) {
@@ -247,12 +243,12 @@ public class APIKeyValidator {
     }
 
     protected APIKeyValidationInfoDTO doGetKeyValidationInfo(String context, String apiVersion, String apiKey,
-                                                             String authenticationScheme, String clientDomain,
+                                                             String authenticationScheme,
                                                              String matchingResource, String httpVerb,
                                                              String tenantDomain, List<String> keyManagers)
             throws APISecurityException {
 
-        return dataStore.getAPIKeyData(context, apiVersion, apiKey, authenticationScheme, clientDomain,
+        return dataStore.getAPIKeyData(context, apiVersion, apiKey, authenticationScheme,
                 matchingResource, httpVerb, tenantDomain, keyManagers);
     }
 
@@ -286,13 +282,7 @@ public class APIKeyValidator {
     public String getResourceAuthenticationScheme(MessageContext synCtx) throws APISecurityException {
         String authType = "";
         List<VerbInfoDTO> verbInfoList;
-        TracingSpan span = null;
         try {
-            if (Util.tracingEnabled()) {
-                TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
-                TracingTracer tracer = Util.getGlobalTracer();
-                span = Util.startSpan(APIMgtGatewayConstants.FIND_MATCHING_VERB, keySpan, tracer);
-            }
             verbInfoList = findMatchingVerb(synCtx);
             if (verbInfoList != null && verbInfoList.toArray().length > 0) {
                 for (VerbInfoDTO verb : verbInfoList) {
@@ -307,16 +297,8 @@ public class APIKeyValidator {
                 synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoList);
             }
         } catch (ResourceNotFoundException e) {
-            if (Util.tracingEnabled() && span != null) {
-                Util.setTag(span, APIMgtGatewayConstants.ERROR,
-                        APIMgtGatewayConstants.RESOURCE_AUTH_ERROR);
-            }
             log.error("Could not find matching resource for request", e);
             return APIConstants.NO_MATCHING_AUTH_SCHEME;
-        } finally {
-            if (Util.tracingEnabled()) {
-                Util.finishSpan(span);
-            }
         }
 
         if (!authType.isEmpty()) {
@@ -366,6 +348,10 @@ public class APIKeyValidator {
             for (String resourceString : resourceArray) {
                 VerbInfoDTO verbInfo;
                 if (isGatewayAPIResourceValidationEnabled) {
+                    String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(apiContext, apiVersion);
+                    if (!getResourceCache().containsKey(apiCacheKey)) {
+                        break;
+                    }
                     resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
                             resourceString, httpMethod);
                     verbInfo = (VerbInfoDTO) getResourceCache().get(resourceCacheKey);
@@ -422,7 +408,11 @@ public class APIKeyValidator {
             }
 
             resourceString = selectedResource.getDispatcherHelper().getString();
+            resourceArray = new ArrayList<>(Arrays.asList(resourceString));
             resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion, resourceString, httpMethod);
+            synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
+            synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
+            synCtx.setProperty(APIConstants.REST_METHOD, httpMethod);
 
             if (log.isDebugEnabled()) {
                 log.debug("Selected Resource: " + resourceString);
@@ -457,12 +447,6 @@ public class APIKeyValidator {
             if (log.isDebugEnabled()) {
                 log.debug("Could not find API object in cache for key: " + apiCacheKey);
             }
-            TracingSpan apiInfoDTOSpan = null;
-            if (Util.tracingEnabled()) {
-                TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
-                apiInfoDTOSpan =
-                        Util.startSpan(APIMgtGatewayConstants.DO_GET_API_INFO_DTO, keySpan, Util.getGlobalTracer());
-            }
 
             String apiType = (String) synCtx.getProperty(APIMgtGatewayConstants.API_TYPE);
 
@@ -470,10 +454,6 @@ public class APIKeyValidator {
                 apiInfoDTO = doGetAPIProductInfo(synCtx, apiContext, apiVersion);
             } else {
                 apiInfoDTO = doGetAPIInfo(synCtx, apiContext, apiVersion);
-            }
-
-            if (Util.tracingEnabled()) {
-                Util.finishSpan(apiInfoDTOSpan);
             }
 
             if (isGatewayAPIResourceValidationEnabled) {

@@ -70,14 +70,6 @@ public class ServiceReferenceHolder {
         this.indexLoader = indexLoader;
     }
 
-    public static void setUserRealm(UserRealm realm) {
-        userRealm = realm;
-    }
-
-    public static UserRealm getUserRealm() {
-        return userRealm;
-    }
-
     public static ConfigurationContextService getContextService() {
         return contextService;
     }

@@ -47,9 +47,6 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
-import org.wso2.carbon.apimgt.tracing.TracingSpan;
-import org.wso2.carbon.apimgt.tracing.TracingTracer;
-import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -79,32 +76,16 @@ public class APIKeyValidationService {
      * @throws APIKeyMgtException Error occurred when accessing the underlying database or registry.
      */
     public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,
-                                               String requiredAuthenticationLevel, String clientDomain,
-                                               String matchingResource, String httpVerb,String tenantDomain,
+                                               String requiredAuthenticationLevel,
+                                               String matchingResource, String httpVerb, String tenantDomain,
                                                List keyManagers)
             throws APIKeyMgtException, APIManagementException {
-
-        TracingSpan validateMainSpan = null;
-        TracingSpan getAccessTokenCacheSpan = null;
-        TracingSpan fetchingKeyValDTOSpan = null;
-        TracingSpan validateTokenSpan = null;
-        TracingSpan validateSubscriptionSpan = null;
-        TracingSpan validateScopeSpan = null;
-        TracingSpan generateJWTSpan = null;
-        TracingSpan keyCache = null;
-        TracingSpan keyValResponseSpan = null;
-        TracingTracer tracer = Util.getGlobalTracer();
 
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_MAIN"));
         Timer.Context timerContext = timer.start();
 
         MessageContext axis2MessageContext = MessageContext.getCurrentMessageContext();
-        if (Util.tracingEnabled() && axis2MessageContext != null) {
-            Map map = (Map) axis2MessageContext.getProperty(MessageContext.TRANSPORT_HEADERS);
-            TracingSpan spanContext = Util.extract(tracer, map);
-            validateMainSpan = Util.startSpan(TracingConstants.VALIDATE_MAIN, spanContext, tracer);
-        }
         Map headersMap = null;
         String activityID = null;
         try {
@@ -142,7 +123,6 @@ public class APIKeyValidationService {
 
         TokenValidationContext validationContext = new TokenValidationContext();
         validationContext.setAccessToken(accessToken);
-        validationContext.setClientDomain(clientDomain);
         validationContext.setContext(context);
         validationContext.setHttpVerb(httpVerb);
         validationContext.setMatchingResource(matchingResource);
@@ -152,78 +132,44 @@ public class APIKeyValidationService {
         validationContext.setTenantDomain(tenantDomain);
         validationContext.setKeyManagers(keyManagers);
 
-        if (Util.tracingEnabled()) {
-            getAccessTokenCacheSpan =
-                    Util.startSpan(TracingConstants.GET_ACCESS_TOKEN_CACHE_KEY, validateMainSpan, tracer);
-        }
         String cacheKey = APIUtil.getAccessTokenCacheKey(accessToken,
                                                          context, version, matchingResource, httpVerb, requiredAuthenticationLevel);
 
         validationContext.setCacheKey(cacheKey);
-        if (Util.tracingEnabled()) {
-            Util.finishSpan(getAccessTokenCacheSpan);
-            fetchingKeyValDTOSpan =
-                    Util.startSpan(TracingConstants.FETCHING_API_KEY_VAL_INFO_DTO_FROM_CACHE, validateMainSpan, tracer);
-        }
         APIKeyValidationInfoDTO infoDTO = APIKeyMgtUtil.getFromKeyManagerCache(cacheKey);
-        if (Util.tracingEnabled()) {
-            Util.finishSpan(fetchingKeyValDTOSpan);
-        }
 
         if (infoDTO != null) {
             validationContext.setCacheHit(true);
             log.debug("APIKeyValidationInfoDTO fetched from cache. Setting cache hit to true...");
             validationContext.setValidationInfoDTO(infoDTO);
         }
-
         log.debug("Before calling Validate Token method...");
 
         Timer timer2 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_TOKEN"));
         Timer.Context timerContext2 = timer2.start();
-        if (Util.tracingEnabled()) {
-            validateTokenSpan = Util.startSpan(TracingConstants.VALIDATE_TOKEN, validateMainSpan, tracer);
-        }
         KeyValidationHandler keyValidationHandler =
                 ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
         boolean state = keyValidationHandler.validateToken(validationContext);
         timerContext2.stop();
-        if (Util.tracingEnabled()) {
-            Util.finishSpan(validateTokenSpan);
-        }
         log.debug("State after calling validateToken ... " + state);
 
         if (state) {
             Timer timer3 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_SUBSCRIPTION"));
             Timer.Context timerContext3 = timer3.start();
-            if (Util.tracingEnabled()) {
-                validateSubscriptionSpan =
-                        Util.startSpan(TracingConstants.VALIDATE_SUBSCRIPTION, validateMainSpan, tracer);
-            }
             state = keyValidationHandler.validateSubscription(validationContext);
             timerContext3.stop();
-            if (Util.tracingEnabled()) {
-                Util.finishSpan(validateSubscriptionSpan);
-            }
         }
-
         log.debug("State after calling validateSubscription... " + state);
 
         if (state) {
             Timer timer4 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_SCOPES"));
             Timer.Context timerContext4 = timer4.start();
-            if (Util.tracingEnabled()) {
-                validateScopeSpan = Util.startSpan(TracingConstants.VALIDATE_SCOPES, validateMainSpan, tracer);
-            }
             state = keyValidationHandler.validateScopes(validationContext);
             timerContext4.stop();
-            if (Util.tracingEnabled()) {
-                Util.finishSpan(validateScopeSpan);
-            }
         }
-
         log.debug("State after calling validateScopes... " + state);
 
         if (state && APIKeyMgtDataHolder.isJwtGenerationEnabled() &&
@@ -231,47 +177,23 @@ public class APIKeyValidationService {
             Timer timer5 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GENERATE_JWT"));
             Timer.Context timerContext5 = timer5.start();
-            if (Util.tracingEnabled()) {
-                generateJWTSpan = Util.startSpan(TracingConstants.GENERATE_JWT, validateMainSpan, tracer);
-            }
             keyValidationHandler.generateConsumerToken(validationContext);
             timerContext5.stop();
-            if (Util.tracingEnabled()) {
-                Util.finishSpan(generateJWTSpan);
-            }
         }
         log.debug("State after calling generateConsumerToken... " + state);
 
         if (!validationContext.isCacheHit()) {
-            if (Util.tracingEnabled()) {
-                keyCache = Util.startSpan(TracingConstants.WRITE_TO_KEY_MANAGER_CACHE, validateMainSpan, tracer);
-            }
             APIKeyMgtUtil.writeToKeyManagerCache(cacheKey, validationContext.getValidationInfoDTO());
-            if (Util.tracingEnabled()) {
-                Util.finishSpan(keyCache);
-            }
-        }
-
-        if (Util.tracingEnabled()) {
-            keyValResponseSpan =
-                    Util.startSpan(TracingConstants.PUBLISHING_KEY_VALIDATION_RESPONSE, validateMainSpan, tracer);
         }
         if (log.isDebugEnabled() && axis2MessageContext != null) {
             logMessageDetails(axis2MessageContext, validationContext.getValidationInfoDTO());
         }
-
         if (log.isDebugEnabled()) {
             log.debug("APIKeyValidationInfoDTO before returning : " + validationContext.getValidationInfoDTO());
             log.debug("KeyValidation response from keymanager to gateway for access token:" + accessToken + " at "
                     + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
         }
-        if (Util.tracingEnabled()) {
-            Util.finishSpan(keyValResponseSpan);
-        }
         timerContext.stop();
-        if (Util.tracingEnabled() && validateMainSpan != null) {
-            Util.finishSpan(validateMainSpan);
-        }
         return validationContext.getValidationInfoDTO();
     }
 
@@ -355,9 +277,14 @@ public class APIKeyValidationService {
                     apiPolicy = new SubscriptionDataLoaderImpl().getAPIPolicy(urlMapping.getThrottlingPolicy(),
                             tenantDomain);
                     if (apiPolicy != null) {
-                        store.addOrUpdateApiPolicy(apiPolicy);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Update SubscriptionDataStore API Policy for " + apiPolicy.getCacheKey());
+                        if (apiPolicy.getName() != null) {
+                            store.addOrUpdateApiPolicy(apiPolicy);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Update SubscriptionDataStore API Policy for " + apiPolicy.getCacheKey());
+                            }
+                        } else {
+                            throw new APIManagementException("Exception while loading api policy for " +
+                                    urlMapping.getThrottlingPolicy() + " for domain " + tenantDomain);
                         }
                     }
 
@@ -367,9 +294,14 @@ public class APIKeyValidationService {
                 apiPolicy = new SubscriptionDataLoaderImpl().getAPIPolicy(urlMapping.getThrottlingPolicy(),
                         tenantDomain);
                 if (apiPolicy != null) {
-                    store.addOrUpdateApiPolicy(apiPolicy);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Update SubscriptionDataStore API Policu for " + apiPolicy.getCacheKey());
+                    if (apiPolicy.getName() != null) {
+                        store.addOrUpdateApiPolicy(apiPolicy);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Update SubscriptionDataStore API Policy for " + apiPolicy.getCacheKey());
+                        }
+                    } else {
+                        throw new APIManagementException("Exception while loading api policy for " +
+                                urlMapping.getThrottlingPolicy() + " for domain " + tenantDomain);
                     }
                 }
             }

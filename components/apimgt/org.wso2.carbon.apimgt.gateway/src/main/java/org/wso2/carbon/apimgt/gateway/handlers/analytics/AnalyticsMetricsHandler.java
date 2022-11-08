@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDat
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.handlers.DataPublisherUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.AsyncAnalyticsDataProvider;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.InboundWebsocketConstants;
@@ -81,23 +82,18 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
         if (messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
             return true;
         }
-        if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
-            if (log.isDebugEnabled()){
-                log.debug("Skipping prototype APIs as analytics does not support this type of API");
-            }
-            return true;
-        }
         AnalyticsDataProvider provider;
         Object skipPublishMetrics = messageContext.getProperty(Constants.SKIP_DEFAULT_METRICS_PUBLISHING);
         if (skipPublishMetrics != null && (Boolean) skipPublishMetrics) {
             provider = new AsyncAnalyticsDataProvider(messageContext);
         } else {
-            provider = new SynapseAnalyticsDataProvider(messageContext);
+            provider = new SynapseAnalyticsDataProvider(messageContext,
+                    ServiceReferenceHolder.getInstance().getAnalyticsCustomDataProvider());
         }
         GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
         try {
             dataCollector.collectData();
-        } catch (AnalyticsException e) {
+        } catch (Exception e) {
             log.error("Error Occurred when collecting data", e);
         }
         return true;

@@ -30,8 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -102,31 +100,18 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor {
 
         super.complete(workflowDTO);
 
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
 
         String tenantDomain = workflowDTO.getTenantDomain();
         try {
 
             UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
 
-            String adminUsername = signupConfig.getAdminUserName();
-            String adminPassword = signupConfig.getAdminPassword();
-            if (serverURL == null) {
-                throw new WorkflowException("Can't connect to the authentication manager. serverUrl is missing");
-            } else if(adminUsername == null) {
-                throw new WorkflowException("Can't connect to the authentication manager. adminUsername is missing");
-            } else if(adminPassword == null) {
-                throw new WorkflowException("Can't connect to the authentication manager. adminPassword is missing");
-            }
 
             String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(workflowDTO.getWorkflowReference());
 
             if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
                 try {
-                    updateRolesOfUser(serverURL, adminUsername, adminPassword, tenantAwareUserName,
-                            SelfSignUpUtil.getRoleNames(signupConfig), tenantDomain);
+                    updateRolesOfUser(tenantAwareUserName, signupConfig.getRoles(), tenantDomain);
                 } catch (Exception e) {
 
                     // updateRolesOfUser throws generic Exception. Therefore generic Exception is caught
@@ -135,7 +120,7 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor {
             } else {
                 try {
                     /* Remove created user */
-                    deleteUser(serverURL, adminUsername, adminPassword, tenantAwareUserName);
+                    deleteUser(tenantDomain, tenantAwareUserName);
                 } catch (Exception e) {
                     throw new WorkflowException("Error while deleting the user", e);
                 }

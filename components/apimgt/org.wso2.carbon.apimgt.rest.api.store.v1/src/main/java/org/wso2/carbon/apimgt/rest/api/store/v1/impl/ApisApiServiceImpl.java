@@ -70,7 +70,6 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.AsyncAPIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -98,13 +97,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, organization, offset,
-                    limit);
+                    limit, null, null);
             
 
             Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);
 
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, organization);
             //Add pagination section in the response
             Object totalLength = allMatchedApisMap.get("length");
             Integer totalAvailableAPis = 0;
@@ -182,10 +181,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, organization);
             API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                String schemaContent = apiConsumer.getGraphqlSchema(apiIdentifier);
+                String schemaContent = apiConsumer.getGraphqlSchemaDefinition(apiId,organization);
                 List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);
                 GraphQLSchemaTypeListDTO graphQLSchemaTypeListDTO =
                         GraphqlQueryAnalysisMappingUtil.fromGraphqlSchemaTypeListtoDTO(typeList);
@@ -265,6 +263,39 @@ public class ApisApiServiceImpl implements ApisApiService {
             throw new APIManagementException("Error while retrieving comment content location for API " + apiId);
         }
         return null;
+    }
+
+    /**
+     * Retrieves the async api specification document of an API
+     *
+     * @param apiId API identifier
+     * @param environmentName name of the gateway environment
+     * @param ifNoneMatch If-None-Match header value
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @param messageContext CXF message context
+     * @return Async API Specification document of the API for the given cluster or gateway environment
+     */
+    @Override
+    public Response apisApiIdAsyncApiSpecificationGet(String apiId, String environmentName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+            try {
+                String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+                String asyncApiSpecification = apiConsumer.getAsyncAPIDefinition(apiId, organization);
+
+                return Response.ok().entity(asyncApiSpecification).header("Content-Disposition",
+                        "attachment; filename=\"" + "async_api.json" + "\"" ).build();
+
+            } catch (APIManagementException e) {
+                if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
+                } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                } else {
+                    String errorMessage = "Error while retrieving Async API Specification of API : " + apiId;
+                    RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                }
+            }
+            return null;
     }
 
     @Override
@@ -680,14 +711,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             if (api.getSwaggerDefinition() != null) {
-                api.setSwaggerDefinition(APIUtil.removeXMediationScriptsFromSwagger(api.getSwaggerDefinition()));
+                api.setSwaggerDefinition(APIUtil.removeInterceptorsFromSwagger(
+                        APIUtil.removeXMediationScriptsFromSwagger(api.getSwaggerDefinition())));
             } else {
                 api.setSwaggerDefinition(apiConsumer.getOpenAPIDefinition(apiId, organization));
             }
 
             // gets the first available environment if environment is not provided
             if (StringUtils.isEmpty(environmentName)) {
-                Map<String, Environment> existingEnvironments = APIUtil.getEnvironments();
+                Map<String, Environment> existingEnvironments = APIUtil.getEnvironments(organization);
 
                 // find a valid environment name from API
                 // gateway environment may be invalid due to inconsistent state of the API
@@ -965,7 +997,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIDTO apiInfo = getAPIByAPIId(apiId, organization);
         List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
-                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), xWSO2Tenant);
+                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), organization);
 
         if (apiInfo != null ) {
             List<APITiersDTO> apiTiers = apiInfo.getTiers();
@@ -992,7 +1024,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // Extracting clicked API name by the user, for the recommendation system
             String userName = RestApiCommonUtil.getLoggedInUsername();
-            apiConsumer.publishClickedAPI(api, userName);
+            apiConsumer.publishClickedAPI(api, userName, organization);
 
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
                             || APIConstants.DEPRECATED.equals(status)) {

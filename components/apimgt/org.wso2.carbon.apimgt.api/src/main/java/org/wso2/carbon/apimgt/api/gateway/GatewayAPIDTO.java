@@ -21,6 +21,8 @@
 package org.wso2.carbon.apimgt.api.gateway;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This Contains the API Related data to deploy in Gateway.
@@ -35,6 +37,7 @@ public class GatewayAPIDTO implements Serializable {
     private String tenantDomain;
     private String apiId;
     private String apiDefinition;
+    private String graphQLSchema;
     private GatewayContentDTO[] sequenceToBeAdd;
     private String[] sequencesToBeRemove;
     private GatewayContentDTO[] localEntriesToBeAdd;
@@ -45,7 +48,7 @@ public class GatewayAPIDTO implements Serializable {
     private String[] endpointEntriesToBeRemove;
     private CredentialDto[] credentialsToBeAdd ;
     private String[] credentialsToBeRemove;
-
+    private List<String> keyManagers = new ArrayList<>();
     public String getName() {
 
         return name;
@@ -204,5 +207,23 @@ public class GatewayAPIDTO implements Serializable {
     public void setCredentialsToBeRemove(String[] credentialsToBeRemove) {
 
         this.credentialsToBeRemove = credentialsToBeRemove;
+    }
+
+    public String getGraphQLSchema() {
+        return graphQLSchema;
+    }
+
+    public void setGraphQLSchema(String graphQLSchema) {
+        this.graphQLSchema = graphQLSchema;
+    }
+
+    public List<String> getKeyManagers() {
+
+        return keyManagers;
+    }
+
+    public void setKeyManagers(List<String> keyManagers) {
+
+        this.keyManagers = keyManagers;
     }
 }

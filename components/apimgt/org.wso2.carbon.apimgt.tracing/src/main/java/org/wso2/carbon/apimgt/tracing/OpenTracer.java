@@ -22,7 +22,10 @@ import io.opentracing.Tracer;
 
 /**
  * This interface used to implement OpenTracing Bridge Implementations for APIM.
+ * @deprecated
+ * <p> Use {@link org.wso2.carbon.apimgt.tracing.telemetry.APIMOpenTelemetry} instead</p>
  */
+@Deprecated
 public interface OpenTracer {
 
     Tracer getTracer(String serviceName);

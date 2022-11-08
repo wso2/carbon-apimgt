@@ -26,7 +26,7 @@ import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -98,16 +98,13 @@ public class TestUtils {
         UserRealm bootstrapRealm = Mockito.mock(UserRealm.class);
         
         PowerMockito.when(systemReg.getUserRealm()).thenReturn(userRealm);        
-        PowerMockito.doNothing().when(ServiceReferenceHolder.class); 
-        ServiceReferenceHolder.setUserRealm(userRealm);
         org.wso2.carbon.user.api.UserRealm userR = Mockito.mock(org.wso2.carbon.user.api.UserRealm.class);
         PowerMockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userR);
         AuthorizationManager authManager = Mockito.mock(AuthorizationManager.class);
         PowerMockito.when(userR.getAuthorizationManager()).thenReturn(authManager);
         PowerMockito.when(realmService.getBootstrapRealm()).thenReturn(bootstrapRealm);
-        ServiceReferenceHolder.setUserRealm(bootstrapRealm);
 
-        PowerMockito.when(tm.getTenantId(Matchers.anyString())).thenReturn(tenantId);
+        PowerMockito.when(tm.getTenantId(ArgumentMatchers.anyString())).thenReturn(tenantId);
 
         return sh;
     }

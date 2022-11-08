@@ -15,10 +15,7 @@
  */
 package org.wso2.carbon.apimgt.impl.utils;
 
-
-import org.wso2.balana.attr.BooleanAttribute;
 import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.utils.xml.StringUtils;
 
 import java.io.Serializable;
 import java.util.Comparator;

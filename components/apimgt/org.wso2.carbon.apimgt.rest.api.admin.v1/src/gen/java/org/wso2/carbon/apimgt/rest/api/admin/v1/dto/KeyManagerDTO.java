@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ClaimMappingEntryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerCertificatesDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerEndpointDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.TokenValidationDTO;
 import javax.validation.constraints.*;
 
@@ -34,9 +35,12 @@ public class KeyManagerDTO   {
     private String introspectionEndpoint = null;
     private String clientRegistrationEndpoint = null;
     private String tokenEndpoint = null;
+    private String displayTokenEndpoint = null;
     private String revokeEndpoint = null;
+    private String displayRevokeEndpoint = null;
     private String userInfoEndpoint = null;
     private String authorizeEndpoint = null;
+    private List<KeyManagerEndpointDTO> endpoints = new ArrayList<KeyManagerEndpointDTO>();
     private KeyManagerCertificatesDTO certificates = null;
     private String issuer = null;
     private String alias = null;
@@ -59,7 +63,8 @@ public class KeyManagerDTO   {
     @XmlEnum(String.class)
     public enum TokenTypeEnum {
         EXCHANGED("EXCHANGED"),
-        ORIGINAL("ORIGINAL");
+        DIRECT("DIRECT"),
+        BOTH("BOTH");
         private String value;
 
         TokenTypeEnum (String v) {
@@ -85,7 +90,7 @@ public class KeyManagerDTO   {
 return null;
         }
     }
-    private TokenTypeEnum tokenType = TokenTypeEnum.ORIGINAL;
+    private TokenTypeEnum tokenType = TokenTypeEnum.DIRECT;
 
   /**
    **/
@@ -246,6 +251,23 @@ return null;
 
   /**
    **/
+  public KeyManagerDTO displayTokenEndpoint(String displayTokenEndpoint) {
+    this.displayTokenEndpoint = displayTokenEndpoint;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "https://localhost:9444/oauth2/token", value = "")
+  @JsonProperty("displayTokenEndpoint")
+  public String getDisplayTokenEndpoint() {
+    return displayTokenEndpoint;
+  }
+  public void setDisplayTokenEndpoint(String displayTokenEndpoint) {
+    this.displayTokenEndpoint = displayTokenEndpoint;
+  }
+
+  /**
+   **/
   public KeyManagerDTO revokeEndpoint(String revokeEndpoint) {
     this.revokeEndpoint = revokeEndpoint;
     return this;
@@ -259,6 +281,23 @@ return null;
   }
   public void setRevokeEndpoint(String revokeEndpoint) {
     this.revokeEndpoint = revokeEndpoint;
+  }
+
+  /**
+   **/
+  public KeyManagerDTO displayRevokeEndpoint(String displayRevokeEndpoint) {
+    this.displayRevokeEndpoint = displayRevokeEndpoint;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "https://localhost:9444/oauth2/revoke", value = "")
+  @JsonProperty("displayRevokeEndpoint")
+  public String getDisplayRevokeEndpoint() {
+    return displayRevokeEndpoint;
+  }
+  public void setDisplayRevokeEndpoint(String displayRevokeEndpoint) {
+    this.displayRevokeEndpoint = displayRevokeEndpoint;
   }
 
   /**
@@ -293,6 +332,24 @@ return null;
   }
   public void setAuthorizeEndpoint(String authorizeEndpoint) {
     this.authorizeEndpoint = authorizeEndpoint;
+  }
+
+  /**
+   **/
+  public KeyManagerDTO endpoints(List<KeyManagerEndpointDTO> endpoints) {
+    this.endpoints = endpoints;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("endpoints")
+  public List<KeyManagerEndpointDTO> getEndpoints() {
+    return endpoints;
+  }
+  public void setEndpoints(List<KeyManagerEndpointDTO> endpoints) {
+    this.endpoints = endpoints;
   }
 
   /**
@@ -590,7 +647,7 @@ return null;
   }
 
   /**
-   * The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED and ORIGINAL.
+   * The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT and BOTH.
    **/
   public KeyManagerDTO tokenType(TokenTypeEnum tokenType) {
     this.tokenType = tokenType;
@@ -598,7 +655,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "EXCHANGED", value = "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED and ORIGINAL.")
+  @ApiModelProperty(example = "EXCHANGED", value = "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT and BOTH.")
   @JsonProperty("tokenType")
   public TokenTypeEnum getTokenType() {
     return tokenType;
@@ -626,9 +683,12 @@ return null;
         Objects.equals(introspectionEndpoint, keyManager.introspectionEndpoint) &&
         Objects.equals(clientRegistrationEndpoint, keyManager.clientRegistrationEndpoint) &&
         Objects.equals(tokenEndpoint, keyManager.tokenEndpoint) &&
+        Objects.equals(displayTokenEndpoint, keyManager.displayTokenEndpoint) &&
         Objects.equals(revokeEndpoint, keyManager.revokeEndpoint) &&
+        Objects.equals(displayRevokeEndpoint, keyManager.displayRevokeEndpoint) &&
         Objects.equals(userInfoEndpoint, keyManager.userInfoEndpoint) &&
         Objects.equals(authorizeEndpoint, keyManager.authorizeEndpoint) &&
+        Objects.equals(endpoints, keyManager.endpoints) &&
         Objects.equals(certificates, keyManager.certificates) &&
         Objects.equals(issuer, keyManager.issuer) &&
         Objects.equals(alias, keyManager.alias) &&
@@ -651,7 +711,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, type, description, wellKnownEndpoint, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, revokeEndpoint, userInfoEndpoint, authorizeEndpoint, certificates, issuer, alias, scopeManagementEndpoint, availableGrantTypes, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, additionalProperties, tokenType);
+    return Objects.hash(id, name, displayName, type, description, wellKnownEndpoint, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, displayTokenEndpoint, revokeEndpoint, displayRevokeEndpoint, userInfoEndpoint, authorizeEndpoint, endpoints, certificates, issuer, alias, scopeManagementEndpoint, availableGrantTypes, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, additionalProperties, tokenType);
   }
 
   @Override
@@ -668,9 +728,12 @@ return null;
     sb.append("    introspectionEndpoint: ").append(toIndentedString(introspectionEndpoint)).append("\n");
     sb.append("    clientRegistrationEndpoint: ").append(toIndentedString(clientRegistrationEndpoint)).append("\n");
     sb.append("    tokenEndpoint: ").append(toIndentedString(tokenEndpoint)).append("\n");
+    sb.append("    displayTokenEndpoint: ").append(toIndentedString(displayTokenEndpoint)).append("\n");
     sb.append("    revokeEndpoint: ").append(toIndentedString(revokeEndpoint)).append("\n");
+    sb.append("    displayRevokeEndpoint: ").append(toIndentedString(displayRevokeEndpoint)).append("\n");
     sb.append("    userInfoEndpoint: ").append(toIndentedString(userInfoEndpoint)).append("\n");
     sb.append("    authorizeEndpoint: ").append(toIndentedString(authorizeEndpoint)).append("\n");
+    sb.append("    endpoints: ").append(toIndentedString(endpoints)).append("\n");
     sb.append("    certificates: ").append(toIndentedString(certificates)).append("\n");
     sb.append("    issuer: ").append(toIndentedString(issuer)).append("\n");
     sb.append("    alias: ").append(toIndentedString(alias)).append("\n");

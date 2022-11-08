@@ -19,26 +19,25 @@ package org.wso2.carbon.apimgt.gateway.utils;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.util.JavaUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsConstants;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsDataPublisher;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 
 public class APIMgtGoogleAnalyticsUtils {
     private static final Log log = LogFactory.getLog(APIMgtGoogleAnalyticsUtils.class);
@@ -67,22 +66,18 @@ public class APIMgtGoogleAnalyticsUtils {
      * @param tenantDomain Tenant domain of the current tenant
      */
     public void init(String tenantDomain) {
-        configKey = APIConstants.GA_CONFIGURATION_LOCATION;
 
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry();
-            Resource resource = registry.get(configKey);
-            InputStream in = resource.getContentStream();
-            StAXOMBuilder builder = new StAXOMBuilder(in);
-            this.gaConfig = new GoogleAnalyticsConfig(builder.getDocumentElement());
-        } catch (RegistryException | XMLStreamException e) {
-            // flow should not break. Therefore ignoring the exception
+        String googleAnalyticsConfig = DataHolder.getInstance().getGoogleAnalyticsConfig(tenantDomain);
+        if (StringUtils.isNotEmpty(googleAnalyticsConfig)) {
+            try (InputStream in = new ByteArrayInputStream(googleAnalyticsConfig.getBytes())) {
+                StAXOMBuilder builder = new StAXOMBuilder(in);
+                this.gaConfig = new GoogleAnalyticsConfig(builder.getDocumentElement());
+            } catch (XMLStreamException | IOException e) {
+                // flow should not break. Therefore ignoring the exception
+                log.error("Failed to retrieve google analytics configurations for tenant:" + tenantDomain);
+            }
+        } else {
             log.error("Failed to retrieve google analytics configurations for tenant:" + tenantDomain);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 

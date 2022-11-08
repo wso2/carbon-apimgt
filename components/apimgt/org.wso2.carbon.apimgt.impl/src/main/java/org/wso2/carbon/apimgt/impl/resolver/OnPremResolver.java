@@ -38,7 +38,10 @@ public class OnPremResolver implements OrganizationResolver {
     public String resolve(Map<String, Object> properties) throws APIManagementException {
         ArrayList requestedTenantDomain = (ArrayList) ((TreeMap) (properties.get(APIConstants.PROPERTY_HEADERS_KEY)))
                 .get(HEADER_X_WSO2_TENANT);
-        
+        if (requestedTenantDomain == null || requestedTenantDomain.isEmpty()) {
+            requestedTenantDomain = (ArrayList) ((TreeMap) (properties.get(APIConstants.PROPERTY_HEADERS_KEY)))
+                    .get(APIConstants.HEADER_TENANT);
+        }
         String tenantDomain = null;
         if (requestedTenantDomain != null) {
             String header = requestedTenantDomain.get(0).toString();
@@ -53,7 +56,7 @@ public class OnPremResolver implements OrganizationResolver {
                     throw new APIMgtBadRequestException(errorMessage);
 
                 }
-            } catch (UserStoreException  e) {
+            } catch (UserStoreException e) {
                 String errorMessage = "Error while checking availability of tenant " + tenantDomain;
                 throw new APIMgtInternalException(errorMessage);
             }

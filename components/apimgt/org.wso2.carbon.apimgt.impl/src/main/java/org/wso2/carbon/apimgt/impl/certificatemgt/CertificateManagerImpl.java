@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
@@ -113,7 +113,7 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public ResponseCode addClientCertificate(APIIdentifier apiIdentifier, String certificate, String alias,
+    public ResponseCode addClientCertificate(Identifier apiIdentifier, String certificate, String alias,
                                              String tierName, int tenantId, String organization) {
 
         ResponseCode responseCode;
@@ -174,7 +174,7 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public ResponseCode deleteClientCertificateFromParentNode(APIIdentifier apiIdentifier, String alias, int tenantId) {
+    public ResponseCode deleteClientCertificateFromParentNode(Identifier apiIdentifier, String alias, int tenantId) {
 
         try {
             boolean removeFromDB = certificateMgtDAO.deleteClientCertificate(apiIdentifier, alias, tenantId);
@@ -334,6 +334,26 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
+    public CertificateMetadataDTO getCertificate(String alias, int tenantId) {
+
+        List<CertificateMetadataDTO> certificateMetadataList = null;
+        CertificateMetadataDTO certificate = null;
+
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieving certificate metadata for alias: " + alias + " and tenant:-> " + tenantId);
+            }
+            certificateMetadataList = certificateMgtDAO.getCertificates(alias, "", tenantId);
+            if (certificateMetadataList != null && certificateMetadataList.size() == 1) {
+                certificate = certificateMetadataList.get(0);
+            }
+        } catch (CertificateManagementException e) {
+            log.error("Error when retrieving certificate metadata for alias '" + alias + "'", e);
+        }
+        return certificate;
+    }
+
+    @Override
     public List<CertificateMetadataDTO> getCertificates(String endpoint, int tenantId) {
 
         List<CertificateMetadataDTO> certificateMetadataList = null;
@@ -382,7 +402,7 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
-            APIIdentifier apiIdentifier, String organization)
+                                                               Identifier apiIdentifier, String organization)
             throws APIManagementException {
 
         try {
@@ -410,13 +430,14 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public CertificateInformationDTO getCertificateInformation(String alias) throws APIManagementException {
+    public CertificateInformationDTO getCertificateInformation(int tenantId, String alias) throws APIManagementException {
 
         if (log.isDebugEnabled()) {
             log.debug(String.format("Get Certificate information for alias %s", alias));
         }
         try {
-            return certificateMgtUtils.getCertificateInformation(alias);
+            CertificateMetadataDTO metadataDTO = certificateMgtDAO.getCertificate(alias, tenantId);
+            return certificateMgtUtils.getCertificateInfo(metadataDTO.getCertificate());
         } catch (CertificateManagementException e) {
             throw new APIManagementException(e);
         }
@@ -484,13 +505,14 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException {
+    public ByteArrayInputStream getCertificateContent(int tenantId, String alias) throws APIManagementException {
 
         if (log.isDebugEnabled()) {
             log.debug(String.format("Get the contents of the certificate for alias %s", alias));
         }
         try {
-            return certificateMgtUtils.getCertificateContent(alias);
+            CertificateMetadataDTO metadataDTO = certificateMgtDAO.getCertificate(alias, tenantId);
+            return certificateMgtUtils.getCertificateContentFromDB(metadataDTO.getCertificate());
         } catch (CertificateManagementException e) {
             throw new APIManagementException(e);
         }

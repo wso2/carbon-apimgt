@@ -21,24 +21,6 @@
          <DefaultMaxPerRoute>{{apim.http_client.default_max_per_route}}</DefaultMaxPerRoute>
      </HttpClient>
 
-    <!-- Authentication manager configuration for Admin Portal. This is a required configuration as its user
-    authentication logic relies on this. -->
-    <AuthManager>
-        <!-- Server URL of the Authentication service -->
-        <ServerURL>{{apim.auth_manager.service_url}}</ServerURL>
-        <!-- Admin username for the Authentication manager. -->
-        <Username>${admin.username}</Username>
-        <!-- Admin password for the Authentication manager. -->
-        <Password>${admin.password}</Password>
-        <!-- Indicates whether the permissions checking of the user (on the Publisher and Developer Portal) should be done
-           via a remote service. The check will be done on the local server when false. -->
-        <CheckPermissionsRemotely>{{apim.auth_manager.check_permissions_remotely}}</CheckPermissionsRemotely>
-        <!-- Indicates whether the authentication endpoint has been reverse proxied through the Gateway when using
-             APIM with IS-KM. -->
-        {% if apim.auth_manager.iskm_reverseproxy_enabled is defined %}
-        <ISKMReverseProxyEnabled>{{apim.auth_manager.iskm_reverseproxy_enabled}}</ISKMReverseProxyEnabled>
-        {% endif %}
-    </AuthManager>
 
     {% if apim.idp is defined %}
     <IdentityProvider>
@@ -62,6 +44,9 @@
              jwt token, he needs to enable this parameter.
              The DefaultClaimsRetriever class adds user claims from the default carbon user store. -->
         <EnableUserClaims>{{apim.jwt.enable_user_claims}}</EnableUserClaims>
+        {% if apim.jwt.binding_federated_user_claims %}
+        <EnableBindingFederatedUserClaims>{{apim.jwt.binding_federated_user_claims}}</EnableBindingFederatedUserClaims>
+        {% endif %}
         {% if apim.jwt.enable_user_claims %}
         <ClaimsRetrieverImplClass>{{apim.jwt.claims_extractor_impl}}</ClaimsRetrieverImplClass>
         {% else %}
@@ -140,6 +125,8 @@
                 <Username>{{environment_name.username}}</Username>
                 <!-- Admin password for the API gateway.-->
                 <Password>{{environment_name.password}}</Password>
+                <!-- Provider Vendor of the API gateway.-->
+                <Provider>{{environment_name.provider}}</Provider>
                 <!-- Endpoint URLs for the APIs hosted in this API gateway.-->
                 {% if environment_name.http_endpoint is defined and environment_name.https_endpoint is defined %}
                 <GatewayEndpoint>{{environment_name.https_endpoint}},{{environment_name.http_endpoint}}</GatewayEndpoint>
@@ -149,6 +136,14 @@
                 <GatewayEndpoint>{{environment_name.http_endpoint}}</GatewayEndpoint>
                 {% else %}
                 <GatewayEndpoint></GatewayEndpoint>
+                {% endif %}
+                <!-- Additional properties for External Gateways -->
+                {% if environment_name.properties %}
+                <Properties>
+                    {% for key,value in environment_name.properties.items() %}
+                    <Property name="{{key}}">{{value}}</Property>
+                    {% endfor %}
+                </Properties>
                 {% endif %}
                 <!-- Endpoint URLs of the WebSocket APIs hosted in this API Gateway -->
                 {% if environment_name.ws_endpoint is defined and environment_name.wss_endpoint is defined %}
@@ -281,6 +276,8 @@
         <!-- Enable Analytics for API Manager -->
         <Enabled>{{apim.analytics.enable}}</Enabled>
 
+        <Type>{{apim.analytics.type}}</Type>
+
         <AuthToken>{{apim.analytics.auth_token}}</AuthToken>
 
         {% if apim.analytics.response_schema_name is defined %}
@@ -303,6 +300,14 @@
         </Properties>
 
     </Analytics>
+
+    <!--
+        Configurations relevant to enable rate limit feature.
+        This enables to use resources considering subscription levels.
+    -->
+    <ResourceQuotaLimit>
+        <EnableAPIQuotaLimit>{{apim.api_quota_limit.enable}}</EnableAPIQuotaLimit>
+    </ResourceQuotaLimit>
 
     <!--
         API key validator configuration used by API key manager (IS), API Developer Portal and API gateway.
@@ -378,6 +383,12 @@
         <EnableCertificateBoundAccessToken>{{apim.oauth_config.enable_certificate_bound_access_token}}</EnableCertificateBoundAccessToken>
 
     </OAuthConfigurations>
+
+    <AccessTokenBinding>
+        {% if apim.access_token_binding.enable is defined %}
+        <Enabled>{{apim.access_token_binding.enable}}</Enabled>
+        {% endif %}
+    </AccessTokenBinding>
 
     <TokenRevocationNotifiers class="{{apim.token.revocation.notifier_impl}}">
         {% if apim.token.revocation.enable_realtime_notifier %}
@@ -495,6 +506,12 @@
         <Observer>org.wso2.carbon.apimgt.impl.observers.SimpleLoggingObserver</Observer>
     </StatusObservers-->
 
+    <!-- Configuration to configure the email recipient field (To/cc/bcc) and delimeter(, or ;)-->
+    <SubscriberContactConfiguration>
+    <EmailRecipientField>{{subscriber.contact.email_recipient_field}}</EmailRecipientField>
+        <EmailAddressDelimiter>{{subscriber.contact.email_address_delimeter}}</EmailAddressDelimiter>
+    </SubscriberContactConfiguration>
+
     <!-- Configuration to enable/disable sending CORS headers in the Gateway response
          and define the Access-Control-Allow-Origin header value.-->
     <CORSConfiguration>
@@ -520,6 +537,10 @@
         <!-- Specifying this header to true means that the server allows cookies (or other user credentials) to be included on cross-origin requests.
              It is false by default and if you set it to true then make sure that the Access-Control-Allow-Origin header does not contain the wildcard (*) -->
         <Access-Control-Allow-Credentials>{{apim.cors.allow_credentials}}</Access-Control-Allow-Credentials>
+        <!-- Configuration to enable/disable CORS validation for WebSocket APIs. If enabled (true), the 'Origin' header
+             will be validated for CORS in the handshake of Webscoket API invocations. Else (false), no CORS validation will
+             take place with 'Origin' header -->
+        <EnableValidationForWS>{{apim.cors.enable_validation_for_ws}}</EnableValidationForWS>
     </CORSConfiguration>
 
     <!-- This property is there to configure velocity log output into existing Log4j carbon Logger.
@@ -577,6 +598,10 @@
             </AllowedURI>
             <AllowedURI>
                 <URI>/api/am/devportal/{version}/apis/{apiId}/swagger</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/async-api-specification</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
@@ -700,6 +725,10 @@
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/topics</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/service-catalog/{serviceCatalogVersion}/oas.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
@@ -814,6 +843,16 @@
                 <HTTPMethods>POST</HTTPMethods>
             </ETagSkipURI>
         </ETagSkipList>
+        {% if apim.rest_api.jwt.audience is defined %}
+        <JWTAudiences>
+        {%- for aud in apim.rest_api.jwt.audience -%}
+            <JWTAudience>
+                <Audience>{{aud.audience}}</Audience>
+                <Basepath>{{aud.basepath}}</Basepath>
+            </JWTAudience>
+         {%- endfor -%}
+        </JWTAudiences>
+        {% endif %}
     </RESTAPI>
     <ThrottlingConfigurations>
         <TrafficManager>
@@ -894,7 +933,7 @@
                 {% if apim.throttling.jms.topic_connection_factory is defined %}
                 <connectionfactory.TopicConnectionFactory>{{apim.throttling.jms.topic_connection_factory}}</connectionfactory.TopicConnectionFactory>
                 {% elif apim.throttling.throttle_decision_endpoints is defined %}
-                <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+                <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?{% if apim.throttling.jms.ssl is defined %}ssl='{{apim.throttling.jms.ssl}}'{% endif %}%26retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
                 {% elif apim.throttling.jms.username is defined %}
                 {% if apim.throttling.jms.password is defined %}
                 <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
@@ -963,11 +1002,21 @@
     <Monetization>
         <MonetizationImpl>{{apim.monetization.monetization_impl}}</MonetizationImpl>
         <UsagePublisher>
+            <!--Inorder to reduce configuration migration, previous config name for query API is used for choreo insight API endpoint-->
              {% if apim.monetization.analytics_query_api_endpoint is defined %}
-                   <AnalyticsQueryAPIEndpoint>{{apim.monetization.analytics_query_api_endpoint}}</AnalyticsQueryAPIEndpoint>
+                    <ChoreoInsightAPIEndpoint>{{apim.monetization.analytics_query_api_endpoint}}</ChoreoInsightAPIEndpoint>
              {% endif %}
              {% if apim.monetization.analytics_access_token is defined %}
                     <AnalyticsAccessToken>{{apim.monetization.analytics_access_token}}</AnalyticsAccessToken>
+             {% endif %}
+             {% if apim.monetization.choreo_insight_app_consumer_key is defined %}
+                    <ChoreoInsightAppConsumerKey>{{apim.monetization.choreo_insight_app_consumer_key}}</ChoreoInsightAppConsumerKey>
+             {% endif %}
+             {% if apim.monetization.choreo_insight_app_consumer_secret is defined %}
+                    <ChoreoInsightAppConsumerSecret>{{apim.monetization.choreo_insight_app_consumer_secret}}</ChoreoInsightAppConsumerSecret>
+             {% endif %}
+             {% if apim.monetization.choreo_token_endpoint is defined %}
+                    <ChoreoTokenEndpoint>{{apim.monetization.choreo_token_endpoint}}</ChoreoTokenEndpoint>
              {% endif %}
         </UsagePublisher>
         {% if apim.monetization.additional_attributes is defined %}
@@ -1009,6 +1058,24 @@
         {% endif %}
     </APIRecommendations>
     {% endif %}
+
+    <OpenTelemetry>
+        <RemoteTracer>
+            <Enabled>{{apim.open_telemetry.remote_tracer.enable}}</Enabled>
+            <Name>{{apim.open_telemetry.remote_tracer.name}}</Name>
+            <Url>{{apim.open_telemetry.remote_tracer.url}}</Url>
+            <HostName>{{apim.open_telemetry.remote_tracer.hostname}}</HostName>
+            <Port>{{apim.open_telemetry.remote_tracer.port}}</Port>
+            <Properties>
+                {% for property in apim.open_telemetry.remote_tracer.properties %}
+                <{{property.name}}>{{property.value}}</{{property.name}}>
+                {% endfor %}
+            </Properties>
+        </RemoteTracer>
+        <LogTracer>
+            <Enabled>{{apim.open_telemetry.log_tracer.enable}}</Enabled>
+        </LogTracer>
+    </OpenTelemetry>
 
     <OpenTracer>
         <RemoteTracer>
@@ -1056,6 +1123,13 @@
             {% if apim.redis_config.ssl is defined %}
             <RedisIsSslEnabled>{{apim.redis_config.ssl}}</RedisIsSslEnabled>
             {% endif %}
+            <Properties>
+                {% if apim.redis_config.pool_options is defined %}
+                {% for property_name,property_value in apim.redis_config.pool_options.items() %}
+                 <{{property_name}}>{{property_value}}</{{property_name}}>
+                {% endfor %}
+                {% endif %}
+            </Properties>
         </RedisConfig>
     {% endif %}
 
@@ -1192,6 +1266,9 @@
         {% else %}
          <ServiceURL>{{apim.throttling.service_url}}</ServiceURL>
         {% endif %}
+        {% if apim.event_hub.event_waiting_time is defined %}
+        <EventWaitingTime>{{apim.event_hub.event_waiting_time}}</EventWaitingTime>
+        {% endif %}
          {% if apim.event_hub.init_delay is defined %}
         <InitDelay>{{apim.event_hub.init_delay}}</InitDelay>
           {% endif %}
@@ -1252,15 +1329,19 @@
              <transport.jms.DestinationType>topic</transport.jms.DestinationType>
              <java.naming.factory.initial>{{apim.event_hub.java_naming_factory_initial}}</java.naming.factory.initial>
              {% if apim.event_hub.event_listening_endpoints is defined %}
-             <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.event_hub.username}}]]>:<![CDATA[{{apim.event_hub.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.event_hub.event_listening_endpoints %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+             {% if (apim.event_hub.jms.username is defined) and (apim.event_hub.jms.password is defined) %}
+             <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.event_hub.jms.username}}]]>:<![CDATA[{{apim.event_hub.jms.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.event_hub.event_listening_endpoints %}{{url}}?{% if apim.event_hub.jms.ssl is defined %}ssl='{{apim.event_hub.jms.ssl}}'{% endif %}%26retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+              {% else %}
+             <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.event_hub.username}}]]>:<![CDATA[{{apim.event_hub.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.event_hub.event_listening_endpoints %}{{url}}?{% if apim.event_hub.jms.ssl is defined %}ssl='{{apim.event_hub.jms.ssl}}'{% endif %}%26retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+             {% endif %}
              {% elif apim.throttling.throttle_decision_endpoints is defined %}
-             <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+             <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?{% if apim.throttling.jms.ssl is defined %}ssl='{{apim.throttling.jms.ssl}}'{% endif %}%26retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
              {% elif apim.throttling.jms.username is defined %}
              {% if apim.throttling.jms.password is defined %}
-             <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
+             <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}?{% if apim.throttling.jms.ssl is defined %}ssl='{{apim.throttling.jms.ssl}}'{% endif %}'</connectionfactory.TopicConnectionFactory>
              {% endif %}
              {% else %}
-             <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
+             <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}?{% if apim.throttling.jms.ssl is defined %}ssl='{{apim.throttling.jms.ssl}}'{% endif %}'</connectionfactory.TopicConnectionFactory>
              {% endif %}
          </EventReceiverConfiguration>
      </EventHubConfigurations>
@@ -1299,7 +1380,7 @@
         {% if apim.sync_runtime_artifacts.gateway.data_retrieval_mode is defined %}
         <DataRetrievalMode>{{apim.sync_runtime_artifacts.gateway.data_retrieval_mode}}</DataRetrievalMode>
         {% endif %}
-        {% if apim.sync_runtime_artifacts.gateway.event_waiting_time is defined %}
+        {% if  apim.event_hub.event_waiting_time is not defined and apim.sync_runtime_artifacts.gateway.event_waiting_time is defined %}
         <EventWaitingTime>{{apim.sync_runtime_artifacts.gateway.event_waiting_time}}</EventWaitingTime>
         {% endif %}
         <SkipList>
@@ -1336,6 +1417,7 @@
             <Sequence>webhooksFaultSequence.xml</Sequence>
             <Sequence>_block_api_handler_.xml</Sequence>
             <Sequence>_backend_failure_handler_.xml</Sequence>
+            <Sequence>_opa_policy_failure_handler_.xml</Sequence>
         {% if apim.sync_runtime_artifacts.gateway.skip_list.sequences is defined %}
             {%- for sequence in apim.sync_runtime_artifacts.gateway.skip_list.sequences -%}
             <Sequence>{{sequence}}</Sequence>
@@ -1353,27 +1435,6 @@
     </SyncRuntimeArtifactsGateway>
     {% endif %}
 
-     <ContainerMgt>
-         <DeploymentEnvironments>
-             {% for key,value in ContainerMgtConfig.items() %}
-                 <Property name="{{key}}">{{value}}</Property>
-             {% endfor %}
-         </DeploymentEnvironments>
-
-         {% for cluster in ContainerMgtClusterConfig%}
-         <ContainerMgtInfo>
-             <Type>{{cluster.type}}</Type>
-             <ClassName>{{cluster.class}}</ClassName>
-             <ClusterName>{{cluster.clusterName}}</ClusterName>
-             <DisplayName>{{cluster.displayName}}</DisplayName>
-             <Properties>
-                 {% for key,value in cluster.properties.items() %}
-                     <Property name="{{key}}">{{value}}</Property>
-                 {% endfor %}
-             </Properties>
-         </ContainerMgtInfo>
-         {% endfor %}
-     </ContainerMgt>
     <ProxyConfig>
         <Enable>{{apim.proxy_config.enable}}</Enable>
         <Host>{{apim.proxy_config.host}}</Host>
@@ -1407,4 +1468,13 @@
         </Properties>
      </PersistenceConfigs>
      {% endif %}
+
+     {% if apim.mediator_config.oauth is defined %}
+      <MediatorConfigs>
+        <OAuth>
+        <!-- If the access token expires, the server should reply with the duration of time the access token is granted for. -->
+                 <ExpiresIn>{{apim.mediator_config.oauth.expires_in}}</ExpiresIn>
+             </OAuth>
+          </MediatorConfigs>
+      {% endif %}
 </APIManager>

@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.RealmUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -71,6 +72,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
      * @param inMessage cxf Message
      */
     @Override
+    @MethodStats
     public void handleMessage(Message inMessage) {
         //by-passes the interceptor if user calls an anonymous api
         if (RestApiUtil.checkIfAnonymousAPI(inMessage)) {
@@ -135,6 +137,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 carbonContext.setTenantDomain(tenantDomain);
                 carbonContext.setTenantId(tenantId);
                 carbonContext.setUsername(domainAwareUserName);
+                inMessage.put(RestApiConstants.SUB_ORGANIZATION, tenantDomain);
                 if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                     APIUtil.loadTenantConfigBlockingMode(tenantDomain);
                 }
@@ -168,7 +171,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
         String[] userRoles;
         Map<String, String> restAPIScopes;
         //get all the URI templates of the REST API from the base path
-        Set<URITemplate> uriTemplates = RestApiUtil.getURITemplatesForBasePath(basePath + version);
+        Set<URITemplate> uriTemplates = RestApiCommonUtil.getURITemplatesForBasePath(basePath + version);
         if (uriTemplates.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("No matching scopes found for request with path: " + basePath + version

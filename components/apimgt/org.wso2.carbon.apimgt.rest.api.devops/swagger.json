@@ -1,0 +1,212 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "This document specifies a **RESTful API** for WSO2 **API Manager** - DevOps.\n",
+    "version" : "v2",
+    "title" : "WSO2 API Manager - DevOps",
+    "contact" : {
+      "name" : "WSO2",
+      "url" : "http://wso2.com/products/api-manager/",
+      "email" : "architecture@wso2.com"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host" : "apis.wso2.com",
+  "basePath" : "/api/am/devops/v0",
+  "schemes" : [ "https" ],
+  "consumes" : [ "application/json" ],
+  "produces" : [ "application/json" ],
+  "paths" : {
+    "/logging/apis/" : {
+      "get" : {
+        "summary" : "GET log enabled API data\n",
+        "parameters" : [ {
+          "name" : "logging-enabled",
+          "in" : "query",
+          "description" : "Query to select only logging enabled apis. By default, all the apis details will send\n",
+          "required" : false,
+          "type" : "boolean"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Logs enabled API details",
+            "schema" : {
+              "$ref" : "#/definitions/LoggingApiOutputList"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequest API resource or external store Ids not found.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "500" : {
+            "description" : "Internal server error while retrieving API data to be logged",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/logging/apis/{apiId}" : {
+      "get" : {
+        "summary" : "GET log enabled API data\n",
+        "parameters" : [ {
+          "name" : "apiId",
+          "in" : "path",
+          "description" : "API ID of the API that need to enable logging per API.",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Logs enabled API details",
+            "schema" : {
+              "$ref" : "#/definitions/LoggingApiOutputList"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequest API resource or external store Ids not found.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "500" : {
+            "description" : "Internal server error while retrieving API data to be logged",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put" : {
+        "summary" : "Set logging levels of the API with its api ID\n",
+        "description" : "This operation enables you to provide the API context template(context/version) with the log level (OFF|BASIC|STANDARD|FULL). You should either provide the api ID and the api log level.\n",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "Payload",
+          "description" : "The logLeve is provided as a payload.\n",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/LoggingApiInput"
+          }
+        }, {
+          "name" : "apiId",
+          "in" : "path",
+          "description" : "API ID of the API that need to enable logging per API.",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully Enabled the logs for the API",
+            "schema" : {
+              "$ref" : "#/definitions/LoggingApiOutputList"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequest API resource or external store Ids not found.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "500" : {
+            "description" : "Internal server error while configuring API to be logged",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "LoggingApiOutputList" : {
+      "properties" : {
+        "apis" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/LoggingApiOutput"
+          }
+        }
+      },
+      "title" : "apis"
+    },
+    "LoggingApiInput" : {
+      "properties" : {
+        "logLevel" : {
+          "type" : "string",
+          "example" : "FULL"
+        }
+      },
+      "title" : "API Info object with log details"
+    },
+    "LoggingApiOutput" : {
+      "properties" : {
+        "context" : {
+          "type" : "string",
+          "example" : "pizashack/v1.0.0"
+        },
+        "logLevel" : {
+          "type" : "string",
+          "example" : "FULL"
+        },
+        "apiId" : {
+          "type" : "string",
+          "example" : "12d6e73c-778d-45ac-b57d-117c6c5092a4"
+        }
+      },
+      "title" : "API Info object with log details"
+    },
+    "Error" : {
+      "required" : [ "code", "message" ],
+      "properties" : {
+        "code" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "message" : {
+          "type" : "string",
+          "description" : "Error message."
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "A detail description about the error message.\n"
+        },
+        "moreInfo" : {
+          "type" : "string",
+          "description" : "Preferably an url with more details about the error.\n"
+        },
+        "error" : {
+          "type" : "array",
+          "description" : "If there are more than one error list them out.\nFor example, list out validation errors by each field.\n",
+          "items" : {
+            "$ref" : "#/definitions/ErrorListItem"
+          }
+        }
+      },
+      "title" : "Error object returned with 4XX HTTP Status"
+    },
+    "ErrorListItem" : {
+      "required" : [ "code", "message" ],
+      "properties" : {
+        "code" : {
+          "type" : "string"
+        },
+        "message" : {
+          "type" : "string",
+          "description" : "Description about individual errors occurred\n"
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "A detail description about the error message.\n"
+        }
+      },
+      "title" : "Description of individual errors that may have occurred during a request."
+    }
+  }
+}

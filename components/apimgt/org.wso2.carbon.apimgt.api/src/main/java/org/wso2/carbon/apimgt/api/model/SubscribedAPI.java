@@ -59,6 +59,26 @@ public class SubscribedAPI {
         this.uuid = uuid;
     }
 
+    public SubscribedAPI(Application application, APIProductIdentifier identifier) {
+        this.application = application;
+        this.productId = identifier;
+    }
+
+    public SubscribedAPI(Application application, APIIdentifier identifier) {
+        this.application = application;
+        this.apiId = identifier;
+    }
+
+    public SubscribedAPI(Subscriber subscriber, Identifier identifier) {
+
+        if (identifier instanceof APIIdentifier) {
+            this.apiId = (APIIdentifier) identifier;
+        } else if (identifier instanceof APIProductIdentifier) {
+            this.productId = (APIProductIdentifier) identifier;
+        }
+        this.subscriber = subscriber;
+    }
+
     public void setApplication(Application application) {
         this.application = application;
     }
@@ -79,7 +99,7 @@ public class SubscribedAPI {
         return subscriber;
     }
 
-    public APIIdentifier getApiId() {
+    public APIIdentifier getAPIIdentifier() {
         return apiId;
     }
 
@@ -140,7 +160,7 @@ public class SubscribedAPI {
     public String getUUID() {
         return uuid;
     }
-    
+
     public APIProductIdentifier getProductId() {
         return productId;
     }
@@ -198,12 +218,35 @@ public class SubscribedAPI {
     public void setRequestedTier(Tier requestedTier) {
         this.requestedTier = requestedTier;
     }
-    
+
     public Identifier getIdentifier() {
         if (apiId != null) {
             return apiId;
         } else {
             return productId;
+        }
+    }
+    public void setIdentifier(ApiTypeWrapper apiTypeWrapper){
+        if (apiTypeWrapper.isAPIProduct()){
+            productId = (APIProductIdentifier) apiTypeWrapper.getId();
+        }else{
+            apiId = (APIIdentifier) apiTypeWrapper.getId();
+        }
+    }
+
+    public int getApiId() {
+        if (apiId != null) {
+            return apiId.getId();
+        } else {
+            return productId.getProductId();
+        }
+    }
+
+    public String getAPIUUId() {
+        if (apiId != null) {
+            return apiId.getUUID();
+        } else {
+            return productId.getUUID();
         }
     }
 }

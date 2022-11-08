@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.persistence;
 
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
@@ -40,7 +39,6 @@ import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceExc
 import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 
@@ -159,11 +157,13 @@ public interface APIPersistence {
      * @param searchQuery search query
      * @param start       starting index
      * @param offset      offset to search
+     * @param sortBy      sort criteria
+     * @param sortOrder       sort order
      * @return Publisher API Search Result
      * @throws APIPersistenceException
      */
-    PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start, int offset,
-                                    UserContext ctx) throws APIPersistenceException;
+    PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start,
+            int offset, UserContext ctx, String sortBy, String sortOrder) throws APIPersistenceException;
 
     /**
      * Search APIs to be displayed on Dev Portal API listing
@@ -177,7 +177,7 @@ public interface APIPersistence {
      */
     DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset,
                                     UserContext ctx) throws APIPersistenceException;
-    
+
     /**
      * Search based on content to display on publisher
      *
@@ -390,30 +390,6 @@ public interface APIPersistence {
     void deleteDocumentation(Organization org, String apiId, String docId) throws DocumentationPersistenceException;
 
 
-    /* ======= Mediation Policy ========
-     =================================== */
-
-    /**
-     * Add mediation policy to the API
-     *
-     * @param org   Organization the mediation policy is owned by
-     * @param apiId API ID
-     * @return Mediation policy Id
-     * @throws MediationPolicyPersistenceException
-     */
-    Mediation addMediationPolicy(Organization org, String apiId, Mediation mediation) throws
-                                    MediationPolicyPersistenceException;
-
-    /**
-     * Update mediation policy of the API
-     *
-     * @param org       Organization the mediation policy is owned by
-     * @param apiId     API ID
-     * @param mediation Mediation policy
-     * @throws MediationPolicyPersistenceException
-     */
-    Mediation updateMediationPolicy(Organization org, String apiId, Mediation mediation) throws MediationPolicyPersistenceException;
-
     /**
      * Get mediation policy of API
      *
@@ -434,15 +410,6 @@ public interface APIPersistence {
      * @throws MediationPolicyPersistenceException
      */
     List<MediationInfo> getAllMediationPolicies(Organization org, String apiId) throws MediationPolicyPersistenceException;
-    /**
-     * Delete a mediation policy of the API
-     *
-     * @param org               Organization the mediation policy is owned by
-     * @param apiId             API ID
-     * @param mediationPolicyId Mediation policy ID
-     * @throws MediationPolicyPersistenceException
-     */
-    void deleteMediationPolicy(Organization org, String apiId, String mediationPolicyId) throws MediationPolicyPersistenceException;
 
 
     /* ======= Thumbnail Icon =======

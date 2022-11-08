@@ -40,39 +40,41 @@ import org.wso2.carbon.apimgt.internal.service.ApisApiService;
 import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeployedEnvInfoDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.context.CarbonContext;
 
 public class ApisApiServiceImpl implements ApisApiService {
 
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
 
     @Override
-    public Response apisGet(String xWSO2Tenant, String apiId, String context, String version, String gatewayLabel, String accept,
-                            MessageContext messageContext) throws APIManagementException {
-
+    public Response apisGet(String xWSO2Tenant, String apiId, String context, String version, String gatewayLabel,
+            Boolean expand, String accept, MessageContext messageContext) throws APIManagementException {
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         APIListDTO apiListDTO;
         if (StringUtils.isNotEmpty(gatewayLabel)) {
             if (StringUtils.isNotEmpty(apiId)) {
-                API api = subscriptionValidationDAO.getApiByUUID(apiId, gatewayLabel, xWSO2Tenant);
+                API api = subscriptionValidationDAO.getApiByUUID(apiId, gatewayLabel, xWSO2Tenant, expand);
                 apiListDTO = SubscriptionValidationDataUtil.fromAPIToAPIListDTO(api);
             } else if (StringUtils.isNotEmpty(context) && StringUtils.isNotEmpty(version)) {
                 if (!context.startsWith("/t/" + xWSO2Tenant.toLowerCase())) {
                     apiListDTO = new APIListDTO();
                 }
-                API api = subscriptionValidationDAO.getAPIByContextAndVersion(context, version, gatewayLabel);
+                API api = subscriptionValidationDAO
+                        .getAPIByContextAndVersion(context, version, gatewayLabel, expand);
                 apiListDTO = SubscriptionValidationDataUtil.fromAPIToAPIListDTO(api);
             } else {
                 // Retrieve API Detail according to Gateway label.
                 apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(
-                        subscriptionValidationDAO.getAllApis(xWSO2Tenant, gatewayLabel));
+                        subscriptionValidationDAO.getAllApis(xWSO2Tenant, gatewayLabel, expand));
             }
         } else {
             apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(
-                    subscriptionValidationDAO.getAllApis(xWSO2Tenant));
+                    subscriptionValidationDAO.getAllApis(xWSO2Tenant, expand));
         }
         if (APIConstants.APPLICATION_GZIP.equals(accept)) {
             try {
@@ -93,16 +95,23 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
         List<String> revisionUUIDs = new ArrayList<>();
+        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         for (DeployedAPIRevisionDTO deployedAPIRevisionDTO : deployedAPIRevisionDTOList) {
+            String organizationFromQueryParam = RestApiUtil.getOrganization(messageContext);
             // get revision uuid
             String revisionUUID = apiProvider.getAPIRevisionUUID(Integer.toString(deployedAPIRevisionDTO.getRevisionId()),
                     deployedAPIRevisionDTO.getApiId());
+            if (StringUtils.isNotEmpty(organizationFromQueryParam) &&
+                    !organizationFromQueryParam.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
+                revisionUUID = apiProvider.getAPIRevisionUUIDByOrganization(Integer.toString(deployedAPIRevisionDTO.getRevisionId()),
+                        deployedAPIRevisionDTO.getApiId(), organizationFromQueryParam);
+            }
             if (revisionUUID == null) {
                 return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
             }
             if (!revisionUUIDs.contains(revisionUUID)) {
                 revisionUUIDs.add(revisionUUID);
-                Map<String, Environment> environments = APIUtil.getEnvironments();
+                Map<String, Environment> environments = APIUtil.getEnvironments(tenantDomain);
                 List<DeployedAPIRevision> deployedAPIRevisions = new ArrayList<>();
                 for (DeployedEnvInfoDTO deployedEnvInfoDTO : deployedAPIRevisionDTO.getEnvInfo()) {
                     DeployedAPIRevision deployedAPIRevision = new DeployedAPIRevision();
@@ -124,6 +133,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         }
 
+        return Response.ok().build();
+    }
+
+    @Override
+    public Response unDeployedAPIRevision(UnDeployedAPIRevisionDTO unDeployedAPIRevisionDTO, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        apiProvider.removeUnDeployedAPIRevision(unDeployedAPIRevisionDTO.getApiUUID(), unDeployedAPIRevisionDTO.getRevisionUUID(),
+                unDeployedAPIRevisionDTO.getEnvironment());
         return Response.ok().build();
     }
 }

@@ -24,6 +24,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
@@ -70,7 +72,7 @@ public class CertificateMgtDAO {
     }
 
 
-    private boolean addClientCertificate(Connection connection, String certificate, APIIdentifier apiIdentifier,
+    private boolean addClientCertificate(Connection connection, String certificate, Identifier apiIdentifier,
                                          String alias, String tierName,
                                          int tenantId, String organization) throws SQLException {
 
@@ -244,7 +246,7 @@ public class CertificateMgtDAO {
      * @param organization  : Organization
      * @return : A CertificateMetadataDTO object if the certificate is retrieved successfully, null otherwise.
      */
-    public List<ClientCertificateDTO> getClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier,
+    public List<ClientCertificateDTO> getClientCertificates(int tenantId, String alias, Identifier apiIdentifier,
             String organization) throws CertificateManagementException {
 
         Connection connection = null;
@@ -268,6 +270,10 @@ public class CertificateMgtDAO {
                 String apiUuid;
                 if (apiIdentifier.getUUID() != null) {
                     apiUuid = apiIdentifier.getUUID();
+                    APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiUuid);
+                    if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                        apiUuid = apiRevision.getApiUUID();
+                    }
                 } else {
                     apiUuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier(apiIdentifier, organization);
                 }
@@ -297,7 +303,7 @@ public class CertificateMgtDAO {
                     apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
                 }
-                clientCertificateDTO.setApiIdentifier(apiIdentifier);
+                clientCertificateDTO.setApiIdentifier((APIIdentifier) apiIdentifier);
                 clientCertificateDTOS.add(clientCertificateDTO);
             }
         } catch (SQLException e) {
@@ -406,6 +412,42 @@ public class CertificateMgtDAO {
         }
         throw new CertificateManagementException("Certificate didn't exist with alias" + alias);
     }
+
+    /**
+     * Method to retrieve certificate metadata from db for specific tenant which matches alias or endpoint.
+     * From alias and endpoint, only one parameter is required.
+     *
+     * @param tenantId : The id of the tenant which the certificate belongs to.
+     * @param alias    : Alias for the certificate. (Optional)
+     * @return : A CertificateMetadataDTO object if the certificate is retrieved successfully, null otherwise.
+     */
+    public CertificateMetadataDTO getCertificate(String alias, int tenantId)
+            throws CertificateManagementException {
+
+        String getCertQuery;
+        getCertQuery = SQLConstants.CertificateConstants.GET_CERTIFICATE_TENANT_ALIAS;
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(getCertQuery)) {
+                preparedStatement.setInt(1, tenantId);
+                preparedStatement.setString(2, alias);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        CertificateMetadataDTO certificateMetadataDTO = new CertificateMetadataDTO();
+                        certificateMetadataDTO.setAlias(resultSet.getString("ALIAS"));
+                        certificateMetadataDTO.setEndpoint(resultSet.getString("END_POINT"));
+                        try (InputStream certificate = resultSet.getBinaryStream("CERTIFICATE")) {
+                            certificateMetadataDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(certificate));
+                        }
+                        return certificateMetadataDTO;
+                    }
+                }
+            }
+        } catch (SQLException | IOException e) {
+            handleException("Error while retrieving certificate metadata.", e);
+        }
+        throw new CertificateManagementException("Certificate didn't exist with alias" + alias);
+    }
+
     /**
      * To remove the entries of updated certificates from gateway.
      *
@@ -515,7 +557,7 @@ public class CertificateMgtDAO {
      * @param tenantId      : The Id of the tenant who owns the certificate.
      * @return : true if certificate deletion is successful, false otherwise.
      */
-    private boolean deleteClientCertificate(Connection connection, APIIdentifier apiIdentifier, String alias,
+    private boolean deleteClientCertificate(Connection connection, Identifier apiIdentifier, String alias,
                                             int tenantId) throws SQLException {
 
         boolean result;
@@ -555,7 +597,7 @@ public class CertificateMgtDAO {
         return result;
     }
 
-    public boolean deleteClientCertificate(APIIdentifier apiIdentifier, String alias, int tenantId)
+    public boolean deleteClientCertificate(Identifier apiIdentifier, String alias, int tenantId)
             throws CertificateManagementException {
 
         boolean result = false;
@@ -705,7 +747,7 @@ public class CertificateMgtDAO {
      * @return : True if the information is added successfully, false otherwise.
      * @throws CertificateManagementException if existing entry is found for the given endpoint or alias.
      */
-    public boolean addClientCertificate(String certificate, APIIdentifier apiIdentifier, String alias, String tierName,
+    public boolean addClientCertificate(String certificate, Identifier apiIdentifier, String alias, String tierName,
                                         int tenantId, String organization) throws CertificateManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {

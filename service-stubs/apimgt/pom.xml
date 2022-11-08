@@ -19,21 +19,15 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>9.0.294-SNAPSHOT</version>
+        <version>9.26.68-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>apimgt-stubs</artifactId>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
-    <name>API Management</name>
+    <name>WSO2 Carbon - API Management Service Stub Aggregator Module</name>
     <modules>
-        <module>org.wso2.carbon.apimgt.handlers.security.stub</module>
         <module>org.wso2.carbon.apimgt.keymgt.stub</module>
-        <module>org.wso2.carbon.apimgt.gateway.stub</module>
-        <module>org.wso2.carbon.apimgt.statsupdate.stub</module>
-        <module>org.wso2.carbon.apimgt.tier.cache.stub</module>
-        <module>org.wso2.carbon.apimgt.registry.cache.stub</module>
-        <module>org.wso2.carbon.apimgt.localentry.stub</module>
     </modules>
 </project>

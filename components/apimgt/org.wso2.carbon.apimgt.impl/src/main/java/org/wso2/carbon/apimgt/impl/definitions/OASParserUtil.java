@@ -91,7 +91,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import java.io.IOException;
 import java.io.File;
@@ -1084,47 +1083,6 @@ public class OASParserUtil {
     }
 
     /**
-     * This method saves api definition json in the registry
-     *
-     * @param api               API to be saved
-     * @param apiDefinitionJSON API definition as JSON string
-     * @param registry          user registry
-     * @throws APIManagementException
-     */
-    public static void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry)
-            throws APIManagementException {
-        String apiName = api.getId().getApiName();
-        String apiVersion = api.getId().getVersion();
-        String apiProviderName = api.getId().getProviderName();
-
-        try {
-            String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiName, apiVersion, apiProviderName);
-            resourcePath = resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
-            Resource resource;
-            if (!registry.resourceExists(resourcePath)) {
-                resource = registry.newResource();
-            } else {
-                resource = registry.get(resourcePath);
-            }
-            resource.setContent(apiDefinitionJSON);
-            resource.setMediaType("application/json");
-            registry.put(resourcePath, resource);
-
-            String[] visibleRoles = null;
-            if (api.getVisibleRoles() != null) {
-                visibleRoles = api.getVisibleRoles().split(",");
-            }
-
-            //Need to set anonymous if the visibility is public
-            APIUtil.clearResourcePermissions(resourcePath, api.getId(), ((UserRegistry) registry).getTenantId());
-            APIUtil.setResourcePermissions(apiProviderName, api.getVisibility(), visibleRoles, resourcePath);
-
-        } catch (RegistryException e) {
-            handleException("Error while adding Swagger Definition for " + apiName + '-' + apiVersion, e);
-        }
-    }
-
-    /**
      * This method returns api definition json for given api
      *
      * @param apiIdentifier api identifier
@@ -1185,11 +1143,13 @@ public class OASParserUtil {
                                                   Set<Scope> apiScopes) throws APIManagementException {
 
         for (String scopeName : resourceScopes) {
-            Scope scope = APIUtil.findScopeByKey(apiScopes, scopeName);
-            if (scope == null) {
-                throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
+            if (StringUtils.isNotBlank(scopeName)) {
+                Scope scope = APIUtil.findScopeByKey(apiScopes, scopeName);
+                if (scope == null) {
+                    throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
+                }
+                template.setScopes(scope);
             }
-            template.setScopes(scope);
         }
         return template;
     }
@@ -1221,6 +1181,8 @@ public class OASParserUtil {
             endpointResult = populateLoadBalanceConfig(endpointConfig, isProduction);
         } else if (APIConstants.ENDPOINT_TYPE_HTTP.equalsIgnoreCase(type)) {
             endpointResult = setPrimaryConfig(endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_HTTP);
+        } else if (APIConstants.ENDPOINT_TYPE_SERVICE.equalsIgnoreCase(type)) {
+            endpointResult = setPrimaryConfig(endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_SERVICE);
         } else if (APIConstants.ENDPOINT_TYPE_ADDRESS.equalsIgnoreCase(type)) {
             endpointResult = setPrimaryConfig(endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_ADDRESS);
         } else {
@@ -1275,14 +1237,14 @@ public class OASParserUtil {
         }
 
         ArrayNode endpointsArray = objectMapper.createArrayNode();
+        if (primaryEndpoints != null && primaryEndpoints.has(APIConstants.ENDPOINT_URL)) {
+            endpointsArray.add(primaryEndpoints.getString(APIConstants.ENDPOINT_URL));
+        }
         if (endpointsURLs != null) {
             for (int i = 0; i < endpointsURLs.length(); i++) {
                 JSONObject obj = endpointsURLs.getJSONObject(i);
                 endpointsArray.add(obj.getString(APIConstants.ENDPOINT_URL));
             }
-        }
-        if (primaryEndpoints != null && primaryEndpoints.has(APIConstants.ENDPOINT_URL)) {
-            endpointsArray.add(primaryEndpoints.getString(APIConstants.ENDPOINT_URL));
         }
         if (endpointsArray.size() < 1) {
             return null;
@@ -1378,8 +1340,6 @@ public class OASParserUtil {
         extensions.remove(APIConstants.X_WSO2_APP_SECURITY);
         extensions.remove(APIConstants.X_WSO2_RESPONSE_CACHE);
         extensions.remove(APIConstants.X_WSO2_MUTUAL_SSL);
-        extensions.remove(APIConstants.X_WSO2_REQUEST_INTERCEPTOR);
-        extensions.remove(APIConstants.X_WSO2_RESPONSE_INTERCEPTOR);
     }
 
     /**

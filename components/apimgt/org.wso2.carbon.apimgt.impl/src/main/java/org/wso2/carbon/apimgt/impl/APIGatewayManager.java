@@ -24,7 +24,6 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
-import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -44,7 +43,6 @@ public class APIGatewayManager {
     private boolean debugEnabled = log.isDebugEnabled();
     private static APIGatewayManager instance;
 
-    private Map<String, Environment> environments;
     private RecommendationEnvironment recommendationEnvironment;
     private ArtifactSaver artifactSaver;
 
@@ -53,12 +51,7 @@ public class APIGatewayManager {
     private APIGatewayManager() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
-        try {
-            environments = APIUtil.getEnvironments();
-        } catch (APIManagementException e) {
-            // TODO (renuka) do we want to set "environments = APIUtil.getReadOnlyEnvironments();"
-            log.error("Error occurred when reading configured gateway environments", e);
-        }
+
         this.recommendationEnvironment = config.getApiRecommendationEnvironment();
         this.artifactSaver = ServiceReferenceHolder.getInstance().getArtifactSaver();
     }
@@ -90,7 +83,7 @@ public class APIGatewayManager {
         APIProductIdentifier apiIdentifier = api.getId();
         DeployAPIInGatewayEvent
                 deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantDomain,
+                System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), api.getOrganization(),
                 api.getProductId(),api.getUuid(), publishedGateways, apiIdentifier.getName(), apiIdentifier.getVersion(),
                 PRODUCT_PREFIX, api.getType(),api.getContext());
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
@@ -118,12 +111,11 @@ public class APIGatewayManager {
 
         APIProductIdentifier apiProductIdentifier = apiProduct.getId();
         Set<APIEvent> apiEvents = transformAPIToAPIEvent(associatedAPIs);
-        DeployAPIInGatewayEvent
-                deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain,
-                apiProduct.getProductId(),apiProduct.getUuid(), removedGateways, apiProductIdentifier.getName(),
-                apiProductIdentifier.getVersion(), PRODUCT_PREFIX, APIConstants.API_PRODUCT, apiProduct.getContext(),
-                apiEvents);
+        DeployAPIInGatewayEvent deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
+                System.currentTimeMillis(), APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(),
+                apiProduct.getOrganization(), apiProduct.getProductId(), apiProduct.getUuid(), removedGateways,
+                apiProductIdentifier.getName(), apiProductIdentifier.getVersion(), PRODUCT_PREFIX,
+                APIConstants.API_PRODUCT, apiProduct.getContext(), apiEvents);
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
     }
 
@@ -162,7 +154,7 @@ public class APIGatewayManager {
             GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifact(apiProductUuid,
                     APIConstants.API_PRODUCT_REVISION);
             GatewayArtifactsMgtDAO.getInstance()
-                    .removePublishedGatewayLabels(apiProductUuid, APIConstants.API_PRODUCT_REVISION);
+                    .removePublishedGatewayLabels(apiProductUuid, APIConstants.API_PRODUCT_REVISION, gatewaysToRemove);
         } catch (ArtifactSynchronizerException e) {
             throw new APIManagementException("API " + apiProductIdentifier + "couldn't get unDeployed", e);
         }

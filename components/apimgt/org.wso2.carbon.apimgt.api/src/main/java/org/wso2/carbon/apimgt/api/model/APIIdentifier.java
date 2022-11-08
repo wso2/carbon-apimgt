@@ -38,7 +38,7 @@ public class APIIdentifier implements Serializable, Identifier {
     private String applicationId;
     private String uuid;
     private int id;
-
+    private String organization;
     public String getApplicationId() {
         return applicationId;
     }
@@ -134,6 +134,16 @@ public class APIIdentifier implements Serializable, Identifier {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    @Override
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
+    @Override
+    public String getOrganization() {
+        return this.organization;
     }
 
     public void setUuid(String uuid) {

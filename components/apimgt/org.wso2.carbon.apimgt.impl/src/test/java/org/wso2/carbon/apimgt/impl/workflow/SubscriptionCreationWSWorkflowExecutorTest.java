@@ -157,9 +157,7 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		ServiceReferenceHolderMockCreator serviceRefMock = new ServiceReferenceHolderMockCreator(-1234);
 		ServiceReferenceHolderMockCreator.initContextService();
 
-		PowerMockito.whenNew(ServiceClient.class)
-				.withArguments(Mockito.any(ConfigurationContext.class), Mockito.any(AxisService.class))
-				.thenReturn(serviceClient);
+		PowerMockito.whenNew(ServiceClient.class).withAnyArguments().thenReturn(serviceClient);
 
 		try {
 			subscriptionCreationWSWorkflowExecutor.cleanUpPendingTask(workflowDTO.getExternalWorkflowReference());
@@ -217,9 +215,7 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		ServiceReferenceHolderMockCreator serviceRefMock = new ServiceReferenceHolderMockCreator(-1234);
 		ServiceReferenceHolderMockCreator.initContextService();
 
-		PowerMockito.whenNew(ServiceClient.class)
-				.withArguments(Mockito.any(ConfigurationContext.class), Mockito.any(AxisService.class))
-				.thenReturn(serviceClient);
+		PowerMockito.whenNew(ServiceClient.class).withAnyArguments().thenReturn(serviceClient);
 
 		try {
 			Assert.assertNotNull(subscriptionCreationWSWorkflowExecutor.execute(workflowDTO));
@@ -294,9 +290,7 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		ServiceReferenceHolderMockCreator serviceRefMock = new ServiceReferenceHolderMockCreator(-1234);
 		ServiceReferenceHolderMockCreator.initContextService();
 
-		PowerMockito.whenNew(ServiceClient.class)
-				.withArguments(Mockito.any(ConfigurationContext.class), Mockito.any(AxisService.class))
-				.thenReturn(serviceClient);
+		PowerMockito.whenNew(ServiceClient.class).withAnyArguments().thenReturn(serviceClient);
 
 		subscriptionCreationWSWorkflowExecutor.setUsername(null);
 		subscriptionCreationWSWorkflowExecutor.setPassword(null);
@@ -374,9 +368,7 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		ServiceReferenceHolderMockCreator serviceRefMock = new ServiceReferenceHolderMockCreator(-1234);
 		ServiceReferenceHolderMockCreator.initContextService();
 
-		PowerMockito.whenNew(ServiceClient.class)
-				.withArguments(Mockito.any(ConfigurationContext.class), Mockito.any(AxisService.class))
-				.thenReturn(serviceClient);
+		PowerMockito.whenNew(ServiceClient.class).withAnyArguments().thenReturn(serviceClient);
 
 		subscriptionCreationWSWorkflowExecutor.setContentType("application/xml");
 		try {

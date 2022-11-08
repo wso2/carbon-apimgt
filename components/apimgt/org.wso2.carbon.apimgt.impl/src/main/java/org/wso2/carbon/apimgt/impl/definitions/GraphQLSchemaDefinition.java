@@ -26,14 +26,12 @@ import graphql.language.SchemaDefinition;
 import graphql.language.TypeDefinition;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
-import io.swagger.models.Swagger;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.entity.ContentType;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -50,51 +48,50 @@ import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.*;
-
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Optional;
 
 public class GraphQLSchemaDefinition {
 
     protected Log log = LogFactory.getLog(getClass());
 
     /**
-     * Extract GraphQL Operations from given schema
+     * Extract GraphQL Operations from given schema.
      *
-     * @param schema graphQL Schema
-     * @return the arrayList of APIOperationsDTOextractGraphQLOperationList
+     * @param typeRegistry graphQL Schema Type Registry
+     * @param type         operation type string
+     * @return the arrayList of APIOperationsDTO
      */
-    public List<URITemplate> extractGraphQLOperationList(String schema, String type) {
+    public List<URITemplate> extractGraphQLOperationList(TypeDefinitionRegistry typeRegistry, String type) {
         List<URITemplate> operationArray = new ArrayList<>();
-        SchemaParser schemaParser = new SchemaParser();
-        TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
         Map<java.lang.String, TypeDefinition> operationList = typeRegistry.types();
         for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
             Optional<SchemaDefinition> schemaDefinition = typeRegistry.schemaDefinition();
             if (schemaDefinition.isPresent()) {
                 List<OperationTypeDefinition> operationTypeList = schemaDefinition.get().getOperationTypeDefinitions();
                 for (OperationTypeDefinition operationTypeDefinition : operationTypeList) {
-                    if (entry.getValue().getName().equalsIgnoreCase(operationTypeDefinition.getTypeName().getName())) {
-                        if (type == null) {
-                            addOperations(entry, operationTypeDefinition.getName().toUpperCase(), operationArray);
-                        } else if (type.equals(operationTypeDefinition.getName().toUpperCase())) {
-                            addOperations(entry, operationTypeDefinition.getName().toUpperCase(), operationArray);
-                        }
+                    boolean canAddOperation = entry.getValue().getName()
+                            .equalsIgnoreCase(operationTypeDefinition.getTypeName().getName()) &&
+                            (type == null || type.equals(operationTypeDefinition.getName().toUpperCase()));
+                    if (canAddOperation) {
+                        addOperations(entry, operationTypeDefinition.getName().toUpperCase(), operationArray);
                     }
                 }
             } else {
-                if (entry.getValue().getName().equalsIgnoreCase(APIConstants.GRAPHQL_QUERY) ||
+                boolean canAddOperation = (entry.getValue().getName().equalsIgnoreCase(APIConstants.GRAPHQL_QUERY) ||
                         entry.getValue().getName().equalsIgnoreCase(APIConstants.GRAPHQL_MUTATION)
-                        || entry.getValue().getName().equalsIgnoreCase(APIConstants.GRAPHQL_SUBSCRIPTION)) {
-                    if (type == null) {
-                        addOperations(entry, entry.getKey(), operationArray);
-                    } else if (type.equals(entry.getValue().getName().toUpperCase())) {
-                        addOperations(entry, entry.getKey(), operationArray);
-                    }
+                        || entry.getValue().getName().equalsIgnoreCase(APIConstants.GRAPHQL_SUBSCRIPTION)) &&
+                        (type == null || type.equals(entry.getValue().getName().toUpperCase()));
+                if (canAddOperation) {
+                    addOperations(entry, entry.getKey(), operationArray);
                 }
             }
         }
@@ -148,7 +145,6 @@ public class GraphQLSchemaDefinition {
      * @return schemaDefinition
      */
     public String buildSchemaWithAdditionalInfo(API api, GraphqlComplexityInfo graphqlComplexityInfo) {
-        Swagger swagger = null;
         Map<String, String> scopeRoleMap = new HashMap<>();
         Map<String, String> operationScopeMap = new HashMap<>();
         Map<String, String> operationAuthSchemeMap = new HashMap<>();
@@ -156,6 +152,7 @@ public class GraphQLSchemaDefinition {
 
         String operationScopeType;
         StringBuilder schemaDefinitionBuilder = new StringBuilder(api.getGraphQLSchema());
+        schemaDefinitionBuilder.append("\n");
         StringBuilder operationScopeMappingBuilder = new StringBuilder();
         StringBuilder scopeRoleMappingBuilder = new StringBuilder();
         StringBuilder operationAuthSchemeMappingBuilder = new StringBuilder();
@@ -216,15 +213,14 @@ public class GraphQLSchemaDefinition {
             }
 
             if (scopeRoleMap.size() > 0) {
-                List<String> scopeRoles = new ArrayList<>();
                 String[] roleList;
                 String scopeType;
                 String base64EncodedURLScopeKey;
                 String scopeRoleMappingType;
                 String base64EncodedURLRole;
                 String roleField;
-
                 for (Map.Entry<String, String> entry : scopeRoleMap.entrySet()) {
+                    List<String> scopeRoles = new ArrayList<>();
                     base64EncodedURLScopeKey = Base64.getUrlEncoder().withoutPadding().
                             encodeToString(entry.getKey().getBytes(Charset.defaultCharset()));
                     scopeType = "type " + APIConstants.SCOPE_ROLE_MAPPING + "_" + base64EncodedURLScopeKey + "{\n";
@@ -332,53 +328,6 @@ public class GraphQLSchemaDefinition {
 
         policyDefinition.put(APIConstants.QUERY_ANALYSIS_COMPLEXITY, customComplexityObject);
         return policyDefinition;
-    }
-
-    /**
-     * This method saves schema definition of GraphQL APIs in the registry
-     *
-     * @param api              API to be saved
-     * @param schemaDefinition Graphql API definition as String
-     * @param registry         user registry
-     * @throws APIManagementException
-     */
-    public void saveGraphQLSchemaDefinition(API api, String schemaDefinition, Registry registry)
-            throws APIManagementException {
-        String apiName = api.getId().getApiName();
-        String apiVersion = api.getId().getVersion();
-        String apiProviderName = api.getId().getProviderName();
-        String resourcePath = APIUtil.getGraphqlDefinitionFilePath(apiName, apiVersion, apiProviderName);
-        try {
-            String saveResourcePath = resourcePath + apiProviderName + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
-                    apiName + apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
-            Resource resource;
-            if (!registry.resourceExists(saveResourcePath)) {
-                resource = registry.newResource();
-            } else {
-                resource = registry.get(saveResourcePath);
-            }
-
-            resource.setContent(schemaDefinition);
-            resource.setMediaType(String.valueOf(ContentType.TEXT_PLAIN));
-            registry.put(saveResourcePath, resource);
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully imported the schema: " + schemaDefinition);
-            }
-
-            String[] visibleRoles = null;
-            if (api.getVisibleRoles() != null) {
-                visibleRoles = api.getVisibleRoles().split(",");
-            }
-
-            //Need to set anonymous if the visibility is public
-            APIUtil.clearResourcePermissions(resourcePath, api.getId(), ((UserRegistry) registry).getTenantId());
-            APIUtil.setResourcePermissions(apiProviderName, api.getVisibility(), visibleRoles, resourcePath);
-
-        } catch (RegistryException e) {
-            String errorMessage = "Error while adding Graphql Definition for " + apiName + '-' + apiVersion;
-            log.error(errorMessage, e);
-            handleException(errorMessage, e);
-        }
     }
 
     /**

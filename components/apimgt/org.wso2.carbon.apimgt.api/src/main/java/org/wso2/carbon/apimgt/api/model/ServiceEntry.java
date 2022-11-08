@@ -24,7 +24,7 @@ import java.sql.Timestamp;
 public class ServiceEntry {
 
     private String uuid = null;
-    private String key = null;
+    private String serviceKey = null;
     private String md5 = null;
     private String name = null;
     private String version = null;
@@ -74,12 +74,12 @@ public class ServiceEntry {
         this.lastUpdatedTime = lastUpdatedTime;
     }
 
-    public String getKey() {
-        return key;
+    public String getServiceKey() {
+        return serviceKey;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setServiceKey(String serviceKey) {
+        this.serviceKey = serviceKey;
     }
 
     public boolean isMutualSSLEnabled() {

@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.impl.wsdl.WSDL11ProcessorImpl;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDL20ProcessorImpl;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
-import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.xml.sax.SAXException;
 
@@ -76,8 +75,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 /**
  * This class is used to read the WSDL file using WSDL4J library.
@@ -223,6 +220,18 @@ public class APIMWSDLReader {
         } catch (APIManagementException e) {
             return handleExceptionDuringValidation(e);
         }
+    }
+
+    /**
+     * Extract the WSDL file and validates it
+     *
+     * @param wsdlContent file content as a byte array
+     * @return Validation information
+     * @throws APIManagementException Error occurred during validation
+     */
+    public static WSDLValidationResponse validateWSDLFile(byte[] wsdlContent) throws  APIManagementException {
+        WSDLProcessor processor = getWSDLProcessor(wsdlContent);
+        return getWsdlValidationResponse(processor);
     }
 
     /**
@@ -732,6 +741,7 @@ public class APIMWSDLReader {
     private void setServiceDefinitionForWSDL2(org.apache.woden.wsdl20.Description definition, API api)
             throws APIManagementException {
         org.apache.woden.wsdl20.Service[] serviceMap = definition.getServices();
+        String organization = api.getOrganization();
         // URL addressURI;
         try {
             for (org.apache.woden.wsdl20.Service svc : serviceMap) {
@@ -744,7 +754,7 @@ public class APIMWSDLReader {
                     // } else {
                     String endpointTransport = determineURLTransport(endpoint.getAddress().getScheme(),
                                                                      api.getTransports());
-                    setAddressUrl(element, new URI(APIUtil.getGatewayendpoint(endpointTransport) +
+                    setAddressUrl(element, new URI(APIUtil.getGatewayendpoint(endpointTransport, organization) +
                                                    api.getContext() + '/' + api.getId().getVersion()));
                     //}
                 }
@@ -916,6 +926,7 @@ public class APIMWSDLReader {
             throws APIManagementException {
         Map serviceMap = definition.getAllServices();
         URL addressURI;
+        String organization = api.getOrganization();
         for (Object entry : serviceMap.entrySet()) {
             Map.Entry svcEntry = (Map.Entry) entry;
             Service svc = (Service) svcEntry.getValue();
@@ -944,7 +955,7 @@ public class APIMWSDLReader {
                         // Here if there is a conversion failure , consider "https" as default protocol
                     }
                     setAddressUrl(extensibilityElement, endpointTransport, api.getContext(), environmentName,
-                            environmentType);
+                            environmentType, organization);
                 }
             }
         }
@@ -991,19 +1002,21 @@ public class APIMWSDLReader {
 	 */
 	private void setAddressUrl(ExtensibilityElement exElement, String transports, API api) throws APIManagementException {
 
+        String organization = api.getOrganization();
+
         if (exElement instanceof SOAP12AddressImpl) {
-            ((SOAP12AddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
+            ((SOAP12AddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports, organization) + api.getContext());
         } else if (exElement instanceof SOAPAddressImpl) {
-            ((SOAPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
+            ((SOAPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports, organization) + api.getContext());
         } else if (exElement instanceof HTTPAddressImpl) {
-            ((HTTPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
+            ((HTTPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports, organization) + api.getContext());
         } else if (exElement instanceof UnknownExtensibilityElement) {
             Element unknownExtensibilityElement = ((UnknownExtensibilityElement) exElement).getElement();
             if (unknownExtensibilityElement != null) {
                 NodeList nodeList = unknownExtensibilityElement.getElementsByTagNameNS(APIConstants.WSDL_NAMESPACE_URI,
                         APIConstants.WSDL_ELEMENT_LOCAL_NAME);
                 if (nodeList != null && nodeList.getLength() > 0) {
-                    nodeList.item(0).setTextContent(APIUtil.getGatewayendpoint(transports) + api.getContext());
+                    nodeList.item(0).setTextContent(APIUtil.getGatewayendpoint(transports, organization) + api.getContext());
                 }
             }
         } else {
@@ -1024,24 +1037,24 @@ public class APIMWSDLReader {
      * @throws APIManagementException when unsupported WSDL as a input
      */
     private void setAddressUrl(ExtensibilityElement exElement, String transports, String context,
-            String environmentName, String environmentType) throws APIManagementException {
+            String environmentName, String environmentType, String organization) throws APIManagementException {
         if (exElement instanceof SOAP12AddressImpl) {
             ((SOAP12AddressImpl) exElement)
-                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType, organization) + context);
             if (log.isDebugEnabled()) {
                 log.debug("Gateway endpoint for environment:" + environmentName + " is: "
                         + ((SOAP12AddressImpl) exElement).getLocationURI());
             }
         } else if (exElement instanceof SOAPAddressImpl) {
             ((SOAPAddressImpl) exElement)
-                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType, organization) + context);
             if (log.isDebugEnabled()) {
                 log.debug("Gateway endpoint for environment:" + environmentName + " is: "
                         + ((SOAPAddressImpl) exElement).getLocationURI());
             }
         } else if (exElement instanceof HTTPAddressImpl) {
             ((HTTPAddressImpl) exElement)
-                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType, organization) + context);
             if (log.isDebugEnabled()) {
                 log.debug("Gateway endpoint for environment:" + environmentName + " is: "
                         + ((HTTPAddressImpl) exElement).getLocationURI());

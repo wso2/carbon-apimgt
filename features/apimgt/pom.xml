@@ -19,17 +19,18 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>9.0.294-SNAPSHOT</version>
+        <version>9.26.68-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>apimgt-feature</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - API management Feature Aggregator Module</name>
+    <name>WSO2 Carbon - API Management Feature Aggregator Module</name>
     <url>http://wso2.org</url>
 
     <modules>
+        <module>org.wso2.carbon.apimgt.eventing.feature</module>
         <module>org.wso2.carbon.apimgt.eventing.hub.feature</module>
         <module>org.wso2.carbon.apimgt.core.feature</module>
         <module>org.wso2.carbon.apimgt.gateway.feature</module>
@@ -42,6 +43,7 @@
         <module>org.wso2.carbon.apimgt.rest.api.store.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.admin.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.gateway.feature</module>
+        <module>org.wso2.carbon.apimgt.rest.api.devops.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.dcr.feature</module>
         <module>org.wso2.carbon.apimgt.scxml.feature</module>
         <module>org.wso2.carbon.apimgt.throttling.siddhi.extension.feature</module>

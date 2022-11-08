@@ -9,7 +9,7 @@ public class ConfigurationDto {
     private String label;
     private String type;
     private String tooltip;
-    private String defaultValue;
+    private Object defaultValue;
     private boolean required;
     private boolean mask;
     private List values = new ArrayList<>();
@@ -55,7 +55,7 @@ public class ConfigurationDto {
         this.tooltip = tooltip;
     }
 
-    public String getDefaultValue() {
+    public Object getDefaultValue() {
 
         return defaultValue;
     }
@@ -110,6 +110,20 @@ public class ConfigurationDto {
         this.values.add(value);
     }
 
+    public ConfigurationDto(String name, String label, String type, String tooltip, Object defaultValue,
+                            boolean required,
+                            boolean mask, List values, boolean multiple) {
+
+        this.name = name;
+        this.label = label;
+        this.type = type;
+        this.tooltip = tooltip;
+        this.defaultValue = defaultValue;
+        this.required = required;
+        this.mask = mask;
+        this.values = values;
+        this.multiple = multiple;
+    }
     public ConfigurationDto(String name, String label, String type, String tooltip, String defaultValue,
                             boolean required,
                             boolean mask, List values, boolean multiple) {

@@ -23,8 +23,11 @@ import io.opentracing.SpanContext;
 
 /**
  * A Wrapper class for io.opentracing Span
+ * @deprecated
+ * <p> Use {@link org.wso2.carbon.apimgt.tracing.telemetry.TelemetrySpan} instead</p>
  */
 
+@Deprecated
 public class TracingSpan {
 
     private Span span;

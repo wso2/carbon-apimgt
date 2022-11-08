@@ -21,6 +21,8 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.junit.Test;
 import org.testng.Assert;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Environment;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -52,5 +54,77 @@ public class APIManagerConfigurationTest {
         Map<String, String> extractedProperties = config.extractPublisherProperties(element);
         Assert.assertTrue(extractedProperties.isEmpty());
 
+    }
+
+    @Test
+    public void testEnvironmentsConfigProvided() throws XMLStreamException, APIManagementException {
+        String envConfig = "<Environment type=\"hybrid\" api-console=\"true\" isDefault=\"true\">\n" +
+                "                <Name>Default</Name>\n" +
+                "                <DisplayName></DisplayName>\n" +
+                "                <Description>This is a hybrid gateway that handles both production and sandbox token traffic.</Description>\n" +
+                "                <!-- Server URL of the API gateway -->\n" +
+                "                <ServerURL>https://localhost:9440/services/</ServerURL>\n" +
+                "                <!-- Admin username for the API gateway. -->\n" +
+                "                <Username>${admin.username}</Username>\n" +
+                "                <!-- Admin password for the API gateway.-->\n" +
+                "                <Password>${admin.password}</Password>\n" +
+                "                <!-- Provider Vendor of the API gateway.-->\n" +
+                "                <Provider>wso2</Provider>\n" +
+                "                <!-- Endpoint URLs for the APIs hosted in this API gateway.-->\n" +
+                "                <GatewayEndpoint>https://localhost:9440,http://localhost:9440</GatewayEndpoint>\n" +
+                "                <!-- Additional properties for External Gateways -->\n" +
+                "                <!-- Endpoint URLs of the WebSocket APIs hosted in this API Gateway -->\n" +
+                "                <GatewayWSEndpoint>ws://localhost:9099,wss://localhost:8099</GatewayWSEndpoint>\n" +
+                "                <!-- Endpoint URLs of the WebSub APIs hosted in this API Gateway -->\n" +
+                "                <GatewayWebSubEndpoint>http://localhost:9021,https://localhost:8021</GatewayWebSubEndpoint>\n" +
+                "                <VirtualHosts>\n" +
+                "                </VirtualHosts>\n" +
+                "            </Environment>";
+        OMElement element = AXIOMUtil.stringToOM(envConfig);
+        APIManagerConfiguration config = new APIManagerConfiguration();
+        config.setEnvironmentConfig(element);
+        Map<String, Environment> environmentsList = config.getGatewayEnvironments();
+        Assert.assertFalse(environmentsList.isEmpty());
+        Environment defaultEnv = environmentsList.get("Default");
+        Assert.assertEquals(defaultEnv.getProvider(), "wso2");
+        Assert.assertTrue(defaultEnv.getAdditionalProperties().isEmpty());
+    }
+
+    @Test
+    public void testEnvironmentsConfigWithAdditionalProperties() throws XMLStreamException, APIManagementException {
+        String envConfig = "<Environment type=\"hybrid\" api-console=\"true\" isDefault=\"true\">\n" +
+                "                <Name>Default</Name>\n" +
+                "                <DisplayName></DisplayName>\n" +
+                "                <Description>This is a hybrid gateway that handles both production and sandbox token traffic.</Description>\n" +
+                "                <!-- Server URL of the API gateway -->\n" +
+                "                <ServerURL>https://localhost:9440/services/</ServerURL>\n" +
+                "                <!-- Admin username for the API gateway. -->\n" +
+                "                <Username>${admin.username}</Username>\n" +
+                "                <!-- Admin password for the API gateway.-->\n" +
+                "                <Password>${admin.password}</Password>\n" +
+                "                <!-- Provider Vendor of the API gateway.-->\n" +
+                "                <Provider>wso2</Provider>\n" +
+                "                <!-- Endpoint URLs for the APIs hosted in this API gateway.-->\n" +
+                "                <GatewayEndpoint>https://localhost:9440,http://localhost:9440</GatewayEndpoint>\n" +
+                "                <!-- Additional properties for External Gateways -->\n" +
+                "                <!-- Endpoint URLs of the WebSocket APIs hosted in this API Gateway -->\n" +
+                "                <GatewayWSEndpoint>ws://localhost:9099,wss://localhost:8099</GatewayWSEndpoint>\n" +
+                "                <!-- Endpoint URLs of the WebSub APIs hosted in this API Gateway -->\n" +
+                "                <GatewayWebSubEndpoint>http://localhost:9021,https://localhost:8021</GatewayWebSubEndpoint>\n" +
+                "                <Properties>\n" +
+                "                    <Property name=\"Organization\">WSO2</Property>\n" +
+                "                    <Property name=\"DisplayName\">Development Environment</Property>\n" +
+                "                    <Property name=\"DevAccountName\">dev-1</Property>\n" +
+                "                </Properties>\n" +
+                "                <VirtualHosts>\n" +
+                "                </VirtualHosts>\n" +
+                "            </Environment>";
+        OMElement element = AXIOMUtil.stringToOM(envConfig);
+        APIManagerConfiguration config = new APIManagerConfiguration();
+        config.setEnvironmentConfig(element);
+        Map<String, Environment> environmentsList = config.getGatewayEnvironments();
+        Assert.assertFalse(environmentsList.isEmpty());
+        Environment defaultEnv = environmentsList.get("Default");
+        Assert.assertFalse(defaultEnv.getAdditionalProperties().isEmpty());
     }
 }

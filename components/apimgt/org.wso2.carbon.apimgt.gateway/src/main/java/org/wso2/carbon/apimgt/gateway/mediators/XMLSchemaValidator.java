@@ -28,7 +28,6 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.threatprotection.APIMThreatAnalyzerException;
 import org.wso2.carbon.apimgt.gateway.threatprotection.AnalyzerHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.analyzer.APIMThreatAnalyzer;
-import org.wso2.carbon.apimgt.gateway.threatprotection.configuration.ConfigurationHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.configuration.XMLConfig;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatExceptionHandler;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
@@ -98,8 +97,8 @@ public class XMLSchemaValidator extends AbstractMediator {
                         xmlValidationStatus = Boolean.valueOf(messageProperty.toString());
                         if (xmlValidationStatus.equals(true)) {
                             XMLConfig xmlConfig = configureSchemaProperties(messageContext);
-                            ConfigurationHolder.addXmlConfig(xmlConfig);
                             apimThreatAnalyzer = AnalyzerHolder.getAnalyzer(contentType);
+                            apimThreatAnalyzer.configure(xmlConfig);
                             inputStreamXml = inputStreams.get(ThreatProtectorConstants.XML);
                             apimThreatAnalyzer.analyze(inputStreamXml, apiContext);
                         }
@@ -122,9 +121,10 @@ public class XMLSchemaValidator extends AbstractMediator {
             } catch (IOException e) {
                 logger.error(APIMgtGatewayConstants.BAD_REQUEST, e);
                 GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, e.getMessage());
+            }finally {
+                //return analyzer to the pool
+                AnalyzerHolder.returnObject(apimThreatAnalyzer);
             }
-            //return analyzer to the pool
-            AnalyzerHolder.returnObject(apimThreatAnalyzer);
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("XML Schema Validator: " + APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);

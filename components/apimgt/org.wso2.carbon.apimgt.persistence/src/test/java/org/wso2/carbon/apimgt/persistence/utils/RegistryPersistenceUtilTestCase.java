@@ -15,7 +15,7 @@
  */
 package org.wso2.carbon.apimgt.persistence.utils;
 
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -58,6 +58,7 @@ import org.wso2.carbon.governance.api.util.GovernanceArtifactConfiguration;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.Tag;
@@ -115,6 +116,8 @@ public class RegistryPersistenceUtilTestCase {
     public void testAPIGet() throws APIManagementException, RegistryException, UserStoreException {
        
         GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
+        String apiPath = generateArtifactPath(artifact);
+        Mockito.when(GovernanceUtils.getArtifactPath(registry, artifact.getId())).thenReturn(apiPath);
         API api = RegistryPersistenceUtil.getAPI(artifact, registry);
         Assert.assertEquals("Attibute overview_type does not match", artifact.getAttribute("overview_type"),
                 api.getType());
@@ -164,6 +167,8 @@ public class RegistryPersistenceUtilTestCase {
     public void testAPIProductGet() throws GovernanceException, APIManagementException {
 
         GenericArtifact artifact = PersistenceHelper.getSampleAPIProductArtifact();
+        String apiPath = generateArtifactPath(artifact);
+        Mockito.when(GovernanceUtils.getArtifactPath(registry, artifact.getId())).thenReturn(apiPath);
         APIProduct apiProduct = RegistryPersistenceUtil.getAPIProduct(artifact, registry);
         Assert.assertEquals("Attibute overview_type does not match", artifact.getAttribute("overview_type"),
                 apiProduct.getType());
@@ -245,5 +250,15 @@ public class RegistryPersistenceUtilTestCase {
         Mockito.when(conf.getRelationshipDefinitions()).thenReturn(assosiations );
         GenericArtifactManager manager = RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY);
         Assert.assertNotNull("Manager is null", manager);
+    }
+
+    private String generateArtifactPath(GenericArtifact artifact) throws GovernanceException {
+        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+        String apiProviderName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+        apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
+                + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
+                + RegistryConstants.PATH_SEPARATOR + "api";
     }
 }

@@ -23,6 +23,7 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.Arrays;
@@ -42,6 +43,7 @@ public class TokenMergeInterceptor extends AbstractPhaseInterceptor {
         super(Phase.PRE_INVOKE);
     }
 
+    @MethodStats
     public void handleMessage(Message message) throws Fault {
         //If Authorization headers are present anonymous URI check will be skipped
         String accessToken = RestApiUtil

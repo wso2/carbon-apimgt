@@ -19,7 +19,10 @@ package org.wso2.carbon.apimgt.impl.wsdl;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.swagger.inflector.examples.ExampleBuilder;
+import io.swagger.inflector.examples.models.ArrayExample;
 import io.swagger.inflector.examples.models.Example;
+import io.swagger.inflector.examples.models.ObjectExample;
+import io.swagger.inflector.examples.models.StringExample;
 import io.swagger.inflector.processors.JsonNodeExampleSerializer;
 import io.swagger.models.HttpMethod;
 import io.swagger.models.Model;
@@ -159,7 +162,7 @@ public class SequenceGenerator {
                                 Model model = definitions.get(defName);
                                 Example example = ExampleBuilder
                                         .fromModel(defName, model, definitions, new HashSet<String>());
-
+                                replaceNullWithStringExample(example);
                                 String jsonExample = Json.pretty(example);
                                 try {
                                     org.json.JSONObject json = new org.json.JSONObject(jsonExample);
@@ -213,6 +216,44 @@ public class SequenceGenerator {
             }
         }
         return sequences;
+    }
+
+    /**
+     * Replace nullable objects with StringExample objects.
+     * This is done to include properties with null values in the result of Json.pretty(example).
+     *
+     * @param example object which can contain child objects with null values
+     */
+    private static void replaceNullWithStringExample(Example example) {
+        if (example instanceof ObjectExample) {
+            ObjectExample objectExample = (ObjectExample) example;
+            if (objectExample.getValues() != null) {
+                for (String key : objectExample.keySet()) {
+                    Example child = objectExample.getValues().get(key);
+                    if (child == null) {
+                        objectExample.getValues().put(key, new StringExample());
+                    } else if (child instanceof ObjectExample) {
+                        if (((ObjectExample) child).getValues() == null) {
+                            objectExample.getValues().put(key, new StringExample());
+                        } else {
+                            replaceNullWithStringExample(child);
+                        }
+                    } else if (child instanceof ArrayExample) {
+                        replaceNullWithStringExample(child);
+                    }
+                }
+            }
+        } else if (example instanceof ArrayExample) {
+            ArrayExample arrayExample = (ArrayExample) example;
+            for (int i = 0; i < arrayExample.getItems().size(); i++) {
+                Example child = arrayExample.getItems().get(i);
+                if (child == null) {
+                    arrayExample.getItems().set(i, new StringExample());
+                } else {
+                    replaceNullWithStringExample(child);
+                }
+            }
+        }
     }
 
     private static void populateParametersFromOperation(Operation operation, Map<String, Model> definitions,

@@ -31,6 +31,8 @@ public class ApplicationInfoDTO   {
     private Integer subscriptionCount = null;
     private Object attributes = null;
     private String owner = null;
+    private String createdTime = null;
+    private String updatedTime = null;
 
   /**
    **/
@@ -186,6 +188,40 @@ public class ApplicationInfoDTO   {
     this.owner = owner;
   }
 
+  /**
+   **/
+  public ApplicationInfoDTO createdTime(String createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1651555310208", value = "")
+  @JsonProperty("createdTime")
+  public String getCreatedTime() {
+    return createdTime;
+  }
+  public void setCreatedTime(String createdTime) {
+    this.createdTime = createdTime;
+  }
+
+  /**
+   **/
+  public ApplicationInfoDTO updatedTime(String updatedTime) {
+    this.updatedTime = updatedTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1651555310208", value = "")
+  @JsonProperty("updatedTime")
+  public String getUpdatedTime() {
+    return updatedTime;
+  }
+  public void setUpdatedTime(String updatedTime) {
+    this.updatedTime = updatedTime;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -204,12 +240,14 @@ public class ApplicationInfoDTO   {
         Objects.equals(groups, applicationInfo.groups) &&
         Objects.equals(subscriptionCount, applicationInfo.subscriptionCount) &&
         Objects.equals(attributes, applicationInfo.attributes) &&
-        Objects.equals(owner, applicationInfo.owner);
+        Objects.equals(owner, applicationInfo.owner) &&
+        Objects.equals(createdTime, applicationInfo.createdTime) &&
+        Objects.equals(updatedTime, applicationInfo.updatedTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, throttlingPolicy, description, status, groups, subscriptionCount, attributes, owner);
+    return Objects.hash(applicationId, name, throttlingPolicy, description, status, groups, subscriptionCount, attributes, owner, createdTime, updatedTime);
   }
 
   @Override
@@ -226,6 +264,8 @@ public class ApplicationInfoDTO   {
     sb.append("    subscriptionCount: ").append(toIndentedString(subscriptionCount)).append("\n");
     sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
     sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
     sb.append("}");
     return sb.toString();
   }

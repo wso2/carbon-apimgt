@@ -63,6 +63,17 @@ public interface ArtifactSaver {
             throws ArtifactSynchronizerException;
 
     /**
+     *
+     * @param apiId
+     * @param name
+     * @param version
+     * @param organization
+     * @throws ArtifactSynchronizerException
+     */
+    void removeArtifact(String apiId, String name, String version, String organization)
+            throws ArtifactSynchronizerException;
+
+    /**
      * Will be called after all saving is done, or when init fails
      */
     void disconnect();

@@ -42,7 +42,11 @@ public class APIProductDTO   {
     @XmlEnum(String.class)
     public enum StateEnum {
         CREATED("CREATED"),
-        PUBLISHED("PUBLISHED");
+        PUBLISHED("PUBLISHED"),
+        DEPRECATED("DEPRECATED"),
+        RETIRED("RETIRED"),
+        BLOCKED("BLOCKED"),
+        PROTOTYPED("PROTOTYPED");
         private String value;
 
         StateEnum (String v) {
@@ -68,7 +72,7 @@ public class APIProductDTO   {
 return null;
         }
     }
-    private StateEnum state = null;
+    private StateEnum state = StateEnum.CREATED;
     private Boolean enableSchemaValidation = null;
     private Boolean isRevision = null;
     private String revisionedApiProductId = null;
@@ -224,9 +228,11 @@ return null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private String createdTime = null;
     private String lastUpdatedTime = null;
+    private String gatewayVendor = null;
     private List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
     private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
     private List<String> categories = new ArrayList<String>();
+    private String workflowStatus = null;
 
   /**
    * UUID of the api product 
@@ -830,6 +836,23 @@ return null;
   }
 
   /**
+   **/
+  public APIProductDTO gatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "wso2", value = "")
+  @JsonProperty("gatewayVendor")
+  public String getGatewayVendor() {
+    return gatewayVendor;
+  }
+  public void setGatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
+  }
+
+  /**
    * APIs and resources in the API Product. 
    **/
   public APIProductDTO apis(List<ProductAPIDTO> apis) {
@@ -884,6 +907,23 @@ return null;
     this.categories = categories;
   }
 
+  /**
+   **/
+  public APIProductDTO workflowStatus(String workflowStatus) {
+    this.workflowStatus = workflowStatus;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "APPROVED", value = "")
+  @JsonProperty("workflowStatus")
+  public String getWorkflowStatus() {
+    return workflowStatus;
+  }
+  public void setWorkflowStatus(String workflowStatus) {
+    this.workflowStatus = workflowStatus;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -928,14 +968,16 @@ return null;
         Objects.equals(corsConfiguration, apIProduct.corsConfiguration) &&
         Objects.equals(createdTime, apIProduct.createdTime) &&
         Objects.equals(lastUpdatedTime, apIProduct.lastUpdatedTime) &&
+        Objects.equals(gatewayVendor, apIProduct.gatewayVendor) &&
         Objects.equals(apis, apIProduct.apis) &&
         Objects.equals(scopes, apIProduct.scopes) &&
-        Objects.equals(categories, apIProduct.categories);
+        Objects.equals(categories, apIProduct.categories) &&
+        Objects.equals(workflowStatus, apIProduct.workflowStatus);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes, categories);
+    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, gatewayVendor, apis, scopes, categories, workflowStatus);
   }
 
   @Override
@@ -977,9 +1019,11 @@ return null;
     sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
+    sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    apis: ").append(toIndentedString(apis)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
+    sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -82,52 +82,39 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         }
 
         try {
-            //Check whether GatewayType is "Synapse" before attempting to load Custom-Sequences into registry
-
-            String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-
-            if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
-                APIUtil.writeDefinedSequencesToTenantRegistry(tenantId);
-            }
-        }
-        // Need to continue the execution even if we encounter an error.
-        catch (Exception e) {
-            log.error("Failed to write defined sequences to tenant " + tenantDomain + "'s registry", e);
-        }
-
-        try {
-            APIUtil.loadTenantExternalStoreConfig(tenantId);
+            APIUtil.loadTenantExternalStoreConfig(tenantDomain);
         } catch (Exception e) {
             log.error("Failed to load external-stores.xml to tenant " + tenantDomain + "'s registry", e);
         }
 
         try {
-            APIUtil.loadTenantGAConfig(tenantId);
+            APIUtil.loadTenantGAConfig(tenantDomain);
         } catch (Exception e) {
             log.error("Failed to load ga-config.xml to tenant " + tenantDomain + "'s registry", e);
         }
 
         try {
             //load workflow-extension configuration to the registry
-            APIUtil.loadTenantWorkFlowExtensions(tenantId);
+            APIUtil.loadTenantWorkFlowExtensions(tenantDomain);
         } catch (Exception e) {
             log.error("Failed to load workflow-extension.xml to tenant " + tenantDomain + "'s registry", e);
         }
 
         try {
-            //load self signup configurations to the registry
-            APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
-        } catch (Exception e) {
-            log.error("Failed to load sign-up-config.xml to tenant " + tenantDomain + "'s registry", e);
-        }
-
-        try {
-            APIUtil.loadAndSyncTenantConf(tenantId);
+            APIUtil.loadAndSyncTenantConf(tenantDomain);
         } catch (APIManagementException e) {
             log.error("Failed to load " + APIConstants.API_TENANT_CONF + " for tenant " + tenantDomain, e);
         } catch (Exception e) { // The generic Exception is handled explicitly so execution does not stop during config deployment
             log.error("Exception when loading " + APIConstants.API_TENANT_CONF + " for tenant " + tenantDomain, e);
         }
+
+        try {
+            //Load common operation policies to tenant
+            APIUtil.loadCommonOperationPolicies(tenantDomain);
+        } catch (Exception e) { // The generic Exception is handled explicitly so execution does not stop during config deployment
+            log.error("Exception when loading " + APIConstants.OPERATION_POLICIES + " for tenant " + tenantDomain, e);
+        }
+
 
         try {
             APIUtil.createDefaultRoles(tenantId);

@@ -57,6 +57,7 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
         String offsetDateTime = getTimeInISO(requestInTime);
 
         Event event = new Event();
+        event.setProperties(provider.getProperties());
         API api = provider.getApi();
         Operation operation = provider.getOperation();
         Target target = provider.getTarget();
@@ -73,6 +74,9 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
         String userIp = provider.getEndUserIP();
         if (userIp == null) {
             userIp = Constants.UNKNOWN_VALUE;
+        }
+        if (userAgent == null) {
+            userAgent = Constants.UNKNOWN_VALUE;
         }
 
         event.setApi(api);

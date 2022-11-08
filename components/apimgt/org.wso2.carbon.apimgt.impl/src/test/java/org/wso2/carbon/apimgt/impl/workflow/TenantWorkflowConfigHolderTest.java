@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.workflow;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,23 +29,19 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 
-import javax.xml.stream.XMLStreamException;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import java.util.List;
+import javax.xml.stream.XMLStreamException;
 
 /**
  * TenantWorkflowConfigHolder test cases
@@ -55,29 +52,24 @@ public class TenantWorkflowConfigHolderTest {
 
     private int tenantID = -1234;
     private String tenantDomain = "carbon.super";
-    private UserRegistry registry;
+    private APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
 
     @Before
     public void init() throws RegistryException {
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        RegistryService registryService = Mockito.mock(RegistryService.class);
-        registry = Mockito.mock(UserRegistry.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
-        Mockito.when(registryService.getGovernanceSystemRegistry(Mockito.anyInt())).thenReturn(registry);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
     }
 
     @Test
-    public void testLoadingDefaultTenantWorkflowConfig() throws FileNotFoundException, XMLStreamException,
-            RegistryException {
+    public void testLoadingDefaultTenantWorkflowConfig() throws IOException, XMLStreamException,
+            RegistryException, APIManagementException {
         TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
         File defaultWFConfigFile = new File(Thread.currentThread().getContextClassLoader().
                 getResource("workflow-configs/default-workflow-extensions.xml").getFile());
         InputStream defaultWFConfigContent = new FileInputStream(defaultWFConfigFile);
-        Resource defaultWFConfigResource = new ResourceImpl();
-        defaultWFConfigResource.setContentStream(defaultWFConfigContent);
-        Mockito.when(registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION)).thenReturn(defaultWFConfigResource);
+        Mockito.when(apimConfigService.getWorkFlowConfig(tenantDomain)).thenReturn(IOUtils.toString(defaultWFConfigContent));
         try {
             tenantWorkflowConfigHolder.load();
             Assert.assertNotNull(tenantWorkflowConfigHolder.getWorkflowExecutor("AM_APPLICATION_CREATION"));
@@ -96,15 +88,13 @@ public class TenantWorkflowConfigHolderTest {
     }
 
     @Test
-    public void testLoadingExtendedTenantWorkflowConfig() throws FileNotFoundException, XMLStreamException,
-            RegistryException {
+    public void testLoadingExtendedTenantWorkflowConfig() throws IOException, XMLStreamException,
+            RegistryException, APIManagementException {
         TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
         File defaultWFConfigFile = new File(Thread.currentThread().getContextClassLoader().
                 getResource("workflow-configs/workflow-extensions.xml").getFile());
         InputStream defaultWFConfigContent = new FileInputStream(defaultWFConfigFile);
-        Resource defaultWFConfigResource = new ResourceImpl();
-        defaultWFConfigResource.setContentStream(defaultWFConfigContent);
-        Mockito.when(registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION)).thenReturn(defaultWFConfigResource);
+        Mockito.when(apimConfigService.getWorkFlowConfig(tenantDomain)).thenReturn(IOUtils.toString(defaultWFConfigContent));
         try {
             tenantWorkflowConfigHolder.load();
             Assert.assertNotNull(tenantWorkflowConfigHolder.getWorkflowExecutor("AM_APPLICATION_CREATION"));
@@ -123,16 +113,14 @@ public class TenantWorkflowConfigHolderTest {
 
     @Test
     public void testFailureToLoadTenantWFConfigWhenErrorWhileLoadingRegistryResource() throws FileNotFoundException,
-            XMLStreamException, RegistryException {
+            XMLStreamException, RegistryException, APIManagementException {
         TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
-        Mockito.when(registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION)).thenThrow(new RegistryException("Error " +
-                "loading Workflow Resource"));
+        Mockito.when(apimConfigService.getWorkFlowConfig(tenantDomain)).thenThrow(APIManagementException.class);
         try {
             tenantWorkflowConfigHolder.load();
             Assert.fail("Expected WorkflowException has not been thrown when registry resource loading failed");
         } catch (WorkflowException e) {
-            Assert.assertEquals(e.getMessage(), "Error loading Resource from path" + APIConstants
-                    .WORKFLOW_EXECUTOR_LOCATION);
+            Assert.assertTrue(e.getMessage().contains("Unable to retrieve workflow configurations"));
         }
     }
 
@@ -143,11 +131,8 @@ public class TenantWorkflowConfigHolderTest {
                 "<WorkFlowExtensions>\n" +
                         "    <ApplicationCreation executor=\"org.wso2.carbon.apimgt.impl.workflow" +
                         ".TestExecutor\"/></WorkFlowExtensions>";
-        InputStream invalidInputStream = new ByteArrayInputStream(invalidWFExecutor.getBytes("UTF-8"));
         TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
-        Resource defaultWFConfigResource = new ResourceImpl();
-        defaultWFConfigResource.setContentStream(invalidInputStream);
-        Mockito.when(registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION)).thenReturn(defaultWFConfigResource);
+        Mockito.when(apimConfigService.getWorkFlowConfig(tenantDomain)).thenReturn(invalidWFExecutor);
         try {
             tenantWorkflowConfigHolder.load();
             Assert.fail("Expected WorkflowException has not been thrown when workflow executor class not found");
@@ -164,11 +149,8 @@ public class TenantWorkflowConfigHolderTest {
                         "<WorkFlowExtensions>\n" +
                         "    <ApplicationCreation executor=\"org.wso2.carbon.apimgt.impl.workflow" +
                         ".WorkflowExecutor\"/></WorkFlowExtensions>";
-        InputStream invalidInputStream = new ByteArrayInputStream(invalidWFExecutor.getBytes("UTF-8"));
         TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
-        Resource defaultWFConfigResource = new ResourceImpl();
-        defaultWFConfigResource.setContentStream(invalidInputStream);
-        Mockito.when(registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION)).thenReturn(defaultWFConfigResource);
+        Mockito.when(apimConfigService.getWorkFlowConfig(tenantDomain)).thenReturn(invalidWFExecutor);
         try {
             tenantWorkflowConfigHolder.load();
             Assert.fail("Expected WorkflowException has not been thrown when workflow executor class cannot be " +
@@ -184,19 +166,16 @@ public class TenantWorkflowConfigHolderTest {
         File defaultWFConfigFile = new File(Thread.currentThread().getContextClassLoader().
                 getResource("workflow-configs/workflow-extensions.xml").getFile());
         InputStream defaultWFConfigContent = new FileInputStream(defaultWFConfigFile);
-        Resource defaultWFConfigResource = Mockito.mock(Resource.class);
-        Mockito.when(registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION)).thenReturn(defaultWFConfigResource);
-        Mockito.when(defaultWFConfigResource.getContentStream()).thenReturn(defaultWFConfigContent);
+        Mockito.when(apimConfigService.getWorkFlowConfig(tenantDomain)).thenReturn(IOUtils.toString(defaultWFConfigContent));
         //XMLStreamException will be thrown while building workflow config
-        PowerMockito.whenNew(StAXOMBuilder.class).withArguments(defaultWFConfigContent).thenThrow(new
-                XMLStreamException(""));
+        PowerMockito.whenNew(StAXOMBuilder.class).withParameterTypes(InputStream.class).
+                withArguments(Mockito.any(InputStream.class)).thenThrow(new XMLStreamException(""));
         try {
             tenantWorkflowConfigHolder.load();
             Assert.fail("Expected WorkflowException has not been thrown when XMLStreamException occurred while " +
                     "processing workflow config");
         } catch (WorkflowException e) {
-            Assert.assertEquals(e.getMessage(), "Error building xml from Resource at " + APIConstants
-                    .WORKFLOW_EXECUTOR_LOCATION);
+            Assert.assertEquals(e.getMessage(), "Error building xml");
         }
     }
 
@@ -208,11 +187,8 @@ public class TenantWorkflowConfigHolderTest {
                 "<WorkFlowExtensions>\n" +
                         "    <ApplicationCreation executor=\"org.wso2.carbon.apimgt.impl.workflow" +
                         ".InvalidWorkFlowExecutor1\"/></WorkFlowExtensions>";
-        InputStream invalidInputStream = new ByteArrayInputStream(invalidWFExecutor.getBytes("UTF-8"));
         TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
-        Resource defaultWFConfigResource = new ResourceImpl();
-        defaultWFConfigResource.setContentStream(invalidInputStream);
-        Mockito.when(registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION)).thenReturn(defaultWFConfigResource);
+        Mockito.when(apimConfigService.getWorkFlowConfig(tenantDomain)).thenReturn(invalidWFExecutor);
         try {
             tenantWorkflowConfigHolder.load();
             Assert.fail("Expected WorkflowException has not been thrown when workflow executor class cannot be " +
@@ -233,11 +209,8 @@ public class TenantWorkflowConfigHolderTest {
                         "         <Property/>\n" +
                         "    </ApplicationCreation>\n" +
                         "</WorkFlowExtensions>\n";
-        InputStream invalidInputStream = new ByteArrayInputStream(invalidWFExecutor.getBytes("UTF-8"));
         TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
-        Resource defaultWFConfigResource = new ResourceImpl();
-        defaultWFConfigResource.setContentStream(invalidInputStream);
-        Mockito.when(registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION)).thenReturn(defaultWFConfigResource);
+        Mockito.when(apimConfigService.getWorkFlowConfig(tenantDomain)).thenReturn(invalidWFExecutor);
         try {
             tenantWorkflowConfigHolder.load();
             Assert.fail("Expected WorkflowException has not been thrown when workflow executor property 'name' " +
@@ -257,11 +230,8 @@ public class TenantWorkflowConfigHolderTest {
                         "         <Property name=\"testParam\">test</Property>\n" +
                         "    </ApplicationCreation>\n" +
                         "</WorkFlowExtensions>\n";
-        InputStream invalidInputStream = new ByteArrayInputStream(invalidWFExecutor.getBytes("UTF-8"));
         TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
-        Resource defaultWFConfigResource = new ResourceImpl();
-        defaultWFConfigResource.setContentStream(invalidInputStream);
-        Mockito.when(registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION)).thenReturn(defaultWFConfigResource);
+        Mockito.when(apimConfigService.getWorkFlowConfig(tenantDomain)).thenReturn(invalidWFExecutor);
         try {
             tenantWorkflowConfigHolder.load();
             Assert.fail("Expected WorkflowException has not been thrown when workflow executor property setter method" +
@@ -283,11 +253,8 @@ public class TenantWorkflowConfigHolderTest {
                         "         <Property name=\"username\">admin</Property>\n" +
                         "    </ApplicationCreation>\n" +
                         "</WorkFlowExtensions>\n";
-        InputStream invalidInputStream = new ByteArrayInputStream(invalidWFExecutor.getBytes("UTF-8"));
         TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
-        Resource defaultWFConfigResource = new ResourceImpl();
-        defaultWFConfigResource.setContentStream(invalidInputStream);
-        Mockito.when(registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION)).thenReturn(defaultWFConfigResource);
+        Mockito.when(apimConfigService.getWorkFlowConfig(tenantDomain)).thenReturn(invalidWFExecutor);
         try {
             tenantWorkflowConfigHolder.load();
             Assert.fail("Expected WorkflowException has not been thrown when workflow executor property setter method" +
@@ -331,11 +298,8 @@ public class TenantWorkflowConfigHolderTest {
                         "    <ApplicationDeletion executor=\"org.wso2.carbon.apimgt.impl.workflow" +
                         ".ApplicationDeletionSimpleWorkflowExecutor\"/>\n"+
                         "</WorkFlowExtensions>\n";
-        InputStream invalidInputStream = new ByteArrayInputStream(invalidWFExecutor.getBytes("UTF-8"));
         TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
-        Resource defaultWFConfigResource = new ResourceImpl();
-        defaultWFConfigResource.setContentStream(invalidInputStream);
-        Mockito.when(registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION)).thenReturn(defaultWFConfigResource);
+        Mockito.when(apimConfigService.getWorkFlowConfig(tenantDomain)).thenReturn(invalidWFExecutor);
         try {
             tenantWorkflowConfigHolder.load();
             Assert.assertNotNull(tenantWorkflowConfigHolder.getWorkflowExecutor("AM_APPLICATION_CREATION"));

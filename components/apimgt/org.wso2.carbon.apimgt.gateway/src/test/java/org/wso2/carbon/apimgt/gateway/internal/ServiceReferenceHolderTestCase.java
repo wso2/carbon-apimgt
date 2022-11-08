@@ -21,7 +21,6 @@
 package org.wso2.carbon.apimgt.gateway.internal;
 
 import org.apache.axis2.context.ConfigurationContext;
-import org.bouncycastle.crypto.tls.TlsDHEKeyExchange;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mock;

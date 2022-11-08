@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationUsageDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdditionalSubscriptionInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
@@ -39,6 +40,22 @@ public class SubscriptionsApi  {
 
 SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
 
+
+    @GET
+    @Path("/{apiId}/additionalInfo")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get Additional Information of subscriptions attached to an API.", notes = "This operation can be used to retrieve all additional Information of subscriptions attached to an API by providing the API id. ", response = AdditionalSubscriptionInfoListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "Subscriptions",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Types and fields returned successfully. ", response = AdditionalSubscriptionInfoListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Retrieving types and fields failed. ", response = Void.class) })
+    public Response getAdditionalInfoOfAPISubscriptions(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Application Group Id ")  @QueryParam("groupId") String groupId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.getAdditionalInfoOfAPISubscriptions(apiId, groupId, xWSO2Tenant, offset, limit, ifNoneMatch, securityContext);
+    }
 
     @GET
     

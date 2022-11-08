@@ -169,7 +169,7 @@ public class SubscriptionValidationDataUtil {
                 applicationDTO.setPolicy(appModel.getPolicy());
                 applicationDTO.setSubName(appModel.getSubName());
                 applicationDTO.setTokenType(appModel.getTokenType());
-
+                applicationDTO.setOrganization(appModel.getOrganization());
                 Set<String> groupIds = appModel.getGroupIds();
                 for (String grp : groupIds) {
                     GroupIdDTO groupIdDTO = new GroupIdDTO();

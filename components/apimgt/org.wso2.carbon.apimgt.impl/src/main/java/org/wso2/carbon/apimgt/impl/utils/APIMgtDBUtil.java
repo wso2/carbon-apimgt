@@ -18,12 +18,19 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
@@ -31,11 +38,8 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -221,5 +225,71 @@ public final class APIMgtDBUtil {
             // Rethrow original exception so that it can be handled in the common catch clause of the calling method
             throw e;
         }
+    }
+
+    /**
+     * Handle connection rollback logic. Rethrow original exception so that it can be handled centrally.
+     * @param rs result set
+     * @throws SQLException sql exception
+     * @throws APIManagementException api management exception
+     */
+    public static List<APIRevisionDeployment> mergeRevisionDeploymentDTOs(ResultSet rs) throws APIManagementException,
+            SQLException {
+        List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
+        Map<String, APIRevisionDeployment> uniqueSet = new HashMap<>();
+        while (rs.next()) {
+            APIRevisionDeployment apiRevisionDeployment;
+            String environmentName = rs.getString("NAME");
+            String vhost = VHostUtils.resolveIfNullToDefaultVhost(environmentName,
+                    rs.getString("VHOST"));
+            String revisionUuid = rs.getString("REVISION_UUID");
+            String uniqueKey = (environmentName != null ? environmentName : "") +
+                    (vhost != null ? vhost : "") + (revisionUuid != null ? revisionUuid : "");
+            if (!uniqueSet.containsKey(uniqueKey)) {
+                apiRevisionDeployment = new APIRevisionDeployment();
+                apiRevisionDeployment.setDeployment(environmentName);
+                apiRevisionDeployment.setVhost(vhost);
+                apiRevisionDeployment.setRevisionUUID(revisionUuid);
+                apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+                apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
+                apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
+                apiRevisionDeploymentList.add(apiRevisionDeployment);
+                uniqueSet.put(uniqueKey, apiRevisionDeployment);
+            } else {
+                apiRevisionDeployment = uniqueSet.get(uniqueKey);
+                if (!apiRevisionDeployment.isDisplayOnDevportal()) {
+                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+                }
+                if (apiRevisionDeployment.getDeployedTime() == null) {
+                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
+                }
+                if (apiRevisionDeployment.getSuccessDeployedTime() == null) {
+                    apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
+                }
+            }
+        }
+        return  apiRevisionDeploymentList;
+    }
+
+    /**
+     * Converts a JSON Object String to a String Map
+     *
+     * @param jsonString    JSON String
+     * @return              String Map
+     * @throws APIManagementException if errors occur during parsing the json string
+     */
+    public static Map<String, Object> convertJSONStringToMap(String jsonString) throws APIManagementException {
+        Map<String, Object> map = null;
+        if (StringUtils.isNotEmpty(jsonString)) {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                map = objectMapper.readValue(jsonString, Map.class);
+            } catch (IOException e) {
+                String msg = "Error while parsing JSON string";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+        }
+        return map;
     }
 }

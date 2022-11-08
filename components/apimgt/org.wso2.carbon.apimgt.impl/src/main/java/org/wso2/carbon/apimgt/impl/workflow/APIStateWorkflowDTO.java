@@ -34,6 +34,7 @@ public class APIStateWorkflowDTO extends WorkflowDTO{
     private String invoker;
     private String apiContext;
     private String apiType;
+    private String gatewayVendor;
     
     public String getInvoker() {
         return invoker;
@@ -121,4 +122,13 @@ public class APIStateWorkflowDTO extends WorkflowDTO{
 
         this.apiUUID = apiUUID;
     }
+
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
+
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
+
 }

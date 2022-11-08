@@ -18,15 +18,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
-import java.util.Base64;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.restapi.publisher.MeApiServiceImplUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.MeApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.user.api.UserStoreException;
 import javax.ws.rs.core.Response;
 
 /**
@@ -34,27 +30,19 @@ import javax.ws.rs.core.Response;
  */
 public class MeApiServiceImpl implements MeApiService {
 
-    private static final Log log = LogFactory.getLog(MeApiServiceImpl.class);
-
     /**
      * Check whether the logged-in user has given role
      *
      * @param roleId Base64 URL encoded form of role name -Base64URLEncode{user-store-name/role-name}
      * @return 200 if logged-in user has given role
      */
-    public Response validateUserRole(String roleId, MessageContext messageContext) {
+    public Response validateUserRole(String roleId, MessageContext messageContext) throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         boolean isUserInRole = false;
 
         if (roleId != null) {
-            try {
-                String roleName = new String(Base64.getUrlDecoder().decode(roleId));
-                log.debug("Checking whether user :" + userName + " has role : " + roleName);
-                isUserInRole = APIUtil.checkIfUserInRole(userName, roleName);
-            } catch (UserStoreException e) {
-                RestApiUtil.handleInternalServerError(e.getMessage(), e, log);
-            }
+            isUserInRole = MeApiServiceImplUtils.checkUserInRole(roleId, userName);
         }
         if (isUserInRole) {
             return Response.status(Response.Status.OK).build();

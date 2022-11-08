@@ -35,6 +35,8 @@ public class SQLConstantsMSSQL extends SQLConstants{
             "   cast(NAME as varchar(100)) collate SQL_Latin1_General_CP1_CI_AS as NAME," +
             "   APPLICATION_TIER," +
             "   APP.SUBSCRIBER_ID,  " +
+            "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+            "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
             "   CALLBACK_URL,  " +
             "   DESCRIPTION, " +
             "   APPLICATION_STATUS, " +
@@ -54,7 +56,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " And " +
             "    NAME like ?" +
             " ) a " +
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)" +
+            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = (x.USER_ID + ':') + x.NAME)" +
             " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
 
@@ -69,6 +71,8 @@ public class SQLConstantsMSSQL extends SQLConstants{
             "   cast(NAME as varchar(100)) collate SQL_Latin1_General_CP1_CI_AS as NAME," +
             "   APPLICATION_TIER," +
             "   APP.SUBSCRIBER_ID,  " +
+            "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+            "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
             "   CALLBACK_URL,  " +
             "   DESCRIPTION, " +
             "   APPLICATION_STATUS, " +
@@ -88,7 +92,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " And "+
             "    NAME like ?"+
             " ) a WHERE a.row > ? and a.row <= a.row + ?"+
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)"+
+            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = (x.USER_ID + ':') + x.NAME)"+
             " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
 
@@ -101,6 +105,8 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     "   cast(NAME as varchar(100)) collate SQL_Latin1_General_CP1_CI_AS as NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -124,7 +130,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    NAME like ? ) a " +
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)" +
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = (x.USER_ID + ':') + x.NAME)" +
                     " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
 
@@ -139,6 +145,8 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     "   cast(NAME as varchar(100)) collate SQL_Latin1_General_CP1_CI_AS as NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -164,7 +172,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     " And " +
                     "    NAME like ?"+
                     " ) a " +
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)" +
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = (x.USER_ID + ':') + x.NAME)" +
                     " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
 
@@ -177,6 +185,8 @@ public class SQLConstantsMSSQL extends SQLConstants{
             "   cast(NAME as varchar(100)) collate SQL_Latin1_General_CP1_CI_AS as NAME," +
             "   APPLICATION_TIER," +
             "   APP.SUBSCRIBER_ID,  " +
+            "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+            "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
             "   CALLBACK_URL,  " +
             "   DESCRIPTION, " +
             "   APPLICATION_STATUS, " +
@@ -196,7 +206,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " And "+
             "    NAME like ?"+
             " )a " +
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)" +
+            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = (x.USER_ID + ':') + x.NAME)" +
             " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
 
@@ -209,6 +219,8 @@ public class SQLConstantsMSSQL extends SQLConstants{
             "   cast(NAME as varchar(100)) collate SQL_Latin1_General_CP1_CI_AS as NAME," +
             "   APPLICATION_TIER," +
             "   APP.SUBSCRIBER_ID,  " +
+            "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+            "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
             "   CALLBACK_URL,  " +
             "   DESCRIPTION, " +
             "   APPLICATION_STATUS, " +
@@ -228,7 +240,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " And "+
             "    NAME like ?"+
             " ) a " +
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)" +
+            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = (x.USER_ID + ':') + x.NAME)" +
             " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String GET_APPLICATIONS_BY_TENANT_ID =
@@ -239,6 +251,8 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     "   APP.APPLICATION_ID as APPLICATION_ID, " +
                     "   SUB.CREATED_BY AS CREATED_BY, " +
                     "   APP.GROUP_ID AS GROUP_ID, " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   SUB.TENANT_ID AS TENANT_ID, " +
                     "   SUB.SUBSCRIBER_ID AS SUBSCRIBER_ID, " +
                     "   APP.UUID AS UUID," +

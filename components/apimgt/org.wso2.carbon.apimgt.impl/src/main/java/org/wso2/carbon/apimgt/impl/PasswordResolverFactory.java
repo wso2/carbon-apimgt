@@ -49,8 +49,7 @@ public class PasswordResolverFactory {
                 passwordResolver = new DefaultPasswordResolverImpl();
             } else {
                 try {
-                    passwordResolver = (PasswordResolver) APIUtil.getClassForName(passwordResolverImplClass)
-                            .newInstance();
+                    passwordResolver = (PasswordResolver) APIUtil.getClassInstance(passwordResolverImplClass);
                 } catch (InstantiationException e) {
                     log.error("Error while instantiating class " + passwordResolverImplClass, e);
                     throw new APIManagementException("Error while instantiating class " + passwordResolverImplClass);

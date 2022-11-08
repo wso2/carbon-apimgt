@@ -30,6 +30,9 @@ public class Constants {
     public static final String CACHED_RESPONSE_KEY = "CachableResponse";
     public static final String SKIP_DEFAULT_METRICS_PUBLISHING = "skip_default_metrics_publishing";
     public static final String REQUEST_CACHE_HIT = "api.analytics.cacheHit";
+    public static final String API_USER_NAME_KEY = "userName";
+    public static final String API_CONTEXT_KEY = "apiContext";
+    public static final String API_ANALYTICS_CUSTOM_DATA_PROVIDER_CLASS = "publisher.custom.data.provider.class";
 
     public static final String REGION_ID_PROP = "apim.gw.region";
     public static final String DEFAULT_REGION_ID = "default";

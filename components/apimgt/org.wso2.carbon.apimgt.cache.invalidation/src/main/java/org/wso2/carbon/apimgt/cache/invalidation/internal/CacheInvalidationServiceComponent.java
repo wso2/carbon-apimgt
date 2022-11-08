@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.cache.invalidation.APIMgtCacheInvalidationRequestS
 import org.wso2.carbon.apimgt.cache.invalidation.APIMgtServerStartupListener;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.CacheInvalidationConfiguration;
+import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
 
@@ -73,6 +74,9 @@ public class CacheInvalidationServiceComponent {
                 cacheInvalidationRequestSenderServiceRegistration = bundleContext
                         .registerService(ServerShutdownHandler.class, apimgtCacheInvalidationServerStartupListener,
                                 null);
+                cacheInvalidationRequestSenderServiceRegistration = bundleContext
+                        .registerService(JMSListenerShutDownService.class,
+                                apimgtCacheInvalidationServerStartupListener, null);
             }
         }
     }

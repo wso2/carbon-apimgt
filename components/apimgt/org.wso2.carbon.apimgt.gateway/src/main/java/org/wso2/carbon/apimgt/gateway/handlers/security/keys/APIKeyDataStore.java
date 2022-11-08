@@ -58,7 +58,7 @@ public interface APIKeyDataStore {
      * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException on error
      */
     APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey,
-                                          String requiredAuthenticationLevel, String clientDomain,
+                                          String requiredAuthenticationLevel,
                                           String matchingResource, String httpVerb, String tenantDomain,
                                           List<String> keyManagers) throws APISecurityException;
 

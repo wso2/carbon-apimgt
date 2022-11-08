@@ -149,7 +149,7 @@ public class ExportUtils {
                 .getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
         Set<ExportedSubscribedAPI> exportedSubscribedAPIs = new HashSet<>();
         for (SubscribedAPI subscribedAPI : subscribedAPIs) {
-            ExportedSubscribedAPI exportedSubscribedAPI = new ExportedSubscribedAPI(subscribedAPI.getApiId(),
+            ExportedSubscribedAPI exportedSubscribedAPI = new ExportedSubscribedAPI(subscribedAPI.getAPIIdentifier(),
                     subscribedAPI.getSubscriber(), subscribedAPI.getTier().getName());
             exportedSubscribedAPIs.add(exportedSubscribedAPI);
         }

@@ -19,7 +19,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -45,7 +45,7 @@ public class LocalDatabaseCreatorTestCase {
         System.setProperty(CARBON_HOME, "");
         localDatabaseCreator = new LocalDatabaseCreator(Mockito.mock(DataSource.class));
         PowerMockito.mockStatic(DatabaseCreator.class);
-        PowerMockito.when(DatabaseCreator.getDatabaseType(Matchers.any(Connection.class))).thenReturn("mysql");
+        PowerMockito.when(DatabaseCreator.getDatabaseType(ArgumentMatchers.any(Connection.class))).thenReturn("mysql");
         PowerMockito.whenNew(File.class).withAnyArguments().thenReturn(file);
 
     }

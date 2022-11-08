@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-
 public class SubscriptionWorkflowDTO extends WorkflowDTO{
 
     private String apiName;

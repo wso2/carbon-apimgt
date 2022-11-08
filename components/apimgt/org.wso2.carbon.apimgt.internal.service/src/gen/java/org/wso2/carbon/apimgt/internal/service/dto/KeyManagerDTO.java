@@ -2,15 +2,12 @@ package org.wso2.carbon.apimgt.internal.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import javax.validation.constraints.*;
 
 
 import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -26,7 +23,8 @@ public class KeyManagerDTO   {
     @XmlEnum(String.class)
     public enum TokenTypeEnum {
         EXCHANGED("EXCHANGED"),
-        ORIGINAL("ORIGINAL");
+        DIRECT("DIRECT"),
+        BOTH("BOTH");
         private String value;
 
         TokenTypeEnum (String v) {
@@ -52,7 +50,7 @@ public class KeyManagerDTO   {
 return null;
         }
     }
-    private TokenTypeEnum tokenType = TokenTypeEnum.ORIGINAL;
+    private TokenTypeEnum tokenType = TokenTypeEnum.DIRECT;
 
   /**
    **/
@@ -140,7 +138,7 @@ return null;
   }
 
   /**
-   * The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED and ORIGINAL.
+   * The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.
    **/
   public KeyManagerDTO tokenType(TokenTypeEnum tokenType) {
     this.tokenType = tokenType;
@@ -148,7 +146,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "EXCHANGED", value = "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED and ORIGINAL.")
+  @ApiModelProperty(example = "EXCHANGED", value = "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.")
   @JsonProperty("tokenType")
   public TokenTypeEnum getTokenType() {
     return tokenType;

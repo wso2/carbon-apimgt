@@ -37,10 +37,13 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
+
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import javax.wsdl.Definition;
@@ -81,6 +84,17 @@ public class APIMWSDLReaderTest {
                 element.toString().contains("location=\"http://www.webservicex.net/stockquote.asmx\""));
         Assert.assertTrue("Endpoints does not include GW endpoint",
                 element.toString().contains("https://localhost:8243/abc"));
+    }
+
+    @Test
+    public void endpointReferenceElementWSDL11Test() throws Exception {
+        doMockStatics();
+        WSDLValidationResponse validationResponse = APIMWSDLReader.validateWSDLUrl(
+                new URL(Thread.currentThread().getContextClassLoader().getResource("wsdls/Service.svc.wsdl")
+                        .toExternalForm()));
+        Map<String, String> endpointsMap = validationResponse.getWsdlInfo().getEndpoints();
+        Assert.assertNotNull("Endpoint reference are not read properly", validationResponse.getWsdlInfo());
+        Assert.assertTrue("Endpoint address not read", endpointsMap.containsValue("http://example.com/fabrikam/acct"));
     }
 
     @Test
@@ -145,7 +159,9 @@ public class APIMWSDLReaderTest {
         API api = getAPIForTesting();
         String environmentName = "Default";
         String environmentType = "hybrid";
-        PowerMockito.when(APIUtil.getGatewayEndpoint(api.getTransports(), environmentName, environmentType))
+        String organization = "61416403c40f086ad2dc5eed";
+        PowerMockito.when(APIUtil.getGatewayEndpoint(api.getTransports(), environmentName, environmentType,
+                        organization))
                 .thenReturn("http://localhost:8280");
 
         APIMWSDLReader wsdlReader = new APIMWSDLReader("");
@@ -211,7 +227,7 @@ public class APIMWSDLReaderTest {
             Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
             Mockito.when(apiMgtDAO.getAllEnvironments(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME))
                     .thenReturn(new ArrayList<org.wso2.carbon.apimgt.api.model.Environment>());
-            PowerMockito.when(APIUtil.getEnvironments()).thenReturn(gatewayEnvironments);
+            PowerMockito.when(APIUtil.getEnvironments("61416403c40f086ad2dc5eed")).thenReturn(gatewayEnvironments);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }

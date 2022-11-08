@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
+import org.wso2.carbon.apimgt.api.dto.APIEndpointValidationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -46,10 +47,10 @@ import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -57,8 +58,8 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -75,8 +76,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropert
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListExpandedDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
@@ -91,6 +93,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
@@ -120,7 +123,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -205,10 +207,15 @@ public class APIMappingUtil {
         if (dto.isEnableSchemaValidation() != null) {
             model.setEnableSchemaValidation(dto.isEnableSchemaValidation());
         }
+        if (dto.isEnableSubscriberVerification() != null) {
+            model.setEnableSubscriberVerification(dto.isEnableSubscriberVerification());
+        }
         model.setEnableStore(true);
         if (dto.getAdvertiseInfo() != null) {
             AdvertiseInfoDTO advertiseInfoDTO = dto.getAdvertiseInfo();
             model.setAdvertiseOnly(advertiseInfoDTO.isAdvertised());
+            model.setApiExternalProductionEndpoint(advertiseInfoDTO.getApiExternalProductionEndpoint());
+            model.setApiExternalSandboxEndpoint(advertiseInfoDTO.getApiExternalSandboxEndpoint());
             model.setRedirectURL(advertiseInfoDTO.getOriginalDevPortalUrl());
             model.setApiOwner(advertiseInfoDTO.getApiOwner());
             model.setAdvertiseOnlyAPIVendor(dto.getAdvertiseInfo().getVendor().value());
@@ -416,6 +423,15 @@ public class APIMappingUtil {
         if (dto.getAudience() != null) {
             model.setAudience(dto.getAudience().toString());
         }
+        if (dto.getGatewayVendor() != null) {
+            model.setGatewayVendor(dto.getGatewayVendor());
+        }
+
+        if (dto.getAsyncTransportProtocols() != null) {
+            String asyncTransports = StringUtils.join(dto.getAsyncTransportProtocols(), ',');
+            model.setAsyncTransportProtocols(asyncTransports);
+        }
+
         return model;
     }
 
@@ -481,26 +497,6 @@ public class APIMappingUtil {
         return apiMonetizationInfoDTO;
     }
 
-    public static APIMonetizationInfoDTO getMonetizationInfoDTO(APIProductIdentifier apiProductIdentifier)
-            throws APIManagementException {
-
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
-        APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
-        //set the information related to monetization to the DTO
-        apiMonetizationInfoDTO.setEnabled(apiProduct.getMonetizationStatus());
-        Map<String, String> monetizationPropertiesMap = new HashMap<>();
-        if (apiProduct.getMonetizationProperties() != null) {
-            JSONObject monetizationProperties = apiProduct.getMonetizationProperties();
-            for (Object propertyKey : monetizationProperties.keySet()) {
-                String key = (String) propertyKey;
-                monetizationPropertiesMap.put(key, (String) monetizationProperties.get(key));
-            }
-        }
-        apiMonetizationInfoDTO.setProperties(monetizationPropertiesMap);
-        return apiMonetizationInfoDTO;
-    }
-
     /**
      * Get map of monetized policies to plan mapping.
      *
@@ -518,18 +514,6 @@ public class APIMappingUtil {
         API api = apiProvider.getLightweightAPIByUUID(uuid, organization);
         APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
         apiMonetizationInfoDTO.setEnabled(api.getMonetizationStatus());
-        apiMonetizationInfoDTO.setProperties(monetizedPoliciesToPlanMapping);
-        return apiMonetizationInfoDTO;
-    }
-
-    public static APIMonetizationInfoDTO getMonetizedTiersDTO(APIProductIdentifier apiProductIdentifier,
-                                                              Map<String, String> monetizedPoliciesToPlanMapping)
-            throws APIManagementException {
-
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
-        APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
-        apiMonetizationInfoDTO.setEnabled(apiProduct.getMonetizationStatus());
         apiMonetizationInfoDTO.setProperties(monetizedPoliciesToPlanMapping);
         return apiMonetizationInfoDTO;
     }
@@ -568,16 +552,10 @@ public class APIMappingUtil {
      * Converts a List object of APIs into a DTO.
      *
      * @param apiList List of APIs
-     * @param expand  defines whether APIListDTO should contain APIINFODTOs or APIDTOs
      * @return APIListDTO object containing APIDTOs
      */
-    public static Object fromAPIListToDTO(List<API> apiList, boolean expand) throws APIManagementException {
-
-        if (expand) {
-            return fromAPIListToExpandedDTO(apiList);
-        } else {
-            return fromAPIListToInfoDTO(apiList);
-        }
+    public static Object fromAPIListToDTO(List<API> apiList) throws APIManagementException {
+        return fromAPIListToInfoDTO(apiList);
     }
 
     /**
@@ -595,6 +573,24 @@ public class APIMappingUtil {
         }
         apiListDTO.setCount(apiInfoDTOs.size());
         return apiListDTO;
+    }
+
+    /**
+     * Converts a List object of APIs into quick info DTO List.
+     *
+     * @param apiList List of APIs
+     * @return APIListDTO object containing APIDTOs
+     */
+    public static APIMetadataListDTO fromAPIListToAPIMetadataListDTO(List<API> apiList) {
+
+        APIMetadataListDTO apiMetadataListDTO = new APIMetadataListDTO();
+        List<APIMetadataDTO> apiInfoDTOs = apiMetadataListDTO.getList();
+        for (API api : apiList) {
+            apiInfoDTOs.add(fromAPIToAPIMetadataDTO(api));
+        }
+        apiMetadataListDTO.setCount(apiInfoDTOs.size());
+
+        return apiMetadataListDTO;
     }
 
     /**
@@ -627,23 +623,6 @@ public class APIMappingUtil {
         operation.setVerb(uriTemplate.getHTTPVerb());
         operation.setTarget(uriTemplate.getUriTemplate());
         return operation;
-    }
-
-    /**
-     * Converts a List object of APIs into a Expanded DTO List.
-     *
-     * @param apiList List of APIs
-     * @return APIListDTO object containing APIDTOs
-     */
-    public static APIListExpandedDTO fromAPIListToExpandedDTO(List<API> apiList) throws APIManagementException {
-
-        APIListExpandedDTO apiListDTO = new APIListExpandedDTO();
-        List<APIDTO> apiInfoDTOs = apiListDTO.getList();
-        for (API api : apiList) {
-            apiInfoDTOs.add(fromAPItoDTO(api));
-        }
-        apiListDTO.setCount(apiInfoDTOs.size());
-        return apiListDTO;
     }
 
     /**
@@ -682,6 +661,7 @@ public class APIMappingUtil {
             Date lastUpdatedTime = api.getLastUpdated();
             apiInfoDTO.setUpdatedTime(String.valueOf(lastUpdatedTime.getTime()));
         }
+        apiInfoDTO.setAdvertiseOnly(api.isAdvertiseOnly());
         if (api.getAdditionalProperties() != null) {
             JSONObject additionalProperties = api.getAdditionalProperties();
             List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
@@ -709,8 +689,34 @@ public class APIMappingUtil {
             }
             apiInfoDTO.setAdditionalProperties(additionalPropertiesList);
             apiInfoDTO.setAdditionalPropertiesMap(additionalPropertiesMap);
+            apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
         }
         return apiInfoDTO;
+    }
+
+    /**
+     * Creates a very minimal DTO representation of an API object.
+     *
+     * @param api API object
+     * @return a very minimal representation DTO
+     */
+    public static APIMetadataDTO fromAPIToAPIMetadataDTO(API api) {
+
+        String context = api.getContextTemplate();
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }
+
+        APIMetadataDTO apiMetadataDTO = new APIMetadataDTO();
+        apiMetadataDTO.setContext(context);
+        apiMetadataDTO.setId(api.getUuid());
+        APIIdentifier apiId = api.getId();
+        apiMetadataDTO.setName(apiId.getApiName());
+        apiMetadataDTO.setVersion(apiId.getVersion());
+        String providerName = api.getId().getProviderName();
+        apiMetadataDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+
+        return apiMetadataDTO;
     }
 
     /**
@@ -813,11 +819,43 @@ public class APIMappingUtil {
 
         PaginationDTO paginationDTO = CommonMappingUtil
                 .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
-        if (apiListDTO instanceof APIListDTO) {
-            ((APIListDTO) apiListDTO).setPagination(paginationDTO);
-        } else if (apiListDTO instanceof APIListExpandedDTO) {
-            ((APIListExpandedDTO) apiListDTO).setPagination(paginationDTO);
+        ((APIListDTO) apiListDTO).setPagination(paginationDTO);
+    }
+
+    /**
+     * Sets pagination urls for a APIMetadataListDTO object given pagination parameters and url parameters.
+     *
+     * @param apiMetadataListDTO a APIMetadataListDTO object
+     * @param alias      alias of the certificate
+     * @param limit      max number of objects returned
+     * @param offset     starting index
+     * @param size       max offset
+     */
+    public static void setPaginationParamsForAPIMetadataListDTO(
+            Object apiMetadataListDTO, String alias, int offset, int limit, int size) {
+
+        //acquiring pagination parameters and setting pagination urls
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiCommonUtil
+                    .getCertificateUsagePaginatedURL(alias,
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
         }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiCommonUtil
+                    .getCertificateUsagePaginatedURL(alias,
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
+        }
+
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        ((APIMetadataListDTO) apiMetadataListDTO).setPagination(paginationDTO);
     }
 
     private static String checkAndSetVersionParam(String context) {
@@ -900,12 +938,14 @@ public class APIMappingUtil {
         return fromAPItoDTO(model, false, null);
     }
 
-    public static APIDTO fromAPItoDTO(API model, APIProvider apiProvider) throws APIManagementException {
+    public static APIDTO fromAPItoDTO(API model, APIProvider apiProvider)
+            throws APIManagementException {
 
         return fromAPItoDTO(model, false, apiProvider);
     }
 
-    public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials, APIProvider apiProviderParam)
+    public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials,
+                                      APIProvider apiProviderParam)
             throws APIManagementException {
 
         APIProvider apiProvider;
@@ -935,9 +975,12 @@ public class APIMappingUtil {
         dto.setRevisionedApiId(model.getRevisionedApiId());
         dto.setRevisionId(model.getRevisionId());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
+        dto.setEnableSubscriberVerification(model.isEnableSubscriberVerification());
 
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
+        advertiseInfoDTO.setApiExternalProductionEndpoint(model.getApiExternalProductionEndpoint());
+        advertiseInfoDTO.setApiExternalSandboxEndpoint(model.getApiExternalSandboxEndpoint());
         advertiseInfoDTO.setOriginalDevPortalUrl(model.getRedirectURL());
         advertiseInfoDTO.setApiOwner(model.getApiOwner());
         if (model.getAdvertiseOnlyAPIVendor() != null) {
@@ -1091,7 +1134,6 @@ public class APIMappingUtil {
         }
 
         dto.setMediationPolicies(mediationPolicies);
-
         dto.setLifeCycleStatus(model.getStatus());
 
         String subscriptionAvailability = model.getSubscriptionAvailability();
@@ -1107,7 +1149,8 @@ public class APIMappingUtil {
 
         boolean isAsyncAPI = APIDTO.TypeEnum.WS.toString().equals(model.getType())
                 || APIDTO.TypeEnum.WEBSUB.toString().equals(model.getType())
-                || APIDTO.TypeEnum.SSE.toString().equals(model.getType());
+                || APIDTO.TypeEnum.SSE.toString().equals(model.getType())
+                || APIDTO.TypeEnum.ASYNC.toString().equals(model.getType());
 
         //Get Swagger definition which has URL templates, scopes and resource details
         model.getId().setUuid(model.getUuid());
@@ -1118,13 +1161,18 @@ public class APIMappingUtil {
             if (model.getSwaggerDefinition() != null) {
                 apiSwaggerDefinition = model.getSwaggerDefinition();
             } else {
-                apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId(), tenantDomain);
+                apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getUuid(), tenantDomain);
             }
 
             //We will fetch operations from the swagger definition and not from the AM_API_URL_MAPPING table: table
             //entries may have API level throttling tiers listed in case API level throttling is selected for the API.
             //This will lead the x-throttling-tiers of API definition to get overwritten. (wso2/product-apim#11240)
             apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
+
+            //since the operation details goes missing after fetching operations list from the swagger definition, we
+            //have to set them back from the original API model.
+            setOperationPoliciesToOperationsDTO(model, apiOperationsDTO);
+
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
@@ -1237,12 +1285,24 @@ public class APIMappingUtil {
         if (corsConfiguration == null) {
             corsConfiguration = APIUtil.getDefaultCorsConfiguration();
         }
-        apiCorsConfigurationDTO
-                .setAccessControlAllowOrigins(corsConfiguration.getAccessControlAllowOrigins());
-        apiCorsConfigurationDTO
-                .setAccessControlAllowHeaders(corsConfiguration.getAccessControlAllowHeaders());
-        apiCorsConfigurationDTO
-                .setAccessControlAllowMethods(corsConfiguration.getAccessControlAllowMethods());
+        List<String> accessControlAllowOrigins = corsConfiguration.getAccessControlAllowOrigins();
+        List<String> accessControlAllowHeaders = corsConfiguration.getAccessControlAllowHeaders();
+        List<String> accessControlAllowMethods = corsConfiguration.getAccessControlAllowMethods();
+        if (accessControlAllowOrigins == null) {
+            apiCorsConfigurationDTO.setAccessControlAllowOrigins(Collections.emptyList());
+        } else {
+            apiCorsConfigurationDTO.setAccessControlAllowOrigins(accessControlAllowOrigins);
+        }
+        if (accessControlAllowHeaders == null) {
+            apiCorsConfigurationDTO.setAccessControlAllowHeaders(Collections.emptyList());
+        } else {
+            apiCorsConfigurationDTO.setAccessControlAllowHeaders(accessControlAllowHeaders);
+        }
+        if (accessControlAllowMethods == null) {
+            apiCorsConfigurationDTO.setAccessControlAllowMethods(Collections.emptyList());
+        } else {
+            apiCorsConfigurationDTO.setAccessControlAllowMethods(accessControlAllowMethods);
+        }
         apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isCorsConfigurationEnabled());
         apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAccessControlAllowCredentials());
         dto.setCorsConfiguration(apiCorsConfigurationDTO);
@@ -1296,6 +1356,19 @@ public class APIMappingUtil {
         if (model.getAudience() != null) {
             dto.setAudience(AudienceEnum.valueOf(model.getAudience()));
         }
+
+        String gatewayVendor = StringUtils.toRootLowerCase(model.getGatewayVendor());
+        dto.setGatewayVendor(gatewayVendor);
+        dto.setGatewayType(model.getGatewayType());
+
+        if (model.getGatewayVendor() == null) {
+            dto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+        }
+
+        if (model.getAsyncTransportProtocols() != null) {
+            dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
+        }
+
         return dto;
     }
 
@@ -1435,32 +1508,12 @@ public class APIMappingUtil {
     private static boolean checkEndpointSecurityPasswordEnabled(String tenantDomainName) throws APIManagementException {
 
         JSONObject apiTenantConfig;
-        try {
-            APIMRegistryServiceImpl apimRegistryService = new APIMRegistryServiceImpl();
-            String content = apimRegistryService.getConfigRegistryResourceContent(tenantDomainName,
-                    APIConstants.API_TENANT_CONF_LOCATION);
-            if (content != null) {
-                JSONParser parser = new JSONParser();
-                apiTenantConfig = (JSONObject) parser.parse(content);
-                if (apiTenantConfig != null) {
-                    Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_EXPOSE_ENDPOINT_PASSWORD);
-                    if (value != null) {
-                        return Boolean.parseBoolean(value.toString());
-                    }
-                }
+        apiTenantConfig = APIUtil.getTenantConfig(tenantDomainName);
+        if (apiTenantConfig != null) {
+            Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_EXPOSE_ENDPOINT_PASSWORD);
+            if (value != null) {
+                return Boolean.parseBoolean(value.toString());
             }
-        } catch (UserStoreException e) {
-            String msg = "UserStoreException thrown when getting API tenant config from registry while reading "
-                    + "ExposeEndpointPassword config";
-            throw new APIManagementException(msg, e);
-        } catch (RegistryException e) {
-            String msg = "RegistryException thrown when getting API tenant config from registry while reading "
-                    + "ExposeEndpointPassword config";
-            throw new APIManagementException(msg, e);
-        } catch (ParseException e) {
-            String msg = "ParseException thrown when parsing API tenant config from registry while reading "
-                    + "ExposeEndpointPassword config";
-            throw new APIManagementException(msg, e);
         }
         return false;
     }
@@ -1625,7 +1678,10 @@ public class APIMappingUtil {
                 template.setHttpVerbs(httpVerb.toUpperCase());
                 template.setAuthType(authType);
                 template.setAuthTypes(authType);
-
+                if (operation.getOperationPolicies() != null) {
+                    template.setOperationPolicies(OperationPolicyMappingUtil
+                            .fromDTOToAPIOperationPoliciesList(operation.getOperationPolicies()));
+                }
                 uriTemplates.add(template);
             } else {
                 if (APIConstants.GRAPHQL_API.equals(model.getType())) {
@@ -1887,7 +1943,7 @@ public class APIMappingUtil {
     }
 
     public static AsyncAPISpecificationValidationResponseDTO getAsyncAPISpecificationValidationResponseFromModel(
-            APIDefinitionValidationResponse model, boolean returnContent) {
+            APIDefinitionValidationResponse model, boolean returnContent) throws APIManagementException {
 
         AsyncAPISpecificationValidationResponseDTO responseDTO = new AsyncAPISpecificationValidationResponseDTO();
         responseDTO.setIsValid(model.isValid());
@@ -1904,6 +1960,25 @@ public class APIMappingUtil {
                 infoDTO.setDescription(modelInfo.getDescription());
                 infoDTO.setEndpoints(modelInfo.getEndpoints());
                 infoDTO.setProtocol(model.getProtocol());
+
+                Map<String, APIDefinition> apiDefinitionMap = APIUtil.getApiDefinitionParsersMap();
+                apiDefinitionMap.remove(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+                if (!apiDefinitionMap.isEmpty()) {
+                    for (Map.Entry<String, APIDefinition> apiDefinitionEntry : apiDefinitionMap.entrySet()) {
+                        APIDefinition apiParser = apiDefinitionEntry.getValue();
+                        String gatewayVendor = apiParser.getVendorFromExtension(model.getContent());
+                        if (gatewayVendor != null) {
+                            infoDTO.setGatewayVendor(gatewayVendor);
+                            break;
+                        }
+                    }
+                    infoDTO.asyncTransportProtocols(AsyncApiParser.getTransportProtocolsForAsyncAPI
+                            (model.getContent()));
+                }
+                // Set default value
+                if (infoDTO.getGatewayVendor() == null) {
+                    infoDTO.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+                }
                 responseDTO.setInfo(infoDTO);
             }
             if (returnContent) {
@@ -2053,6 +2128,33 @@ public class APIMappingUtil {
     }
 
     /**
+     * Reads the operationPolicies from the API object passed in, and sets them back to the API Operations DTO
+     *
+     * @param api               API object
+     * @param apiOperationsDTO  List of API Operations DTO
+     */
+    private static void setOperationPoliciesToOperationsDTO(API api, List<APIOperationsDTO> apiOperationsDTO) {
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+
+        Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+        for (URITemplate uriTemplate : uriTemplates) {
+            String key = uriTemplate.getUriTemplate() + ":" + uriTemplate.getHTTPVerb();
+            uriTemplateMap.put(key, uriTemplate);
+        }
+
+        for (APIOperationsDTO operationsDTO : apiOperationsDTO) {
+            String key = operationsDTO.getTarget() + ":" + operationsDTO.getVerb();
+            if (uriTemplateMap.get(key) != null) {
+                List<OperationPolicy> operationPolicies = uriTemplateMap.get(key).getOperationPolicies();
+                if (!operationPolicies.isEmpty()) {
+                    operationsDTO.setOperationPolicies(
+                            OperationPolicyMappingUtil.fromOperationPolicyListToDTO(operationPolicies));
+                }
+            }
+        }
+    }
+
+    /**
      * Converts a URI template object to a REST API DTO.
      *
      * @param uriTemplate URI Template object
@@ -2077,6 +2179,8 @@ public class APIMappingUtil {
         operationsDTO.setTarget(uriTemplate.getUriTemplate());
         operationsDTO.setScopes(uriTemplate.retrieveAllScopes().stream().map(Scope::getKey).collect(
                 Collectors.toList()));
+        operationsDTO.setOperationPolicies(
+                OperationPolicyMappingUtil.fromOperationPolicyListToDTO(uriTemplate.getOperationPolicies()));
         operationsDTO.setThrottlingPolicy(uriTemplate.getThrottlingTier());
         Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
         List<String> usedProductIds = new ArrayList<>();
@@ -2147,6 +2251,7 @@ public class APIMappingUtil {
             productDto.setState(org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO.StateEnum
                     .valueOf(apiProduct.getState()));
             productDto.setId(apiProduct.getUuid());
+            productDto.setHasThumbnail(!StringUtils.isBlank(apiProduct.getThumbnailUrl()));
             if (apiProduct.getApiSecurity() != null) {
                 productDto.setSecurityScheme(Arrays.asList(apiProduct.getApiSecurity().split(",")));
             }
@@ -2170,6 +2275,8 @@ public class APIMappingUtil {
         productDto.setDescription(product.getDescription());
         productDto.setApiType(APIProductDTO.ApiTypeEnum.fromValue(APIConstants.AuditLogConstants.API_PRODUCT));
         productDto.setAuthorizationHeader(product.getAuthorizationHeader());
+        productDto.setGatewayVendor(product.getGatewayVendor());
+        productDto.setHasThumbnail(!StringUtils.isBlank(product.getThumbnailUrl()));
 
         Set<String> apiTags = product.getTags();
         List<String> tagsToReturn = new ArrayList<>(apiTags);
@@ -2211,6 +2318,7 @@ public class APIMappingUtil {
         productDto.setCorsConfiguration(apiCorsConfigurationDTO);
 
         productDto.setState(StateEnum.valueOf(product.getState()));
+        productDto.setWorkflowStatus(product.getWorkflowStatus());
 
         //Aggregate API resources to each relevant API.
         Map<String, ProductAPIDTO> aggregatedAPIs = new HashMap<String, ProductAPIDTO>();
@@ -2241,7 +2349,7 @@ public class APIMappingUtil {
         productDto.setApis(new ArrayList<>(aggregatedAPIs.values()));
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId()
                 .getProviderName()));
-        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(product.getId(), tenantDomain);
+        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(product.getUuid(), tenantDomain);
         List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
         productDto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS));
 
@@ -2342,7 +2450,7 @@ public class APIMappingUtil {
         if (null != product.getCreatedTime()) {
             Date createdTime = product.getCreatedTime();
             Timestamp timeStamp = new Timestamp(createdTime.getTime());
-            productDto.setCreatedTime(String.valueOf(timeStamp));
+            productDto.setCreatedTime(String.valueOf(timeStamp.getTime()));
         }
 
         return productDto;
@@ -2433,7 +2541,6 @@ public class APIMappingUtil {
             product.setTechnicalOwnerEmail(dto.getBusinessInformation().getTechnicalOwnerEmail());
         }
 
-        product.setState(APIStatus.PUBLISHED.toString());
         Set<Tier> apiTiers = new HashSet<>();
         List<String> tiersFromDTO = dto.getPolicies();
 
@@ -2464,6 +2571,8 @@ public class APIMappingUtil {
         product.setAvailableTiers(apiTiers);
 
         product.setProductLevelPolicy(dto.getApiThrottlingPolicy());
+
+        product.setGatewayVendor(dto.getGatewayVendor());
 
         if (dto.getSubscriptionAvailability() != null) {
             product.setSubscriptionAvailability(
@@ -2505,8 +2614,11 @@ public class APIMappingUtil {
 
                 URITemplate template = new URITemplate();
                 template.setHTTPVerb(resourceItem.getVerb());
+                template.setHttpVerbs(resourceItem.getVerb());
                 template.setResourceURI(resourceItem.getTarget());
                 template.setUriTemplate(resourceItem.getTarget());
+                template.setOperationPolicies(OperationPolicyMappingUtil
+                        .fromDTOToAPIOperationPoliciesList(resourceItem.getOperationPolicies()));
 
                 APIProductResource resource = new APIProductResource();
                 resource.setApiId(res.getApiId());
@@ -2873,34 +2985,6 @@ public class APIMappingUtil {
     }
 
     /**
-     * Returns uuid of the specified mediation policy.
-     *
-     * @param sequenceName mediation sequence name
-     * @param direction    in/out/fault
-     * @param dto          APIDetailedDTO contains details of the exporting API
-     * @return UUID of sequence or null
-     */
-    private static Map<String, String> getMediationPolicyAttributes(String sequenceName, String direction,
-                                                                    APIDTO dto) {
-
-        APIIdentifier apiIdentifier = new APIIdentifier(dto.getProvider(), dto.getName(),
-                dto.getVersion());
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                    getTenantId(tenantDomain);
-            return APIUtil.getMediationPolicyAttributes(sequenceName, tenantId, direction, apiIdentifier);
-        } catch (UserStoreException e) {
-            log.error("Error occurred while reading tenant information ", e);
-
-        } catch (APIManagementException e) {
-            log.error("Error occurred while getting the uuid of the mediation sequence", e);
-        }
-
-        return null;
-    }
-
-    /**
      * Set API categories to API or APIProduct based on the instance type of the DTO object passes.
      *
      * @param dto   APIDTO or APIProductDTO
@@ -3062,6 +3146,16 @@ public class APIMappingUtil {
             }
         }
         return apiRevisionDeploymentDTO;
+    }
+
+    public static ApiEndpointValidationResponseDTO fromEndpointValidationToDTO(
+            APIEndpointValidationDTO endpointValidationDTO) {
+        ApiEndpointValidationResponseDTO apiEndpointValidationResponseDTO = new ApiEndpointValidationResponseDTO();
+        apiEndpointValidationResponseDTO.setStatusCode(endpointValidationDTO.getStatusCode());
+        apiEndpointValidationResponseDTO.setStatusMessage(endpointValidationDTO.getStatusMessage());
+        apiEndpointValidationResponseDTO.setError(endpointValidationDTO.getError());
+
+        return apiEndpointValidationResponseDTO;
     }
 
     private static Date parseStringToDate(String time) throws java.text.ParseException {

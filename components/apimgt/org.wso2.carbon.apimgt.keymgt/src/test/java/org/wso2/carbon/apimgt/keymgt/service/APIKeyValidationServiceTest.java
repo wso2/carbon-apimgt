@@ -154,7 +154,7 @@ public class APIKeyValidationServiceTest {
     public void testAPIKeyValidationServiceConstructor() throws Exception {
 
         PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.when(APIUtil.getClassForName(DefaultKeyValidationHandler.class.getName()))
+        PowerMockito.when(APIUtil.getClassInstance(DefaultKeyValidationHandler.class.getName()))
                 .thenThrow(InstantiationException.class).thenThrow(IllegalAccessException.class)
                 .thenThrow(ClassNotFoundException.class);
         try {

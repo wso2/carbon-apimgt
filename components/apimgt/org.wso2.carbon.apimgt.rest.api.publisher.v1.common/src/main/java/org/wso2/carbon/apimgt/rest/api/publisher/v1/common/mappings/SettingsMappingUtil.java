@@ -31,7 +31,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityAuditAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberContactAttributeDTO;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -49,20 +51,22 @@ public class SettingsMappingUtil {
      *
      * @param isUserAvailable check if user is logged in
      * @return SettingsDTO
-     * @throws APIManagementException
+     * @throws APIManagementException,IOException
      */
-    public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable) throws APIManagementException {
+    public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable, String organization) throws APIManagementException,
+            IOException {
 
         SettingsDTO settingsDTO = new SettingsDTO();
         EnvironmentListDTO environmentListDTO = new EnvironmentListDTO();
         if (isUserAvailable) {
-            Map<String, Environment> environments = APIUtil.getEnvironments();
+            Map<String, Environment> environments = APIUtil.getEnvironments(organization);
             if (environments != null) {
                 environmentListDTO = EnvironmentMappingUtil.fromEnvironmentCollectionToDTO(environments.values());
             }
             settingsDTO.setEnvironment(environmentListDTO.getList());
             String storeUrl = APIUtil.getStoreUrl();
             String loggedInUserTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            settingsDTO.setSubscriberContactAttributes(getSubscriberContactAttributes());
             Map<String, String> domainMappings =
                     APIUtil.getDomainMappings(loggedInUserTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_STORE);
             if (domainMappings.size() != 0) {
@@ -80,8 +84,36 @@ public class SettingsMappingUtil {
                     APIUtil.isExternalStoresEnabled(RestApiCommonUtil.getLoggedInUserTenantDomain()));
             settingsDTO.setDocVisibilityEnabled(APIUtil.isDocVisibilityLevelsEnabled());
             settingsDTO.setCrossTenantSubscriptionEnabled(APIUtil.isCrossTenantSubscriptionsEnabled());
+            Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
+            String authorizationHeader = APIUtil.getOAuthConfiguration(loggedInUserTenantDomain,
+                    APIConstants.AUTHORIZATION_HEADER);
+
+            if (authorizationHeader == null) {
+                authorizationHeader = APIConstants.AUTHORIZATION_HEADER_DEFAULT;
+            }
+            settingsDTO.setAuthorizationHeader(authorizationHeader);
         }
         return settingsDTO;
+    }
+
+    /**
+     * This method returns the Subscriber Contact properties from configuration
+     *
+     * @return List<String> Subscriber Contact properties
+     * @throws APIManagementException
+     */
+    private List<SubscriberContactAttributeDTO> getSubscriberContactAttributes() {
+        List<SubscriberContactAttributeDTO> subscriberContactAttributeDTOsList = new ArrayList<>();
+        JSONObject subscriberContactAttribute = APIUtil.getSubscriberAttributes();
+        SubscriberContactAttributeDTO subscriberContactAttributeDTO = new SubscriberContactAttributeDTO();
+        if (subscriberContactAttribute.size() > 0) {
+            subscriberContactAttributeDTO.setDelimiter((String) subscriberContactAttribute
+                    .get(APIConstants.SUBSCRIBER_CONFIGURATION_DELIMITER));
+            subscriberContactAttributeDTO.setRecipient((String) subscriberContactAttribute
+                    .get(APIConstants.SUBSCRIBER_CONFIGURATION_RECIPIENT));
+            subscriberContactAttributeDTOsList.add(subscriberContactAttributeDTO);
+        }
+        return subscriberContactAttributeDTOsList;
     }
 
     /**

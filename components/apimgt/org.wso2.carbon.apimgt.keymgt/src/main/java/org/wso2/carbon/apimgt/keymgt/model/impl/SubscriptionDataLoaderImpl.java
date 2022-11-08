@@ -317,8 +317,9 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
                         api = list.getList().get(0);
                     }
                 }
-                return api;
-
+                if (api != null) {
+                    return api;
+                }
             }
         }
         return null;
@@ -444,8 +445,14 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             do {
                 try {
                     httpResponse = httpClient.execute(method);
+                    if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
+                        log.error("Could not retrieve subscriptions for tenantDomain: " + tenantDomain
+                                + ". Received response with status code "
+                                + httpResponse.getStatusLine().getStatusCode());
+                        throw new DataLoadingException("Error while retrieving subscription");
+                    }
                     retry = false;
-                } catch (IOException ex) {
+                } catch (IOException | DataLoadingException ex) {
                     retryCount++;
                     if (retryCount < retrievalRetries) {
                         retry = true;

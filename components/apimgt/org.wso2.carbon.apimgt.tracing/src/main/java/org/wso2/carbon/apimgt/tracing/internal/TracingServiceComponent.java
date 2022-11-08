@@ -35,9 +35,16 @@ import org.wso2.carbon.apimgt.tracing.OpenTracer;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
 import org.wso2.carbon.apimgt.tracing.ZipkinTracer;
+import org.wso2.carbon.apimgt.tracing.telemetry.APIMOpenTelemetry;
+import org.wso2.carbon.apimgt.tracing.telemetry.JaegerTelemetry;
+import org.wso2.carbon.apimgt.tracing.telemetry.LogTelemetry;
+import org.wso2.carbon.apimgt.tracing.telemetry.OTLPTelemetry;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryService;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryServiceImpl;
+import org.wso2.carbon.apimgt.tracing.telemetry.ZipkinTelemetry;
 
 /**
- * Osgi Service Component to Opentracing.
+ * Osgi Service Component to Opentracing and Opentelemetry.
  */
 @Component(
         name = "org.wso2.carbon.apimgt.tracing.internal.TracingServiceComponent",
@@ -58,6 +65,12 @@ public class TracingServiceComponent {
             registration = bundleContext.registerService(OpenTracer.class, new ZipkinTracer(), null);
             registration = bundleContext.registerService(OpenTracer.class, new LogTracer(), null);
             registration = bundleContext.registerService(TracingService.class, TracingServiceImpl.getInstance(), null);
+            registration = bundleContext.registerService(APIMOpenTelemetry.class, new JaegerTelemetry(), null);
+            registration = bundleContext.registerService(APIMOpenTelemetry.class, new ZipkinTelemetry(), null);
+            registration = bundleContext.registerService(APIMOpenTelemetry.class, new LogTelemetry(), null);
+            registration = bundleContext.registerService(APIMOpenTelemetry.class, new OTLPTelemetry(), null);
+            registration = bundleContext.registerService(TelemetryService.class, TelemetryServiceImpl.getInstance(),
+                    null);
 
         } catch (Exception e) {
             log.error("Error occured in tracing component activation", e);
@@ -95,12 +108,29 @@ public class TracingServiceComponent {
             unbind = "unsetTracerService")
     protected void setTracerService(OpenTracer tracer) {
 
-        ServiceReferenceHolder.getInstance().getOpenTracerMap().put(tracer.getName(), tracer);
+        ServiceReferenceHolder.getOpenTracerMap().put(tracer.getName(), tracer);
     }
 
     protected void unsetTracerService(OpenTracer tracer) {
 
-        ServiceReferenceHolder.getInstance().getOpenTracerMap().remove(tracer.getName());
+        ServiceReferenceHolder.getOpenTracerMap().remove(tracer.getName());
+    }
+
+    @Reference(
+            name = "opentelemetry.tracer.service",
+            service = APIMOpenTelemetry.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTelemetryService")
+    protected void setTelemetryService(APIMOpenTelemetry tracer) {
+
+        ServiceReferenceHolder.getOpenTelemetryTracerMap().put(tracer.getName(), tracer);
+    }
+
+    protected void unsetTelemetryService(APIMOpenTelemetry tracer) {
+
+        tracer.close();
+        ServiceReferenceHolder.getOpenTelemetryTracerMap().remove(tracer.getName());
     }
 }
 

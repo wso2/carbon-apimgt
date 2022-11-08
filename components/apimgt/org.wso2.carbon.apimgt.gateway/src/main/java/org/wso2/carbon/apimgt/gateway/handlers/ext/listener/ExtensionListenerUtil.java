@@ -54,10 +54,10 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.io.IOException;
+import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.security.cert.X509Certificate;
 import javax.xml.stream.XMLStreamException;
 
 /**
@@ -165,19 +165,19 @@ public class ExtensionListenerUtil {
         requestDTO.setMsgInfo(msgInfoDTO);
         requestDTO.setCustomProperty(getCustomPropertyMapFromMsgContext(messageContext));
 
-        javax.security.cert.X509Certificate[] clientCerts = null;
+        Certificate[] clientCerts = null;
 
         try {
-            X509Certificate clientCertificate = Utils.getClientCertificate(
+            Certificate clientCertificate = Utils.getClientCertificate(
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext());
 
             if (clientCertificate != null) {
-                clientCerts = new X509Certificate[]{clientCertificate};
+                clientCerts = new Certificate[]{clientCertificate};
             }
         } catch (APIManagementException e) {
             log.error("Error when getting client certificate", e);
         }
-        requestDTO.setClientCerts(clientCerts);
+        requestDTO.setClientCertsLatest(clientCerts);
         return requestDTO;
     }
 
@@ -292,7 +292,7 @@ public class ExtensionListenerUtil {
             try {
                 String payload = IOUtils.toString(extensionResponseDTO.getPayload());
                 // based on Content-Type header reset the payload
-                if (StringUtils.equals(contentType, APIConstants.APPLICATION_JSON_MEDIA_TYPE)) {
+                if (StringUtils.startsWith(contentType, APIConstants.APPLICATION_JSON_MEDIA_TYPE)) {
                     JsonUtil.removeJsonPayload(axis2MC);
                     JsonUtil.getNewJsonPayload(axis2MC, payload, true, true);
                     axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);

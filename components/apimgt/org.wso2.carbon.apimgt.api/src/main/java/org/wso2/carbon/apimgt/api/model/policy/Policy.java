@@ -19,8 +19,6 @@
 package org.wso2.carbon.apimgt.api.model.policy;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Policy implements Serializable {
 

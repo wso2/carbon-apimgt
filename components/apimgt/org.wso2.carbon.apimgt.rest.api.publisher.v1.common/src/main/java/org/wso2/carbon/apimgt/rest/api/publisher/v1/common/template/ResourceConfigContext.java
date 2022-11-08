@@ -56,6 +56,7 @@ public class ResourceConfigContext extends ConfigContextDecorator {
             if (api.getUriTemplates() == null || api.getUriTemplates().isEmpty()) {
                 throw new APIManagementException("At least one resource is required");
             }
+
             this.faultSeqExt = APIUtil.getFaultSequenceName(api);
         }
     }

@@ -24,9 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.gateway.threatprotection.analyzer.APIMThreatAnalyzer;
 import org.wso2.carbon.apimgt.gateway.threatprotection.analyzer.JSONAnalyzer;
 import org.wso2.carbon.apimgt.gateway.threatprotection.analyzer.XMLAnalyzer;
-import org.wso2.carbon.apimgt.gateway.threatprotection.configuration.ConfigurationHolder;
-import org.wso2.carbon.apimgt.gateway.threatprotection.configuration.JSONConfig;
-import org.wso2.carbon.apimgt.gateway.threatprotection.configuration.XMLConfig;
 import org.wso2.carbon.apimgt.gateway.threatprotection.pool.AnalyzerPool;
 import org.wso2.carbon.apimgt.gateway.threatprotection.pool.JSONAnalyzerFactory;
 import org.wso2.carbon.apimgt.gateway.threatprotection.pool.XMLAnalyzerFactory;
@@ -73,8 +70,6 @@ public class AnalyzerHolder {
                 ThreatProtectorConstants.APPLICATION_XML.equalsIgnoreCase(contentType)) {
             try {
                 analyzer = xmlAnalyzerAnalyzerPool.borrowObject();
-                XMLConfig xmlConfig = ConfigurationHolder.getXmlConfig();
-                analyzer.configure(xmlConfig);
             } catch (Exception e) {
                 // here apache.commons GenericObjectPool's borrow object method throws generic exception.
                 // here log the stacktrace along with the message.
@@ -84,8 +79,6 @@ public class AnalyzerHolder {
                 ThreatProtectorConstants.APPLICATION_JSON.equalsIgnoreCase(contentType)) {
             try {
                 analyzer = jsonAnalyzerAnalyzerPool.borrowObject();
-                JSONConfig jsonConfig = ConfigurationHolder.getJsonConfig();
-                analyzer.configure(jsonConfig);
             } catch (Exception e) {
                 log.error("Threat Protection: Error occurred while getting an object from the pool.", e);
             }
@@ -99,6 +92,7 @@ public class AnalyzerHolder {
      * @param analyzer borrowed instance of {@link APIMThreatAnalyzer}
      */
     public static void returnObject(APIMThreatAnalyzer analyzer) {
+        analyzer.clearConfiguration();
         if (analyzer instanceof JSONAnalyzer) {
             jsonAnalyzerAnalyzerPool.returnObject((JSONAnalyzer) analyzer);
         } else if (analyzer instanceof XMLAnalyzer) {

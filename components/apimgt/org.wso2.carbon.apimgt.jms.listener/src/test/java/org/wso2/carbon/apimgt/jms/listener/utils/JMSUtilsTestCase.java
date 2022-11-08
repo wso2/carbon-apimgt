@@ -35,5 +35,12 @@ public class JMSUtilsTestCase {
 		Hashtable<String, String> maskedParamTable = JMSUtils.maskAxis2ConfigSensitiveParameters(sensitiveParamsTable);
 		Assert.assertEquals("amqp://***:***@clientid/carbon?brokerlist='tcp://localhost:5672'",
 				maskedParamTable.get("connectionfactory.TopicConnectionFactory"));
+
+		sensitiveParamsTable = new Hashtable<String, String>();
+		sensitiveParamsTable.put("connectionfactory.TopicConnectionFactory",
+				"amqp://admin:%23admin@clientid/carbon?brokerlist='tcp://localhost:5672'");
+		maskedParamTable = JMSUtils.maskAxis2ConfigSensitiveParameters(sensitiveParamsTable);
+		Assert.assertEquals("amqp://***:***@clientid/carbon?brokerlist='tcp://localhost:5672'",
+				maskedParamTable.get("connectionfactory.TopicConnectionFactory"));
 	}
 }

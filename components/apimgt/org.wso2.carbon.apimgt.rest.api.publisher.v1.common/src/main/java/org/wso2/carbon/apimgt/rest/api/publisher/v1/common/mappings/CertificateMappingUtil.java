@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
+import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateValidityDTO;
 
@@ -46,5 +48,13 @@ public class CertificateMappingUtil {
         certificateInfoDTO.setVersion(certificateInformationDTO.getVersion());
 
         return certificateInfoDTO;
+    }
+
+    public static CertMetadataDTO fromCertificateMetadataToDTO(CertificateMetadataDTO certificateMetadata) {
+        CertMetadataDTO certificateDTO = new CertMetadataDTO();
+        certificateDTO.setAlias(certificateMetadata.getAlias());
+        certificateDTO.setEndpoint(certificateMetadata.getEndpoint());
+
+        return certificateDTO;
     }
 }

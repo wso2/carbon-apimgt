@@ -15,10 +15,6 @@
  */
 package org.wso2.carbon.apimgt.gateway.utils;
 
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
@@ -51,7 +47,6 @@ import org.wso2.carbon.apimgt.impl.dto.WebhooksDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.IOException;
 import java.net.URI;

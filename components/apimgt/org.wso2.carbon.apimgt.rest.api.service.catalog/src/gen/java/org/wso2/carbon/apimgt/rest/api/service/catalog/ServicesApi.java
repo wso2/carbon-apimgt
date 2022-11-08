@@ -103,7 +103,8 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get details of a service", notes = "Get details of a service using the id of the service. ", response = ServiceDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "service_catalog:service_view", description = "view access to services in service catalog")
+            @AuthorizationScope(scope = "service_catalog:service_view", description = "view access to services in service catalog"),
+            @AuthorizationScope(scope = "apim:api_view", description = "view access to services for read only users")
         })
     }, tags={ "Services",  })
     @ApiResponses(value = { 
@@ -122,7 +123,8 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
     @Produces({ "application/json", "application/yaml" })
     @ApiOperation(value = "Retrieve a service definition", notes = "Retrieve the definition of a service identified by the service id. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "service_catalog:service_view", description = "view access to services in service catalog")
+            @AuthorizationScope(scope = "service_catalog:service_view", description = "view access to services in service catalog"),
+            @AuthorizationScope(scope = "apim:api_view", description = "view access to services for read only users")
         })
     }, tags={ "Services",  })
     @ApiResponses(value = { 
@@ -141,7 +143,8 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve the API Info that use the given service", notes = "Retrieve the id, name, context and version of the APIs that used by the service ", response = APIListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "service_catalog:service_view", description = "view access to services in service catalog")
+            @AuthorizationScope(scope = "service_catalog:service_view", description = "view access to services in service catalog"),
+            @AuthorizationScope(scope = "apim:api_view", description = "view access to services for read only users")
         })
     }, tags={ "Services",  })
     @ApiResponses(value = { 
@@ -178,7 +181,8 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve/search services", notes = "Retrieve or search services in the service catalog of the user's organization or tenant. Search is supported using the name, version, definitionType and key of the service. Search based on the definition type and key of the service will always be an exact search. If you want to execute an exact search for either name or version the parameter should be given inside double quotation. ", response = ServiceListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "service_catalog:service_view", description = "view access to services in service catalog")
+            @AuthorizationScope(scope = "service_catalog:service_view", description = "view access to services in service catalog"),
+            @AuthorizationScope(scope = "apim:api_view", description = "view access to services for read only users")
         })
     }, tags={ "Services",  })
     @ApiResponses(value = { 

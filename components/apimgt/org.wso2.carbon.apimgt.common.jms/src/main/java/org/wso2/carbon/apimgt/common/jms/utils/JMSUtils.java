@@ -23,8 +23,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.jms.JMSConstants;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -408,7 +410,9 @@ public class JMSUtils extends BaseUtils {
                 connection = conFac.createConnection();
             }
             if (isDurable) {
-                connection.setClientID(clientID);
+                if (connection != null) {
+                    connection.setClientID(clientID);
+                }
             }
 
         } else {
@@ -434,7 +438,9 @@ public class JMSUtils extends BaseUtils {
                 }
             }
             if (isDurable) {
-                connection.setClientID(clientID);
+                if (connection != null) {
+                    connection.setClientID(clientID);
+                }
             }
         }
         return connection;
@@ -642,17 +648,22 @@ public class JMSUtils extends BaseUtils {
             } else {
                 // user info = user:pass
                 int colonIndex = userInfo.indexOf(':');
+                String decodedConnectionString = java.net.URLDecoder.decode(connectionString,
+                        StandardCharsets.UTF_8.name());
                 if (colonIndex == -1) {
                     // password is not in the url.
-                    return connectionString.replace(userInfo, maskString);
+                    return decodedConnectionString.replace(userInfo, maskString);
                 } else {
-                    return connectionString.replace(userInfo, maskString + ":" + maskString);
+                    return decodedConnectionString.replace(userInfo, maskString + ":" + maskString);
                 }
             }
         } catch (URISyntaxException ignore) {
             // If the provided url cannot be parsed, then a custom message will
             // be printed instead of the invalid url.
             log.error("Error while parsing the JMS connection url");
+            maskedConnectionString = "Invalid connection url";
+        } catch (UnsupportedEncodingException e) {
+            log.error("Error while decoding the JMS connection url");
             maskedConnectionString = "Invalid connection url";
         }
 
