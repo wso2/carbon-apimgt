@@ -110,11 +110,13 @@ public class ApplicationsCommonImpl {
      * @param offset  starting index
      * @return Response object containing resulted applications
      */
-    public static ApplicationListDTO getApplicationList(String groupId, String query, String sortBy, String sortOrder,
-            Integer limit, Integer offset, String organization) throws APIManagementException {
+    public static String getApplicationList(String groupId, String query, String sortBy, String sortOrder,
+            int limit, int offset, String organization) throws APIManagementException {
 
-        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
-        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+//        limit = RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+//        offset = RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+//        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+//        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DEFAULT_SORT_ORDER;
         sortBy = sortBy != null ?
                 ApplicationMappingUtil.getApplicationSortByField(sortBy) :
@@ -165,7 +167,7 @@ public class ApplicationsCommonImpl {
             ApplicationMappingUtil.setPaginationParamsWithSortParams(applicationListDTO, groupId, limit, offset,
                     applicationCount, sortOrder, sortBy.toLowerCase());
 
-            return applicationListDTO;
+            return RestApiUtil.getJsonFromDTO(applicationListDTO);
         } catch (APIManagementException e) {
             if (RestApiUtil.rootCauseMessageMatches(e,
                     "start index seems to be greater than the limit count")) {
@@ -173,7 +175,7 @@ public class ApplicationsCommonImpl {
                 // Thus sends an empty response
                 applicationListDTO.setCount(0);
                 applicationListDTO.setPagination(new PaginationDTO());
-                return applicationListDTO;
+                return RestApiUtil.getJsonFromDTO(applicationListDTO);
             } else {
                 String errorMessage = "Error while retrieving applications of " + organization;
                 throw new APIManagementException(errorMessage,
@@ -247,7 +249,7 @@ public class ApplicationsCommonImpl {
      * @param organization        Organization of the application
      * @return imported Application
      */
-    public ApplicationInfoDTO importApplication(InputStream fileInputStream, Boolean preserveOwner,
+    public String importApplication(InputStream fileInputStream, Boolean preserveOwner,
                                                 Boolean skipSubscriptions, String appOwner, Boolean skipApplicationKeys,
                                                 Boolean update, String organization) throws APIManagementException {
         String ownerId;
@@ -330,8 +332,7 @@ public class ApplicationsCommonImpl {
 //                APIInfoListDTO skippedAPIListDTO = APIInfoMappingUtil.fromAPIInfoListToDTO(skippedAPIs);
 //                return Response.created(location).status(207).entity(skippedAPIListDTO).build();
 //            }
-            return importedApplicationDTO;
-
+            return RestApiUtil.getJsonFromDTO(importedApplicationDTO);
         } catch (APIImportExportException e) {
             throw new APIManagementException("Error while importing Application", e);
         } catch (UnsupportedEncodingException e) {
@@ -381,24 +382,24 @@ public class ApplicationsCommonImpl {
      * Creates a new application
      *
      * @param body request body containing application details
-     * @return 201 response if successful
+     * @return Created application
      */
-    public static ApplicationDTO addApplication(ApplicationDTO body, String organization)
+    public static String addApplication(String body, String organization)
             throws APIManagementException {
-
+        ApplicationDTO applicationDTO = RestApiUtil.getDTOFromJson(body, ApplicationDTO.class);
         ApplicationDTO createdApplicationDto = null;
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
-            Application createdApplication = preProcessAndAddApplication(username, body, organization);
+            Application createdApplication = preProcessAndAddApplication(username, applicationDTO, organization);
             createdApplicationDto = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
                 throw new APIManagementException(
-                        "A duplicate application already exists by the name - " + body.getName(),
-                        ExceptionCodes.from(ExceptionCodes.APPLICATION_ALREADY_EXISTS, body.getName()));
+                        "A duplicate application already exists by the name - " + applicationDTO.getName(),
+                        ExceptionCodes.from(ExceptionCodes.APPLICATION_ALREADY_EXISTS, applicationDTO.getName()));
             }
         }
-        return createdApplicationDto;
+        return RestApiUtil.getJsonFromDTO(createdApplicationDto);
     }
 
     /**
@@ -446,7 +447,7 @@ public class ApplicationsCommonImpl {
      * @param applicationId application identifier
      * @return response containing the required application object
      */
-    public static ApplicationDTO getApplicationById(String applicationId, String organization)
+    public static String getApplicationById(String applicationId, String organization)
             throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
@@ -467,7 +468,7 @@ public class ApplicationsCommonImpl {
                             organization);
                     List<ScopeInfoDTO> scopeInfoList = ApplicationMappingUtil.getScopeInfoDTO(scopes);
                     applicationDTO.setSubscriptionScopes(scopeInfoList);
-                    return applicationDTO;
+                    return RestApiUtil.getJsonFromDTO(applicationDTO);
                 } else {
                     throw new APIManagementException(
                             "User " + username + " does not have permission to access application with Id : "
@@ -493,8 +494,9 @@ public class ApplicationsCommonImpl {
      * @param body          request body containing application details
      * @return response containing the updated application object
      */
-    public static ApplicationDTO updateApplication(String applicationId, ApplicationDTO body)
+    public static String updateApplication(String applicationId, String body)
             throws APIManagementException {
+        ApplicationDTO applicationDTO = RestApiUtil.getDTOFromJson(body, ApplicationDTO.class);
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
         Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
@@ -511,8 +513,9 @@ public class ApplicationsCommonImpl {
                     ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION, "application " + applicationId));
         }
 
-        Application updatedApplication = preProcessAndUpdateApplication(username, body, oldApplication, applicationId);
-        return ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
+        Application updatedApplication = preProcessAndUpdateApplication(username, applicationDTO, oldApplication,
+                applicationId);
+        return RestApiUtil.getJsonFromDTO(ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication));
     }
 
     /**

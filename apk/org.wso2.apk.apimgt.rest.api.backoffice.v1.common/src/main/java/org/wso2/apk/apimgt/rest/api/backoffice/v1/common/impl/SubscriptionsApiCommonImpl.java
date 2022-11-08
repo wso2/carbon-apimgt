@@ -30,6 +30,7 @@ import org.wso2.apk.apimgt.api.model.APIRevision;
 import org.wso2.apk.apimgt.api.model.Monetization;
 import org.wso2.apk.apimgt.api.model.SubscribedAPI;
 import org.wso2.apk.apimgt.impl.APIConstants;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.BackofficeAPIUtils;
 import org.wso2.apk.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.apk.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings.SubscriptionMappingUtil;
@@ -52,18 +53,18 @@ public class SubscriptionsApiCommonImpl {
         //To hide the default constructor
     }
 
-    public static SubscriptionDTO blockSubscription(String subscriptionId, String blockState)
+    public static String blockSubscription(String subscriptionId, String blockState)
             throws APIManagementException {
 
         SubscribedAPI updatedSubscription = changeBlockStatus(subscriptionId, blockState);
-        return SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscription);
+        return BackofficeAPIUtils.getJsonFromDTO(SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscription));
     }
 
-    public static SubscriptionDTO unBlockSubscription(String subscriptionId) throws APIManagementException {
+    public static String unBlockSubscription(String subscriptionId) throws APIManagementException {
 
         SubscribedAPI updatedSubscribedAPI = changeBlockStatus(subscriptionId,
                 APIConstants.SubscriptionStatus.UNBLOCKED);
-        return SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscribedAPI);
+        return BackofficeAPIUtils.getJsonFromDTO(SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscribedAPI));
     }
 
     /**
@@ -95,7 +96,7 @@ public class SubscriptionsApiCommonImpl {
         return apiProvider.getSubscriptionByUUID(subscriptionId);
     }
 
-    public static SubscriptionListDTO getSubscriptions(String apiId, Integer limit, Integer offset, String query,
+    public static String getSubscriptions(String apiId, Integer limit, Integer offset, String query,
                                                        String organization) throws APIManagementException {
 
         // setting default limit and offset if they are null
@@ -117,7 +118,7 @@ public class SubscriptionsApiCommonImpl {
             SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, "", limit, offset,
                     apiUsages.size());
         }
-        return subscriptionListDTO;
+        return BackofficeAPIUtils.getJsonFromDTO(subscriptionListDTO);
     }
 
     /**
@@ -167,12 +168,12 @@ public class SubscriptionsApiCommonImpl {
         return subscribedAPIs;
     }
 
-    public static APIMonetizationUsageDTO getSubscriptionUsage(String subscriptionId) throws APIManagementException {
+    public static String getSubscriptionUsage(String subscriptionId) throws APIManagementException {
 
         Map<String, String> billingEngineUsageData = getBillingEngineUsageData(subscriptionId);
         APIMonetizationUsageDTO apiMonetizationUsageDTO = new APIMonetizationUsageDTO();
         apiMonetizationUsageDTO.setProperties(billingEngineUsageData);
-        return apiMonetizationUsageDTO;
+        return BackofficeAPIUtils.getJsonFromDTO(apiMonetizationUsageDTO);
     }
 
     /**
@@ -206,7 +207,7 @@ public class SubscriptionsApiCommonImpl {
         return billingEngineUsageData;
     }
 
-    public static SubscriberInfoDTO getSubscriberInfoBySubscriptionId(String subscriptionId)
+    public static String getSubscriberInfoBySubscriptionId(String subscriptionId)
             throws APIManagementException {
 
         if (StringUtils.isBlank(subscriptionId)) {
@@ -217,7 +218,8 @@ public class SubscriptionsApiCommonImpl {
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
         String subscriberName = apiProvider.getSubscriber(subscriptionId);
         Map<String, String> subscriberClaims = apiProvider.getSubscriberClaims(subscriberName);
-        return SubscriptionMappingUtil.fromSubscriberClaimsToDTO(subscriberClaims, subscriberName);
+        return BackofficeAPIUtils.getJsonFromDTO(SubscriptionMappingUtil.fromSubscriberClaimsToDTO(
+                subscriberClaims, subscriberName));
     }
 
 }

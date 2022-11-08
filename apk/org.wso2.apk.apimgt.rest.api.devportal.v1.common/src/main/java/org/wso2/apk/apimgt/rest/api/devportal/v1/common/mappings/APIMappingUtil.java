@@ -164,11 +164,11 @@ public class APIMappingUtil {
 
         Set<Tier> apiTiers = model.getAvailableTiers();
         List<APITiersDTO> tiersToReturn = new ArrayList<>();
-        int tenantId = 0;
-        if (!StringUtils.isBlank(organization)) {
-            tenantId = APIUtil.getInternalOrganizationId(organization);
-        }
-        Set<String> deniedTiers = apiConsumer.getDeniedTiers(tenantId);
+//        int tenantId = 0;
+//        if (!StringUtils.isBlank(organization)) {
+//            tenantId = APIUtil.getInternalOrganizationId(organization);
+//        }
+        Set<String> deniedTiers = apiConsumer.getDeniedTiers(organization);
         for (Tier currentTier : apiTiers) {
             if (!deniedTiers.contains(currentTier.getName())) {
                 APITiersDTO apiTiersDTO = new APITiersDTO();
@@ -732,7 +732,7 @@ public class APIMappingUtil {
         APIListDTO apiListDTO = new APIListDTO();
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         Set<String> deniedTiers = apiConsumer.getDeniedTiers(organization);
-        Map<String, Tier> tierMap = APIUtil.getTiers(organization);
+        Map<String, Tier> tierMap = APIUtil.getSubscriptionTiers(organization);
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
         if (apiList != null) {
             for (Object api : apiList) {
@@ -898,7 +898,7 @@ public class APIMappingUtil {
 
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         Set<String> deniedTiers = apiConsumer.getDeniedTiers(organization);
-        Map<String, Tier> tierMap = APIUtil.getTiers(organization);
+        Map<String, Tier> tierMap = APIUtil.getSubscriptionTiers(organization);
         setThrottlePoliciesAndMonetization(apiProduct, apiInfoDTO, deniedTiers, tierMap);
         APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(apiProduct.getBusinessOwner());
@@ -1013,7 +1013,8 @@ public class APIMappingUtil {
         if (api.getAvailableTiers() != null) {
             tiers = String.join("||", tierNameSet);
         }
-        Map<String, Tier> definedTiers = APIUtil.getTiers(APIUtil.getTenantId(RestApiCommonUtil.getLoggedInUsername()));
+        Map<String, Tier> definedTiers = APIUtil.getTiers(APIUtil.getTenantDomain(RestApiCommonUtil
+                .getLoggedInUsername()));
         Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
         for (Tier currentTier : availableTiers) {
             if (!deniedTiers.contains(currentTier.getName())) {
@@ -1054,7 +1055,8 @@ public class APIMappingUtil {
         if (apiProduct.getAvailableTiers() != null) {
             tiers = String.join("||", tierNameSet);
         }
-        Map<String, Tier> definedTiers = APIUtil.getTiers(APIUtil.getTenantId(RestApiCommonUtil.getLoggedInUsername()));
+        Map<String, Tier> definedTiers = APIUtil.getTiers(APIUtil.getTenantDomain(RestApiCommonUtil
+                .getLoggedInUsername()));
         Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers, apiProduct.getId().getName());
         for (Tier currentTier : availableTiers) {
             if (!deniedTiers.contains(currentTier.getName())) {

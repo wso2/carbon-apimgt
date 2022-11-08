@@ -27,6 +27,7 @@ import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.apk.apimgt.api.model.Comment;
 import org.wso2.apk.apimgt.api.model.CommentList;
+import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.BackofficeAPIUtils;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.common.utils.mappings.CommentMappingUtil;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.CommentDTO;
 import org.wso2.apk.apimgt.rest.api.backoffice.v1.dto.CommentListDTO;
@@ -49,20 +50,22 @@ public class ApiCommentsAPICommonImpl {
 
     private static final Log log = LogFactory.getLog(ApiCommentsAPICommonImpl.class);
 
-    public static CommentDTO addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String replyTo,
+    public static String addCommentToAPI(String apiId, String postRequestBodyJson, String replyTo,
                                              String organization) throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
+        PostRequestBodyDTO postRequestBodyDTO = BackofficeAPIUtils.getDTOFromJson(postRequestBodyJson,
+                PostRequestBodyDTO.class);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
         Comment comment = createComment(postRequestBodyDTO.getContent(), postRequestBodyDTO.getCategory(),
                 replyTo, username, apiId);
         String createdCommentId = apiProvider.addComment(apiId, comment, username);
         Comment createdComment = apiProvider.getComment(apiTypeWrapper, createdCommentId, 0, 0);
-        return CommentMappingUtil.fromCommentToDTO(createdComment);
+        return BackofficeAPIUtils.getJsonFromDTO(CommentMappingUtil.fromCommentToDTO(createdComment));
     }
 
-    public static CommentListDTO getAllCommentsOfAPI(String apiId, Integer limit, Integer offset,
+    public static String getAllCommentsOfAPI(String apiId, Integer limit, Integer offset,
                                                      Boolean includeCommenterInfo, String requestedTenantDomain)
             throws APIManagementException {
 
@@ -70,10 +73,11 @@ public class ApiCommentsAPICommonImpl {
         ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
         String parentCommentID = null;
         CommentList comments = apiProvider.getComments(apiTypeWrapper, parentCommentID, limit, offset);
-        return CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
+        return BackofficeAPIUtils.getJsonFromDTO(CommentMappingUtil.
+                fromCommentListToDTO(comments, includeCommenterInfo));
     }
 
-    public static CommentDTO getCommentOfAPI(String commentId, String apiId, Boolean includeCommenterInfo,
+    public static String getCommentOfAPI(String commentId, String apiId, Boolean includeCommenterInfo,
                                              Integer replyLimit, Integer replyOffset, String requestedTenantDomain)
             throws APIManagementException {
 
@@ -89,14 +93,16 @@ public class ApiCommentsAPICommonImpl {
         } else {
             commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
         }
-        return commentDTO;
+        return BackofficeAPIUtils.getJsonFromDTO(commentDTO);
     }
 
-    public static CommentDTO editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO)
+    public static String editCommentOfAPI(String commentId, String apiId, String patchRequestBodyJson)
             throws APIManagementException {
 
         CommentDTO commentDTO = null;
         String username = RestApiCommonUtil.getLoggedInUsername();
+        PatchRequestBodyDTO patchRequestBodyDTO = BackofficeAPIUtils.getDTOFromJson(patchRequestBodyJson,
+                PatchRequestBodyDTO.class)
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
@@ -118,17 +124,18 @@ public class ApiCommentsAPICommonImpl {
             Comment editedComment = apiProvider.getComment(apiTypeWrapper, commentId, 0, 0);
             commentDTO = CommentMappingUtil.fromCommentToDTO(editedComment);
         }
-        return commentDTO;
+        return BackofficeAPIUtils.getJsonFromDTO(commentDTO);
     }
 
-    public static CommentListDTO getRepliesOfComment(String commentId, String apiId, Integer limit, Integer offset,
+    public static String getRepliesOfComment(String commentId, String apiId, Integer limit, Integer offset,
                                                      Boolean includeCommenterInfo, String requestedTenantDomain)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
         CommentList comments = apiProvider.getComments(apiTypeWrapper, commentId, limit, offset);
-        return CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
+        return BackofficeAPIUtils.getJsonFromDTO(CommentMappingUtil.
+                fromCommentListToDTO(comments, includeCommenterInfo));
     }
 
     /**

@@ -4903,7 +4903,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (api.getAvailableTiers() != null) {
                     tiers = String.join("||", tierNameSet);
                 }
-                Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+                Map<String, Tier> definedTiers = APIUtil.getTiers(organization);
                 Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
                 api.removeAllTiers();
                 api.setAvailableTiers(availableTiers);

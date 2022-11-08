@@ -18,6 +18,9 @@
 
 package org.wso2.apk.apimgt.rest.api.util.utils;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -541,5 +544,25 @@ public class RestApiUtil {
             log.error("Error while retrieving Anonymous config from registry", e);
         }
         return true;
+    }
+
+    public static <T> T getDTOFromJson(String json, Class<T> clazz)
+            throws APIManagementException{
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(json, clazz);
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error");
+        }
+    }
+
+    public static <T> String getJsonFromDTO(T dto) throws APIManagementException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        try {
+            return mapper.writeValueAsString(dto);
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error");
+        }
     }
 }

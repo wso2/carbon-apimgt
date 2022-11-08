@@ -20,7 +20,6 @@ package org.wso2.apk.apimgt.impl;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,7 +40,6 @@ import org.wso2.apk.apimgt.api.model.ResourceFile;
 import org.wso2.apk.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.apk.apimgt.api.model.webhooks.Subscription;
 import org.wso2.apk.apimgt.api.model.webhooks.Topic;
-import org.wso2.apk.apimgt.impl.caching.CacheProvider;
 import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPI;
 import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPIInfo;
 import org.wso2.apk.apimgt.impl.dao.dto.DevPortalAPISearchResult;
@@ -81,7 +79,6 @@ import org.wso2.apk.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.apk.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.apk.apimgt.impl.wsdl.model.WSDLValidationResponse;
 
-import javax.cache.Cache;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -574,7 +571,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         try {
             originalSubscribedAPIs = apiMgtDAO.getSubscribedAPIs(organization, subscriber, groupingId);
             if (originalSubscribedAPIs != null && !originalSubscribedAPIs.isEmpty()) {
-                Map<String, Tier> tiers = APIUtil.getTiers(organization);
+                Map<String, Tier> tiers = APIUtil.getSubscriptionTiers(organization);
                 for (SubscribedAPI subscribedApi : originalSubscribedAPIs) {
                     Tier tier = tiers.get(subscribedApi.getTier().getName());
                     subscribedApi.getTier().setDisplayName(tier != null ? tier.getDisplayName() : subscribedApi.getTier().getName());
@@ -594,7 +591,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         try {
             originalSubscribedAPIs = apiMgtDAO.getSubscribedAPIs(organization, subscriber, groupingId);
             if (originalSubscribedAPIs != null && !originalSubscribedAPIs.isEmpty()) {
-                Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
+                Map<String, Tier> tiers = APIUtil.getTiers(organization);
                 for (SubscribedAPI subscribedApi : originalSubscribedAPIs) {
                     Application application = subscribedApi.getApplication();
                     if (application != null) {
@@ -619,7 +616,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         try {
             subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, applicationName, groupingId);
             if (subscribedAPIs != null && !subscribedAPIs.isEmpty()) {
-                Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
+                Map<String, Tier> tiers = APIUtil.getTiers(organization);
                 for (SubscribedAPI subscribedApi : subscribedAPIs) {
                     Tier tier = tiers.get(subscribedApi.getTier().getName());
                     subscribedApi.getTier().setDisplayName(tier != null ? tier.getDisplayName() : subscribedApi
@@ -1789,25 +1786,25 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public Set<String> getDeniedTiers() throws APIManagementException {
         // '0' is passed as argument whenever tenant id of logged in user is needed
-        return getDeniedTiers(0);
+        return getDeniedTiers(null);
     }
 
     /**
      * Returns a list of tiers denied
-     * @param apiProviderTenantId tenant id of API provider
+     * @param apiProviderOrganization tenant id of API provider
      * @return Set<Tier>
      */
     @Override
-    public Set<String> getDeniedTiers(int apiProviderTenantId) throws APIManagementException {
+    public Set<String> getDeniedTiers(String apiProviderOrganization) throws APIManagementException {
         Set<String> deniedTiers = new HashSet<String>();
         String[] currentUserRoles;
-        Set<TierPermissionDTO> tierPermissions = apiMgtDAO.getThrottleTierPermissions(apiProviderTenantId);
-        if (apiProviderTenantId == 0) {
-            apiProviderTenantId = tenantId;
+        Set<TierPermissionDTO> tierPermissions = apiMgtDAO.getThrottleTierPermissions(apiProviderOrganization);
+        if (apiProviderOrganization.isEmpty()) {
+            apiProviderOrganization = organization;
         }
-        if (apiProviderTenantId != 0) {
+        if (apiProviderOrganization.isEmpty()) {
             if (APIUtil.isOnPremResolver()){
-                if (tenantId != apiProviderTenantId){
+                if (!organization.equals(apiProviderOrganization)){
                     // if OnPrem Cross Tenant Scenario we will not able to validate roles allow or deny to policy
                     // therefore any POLICY that have a permission attached marked as deny policy.
                     for (TierPermissionDTO tierPermission : tierPermissions) {
@@ -1849,17 +1846,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Set<String> getDeniedTiers(String organization) throws APIManagementException {
-        int tenantId = APIUtil.getInternalOrganizationId(organization);
-        return getDeniedTiers(tenantId);
-    }
-
-    @Override
     public Set<TierPermission> getTierPermissions() throws APIManagementException {
 
         Set<TierPermission> tierPermissions = new HashSet<TierPermission>();
-        if (tenantId != 0) {
-            Set<TierPermissionDTO> tierPermissionDtos = apiMgtDAO.getThrottleTierPermissions(tenantId);
+        if (!organization.isEmpty()) {
+            Set<TierPermissionDTO> tierPermissionDtos = apiMgtDAO.getThrottleTierPermissions(organization);
 
             for (TierPermissionDTO tierDto : tierPermissionDtos) {
                 TierPermission tierPermission = new TierPermission(tierDto.getTierName());
@@ -2684,7 +2675,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     if (tierNameSet != null) {
                         tiers = String.join("||", tierNameSet);
                     }
-                    Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+                    Map<String, Tier> definedTiers = APIUtil.getTiers(organization);
                     Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers,
                             mappedAPI.getId().getApiName());
                     mappedAPI.removeAllTiers();
@@ -2788,12 +2779,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     private API addTiersToAPI(API api, String organization) throws APIManagementException {
-        int tenantId = APIUtil.getInternalIdFromTenantDomainOrOrganization(organization);
         Set<Tier> tierNames = api.getAvailableTiers();
-        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+        Map<String, Tier> definedTiers = APIUtil.getTiers(organization);
 
         Set<Tier> availableTiers = new HashSet<Tier>();
-        Set<String> deniedTiers = getDeniedTiers(tenantId);
+        Set<String> deniedTiers = getDeniedTiers(organization);
 
         for (Tier tierName : tierNames) {
             Tier definedTier = definedTiers.get(tierName.getName());
@@ -2812,10 +2802,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private APIProduct addTiersToAPI(APIProduct apiProduct, String organization) throws APIManagementException {
         int tenantId = APIUtil.getInternalIdFromTenantDomainOrOrganization(organization);
         Set<Tier> tierNames = apiProduct.getAvailableTiers();
-        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+        Map<String, Tier> definedTiers = APIUtil.getTiers(organization);
 
         Set<Tier> availableTiers = new HashSet<>();
-        Set<String> deniedTiers = getDeniedTiers(tenantId);
+        Set<String> deniedTiers = getDeniedTiers(organization);
 
         for (Tier tierName : tierNames) {
             Tier definedTier = definedTiers.get(tierName.getName());
@@ -2867,7 +2857,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (api.getAvailableTiers() != null) {
                     tiers = String.join("||", tierNameSet);
                 }
-                Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+                Map<String, Tier> definedTiers = APIUtil.getTiers(organization);
                 Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
                 api.removeAllTiers();
                 api.setAvailableTiers(availableTiers);
@@ -2952,7 +2942,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (api.getAvailableTiers() != null) {
                     tiers = String.join("||", tierNameSet);
                 }
-                Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+                Map<String, Tier> definedTiers = APIUtil.getTiers(organization);
                 Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
                 api.removeAllTiers();
                 api.setAvailableTiers(availableTiers);
@@ -3096,7 +3086,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIsByApplication(application, offset,
                     limit, organization);
             if (subscribedAPIs != null && !subscribedAPIs.isEmpty()) {
-                Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
+                Map<String, Tier> tiers = APIUtil.getTiers(organization);
                 for (SubscribedAPI subscribedApi : subscribedAPIs) {
                     Tier tier = tiers.get(subscribedApi.getTier().getName());
                     subscribedApi.getTier().setDisplayName(tier != null ? tier.getDisplayName() : subscribedApi

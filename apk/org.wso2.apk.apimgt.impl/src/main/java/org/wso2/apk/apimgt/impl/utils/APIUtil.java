@@ -548,7 +548,7 @@ public final class APIUtil {
      */
     public static Map<String, Tier> getAllTiers() throws APIManagementException {
 
-        return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, APIConstants.SUPER_TENANT_ID);
+        return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, APIConstants.SUPER_TENANT_DOMAIN);
     }
 
     /**
@@ -558,9 +558,9 @@ public final class APIUtil {
      * @return Map<String, Tier> an unfiltered Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
-    public static Map<String, Tier> getAllTiers(int tenantId) throws APIManagementException {
+    public static Map<String, Tier> getAllTiers(String organization) throws APIManagementException {
 
-        return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
+        return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, organization);
 
     }
 
@@ -573,7 +573,7 @@ public final class APIUtil {
      */
     public static Map<String, Tier> getTiers() throws APIManagementException {
 
-        return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, APIConstants.SUPER_TENANT_ID);
+        return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, APIConstants.SUPER_TENANT_DOMAIN);
     }
 
     /**
@@ -585,7 +585,7 @@ public final class APIUtil {
      */
     public static Map<String, Tier> getAdvancedSubsriptionTiers() throws APIManagementException {
 
-        return getAdvancedSubsriptionTiers(APIConstants.SUPER_TENANT_ID);
+        return getAdvancedSubsriptionTiers(APIConstants.SUPER_TENANT_DOMAIN);
     }
 
     /**
@@ -595,9 +595,9 @@ public final class APIUtil {
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
-    public static Map<String, Tier> getAdvancedSubsriptionTiers(int tenantId) throws APIManagementException {
+    public static Map<String, Tier> getAdvancedSubsriptionTiers(String organization) throws APIManagementException {
 
-        return APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
+        return APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, organization);
     }
 
     /**
@@ -607,9 +607,9 @@ public final class APIUtil {
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
-    public static Map<String, Tier> getTiers(int tenantId) throws APIManagementException {
+    public static Map<String, Tier> getTiers(String organization) throws APIManagementException {
 
-        return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
+        return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, organization);
     }
 
     /**
@@ -623,13 +623,12 @@ public final class APIUtil {
      */
     public static Map<String, Tier> getTiers(int tierType, String organization) throws APIManagementException {
 
-        int tenantId = APIUtil.getInternalOrganizationId(organization);
         if (tierType == APIConstants.TIER_API_TYPE) {
-            return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
+            return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, organization);
         } else if (tierType == APIConstants.TIER_RESOURCE_TYPE) {
-            return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_API, tenantId);
+            return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_API, organization);
         } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
-            return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_APP, tenantId);
+            return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_APP, organization);
         } else {
             throw new APIManagementException("No such a tier type : " + tierType, ExceptionCodes.UNSUPPORTED_TIER_TYPE);
         }
@@ -1468,30 +1467,31 @@ public final class APIUtil {
 
     private static boolean isUnlimitedTierPaid(String tenantDomain) throws APIManagementException {
 
-        JSONObject apiTenantConfig = getTenantConfig(tenantDomain);
-        if (apiTenantConfig != null) {
-            Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID);
+        //TODO: parse the tenant configs
+//        JSONObject apiTenantConfig = getTenantConfig(tenantDomain);
+//        if (apiTenantConfig != null) {
+//            Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID);
+//
+//            if (value != null) {
+//                return Boolean.parseBoolean(value.toString());
+//            } else {
+//                throw new APIManagementException(
+//                        APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID + " config does not exist for tenant "
+//                                + tenantDomain, ExceptionCodes.CONFIG_NOT_FOUND);
+//            }
+//        }
 
-            if (value != null) {
-                return Boolean.parseBoolean(value.toString());
-            } else {
-                throw new APIManagementException(
-                        APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID + " config does not exist for tenant "
-                                + tenantDomain, ExceptionCodes.CONFIG_NOT_FOUND);
-            }
-        }
-
-        return false;
+        return true;
     }
 
-    public static Map<String, Tier> getTiers(String organization) throws APIManagementException {
+    public static Map<String, Tier> getSubscriptionTiers(String organization) throws APIManagementException {
 
-        int requestedTenantId = getInternalOrganizationId(organization);
+//        int requestedTenantId = getInternalOrganizationId(organization);
 
-        if (requestedTenantId == 0) {
+        if (organization.isEmpty()) {
             return APIUtil.getAdvancedSubsriptionTiers();
         } else {
-            return APIUtil.getAdvancedSubsriptionTiers(requestedTenantId);
+            return APIUtil.getAdvancedSubsriptionTiers(organization);
         }
     }
 
@@ -2011,17 +2011,17 @@ public final class APIUtil {
         return defaultTier;
     }
 
-    public static Map<String, Tier> getTiersFromPolicies(String policyLevel, int tenantId) throws APIManagementException {
+    public static Map<String, Tier> getTiersFromPolicies(String policyLevel, String organization) throws APIManagementException {
 
         Map<String, Tier> tierMap = new TreeMap<>();
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         Policy[] policies;
         if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
-            policies = apiMgtDAO.getSubscriptionPolicies(tenantId);
+            policies = apiMgtDAO.getSubscriptionPolicies(organization);
         } else if (PolicyConstants.POLICY_LEVEL_API.equalsIgnoreCase(policyLevel)) {
-            policies = apiMgtDAO.getAPIPolicies(tenantId);
+            policies = apiMgtDAO.getAPIPolicies(organization);
         } else if (PolicyConstants.POLICY_LEVEL_APP.equalsIgnoreCase(policyLevel)) {
-            policies = apiMgtDAO.getApplicationPolicies(tenantId);
+            policies = apiMgtDAO.getApplicationPolicies(organization);
         } else {
             throw new APIManagementException("No such a policy type : " + policyLevel, ExceptionCodes.UNSUPPORTED_POLICY_TYPE);
         }
@@ -2073,7 +2073,7 @@ public final class APIUtil {
                     tier.setDisplayName(policy.getDisplayName());
                     tier.setRequestsPerMin(Integer.MAX_VALUE);
                     tier.setRequestCount(Integer.MAX_VALUE);
-                    if (isUnlimitedTierPaid(getTenantDomainFromTenantId(tenantId))) {
+                    if (isUnlimitedTierPaid(organization)) {
                         tier.setTierPlan(APIConstants.COMMERCIAL_TIER_PLAN);
                     } else {
                         tier.setTierPlan(APIConstants.BILLING_PLAN_FREE);
