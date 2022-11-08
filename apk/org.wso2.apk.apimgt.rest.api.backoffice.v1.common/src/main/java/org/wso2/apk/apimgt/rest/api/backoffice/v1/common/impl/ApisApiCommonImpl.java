@@ -121,22 +121,9 @@ public class ApisApiCommonImpl {
         APIDTO body = getDTOFromJson(json, APIDTO.class);
 
         String username = RestApiCommonUtil.getLoggedInUsername();
-        boolean isWSAPI = APIDTO.TypeEnum.WS.equals(body.getType());
 
         //validate if api exists
         RestApiCommonUtil.validateAPIExistence(apiId);
-
-        // validate web socket api endpoint configurations
-//        if (isWSAPI && !PublisherCommonUtils.isValidWSAPI(body)) {
-//            throw new APIManagementException("Endpoint URLs should be valid web socket URLs",
-//                    ExceptionCodes.INVALID_ENDPOINT_URL);
-//        }
-
-        // validate sandbox and production endpoints
-        if (!PublisherCommonUtils.validateEndpoints(body)) {
-            throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
-                    ExceptionCodes.INVALID_ENDPOINT_URL);
-        }
 
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
         API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
