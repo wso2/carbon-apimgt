@@ -18,6 +18,9 @@
 
 package org.wso2.apk.apimgt.rest.api.backoffice.v1.common.impl;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -29,7 +32,6 @@ import org.wso2.apk.apimgt.api.ExceptionCodes;
 import org.wso2.apk.apimgt.api.FaultGatewaysException;
 import org.wso2.apk.apimgt.api.model.API;
 import org.wso2.apk.apimgt.api.model.APIIdentifier;
-import org.wso2.apk.apimgt.api.model.ResourceFile;
 import org.wso2.apk.apimgt.api.model.ResourcePath;
 import org.wso2.apk.apimgt.api.model.SwaggerData;
 import org.wso2.apk.apimgt.impl.APIConstants;
@@ -63,7 +65,7 @@ public class ApisApiCommonImpl {
 
     private static final Log log = LogFactory.getLog(ApisApiCommonImpl.class);
 
-    public static Object getAllAPIs(Integer limit, Integer offset, String sortBy, String sortOrder, String query,
+    public static String getAllAPIs(Integer limit, Integer offset, String sortBy, String sortOrder, String query,
                                     String organization) throws APIManagementException {
 
         List<API> allMatchedApis = new ArrayList<>();
@@ -104,17 +106,19 @@ public class ApisApiCommonImpl {
         }
 
         APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, length);
-        return apiListDTO;
+        return getJsonFromDTO(apiListDTO);
     }
 
-    public static APIDTO getAPI(String apiId, String organization) throws APIManagementException {
+    public static String getAPI(String apiId, String organization) throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        return getAPIByID(apiId, apiProvider, organization);
+        return getJsonFromDTO(getAPIByID(apiId, apiProvider, organization));
     }
 
-    public static APIDTO updateAPI(String apiId, APIDTO body, String[] tokenScopes, String organization)
+    public static String updateAPI(String apiId, String json, String[] tokenScopes, String organization)
             throws APIManagementException {
+
+        APIDTO body = getDTOFromJson(json, APIDTO.class);
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         boolean isWSAPI = APIDTO.TypeEnum.WS.equals(body.getType());
@@ -147,7 +151,7 @@ public class ApisApiCommonImpl {
             throw new APIManagementException(errorMessage,
                     ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
-        return APIMappingUtil.fromAPItoDTO(updatedApi);
+        return getJsonFromDTO(APIMappingUtil.fromAPItoDTO(updatedApi));
     }
 
     private static void validateAPIOperationsPerLC(String status, String[] tokenScopes) throws APIManagementException {
@@ -171,8 +175,8 @@ public class ApisApiCommonImpl {
         }
     }
 
-    public static FileInfoDTO updateAPIThumbnail(String apiId, InputStream fileInputStream, String organization,
-                                                 String fileName, String fileDetailContentType)
+    public static String updateAPIThumbnail(String apiId, InputStream fileInputStream, String organization,
+                                            String fileName, String fileDetailContentType)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -189,18 +193,18 @@ public class ApisApiCommonImpl {
         PublisherCommonUtils.updateThumbnail(fileInputStream, fileContentType, apiProvider, apiId, organization);
         FileInfoDTO infoDTO = new FileInfoDTO();
         infoDTO.setMediaType(fileContentType);
-        return infoDTO;
+        return getJsonFromDTO(infoDTO);
     }
 
-    public static ResourceFile getAPIThumbnail(String apiId, APIProvider apiProvider, String organization)
+    public static String getAPIThumbnail(String apiId, APIProvider apiProvider, String organization)
             throws APIManagementException {
 
         //this will fail if user does not have access to the API or the API does not exist
         RestApiCommonUtil.validateAPIExistence(apiId);
-        return apiProvider.getIcon(apiId, organization);
+        return getJsonFromDTO(apiProvider.getIcon(apiId, organization));
     }
 
-    public static ResourcePathListDTO getAPIResourcePaths(String apiId, Integer limit, Integer offset)
+    public static String getAPIResourcePaths(String apiId, Integer limit, Integer offset)
             throws APIManagementException {
 
         RestApiCommonUtil.validateAPIExistence(apiId);
@@ -210,7 +214,7 @@ public class ApisApiCommonImpl {
 
         ResourcePathListDTO dto = APIMappingUtil.fromResourcePathListToDTO(apiResourcePaths, limit, offset);
         APIMappingUtil.setPaginationParamsForAPIResourcePathList(dto, offset, limit, apiResourcePaths.size());
-        return dto;
+        return getJsonFromDTO(dto);
     }
 
     /**
@@ -231,5 +235,25 @@ public class ApisApiCommonImpl {
         API api = apiProvider.getAPIbyUUID(apiId, organization);
         api.setOrganization(organization);
         return APIMappingUtil.fromAPItoDTO(api, apiProvider);
+    }
+
+    private static <T> T getDTOFromJson(String json, Class<T> clazz)
+            throws APIManagementException{
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(json, clazz);
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error");
+        }
+    }
+
+    private static <T> String getJsonFromDTO(T dto) throws APIManagementException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        try {
+            return mapper.writeValueAsString(dto);
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error");
+        }
     }
 }
