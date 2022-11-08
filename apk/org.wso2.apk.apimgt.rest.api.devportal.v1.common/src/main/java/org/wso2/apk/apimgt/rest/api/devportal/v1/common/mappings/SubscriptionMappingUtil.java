@@ -71,7 +71,7 @@ public class SubscriptionMappingUtil {
             apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(subscription.getIdentifier().getUUID(), organization);
             subscriptionDTO.setApiId(subscription.getIdentifier().getUUID());
             Set<String> deniedTiers = apiConsumer.getDeniedTiers(organization);
-            Map<String, Tier> tierMap = APIUtil.getTiers(organization);
+            Map<String, Tier> tierMap = APIUtil.getSubscriptionTiers(organization);
             if (apiTypeWrapper.isAPIProduct()) {
                 apiInfo = APIMappingUtil.fromAPIToInfoDTO(apiTypeWrapper.getApiProduct(), organization);
                 APIMappingUtil.setThrottlePoliciesAndMonetization(apiTypeWrapper.getApiProduct(), apiInfo, deniedTiers,
@@ -109,7 +109,7 @@ public class SubscriptionMappingUtil {
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         Set<String> deniedTiers = apiConsumer.getDeniedTiers(organization);
-        Map<String, Tier> tierMap = APIUtil.getTiers(organization);
+        Map<String, Tier> tierMap = APIUtil.getSubscriptionTiers(organization);
         if (apiTypeWrapper != null && !apiTypeWrapper.isAPIProduct()) {
             API api = apiTypeWrapper.getApi();
             subscriptionDTO.setApiId(api.getUUID());

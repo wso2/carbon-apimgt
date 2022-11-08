@@ -702,27 +702,25 @@ public abstract class AbstractAPIManager implements APIManager {
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
         Map<String, Tier> tierMap;
 
-        if (tenantId == -1) {
+        if (organization.isEmpty()) {
             tierMap = APIUtil.getAllTiers();
         } else {
-            tierMap = APIUtil.getAllTiers(tenantId);
+            tierMap = APIUtil.getAllTiers(organization);
         }
 
         tiers.addAll(tierMap.values());
         return tiers;
     }
 
-    public Set<Tier> getAllTiers(String tenantDomain) throws APIManagementException {
+    public Set<Tier> getAllTiers(String organization) throws APIManagementException {
 
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
         Map<String, Tier> tierMap;
 
-        int requestedTenantId = org.wso2.apk.apimgt.user.ctx.UserContext.getThreadLocalUserContext()
-                .getOrganizationId();
-        if (requestedTenantId == -1234 || requestedTenantId == -1) {
+        if (organization.isEmpty()) {
             tierMap = APIUtil.getAllTiers();
         } else {
-            tierMap = APIUtil.getAllTiers(requestedTenantId);
+            tierMap = APIUtil.getAllTiers(organization);
         }
 
         tiers.addAll(tierMap.values());
@@ -738,7 +736,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
 
-        Map<String, Tier> tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
+        Map<String, Tier> tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, organization);
         tiers.addAll(tierMap.values());
 
         return tiers;
@@ -749,10 +747,10 @@ public abstract class AbstractAPIManager implements APIManager {
      *
      * @return Set<Tier>
      */
-    public Set<Tier> getTiers(String tenantDomain) throws APIManagementException {
+    public Set<Tier> getTiers(String organization) throws APIManagementException {
 
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
-        Map<String, Tier> tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
+        Map<String, Tier> tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, organization);
         tiers.addAll(tierMap.values());
         return tiers;
     }
@@ -770,13 +768,13 @@ public abstract class AbstractAPIManager implements APIManager {
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
         Map<String, Tier> tierMap;
 
-        int tenantIdFromUsername = APIUtil.getTenantId(username);
+        String organization = APIUtil.getTenantDomain(username);
         if (tierType == APIConstants.TIER_API_TYPE) {
-            tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantIdFromUsername);
+            tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, organization);
         } else if (tierType == APIConstants.TIER_RESOURCE_TYPE) {
-            tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_API, tenantIdFromUsername);
+            tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_API, organization);
         } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
-            tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_APP, tenantIdFromUsername);
+            tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_APP, organization);
         } else {
             throw new APIManagementException("No such a tier type : " + tierType);
         }
@@ -809,16 +807,16 @@ public abstract class AbstractAPIManager implements APIManager {
 
         Policy[] policies = null;
 
-        int tenantID = APIUtil.getTenantId(username);
+        String organization = APIUtil.getTenantDomain(username);
 
         if (PolicyConstants.POLICY_LEVEL_API.equals(level)) {
-            policies = apiMgtDAO.getAPIPolicies(tenantID);
+            policies = apiMgtDAO.getAPIPolicies(organization);
         } else if (PolicyConstants.POLICY_LEVEL_APP.equals(level)) {
-            policies = apiMgtDAO.getApplicationPolicies(tenantID);
+            policies = apiMgtDAO.getApplicationPolicies(organization);
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(level)) {
-            policies = apiMgtDAO.getSubscriptionPolicies(tenantID);
+            policies = apiMgtDAO.getSubscriptionPolicies(organization);
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(level)) {
-            policies = apiMgtDAO.getGlobalPolicies(tenantID);
+            policies = apiMgtDAO.getGlobalPolicies(organization);
         }
 
         //Get the API Manager configurations and check whether the unlimited tier is disabled. If disabled, remove
@@ -1106,7 +1104,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (api.getAvailableTiers() != null) {
             tiers = String.join("||", tierNameSet);
         }
-        Map<String, Tier> definedTiers = APIUtil.getTiers(APIUtil.getInternalOrganizationId(organization));
+        Map<String, Tier> definedTiers = APIUtil.getTiers(organization);
         Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
         api.setAvailableTiers(availableTier);
 
@@ -1281,7 +1279,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (apiProduct.getAvailableTiers() != null) {
             tiers = String.join("||", tierNameSet);
         }
-        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+        Map<String, Tier> definedTiers = APIUtil.getTiers(organization);
         Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, apiProduct.getId().getName());
         apiProduct.setAvailableTiers(availableTier);
 
