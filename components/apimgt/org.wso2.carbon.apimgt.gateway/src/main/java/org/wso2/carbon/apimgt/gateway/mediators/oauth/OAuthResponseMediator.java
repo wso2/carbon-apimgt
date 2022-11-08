@@ -31,6 +31,8 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.mediators.oauth.client.TokenResponse;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.conf.OAuthEndpoint;
 
 /**
@@ -59,7 +61,15 @@ public class OAuthResponseMediator extends AbstractMediator implements ManagedLi
                 Object oauthEndpointObject = messageContext.getProperty(APIMgtGatewayConstants.OAUTH_ENDPOINT_INSTANCE);
                 if (oauthEndpointObject instanceof OAuthEndpoint) {
                     try {
-                        OAuthTokenGenerator.generateToken((OAuthEndpoint) oauthEndpointObject, null, true);
+                        OAuthEndpoint oAuthEndpoint = (OAuthEndpoint) oauthEndpointObject;
+                        if (ServiceReferenceHolder.getInstance().isRedisEnabled()) {
+                            ServiceReferenceHolder.getInstance().getRedisCacheUtils()
+                                    .deleteKey(oAuthEndpoint.getId());
+                        } else {
+                            TokenCache.getInstance().getTokenMap().put(oAuthEndpoint.getId(), null);
+                        }
+
+                        OAuthTokenGenerator.generateToken(oAuthEndpoint, null);
                         log.error("OAuth 2.0 access token has been rejected by the backend...");
                         handleFailure(APISecurityConstants.OAUTH_TEMPORARY_SERVER_ERROR, messageContext,
                                 APISecurityConstants.OAUTH_TEMPORARY_SERVER_ERROR_MESSAGE, "Please try again");
