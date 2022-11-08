@@ -55,7 +55,8 @@ public class OAuthTokenGenerator {
         try {
             TokenResponse tokenResponse = null;
             if (ServiceReferenceHolder.getInstance().isRedisEnabled()) {
-                    Object previousResponseObject = new RedisCacheUtils(ServiceReferenceHolder.getInstance().getRedisPool())
+                Object previousResponseObject =
+                        new RedisCacheUtils(ServiceReferenceHolder.getInstance().getRedisPool())
                                 .getObject(oAuthEndpoint.getId(), TokenResponse.class);
                 if (previousResponseObject != null) {
                     tokenResponse = (TokenResponse) previousResponseObject;
