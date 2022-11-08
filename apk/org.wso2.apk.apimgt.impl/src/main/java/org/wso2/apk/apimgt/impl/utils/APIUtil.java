@@ -1467,20 +1467,21 @@ public final class APIUtil {
 
     private static boolean isUnlimitedTierPaid(String tenantDomain) throws APIManagementException {
 
-        JSONObject apiTenantConfig = getTenantConfig(tenantDomain);
-        if (apiTenantConfig != null) {
-            Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID);
+        //TODO: parse the tenant configs
+//        JSONObject apiTenantConfig = getTenantConfig(tenantDomain);
+//        if (apiTenantConfig != null) {
+//            Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID);
+//
+//            if (value != null) {
+//                return Boolean.parseBoolean(value.toString());
+//            } else {
+//                throw new APIManagementException(
+//                        APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID + " config does not exist for tenant "
+//                                + tenantDomain, ExceptionCodes.CONFIG_NOT_FOUND);
+//            }
+//        }
 
-            if (value != null) {
-                return Boolean.parseBoolean(value.toString());
-            } else {
-                throw new APIManagementException(
-                        APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID + " config does not exist for tenant "
-                                + tenantDomain, ExceptionCodes.CONFIG_NOT_FOUND);
-            }
-        }
-
-        return false;
+        return true;
     }
 
     public static Map<String, Tier> getSubscriptionTiers(String organization) throws APIManagementException {

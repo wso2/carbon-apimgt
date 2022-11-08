@@ -8853,11 +8853,12 @@ public class ApiMgtDAO {
      */
     private String getLoginUserName(String userID) throws APIManagementException {
 
-        String primaryLogin = userID;
-        if (isSecondaryLogin(userID)) {
-            primaryLogin = getPrimaryLoginFromSecondary(userID);
-        }
-        return primaryLogin;
+        return "apkuser";
+//        String primaryLogin = userID;
+//        if (isSecondaryLogin(userID)) {
+//            primaryLogin = getPrimaryLoginFromSecondary(userID);
+//        }
+//        return primaryLogin;
     }
 
     /**
@@ -10712,7 +10713,7 @@ public class ApiMgtDAO {
     /**
      * Get application level polices
      *
-     * @param tenantID polices are selected only belong to specific tenantID
+     * @param organization polices are selected only belong to specific organization
      * @return AppilicationPolicy array list
      */
     public ApplicationPolicy[] getApplicationPolicies(String organization) throws APIManagementException {
@@ -12043,8 +12044,7 @@ public class ApiMgtDAO {
         policy.setDescription(resultSet.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
         policy.setDisplayName(resultSet.getString(ThrottlePolicyConstants.COLUMN_DISPLAY_NAME));
         policy.setPolicyId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
-        policy.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
-        policy.setTenantDomain(APIUtil.getTenantDomainFromTenantId(policy.getTenantId()));
+        policy.setTenantDomain(resultSet.getString(ThrottlePolicyConstants.COLUMN_ORGANIZATION));
         policy.setDefaultQuotaPolicy(quotaPolicy);
         policy.setDeployed(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
     }
