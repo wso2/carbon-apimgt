@@ -6226,8 +6226,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public boolean isValidContext(String providerName, String apiName, String contextTemplate, String userName,
                                   String organization) throws APIManagementException {
-        providerName = (StringUtils.isBlank(providerName)) ? userName : providerName;
         if (isApiNameExist(apiName, organization)) {
+            providerName = (StringUtils.isBlank(providerName)) ? userName : providerName;
+            providerName = APIUtil.replaceEmailDomainBack(providerName);
             if (!contextTemplate.startsWith("/")) {
                 contextTemplate = "/" + contextTemplate;
             }
