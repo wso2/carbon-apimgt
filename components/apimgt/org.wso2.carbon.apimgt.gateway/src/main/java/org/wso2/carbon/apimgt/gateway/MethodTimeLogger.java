@@ -63,12 +63,14 @@ public class MethodTimeLogger
      *
      * @return true if the property value matches this package name
      */
-    @Pointcut("execution(* *(..)) && " +
-            "!execution(* org.wso2.carbon.apimgt.gateway.ConfigurableCorrelationLogService.*(..)) && if()")
+    @Pointcut("execution(* *(..)) && if()")
     public static boolean pointCutAll() {
         if (!isLogAllSet) {
-            logAllMethods = ConfigurableCorrelationLogService.isLogAllMethods();
-            isLogAllSet = true;
+            String config = System.getProperty(APIConstants.LOG_ALL_METHODS);
+            if (StringUtils.isNotEmpty(config)) {
+                logAllMethods = config.contains("org.wso2.carbon.apimgt.gateway");
+                isLogAllSet = true;
+            }
         }
         return logAllMethods;
     }
@@ -81,8 +83,11 @@ public class MethodTimeLogger
     @Pointcut("if()")
     public static boolean isConfigEnabled() {
         if (!isSet) {
-            isEnabled = ConfigurableCorrelationLogService.isEnable();
-            isSet = true;
+            String config = System.getProperty(APIConstants.ENABLE_CORRELATION_LOGS);
+            if (StringUtils.isNotEmpty(config)) {
+                isEnabled = Boolean.parseBoolean(config);
+                isSet = true;
+            }
         }
         return isEnabled;
     }
