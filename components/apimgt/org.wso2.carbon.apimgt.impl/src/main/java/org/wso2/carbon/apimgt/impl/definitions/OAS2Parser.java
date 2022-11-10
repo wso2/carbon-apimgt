@@ -1278,7 +1278,7 @@ public class OAS2Parser extends APIDefinition {
         String host = StringUtils.EMPTY;
         String context = StringUtils.EMPTY;
         for (EndpointUrl endpointUrl : endpointUrls) {
-            schemes.add(Scheme.valueOf(endpointUrl.getProtocol()));
+            schemes.add(Scheme.valueOf(endpointUrl.getProtocol().toUpperCase()));
             if (StringUtils.equalsIgnoreCase(endpointUrl.getProtocol(), HTTPS_PROTOCOL)) {
                 host = endpointUrl.getHost();
                 context = endpointUrl.getContext();
