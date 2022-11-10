@@ -130,7 +130,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof FullHttpRequest) {
             FullHttpRequest req = (FullHttpRequest) msg;
             populateContextHeaders(req, inboundMessageContext);
-            validateCorsHeaders(ctx, req);
 
             InboundProcessorResponseDTO responseDTO =
                     webSocketProcessor.handleHandshake(req, ctx, inboundMessageContext);
@@ -292,48 +291,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     inboundMessageContext.getMatchingResource());
             metricsHandler.handleHandshake(ctx);
         }
-    }
-
-    private void validateCorsHeaders(ChannelHandlerContext ctx, FullHttpRequest req) throws APISecurityException {
-        // Current implementation supports validating only the 'origin' header
-
-        if (!APIUtil.isCORSValidationEnabledForWS()) {
-            return;
-        }
-        String requestOrigin = req.headers().get(HttpHeaderNames.ORIGIN);
-        // Don't validate the 'origin' header if it's not present in the request
-        if (requestOrigin == null) {
-            return;
-        }
-        String allowedOrigin = assessAndGetAllowedOrigin(requestOrigin);
-        if (allowedOrigin == null) {
-            FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN);
-            ctx.writeAndFlush(httpResponse);
-            ctx.close();
-            log.warn("Validation of CORS origin header failed for WS request on: " + req.uri());
-            throw new APISecurityException(APISecurityConstants.CORS_ORIGIN_HEADER_VALIDATION_FAILED,
-                    APISecurityConstants.CORS_ORIGIN_HEADER_VALIDATION_FAILED_MESSAGE);
-        }
-    }
-
-    private String assessAndGetAllowedOrigin(String origin) {
-
-        if (WebsocketUtil.allowedOriginsConfigured.contains("*")) {
-            return "*";
-        } else if (WebsocketUtil.allowedOriginsConfigured.contains(origin)) {
-            return origin;
-        } else if (origin != null) {
-            for (String allowedOrigin : WebsocketUtil.allowedOriginsConfigured) {
-                if (allowedOrigin.contains("*")) {
-                    Pattern pattern = Pattern.compile(allowedOrigin.replace("*", ".*"));
-                    Matcher matcher = pattern.matcher(origin);
-                    if (matcher.find()) {
-                        return origin;
-                    }
-                }
-            }
-        }
-        return null;
     }
 
     private void setApiPropertiesMapToChannel(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext) {

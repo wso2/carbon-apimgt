@@ -17,6 +17,14 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers;
 
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
+import io.netty.util.CharsetUtil;
 import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
@@ -29,6 +37,9 @@ import org.apache.synapse.core.axis2.MessageContextCreatorForAxis2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -197,6 +208,10 @@ public class WebsocketUtil {
 		return accessToken + ':' + apiContext + ':' + matchingResource;
 	}
 
+	public static Set<String> getAllowedOriginsConfigured() {
+		return allowedOriginsConfigured;
+	}
+
 	public static MessageContext getSynapseMessageContext(String tenantDomain) throws AxisFault {
 
 		org.apache.axis2.context.MessageContext axis2MsgCtx = createAxis2MessageContext();
@@ -226,6 +241,31 @@ public class WebsocketUtil {
 		axis2MsgCtx.setProperty(org.apache.axis2.context.MessageContext.CLIENT_API_NON_BLOCKING, Boolean.TRUE);
 		axis2MsgCtx.setServerSide(true);
 		return axis2MsgCtx;
+	}
+
+	/**
+	 * Send error messages in handshake phase for API request message
+	 *
+	 * @param ctx                   Channel handler context
+	 * @param inboundMessageContext InboundMessageContext
+	 * @param responseDTO           InboundProcessorResponseDTO
+	 * @param errorMessage          Error message
+	 * @param errorCode             Error code
+	 * @throws APISecurityException
+	 */
+	public static void sendHandshakeErrorMessage(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext,
+	                                             InboundProcessorResponseDTO responseDTO, String errorMessage,
+	                                             int errorCode) throws APISecurityException {
+		FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(
+				responseDTO.getErrorCode()), Unpooled.copiedBuffer(errorMessage, CharsetUtil.UTF_8));
+		httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+		httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
+		ctx.writeAndFlush(httpResponse);
+		if (log.isDebugEnabled()) {
+			log.debug("API request failed due to " + errorMessage + " for the websocket API: "
+					          + inboundMessageContext.getRequestPath());
+		}
+		throw new APISecurityException(errorCode, errorMessage);
 	}
 
 }

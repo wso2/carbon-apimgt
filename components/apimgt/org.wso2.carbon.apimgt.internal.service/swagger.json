@@ -1086,6 +1086,10 @@
           "items" : {
             "$ref" : "#/definitions/URLMapping"
           }
+        },
+        "corsConfiguration" : {
+          "type" : "object",
+          "properties" : { }
         }
       }
     },

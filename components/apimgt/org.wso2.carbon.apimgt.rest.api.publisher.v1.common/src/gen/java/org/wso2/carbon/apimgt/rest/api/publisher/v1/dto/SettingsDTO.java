@@ -34,6 +34,7 @@ public class SettingsDTO   {
     private Boolean externalStoresEnabled = null;
     private Boolean docVisibilityEnabled = null;
     private Boolean crossTenantSubscriptionEnabled = false;
+    private Boolean validationForWSEnabled = false;
     private String authorizationHeader = null;
 
   /**
@@ -198,6 +199,24 @@ public class SettingsDTO   {
   }
 
   /**
+   * Is Validation for WS Enabled 
+   **/
+  public SettingsDTO validationForWSEnabled(Boolean validationForWSEnabled) {
+    this.validationForWSEnabled = validationForWSEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Is Validation for WS Enabled ")
+  @JsonProperty("validationForWSEnabled")
+  public Boolean isValidationForWSEnabled() {
+    return validationForWSEnabled;
+  }
+  public void setValidationForWSEnabled(Boolean validationForWSEnabled) {
+    this.validationForWSEnabled = validationForWSEnabled;
+  }
+
+  /**
    * Authorization Header
    **/
   public SettingsDTO authorizationHeader(String authorizationHeader) {
@@ -234,12 +253,13 @@ public class SettingsDTO   {
         Objects.equals(externalStoresEnabled, settings.externalStoresEnabled) &&
         Objects.equals(docVisibilityEnabled, settings.docVisibilityEnabled) &&
         Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled) &&
+        Objects.equals(validationForWSEnabled, settings.validationForWSEnabled) &&
         Objects.equals(authorizationHeader, settings.authorizationHeader);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, authorizationHeader);
+    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, validationForWSEnabled, authorizationHeader);
   }
 
   @Override
@@ -256,6 +276,7 @@ public class SettingsDTO   {
     sb.append("    externalStoresEnabled: ").append(toIndentedString(externalStoresEnabled)).append("\n");
     sb.append("    docVisibilityEnabled: ").append(toIndentedString(docVisibilityEnabled)).append("\n");
     sb.append("    crossTenantSubscriptionEnabled: ").append(toIndentedString(crossTenantSubscriptionEnabled)).append("\n");
+    sb.append("    validationForWSEnabled: ").append(toIndentedString(validationForWSEnabled)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
     sb.append("}");
     return sb.toString();

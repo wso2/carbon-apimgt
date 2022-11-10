@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.internal.service.utils;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -39,6 +41,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.Policy;
 import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.internal.service.dto.APIDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyConditionGroupDTO;
@@ -65,6 +68,8 @@ import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
@@ -74,7 +79,9 @@ import java.util.Set;
 
 public class SubscriptionValidationDataUtil {
 
-    private static APIDTO fromAPItoDTO(API model) {
+    private static final Log log = LogFactory.getLog(SubscriptionValidationDataUtil.class);
+
+    private static APIDTO fromAPItoDTO(API model, String tenantDomain) {
 
         APIDTO apidto = null;
         if (model != null) {
@@ -90,6 +97,22 @@ public class SubscriptionValidationDataUtil {
             apidto.setName(model.getName());
             apidto.setStatus(model.getStatus());
             apidto.setIsDefaultVersion(model.isDefaultVersion());
+            GenericArtifact artifact = APIUtil.getAPIArtifact(model.getProvider(), model.getName(), model.getVersion(),
+                                                              tenantDomain);
+            if (artifact != null) {
+                String uuid = artifact.getId();
+                if (StringUtils.isNotEmpty(uuid)) {
+                    apidto.setUuid(uuid);
+                }
+                try {
+                    apidto.setCorsConfiguration(APIUtil.getCorsConfigurationFromArtifact(artifact));
+                } catch (GovernanceException e) {
+                    String msg = "Failed to get CORS configuration from API artifact for api UUID: " + uuid;
+                    log.error(msg, e);
+                }
+            } else {
+                log.error("Failed to fetch API artifact for API ID: " + model.getApiId());
+            }
             Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {
@@ -106,7 +129,7 @@ public class SubscriptionValidationDataUtil {
         return apidto;
     }
 
-    public static APIListDTO fromAPIToAPIListDTO(API model) {
+    public static APIListDTO fromAPIToAPIListDTO(API model, String tenantDomain) {
 
         APIListDTO apiListdto = new APIListDTO();
         if (model != null) {
@@ -121,6 +144,22 @@ public class SubscriptionValidationDataUtil {
             apidto.setName(model.getName());
             apidto.setStatus(model.getStatus());
             apidto.setIsDefaultVersion(model.isDefaultVersion());
+            GenericArtifact artifact = APIUtil.getAPIArtifact(model.getProvider(), model.getName(), model.getVersion(),
+                                                              tenantDomain);
+            if (artifact != null) {
+                String uuid = artifact.getId();
+                if (StringUtils.isNotEmpty(uuid)) {
+                    apidto.setUuid(uuid);
+                }
+                try {
+                    apidto.setCorsConfiguration(APIUtil.getCorsConfigurationFromArtifact(artifact));
+                } catch (GovernanceException e) {
+                    String msg = "Failed to get CORS configuration from API artifact for api UUID: " + uuid;
+                    log.error(msg, e);
+                }
+            } else {
+                log.error("Failed to fetch API artifact for API ID: " + model.getApiId());
+            }
             Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {
@@ -141,13 +180,13 @@ public class SubscriptionValidationDataUtil {
         return apiListdto;
     }
 
-    public static APIListDTO fromAPIListToAPIListDTO(List<API> apiList) {
+    public static APIListDTO fromAPIListToAPIListDTO(List<API> apiList, String tenantDomain) {
 
         APIListDTO apiListDTO = new APIListDTO();
 
         if (apiList != null) {
             for (API api : apiList) {
-                apiListDTO.getList().add(fromAPItoDTO(api));
+                apiListDTO.getList().add(fromAPItoDTO(api, tenantDomain));
             }
             apiListDTO.setCount(apiList.size());
         } else {

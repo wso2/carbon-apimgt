@@ -98,6 +98,7 @@ import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
@@ -162,6 +163,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
@@ -192,6 +194,7 @@ import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.proxy.ExtendedProxyRoutePlanner;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.resolver.OnPremResolver;
+import org.wso2.carbon.apimgt.persistence.RegistryPersistenceImpl;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -9317,6 +9320,46 @@ public final class APIUtil {
             }
         }
         return true;
+    }
+
+    public static GenericArtifact getAPIArtifact(String provider, String name, String version, String tenantDomain) {
+
+        int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            try {
+                APIUtil.loadTenantRegistry(tenantID);
+            } catch (RegistryException e) {
+                log.error("Error while loading tenant registry " + tenantDomain, e);
+                return null;
+            }
+        }
+        UserRegistry governanceSystemRegistry = null;
+        try {
+            governanceSystemRegistry =
+                    ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(tenantID);
+        } catch (RegistryException e) {
+            log.error("Error while retrieving tenant registry " + tenantDomain, e);
+            return null;
+        }
+        APIIdentifier apiIdentifier = new APIIdentifier(provider, name, version);
+        GenericArtifact apiArtifact = null;
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        try {
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(governanceSystemRegistry,
+                                                                                APIConstants.API_KEY);
+            String uuid = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier, tenantDomain);
+            if (uuid == null) {
+                throw new APIManagementException("artifact id is null for : " + apiIdentifier);
+            }
+            apiArtifact = artifactManager.getGenericArtifact(uuid);
+        } catch (APIManagementException | GovernanceException e) {
+            log.error("Error while retrieving API Artifact " + tenantDomain, e);
+            return null;
+        }
+        if (apiArtifact != null) {
+            return apiArtifact;
+        }
+        return null;
     }
 
     /**

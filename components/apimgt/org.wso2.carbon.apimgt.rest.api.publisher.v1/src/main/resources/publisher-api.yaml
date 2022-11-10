@@ -11435,6 +11435,12 @@ components:
             Is Cross Tenant Subscriptions Enabled
           example: false
           default: false
+        validationForWSEnabled:
+          type: boolean
+          description: |
+            Is Validation for WS Enabled
+          example: false
+          default: false
         authorizationHeader:
           type: string
           description: Authorization Header

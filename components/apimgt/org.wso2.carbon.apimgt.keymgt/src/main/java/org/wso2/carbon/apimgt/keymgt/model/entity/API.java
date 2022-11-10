@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 
@@ -39,6 +40,7 @@ public class API implements CacheableEntity<String> {
     private String apiType = null;
     private String status;
     private boolean isDefaultVersion = false;
+    private CORSConfiguration corsConfiguration = null;
 
     public API() {
     }
@@ -68,6 +70,20 @@ public class API implements CacheableEntity<String> {
         this.apiType = apiType;
         this.status = status;
         this.isDefaultVersion = isDefaultVersion;
+    }
+
+    public API(String uuid, Integer apiId, String provider, String name, String version, String context, String policy,
+               String apiType, boolean isDefaultVersion, CORSConfiguration corsConfiguration) {
+        this.uuid = uuid;
+        this.apiId = apiId;
+        this.provider = provider;
+        this.name = name;
+        this.version = version;
+        this.context = context;
+        this.policy = policy;
+        this.apiType = apiType;
+        this.isDefaultVersion = isDefaultVersion;
+        this.corsConfiguration = corsConfiguration;
     }
 
     private List<URLMapping> urlMappings = new ArrayList<>();
@@ -160,6 +176,14 @@ public class API implements CacheableEntity<String> {
     public void setApiType(String apiType) {
 
         this.apiType = apiType;
+    }
+
+    public CORSConfiguration getCORSConfiguration() {
+        return corsConfiguration;
+    }
+
+    public void setCORSConfiguration(CORSConfiguration corsConfiguration) {
+        this.corsConfiguration = corsConfiguration;
     }
 
     @Override

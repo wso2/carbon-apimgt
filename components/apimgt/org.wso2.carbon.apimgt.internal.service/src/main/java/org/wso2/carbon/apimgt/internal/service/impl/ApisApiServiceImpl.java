@@ -55,28 +55,28 @@ public class ApisApiServiceImpl implements ApisApiService {
             Boolean expand, String accept, MessageContext messageContext) throws APIManagementException {
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
+        List<API> apiList = new ArrayList<>();
         APIListDTO apiListDTO;
         if (StringUtils.isNotEmpty(gatewayLabel)) {
             if (StringUtils.isNotEmpty(apiId)) {
                 API api = subscriptionValidationDAO.getApiByUUID(apiId, gatewayLabel, xWSO2Tenant, expand);
-                apiListDTO = SubscriptionValidationDataUtil.fromAPIToAPIListDTO(api);
+                apiList.add(api);
             } else if (StringUtils.isNotEmpty(context) && StringUtils.isNotEmpty(version)) {
                 if (!context.startsWith("/t/" + xWSO2Tenant.toLowerCase())) {
                     apiListDTO = new APIListDTO();
                 }
                 API api = subscriptionValidationDAO
                         .getAPIByContextAndVersion(context, version, gatewayLabel, expand);
-                apiListDTO = SubscriptionValidationDataUtil.fromAPIToAPIListDTO(api);
+                apiList.add(api);
             } else {
                 // Retrieve API Detail according to Gateway label.
-                apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(
-                        subscriptionValidationDAO.getAllApis(xWSO2Tenant, gatewayLabel, expand));
+                apiList = subscriptionValidationDAO.getAllApis(xWSO2Tenant, gatewayLabel, expand);
             }
         } else {
-            apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(
-                    subscriptionValidationDAO.getAllApis(xWSO2Tenant, expand));
+            apiList = subscriptionValidationDAO.getAllApis(xWSO2Tenant, expand);
         }
-        if (APIConstants.APPLICATION_GZIP.equals(accept)) {
+        apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(apiList, xWSO2Tenant);
+        if (APIConstants.APPLICATION_GZIP.equals(accept) && apiList.size() > 1) {
             try {
                 File zippedResponse = GZIPUtils.constructZippedResponse(apiListDTO);
                 return Response.ok().entity(zippedResponse)
