@@ -749,7 +749,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .errorDecoder(new KMClientErrorDecoder())
                 .target(UserClient.class, userInfoEndpoint);
 
-        if (!configuration.getType().equals(APIConstants.KeyManager.WSO2_IS_KEY_MANAGER_TYPE)) {
+        if (!APIConstants.KeyManager.WSO2_IS_KEY_MANAGER_TYPE.equals(configuration.getType())) {
             String revokeOneTimeTokenEndpoint;
             if (configuration.getParameter(APIConstants.KeyManager.REVOKE_TOKEN_ENDPOINT) != null) {
                 revokeOneTimeTokenEndpoint = (String) configuration
