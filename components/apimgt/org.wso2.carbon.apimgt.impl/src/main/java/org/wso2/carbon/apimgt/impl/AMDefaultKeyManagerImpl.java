@@ -701,14 +701,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                     .concat(getTenantAwareContext().trim()).concat
                             (APIConstants.KeyManager.KEY_MANAGER_OPERATIONS_USERINFO_ENDPOINT);
         }
-        String revokeOneTimeTokenEndpoint;
-        if (configuration.getParameter(APIConstants.KeyManager.REVOKE_TOKEN_ENDPOINT) != null) {
-            revokeOneTimeTokenEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.REVOKE_ENDPOINT);
-        } else {
-            revokeOneTimeTokenEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                    .concat(getTenantAwareContext().trim()).concat
-                            (APIConstants.KeyManager.KEY_MANAGER_OPERATIONS_REVOKE_TOKEN_ENDPOINT);
-        }
 
         dcrClient = Feign.builder()
                 .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(dcrEndpoint)))
@@ -756,15 +748,28 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .requestInterceptor(new TenantHeaderInterceptor(tenantDomain))
                 .errorDecoder(new KMClientErrorDecoder())
                 .target(UserClient.class, userInfoEndpoint);
-        revokeClient = Feign.builder()
-                .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(revokeOneTimeTokenEndpoint)))
-                .encoder(new GsonEncoder())
-                .decoder(new GsonDecoder())
-                .logger(new Slf4jLogger())
-                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
-                .requestInterceptor(new TenantHeaderInterceptor(tenantDomain))
-                .errorDecoder(new KMClientErrorDecoder())
-                .target(RevokeClient.class, revokeOneTimeTokenEndpoint);
+
+        if (!configuration.getType().equals(APIConstants.KeyManager.WSO2_IS_KEY_MANAGER_TYPE)) {
+            String revokeOneTimeTokenEndpoint;
+            if (configuration.getParameter(APIConstants.KeyManager.REVOKE_TOKEN_ENDPOINT) != null) {
+                revokeOneTimeTokenEndpoint = (String) configuration
+                        .getParameter(APIConstants.KeyManager.REVOKE_ENDPOINT);
+            } else {
+                revokeOneTimeTokenEndpoint = keyManagerServiceUrl
+                        .split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(getTenantAwareContext().trim())
+                        .concat(APIConstants.KeyManager.KEY_MANAGER_OPERATIONS_REVOKE_TOKEN_ENDPOINT);
+            }
+
+            revokeClient = Feign.builder()
+                    .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(revokeOneTimeTokenEndpoint)))
+                    .encoder(new GsonEncoder())
+                    .decoder(new GsonDecoder())
+                    .logger(new Slf4jLogger())
+                    .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
+                    .requestInterceptor(new TenantHeaderInterceptor(tenantDomain))
+                    .errorDecoder(new KMClientErrorDecoder())
+                    .target(RevokeClient.class, revokeOneTimeTokenEndpoint);
+        }
     }
 
     @Override
