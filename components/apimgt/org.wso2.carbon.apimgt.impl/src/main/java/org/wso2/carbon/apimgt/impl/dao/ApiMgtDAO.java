@@ -18795,6 +18795,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
+                operationPolicyData.setClonedCommonPolicyId(null);
                 String policyId = addAPISpecificOperationPolicy(connection, apiUUID, null, operationPolicyData, operationPolicyData.getClonedCommonPolicyId());
                 connection.commit();
                 return policyId;
@@ -18857,6 +18858,7 @@ public class ApiMgtDAO {
                 organization, true);
         // Since we import all the policies to API at API update, getting the policy from API specific policy list is enough
         if (policyData != null) {
+            policyData.setClonedCommonPolicyId(null);
             return addAPISpecificOperationPolicy(connection, apiUUID, revisionUUID, policyData,
                     policyData.getClonedCommonPolicyId());
         } else {
