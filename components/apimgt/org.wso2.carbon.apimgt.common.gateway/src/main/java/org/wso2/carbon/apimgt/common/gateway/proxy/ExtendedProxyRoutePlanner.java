@@ -16,97 +16,76 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.proxy;
+package org.wso2.carbon.apimgt.common.gateway.proxy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.protocol.HttpContext;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
 
 /**
  * Extended ProxyRoutePlanner class to handle non proxy hosts implementation
  */
 public class ExtendedProxyRoutePlanner extends DefaultProxyRoutePlanner {
     private static final Log log = LogFactory.getLog(ExtendedProxyRoutePlanner.class);
-    APIManagerConfiguration configuration;
-    String nonProxyHosts;
+    private final HttpClientConfigurationDTO configuration;
+    String[] nonProxyHosts;
     String proxyHost;
-    String proxyPort;
+    int proxyPort;
     String protocol;
 
-    public ExtendedProxyRoutePlanner(HttpHost host, APIManagerConfiguration configuration) {
+    public ExtendedProxyRoutePlanner(HttpHost host, HttpClientConfigurationDTO configuration) {
         super(host);
         this.configuration = configuration;
-        this.nonProxyHosts = configuration.getFirstProperty(APIConstants.NON_PROXY_HOSTS);
-        this.proxyHost = configuration.getFirstProperty(APIConstants.PROXY_HOST);
-        this.proxyPort = configuration.getFirstProperty(APIConstants.PROXY_PORT);
-        this.protocol = configuration.getFirstProperty(APIConstants.PROXY_PROTOCOL);
+        this.nonProxyHosts = configuration.getNonProxyHosts();
+        this.proxyHost = configuration.getProxyHost();
+        this.proxyPort = configuration.getProxyPort();
+        this.protocol = configuration.getProxyProtocol();
     }
 
     private HttpHost getProxy(String scheme) {
         log.debug("Get proxy for scheme: " + scheme);
-        String proto = scheme;
 
         String protoProxyHost = proxyHost;
         if (protoProxyHost == null) {
             return null;
         }
-        String proxyPortStr = proxyPort;
-        if (proxyPortStr == null) {
-            return null;
-        }
-        int protoProxyPort = -1;
-        if (proxyPortStr != null) {
-            try {
-                protoProxyPort = Integer.valueOf(proxyPortStr);
-            } catch (NumberFormatException nfe) {
-                log.warn("invalid proxy port: " + proxyPortStr + ". proxy will be ignored");
-                return null;
-            }
-        }
+
+        int protoProxyPort = proxyPort;
         if (protoProxyPort < 1) {
             return null;
         }
-        log.debug("set " + proto + " proxy '" + protoProxyHost + ":" + protoProxyPort + "'");
+        log.debug("set " + scheme + " proxy '" + protoProxyHost + ":" + protoProxyPort + "'");
         return new HttpHost(protoProxyHost, protoProxyPort, scheme);
-    }
-
-    private String[] getNonProxyHosts() {
-        String nonProxyHosts = this.nonProxyHosts;
-        if (nonProxyHosts == null) {
-            return null;
-        }
-        return nonProxyHosts.split("\\|");
     }
 
     private boolean doesTargetMatchNonProxy(HttpHost target) {
         String uriHost = target.getHostName();
         String uriScheme = target.getSchemeName();
-        String[] nonProxyHosts = getNonProxyHosts();
+        String[] nonProxyHosts = configuration.getNonProxyHosts();
         int nphLength = nonProxyHosts != null ? nonProxyHosts.length : 0;
         if (nonProxyHosts == null || nphLength < 1) {
-            log.debug("sheme:'" + uriScheme + "', host:'" + uriHost + "' : DEFAULT (0 non proxy host)");
+            log.debug("scheme:'" + uriScheme + "', host:'" + uriHost + "' : DEFAULT (0 non proxy host)");
             return false;
         }
         for (String nonProxyHost : nonProxyHosts) {
             if (uriHost.matches(nonProxyHost)) {
-                log.debug("sheme:'" + uriScheme + "', host:'" + uriHost + "' matches nonProxyHost '" + nonProxyHost + "' : NO PROXY");
+                log.debug("scheme:'" + uriScheme + "', host:'" + uriHost + "' matches nonProxyHost '" +
+                        nonProxyHost + "' : NO PROXY");
                 return true;
             }
         }
-        log.debug("sheme:'" + uriScheme + "', host:'" + uriHost + "' : DEFAULT  (no match of " + nphLength + " non proxy host)");
+        log.debug("scheme:'" + uriScheme + "', host:'" + uriHost + "' : DEFAULT  (no match of " + nphLength +
+                " non proxy host)");
         return false;
     }
 
     @Override
-    protected HttpHost determineProxy(HttpHost target, final HttpRequest request, final HttpContext context)
-            throws HttpException {
+    protected HttpHost determineProxy(HttpHost target, final HttpRequest request, final HttpContext context) {
 
         if (doesTargetMatchNonProxy(target)) {
             return null;

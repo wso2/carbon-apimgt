@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.common.gateway.exception;
 
 /**
- * This error handler interface must use in all exceptions class, for example please see APIManagementException class.
+ * This error handler interface must use in all exceptions class, for example please see CommonGatewayException class.
  */
 public interface ErrorHandler {
     /**
