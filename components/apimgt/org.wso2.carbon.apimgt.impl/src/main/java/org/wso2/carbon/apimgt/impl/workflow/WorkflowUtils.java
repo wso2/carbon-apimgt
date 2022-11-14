@@ -151,7 +151,7 @@ public class WorkflowUtils {
             }
             APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), apiStateWFDto.getTenantId(),
-                    orgId, apiStateWFDto.getMetadata("ApiName"),
+                    (orgId != null) ? orgId:apiStateWFDto.getTenantDomain(), apiStateWFDto.getMetadata("ApiName"),
                     Integer.parseInt(apiStateWFDto.getWorkflowReference()), apiStateWFDto.getApiUUID(),
                     apiStateWFDto.getMetadata("ApiVersion"),
                     apiStateWFDto.getApiType(), apiStateWFDto.getMetadata( "ApiContext"),
