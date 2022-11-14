@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.27.1-SNAPSHOT</version>
+        <version>9.27.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -71,6 +71,15 @@
             <artifactId>log4j-slf4j-impl</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-netty</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -102,6 +111,8 @@
                             org.wso2.am.analytics.publisher.*;version="${analytics.event.publisher.client.version.range}",
                             graphql.*; version="${graphql.java.version}",
                             org.json.simple.*,
+                            org.apache.commons.*,
+                            org.apache.http.*,
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>

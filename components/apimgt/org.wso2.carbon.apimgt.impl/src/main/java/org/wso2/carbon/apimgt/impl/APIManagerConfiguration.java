@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
@@ -47,6 +48,7 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.monetization.MonetizationConfigurationDto;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
@@ -103,6 +105,8 @@ public class APIManagerConfiguration {
     private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
     private JSONArray applicationAttributes = new JSONArray();
     private CacheInvalidationConfiguration cacheInvalidationConfiguration;
+
+    private HttpClientConfigurationDTO httpClientConfiguration;
 
     private RecommendationEnvironment recommendationEnvironment;
 
@@ -2149,5 +2153,13 @@ public class APIManagerConfiguration {
 
     public Map<String, Environment> getGatewayEnvironments() {
         return apiGatewayEnvironments;
+    }
+
+    public HttpClientConfigurationDTO getHttpClientConfiguration() {
+        return httpClientConfiguration;
+    }
+
+    public void setHttpClientConfiguration(HttpClientConfigurationDTO httpClientConfiguration) {
+        this.httpClientConfiguration = httpClientConfiguration;
     }
 }
