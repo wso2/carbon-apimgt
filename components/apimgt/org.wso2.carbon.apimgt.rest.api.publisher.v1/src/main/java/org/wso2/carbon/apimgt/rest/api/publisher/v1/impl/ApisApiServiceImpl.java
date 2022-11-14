@@ -778,13 +778,22 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate if api exists
             validateAPIExistence(apiId);
 
+            //validate if api name exists
+            APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+            boolean apiNameExists = apiProvider.isApiNameExist(body.getName(), organization) ||
+                    apiProvider.isApiNameWithDifferentCaseExist(body.getName(), organization);
+            if (apiNameExists) {
+                throw new APIManagementException(
+                        "Error occurred while updating the API name. API with name " + body.getName() + " already exists.",
+                        ExceptionCodes.from(ExceptionCodes.API_NAME_ALREADY_EXISTS, body.getName()));
+            }
+
             // validate sandbox and production endpoints
             if (!PublisherCommonUtils.validateEndpoints(body)) {
                 throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
                         ExceptionCodes.INVALID_ENDPOINT_URL);
             }
 
-            APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
             originalAPI.setOrganization(organization);
             //validate API update operation permitted based on the LC state
