@@ -60,7 +60,7 @@ public class ServerStartupListener implements ServerStartupObserver {
                 tokenIssuerDtoMap.forEach((issuer, tokenIssuer) -> KeyManagerHolder.addGlobalJWTValidators(tokenIssuer));
             }
         } else {
-            log.info("Stopped at ServerStartupListener completed!");
+            log.info("Running on migration enabled mode: Stopped at ServerStartupListener completed");
         }
     }
 

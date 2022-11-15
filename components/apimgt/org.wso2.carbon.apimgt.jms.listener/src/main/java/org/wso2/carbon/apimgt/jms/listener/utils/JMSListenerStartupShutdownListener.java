@@ -71,7 +71,7 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
                 }
             }
         } else {
-            log.info("Stopped at JMSListenerStartupShutdownListener completed!");
+            log.info("Running on migration enabled mode: Stopped at JMSListenerStartupShutdownListener completed");
         }
     }
 

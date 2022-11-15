@@ -118,7 +118,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             SubscriptionDataHolder.getInstance().initializeSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             cleanDeployment(CarbonUtils.getCarbonRepository());
         } else {
-            log.info("Stopped at gateway startup listener completing!");
+            log.info("Running on migration enabled mode: Stopped at gateway startup listener completing");
         }
     }
 
@@ -191,7 +191,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             copyTenantArtifacts();
             APILoggerManager.getInstance().initializeAPILoggerList();
         } else {
-            log.info("Stopped at Gateway Startup listener completed!");
+            log.info("Running on migration enabled mode: Stopped at Gateway Startup listener completed");
         }
     }
 
