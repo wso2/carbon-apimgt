@@ -8617,6 +8617,26 @@ components:
               example: false
         advertiseInfo:
           $ref: '#/components/schemas/AdvertiseInfo'
+        gatewayVendor:
+          title: field to identify gateway vendor
+          type: string
+          example:
+            wso2
+        gatewayType:
+          title: Field to identify gateway type.
+          type: string
+          description: The gateway type selected for the API policies. Accepts one of the
+            following. wso2/synapse, wso2/choreo-connect.
+          example: wso2/synapse
+        asyncTransportProtocols:
+          type: array
+          description: |
+            Supported transports for the async API (http and/or https).
+          example:
+            - http
+            - https
+          items:
+            type: string
       x-scopes:
         - apim:api_create
         - apim:api_import_export
@@ -10308,6 +10328,8 @@ components:
         uriMapping:
           type: string
           example: ""
+        operationPolicies:
+          $ref: '#/components/schemas/APIOperationPolicies'
     ScopeList:
       title: Scope List
       type: object
@@ -11138,6 +11160,12 @@ components:
         advertised:
           type: boolean
           example: true
+        apiExternalProductionEndpoint:
+          type: string
+          example: https://localhost:9443/devportal
+        apiExternalSandboxEndpoint:
+          type: string
+          example: https://localhost:9443/devportal
         originalDevPortalUrl:
           type: string
           example: https://localhost:9443/devportal
@@ -11295,6 +11323,38 @@ components:
             For example, list out validation error by each field.
           items:
             $ref: '#/components/schemas/ErrorListItem'
+    OperationPolicy:
+      title: API Operation Policy
+      type: object
+      required:
+        - policyName
+      properties:
+        policyName:
+          type: string
+        policyVersion:
+          type: string
+          default: v1
+        policyId:
+          type: string
+        parameters:
+          type: object
+          additionalProperties:
+            type: object
+    APIOperationPolicies:
+      title: API Operation Level Policies
+      properties:
+        request:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
+        response:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
+        fault:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
