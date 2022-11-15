@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.SystemScopeUtils;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.application.common.model.*;
@@ -700,21 +701,24 @@ public class SystemScopesIssuer implements ScopeValidator {
 
         //Get all the scopes and roles against the scopes defined for the APIs subscribed to the application.
         Map<String, String> appScopes = new HashMap<>();
-        String tenantDomain = null;
-        try {
-            tenantDomain = getAppInformationByClientId(consumerKey).getAppOwner().getTenantDomain();
-        } catch (InvalidOAuthClientException | IdentityOAuth2Exception e) {
-            log.error("Error when retrieving the tenant domain " + e.getMessage(), e);
-        }
+        boolean isTenantFlowStarted = false;
+        String tenantDomain = authenticatedUser.getTenantDomain();
         //Add API Manager rest API scopes set. This list should be loaded at server start up and keep
         //in memory and add it to each and every request coming.
         try {
+            isTenantFlowStarted = true;
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             Map<String, String> restAPIScopes = SystemScopeUtils.getRESTAPIScopesForTenant(tenantDomain);
             if (!restAPIScopes.isEmpty()) {
                 appScopes.putAll(restAPIScopes);
             }
         } catch (APIManagementException e) {
             log.error("Error while getting scopes of application " + e.getMessage(), e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return appScopes;
     }
