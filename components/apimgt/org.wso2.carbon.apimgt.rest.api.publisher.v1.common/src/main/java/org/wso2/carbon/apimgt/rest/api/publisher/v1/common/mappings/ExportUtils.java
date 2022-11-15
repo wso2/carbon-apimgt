@@ -885,7 +885,7 @@ public class ExportUtils {
             } else {
                 apiTenantDomain = getTenantDomain(apiIdentifier);
                 api.setOrganization(apiTenantDomain);
-            }            api.setId(apiIdentifier);
+            }
             api.setId(apiIdentifier);
             if (!PublisherCommonUtils.isStreamingAPI(apiDtoToReturn)) {
                 // For Graphql APIs, the graphql schema definition should be exported.
