@@ -62,7 +62,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.stream.Stream;
+import java.util.List;
 
 /**
  * Class for loading synapse artifacts to memory on initial server startup
@@ -223,9 +223,8 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     private void copyTenantArtifacts() {
 
         Path directory = Paths.get(tenantsRootPath);
-
-        try (Stream<Path> files = Files.walk(directory, 1)) {
-            files.filter(entry -> !entry.equals(directory))
+        try {
+            Files.walk(directory, 1).filter(entry -> !entry.equals(directory))
                     .filter(Files::isDirectory).forEach(subdirectory ->
             {
                 try {
