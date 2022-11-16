@@ -4529,6 +4529,9 @@ definitions:
       owner:
         type: string
         example: admin
+      tokenType:
+        type: string
+        example: JWT
 
   #-----------------------------------------------------
   # The Document List resource

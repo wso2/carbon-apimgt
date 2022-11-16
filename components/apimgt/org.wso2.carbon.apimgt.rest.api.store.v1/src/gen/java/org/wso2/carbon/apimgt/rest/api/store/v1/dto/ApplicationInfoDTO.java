@@ -33,6 +33,7 @@ public class ApplicationInfoDTO   {
     private String owner = null;
     private String createdTime = null;
     private String updatedTime = null;
+    private String tokenType = null;
 
   /**
    **/
@@ -190,6 +191,23 @@ public class ApplicationInfoDTO   {
 
   /**
    **/
+  public ApplicationInfoDTO tokenType(String tokenType) {
+    this.tokenType = tokenType;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "JWT", value = "")
+  @JsonProperty("tokenType")
+  public String getTokenType() {
+    return tokenType;
+  }
+  public void setTokenType(String tokenType) {
+    this.tokenType = tokenType;
+  }
+
+  /**
+   **/
   public ApplicationInfoDTO createdTime(String createdTime) {
     this.createdTime = createdTime;
     return this;
@@ -241,13 +259,14 @@ public class ApplicationInfoDTO   {
         Objects.equals(subscriptionCount, applicationInfo.subscriptionCount) &&
         Objects.equals(attributes, applicationInfo.attributes) &&
         Objects.equals(owner, applicationInfo.owner) &&
+        Objects.equals(tokenType, applicationInfo.tokenType) &&
         Objects.equals(createdTime, applicationInfo.createdTime) &&
         Objects.equals(updatedTime, applicationInfo.updatedTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, throttlingPolicy, description, status, groups, subscriptionCount, attributes, owner, createdTime, updatedTime);
+    return Objects.hash(applicationId, name, throttlingPolicy, description, status, groups, subscriptionCount, attributes, owner, tokenType, createdTime, updatedTime);
   }
 
   @Override
@@ -264,6 +283,7 @@ public class ApplicationInfoDTO   {
     sb.append("    subscriptionCount: ").append(toIndentedString(subscriptionCount)).append("\n");
     sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
     sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
+    sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
     sb.append("}");
