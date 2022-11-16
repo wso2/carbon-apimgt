@@ -2,9 +2,9 @@
 
 ## About this repository
 
-|  Branch | Build Status(Jenkins) | Build Status(TravisCI) |
-| :------------ |:------------- |:-------------
-| master      | [![Build Status](https://wso2.org/jenkins/job/platform-builds/job/carbon-apimgt/badge/icon)](https://wso2.org/jenkins/view/platform/job/platform-builds/job/carbon-apimgt/) | [![Build Status](https://api.travis-ci.org/wso2/carbon-apimgt.svg?branch=master)](https://travis-ci.org/wso2/carbon-apimgt) |
+|  Branch | Build Status(Jenkins) |
+| :------------ |:------------- |
+| 9.22.x      | [![Build Status](https://wso2.org/jenkins/view/platform/job/platform-builds/job/carbon-apimgt_9.22.x/badge/icon)](https://wso2.org/jenkins/view/platform/job/platform-builds/job/carbon-apimgt_9.22.x/) |
 
 ## Building from the source
 
