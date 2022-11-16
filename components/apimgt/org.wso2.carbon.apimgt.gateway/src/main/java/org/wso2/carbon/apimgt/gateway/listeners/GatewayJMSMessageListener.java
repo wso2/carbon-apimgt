@@ -247,7 +247,8 @@ public class GatewayJMSMessageListener implements MessageListener {
             ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().deleteScope(event);
         } else if (EventType.POLICY_CREATE.toString().equals(eventType) ||
-                EventType.POLICY_DELETE.toString().equals(eventType)) {
+            EventType.POLICY_DELETE.toString().equals(eventType) ||
+            EventType.POLICY_UPDATE.toString().equals(eventType)) {
             PolicyEvent event = new Gson().fromJson(eventJson, PolicyEvent.class);
             boolean updatePolicy = false;
             boolean deletePolicy = false;
