@@ -3379,11 +3379,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             VHost vhost = VHostUtils.getVhostFromEnvironment(environment, host);
             if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)
-                    && vhost.getHttpPort() != null) {
+                    && vhost.getHttpPort() != -1) {
                 hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, vhost.getHttpUrl());
             }
             if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)
-                    && vhost.getHttpsPort() != null) {
+                    && vhost.getHttpsPort() != -1) {
                 hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, vhost.getHttpsUrl());
             }
         }
