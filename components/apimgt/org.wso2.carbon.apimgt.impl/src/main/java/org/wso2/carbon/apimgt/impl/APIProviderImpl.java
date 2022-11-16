@@ -5302,7 +5302,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
         }
         apiRevision.setRevisionUUID(revisionUUID);
-        apiMgtDAO.addAPIRevision(apiRevision);
+        apiMgtDAO.addAPIRevision(apiRevision, organization);
         if (importExportAPI != null) {
             try {
                 File artifact = importExportAPI

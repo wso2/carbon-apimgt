@@ -16144,10 +16144,11 @@ public class ApiMgtDAO {
     /**
      * Adds an API revision record to the database
      *
-     * @param apiRevision content of the revision
+     * @param apiRevision  content of the revision
+     * @param organization organization ID
      * @throws APIManagementException if an error occurs when adding a new API revision
      */
-    public void addAPIRevision(APIRevision apiRevision) throws APIManagementException {
+    public void addAPIRevision(APIRevision apiRevision, String organization) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
@@ -16167,7 +16168,6 @@ public class ApiMgtDAO {
                 APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
                 int apiId = getAPIID(apiRevision.getApiUUID(), connection);
                 int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
-                String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
 
                 // Adding to AM_API_URL_MAPPING table
                 PreparedStatement getURLMappingsStatement = connection
@@ -16284,7 +16284,7 @@ public class ApiMgtDAO {
                                         // Since we are creating a new revision, if the policy is not found in the policy map,
                                         // we have to clone the policy.
                                         String clonedPolicyId = revisionOperationPolicy(connection, policy.getPolicyId(),
-                                                apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), tenantDomain);
+                                                apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), organization);
 
                                         // policy ID is stored in a map as same policy can be applied to multiple operations
                                         // and we only need to create the policy once.
