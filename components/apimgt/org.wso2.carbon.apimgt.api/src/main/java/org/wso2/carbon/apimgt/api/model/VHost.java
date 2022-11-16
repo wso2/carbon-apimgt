@@ -29,15 +29,15 @@ import java.net.URL;
 public class VHost {
     private String host;
     private String httpContext = "";
-    private Integer httpPort = DEFAULT_HTTP_PORT;
-    private Integer httpsPort = DEFAULT_HTTPS_PORT;
+    private Integer httpPort = -1;
+    private Integer httpsPort = -1;
     private Integer wsPort = DEFAULT_WS_PORT;
     private Integer wssPort = DEFAULT_WSS_PORT;
     private Integer websubHttpPort = DEFAULT_WEBSUB_HTTP_PORT;
     private Integer websubHttpsPort = DEFAULT_WEBSUB_HTTPS_PORT;
 
-    public static Integer DEFAULT_HTTP_PORT;
-    public static Integer DEFAULT_HTTPS_PORT;
+    public static final int DEFAULT_HTTP_PORT = 80;
+    public static final int DEFAULT_HTTPS_PORT = 443;
     public static final int DEFAULT_WS_PORT = 9099;
     public static final int DEFAULT_WSS_PORT = 8099;
     public static final int DEFAULT_WEBSUB_HTTP_PORT = 9021;
