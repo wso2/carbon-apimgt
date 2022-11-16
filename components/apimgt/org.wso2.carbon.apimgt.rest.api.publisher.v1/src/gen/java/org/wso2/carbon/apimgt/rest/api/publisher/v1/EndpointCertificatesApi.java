@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificatesDTO;
@@ -85,7 +85,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
     @Path("/{alias}/usage")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve all the APIs that use a given certificate by the alias", notes = "This operation can be used to retrieve/identify apis that use a known certificate. ", response = APIListDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve all the APIs that use a given certificate by the alias", notes = "This operation can be used to retrieve/identify apis that use a known certificate. ", response = APIMetadataListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
@@ -94,7 +94,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         })
     }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. List of qualifying APIs is returned. ", response = APIListDTO.class),
+        @ApiResponse(code = 200, message = "OK. List of qualifying APIs is returned. ", response = APIMetadataListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })

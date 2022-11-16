@@ -41,7 +41,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get the subscription information of an api by providing the api uuid.", notes = "This operation is used to get the subscription information of an API from storage. If the Tenant domain is not provided carbon.super will be picked as the Tenant domain. ", response = APIInfoDTO.class, tags={ "Get API Info",  })
+    @ApiOperation(value = "Get the subscription information of an API by providing the API uuid.", notes = "This operation is used to get the subscription information of an API from storage. If the Tenant domain is not provided carbon.super will be picked as the Tenant domain. ", response = APIInfoDTO.class, tags={ "Get API Info",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. APIS successfully retrieved from the storage for the API. ", response = APIInfoDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),

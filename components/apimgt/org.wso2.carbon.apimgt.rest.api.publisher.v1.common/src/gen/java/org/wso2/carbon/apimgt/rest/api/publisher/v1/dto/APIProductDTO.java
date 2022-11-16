@@ -342,7 +342,7 @@ return null;
   }
 
   /**
-   * State of the API product. Only published api products are visible on the Developer Portal 
+   * State of the API product. Only published API products are visible on the Developer Portal 
    **/
   public APIProductDTO state(StateEnum state) {
     this.state = state;
@@ -350,7 +350,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "State of the API product. Only published api products are visible on the Developer Portal ")
+  @ApiModelProperty(value = "State of the API product. Only published API products are visible on the Developer Portal ")
   @JsonProperty("state")
   public StateEnum getState() {
     return state;

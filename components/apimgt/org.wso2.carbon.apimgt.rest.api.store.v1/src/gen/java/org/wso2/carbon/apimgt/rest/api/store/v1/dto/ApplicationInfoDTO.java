@@ -31,9 +31,9 @@ public class ApplicationInfoDTO   {
     private Integer subscriptionCount = null;
     private Object attributes = null;
     private String owner = null;
+    private String tokenType = null;
     private String createdTime = null;
     private String updatedTime = null;
-    private String tokenType = null;
 
   /**
    **/
@@ -196,7 +196,7 @@ public class ApplicationInfoDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "JWT", value = "")
   @JsonProperty("tokenType")
   public String getTokenType() {
