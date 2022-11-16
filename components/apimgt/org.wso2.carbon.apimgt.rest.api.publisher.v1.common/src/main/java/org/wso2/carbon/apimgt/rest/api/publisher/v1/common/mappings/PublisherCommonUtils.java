@@ -217,6 +217,17 @@ public class PublisherCommonUtils {
         //API Name change not allowed if OnPrem
         if (APIUtil.isOnPremResolver()) {
             apiDtoToUpdate.setName(apiIdentifier.getApiName());
+        } else if (!originalAPI.getId().getApiName().equals(apiDtoToUpdate.getName())) {
+            boolean apiNameExists =
+                    apiProvider.isApiNameExist(apiDtoToUpdate.getName(), originalAPI.getOrganization()) ||
+                            apiProvider.isApiNameWithDifferentCaseExist(apiDtoToUpdate.getName(),
+                                    originalAPI.getOrganization());
+            if (apiNameExists) {
+                throw new APIManagementException(
+                        "Error occurred while updating the API name. API with name " + apiDtoToUpdate.getName() +
+                                " already exists.",
+                        ExceptionCodes.from(ExceptionCodes.API_NAME_ALREADY_EXISTS, apiDtoToUpdate.getName()));
+            }
         }
         apiDtoToUpdate.setVersion(apiIdentifier.getVersion());
         apiDtoToUpdate.setProvider(apiIdentifier.getProviderName());
