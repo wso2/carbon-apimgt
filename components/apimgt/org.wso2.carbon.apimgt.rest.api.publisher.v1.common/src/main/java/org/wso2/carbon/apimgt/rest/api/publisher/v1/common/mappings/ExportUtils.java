@@ -189,7 +189,7 @@ public class ExportUtils {
 
         CommonUtil.createDirectory(archivePath);
         if (preserveDocs) {
-            addThumbnailToArchive(archivePath, apiIdentifier, apiProvider);
+            addThumbnailToArchive(archivePath, apiIdentifier, apiProvider, organization);
             addDocumentationToArchive(archivePath, apiIdentifier, exportFormat, apiProvider,
                     APIConstants.API_IDENTIFIER_TYPE);
         } else {
@@ -279,7 +279,7 @@ public class ExportUtils {
         CommonUtil.createDirectory(archivePath);
 
         if (preserveDocs) {
-            addThumbnailToArchive(archivePath, apiProductIdentifier, apiProvider);
+            addThumbnailToArchive(archivePath, apiProductIdentifier, apiProvider, organization);
             addDocumentationToArchive(archivePath, apiProductIdentifier, exportFormat, apiProvider,
                     APIConstants.API_PRODUCT_IDENTIFIER_TYPE);
         }
@@ -314,12 +314,20 @@ public class ExportUtils {
      * @throws APIImportExportException If an error occurs while retrieving image from the registry or
      *                                  storing in the archive directory
      */
-    public static void addThumbnailToArchive(String archivePath, Identifier identifier, APIProvider apiProvider)
+    public static void addThumbnailToArchive(String archivePath, Identifier identifier, APIProvider apiProvider,
+                                             String organization)
             throws APIImportExportException, APIManagementException {
 
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String localImagePath = archivePath + File.separator + ImportExportConstants.IMAGE_RESOURCE;
         try {
-            ResourceFile thumbnailResource = apiProvider.getIcon(identifier.getUUID(), identifier.getOrganization());
+
+            ResourceFile thumbnailResource;
+            if (StringUtils.isNotEmpty(organization)) {
+                thumbnailResource = apiProvider.getIcon(identifier.getUUID(), organization);
+            } else {
+                thumbnailResource = apiProvider.getIcon(identifier.getUUID(), tenantDomain);
+            }
             if (thumbnailResource != null) {
                 String mediaType = thumbnailResource.getContentType();
                 String extension = ImportExportConstants.fileExtensionMapping.get(mediaType);
