@@ -4,7 +4,7 @@
 
 |  Branch | Build Status(Jenkins) |
 | :------------ |:------------- |
-| 9.22.x      | [![Build Status](https://wso2.org/jenkins/view/platform/job/platform-builds/job/carbon-apimgt_9.22.x/badge/icon)](https://wso2.org/jenkins/view/platform/job/platform-builds/job/carbon-apimgt_9.22.x/) |
+| 9.22.50.x      | [![Build Status](https://wso2.org/jenkins/job/platform-builds/job/carbon-apimgt_9.22.50.x/badge/icon)](https://wso2.org/jenkins/job/platform-builds/job/carbon-apimgt_9.22.50.x/) |
 
 ## Building from the source
 
