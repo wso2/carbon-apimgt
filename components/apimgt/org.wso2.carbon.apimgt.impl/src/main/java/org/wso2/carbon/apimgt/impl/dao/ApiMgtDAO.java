@@ -18435,10 +18435,9 @@ public class ApiMgtDAO {
             throws SQLException {
 
         OperationPolicySpecification policySpecification = policyData.getSpecification();
-        String toBeClonedPolicyId = policyData.getClonedCommonPolicyId();
         String dbQuery = SQLConstants.OperationPolicyConstants.ADD_OPERATION_POLICY;
-        String policyUUID = toBeClonedPolicyId;
-        if (toBeClonedPolicyId == null) {
+        String policyUUID = policyData.getClonedCommonPolicyId();;
+        if (policyUUID == null) {
             policyUUID = UUID.randomUUID().toString();
         }
 
