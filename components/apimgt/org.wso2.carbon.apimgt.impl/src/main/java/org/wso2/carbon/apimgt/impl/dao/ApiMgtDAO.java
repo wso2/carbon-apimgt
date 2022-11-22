@@ -4150,6 +4150,7 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setIsBlackListed(rs.getBoolean("ENABLED"));
                 application.setOwner(rs.getString("CREATED_BY"));
+                application.setTokenType(rs.getString("TOKEN_TYPE"));
                 application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("APP_UPDATED_TIME").getTime()));
                 application.setCreatedTime(String.valueOf(rs.getTimestamp("APP_CREATED_TIME").getTime()));
 

@@ -1,13 +1,20 @@
 package org.wso2.carbon.apimgt.internal.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.internal.service.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ScopeDTO;
+import javax.validation.constraints.*;
 
 
 import io.swagger.annotations.*;
 import java.util.Objects;
 
+import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 

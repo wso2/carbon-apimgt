@@ -53,7 +53,7 @@ public class SearchResultListDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[{\"id\":\"abcff4cf-24c5-4298-a7b4-39a1fbd34693\",\"name\":\"PizzaShackAPI\",\"type\":\"API\",\"transportType\":null,\"description\":null,\"context\":\"/pizzashack\",\"version\":\"1.0.0\",\"provider\":\"admin\",\"status\":\"PUBLISHED\",\"thumbnailUri\":null,\"businessInformation\":{\"businessOwner\":\"Jane Roe\",\"businessOwnerEmail\":\"businessowner@wso2.com\",\"technicalOwner\":\"John Doe\",\"technicalOwnerEmail\":\"technicalowner@wso2.com\"},\"avgRating\":\"4.0\"}]", value = "")
   @JsonProperty("list")
   public List<Object> getList() {
     return list;
