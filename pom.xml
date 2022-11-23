@@ -1880,6 +1880,11 @@
                 </exclusions>
             </dependency>
             <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-httpclient</artifactId>
+                <version>${openfeign.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>commons-logging</groupId>
                 <artifactId>commons-logging</artifactId>
                 <version>${commons-logging.version}</version>
