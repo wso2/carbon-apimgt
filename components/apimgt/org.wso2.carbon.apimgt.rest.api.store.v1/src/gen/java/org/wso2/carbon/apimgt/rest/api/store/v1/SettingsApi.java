@@ -58,7 +58,7 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retreive Developer Portal settings", notes = "Retreive Developer Portal Settings ", response = SettingsDTO.class, authorizations = {
+    @ApiOperation(value = "Retreive Developer Portal settings", notes = "Retreive Developer Portal settings ", response = SettingsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:store_settings", description = "Retrieve Developer Portal settings")
         })

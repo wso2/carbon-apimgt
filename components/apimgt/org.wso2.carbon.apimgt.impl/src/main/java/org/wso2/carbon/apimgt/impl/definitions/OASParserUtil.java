@@ -35,7 +35,9 @@ import io.swagger.models.Swagger;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
+import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Yaml;
+import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
@@ -138,6 +140,8 @@ public class OASParserUtil {
     private static final String REF_PREFIX = "#/components/";
     private static final String ARRAY_DATA_TYPE = "array";
     private static final String OBJECT_DATA_TYPE = "object";
+    private static final String OPENAPI_RESOURCE_KEY = "paths";
+    private static final String[] UNSUPPORTED_RESOURCE_BLOCKS = new String[]{"servers"};
 
     static class SwaggerUpdateContext {
         private final Paths paths = new Paths();
@@ -874,6 +878,19 @@ public class OASParserUtil {
      */
     public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
             throws APIManagementException {
+        String apiDefinitionProcessed = apiDefinition;
+        if (!apiDefinition.trim().startsWith("{")) {
+            try {
+                JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition, new SwaggerDeserializationResult());
+                apiDefinitionProcessed = jsonNode.toString();
+            } catch (IOException e) {
+                throw new APIManagementException("Error while reading API definition yaml", e);
+            }
+        }
+        apiDefinitionProcessed = removeUnsupportedBlocksFromResources(apiDefinitionProcessed);
+        if (apiDefinitionProcessed != null) {
+            apiDefinition = apiDefinitionProcessed;
+        }
         APIDefinitionValidationResponse validationResponse =
                 oas3Parser.validateAPIDefinition(apiDefinition, returnJsonContent);
         if (!validationResponse.isValid()) {
@@ -898,6 +915,19 @@ public class OASParserUtil {
     public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url ,
                                                                         boolean returnJsonContent)
             throws APIManagementException {
+        String apiDefinitionProcessed = apiDefinition;
+        if (!apiDefinition.trim().startsWith("{")) {
+            try {
+                JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition, new SwaggerDeserializationResult());
+                apiDefinitionProcessed = jsonNode.toString();
+            } catch (IOException e) {
+                throw new APIManagementException("Error while reading API definition yaml", e);
+            }
+        }
+        apiDefinitionProcessed = removeUnsupportedBlocksFromResources(apiDefinitionProcessed);
+        if (apiDefinitionProcessed != null) {
+            apiDefinition = apiDefinitionProcessed;
+        }
         APIDefinitionValidationResponse validationResponse =
                 oas3Parser.validateAPIDefinition(apiDefinition, url, returnJsonContent);
         if (!validationResponse.isValid()) {
@@ -1023,6 +1053,19 @@ public class OASParserUtil {
 
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
                 String responseStr = EntityUtils.toString(response.getEntity(), "UTF-8");
+                String responseStrProcessed = responseStr;
+                if (!responseStr.trim().startsWith("{")) {
+                    try {
+                        JsonNode jsonNode = DeserializationUtils.readYamlTree(responseStr, new SwaggerDeserializationResult());
+                        responseStrProcessed = jsonNode.toString();
+                    } catch (IOException e) {
+                        throw new APIManagementException("Error while reading API definition yaml", e);
+                    }
+                }
+                responseStrProcessed = removeUnsupportedBlocksFromResources(responseStrProcessed);
+                if (responseStrProcessed != null) {
+                    responseStr = responseStrProcessed;
+                }
                 validationResponse = validateAPIDefinition(responseStr, host, returnJsonContent);
             } else {
                 validationResponse.setValid(false);
@@ -1670,4 +1713,60 @@ public class OASParserUtil {
         }
     }
 
+    /**
+     * This method removes the unsupported json blocks from the given json string.
+     *
+     * @param jsonString Open api specification from which unsupported blocks must be removed.
+     * @return String open api specification without unsupported blocks. Null value if there is no unsupported blocks.
+     */
+    public static String removeUnsupportedBlocksFromResources(String jsonString) {
+        JSONObject jsonObject = new JSONObject(jsonString);
+        boolean definitionUpdated = false;
+        if (jsonObject.has(OPENAPI_RESOURCE_KEY)) {
+            JSONObject paths = jsonObject.optJSONObject(OPENAPI_RESOURCE_KEY);
+            if (paths != null ) {
+                for (String unsupportedBlockKey : UNSUPPORTED_RESOURCE_BLOCKS) {
+                    boolean result = removeBlocksRecursivelyFromJsonObject(unsupportedBlockKey, paths, false);
+                    definitionUpdated = definitionUpdated  || result;
+                }
+            }
+        }
+        if (definitionUpdated) {
+            ObjectMapper om = new ObjectMapper();
+            om.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+            try {
+                Map<String, Object> map = om.readValue(jsonObject.toString(), HashMap.class);
+                String json = om.writeValueAsString(map);
+                return json;
+            } catch (JsonProcessingException e) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * This method removes provided key from the json object recursively.
+     *
+     * @param keyToBeRemoved, Key to remove from open api spec.
+     * @param jsonObject, Open api spec as json object.
+     */
+    private static boolean removeBlocksRecursivelyFromJsonObject(String keyToBeRemoved, JSONObject jsonObject, boolean definitionUpdated) {
+        if (jsonObject == null) {
+            return definitionUpdated;
+        }
+        if (jsonObject.has(keyToBeRemoved)) {
+            jsonObject.remove(keyToBeRemoved);
+            definitionUpdated = true;
+        }
+        for (Object key : jsonObject.keySet()) {
+            JSONObject subObj = jsonObject.optJSONObject(key.toString());
+            if (subObj != null) {
+                boolean result = removeBlocksRecursivelyFromJsonObject(keyToBeRemoved, subObj, definitionUpdated);
+                definitionUpdated = definitionUpdated || result;
+            }
+        }
+        return definitionUpdated;
+    }
 }

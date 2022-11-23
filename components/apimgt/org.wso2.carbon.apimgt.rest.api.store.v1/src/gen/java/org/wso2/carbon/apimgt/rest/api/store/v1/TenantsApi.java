@@ -40,7 +40,7 @@ TenantsApiService delegate = new TenantsApiServiceImpl();
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get Tenants by State ", notes = "This operation is to get tenants by state ", response = TenantListDTO.class, authorizations = {
+    @ApiOperation(value = "Get Tenants by State ", notes = "This operation is used to get tenants by state ", response = TenantListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
