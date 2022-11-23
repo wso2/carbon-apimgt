@@ -104,9 +104,10 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
       @Valid
   @JsonProperty("monetization")
+  @NotNull
   public MonetizationInfoDTO getMonetization() {
     return monetization;
   }
@@ -123,8 +124,9 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(example = "10", value = "Burst control request count")
+  @ApiModelProperty(example = "10", required = true, value = "Burst control request count")
   @JsonProperty("rateLimitCount")
+  @NotNull
   public Integer getRateLimitCount() {
     return rateLimitCount;
   }
@@ -141,8 +143,9 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(example = "min", value = "Burst control time unit")
+  @ApiModelProperty(example = "min", required = true, value = "Burst control time unit")
   @JsonProperty("rateLimitTimeUnit")
+  @NotNull
   public String getRateLimitTimeUnit() {
     return rateLimitTimeUnit;
   }
@@ -159,8 +162,9 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(example = "10", value = "Number of subscriptions allowed")
+  @ApiModelProperty(example = "10", required = true, value = "Number of subscriptions allowed")
   @JsonProperty("subscriberCount")
+  @NotNull
   public Integer getSubscriberCount() {
     return subscriberCount;
   }
@@ -214,8 +218,9 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(example = "FREE", value = "define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL. ")
+  @ApiModelProperty(example = "FREE", required = true, value = "define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL. ")
   @JsonProperty("billingPlan")
+  @NotNull
   public String getBillingPlan() {
     return billingPlan;
   }
