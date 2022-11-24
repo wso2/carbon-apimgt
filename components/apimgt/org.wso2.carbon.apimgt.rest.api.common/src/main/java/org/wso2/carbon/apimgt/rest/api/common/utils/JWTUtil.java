@@ -70,6 +70,10 @@ public class JWTUtil {
         String scopeClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim(APIConstants.JwtTokenConstants.SCOPE);
         if (scopeClaim != null) {
             String orgId = (String) message.get(RestApiConstants.ORG_ID);
+            if (orgId == null) {
+                log.error("Organization is not present in the request");
+                return false;
+            }
             String[] scopes = scopeClaim.split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER);
             scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
                     .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
@@ -77,14 +81,12 @@ public class JWTUtil {
             oauthTokenInfo.setScopes(scopes);
             // check whether organization claim value and orgId matches
             JSONObject orgClaim = signedJWTInfo.getJwtClaimsSet().getJSONObjectClaim("organization");
-            String orgUuid = orgClaim.getAsString("uuid");
-            if (orgId == null) {
-                log.error("Organization is not present in the request");
-                return false;
-            }
-            if (orgUuid != null && (!orgId.equals(orgUuid))) {
-                log.error(String.format("Requested OrgId (%s) and the token's organization uuid (%s) mismatch!", orgId, orgUuid));
-                return false;
+            if (orgClaim != null) {
+                String orgUuid = orgClaim.getAsString(APIConstants.JwtTokenConstants.UUID);
+                if (orgUuid != null && (!orgId.equals(orgUuid))) {
+                    log.error(String.format("Requested OrgId (%s) and the token's organization uuid (%s) mismatch!", orgId, orgUuid));
+                    return false;
+                }
             }
             if (validateScopes(message, oauthTokenInfo)) {
                 //Add the user scopes list extracted from token to the cxf message
