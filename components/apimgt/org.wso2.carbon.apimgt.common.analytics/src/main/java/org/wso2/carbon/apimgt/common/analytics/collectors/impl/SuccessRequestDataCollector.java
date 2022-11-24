@@ -71,6 +71,7 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
         Latencies latencies = provider.getLatencies();
         MetaInfo metaInfo = provider.getMetaInfo();
         String userAgent = provider.getUserAgentHeader();
+        String userName = provider.getUserName();
         String userIp = provider.getEndUserIP();
         if (userIp == null) {
             userIp = Constants.UNKNOWN_VALUE;
@@ -88,6 +89,7 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
         event.setRequestTimestamp(offsetDateTime);
         event.setMetaInfo(metaInfo);
         event.setUserAgentHeader(userAgent);
+        event.setUserName(userName);
         event.setUserIp(userIp);
 
         this.processor.publish(event);
