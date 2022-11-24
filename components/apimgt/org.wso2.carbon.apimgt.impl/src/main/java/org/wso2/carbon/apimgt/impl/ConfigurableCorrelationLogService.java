@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.logging.correlation.CorrelationLogConfigurable;
-import org.wso2.carbon.logging.correlation.bean.CorrelationLogConfig;
 import org.wso2.carbon.logging.correlation.bean.ImmutableCorrelationLogConfig;
 
 @Component(
@@ -34,6 +33,11 @@ public class ConfigurableCorrelationLogService implements CorrelationLogConfigur
     @Override
     public String getName() {
         return "apimgt";
+    }
+
+    @Override
+    public ImmutableCorrelationLogConfig getConfiguration() {
+        return new ImmutableCorrelationLogConfig(enable, null, logAllMethods);
     }
 
     @Override

@@ -37,6 +37,11 @@ public class ConfigurableCorrelationLogService implements CorrelationLogConfigur
     }
 
     @Override
+    public ImmutableCorrelationLogConfig getConfiguration() {
+        return new ImmutableCorrelationLogConfig(enable, null, logAllMethods);
+    }
+
+    @Override
     public void onConfigure(ImmutableCorrelationLogConfig immutableCorrelationLogConfig) {
         enable = immutableCorrelationLogConfig.isEnable();
         logAllMethods = immutableCorrelationLogConfig.isLogAllMethods();
