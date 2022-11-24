@@ -104,10 +104,9 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("monetization")
-  @NotNull
   public MonetizationInfoDTO getMonetization() {
     return monetization;
   }
@@ -143,9 +142,8 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(example = "min", required = true, value = "Burst control time unit")
+  @ApiModelProperty(example = "min", value = "Burst control time unit")
   @JsonProperty("rateLimitTimeUnit")
-  @NotNull
   public String getRateLimitTimeUnit() {
     return rateLimitTimeUnit;
   }
