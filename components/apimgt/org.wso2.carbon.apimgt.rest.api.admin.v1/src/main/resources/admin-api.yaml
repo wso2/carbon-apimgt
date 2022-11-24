@@ -3428,6 +3428,11 @@ components:
         - $ref: '#/components/schemas/GraphQLQuery'
         - required:
             - defaultLimit
+            - monetization
+            - rateLimitCount
+            - rateLimitTimeUnit
+            - subscriberCount
+            - billingPlan
           type: object
           properties:
             defaultLimit:
