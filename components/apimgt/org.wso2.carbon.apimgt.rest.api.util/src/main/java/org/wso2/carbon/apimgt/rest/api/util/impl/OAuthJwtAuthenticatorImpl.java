@@ -163,7 +163,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     log.error("Unable to get organization claim from the jwt");
                     return false;
                 }
-                if (orgUuid != null && (!orgId.equals(orgUuid))) {
+                if (!orgId.equals(orgUuid)) {
                     log.error(String.format("Requested OrgId (%s) and the token's organization uuid (%s) mismatch!", orgId, orgUuid));
                     return false;
                 }
