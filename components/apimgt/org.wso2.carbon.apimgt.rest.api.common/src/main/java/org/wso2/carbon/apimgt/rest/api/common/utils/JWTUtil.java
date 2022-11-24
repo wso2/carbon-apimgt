@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.common.utils;
 
+import net.minidev.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -74,6 +75,17 @@ public class JWTUtil {
                     .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
                     .toArray(size -> new String[size]);
             oauthTokenInfo.setScopes(scopes);
+            // check whether organization claim value and orgId matches
+            JSONObject orgClaim = signedJWTInfo.getJwtClaimsSet().getJSONObjectClaim("organization");
+            String orgUuid = orgClaim.getAsString("uuid");
+            if (orgId == null) {
+                log.error("Organization is not present in the request");
+                return false;
+            }
+            if (orgUuid != null && (!orgId.equals(orgUuid))) {
+                log.error(String.format("Requested OrgId (%s) and the token's organization uuid (%s) mismatch!", orgId, orgUuid));
+                return false;
+            }
             if (validateScopes(message, oauthTokenInfo)) {
                 //Add the user scopes list extracted from token to the cxf message
                 message.put(RestApiConstants.USER_REST_API_SCOPES, oauthTokenInfo.getScopes());

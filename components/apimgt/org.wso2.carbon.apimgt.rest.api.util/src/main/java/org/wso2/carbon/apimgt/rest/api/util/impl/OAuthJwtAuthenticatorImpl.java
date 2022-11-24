@@ -151,7 +151,17 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             if (orgHandle != null) {
                 message.put(ORGANIZATION_HANDLE, orgHandle);
             }
-
+            // check whether organization claim value and orgId matches
+            JSONObject orgClaim = signedJWTInfo.getJwtClaimsSet().getJSONObjectClaim(JwtTokenConstants.ORGANIZATION);
+            String orgUuid = orgClaim.getAsString(JwtTokenConstants.UUID);
+            if (orgId == null) {
+                log.error("Organization is not present in the request");
+                return false;
+            }
+            if (orgUuid != null && (!orgId.equals(orgUuid))) {
+                log.error(String.format("Requested OrgId (%s) and the token's organization uuid (%s) mismatch!", orgId, orgUuid));
+                return false;
+            }
             if (validateScopes(message, oauthTokenInfo)) {
                 //Add the user scopes list extracted from token to the cxf message
                 message.getExchange().put(RestApiConstants.USER_REST_API_SCOPES, oauthTokenInfo.getScopes());
