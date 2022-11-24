@@ -81,13 +81,12 @@ public class JWTUtil {
             oauthTokenInfo.setScopes(scopes);
             // check whether organization claim value and orgId matches
             String orgUuid = getOrgIdFromJwt(signedJWTInfo);
-            JSONObject orgClaim = signedJWTInfo.getJwtClaimsSet().getJSONObjectClaim("organization");
             if (orgUuid == null) {
                 log.error("Unable to get organization claim from the jwt");
                 return false;
             }
             if (!orgId.equals(orgUuid)) {
-                log.error(String.format("Requested OrgId (%s) and the token's organization uuid (%s) mismatch!", orgId, orgClaim));
+                log.error(String.format("Requested OrgId (%s) and the token's organization uuid (%s) mismatch!", orgId, orgUuid));
                 return false;
             }
             if (validateScopes(message, oauthTokenInfo)) {
