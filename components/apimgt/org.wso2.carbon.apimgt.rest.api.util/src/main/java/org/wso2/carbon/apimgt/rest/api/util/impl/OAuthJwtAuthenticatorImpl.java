@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil.getRestApiJWTAuthAudiences;
+import static org.wso2.carbon.apimgt.rest.api.common.utils.JWTUtil.getOrgIdFromJwt;
 
 /**
  * This OAuthJwtAuthenticatorImpl class specifically implemented for API Manager store and publisher rest APIs'
@@ -156,17 +157,14 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 message.put(ORGANIZATION_HANDLE, orgHandle);
             }
             // check whether organization claim value and orgId matches
-            JSONObject orgClaim = signedJWTInfo.getJwtClaimsSet().getJSONObjectClaim(JwtTokenConstants.ORGANIZATION);
-            if (orgClaim != null) {
-                String orgUuid = orgClaim.getAsString(JwtTokenConstants.UUID);
-                if (orgUuid == null) {
-                    log.error("Unable to get organization claim from the jwt");
-                    return false;
-                }
-                if (!orgId.equals(orgUuid)) {
-                    log.error(String.format("Requested OrgId (%s) and the token's organization uuid (%s) mismatch!", orgId, orgUuid));
-                    return false;
-                }
+            String orgUuid = getOrgIdFromJwt(signedJWTInfo);
+            if (orgUuid == null) {
+                log.error("Unable to get organization claim from the jwt");
+                return false;
+            }
+            if (!orgId.equals(orgUuid)) {
+                log.error(String.format("Requested OrgId (%s) and the token's organization uuid (%s) mismatch!", orgId, orgUuid));
+                return false;
             }
             if (validateScopes(message, oauthTokenInfo)) {
                 //Add the user scopes list extracted from token to the cxf message

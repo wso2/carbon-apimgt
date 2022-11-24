@@ -80,17 +80,15 @@ public class JWTUtil {
                     .toArray(size -> new String[size]);
             oauthTokenInfo.setScopes(scopes);
             // check whether organization claim value and orgId matches
+            String orgUuid = getOrgIdFromJwt(signedJWTInfo);
             JSONObject orgClaim = signedJWTInfo.getJwtClaimsSet().getJSONObjectClaim("organization");
-            if (orgClaim != null) {
-                String orgUuid = orgClaim.getAsString(APIConstants.JwtTokenConstants.UUID);
-                if (orgUuid == null) {
-                    log.error("Unable to get organization claim from the jwt");
-                    return false;
-                }
-                if (!orgId.equals(orgUuid)) {
-                    log.error(String.format("Requested OrgId (%s) and the token's organization uuid (%s) mismatch!", orgId, orgUuid));
-                    return false;
-                }
+            if (orgUuid == null) {
+                log.error("Unable to get organization claim from the jwt");
+                return false;
+            }
+            if (!orgId.equals(orgUuid)) {
+                log.error(String.format("Requested OrgId (%s) and the token's organization uuid (%s) mismatch!", orgId, orgClaim));
+                return false;
             }
             if (validateScopes(message, oauthTokenInfo)) {
                 //Add the user scopes list extracted from token to the cxf message
@@ -213,6 +211,33 @@ public class JWTUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * Extract org UUID from the organization claim
+     * @param signedJWTInfo : Signed token info
+     */
+    public static String getOrgIdFromJwt(SignedJWTInfo jwtInfo) {
+        try {
+            JSONObject organizationClaim = jwtInfo.getJwtClaimsSet().getJSONObjectClaim("organization");
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieved organization claim from jwt: " + organizationClaim);
+            }
+            if (organizationClaim.getAsString(APIConstants.JwtTokenConstants.UUID) == null) {
+                log.debug("Unable to get organization claim from the jwt");
+                return null;
+            }
+            if (organizationClaim != null && organizationClaim.containsKey("uuid")) {
+                return organizationClaim.getAsString("uuid");
+            }
+        } catch (ParseException e) {
+            if (log.isDebugEnabled()) {
+                log.error("Failed to parse organization claim from JWT claims", e);
+            } else {
+                log.error("Failed to parse organization claim from JWT claims: " + e.getMessage());
+            }
+        }
+        return null;
     }
 
 }
