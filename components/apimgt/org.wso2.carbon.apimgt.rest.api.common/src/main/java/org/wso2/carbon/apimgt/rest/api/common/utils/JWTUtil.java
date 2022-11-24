@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.common.utils;
 
+import net.minidev.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -69,11 +70,25 @@ public class JWTUtil {
         String scopeClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim(APIConstants.JwtTokenConstants.SCOPE);
         if (scopeClaim != null) {
             String orgId = (String) message.get(RestApiConstants.ORG_ID);
+            if (orgId == null) {
+                log.error("Organization is not present in the request");
+                return false;
+            }
             String[] scopes = scopeClaim.split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER);
             scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
                     .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
                     .toArray(size -> new String[size]);
             oauthTokenInfo.setScopes(scopes);
+            // check whether organization claim value and orgId matches
+            String orgUuid = getOrgIdFromJwt(signedJWTInfo);
+            if (orgUuid == null) {
+                log.error("Unable to get organization claim from the jwt");
+                return false;
+            }
+            if (!orgId.equals(orgUuid)) {
+                log.error(String.format("Requested OrgId (%s) and the token's organization uuid (%s) mismatch!", orgId, orgUuid));
+                return false;
+            }
             if (validateScopes(message, oauthTokenInfo)) {
                 //Add the user scopes list extracted from token to the cxf message
                 message.put(RestApiConstants.USER_REST_API_SCOPES, oauthTokenInfo.getScopes());
@@ -195,6 +210,33 @@ public class JWTUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * Extract org UUID from the organization claim
+     * @param signedJWTInfo : Signed token info
+     */
+    public static String getOrgIdFromJwt(SignedJWTInfo jwtInfo) {
+        try {
+            JSONObject organizationClaim = jwtInfo.getJwtClaimsSet().getJSONObjectClaim("organization");
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieved organization claim from jwt: " + organizationClaim);
+            }
+            if (organizationClaim.getAsString(APIConstants.JwtTokenConstants.UUID) == null) {
+                log.debug("Unable to get organization claim from the jwt");
+                return null;
+            }
+            if (organizationClaim != null && organizationClaim.containsKey("uuid")) {
+                return organizationClaim.getAsString("uuid");
+            }
+        } catch (ParseException e) {
+            if (log.isDebugEnabled()) {
+                log.error("Failed to parse organization claim from JWT claims", e);
+            } else {
+                log.error("Failed to parse organization claim from JWT claims: " + e.getMessage());
+            }
+        }
+        return null;
     }
 
 }
