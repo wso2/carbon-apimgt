@@ -159,6 +159,10 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             JSONObject orgClaim = signedJWTInfo.getJwtClaimsSet().getJSONObjectClaim(JwtTokenConstants.ORGANIZATION);
             if (orgClaim != null) {
                 String orgUuid = orgClaim.getAsString(JwtTokenConstants.UUID);
+                if (orgUuid == null) {
+                    log.error("Unable to get organization claim from the jwt");
+                    return false;
+                }
                 if (orgUuid != null && (!orgId.equals(orgUuid))) {
                     log.error(String.format("Requested OrgId (%s) and the token's organization uuid (%s) mismatch!", orgId, orgUuid));
                     return false;

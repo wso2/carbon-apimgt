@@ -83,7 +83,11 @@ public class JWTUtil {
             JSONObject orgClaim = signedJWTInfo.getJwtClaimsSet().getJSONObjectClaim("organization");
             if (orgClaim != null) {
                 String orgUuid = orgClaim.getAsString(APIConstants.JwtTokenConstants.UUID);
-                if (orgUuid != null && (!orgId.equals(orgUuid))) {
+                if (orgUuid == null) {
+                    log.error("Unable to get organization claim from the jwt");
+                    return false;
+                }
+                if (!orgId.equals(orgUuid)) {
                     log.error(String.format("Requested OrgId (%s) and the token's organization uuid (%s) mismatch!", orgId, orgUuid));
                     return false;
                 }
