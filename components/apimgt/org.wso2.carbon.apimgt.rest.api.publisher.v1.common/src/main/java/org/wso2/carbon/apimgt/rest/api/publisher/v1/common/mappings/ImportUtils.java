@@ -1694,6 +1694,12 @@ public class ImportUtils {
                             log.debug("Found documents definition file " + pathToJsonFile);
                         }
                         jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
+                    } else {
+                        // Handle no document files scenario
+                        if (log.isDebugEnabled()) {
+                            log.debug("No documents definition file found");
+                        }
+                        continue;
                     }
 
                     JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject()

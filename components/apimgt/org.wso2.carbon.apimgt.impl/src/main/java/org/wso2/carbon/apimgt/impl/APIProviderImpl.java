@@ -130,6 +130,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected ImportExportAPI importExportAPI;
     protected GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
     private RecommendationEnvironment recommendationEnvironment;
+    String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
     private GlobalMediationPolicyImpl globalMediationPolicyImpl;
     private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig:";
 
@@ -3684,6 +3685,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIProductIdentifier apiProductIdentifier, String organization) throws APIManagementException {
         APIIdentifier apiIdentifier = new APIIdentifier(apiProductIdentifier.getProviderName(),
                 apiProductIdentifier.getName(), apiProductIdentifier.getVersion());
+        apiIdentifier.setUuid(apiMgtDAO.getUUIDFromIdentifier(apiIdentifier));
         return certificateManager.searchClientCertificates(tenantId, alias, apiIdentifier, organization);
     }
 
@@ -4729,7 +4731,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateAPIInformation(uuid, organization, api);
                 if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                         || APIUtil.isSequenceDefined(api.getFaultSequence())) {
-                    loadMediationPoliciesAsOperationPoliciesToAPI(api, organization);
+                    if (migrationEnabled == null) {
+                        loadMediationPoliciesAsOperationPoliciesToAPI(api, organization);
+                    } else {
+                        loadMediationPoliciesToAPI(api, organization);
+                    }
                 }
                 populateAPIStatus(api);
                 populateDefaultVersion(api);
@@ -5432,6 +5438,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             List<APIRevisionDeployment> apiRevisionDeployments, String organization)
             throws APIManagementException {
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
+        if (organization ==  null) {
+            String tenantDomain = getTenantDomain(apiIdentifier);
+            if (tenantDomain != null) {
+                organization = tenantDomain;
+            }
+        }
         if (apiIdentifier == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                     + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
