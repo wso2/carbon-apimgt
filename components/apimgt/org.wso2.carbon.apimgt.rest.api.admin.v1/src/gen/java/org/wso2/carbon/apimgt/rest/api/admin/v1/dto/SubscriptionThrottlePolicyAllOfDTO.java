@@ -82,8 +82,9 @@ public class SubscriptionThrottlePolicyAllOfDTO   {
   }
 
   
-  @ApiModelProperty(example = "10", value = "Burst control request count")
+  @ApiModelProperty(example = "10", required = true, value = "Burst control request count")
   @JsonProperty("rateLimitCount")
+  @NotNull
   public Integer getRateLimitCount() {
     return rateLimitCount;
   }
@@ -118,8 +119,9 @@ public class SubscriptionThrottlePolicyAllOfDTO   {
   }
 
   
-  @ApiModelProperty(example = "10", value = "Number of subscriptions allowed")
+  @ApiModelProperty(example = "10", required = true, value = "Number of subscriptions allowed")
   @JsonProperty("subscriberCount")
+  @NotNull
   public Integer getSubscriberCount() {
     return subscriberCount;
   }
