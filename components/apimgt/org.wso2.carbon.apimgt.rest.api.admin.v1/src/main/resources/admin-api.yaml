@@ -3428,6 +3428,9 @@ components:
         - $ref: '#/components/schemas/GraphQLQuery'
         - required:
             - defaultLimit
+            - rateLimitCount
+            - subscriberCount
+            - billingPlan
           type: object
           properties:
             defaultLimit:
