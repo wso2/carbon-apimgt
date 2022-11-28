@@ -3428,6 +3428,7 @@ components:
         - $ref: '#/components/schemas/GraphQLQuery'
         - required:
             - defaultLimit
+#            - billingPlan
           type: object
           properties:
             defaultLimit:
