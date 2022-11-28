@@ -214,8 +214,9 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(example = "FREE", value = "define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL. ")
+  @ApiModelProperty(example = "FREE", required = true, value = "define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL. ")
   @JsonProperty("billingPlan")
+  @NotNull
   public String getBillingPlan() {
     return billingPlan;
   }
