@@ -4021,7 +4021,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<API> apiList = getAPIVersionsByProviderAndName(provider,
                 name, org);
         for (API mappedAPI : apiList) {
-            apiSortedMap.put(mappedAPI.getVersionTimestamp(), mappedAPI);
+            if (mappedAPI.getVersionTimestamp() != null) {
+                apiSortedMap.put(mappedAPI.getVersionTimestamp(), mappedAPI);
+            }
         }
         APIVersionStringComparator comparator = new APIVersionStringComparator();
         String latestVersion = version;
