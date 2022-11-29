@@ -66,7 +66,7 @@ public interface AnalyticsDataProvider {
 
     String getUserAgentHeader();
 
-    default String getUserName(){ return null;};
+    String getUserName();
 
     String getEndUserIP();
 
