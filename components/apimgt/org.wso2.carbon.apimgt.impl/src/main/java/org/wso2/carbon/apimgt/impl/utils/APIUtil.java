@@ -9077,8 +9077,13 @@ public final class APIUtil {
      * @return String uuid string
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static String getUUIDFromIdentifier(APIIdentifier identifier, String organization) throws APIManagementException{
-        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, organization);
+    public static String getUUIDFromIdentifier(APIIdentifier identifier, String organization)
+            throws APIManagementException{
+        if (organization != null) {
+            return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, organization);
+        } else {
+            return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier);
+        }
     }
 
     /**

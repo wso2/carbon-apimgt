@@ -88,7 +88,7 @@ public class APIDefaultVersionURLsDTO   {
   }
 
   
-  @ApiModelProperty(example = "ws://localhost:9099/phoneverify/", value = "WSS environment default URL")
+  @ApiModelProperty(example = "wss://localhost:9099/phoneverify/", value = "WSS environment default URL")
   @JsonProperty("wss")
   public String getWss() {
     return wss;

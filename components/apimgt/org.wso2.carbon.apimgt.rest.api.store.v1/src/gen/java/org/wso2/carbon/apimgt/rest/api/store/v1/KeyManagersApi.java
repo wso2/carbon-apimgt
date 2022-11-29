@@ -43,9 +43,9 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "Key Managers (Collection)" })
+    }, tags={ "Key Managers" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Categories returned ", response = KeyManagerListDTO.class) })
+        @ApiResponse(code = 200, message = "OK. Key Manager list returned ", response = KeyManagerListDTO.class) })
     public Response keyManagersGet( @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
         return delegate.keyManagersGet(xWSO2Tenant, securityContext);
     }

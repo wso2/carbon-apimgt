@@ -155,7 +155,7 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Requested scope name exists.", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response validateScope(@ApiParam(value = "Scope name ",required=true) @PathParam("scopeId") String scopeId) throws APIManagementException{
+    public Response validateScope(@ApiParam(value = "Base64 URL encoded value of the scope name ",required=true) @PathParam("scopeId") String scopeId) throws APIManagementException{
         return delegate.validateScope(scopeId, securityContext);
     }
 }

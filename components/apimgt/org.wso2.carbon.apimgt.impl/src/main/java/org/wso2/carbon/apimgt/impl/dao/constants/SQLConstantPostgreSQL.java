@@ -39,7 +39,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   USER_ID, " +
                     "   GROUP_ID, " +
                     "   UUID, " +
-                    "   APP.CREATED_BY AS CREATED_BY " +
+                    "   APP.CREATED_BY AS CREATED_BY, " +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
@@ -71,7 +72,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   USER_ID, " +
                     "   GROUP_ID, " +
                     "   UUID, " +
-                    "   APP.CREATED_BY AS CREATED_BY " +
+                    "   APP.CREATED_BY AS CREATED_BY, " +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
@@ -102,7 +104,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   USER_ID, " +
                     "   GROUP_ID, " +
                     "   UUID, " +
-                    "   APP.CREATED_BY AS CREATED_BY " +
+                    "   APP.CREATED_BY AS CREATED_BY, " +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
@@ -139,7 +142,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   USER_ID, " +
                     "   GROUP_ID, " +
                     "   UUID, " +
-                    "   APP.CREATED_BY AS CREATED_BY " +
+                    "   APP.CREATED_BY AS CREATED_BY, " +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
@@ -177,7 +181,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   USER_ID, " +
                     "   GROUP_ID, " +
                     "   UUID, " +
-                    "   APP.CREATED_BY AS CREATED_BY " +
+                    "   APP.CREATED_BY AS CREATED_BY, " +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
@@ -208,7 +213,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   USER_ID, " +
                     "   GROUP_ID, " +
                     "   UUID, " +
-                    "   APP.CREATED_BY AS CREATED_BY " +
+                    "   APP.CREATED_BY AS CREATED_BY, " +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
