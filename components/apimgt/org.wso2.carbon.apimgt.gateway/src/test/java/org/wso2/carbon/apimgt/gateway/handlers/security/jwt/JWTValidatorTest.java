@@ -66,7 +66,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import javax.cache.Cache;
-import javax.security.cert.X509Certificate;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({JWTValidator.class, GatewayUtils.class, MultitenantUtils.class, PrivilegedCarbonContext.class,
@@ -222,16 +221,15 @@ public class JWTValidatorTest {
         SignedJWTInfo signedJWTInfo = new SignedJWTInfo(signedJWT.getParsedString(), signedJWT,
                 signedJWT.getJWTClaimsSet());
         PowerMockito.mockStatic(CertificateMgtUtils.class);
-        X509Certificate x509Certificate = getX509Certificate("src/test/resources/cnf/certificate.pem");
+        Certificate certificate = getCertificate("src/test/resources/cnf/certificate.pem");
         java.security.cert.CertificateFactory certificateFactory
                 = java.security.cert.CertificateFactory.getInstance("X.509");
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(x509Certificate.getEncoded());
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(certificate.getEncoded());
         Optional<java.security.cert.X509Certificate> x509CertificateJava =
                 Optional.of((java.security.cert.X509Certificate) certificateFactory.generateCertificate(
                         byteArrayInputStream));
-        PowerMockito.when(CertificateMgtUtils.convert(x509Certificate)).thenReturn(x509CertificateJava);
         signedJWTInfo
-                .setX509ClientCertificate(getX509Certificate("src/test/resources/cnf/certificate.pem"));
+                .setClientCertificate(getCertificate("src/test/resources/cnf/certificate.pem"));
 
         Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo)).thenReturn(jwtValidationInfo);
         JWTValidatorWrapper jwtValidator = new JWTValidatorWrapper("Unlimited",
@@ -242,7 +240,7 @@ public class JWTValidatorTest {
         org.apache.axis2.context.MessageContext axis2MsgCntxt =
                 Mockito.mock(org.apache.axis2.context.MessageContext.class);
         Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("GET");
-        Mockito.when(axis2MsgCntxt.getProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT)).thenReturn(x509Certificate);
+        Mockito.when(axis2MsgCntxt.getProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT)).thenReturn(certificate);
         Map<String, String> headers = new HashMap<>();
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
@@ -327,16 +325,15 @@ public class JWTValidatorTest {
             SignedJWTInfo signedJWTInfo = new SignedJWTInfo(signedJWT.getParsedString(), signedJWT,
                     signedJWT.getJWTClaimsSet());
             PowerMockito.mockStatic(CertificateMgtUtils.class);
-            X509Certificate x509Certificate = getX509Certificate("src/test/resources/cnf/invalid-certificate.pem");
+            Certificate certificate = getCertificate("src/test/resources/cnf/invalid-certificate.pem");
             java.security.cert.CertificateFactory certificateFactory
                     = java.security.cert.CertificateFactory.getInstance("X.509");
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(x509Certificate.getEncoded());
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(certificate.getEncoded());
             Optional<java.security.cert.X509Certificate> x509CertificateJava =
                     Optional.of((java.security.cert.X509Certificate) certificateFactory.generateCertificate(
                             byteArrayInputStream));
-            PowerMockito.when(CertificateMgtUtils.convert(x509Certificate)).thenReturn(x509CertificateJava);
             signedJWTInfo
-                    .setX509ClientCertificate(getX509Certificate("src/test/resources/cnf/invalid-certificate.pem"));
+                    .setClientCertificate(getCertificate("src/test/resources/cnf/invalid-certificate.pem"));
 
             Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo)).thenReturn(jwtValidationInfo);
             JWTValidatorWrapper jwtValidator = new JWTValidatorWrapper("Unlimited",
@@ -347,7 +344,7 @@ public class JWTValidatorTest {
             org.apache.axis2.context.MessageContext axis2MsgCntxt =
                     Mockito.mock(org.apache.axis2.context.MessageContext.class);
             Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("GET");
-            Mockito.when(axis2MsgCntxt.getProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT)).thenReturn(x509Certificate);
+            Mockito.when(axis2MsgCntxt.getProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT)).thenReturn(certificate);
             Map<String, String> headers = new HashMap<>();
             Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                     .thenReturn(headers);
@@ -1240,17 +1237,13 @@ public class JWTValidatorTest {
      * @throws FileNotFoundException
      * @throws javax.security.cert.CertificateException
      */
-    public static X509Certificate getX509Certificate(String certificatePath) throws java.security.cert.CertificateException,
-            FileNotFoundException, javax.security.cert.CertificateException {
+    public static Certificate getCertificate(String certificatePath) throws java.security.cert.CertificateException,
+            FileNotFoundException {
 
         final String x509 = "X.509";
-        javax.security.cert.X509Certificate x509Certificate = null;
+        Certificate certificate = null;
 
         CertificateFactory certificateFactory = CertificateFactory.getInstance(x509);
-        Certificate cert = certificateFactory.generateCertificate(new FileInputStream(certificatePath));
-        byte[] encoded = cert.getEncoded();
-        x509Certificate = javax.security.cert.X509Certificate.getInstance(encoded);
-
-        return x509Certificate;
+        return certificateFactory.generateCertificate(new FileInputStream(certificatePath));
     }
 }
