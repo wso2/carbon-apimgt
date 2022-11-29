@@ -652,12 +652,12 @@ public class JWTValidator {
     }
 
     private boolean isValidCertificateBoundAccessToken(SignedJWTInfo signedJWTInfo) { //Holder of Key token
-        if (signedJWTInfo.getX509ClientCertificate() == null ||
-                StringUtils.isEmpty(signedJWTInfo.getX509ClientCertificateHash()) ||
+        if (signedJWTInfo.getClientCertificate() == null ||
+                StringUtils.isEmpty(signedJWTInfo.getClientCertificateHash()) ||
                 signedJWTInfo.getCertificateThumbprint() == null) {
             return true; // If cnf is not available - 200 success
         }
-        return signedJWTInfo.getX509ClientCertificateHash().equals(signedJWTInfo.getCertificateThumbprint());
+        return signedJWTInfo.getClientCertificateHash().equals(signedJWTInfo.getCertificateThumbprint());
     }
 
     protected long getTimeStampSkewInSeconds() {
