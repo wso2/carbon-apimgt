@@ -3429,8 +3429,6 @@ components:
         - required:
             - defaultLimit
             - billingPlan
-            - rateLimitCount
-            - subscriberCount
           type: object
           properties:
             defaultLimit:
