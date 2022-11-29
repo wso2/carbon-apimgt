@@ -111,9 +111,7 @@ public class SignedJWTInfo implements Serializable {
         if (null != jwtClaimsSet) {
             Object thumbprint = jwtClaimsSet.getClaim(APIConstants.CNF);
             net.minidev.json.JSONObject thumbprintJson = (net.minidev.json.JSONObject) thumbprint;
-            if (thumbprintJson != null) {
-                return thumbprintJson.getAsString(APIConstants.DIGEST);
-            }
+            return thumbprintJson.getAsString(APIConstants.DIGEST);
         }
         return null;
     }
