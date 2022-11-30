@@ -98,7 +98,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
         List<String> revisionUUIDs = new ArrayList<>();
-        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         for (DeployedAPIRevisionDTO deployedAPIRevisionDTO : deployedAPIRevisionDTOList) {
             String organizationFromQueryParam = RestApiUtil.getOrganization(messageContext);
             // get revision uuid
@@ -114,7 +113,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             if (!revisionUUIDs.contains(revisionUUID)) {
                 revisionUUIDs.add(revisionUUID);
-                Map<String, Environment> environments = APIUtil.getEnvironments(tenantDomain);
+                String organization = apiProvider.getAPIInfoByUUID(deployedAPIRevisionDTO.getApiId()).getOrganization();
+                Map<String, Environment> environments = APIUtil.getEnvironments(organization);
                 List<DeployedAPIRevision> deployedAPIRevisions = new ArrayList<>();
                 for (DeployedEnvInfoDTO deployedEnvInfoDTO : deployedAPIRevisionDTO.getEnvInfo()) {
                     DeployedAPIRevision deployedAPIRevision = new DeployedAPIRevision();
