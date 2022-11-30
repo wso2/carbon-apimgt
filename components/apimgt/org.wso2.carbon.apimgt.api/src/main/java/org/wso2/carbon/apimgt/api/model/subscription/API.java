@@ -38,6 +38,7 @@ public class API implements CacheableEntity<String> {
     private String environment;
     private String status;
     private String revision;
+    private String organization;
 
     public String getRevision() {
 
@@ -189,5 +190,13 @@ public class API implements CacheableEntity<String> {
     public void setStatus(String status) {
 
         this.status = status;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 }

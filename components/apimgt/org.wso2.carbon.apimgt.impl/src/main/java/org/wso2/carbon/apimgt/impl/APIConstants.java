@@ -2637,6 +2637,7 @@ public final class APIConstants {
         public static final String API_ID = "apiId";
         public static final String LABEL = "label";
         public static final String LABELS = "labels";
+        public static final String EnableOnDemandLoadingAPIS = "EnableOnDemandLoadingAPIS";
 
     }
 
