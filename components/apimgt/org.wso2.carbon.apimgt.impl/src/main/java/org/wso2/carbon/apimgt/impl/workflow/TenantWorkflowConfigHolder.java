@@ -100,12 +100,12 @@ public class TenantWorkflowConfigHolder implements Serializable {
                 WorkflowExecutor workFlowExecutor;
                 executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
                 try {
-					clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
-	                workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-	                loadProperties(workflowElem, workFlowExecutor);
-				} catch (ClassNotFoundException e1) {
-					workFlowExecutor = new ApplicationCreationSimpleWorkflowExecutor();
-				}
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+                    loadProperties(workflowElem, workFlowExecutor);
+                } catch (ClassNotFoundException e1) {
+                    workFlowExecutor = new ApplicationCreationSimpleWorkflowExecutor();
+                }
 
                 workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION, workFlowExecutor);
 
@@ -113,12 +113,12 @@ public class TenantWorkflowConfigHolder implements Serializable {
                         new QName(WorkflowConstants.PRODUCTION_APPLICATION_REGISTRATION));
                 executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
                 try {
-					clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
-	                workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-	                loadProperties(workflowElem, workFlowExecutor);
-				} catch (ClassNotFoundException e1) {
-					workFlowExecutor = new ApplicationRegistrationSimpleWorkflowExecutor();
-				}
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+                    loadProperties(workflowElem, workFlowExecutor);
+                } catch (ClassNotFoundException e1) {
+                    workFlowExecutor = new ApplicationRegistrationSimpleWorkflowExecutor();
+                }
 
                 workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION, workFlowExecutor);
 
@@ -126,38 +126,38 @@ public class TenantWorkflowConfigHolder implements Serializable {
                         new QName(WorkflowConstants.SANDBOX_APPLICATION_REGISTRATION));
                 executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
                 try {
-					clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
-	                workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-	                loadProperties(workflowElem, workFlowExecutor);
-				} catch (ClassNotFoundException e1) {
-					 workFlowExecutor = new ApplicationRegistrationSimpleWorkflowExecutor();
-				}
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+                    loadProperties(workflowElem, workFlowExecutor);
+                } catch (ClassNotFoundException e1) {
+                    workFlowExecutor = new ApplicationRegistrationSimpleWorkflowExecutor();
+                }
 
                 workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX, workFlowExecutor);
 
                 workflowElem = workflowExtensionsElem.getFirstChildWithName(
                         new QName(WorkflowConstants.USER_SIGN_UP));
                 executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
-				try {
-					clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
-					workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-					loadProperties(workflowElem, workFlowExecutor);
-				} catch (ClassNotFoundException e) {
-					workFlowExecutor = new UserSignUpSimpleWorkflowExecutor();
-				}
-				
-				workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP, workFlowExecutor);
+                try {
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+                    loadProperties(workflowElem, workFlowExecutor);
+                } catch (ClassNotFoundException e) {
+                    workFlowExecutor = new UserSignUpSimpleWorkflowExecutor();
+                }
+
+                workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP, workFlowExecutor);
 
                 workflowElem = workflowExtensionsElem.getFirstChildWithName(
                         new QName(WorkflowConstants.SUBSCRIPTION_CREATION));
                 executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
                 try {
-					clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
-	                workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-	                loadProperties(workflowElem, workFlowExecutor);
-				} catch (ClassNotFoundException e) {
-					workFlowExecutor = new SubscriptionCreationSimpleWorkflowExecutor();
-				}
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+                    loadProperties(workflowElem, workFlowExecutor);
+                } catch (ClassNotFoundException e) {
+                    workFlowExecutor = new SubscriptionCreationSimpleWorkflowExecutor();
+                }
 
                 workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION, workFlowExecutor);
 
@@ -166,12 +166,12 @@ public class TenantWorkflowConfigHolder implements Serializable {
                 if (workflowElem != null) {
                     executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
                     try {
-						clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
-	                    workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-	                    loadProperties(workflowElem, workFlowExecutor);
-					} catch (ClassNotFoundException e) {
-						workFlowExecutor = new SubscriptionUpdateSimpleWorkflowExecutor();
-					}
+                        clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                        workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+                        loadProperties(workflowElem, workFlowExecutor);
+                    } catch (ClassNotFoundException e) {
+                        workFlowExecutor = new SubscriptionUpdateSimpleWorkflowExecutor();
+                    }
 
                     workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE, workFlowExecutor);
                 } else {
@@ -183,12 +183,12 @@ public class TenantWorkflowConfigHolder implements Serializable {
                         new QName(WorkflowConstants.SUBSCRIPTION_DELETION));
                 executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
                 try {
-					clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
-	                workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-	                loadProperties(workflowElem, workFlowExecutor);
-				} catch (ClassNotFoundException e) {
-					workFlowExecutor = new SubscriptionDeletionSimpleWorkflowExecutor();
-				}
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+                    loadProperties(workflowElem, workFlowExecutor);
+                } catch (ClassNotFoundException e) {
+                    workFlowExecutor = new SubscriptionDeletionSimpleWorkflowExecutor();
+                }
 
                 workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION, workFlowExecutor);
 
@@ -196,12 +196,12 @@ public class TenantWorkflowConfigHolder implements Serializable {
                         new QName(WorkflowConstants.APPLICATION_DELETION));
                 executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
                 try {
-					clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
-	                workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-	                loadProperties(workflowElem, workFlowExecutor);
-				} catch (ClassNotFoundException e) {
-					workFlowExecutor = new ApplicationDeletionSimpleWorkflowExecutor();
-				}
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+                    loadProperties(workflowElem, workFlowExecutor);
+                } catch (ClassNotFoundException e) {
+                    workFlowExecutor = new ApplicationDeletionSimpleWorkflowExecutor();
+                }
 
                 workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION, workFlowExecutor);
 
@@ -216,12 +216,12 @@ public class TenantWorkflowConfigHolder implements Serializable {
                     executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
                 }
                 try {
-					clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
-	                workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-	                loadProperties(workflowElem, workFlowExecutor);
-				} catch (ClassNotFoundException e) {
-					workFlowExecutor = new APIStateChangeSimpleWorkflowExecutor();
-				}
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+                    loadProperties(workflowElem, workFlowExecutor);
+                } catch (ClassNotFoundException e) {
+                    workFlowExecutor = new APIStateChangeSimpleWorkflowExecutor();
+                }
 
                 workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_API_STATE, workFlowExecutor);
 
@@ -239,12 +239,12 @@ public class TenantWorkflowConfigHolder implements Serializable {
                     executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
                 }
                 try {
-					clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
-	                workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-	                loadProperties(workflowElem, workFlowExecutor);
-				} catch (ClassNotFoundException e) {
-					workFlowExecutor = new APIProductStateChangeSimpleWorkflowExecutor();
-				}
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+                    loadProperties(workflowElem, workFlowExecutor);
+                } catch (ClassNotFoundException e) {
+                    workFlowExecutor = new APIProductStateChangeSimpleWorkflowExecutor();
+                }
 
                 workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE, workFlowExecutor);
             }
