@@ -129,18 +129,16 @@ public class TenantWorkflowConfigHolderTest {
         //Workflow executor is an non existing class so that ClassNotFoundException will be thrown
         String invalidWFExecutor =
                 "<WorkFlowExtensions>\n" +
-                        "    <ApplicationCreation executor=\"org.wso2.carbon.apimgt.impl.workflow" +
+                        "    <UserSignUp executor=\"org.wso2.carbon.apimgt.impl.workflow" +
                         ".TestExecutor\"/></WorkFlowExtensions>";
         TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
         Mockito.when(apimConfigService.getWorkFlowConfig(tenantDomain)).thenReturn(invalidWFExecutor);
-        try {
-            tenantWorkflowConfigHolder.load();
-            Assert.fail("Expected WorkflowException has not been thrown when workflow executor class not found");
-        } catch (WorkflowException e) {
-            Assert.assertEquals(e.getMessage(), "Unable to find class");
-        }
+        
+        
+        WorkflowExecutor executor = tenantWorkflowConfigHolder.getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
+        Assert.assertEquals("Default class is not loaded for missing class",
+                "org.wso2.carbon.apimgt.impl.workflow.UserSignUpSimpleWorkflowExecutor", executor.getClass().getName());
     }
-
 
     @Test
     public void testFailureToLoadTenantWFConfigWhenWFExecutorClassCannotBeInstantiated() throws Exception {
