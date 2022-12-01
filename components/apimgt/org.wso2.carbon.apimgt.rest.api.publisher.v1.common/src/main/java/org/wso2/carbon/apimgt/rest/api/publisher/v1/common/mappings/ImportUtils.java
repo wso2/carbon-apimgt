@@ -2073,7 +2073,7 @@ public class ImportUtils {
                     if (fileName.split(".xml").length != 0) {
                         method =
                                 fileName.split(".xml")[0].substring(file.getFileName().toString().lastIndexOf("_") + 1);
-                        resource = fileName.substring(0, fileName.indexOf("_"));
+                        resource = fileName.substring(0, fileName.lastIndexOf("_"));
                     }
                     try (InputStream inputFlowStream = new FileInputStream(file.toFile())) {
                         String content = IOUtils.toString(inputFlowStream);
