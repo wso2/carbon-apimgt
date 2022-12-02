@@ -11415,7 +11415,7 @@ components:
         subscriberContactAttributes:
           type: object
           items:
-            $ref: '#/definitions/SubscriberContactAttribute'
+            $ref: '#/components/schemas/SubscriberContactAttribute'
         securityAuditProperties:
           type: object
           properties: {}
