@@ -253,6 +253,12 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                     .from(ExceptionCodes.ALREADY_ASSIGNED_ADVANCED_POLICY_DELETE_ERROR,
                             existingPolicy.getPolicyName()));
         }
+        if (APIUtil.checkPolicyConfiguredAsDefault(existingPolicy.getPolicyName(),
+                PolicyConstants.POLICY_LEVEL_API, organization)) {
+            String message = "Policy " + policyId + " configured as the Default Policy.";
+            log.error(message);
+            throw new APIManagementException(message);
+        }
         apiProvider.deletePolicy(username, PolicyConstants.POLICY_LEVEL_API, existingPolicy.getPolicyName());
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ADVANCED_POLICIES, new Gson().toJson(existingPolicy),
                 APIConstants.AuditLogConstants.DELETED, RestApiCommonUtil.getLoggedInUsername());
@@ -434,6 +440,12 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             if (apiProvider.hasAttachments(organization, existingPolicy.getPolicyName(),
                     PolicyConstants.POLICY_LEVEL_APP,organization)) {
                 String message = "Policy " + policyId + " already attached to an application";
+                log.error(message);
+                throw new APIManagementException(message);
+            }
+            if (APIUtil.checkPolicyConfiguredAsDefault(existingPolicy.getPolicyName(),
+                    PolicyConstants.POLICY_LEVEL_APP, organization)) {
+                String message = "Policy " + policyId + " configured as the Default Policy.";
                 log.error(message);
                 throw new APIManagementException(message);
             }
@@ -843,6 +855,12 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(),
                     PolicyConstants.POLICY_LEVEL_SUB, organization)) {
                 String message = "Policy " + policyId + " already has subscriptions";
+                log.error(message);
+                throw new APIManagementException(message);
+            }
+            if (APIUtil.checkPolicyConfiguredAsDefault(existingPolicy.getPolicyName(),
+                    PolicyConstants.POLICY_LEVEL_SUB, organization)) {
+                String message = "Policy " + policyId + " configured as the Default Policy.";
                 log.error(message);
                 throw new APIManagementException(message);
             }

@@ -1227,35 +1227,6 @@ public class APIMgtDAOTest {
     }
 
     @Test
-    public void testAddAndConvertNullThrottlingTiers() throws APIManagementException {
-
-        //Adding an API with a null THROTTLING_TIER should automatically convert it to Unlimited
-        APIIdentifier apiIdentifier = new APIIdentifier("testAddAndGetApi", "testAddAndGetApi", "1.0.0");
-        API api = new API(apiIdentifier);
-        api.setContext("/testAddAndGetApi");
-        api.setContextTemplate("/testAddAndGetApi/{version}");
-        Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
-        uriTemplates.add(getUriTemplate("/abc", "GET", "Any", "read", null));
-        api.setUriTemplates(uriTemplates);
-        api.setScopes(getScopes());
-        api.setStatus(APIConstants.PUBLISHED);
-        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
-        api.setAsDefaultVersion(true);
-        api.setUUID(UUID.randomUUID().toString());
-        int apiId = apiMgtDAO.addAPI(api, -1234, "testOrg");
-        apiMgtDAO.addURITemplates(apiId, api, -1234);
-        HashMap<String, String> result1 = apiMgtDAO.getURITemplatesPerAPIAsString(api.getUuid());
-        Assert.assertTrue(result1.containsKey("/abc::GET::Any::Unlimited::abcd defgh fff"));
-
-        //Change the inserted throttling tier back to Null and test the convertNullThrottlingTier method
-        updateThrottlingTierToNull();
-        apiMgtDAO.convertNullThrottlingTiers();
-        HashMap<String, String> result2 = apiMgtDAO.getURITemplatesPerAPIAsString(api.getUuid());
-        Assert.assertTrue(result2.containsKey("/abc::GET::Any::Unlimited::abcd defgh fff"));
-        apiMgtDAO.deleteAPI(api.getUuid());
-    }
-
-    @Test
     public void testGetProviderByNameVersionTenant() throws APIManagementException, SQLException {
         final String apiProviderSuperTenant = "testUser1";
         final String apiProviderWSO2Tenant = "testUser1@wso2.test";

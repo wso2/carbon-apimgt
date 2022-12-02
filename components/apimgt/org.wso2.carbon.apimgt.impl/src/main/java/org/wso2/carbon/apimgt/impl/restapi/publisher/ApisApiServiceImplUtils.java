@@ -668,7 +668,16 @@ public class ApisApiServiceImplUtils {
             definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
         }
         definitionToAdd = OASParserUtil.preProcess(definitionToAdd);
+
         Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
+        String defaultAPILevelPolicy = APIUtil.getDefaultAPILevelPolicy(tenantId);
+        for (URITemplate uriTemplate : uriTemplates) {
+            if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
+                uriTemplate.setThrottlingTier(defaultAPILevelPolicy);
+            }
+        }
+
         Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
         apiToAdd.setUriTemplates(uriTemplates);
         apiToAdd.setScopes(scopes);
