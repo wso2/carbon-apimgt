@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.impl;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
-import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
+import org.wso2.carbon.apimgt.common.gateway.jwt.JWTValidatorImpl;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -1,7 +1,7 @@
 package org.wso2.carbon.apimgt.impl.dto;
 
 import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
+import org.wso2.carbon.apimgt.common.gateway.jwt.JWTValidator;
 
 public class KeyManagerDto {
 
@@ -9,6 +9,8 @@ public class KeyManagerDto {
     private String issuer;
     private KeyManager keyManager;
     private JWTValidator jwtValidator;
+
+    private org.wso2.carbon.apimgt.impl.jwt.JWTValidator deprecatedJWTValidator;
 
     public String getName() {
 
@@ -48,5 +50,13 @@ public class KeyManagerDto {
     public void setJwtValidator(JWTValidator jwtValidator) {
 
         this.jwtValidator = jwtValidator;
+    }
+
+    public org.wso2.carbon.apimgt.impl.jwt.JWTValidator getDeprecatedJWTValidator() {
+        return deprecatedJWTValidator;
+    }
+
+    public void setDeprecatedJWTValidator(org.wso2.carbon.apimgt.impl.jwt.JWTValidator deprecatedJWTValidator) {
+        this.deprecatedJWTValidator = deprecatedJWTValidator;
     }
 }

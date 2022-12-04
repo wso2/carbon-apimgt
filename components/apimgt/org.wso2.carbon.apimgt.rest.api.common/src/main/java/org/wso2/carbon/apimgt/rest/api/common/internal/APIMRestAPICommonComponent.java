@@ -24,8 +24,8 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
-import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
+import org.wso2.carbon.apimgt.common.gateway.jwt.JWTValidator;
+import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
 import org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestAPIAuthenticator;
 import java.util.HashMap;
@@ -48,8 +48,7 @@ public class APIMRestAPICommonComponent {
         Map<String, JWTValidator> jwtValidatorMap = new HashMap<>();
         Map<String, TokenIssuerDto> tokenIssuerMap = APIMConfigUtil.getTokenIssuerMap();
         tokenIssuerMap.forEach((issuer, tokenIssuer) -> {
-            JWTValidator jwtValidator = new JWTValidatorImpl();
-            jwtValidator.loadTokenIssuerConfiguration(tokenIssuer);
+            JWTValidator jwtValidator = JWTUtil.createJWTValidator(tokenIssuer);
             jwtValidatorMap.put(issuer, jwtValidator);
         });
         ServiceReferenceHolder.getInstance().setJwtValidatorMap(jwtValidatorMap);

@@ -26,6 +26,7 @@ import javax.security.cert.Certificate;
  * Holds data related to token issuers.
  */
 public class TokenIssuerDto {
+    // TODO: (VirajSalaka) javax certificate deprecated.
     private String issuer;
     private boolean disableDefaultClaimMapping = false;
     private Map<String, ClaimMappingDto> claimConfigurations = new HashMap<>();

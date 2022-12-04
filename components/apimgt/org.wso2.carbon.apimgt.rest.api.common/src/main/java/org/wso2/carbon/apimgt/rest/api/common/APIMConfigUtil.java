@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.common;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.rest.api.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
-import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
+import org.wso2.carbon.apimgt.common.gateway.jwt.JWTValidator;
 
 import java.util.List;
 import java.util.Map;

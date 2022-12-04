@@ -1,0 +1,299 @@
+/*
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.wso2.carbon.apimgt.common.gateway.jwt;
+
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import net.minidev.json.JSONObject;
+import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.common.gateway.exception.CommonGatewayException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.KeyStore;
+import java.security.interfaces.RSAPublicKey;
+import java.util.Calendar;
+import java.util.Objects;
+
+import static org.mockito.ArgumentMatchers.any;
+
+public class JWTValidatorImplTest {
+    private final String keyId = "keyId";
+    private final String jwksURL = "https://localhost:9443/oauth2/jwks";
+    private static final String CERT_HASH =  "9a0c3570ac7392bee14a408ecb38978852a86d38cbc087feeeeaab2c9a07b9f1";
+
+    @Test
+    public void validateTokenWithJWKSTest() {
+        JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.RS256);
+        jwsHeader = new JWSHeader.Builder(jwsHeader).keyID(keyId).build();
+        SignedJWTInfo signedJWTInfo = new SignedJWTInfo();
+        SignedJWT signedJWT = Mockito.mock(SignedJWT.class);
+        Mockito.when(signedJWT.getHeader()).thenReturn(jwsHeader);
+        signedJWTInfo.setSignedJWT(signedJWT);
+        Calendar now = Calendar.getInstance();
+        now.add(Calendar.HOUR, 1);
+        JSONObject transportCertHash = new JSONObject();
+        transportCertHash.put("x5t#S256", CERT_HASH);
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .expirationTime(now.getTime())
+                .claim("cnf", transportCertHash)
+                .claim("consumerKey", "testConsumerKey")
+                .claim("scope", "testScope")
+                .claim("customClaim", "testCustomClaim")
+                .claim("aut", "application")
+                .claim("jti", "testJTI")
+                .build();
+        signedJWTInfo.setJwtClaimsSet(jwtClaimsSet);
+        signedJWTInfo.setToken("tokenPayload");
+
+        String trustStorePath = Objects.requireNonNull(JWTValidatorImplTest.class.getClassLoader()
+                .getResource("security/client-truststore.jks")).getPath();
+
+        KeyStore trustStore = null;
+        try (InputStream trustStoreContent = Files.newInputStream(Paths.get(trustStorePath))) {
+            trustStore = KeyStore.getInstance("JKS");
+            trustStore.load(trustStoreContent, "wso2carbon".toCharArray());
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
+        CloseableHttpClient httpClient = PowerMockito.mock(CloseableHttpClient.class);
+        CloseableHttpResponse response = PowerMockito.mock(CloseableHttpResponse.class);
+        StatusLine statusLine = PowerMockito.mock(StatusLine.class);
+        Mockito.when(statusLine.getStatusCode()).thenReturn(200);
+        Mockito.when(response.getStatusLine()).thenReturn(statusLine);
+        HttpEntity httpEntity = PowerMockito.mock(HttpEntity.class);
+        try {
+            // Dummy payload. JWKS response's n value is not considered for validation.
+            Mockito.when(httpEntity.getContent()).thenReturn(new ByteArrayInputStream(("" +
+                    "{\"keys\":[{\"kty\":\"RSA\",\"e\":\"AQAB\"," +
+                    "\"use\":\"sig\",\"kid\":\"keyId\",\"alg\":\"RS256\",\"n\":\"kdgncoCrz655Lq8pTdX07" +
+                    "eoVBjdZDCUE6ueBd0D1hpJ0_zE3x3Az6tlvzs98PsPuGzaQOMmuLa4qxNJ-OKxJmutDUlClpuvxuf-jyq4gCV" +
+                    "5tEIILWRMBjlBEpJfWm63-VKKU4nvBWNJ7KfhWjl8-DUdNSh2pCDLpUObmb9Kquqc1x4BgttjN4rx_P-3_v-" +
+                    "1jETXzIP1L44yHtpQNv0khYf4j_aHjcEri9ykvpz1mtdacbrKK25N4V1HHRwDqZiJzOCCISXDuqB6wguY_v4" +
+                    "n0l1XtrEs7iCyfRFwNSKNrLqr23tR1CscmLfbH6ZLg5CYJTD-1uPSx0HMOB4Wv51PbWw\"}]}")
+                    .getBytes(StandardCharsets.UTF_8)));
+        } catch (IOException e) {
+            Assert.fail();
+        }
+        Mockito.when(response.getEntity()).thenReturn(httpEntity);
+        try {
+            Mockito.when(httpClient.execute(any(HttpGet.class))).thenReturn(response);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        TokenIssuerDto tokenIssuerDto = new TokenIssuerDto("https://localhost:9444/services");
+        JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
+        tokenIssuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
+        jwksConfigurationDTO.setEnabled(true);
+        jwksConfigurationDTO.setUrl(jwksURL);
+        JWTValidatorConfiguration jwtValidatorConfiguration = PowerMockito.mock(JWTValidatorConfiguration.class);
+        Mockito.when(jwtValidatorConfiguration.getJwtIssuer()).thenReturn(tokenIssuerDto);
+        Mockito.when(jwtValidatorConfiguration.getTrustStore()).thenReturn(trustStore);
+        Mockito.when(jwtValidatorConfiguration.getHttpClient()).thenReturn(httpClient);
+        try {
+            Mockito.when(signedJWT.verify(any(JWSVerifier.class))).thenReturn(true);
+        } catch (JOSEException e) {
+            Assert.fail();
+        }
+
+        JWTValidator jwtValidator = new JWTValidatorImpl();
+        jwtValidator.loadValidatorConfiguration(jwtValidatorConfiguration);
+        JWTValidationInfo jwtValidationInfo = null;
+        try {
+            jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
+        } catch (CommonGatewayException e) {
+            Assert.fail();
+        }
+        Assert.assertNotNull(jwtValidationInfo);
+        Assert.assertTrue(jwtValidationInfo.isValid());
+        Assert.assertEquals("testConsumerKey", jwtValidationInfo.getConsumerKey());
+        Assert.assertNotNull(jwtValidationInfo.getScopes());
+        Assert.assertEquals("testScope", jwtValidationInfo.getScopes().get(0));
+        Assert.assertTrue(jwtValidationInfo.getAppToken());
+        Assert.assertEquals("testJTI", jwtValidationInfo.getJti());
+        Assert.assertEquals("tokenPayload", jwtValidationInfo.getRawPayload());
+        Assert.assertNotNull(jwtValidationInfo.getClaims());
+        Assert.assertEquals("testCustomClaim",
+                String.valueOf(jwtValidationInfo.getClaims().get("customClaim")));
+
+        try {
+            Mockito.when(signedJWT.verify(any(JWSVerifier.class))).thenReturn(false);
+        } catch (JOSEException e) {
+            Assert.fail();
+        }
+
+        try {
+            jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
+        } catch (CommonGatewayException e) {
+            Assert.fail();
+        }
+        Assert.assertNotNull(jwtValidationInfo);
+        Assert.assertFalse(jwtValidationInfo.isValid());
+
+        try {
+            Mockito.when(signedJWT.verify(any(JWSVerifier.class))).thenThrow(new JOSEException(""));
+        } catch (JOSEException e) {
+            Assert.fail();
+        }
+
+        try {
+            jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
+        } catch (CommonGatewayException e) {
+            Assert.fail();
+        }
+        Assert.assertNotNull(jwtValidationInfo);
+        Assert.assertFalse(jwtValidationInfo.isValid());
+
+        Calendar pastDate = Calendar.getInstance();
+        pastDate.add(Calendar.HOUR, -1);
+        JWTClaimsSet jwtClaimsSetWithExpiry = new JWTClaimsSet.Builder()
+                .expirationTime(pastDate.getTime())
+                .claim("cnf", transportCertHash)
+                .build();
+
+        signedJWTInfo.setJwtClaimsSet(jwtClaimsSetWithExpiry);
+        try {
+            Mockito.when(signedJWT.verify(any(JWSVerifier.class))).thenReturn(true);
+        } catch (JOSEException e) {
+            Assert.fail();
+        }
+        try {
+            jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
+        } catch (CommonGatewayException e) {
+            Assert.fail();
+        }
+        Assert.assertNotNull(jwtValidationInfo);
+        Assert.assertFalse(jwtValidationInfo.isValid());
+        Assert.assertEquals(900901, jwtValidationInfo.getValidationCode());
+    }
+
+    @Test
+    public void validateTokenWithCertTest() {
+        JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.RS256);
+        jwsHeader = new JWSHeader.Builder(jwsHeader).keyID(keyId).build();
+        SignedJWTInfo signedJWTInfo = new SignedJWTInfo();
+        SignedJWT signedJWT = Mockito.mock(SignedJWT.class);
+        Mockito.when(signedJWT.getHeader()).thenReturn(jwsHeader);
+        signedJWTInfo.setSignedJWT(signedJWT);
+        Calendar now = Calendar.getInstance();
+        now.add(Calendar.HOUR, 1);
+        JSONObject transportCertHash = new JSONObject();
+        transportCertHash.put("x5t#S256", CERT_HASH);
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .expirationTime(now.getTime())
+                .claim("cnf", transportCertHash)
+                .build();
+        signedJWTInfo.setJwtClaimsSet(jwtClaimsSet);
+
+        String trustStorePath = Objects.requireNonNull(JWTValidatorImplTest.class
+                .getClassLoader().getResource("security/client-truststore.jks")).getPath();
+
+        KeyStore trustStore = null;
+        try (InputStream trustStoreContent = Files.newInputStream(Paths.get(trustStorePath))) {
+            trustStore = KeyStore.getInstance("JKS");
+            trustStore.load(trustStoreContent, "wso2carbon".toCharArray());
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
+        CloseableHttpClient httpClient = PowerMockito.mock(CloseableHttpClient.class);
+        CloseableHttpResponse response = PowerMockito.mock(CloseableHttpResponse.class);
+        StatusLine statusLine = PowerMockito.mock(StatusLine.class);
+        Mockito.when(statusLine.getStatusCode()).thenReturn(200);
+        Mockito.when(response.getStatusLine()).thenReturn(statusLine);
+        HttpEntity httpEntity = PowerMockito.mock(HttpEntity.class);
+        try {
+            // Dummy payload. JWKS response's n value is not considered for validation.
+            Mockito.when(httpEntity.getContent()).thenReturn(
+                    new ByteArrayInputStream(("{\"keys\":[{\"kty\":\"RSA\",\"e\":\"AQAB\"," +
+                    "\"use\":\"sig\",\"kid\":\"keyId\",\"alg\":\"RS256\",\"n\":\"kdgncoCrz655Lq8pTdX07" +
+                    "eoVBjdZDCUE6ueBd0D1hpJ0_zE3x3Az6tlvzs98PsPuGzaQOMmuLa4qxNJ-OKxJmutDUlClpuvxuf-jyq4gCV" +
+                    "5tEIILWRMBjlBEpJfWm63-VKKU4nvBWNJ7KfhWjl8-DUdNSh2pCDLpUObmb9Kquqc1x4BgttjN4rx_P-3_v-" +
+                    "1jETXzIP1L44yHtpQNv0khYf4j_aHjcEri9ykvpz1mtdacbrKK25N4V1HHRwDqZiJzOCCISXDuqB6wguY_v4" +
+                    "n0l1XtrEs7iCyfRFwNSKNrLqr23tR1CscmLfbH6ZLg5CYJTD-1uPSx0HMOB4Wv51PbWw\"}]}")
+                    .getBytes(StandardCharsets.UTF_8)));
+        } catch (IOException e) {
+            Assert.fail();
+        }
+        Mockito.when(response.getEntity()).thenReturn(httpEntity);
+        try {
+            Mockito.when(httpClient.execute(any(HttpGet.class))).thenReturn(response);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        javax.security.cert.Certificate javaxCert = Mockito.mock(javax.security.cert.Certificate.class);
+        RSAPublicKey rsaPublicKey = Mockito.mock(RSAPublicKey.class);
+        Mockito.when(javaxCert.getPublicKey()).thenReturn(rsaPublicKey);
+
+        TokenIssuerDto tokenIssuerDto = new TokenIssuerDto("https://localhost:9444/services");
+        JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
+        tokenIssuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
+        tokenIssuerDto.setCertificate(javaxCert);
+        jwksConfigurationDTO.setEnabled(false);
+        JWTValidatorConfiguration jwtValidatorConfiguration = PowerMockito.mock(JWTValidatorConfiguration.class);
+        Mockito.when(jwtValidatorConfiguration.getJwtIssuer()).thenReturn(tokenIssuerDto);
+
+        JWTValidator jwtValidator = new JWTValidatorImpl();
+        jwtValidator.loadValidatorConfiguration(jwtValidatorConfiguration);
+        JWTValidationInfo jwtValidationInfo = null;
+        try {
+            jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
+        } catch (CommonGatewayException e) {
+            Assert.fail();
+        }
+        Assert.assertNotNull(jwtValidationInfo);
+        Assert.assertFalse(jwtValidationInfo.isValid());
+        Assert.assertEquals(900901, jwtValidationInfo.getValidationCode());
+
+        try {
+            Mockito.when(signedJWT.verify(any(JWSVerifier.class))).thenReturn(true);
+        } catch (JOSEException e) {
+            Assert.fail();
+        }
+
+        try {
+            jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
+        } catch (CommonGatewayException e) {
+            Assert.fail();
+        }
+        Assert.assertNotNull(jwtValidationInfo);
+        Assert.assertTrue(jwtValidationInfo.isValid());
+    }
+}

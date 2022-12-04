@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.jwt;
+package org.wso2.carbon.apimgt.common.gateway.jwt;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -24,37 +24,46 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.wso2.carbon.apimgt.common.gateway.constants.APIConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.common.gateway.exception.CommonGatewayException;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.DefaultJWTTransformer;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
+import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-@Deprecated
+/**
+ * Default JWTValidator Implementation.
+ */
 public class JWTValidatorImpl implements JWTValidator {
 
     TokenIssuerDto tokenIssuer;
-    private Log log = LogFactory.getLog(JWTValidatorImpl.class);
+    private final Log log = LogFactory.getLog(JWTValidatorImpl.class);
     JWTTransformer jwtTransformer;
     private JWKSet jwkSet;
 
+    // TODO: (VirajSalaka)
+    private JWTValidatorConfiguration jwtValidatorConfiguration;
+
     @Override
-    public JWTValidationInfo validateToken(SignedJWTInfo signedJWTInfo) throws APIManagementException {
+    public JWTValidationInfo validateToken(SignedJWTInfo signedJWTInfo) throws CommonGatewayException {
 
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
         boolean state;
@@ -75,7 +84,8 @@ public class JWTValidatorImpl implements JWTValidator {
                         return jwtValidationInfo;
                     } else {
                         jwtValidationInfo.setValid(false);
-                        jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+                        jwtValidationInfo.setValidationCode(
+                                APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                         return jwtValidationInfo;
                     }
                 } else {
@@ -90,7 +100,7 @@ public class JWTValidatorImpl implements JWTValidator {
                 return jwtValidationInfo;
             }
         } catch (ParseException | JWTGeneratorException e) {
-            throw new APIManagementException("Error while parsing JWT", e);
+            throw new CommonGatewayException("Error while parsing JWT", e);
         }
     }
     private boolean isValidCertificateBoundAccessToken(SignedJWTInfo signedJWTInfo) { //Holder of Key token
@@ -100,30 +110,26 @@ public class JWTValidatorImpl implements JWTValidator {
                     StringUtils.isEmpty(signedJWTInfo.getClientCertificateHash())) {
                 return true; // If cnf is not available - 200 success
             }
-            if (signedJWTInfo.getClientCertificateHash().equals(signedJWTInfo.getCertificateThumbprint())) {
-                return true; // if cnf matches with truststore cert - 200 success
-            }
-            return false; // if cert is not in truststore or thumbprint does not match with the cert
+            return signedJWTInfo.getClientCertificateHash().equals(signedJWTInfo.getCertificateThumbprint());
         }
         return true; /// if config is not enabled - 200 success
     }
 
     private boolean isCertificateBoundAccessTokenEnabled() {
-
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        if (config != null) {
-            String firstProperty = config
-                    .getFirstProperty(APIConstants.ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN);
-            return Boolean.parseBoolean(firstProperty);
-        }
-        return false;
+        return jwtValidatorConfiguration.isEnableCertificateBoundAccessToken();
     }
     @Override
     public void loadTokenIssuerConfiguration(TokenIssuerDto tokenIssuerConfigurations) {
 
-        this.tokenIssuer = tokenIssuerConfigurations;
-        JWTTransformer jwtTransformer = ServiceReferenceHolder.getInstance().getJWTTransformer(tokenIssuer.getIssuer());
+        // TODO: (VirajSalaka) read this from config
+
+    }
+
+    @Override
+    public void loadValidatorConfiguration(JWTValidatorConfiguration jwtValidatorConfiguration) {
+        this.jwtValidatorConfiguration = jwtValidatorConfiguration;
+        this.tokenIssuer = jwtValidatorConfiguration.getJwtIssuer();
+        JWTTransformer jwtTransformer = jwtValidatorConfiguration.getJwtTransformer();
         if (jwtTransformer != null) {
             this.jwtTransformer = jwtTransformer;
         } else {
@@ -132,7 +138,7 @@ public class JWTValidatorImpl implements JWTValidator {
         this.jwtTransformer.loadConfiguration(tokenIssuer);
     }
 
-    protected boolean validateSignature(SignedJWT signedJWT) throws APIManagementException {
+    protected boolean validateSignature(SignedJWT signedJWT) throws CommonGatewayException {
 
         String certificateAlias = APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
         try {
@@ -164,21 +170,20 @@ public class JWTValidatorImpl implements JWTValidator {
                     RSAPublicKey rsaPublicKey = (RSAPublicKey) tokenIssuer.getCertificate().getPublicKey();
                     return JWTUtil.verifyTokenSignature(signedJWT, rsaPublicKey);
                 } else {
-                    return JWTUtil.verifyTokenSignature(signedJWT, keyID);
+                    return JWTUtil.verifyTokenSignature(signedJWT, keyID, jwtValidatorConfiguration.getTrustStore());
                 }
             }
-            return JWTUtil.verifyTokenSignature(signedJWT, certificateAlias);
+            return JWTUtil.verifyTokenSignature(signedJWT, certificateAlias, jwtValidatorConfiguration.getTrustStore());
         } catch (ParseException | JOSEException | IOException e) {
             log.error("Error while parsing JWT", e);
-            throw new APIManagementException("Error while parsing JWT", e);
         }
 
+        return true;
     }
 
     protected boolean validateTokenExpiry(JWTClaimsSet jwtClaimsSet) {
 
-        long timestampSkew =
-                ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getTimeStampSkewInSeconds();
+        long timestampSkew = jwtValidatorConfiguration.getTimeStampSkewInSeconds();
         Date now = new Date();
         Date exp = jwtClaimsSet.getExpirationTime();
         return exp == null || DateUtils.isAfter(exp, now, timestampSkew);
@@ -211,10 +216,10 @@ public class JWTValidatorImpl implements JWTValidator {
         jwtValidationInfo.setIssuer(jwtClaimsSet.getIssuer());
         jwtValidationInfo.setValid(true);
         jwtValidationInfo.setClaims(new HashMap<>(jwtClaimsSet.getClaims()));
-        if (jwtClaimsSet.getExpirationTime() != null){
+        if (jwtClaimsSet.getExpirationTime() != null) {
             jwtValidationInfo.setExpiryTime(jwtClaimsSet.getExpirationTime().getTime());
         }
-        if (jwtClaimsSet.getIssueTime() != null){
+        if (jwtClaimsSet.getIssueTime() != null) {
             jwtValidationInfo.setIssuedTime(jwtClaimsSet.getIssueTime().getTime());
         }
         jwtValidationInfo.setUser(jwtClaimsSet.getSubject());
@@ -223,9 +228,32 @@ public class JWTValidatorImpl implements JWTValidator {
 
     private JWKSet retrieveJWKSet() throws IOException, ParseException {
 
-        String jwksInfo = JWTUtil
-                .retrieveJWKSConfiguration(tokenIssuer.getJwksConfigurationDTO().getUrl());
+        String jwksInfo = retrieveJWKSConfiguration(tokenIssuer.getJwksConfigurationDTO().getUrl());
         jwkSet = JWKSet.parse(jwksInfo);
         return jwkSet;
+    }
+
+    /**
+     * This method used to retrieve JWKS keys from endpoint
+     *
+     * @param jwksEndpoint JWKS endpoint URL
+     * @return JWK payload
+     * @throws IOException If an exception occurs when calling the JWKS endpoint
+     */
+    public String retrieveJWKSConfiguration(String jwksEndpoint) throws IOException {
+        // TODO: (VirajSalaka) moved from JWTUtil
+        try (CloseableHttpClient httpClient = (CloseableHttpClient) jwtValidatorConfiguration.getHttpClient()) {
+            HttpGet httpGet = new HttpGet(jwksEndpoint);
+            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+                if (response.getStatusLine().getStatusCode() == 200) {
+                    HttpEntity entity = response.getEntity();
+                    try (InputStream content = entity.getContent()) {
+                        return IOUtils.toString(content);
+                    }
+                } else {
+                    return null;
+                }
+            }
+        }
     }
 }

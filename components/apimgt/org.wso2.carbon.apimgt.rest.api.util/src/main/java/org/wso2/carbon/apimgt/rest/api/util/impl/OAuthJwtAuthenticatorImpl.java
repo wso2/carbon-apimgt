@@ -29,10 +29,11 @@ import org.wso2.carbon.apimgt.api.OAuthTokenInfo;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.common.gateway.exception.CommonGatewayException;
+import org.wso2.carbon.apimgt.common.gateway.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.JwtTokenConstants;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
-import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil;
@@ -52,7 +53,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -263,7 +263,11 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     }
                     //info not in cache. validate signature and exp
                     JWTValidator jwtValidator = APIMConfigUtil.getJWTValidatorMap().get(issuer);
-                    jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
+                    try {
+                        jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
+                    } catch (CommonGatewayException e) {
+                        throw new APIManagementException(e);
+                    }
                     if (jwtValidationInfo.isValid()) {
                         //valid token
                         if (isRESTApiTokenCacheEnabled) {

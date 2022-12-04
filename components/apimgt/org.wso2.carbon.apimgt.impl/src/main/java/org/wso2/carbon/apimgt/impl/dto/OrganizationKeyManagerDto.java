@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.impl.dto;
 
 import org.apache.commons.lang3.StringUtils;
-import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
+import org.wso2.carbon.apimgt.common.gateway.jwt.JWTValidator;
 
 import java.util.HashMap;
 import java.util.Map;

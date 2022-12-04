@@ -18,111 +18,20 @@
 
 package org.wso2.carbon.apimgt.impl.jwt;
 
-import com.nimbusds.jose.util.X509CertUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
-
-import java.io.Serializable;
-import java.security.cert.Certificate;
 
 /**
  * JWT internal Representation
  */
-public class SignedJWTInfo implements Serializable {
-
-    private String token;
-    private SignedJWT signedJWT;
-    private JWTClaimsSet jwtClaimsSet;
-    private ValidationStatus validationStatus = ValidationStatus.NOT_VALIDATED;
-    private String certificateThumbprint; //holder of key certificate bound access token
-    private Certificate clientCertificate; //holder of key certificate cnf
-    private String clientCertificateHash; //holder of key certificate cnf
-    private static final Log log = LogFactory.getLog(JWTValidator.class);
-
-    public enum ValidationStatus {
-        NOT_VALIDATED, INVALID, VALID
-    }
+@Deprecated
+public class SignedJWTInfo extends org.wso2.carbon.apimgt.common.gateway.jwt.SignedJWTInfo {
 
     public SignedJWTInfo(String token, SignedJWT signedJWT, JWTClaimsSet jwtClaimsSet) {
-
-        this.token = token;
-        this.signedJWT = signedJWT;
-        this.jwtClaimsSet = jwtClaimsSet;
+        super(token, signedJWT, jwtClaimsSet);
     }
 
     public SignedJWTInfo() {
-
-    }
-
-    public SignedJWT getSignedJWT() {
-
-        return signedJWT;
-    }
-
-    public void setSignedJWT(SignedJWT signedJWT) {
-
-        this.signedJWT = signedJWT;
-    }
-
-    public JWTClaimsSet getJwtClaimsSet() {
-
-        return jwtClaimsSet;
-    }
-
-    public void setJwtClaimsSet(JWTClaimsSet jwtClaimsSet) {
-
-        this.jwtClaimsSet = jwtClaimsSet;
-    }
-
-    public String getToken() {
-
-        return token;
-    }
-
-    public void setToken(String token) {
-
-        this.token = token;
-    }
-
-    public ValidationStatus getValidationStatus() {
-        return validationStatus;
-    }
-
-    public void setValidationStatus(ValidationStatus validationStatus) {
-        this.validationStatus = validationStatus;
-    }
-
-    public void setClientCertificate(Certificate clientCertificate) {
-
-        this.clientCertificate = clientCertificate;
-        if (clientCertificate != null) {
-            CertificateMgtUtils.convert(clientCertificate).ifPresent(x509Certificate ->
-                    clientCertificateHash = X509CertUtils.computeSHA256Thumbprint(x509Certificate).toString());
-        }
-    }
-
-
-    public String getCertificateThumbprint() {
-
-        if (null != jwtClaimsSet) {
-            Object thumbprint = jwtClaimsSet.getClaim(APIConstants.CNF);
-            net.minidev.json.JSONObject thumbprintJson = (net.minidev.json.JSONObject) thumbprint;
-            return thumbprintJson.getAsString(APIConstants.DIGEST);
-        }
-        return null;
-    }
-
-    public String getClientCertificateHash() {
-
-        return clientCertificateHash;
-    }
-
-    public Certificate getClientCertificate() {
-
-        return clientCertificate;
+        super();
     }
 }

@@ -16,33 +16,40 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.jwt;
+package org.wso2.carbon.apimgt.common.gateway.jwt;
 
 import com.nimbusds.jwt.SignedJWT;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.common.gateway.exception.CommonGatewayException;
 
 /**
  * This interface used to validate JWT In Self Contain Manner
- *
- * Use {@link org.wso2.carbon.apimgt.common.gateway.jwt.JWTValidator} instead.
  */
-@Deprecated
 public interface JWTValidator {
 
     /**
      * This method used to validate JWT token
      * @param jwtToken {@link SignedJWT} token
      * @return JWTValidationInfo for validated Token
-     * @throws APIManagementException
+     * @throws CommonGatewayException if an exception occurs during the validation process
      */
-    JWTValidationInfo validateToken(SignedJWTInfo jwtToken) throws APIManagementException;
+    JWTValidationInfo validateToken(SignedJWTInfo jwtToken) throws CommonGatewayException;
 
     /**
      * This method used to load JWTValidator related configurations
      *
-     * @param tokenIssuerConfigurations
+     * @param tokenIssuerConfigurations {@link TokenIssuerDto} object
      */
+    @Deprecated
     void loadTokenIssuerConfiguration(TokenIssuerDto tokenIssuerConfigurations);
- }
+
+    /**
+     * This method is used to load the configuration for JWT Validator.
+     *
+     * @param jwtValidatorConfiguration {@link JWTValidatorConfiguration} object
+     */
+    default void loadValidatorConfiguration(JWTValidatorConfiguration jwtValidatorConfiguration) {
+        // TODO: (VirajSalaka) implement body
+    }
+}

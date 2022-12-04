@@ -22,11 +22,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.exception.CommonGatewayException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.apimgt.common.gateway.jwt.SignedJWTInfo;
 
 public class JWTValidationServiceImpl implements JWTValidationService {
 
@@ -40,8 +42,26 @@ public class JWTValidationServiceImpl implements JWTValidationService {
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
         if (StringUtils.isNotEmpty(issuer)) {
             KeyManagerDto keyManagerDto = KeyManagerHolder.getKeyManagerByIssuer(tenantDomain, issuer);
-            if (keyManagerDto != null && keyManagerDto.getJwtValidator() != null) {
-                JWTValidationInfo validationInfo = keyManagerDto.getJwtValidator().validateToken(signedJWTInfo);
+            if (keyManagerDto != null &&
+                    (keyManagerDto.getJwtValidator() != null || keyManagerDto.getDeprecatedJWTValidator() != null)) {
+                JWTValidationInfo validationInfo;
+                if (keyManagerDto.getJwtValidator() != null) {
+                    try {
+                        validationInfo = keyManagerDto.getJwtValidator().validateToken(signedJWTInfo);
+                    } catch (CommonGatewayException e) {
+                        throw new APIManagementException(e);
+                    }
+                } else {
+                    org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo deprecatedSignedJWTInfo
+                            = new org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo();
+                    deprecatedSignedJWTInfo.setToken(signedJWTInfo.getToken());
+                    deprecatedSignedJWTInfo.setSignedJWT(signedJWTInfo.getSignedJWT());
+                    deprecatedSignedJWTInfo.setClientCertificate(signedJWTInfo.getClientCertificate());
+                    deprecatedSignedJWTInfo.setJwtClaimsSet(signedJWTInfo.getJwtClaimsSet());
+                    deprecatedSignedJWTInfo.setValidationStatus(signedJWTInfo.getValidationStatus());
+                    validationInfo = keyManagerDto.getDeprecatedJWTValidator()
+                            .validateToken(deprecatedSignedJWTInfo);
+                }
                 validationInfo.setKeyManager(keyManagerDto.getName());
                 return validationInfo;
             }
@@ -57,7 +77,8 @@ public class JWTValidationServiceImpl implements JWTValidationService {
 
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
         KeyManagerDto keyManagerDto = KeyManagerHolder.getKeyManagerByIssuer(tenantDomain, issuer);
-        if (keyManagerDto != null && keyManagerDto.getJwtValidator() != null) {
+        if (keyManagerDto != null &&
+                (keyManagerDto.getJwtValidator() != null || keyManagerDto.getDeprecatedJWTValidator() != null)) {
             return keyManagerDto.getName();
         }else{
             return null;

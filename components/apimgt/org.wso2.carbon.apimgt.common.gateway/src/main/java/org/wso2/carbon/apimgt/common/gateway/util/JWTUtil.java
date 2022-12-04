@@ -23,17 +23,24 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.common.gateway.exception.CommonGatewayException;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.JWTSignatureAlg;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -41,6 +48,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -78,7 +86,8 @@ public final class JWTUtil {
      *
      * @param publicCert         - The public certificate which needs to include in the header as thumbprint
      * @param signatureAlgorithm signature algorithm which needs to include in the header
-     * @throws JWTGeneratorException
+     * @throws JWTGeneratorException if the JWT generation fails due to invalid algorithm or certificate encoding
+     * issue
      */
     public static String generateHeader(Certificate publicCert, String signatureAlgorithm) throws
             JWTGeneratorException {
@@ -92,7 +101,7 @@ public final class JWTUtil {
             String publicCertThumbprint = hexify(digestInBytes);
             String base64UrlEncodedThumbPrint;
             base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
-                    .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
+                    .encodeToString(publicCertThumbprint.getBytes(StandardCharsets.UTF_8));
             StringBuilder jwtHeader = new StringBuilder();
             /*
              * Sample header
@@ -110,7 +119,7 @@ public final class JWTUtil {
             jwtHeader.append("\"}");
             return jwtHeader.toString();
 
-        } catch (NoSuchAlgorithmException | CertificateEncodingException | UnsupportedEncodingException e) {
+        } catch (NoSuchAlgorithmException | CertificateEncodingException e) {
             throw new JWTGeneratorException("Error in generating public certificate thumbprint", e);
         }
     }
@@ -121,7 +130,7 @@ public final class JWTUtil {
      * @param bytes - The input byte array
      * @return hexadecimal representation
      */
-    public static String hexify(byte bytes[]) {
+    public static String hexify(byte[] bytes) {
 
         char[] hexDigits = {'0', '1', '2', '3', '4', '5', '6', '7',
                 '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
@@ -141,7 +150,8 @@ public final class JWTUtil {
      * @param privateKey         private key which use to sign the JWT assertion
      * @param signatureAlgorithm signature algorithm which use to sign the JWT assertion
      * @return byte array of the JWT signature
-     * @throws JWTGeneratorException
+     * @throws JWTGeneratorException if the JWT generation fails due to invalid algorithm, private key issue or
+     * due to a signature exception
      */
     public static byte[] signJwt(String assertion, PrivateKey privateKey, String signatureAlgorithm) throws
             JWTGeneratorException {
@@ -235,6 +245,67 @@ public final class JWTUtil {
                     getJWTClaimsArray(jwtClaims, (JsonObject) rootElement.getValue(), claimKey);
                 }
             }
+        }
+    }
+
+    /**
+     * Verify the JWT token signature.
+     *
+     * @param jwt SignedJwt Token
+     * @param publicKey      public certificate
+     * @return whether the signature is verified or or not
+     */
+    public static boolean verifyTokenSignature(SignedJWT jwt, RSAPublicKey publicKey) {
+
+        JWSAlgorithm algorithm = jwt.getHeader().getAlgorithm();
+        if ((JWSAlgorithm.RS256.equals(algorithm) || JWSAlgorithm.RS512.equals(algorithm) ||
+                JWSAlgorithm.RS384.equals(algorithm)) || JWSAlgorithm.PS256.equals(algorithm)) {
+            try {
+                JWSVerifier jwsVerifier = new RSASSAVerifier(publicKey);
+                return jwt.verify(jwsVerifier);
+            } catch (JOSEException e) {
+                log.error("Error while verifying JWT signature", e);
+                return false;
+            }
+        } else {
+            log.error("Public key is not a RSA");
+            return false;
+        }
+    }
+
+    /**
+     * Verify the JWT token signature.
+     *
+     * @param jwt        SignedJwt Token
+     * @param alias      public certificate keystore alias
+     * @param trustStore Truststore
+     * @return whether the signature is verified or or not
+     * @throws CommonGatewayException in case of signature verification failure
+     */
+    public static boolean verifyTokenSignature(SignedJWT jwt, String alias, KeyStore trustStore)
+            throws CommonGatewayException {
+
+        Certificate publicCert;
+        //Read the client-truststore.jks into a KeyStore
+        try {
+            publicCert = trustStore.getCertificate(alias);
+        } catch (KeyStoreException e) {
+            throw new CommonGatewayException("Error retrieving certificate from truststore ", e);
+        }
+
+        if (publicCert != null) {
+            JWSAlgorithm algorithm = jwt.getHeader().getAlgorithm();
+            if ((JWSAlgorithm.RS256.equals(algorithm) || JWSAlgorithm.RS512.equals(algorithm) ||
+                    JWSAlgorithm.RS384.equals(algorithm))) {
+                return verifyTokenSignature(jwt, (RSAPublicKey) publicCert.getPublicKey());
+            } else {
+                log.error("Public key is not RSA");
+                throw new CommonGatewayException("Public key is not RSA");
+            }
+        } else {
+            log.error("Couldn't find a public certificate with alias " + alias + " to verify the signature");
+            throw new CommonGatewayException(
+                    "Couldn't find a public certificate with alias " + alias + " to verify the signature");
         }
     }
 }

@@ -19,7 +19,7 @@ package org.wso2.carbon.apimgt.rest.api.common.internal;
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
+import org.wso2.carbon.apimgt.common.gateway.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.rest.api.common.RestAPIAuthenticator;
 
 import java.util.ArrayList;

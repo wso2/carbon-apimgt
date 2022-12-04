@@ -132,6 +132,7 @@
                         </Bundle-SymbolicName>
                         <Import-Package>
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
+                            org.wso2.carbon.apimgt.common.gateway.*; version="${carbon.apimgt.version}",
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>

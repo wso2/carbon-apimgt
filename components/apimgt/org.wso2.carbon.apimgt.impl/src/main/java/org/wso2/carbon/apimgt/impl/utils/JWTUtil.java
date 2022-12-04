@@ -24,6 +24,7 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -31,10 +32,21 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.common.gateway.jwt.JWTValidator;
+import org.wso2.carbon.apimgt.common.gateway.jwt.JWTValidatorConfiguration;
+import org.wso2.carbon.apimgt.common.gateway.jwt.JWTValidatorImpl;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
 
@@ -42,6 +54,7 @@ public class JWTUtil {
 
     private static final Log log = LogFactory.getLog(JWTUtil.class);
 
+    // TODO: (VirajSalaka) remove
     /**
      * This method used to retrieve JWKS keys from endpoint
      *
@@ -73,7 +86,7 @@ public class JWTUtil {
      *
      * @param jwt SignedJwt Token
      * @param publicKey      public certificate
-     * @return whether the signature is verified or or not
+     * @return whether the signature is verified or not
      */
     public static boolean verifyTokenSignature(SignedJWT jwt, RSAPublicKey publicKey) {
 
@@ -125,6 +138,58 @@ public class JWTUtil {
             throw new APIManagementException(
                     "Couldn't find a public certificate with alias " + alias + " to verify the signature");
         }
+    }
+
+    public static JWTValidator createJWTValidator(TokenIssuerDto tokenIssuer) {
+        JWTValidatorImpl jwtValidator = new JWTValidatorImpl();
+        jwtValidator.loadValidatorConfiguration(createJWTValidatorConfiguration(tokenIssuer));
+        return jwtValidator;
+    }
+
+    public static JWTValidator createJWTValidator(TokenIssuerDto tokenIssuer, String jwtValidatorImplName)
+            throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException,
+            InvocationTargetException {
+        JWTValidator jwtValidator = (JWTValidator) Class.forName(jwtValidatorImplName).getDeclaredConstructor().newInstance();
+        jwtValidator.loadValidatorConfiguration(createJWTValidatorConfiguration(tokenIssuer));
+        return jwtValidator;
+    }
+
+    private static JWTValidatorConfiguration createJWTValidatorConfiguration(TokenIssuerDto tokenIssuer) {
+        boolean enableCertificateBoundAccessToken = false;
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        if (config != null) {
+            String firstProperty = config
+                    .getFirstProperty(APIConstants.ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN);
+            enableCertificateBoundAccessToken = Boolean.parseBoolean(firstProperty);
+        }
+        long timestampSkew = ServiceReferenceHolder.getInstance().getOauthServerConfiguration()
+                .getTimeStampSkewInSeconds();
+        JWTTransformer jwtTransformer = ServiceReferenceHolder.getInstance()
+                .getJWTTransformer(tokenIssuer.getIssuer());
+        KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
+
+        JWTValidatorConfiguration.Builder builder = new JWTValidatorConfiguration.Builder()
+                .enableCertificateBoundAccessToken(enableCertificateBoundAccessToken)
+                .timeStampSkewInSeconds(timestampSkew)
+                .jwtTransformer(jwtTransformer)
+                .trustStore(trustStore)
+                .jwtIssuer(tokenIssuer);
+        // TODO: (VirajSalaka) handle with try finally and check the availability of httpClient when necessary.
+        if (tokenIssuer.getJwksConfigurationDTO() != null &&
+                StringUtils.isNotEmpty(tokenIssuer.getJwksConfigurationDTO().getUrl())) {
+            URL url;
+            try {
+                url = new URL(tokenIssuer.getJwksConfigurationDTO().getUrl());
+                CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil
+                        .getHttpClient(url.getPort(), url.getProtocol());
+                builder.httpClient(httpClient);
+            } catch (MalformedURLException e) {
+                log.error("Error while initializing JWT Validator due to malformed URL provided within the JWKS " +
+                        "configuration. HttpClient will not be added to the JwtValidator", e);
+            }
+        }
+        return builder.build();
     }
 
 }

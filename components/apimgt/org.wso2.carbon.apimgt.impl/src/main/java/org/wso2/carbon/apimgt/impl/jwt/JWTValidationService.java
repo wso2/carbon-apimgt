@@ -20,9 +20,10 @@ package org.wso2.carbon.apimgt.impl.jwt;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.jwt.SignedJWTInfo;
 
 public interface JWTValidationService {
 
-    public JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo) throws APIManagementException;
-    public String getKeyManagerNameIfJwtValidatorExist(SignedJWTInfo signedJWTInfo) throws APIManagementException;
+    JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo) throws APIManagementException;
+    String getKeyManagerNameIfJwtValidatorExist(SignedJWTInfo signedJWTInfo) throws APIManagementException;
 }
