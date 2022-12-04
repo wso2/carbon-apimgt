@@ -3249,6 +3249,8 @@ public class SQLConstants {
                 + "WHERE ALIAS=?";
         public static final String CERTIFICATE_EXIST =
                 "SELECT 1 FROM AM_CERTIFICATE_METADATA WHERE ALIAS=? AND TENANT_ID=?";
+
+        public static final String GET_ALL_CERTIFICATES = "SELECT * FROM AM_CERTIFICATE_METADATA";
     }
 
     public static class ClientCertificateConstants{

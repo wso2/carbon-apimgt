@@ -38,6 +38,8 @@ public class API implements CacheableEntity<String> {
     private String policy = null;
     private String apiType = null;
     private String status;
+    private String organization;
+    private boolean deployed = false;
     private boolean isDefaultVersion = false;
 
     public API() {
@@ -69,7 +71,33 @@ public class API implements CacheableEntity<String> {
         this.status = status;
         this.isDefaultVersion = isDefaultVersion;
     }
-
+    /**
+     *
+     * @param uuid
+     * @param apiId
+     * @param provider
+     * @param name
+     * @param version
+     * @param context
+     * @param policy
+     * @param apiType
+     * @param status
+     * @param isDefaultVersion
+     */
+    public API(String uuid, Integer apiId, String provider, String name, String version, String context,
+               String policy, String apiType, String status, boolean isDefaultVersion,boolean isDeployed) {
+        this.uuid = uuid;
+        this.apiId = apiId;
+        this.provider = provider;
+        this.name = name;
+        this.version = version;
+        this.context = context;
+        this.policy = policy;
+        this.apiType = apiType;
+        this.status = status;
+        this.isDefaultVersion = isDefaultVersion;
+        this.deployed = isDeployed;
+    }
     private List<URLMapping> urlMappings = new ArrayList<>();
 
 
@@ -206,5 +234,65 @@ public class API implements CacheableEntity<String> {
     public void setStatus(String status) {
 
         this.status = status;
+    }
+
+    public void setApiId(Integer apiId) {
+        this.apiId = apiId;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getPolicy() {
+        return policy;
+    }
+
+    public void setPolicy(String policy) {
+        this.policy = policy;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
+    public List<URLMapping> getUrlMappings() {
+        return urlMappings;
+    }
+
+    public void setUrlMappings(List<URLMapping> urlMappings) {
+        this.urlMappings = urlMappings;
+    }
+
+    public boolean isDeployed() {
+        return deployed;
+    }
+
+    public void setDeployed(boolean deployed) {
+        this.deployed = deployed;
     }
 }

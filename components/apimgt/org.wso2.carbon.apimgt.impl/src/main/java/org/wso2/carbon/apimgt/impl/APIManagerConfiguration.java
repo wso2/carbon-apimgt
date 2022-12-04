@@ -2082,6 +2082,11 @@ public class APIManagerConfiguration {
         } else {
             log.debug("Gateway artifact synchronizer Event waiting time not set.");
         }
+        OMElement enableEagerLoading =
+                omElement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.EnableOnDemandLoadingAPIS));
+        if (enableEagerLoading != null){
+            gatewayArtifactSynchronizerProperties.setOnDemandLoading(Boolean.parseBoolean(enableEagerLoading.getText()));
+        }
     }
 
     public GatewayArtifactSynchronizerProperties getGatewayArtifactSynchronizerProperties() {

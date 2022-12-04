@@ -774,4 +774,39 @@ public class CertificateMgtDAO {
         }
         return false;
     }
+
+    /**
+     * Method to retrieve all certificate metadata from db.
+     *
+     * @return : A CertificateMetadataDTO object if the certificate is retrieved successfully, null otherwise.
+     */
+    public List<CertificateMetadataDTO> getAllCertificates() throws CertificateManagementException {
+
+        String getCertQuery;
+        CertificateMetadataDTO certificateMetadataDTO;
+        List<CertificateMetadataDTO> certificateMetadataList = new ArrayList<>();
+
+        getCertQuery = SQLConstants.CertificateConstants.GET_ALL_CERTIFICATES;
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(getCertQuery)) {
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        certificateMetadataDTO = new CertificateMetadataDTO();
+                        certificateMetadataDTO.setAlias(resultSet.getString("ALIAS"));
+                        certificateMetadataDTO.setEndpoint(resultSet.getString("END_POINT"));
+                        try (InputStream certificate = resultSet.getBinaryStream("CERTIFICATE")) {
+                            certificateMetadataDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(certificate));
+                        }
+                        certificateMetadataDTO.setTenantId(resultSet.getInt("TENANT_ID"));
+                        certificateMetadataList.add(certificateMetadataDTO);
+                    }
+                }
+            }
+        } catch (SQLException | IOException e) {
+            handleException("Error while retrieving certificate metadata.", e);
+        }
+        return certificateMetadataList;
+    }
+
 }

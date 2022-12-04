@@ -28,6 +28,7 @@ public class APIDTO   {
     private String policy = null;
     private String apiType = null;
     private String status = null;
+    private String organization = null;
     private Boolean isDefaultVersion = null;
     private List<URLMappingDTO> urlMappings = new ArrayList<>();
 
@@ -193,6 +194,24 @@ public class APIDTO   {
   }
 
   /**
+   * Organization of the API.
+   **/
+  public APIDTO organization(String organization) {
+    this.organization = organization;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "wso2.com", value = "Organization of the API.")
+  @JsonProperty("organization")
+  public String getOrganization() {
+    return organization;
+  }
+  public void setOrganization(String organization) {
+    this.organization = organization;
+  }
+
+  /**
    * Whether this is the default version of the API.
    **/
   public APIDTO isDefaultVersion(Boolean isDefaultVersion) {
@@ -246,13 +265,14 @@ public class APIDTO   {
         Objects.equals(policy, API.policy) &&
         Objects.equals(apiType, API.apiType) &&
         Objects.equals(status, API.status) &&
+        Objects.equals(organization, API.organization) &&
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(urlMappings, API.urlMappings);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, isDefaultVersion, urlMappings);
+    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, urlMappings);
   }
 
   @Override
@@ -269,6 +289,7 @@ public class APIDTO   {
     sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
     sb.append("    apiType: ").append(toIndentedString(apiType)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
+    sb.append("    organization: ").append(toIndentedString(organization)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    urlMappings: ").append(toIndentedString(urlMappings)).append("\n");
     sb.append("}");
