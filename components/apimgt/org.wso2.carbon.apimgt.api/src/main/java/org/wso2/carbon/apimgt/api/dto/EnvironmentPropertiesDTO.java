@@ -25,6 +25,7 @@ public class EnvironmentPropertiesDTO {
   
     private String productionEndpoint;
     private String sandboxEndpoint;
+    private String sandboxEndpointChoreo;
 
     public String getProductionEndpoint() {
         return productionEndpoint;
@@ -40,6 +41,14 @@ public class EnvironmentPropertiesDTO {
 
     public void setSandboxEndpoint(String sandboxEndpoint) {
         this.sandboxEndpoint = sandboxEndpoint;
+    }
+
+    public String getSandboxEndpointChoreo() {
+        return sandboxEndpointChoreo;
+    }
+
+    public void setSandboxEndpointChoreo(String sandboxEndpointChoreo) {
+        this.sandboxEndpointChoreo = sandboxEndpointChoreo;
     }
 }
 
