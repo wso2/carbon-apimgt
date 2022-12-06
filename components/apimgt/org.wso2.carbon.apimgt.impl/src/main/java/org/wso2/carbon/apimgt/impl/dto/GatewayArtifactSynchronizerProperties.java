@@ -16,6 +16,7 @@ public class GatewayArtifactSynchronizerProperties {
     private long retryDuartion = 15000 ;
     private String gatewayStartup = "sync";
     private long eventWaitingTime = 1;
+    private boolean onDemandLoading;
 
 
     public String getSaverName() {
@@ -116,5 +117,13 @@ public class GatewayArtifactSynchronizerProperties {
     public void  setGatewayStartup(String gatewayStartup) {
 
         this.gatewayStartup = gatewayStartup;
+    }
+
+    public void setOnDemandLoading(boolean onDemandLoading) {
+        this.onDemandLoading = onDemandLoading;
+    }
+
+    public boolean isOnDemandLoading() {
+        return onDemandLoading;
     }
 }

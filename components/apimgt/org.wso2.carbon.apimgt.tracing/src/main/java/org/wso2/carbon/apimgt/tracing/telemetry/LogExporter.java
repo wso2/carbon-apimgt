@@ -49,24 +49,23 @@ public class LogExporter implements SpanExporter {
 
         Iterator<SpanData> var3 = spans.iterator();
         while (var3.hasNext()) {
-
-            try (StringWriter writer = new StringWriter();
-                 JsonGenerator generator = this.jsonFactory.createGenerator(writer)) {
-                generator.writeStartObject();
-                SpanData span = var3.next();
-                generator.writeStringField(TelemetryConstants.SPAN_ID, span.getSpanId());
-                generator.writeStringField(TelemetryConstants.TRACER_ID, span.getTraceId());
-                generator.writeStringField(TelemetryConstants.OPERATION_NAME, span.getName());
-                generator.writeStringField(TelemetryConstants.LATENCY,
-                        ((int) (span.getEndEpochNanos() - span.getStartEpochNanos()) / 1000000) + "ms");
-                generator.writeStringField(TelemetryConstants.ATTRIBUTES, String.valueOf(span.getAttributes()));
-                generator.writeEndObject();
+            try (StringWriter writer = new StringWriter()) {
+                try (JsonGenerator generator = this.jsonFactory.createGenerator(writer)) {
+                    generator.writeStartObject();
+                    SpanData span = var3.next();
+                    generator.writeStringField(TelemetryConstants.SPAN_ID, span.getSpanId());
+                    generator.writeStringField(TelemetryConstants.TRACER_ID, span.getTraceId());
+                    generator.writeStringField(TelemetryConstants.OPERATION_NAME, span.getName());
+                    generator.writeStringField(TelemetryConstants.LATENCY,
+                            ((int) (span.getEndEpochNanos() - span.getStartEpochNanos()) / 1000000) + "ms");
+                    generator.writeStringField(TelemetryConstants.ATTRIBUTES, String.valueOf(span.getAttributes()));
+                    generator.writeEndObject();
+                }
                 log.trace(writer.toString());
             } catch (IOException e) {
                 log.error("Error in structured message when exporting", e);
             }
         }
-
         return CompletableResultCode.ofSuccess();
     }
 

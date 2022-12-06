@@ -66,6 +66,7 @@ import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorCons
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
@@ -912,8 +913,8 @@ public class GatewayUtils {
             }
         } else {
             log.error("Couldn't find a public certificate to verify signature with alias " + alias);
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.SIGNATURE_VERIFICATION_FAILURE_MESSAGE);
         }
     }
 
@@ -1517,5 +1518,12 @@ public class GatewayUtils {
             return DataHolder.getInstance().getKeyManagersFromUUID(api.getUuid());
         }
         return Arrays.asList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS);
+    }
+
+    public static boolean isOnDemandLoading() {
+        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                        .getGatewayArtifactSynchronizerProperties();
+        return gatewayArtifactSynchronizerProperties.isOnDemandLoading();
     }
 }

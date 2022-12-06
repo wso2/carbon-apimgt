@@ -169,9 +169,9 @@ public class JWTValidatorImpl implements JWTValidator {
             return JWTUtil.verifyTokenSignature(signedJWT, certificateAlias);
         } catch (ParseException | JOSEException | IOException e) {
             log.error("Error while parsing JWT", e);
+            throw new APIManagementException("Error while parsing JWT", e);
         }
 
-        return true;
     }
 
     protected boolean validateTokenExpiry(JWTClaimsSet jwtClaimsSet) {
