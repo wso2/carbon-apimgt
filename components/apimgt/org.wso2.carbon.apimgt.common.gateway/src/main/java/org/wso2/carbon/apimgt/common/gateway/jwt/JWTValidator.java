@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.common.gateway.jwt;
 
 import com.nimbusds.jwt.SignedJWT;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
-import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.common.gateway.exception.CommonGatewayException;
 
 /**
@@ -37,19 +36,9 @@ public interface JWTValidator {
     JWTValidationInfo validateToken(SignedJWTInfo jwtToken) throws CommonGatewayException;
 
     /**
-     * This method used to load JWTValidator related configurations
-     *
-     * @param tokenIssuerConfigurations {@link TokenIssuerDto} object
-     */
-    @Deprecated
-    void loadTokenIssuerConfiguration(TokenIssuerDto tokenIssuerConfigurations);
-
-    /**
      * This method is used to load the configuration for JWT Validator.
      *
      * @param jwtValidatorConfiguration {@link JWTValidatorConfiguration} object
      */
-    default void loadValidatorConfiguration(JWTValidatorConfiguration jwtValidatorConfiguration) {
-        // TODO: (VirajSalaka) implement body
-    }
+    void loadValidatorConfiguration(JWTValidatorConfiguration jwtValidatorConfiguration);
 }

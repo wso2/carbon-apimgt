@@ -32,6 +32,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.common.gateway.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.common.gateway.jwt.JWTValidatorConfiguration;
@@ -54,7 +55,7 @@ public class JWTUtil {
 
     private static final Log log = LogFactory.getLog(JWTUtil.class);
 
-    // TODO: (VirajSalaka) remove
+    @Deprecated
     /**
      * This method used to retrieve JWKS keys from endpoint
      *

@@ -118,12 +118,6 @@ public class JWTValidatorImpl implements JWTValidator {
     private boolean isCertificateBoundAccessTokenEnabled() {
         return jwtValidatorConfiguration.isEnableCertificateBoundAccessToken();
     }
-    @Override
-    public void loadTokenIssuerConfiguration(TokenIssuerDto tokenIssuerConfigurations) {
-
-        // TODO: (VirajSalaka) read this from config
-
-    }
 
     @Override
     public void loadValidatorConfiguration(JWTValidatorConfiguration jwtValidatorConfiguration) {
