@@ -179,6 +179,39 @@ public class AMDefaultKeyManagerImplTest {
         Assert.assertEquals(APP_UUID, oauthApplicationResponse.getClientName());
     }
 
+
+    @Test
+    public void testTokenAuthorizedUserType() throws KeyManagerClientException, APIManagementException {
+        String accessToken = "155ddde3-68db-35b1-82dc-1247616b2da9";
+        IntrospectInfo response = new IntrospectInfo();
+        response.setActive(true);
+        response.setExpiry(Long.MAX_VALUE);
+        response.setIat(new Date().getTime());
+        response.setAut("application");
+        Mockito.when(introspectionClient.introspect(accessToken)).thenReturn(response);
+        AccessTokenInfo accessTokenInfo = keyManager.getTokenMetaData(accessToken);
+        Assert.assertTrue(accessTokenInfo.isApplicationToken());
+
+        response.setAut("application_user");
+        Mockito.when(introspectionClient.introspect(accessToken)).thenReturn(response);
+        accessTokenInfo = keyManager.getTokenMetaData(accessToken);
+        Assert.assertFalse(accessTokenInfo.isApplicationToken());
+
+        response.setAut("APPLICATION");
+        Mockito.when(introspectionClient.introspect(accessToken)).thenReturn(response);
+        accessTokenInfo = keyManager.getTokenMetaData(accessToken);
+        Assert.assertTrue(accessTokenInfo.isApplicationToken());
+
+        response.setAut("APPLICATION_USER");
+        Mockito.when(introspectionClient.introspect(accessToken)).thenReturn(response);
+        accessTokenInfo = keyManager.getTokenMetaData(accessToken);
+        Assert.assertFalse(accessTokenInfo.isApplicationToken());
+
+        response.setAut("");
+        Mockito.when(introspectionClient.introspect(accessToken)).thenReturn(response);
+        accessTokenInfo = keyManager.getTokenMetaData(accessToken);
+        Assert.assertFalse(accessTokenInfo.isApplicationToken());
+    }
 //
 //    @Test
 //    public void testUpdateApplication() throws APIManagementException {
