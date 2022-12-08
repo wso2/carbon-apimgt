@@ -61,7 +61,8 @@ public class MethodTimeLogger
      *
      * @return true if the property value matches this package name
      */
-    @Pointcut("execution(* *(..)) && if()")
+    @Pointcut("execution(* *(..)) && " +
+            "!execution(* org.wso2.carbon.apimgt.impl.ConfigurableCorrelationLogService.*(..)) && if()")
     public static boolean pointCutAll() {
         if (!isLogAllSet) {
             logAllMethods = ConfigurableCorrelationLogService.isLogAllMethods();
