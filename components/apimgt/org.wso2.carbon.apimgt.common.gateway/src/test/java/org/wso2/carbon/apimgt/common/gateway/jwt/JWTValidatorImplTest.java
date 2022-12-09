@@ -45,6 +45,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Calendar;
 import java.util.Objects;
@@ -54,7 +55,7 @@ import static org.mockito.ArgumentMatchers.any;
 public class JWTValidatorImplTest {
     private final String keyId = "keyId";
     private final String jwksURL = "https://localhost:9443/oauth2/jwks";
-    private static final String CERT_HASH =  "9a0c3570ac7392bee14a408ecb38978852a86d38cbc087feeeeaab2c9a07b9f1";
+    private static final String CERT_HASH =  "HXKfuMRo6tggoqC-StuPur7ZqxuhJsnSFGbFcG6OTTA";
 
     @Test
     public void validateTokenWithJWKSTest() {
@@ -204,7 +205,7 @@ public class JWTValidatorImplTest {
     }
 
     @Test
-    public void validateTokenWithCertTest() {
+    public void validateTokenWithCertTest() throws KeyStoreException {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.RS256);
         jwsHeader = new JWSHeader.Builder(jwsHeader).keyID(keyId).build();
         SignedJWTInfo signedJWTInfo = new SignedJWTInfo();
@@ -295,5 +296,35 @@ public class JWTValidatorImplTest {
         }
         Assert.assertNotNull(jwtValidationInfo);
         Assert.assertTrue(jwtValidationInfo.isValid());
+
+        Mockito.when(jwtValidatorConfiguration.isEnableCertificateBoundAccessToken()).thenReturn(true);
+        try {
+            jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
+        } catch (CommonGatewayException e) {
+            Assert.fail();
+        }
+        Assert.assertNotNull(jwtValidationInfo);
+        Assert.assertTrue(jwtValidationInfo.isValid());
+
+        signedJWTInfo.setClientCertificate(trustStore.getCertificate("wso2carbon"));
+        Assert.assertEquals(signedJWTInfo.getCertificateThumbprint(), signedJWTInfo.getClientCertificateHash());
+        try {
+            jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
+        } catch (CommonGatewayException e) {
+            Assert.fail();
+        }
+        Assert.assertNotNull(jwtValidationInfo);
+        Assert.assertTrue(jwtValidationInfo.isValid());
+
+        signedJWTInfo.setClientCertificate(trustStore.getCertificate("comodorsaca"));
+        Assert.assertNotNull(signedJWTInfo.getCertificateThumbprint(), signedJWTInfo.getClientCertificateHash());
+        try {
+            jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
+        } catch (CommonGatewayException e) {
+            Assert.fail();
+        }
+        Assert.assertNotNull(jwtValidationInfo);
+        Assert.assertFalse(jwtValidationInfo.isValid());
+        Assert.assertEquals(900901, jwtValidationInfo.getValidationCode());
     }
 }
