@@ -378,7 +378,8 @@ public class APIManagerConfiguration {
                 Map<String, String> operationPolicyProps = new HashMap<>();
                 while (policyProviderPropertiesIterator.hasNext()) {
                     OMElement propertyElem = (OMElement) policyProviderPropertiesIterator.next();
-                    String name = propertyElem.getAttributeValue(new QName(APIConstants.ApiManagerConfigurationConstants.NAME));
+                    String name =
+                            propertyElem.getAttributeValue(new QName(APIConstants.ApiManagerConfigurationConstants.NAME));
                     String value = propertyElem.getText();
                     operationPolicyProps.put(name, value);
                 }
