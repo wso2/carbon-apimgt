@@ -25,21 +25,19 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.apache.log4j.MDC;
+import org.slf4j.MDC;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-
+import org.wso2.carbon.apimgt.impl.correlation.MethodCallsCorrelationConfigDataHolder;
 import java.util.UUID;
 
+
 /**
- * This class provides AspectJ configurations
+ * This class provides AspectJ configurations.
  */
 @Aspect
-public class MethodTimeLogger
-{
+public class MethodTimeLogger {
     private static final Log log = LogFactory.getLog("correlation");
-    private static boolean isEnabled = false;
     private static boolean logAllMethods = false;
-    private static boolean isSet = false;
     private static boolean isLogAllSet = false;
 
     /**
@@ -72,20 +70,13 @@ public class MethodTimeLogger
     }
 
     /**
-     * This pointcut looks for the system property to enable/ disable timing logs
+     * This pointcut looks for the system property to enable/ disable timing logs.
      *
      * @return true if the property value is given as true
      */
     @Pointcut("if()")
     public static boolean isConfigEnabled() {
-        if (!isSet) {
-            String config = System.getProperty(APIConstants.ENABLE_CORRELATION_LOGS);
-            if (StringUtils.isNotEmpty(config)) {
-                isEnabled = Boolean.parseBoolean(config);
-                isSet = true;
-            }
-        }
-        return isEnabled;
+        return MethodCallsCorrelationConfigDataHolder.isEnable();
     }
 
     /**

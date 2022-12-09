@@ -28,7 +28,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.MDC;
-
+import org.wso2.carbon.apimgt.impl.correlation.MethodCallsCorrelationConfigDataHolder;
 import java.util.Map;
 import java.util.UUID;
 
@@ -76,13 +76,19 @@ public class MethodTimeLogger
      *
      * @return true if the property value is given as true
      */
-    @Pointcut("if()")
+    @Pointcut("!within(org.wso2.carbon.apimgt.impl.correlation.*) && if()")
     public static boolean isConfigEnabled() {
         if (!isSet) {
-            isEnabled = ConfigurableCorrelationLogService.isEnable();
-            isSet = true;
+            String config = System.getProperty(APIConstants.ENABLE_CORRELATION_LOGS);
+            if (StringUtils.isNotEmpty(config)) {
+                isEnabled = Boolean.parseBoolean(config);
+                if (isEnabled) {
+                    MethodCallsCorrelationConfigDataHolder.setEnable(true);
+                }
+                isSet = true;
+            }
         }
-        return isEnabled;
+        return MethodCallsCorrelationConfigDataHolder.isEnable();
     }
 
     /**

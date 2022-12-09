@@ -31,7 +31,7 @@ import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
 
 /**
- * This Class used to properly start and Close JMS listeners
+ * This Class used to properly start and Close JMS listeners.
  */
 public class JMSListenerStartupShutdownListener implements ServerStartupObserver, ServerShutdownHandler,
         JMSListenerShutDownService {
@@ -68,11 +68,14 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
                 if (JavaUtils.isTrueExplicitly(enableKeyManagerRetrieval)) {
                     jmsTransportHandlerForEventHub
                             .subscribeForJmsEvents(JMSConstants.TOPIC_KEY_MANAGER, new KeyManagerJMSMessageListener());
+                    jmsTransportHandlerForEventHub
+                            .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION, new CorrelationConfigJMSMessageListener());
                 }
             }
         } else {
             log.info("Running on migration enabled mode: Stopped at JMSListenerStartupShutdownListener completed");
         }
+
     }
 
     @Override
