@@ -53,7 +53,7 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable e) {
-        UserTokenUtil.clear();
+        UserTokenUtil.clear(); // WARNING : DO NOT REMOVE THIS OR ADD ANY CODE BEFORE THIS
 
         if (e instanceof ClientErrorException) {
             log.error("Client error", e);

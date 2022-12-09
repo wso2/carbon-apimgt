@@ -6004,10 +6004,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public String addAPISpecificOperationPolicy(String apiUUID, OperationPolicyData operationPolicyData,
-                                                String tenantDomain)
+                                                String organization)
             throws APIManagementException {
 
-        return operationPolicyProviderInstance.addAPISpecificOperationPolicy(apiUUID,operationPolicyData,tenantDomain);
+        return operationPolicyProviderInstance.addAPISpecificOperationPolicy(apiUUID,operationPolicyData,organization);
     }
 
     @Override
@@ -6019,22 +6019,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public OperationPolicyData getAPISpecificOperationPolicyByPolicyName(String policyName, String policyVersion,
                                                                          String apiUUID, String revisionUUID,
-                                                                         String tenantDomain,
+                                                                         String organization,
                                                                          boolean isWithPolicyDefinition)
             throws APIManagementException {
 
         return operationPolicyProviderInstance
-                .getAPISpecificOperationPolicyByPolicyName(apiUUID, policyName, policyVersion, tenantDomain,
+                .getAPISpecificOperationPolicyByPolicyName(apiUUID, policyName, policyVersion, organization,
                         isWithPolicyDefinition);
     }
 
     @Override
     public OperationPolicyData getCommonOperationPolicyByPolicyName(String policyName, String policyVersion,
-                                                                    String tenantDomain,
+                                                                    String organization,
                                                                     boolean isWithPolicyDefinition)
             throws APIManagementException {
         return operationPolicyProviderInstance
-                .getCommonOperationPolicyByPolicyName(policyName, policyVersion, tenantDomain, isWithPolicyDefinition);
+                .getCommonOperationPolicyByPolicyName(policyName, policyVersion, organization, isWithPolicyDefinition);
     }
 
     @Override
@@ -6044,7 +6044,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
 
         return operationPolicyProviderInstance
-                .getAPISpecificOperationPolicyByPolicyID(apiUUID, policyId, organization,isWithPolicyDefinition);
+                .getAPISpecificOperationPolicyByPolicyID(apiUUID, policyId, organization, isWithPolicyDefinition);
     }
 
     @Override
@@ -6057,28 +6057,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void updateOperationPolicy(String operationPolicyId, OperationPolicyData operationPolicyData,
-                                      String tenantDomain) throws APIManagementException {
-        operationPolicyProviderInstance.updateOperationPolicy(operationPolicyId, operationPolicyData, tenantDomain);
+                                      String organization) throws APIManagementException {
+        operationPolicyProviderInstance.updateOperationPolicy(operationPolicyId, operationPolicyData, organization);
     }
 
     @Override
-    public List<OperationPolicyData> getAllCommonOperationPolicies(String tenantDomain)
+    public List<OperationPolicyData> getAllCommonOperationPolicies(String organization)
             throws APIManagementException {
 
-        return operationPolicyProviderInstance.getAllCommonOperationPolicies(tenantDomain);
+        return operationPolicyProviderInstance.getAllCommonOperationPolicies(organization);
     }
 
     @Override
-    public List<OperationPolicyData> getAllAPISpecificOperationPolicies(String apiUUID, String tenantDomain)
+    public List<OperationPolicyData> getAllAPISpecificOperationPolicies(String apiUUID, String organization)
             throws APIManagementException {
 
-        return operationPolicyProviderInstance.getAllAPiSpecificOperationPolicies(apiUUID,tenantDomain);
+        return operationPolicyProviderInstance.getAllAPiSpecificOperationPolicies(apiUUID,organization);
     }
 
     @Override
-    public void deleteOperationPolicyById(String policyId, String tenantDomain) throws APIManagementException {
+    public void deleteOperationPolicyById(String policyId, String organization) throws APIManagementException {
 
-        operationPolicyProviderInstance.deleteOperationPolicyById(policyId, tenantDomain);
+        operationPolicyProviderInstance.deleteOperationPolicyById(policyId, organization);
     }
 
     private static Map<String, List<OperationPolicy>> extractAndDropOperationPoliciesFromURITemplate
