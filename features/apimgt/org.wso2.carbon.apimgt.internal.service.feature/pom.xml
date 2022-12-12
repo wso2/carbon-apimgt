@@ -222,7 +222,7 @@
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}</bundleDef>
                                 <bundleDef>io.swagger:swagger-core</bundleDef>
                                 <bundleDef>io.swagger:swagger-models</bundleDef>
-                                <bundleDef>commons-io.wso2:commons-io</bundleDef>
+                                <bundleDef>commons-io:commons-io</bundleDef>
                                 <bundleDef>io.swagger:swagger-annotations</bundleDef>
                                 <bundleDef>io.apicurio:apicurio-data-models</bundleDef>
                                 <bundleDef>org.wso2.orbit.org.everit.json:org.everit.json.schema:${everit.version}</bundleDef>

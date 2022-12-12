@@ -62,7 +62,7 @@
             <artifactId>json-simple</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-io.wso2</groupId>
+            <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <scope>test</scope>
         </dependency>

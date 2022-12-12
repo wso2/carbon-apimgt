@@ -100,7 +100,7 @@
             <artifactId>swagger-models</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-io.wso2</groupId>
+            <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
@@ -235,7 +235,7 @@
                             <bundles>
                                 <bundleDef>io.swagger:swagger-core</bundleDef>
                                 <bundleDef>io.swagger:swagger-models</bundleDef>
-                                <bundleDef>commons-io.wso2:commons-io</bundleDef>
+                                <bundleDef>commons-io:commons-io</bundleDef>
                                 <bundleDef>io.swagger:swagger-annotations</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
