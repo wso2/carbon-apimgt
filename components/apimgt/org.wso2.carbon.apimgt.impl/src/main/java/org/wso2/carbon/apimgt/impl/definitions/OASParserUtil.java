@@ -887,21 +887,47 @@ public class OASParserUtil {
                 throw new APIManagementException("Error while reading API definition yaml", e);
             }
         }
-        apiDefinitionProcessed = removeUnsupportedBlocksFromResources(apiDefinitionProcessed);
-        if (apiDefinitionProcessed != null) {
-            apiDefinition = apiDefinitionProcessed;
-        }
-        APIDefinitionValidationResponse validationResponse =
-                oas3Parser.validateAPIDefinition(apiDefinition, returnJsonContent);
-        if (!validationResponse.isValid()) {
-            for (ErrorHandler handler : validationResponse.getErrorItems()) {
-                if (ExceptionCodes.INVALID_OAS3_FOUND.getErrorCode() == handler.getErrorCode()) {
-                    return tryOAS2Validation(apiDefinition, returnJsonContent);
+        APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
+        try {
+            JSONParser parser = new JSONParser();
+            parser.parse(apiDefinitionProcessed); // Parsing the json content to validate parsing errors
+            apiDefinitionProcessed = removeUnsupportedBlocksFromResources(apiDefinitionProcessed);
+            if (apiDefinitionProcessed != null) {
+                apiDefinition = apiDefinitionProcessed;
+            }
+            validationResponse = oas3Parser.validateAPIDefinition(apiDefinition, returnJsonContent);
+            if (!validationResponse.isValid()) {
+                for (ErrorHandler handler : validationResponse.getErrorItems()) {
+                    if (ExceptionCodes.INVALID_OAS3_FOUND.getErrorCode() == handler.getErrorCode()) {
+                        return tryOAS2Validation(apiDefinition, returnJsonContent);
+                    }
                 }
             }
+        } catch (Exception e) {
+            //catching a generic exception as there can be runtime exceptions when parsing happens
+            addErrorToValidationResponse(validationResponse, e);
         }
         return validationResponse;
     }
+
+    /**
+     * Add error item with the thrown error message to the provided validation response object
+     *
+     * @param validationResponse APIDefinitionValidationResponse object
+     * @param e         error object
+     * @return added ErrorItem object
+     */
+    public static ErrorItem addErrorToValidationResponse(APIDefinitionValidationResponse validationResponse,
+                                                         Exception e) {
+        validationResponse.setValid(false);
+        ErrorItem errorItem = new ErrorItem();
+        errorItem.setErrorCode(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorCode());
+        errorItem.setMessage(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorMessage());
+        errorItem.setDescription(e.toString());
+        validationResponse.getErrorItems().add(errorItem);
+        return errorItem;
+    }
+
 
     /**
      * Try to validate a give openAPI definition using OpenAPI 3 parser
