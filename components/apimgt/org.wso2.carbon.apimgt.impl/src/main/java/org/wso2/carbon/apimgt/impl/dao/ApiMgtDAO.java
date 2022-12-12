@@ -8929,27 +8929,11 @@ public class ApiMgtDAO {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
-                    String uuid = resultSet.getString("UUID");
-                    keyManagerConfigurationDTO.setUuid(uuid);
-                    keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
-                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
-                    keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
-                    keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
-                    keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                    keyManagerConfigurationDTO.setOrganization(organization);
-                    keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
-                    keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
-                    try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
-                        String configurationContent = IOUtils.toString(configuration);
-                        Map map = new Gson().fromJson(configurationContent, Map.class);
-                        keyManagerConfigurationDTO.setAdditionalProperties(map);
-                    } catch (IOException e) {
-                        log.error("Error while converting configurations in " + uuid, e);
-                    }
+                    setKeyManagerConfigurationFromResultSet(resultSet, keyManagerConfigurationDTO);
                     keyManagerConfigurationDTOS.add(keyManagerConfigurationDTO);
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             throw new APIManagementException(
                     "Error while retrieving key manager configurations for organization " + organization, e);
         }
@@ -8968,21 +8952,7 @@ public class ApiMgtDAO {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
-                    String uuid = resultSet.getString("UUID");
-                    keyManagerConfigurationDTO.setUuid(uuid);
-                    keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
-                    keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
-                    keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
-                    keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                    keyManagerConfigurationDTO.setOrganization(organization);
-                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
-                    keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
-                    keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
-                    try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
-                        String configurationContent = IOUtils.toString(configuration);
-                        Map map = new Gson().fromJson(configurationContent, Map.class);
-                        keyManagerConfigurationDTO.setAdditionalProperties(map);
-                    }
+                    setKeyManagerConfigurationFromResultSet(resultSet, keyManagerConfigurationDTO);
                     return keyManagerConfigurationDTO;
                 }
             }
@@ -9038,21 +9008,7 @@ public class ApiMgtDAO {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
-                    String uuid = resultSet.getString("UUID");
-                    keyManagerConfigurationDTO.setUuid(uuid);
-                    keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
-                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
-                    keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
-                    keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
-                    keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                    keyManagerConfigurationDTO.setOrganization(organization);
-                    keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
-                    keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
-                    try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
-                        String configurationContent = IOUtils.toString(configuration);
-                        Map map = new Gson().fromJson(configurationContent, Map.class);
-                        keyManagerConfigurationDTO.setAdditionalProperties(map);
-                    }
+                    setKeyManagerConfigurationFromResultSet(resultSet, keyManagerConfigurationDTO);
                     return keyManagerConfigurationDTO;
                 }
             }
@@ -9071,6 +9027,27 @@ public class ApiMgtDAO {
         }
     }
 
+    public KeyManagerConfigurationDTO getKeyManagerConfigurationByExternalRefId(String externalRefId)
+            throws APIManagementException {
+        final String query = SQLConstants.KeyManagerSqlConstants.GET_KEY_MANAGER_BY_EXT_REF_ID;
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+            preparedStatement.setString(1, externalRefId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+                    setKeyManagerConfigurationFromResultSet(resultSet, keyManagerConfigurationDTO);
+                    return keyManagerConfigurationDTO;
+                }
+            }
+        } catch (SQLException | IOException e) {
+            throw new APIManagementException(
+                    "Error while retrieving key manager configuration for key manager external ref id: "
+                            + externalRefId, e);
+        }
+        return null;
+    }
+
     private KeyManagerConfigurationDTO getKeyManagerConfigurationByUUID(Connection connection, String uuid)
             throws SQLException, IOException {
 
@@ -9080,25 +9057,30 @@ public class ApiMgtDAO {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
-                    keyManagerConfigurationDTO.setUuid(resultSet.getString("UUID"));
-                    keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
-                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
-                    keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
-                    keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
-                    keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                    keyManagerConfigurationDTO.setOrganization(resultSet.getString("ORGANIZATION"));
-                    keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
-                    keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
-                    try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
-                        String configurationContent = IOUtils.toString(configuration);
-                        Map map = new Gson().fromJson(configurationContent, Map.class);
-                        keyManagerConfigurationDTO.setAdditionalProperties(map);
-                    }
+                    setKeyManagerConfigurationFromResultSet(resultSet, keyManagerConfigurationDTO);
                     return keyManagerConfigurationDTO;
                 }
             }
         }
         return null;
+    }
+
+    private void setKeyManagerConfigurationFromResultSet(ResultSet resultSet, KeyManagerConfigurationDTO kmConfigDTO)
+            throws SQLException, IOException {
+        kmConfigDTO.setUuid(resultSet.getString("UUID"));
+        kmConfigDTO.setName(resultSet.getString("NAME"));
+        kmConfigDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
+        kmConfigDTO.setDescription(resultSet.getString("DESCRIPTION"));
+        kmConfigDTO.setType(resultSet.getString("TYPE"));
+        kmConfigDTO.setEnabled(resultSet.getBoolean("ENABLED"));
+        kmConfigDTO.setOrganization(resultSet.getString("ORGANIZATION"));
+        kmConfigDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
+        kmConfigDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
+        try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
+            String configurationContent = IOUtils.toString(configuration);
+            Map map = new Gson().fromJson(configurationContent, Map.class);
+            kmConfigDTO.setAdditionalProperties(map);
+        }
     }
 
     public void addKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
@@ -9225,27 +9207,11 @@ public class ApiMgtDAO {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
-                    String uuid = resultSet.getString("UUID");
-                    keyManagerConfigurationDTO.setUuid(uuid);
-                    keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
-                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
-                    keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
-                    keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
-                    keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                    keyManagerConfigurationDTO.setOrganization(resultSet.getString("ORGANIZATION"));
-                    keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
-                    keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
-                    try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
-                        String configurationContent = IOUtils.toString(configuration);
-                        Map map = new Gson().fromJson(configurationContent, Map.class);
-                        keyManagerConfigurationDTO.setAdditionalProperties(map);
-                    } catch (IOException e) {
-                        log.error("Error while converting configurations in " + uuid, e);
-                    }
+                    setKeyManagerConfigurationFromResultSet(resultSet, keyManagerConfigurationDTO);
                     keyManagerConfigurationDTOS.add(keyManagerConfigurationDTO);
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             throw new APIManagementException("Error while retrieving all key manager configurations", e);
         }
 

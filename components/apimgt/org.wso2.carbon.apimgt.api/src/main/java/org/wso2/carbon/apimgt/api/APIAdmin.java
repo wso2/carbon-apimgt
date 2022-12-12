@@ -39,10 +39,10 @@ public interface APIAdmin  {
     /**
      * Returns environments of a given tenant
      *
-     * @param tenantDomain tenant domain
+     * @param organization organization
      * @return List of environments related to the given tenant
      */
-    List<Environment> getAllEnvironments(String tenantDomain) throws APIManagementException;
+    List<Environment> getAllEnvironments(String organization) throws APIManagementException;
 
     /**
      * Returns environment of a given uuid
@@ -276,6 +276,15 @@ public interface APIAdmin  {
      * @throws APIManagementException
      */
     Map<String, List<KeyManagerConfigurationDTO>> getAllKeyManagerConfigurations() throws APIManagementException;
+
+    /**
+     * This method is used to retrieve the key manager details from the external reference id
+     * @param externalRefId identity provider's id (from identity components)
+     * @return KeyManagerConfigurationDTO for retrieved data
+     * @throws APIManagementException
+     */
+    KeyManagerConfigurationDTO getKeyManagerConfigurationByExternalRefId(String externalRefId)
+            throws APIManagementException;
 
     /**
      * This method used to retrieve key manager with Id in respective tenant

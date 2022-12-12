@@ -118,8 +118,8 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public List<Environment> getAllEnvironments(String tenantDomain) throws APIManagementException {
-        List<Environment> dynamicEnvs = apiMgtDAO.getAllEnvironments(tenantDomain);
+    public List<Environment> getAllEnvironments(String organization) throws APIManagementException {
+        List<Environment> dynamicEnvs = apiMgtDAO.getAllEnvironments(organization);
         // gateway environment name should be unique, ignore environments defined in api-manager.xml with the same name
         // if a dynamic (saved in database) environment exists.
         List<String> dynamicEnvNames = dynamicEnvs.stream().map(Environment::getName).collect(Collectors.toList());
@@ -458,6 +458,12 @@ public class APIAdminImpl implements APIAdmin {
                     .put(keyManagerConfiguration.getOrganization(), keyManagerConfigurationDTOS);
         }
         return keyManagerConfigurationsByTenant;
+    }
+
+    @Override
+    public KeyManagerConfigurationDTO getKeyManagerConfigurationByExternalRefId(String externalRefId)
+            throws APIManagementException {
+        return apiMgtDAO.getKeyManagerConfigurationByExternalRefId(externalRefId);
     }
 
     @Override
