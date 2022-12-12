@@ -173,14 +173,6 @@ public interface OperationPolicyProvider {
             throws APIManagementException;
 
     /**
-     * This is Choreo specific function.
-     * Returns true in Choreo context, false otherwise.
-     *
-     * @return bool
-     */
-    Boolean isReadOnly();
-
-    /**
      * Default Operation Policy Provider will implement this as follows,
      * This method will be used to import Operation policy.
      * This will check existing API specific policy first and then common policy.

@@ -241,11 +241,6 @@ public class DefaultOperationPolicyProviderImpl implements OperationPolicyProvid
 
     }
 
-    @Override
-    public Boolean isReadOnly() {
-        return false;
-    }
-
     /**
      * Import Operation policy. This will check existing API specific policy first and
      * then common policy.
