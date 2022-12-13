@@ -78,38 +78,63 @@ public final class JWTUtil {
      *
      * @param publicCert         - The public certificate which needs to include in the header as thumbprint
      * @param signatureAlgorithm signature algorithm which needs to include in the header
+     * @param useKid - Specifies whether this function should use kid as a thumbprint or x5t
      * @throws JWTGeneratorException
      */
-    public static String generateHeader(Certificate publicCert, String signatureAlgorithm) throws
+    public static String generateHeader(Certificate publicCert, String signatureAlgorithm,boolean useKid) throws
             JWTGeneratorException {
 
         try {
-            //generate the SHA-1 thumbprint of the certificate
-            MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
-            byte[] der = publicCert.getEncoded();
-            digestValue.update(der);
-            byte[] digestInBytes = digestValue.digest();
-            String publicCertThumbprint = hexify(digestInBytes);
-            String base64UrlEncodedThumbPrint;
-            base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
-                    .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
             StringBuilder jwtHeader = new StringBuilder();
-            /*
-             * Sample header
-             * {"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10",
-             * "kid":"a_jhNus21KVuoFx65LmkW2O_l10_RS256"}
-             * {"typ":"JWT", "alg":"[2]", "x5t":"[1]", "x5t":"[1]"}
-             * */
-            jwtHeader.append("{\"typ\":\"JWT\",");
-            jwtHeader.append("\"alg\":\"");
-            jwtHeader.append(getJWSCompliantAlgorithmCode(signatureAlgorithm));
-            jwtHeader.append("\",");
+            MessageDigest digestValue;
+            byte[] der = publicCert.getEncoded();
+            if (useKid) {
+                //generate the SHA-2 thumbprint of the certificate
+                digestValue = MessageDigest.getInstance("SHA-2");
+                digestValue.update(der);
+                byte[] digestInBytes = digestValue.digest();
+                String publicCertThumbprint = hexify(digestInBytes);
+                String base64UrlEncodedThumbPrint;
+                base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
+                        .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
+                /*
+                 * Sample header
+                 * {"typ":"JWT", "alg":"SHA256withRSA", "kid":"a_jhNus21KVuoFx65LmkW2O_l10",
+                 * "kid":"a_jhNus21KVuoFx65LmkW2O_l10_RS256"}
+                 * {"typ":"JWT", "alg":"[2]", "kid":"[1]", "kid":"[1]"}
+                 * */
+                jwtHeader.append("{\"typ\":\"JWT\",");
+                jwtHeader.append("\"alg\":\"");
+                jwtHeader.append(getJWSCompliantAlgorithmCode(signatureAlgorithm));
+                jwtHeader.append("\",");
 
-            jwtHeader.append("\"x5t\":\"");
-            jwtHeader.append(base64UrlEncodedThumbPrint);
+                jwtHeader.append("\"kid\":\"");
+                jwtHeader.append(base64UrlEncodedThumbPrint);
+            } else {
+                //generate the SHA-1 thumbprint of the certificate
+                digestValue = MessageDigest.getInstance("SHA-1");
+                digestValue.update(der);
+                byte[] digestInBytes = digestValue.digest();
+                String publicCertThumbprint = hexify(digestInBytes);
+                String base64UrlEncodedThumbPrint;
+                base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
+                        .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
+                /*
+                 * Sample header
+                 * {"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10",
+                 * "kid":"a_jhNus21KVuoFx65LmkW2O_l10_RS256"}
+                 * {"typ":"JWT", "alg":"[2]", "x5t":"[1]", "x5t":"[1]"}
+                 * */
+                jwtHeader.append("{\"typ\":\"JWT\",");
+                jwtHeader.append("\"alg\":\"");
+                jwtHeader.append(getJWSCompliantAlgorithmCode(signatureAlgorithm));
+                jwtHeader.append("\",");
+
+                jwtHeader.append("\"kid\":\"");
+                jwtHeader.append(base64UrlEncodedThumbPrint);
+            }
             jwtHeader.append("\"}");
             return jwtHeader.toString();
-
         } catch (NoSuchAlgorithmException | CertificateEncodingException | UnsupportedEncodingException e) {
             throw new JWTGeneratorException("Error in generating public certificate thumbprint", e);
         }
