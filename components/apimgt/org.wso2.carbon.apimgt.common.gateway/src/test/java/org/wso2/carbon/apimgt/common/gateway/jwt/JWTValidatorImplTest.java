@@ -326,5 +326,34 @@ public class JWTValidatorImplTest {
         Assert.assertNotNull(jwtValidationInfo);
         Assert.assertFalse(jwtValidationInfo.isValid());
         Assert.assertEquals(900901, jwtValidationInfo.getValidationCode());
+
+        try {
+            // Dummy payload. JWKS response's n value is not considered for validation.
+            Mockito.when(httpEntity.getContent()).thenReturn(
+                    new ByteArrayInputStream(("{\"keys\":[{" +
+                            "  \"kty\" : \"EC\"," +
+                            "  \"crv\" : \"P-256\"," +
+                            "  \"x\"   : \"SVqB4JcUD6lsfvqMr-OKUNUphdNn64Eay60978ZlL74\"," +
+                            "  \"y\"   : \"lf0u0pMj4lGAzZix5u4Cm5CMQIgMNpkwy163wtKYVKI\"," +
+                            "  \"d\"   : \"0g5vAEKzugrXaRbgKG0Tj2qJ5lMP4Bezds1_sTybkfk\"" +
+                            "}]}")
+                            .getBytes(StandardCharsets.UTF_8)));
+        } catch (IOException e) {
+            Assert.fail();
+        }
+        Mockito.when(response.getEntity()).thenReturn(httpEntity);
+        try {
+            Mockito.when(httpClient.execute(any(HttpGet.class))).thenReturn(response);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
+        } catch (CommonGatewayException e) {
+            Assert.fail();
+        }
+        Assert.assertNotNull(jwtValidationInfo);
+        Assert.assertFalse(jwtValidationInfo.isValid());
+        Assert.assertEquals(900901, jwtValidationInfo.getValidationCode());
     }
 }

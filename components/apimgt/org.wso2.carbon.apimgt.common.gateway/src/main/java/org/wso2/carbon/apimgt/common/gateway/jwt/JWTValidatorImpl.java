@@ -92,14 +92,13 @@ public class JWTValidatorImpl implements JWTValidator {
                     jwtValidationInfo.setValid(false);
                     jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                     return jwtValidationInfo;
-
                 }
             } else {
                 jwtValidationInfo.setValid(false);
                 jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                 return jwtValidationInfo;
             }
-        } catch (ParseException | JWTGeneratorException e) {
+        } catch (JWTGeneratorException e) {
             throw new CommonGatewayException("Error while parsing JWT", e);
         }
     }
@@ -169,10 +168,8 @@ public class JWTValidatorImpl implements JWTValidator {
             }
             return JWTUtil.verifyTokenSignature(signedJWT, certificateAlias, jwtValidatorConfiguration.getTrustStore());
         } catch (ParseException | JOSEException | IOException e) {
-            log.error("Error while parsing JWT", e);
+            throw new CommonGatewayException("Error while parsing JWT", e);
         }
-
-        return true;
     }
 
     protected boolean validateTokenExpiry(JWTClaimsSet jwtClaimsSet) {
@@ -204,8 +201,7 @@ public class JWTValidatorImpl implements JWTValidator {
     }
 
     private void createJWTValidationInfoFromJWT(JWTValidationInfo jwtValidationInfo,
-                                                JWTClaimsSet jwtClaimsSet)
-            throws ParseException {
+                                                JWTClaimsSet jwtClaimsSet) {
 
         jwtValidationInfo.setIssuer(jwtClaimsSet.getIssuer());
         jwtValidationInfo.setValid(true);
