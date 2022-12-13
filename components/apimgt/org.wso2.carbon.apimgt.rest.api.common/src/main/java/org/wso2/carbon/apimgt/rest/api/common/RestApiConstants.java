@@ -168,7 +168,7 @@ public final class RestApiConstants {
     public static final String REST_API_DEVELOPER_PORTAL_RESOURCE_PATH_SETTINGS = "/settings";
     public static final String REST_API_DEVELOPER_PORTAL_RESOURCE_PATH_TENANTS = "/tenants";
     public static final String REST_API_STORE_CONTEXT_FULL_0 = REST_API_STORE_CONTEXT + REST_API_STORE_VERSION_0;
-    public static final String REST_API_DEVELOPER_PORTAL_CONTEXT_FULL = REST_API_DEVELOPER_PORTAL_CONTEXT +
+    public static final String REST_API_DEVELOPER_PORTAL_CONTEXT_FULL = REST_API_DEVELOPER_PORTAL_CONTEXT + "/" +
             REST_API_DEVELOPER_PORTAL_VERSION;
     public static final String REST_API_PUBLISHER_VERSION_0 ="v0.16";
     public static final String REST_API_PUBLISHER_VERSION = "v4";
