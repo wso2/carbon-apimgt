@@ -110,7 +110,8 @@ public class TransportHeaderUtil {
     public static void removeRequestHeadersFromResponseHeaders(Map requestHeaders, Map responseHeaders,
                                                                List<String> preserveHeaders) {
         if (responseHeaders != null) {
-            for (Object headerObj : requestHeaders.keySet()) {
+            ArrayList<Object> headerObjs = new ArrayList<>(requestHeaders.keySet());
+            for (Object headerObj : headerObjs) {
                 String headerName = (String) headerObj;
                 if (!preserveHeaders.contains(headerName) && responseHeaders.containsKey(headerName)) {
                     if (log.isDebugEnabled()) {
