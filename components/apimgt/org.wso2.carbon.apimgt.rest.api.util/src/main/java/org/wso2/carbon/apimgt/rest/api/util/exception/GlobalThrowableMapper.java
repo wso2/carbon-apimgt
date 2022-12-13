@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.security.AuthenticationException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.impl.utils.UserTokenUtil;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -52,6 +53,7 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable e) {
+        UserTokenUtil.clear(); // WARNING : DO NOT REMOVE THIS OR ADD ANY CODE BEFORE THIS
 
         if (e instanceof ClientErrorException) {
             log.error("Client error", e);

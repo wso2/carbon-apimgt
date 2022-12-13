@@ -38,6 +38,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.OperationPolicyProvider;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -156,7 +157,7 @@ import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_
         APIProviderImpl.class, APIManagerFactory.class, RegistryUtils.class, LifecycleBeanPopulator.class,
         Caching.class, PaginationContext.class, MultitenantUtils.class, AbstractAPIManager.class, OASParserUtil.class,
         KeyManagerHolder.class, CertificateManagerImpl.class , PublisherAPI.class, Organization.class,
-        APIPersistence.class, GatewayArtifactsMgtDAO.class, RegistryPersistenceUtil.class})
+        APIPersistence.class, GatewayArtifactsMgtDAO.class, RegistryPersistenceUtil.class, OperationPolicyProvider.class})
 @PowerMockIgnore("org.mockito.*")
 public class APIProviderImplTest {
 
@@ -171,6 +172,7 @@ public class APIProviderImplTest {
     private CertificateManagerImpl certificateManager;
     private APIManagerConfiguration config;
     private APIPersistence apiPersistenceInstance;
+    private OperationPolicyProvider operationPolicyProviderInstance;
     private String superTenantDomain;
     private String apiUUID = "12640983654";
     private final String artifactPath = "artifact/path";
@@ -197,6 +199,7 @@ public class APIProviderImplTest {
         scopesDAO = Mockito.mock(ScopesDAO.class);
         keyManager = Mockito.mock(KeyManager.class);
         apiPersistenceInstance = Mockito.mock(APIPersistence.class);
+        operationPolicyProviderInstance = Mockito.mock(OperationPolicyProvider.class);
         certificateManager = Mockito.mock(CertificateManagerImpl.class);
         Mockito.when(keyManager.getResourceByApiId(Mockito.anyString())).thenReturn(null);
         Mockito.when(keyManager.registerNewResource(Mockito.any(API.class), Mockito.any(Map.class))).thenReturn(true);
@@ -1518,7 +1521,8 @@ public class APIProviderImplTest {
     @Test
     public void testOperationPolicyListingWhenMediationPoliciesExists() throws APIManagementException {
 
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        APIProviderImplWrapper apiProvider =
+                new APIProviderImplWrapper(operationPolicyProviderInstance, apimgtDAO, scopesDAO);
         APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
                 "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
         API api = new API(apiId);
@@ -1566,7 +1570,8 @@ public class APIProviderImplTest {
     @Test
     public void testOperationPolicyListingWhenMediationPoliciesExistsAndPolicyAlreadyMigrated() throws APIManagementException {
 
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        APIProviderImplWrapper apiProvider =
+                new APIProviderImplWrapper(operationPolicyProviderInstance, apimgtDAO, scopesDAO);
         APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
                 "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
         API api = new API(apiId);
@@ -1648,7 +1653,8 @@ public class APIProviderImplTest {
         PowerMockito.when(apiPersistenceInstance.getAllMediationPolicies(any(Organization.class), any(String.class))).thenReturn(localPolicies);
         PowerMockito.when(apiPersistenceInstance.getMediationPolicy(any(Organization.class), any(String.class), any(String.class))).thenReturn(mediationPolicy);
 
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        APIProviderImplWrapper apiProvider =
+                new APIProviderImplWrapper(operationPolicyProviderInstance, apiPersistenceInstance, apimgtDAO, scopesDAO);
         APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0", apiuuid);
         API api = new API(apiId);
         api.setContext("/test");
@@ -1729,7 +1735,8 @@ public class APIProviderImplTest {
         PowerMockito.when(apiPersistenceInstance.getAllMediationPolicies(any(Organization.class), any(String.class))).thenReturn(localPolicies);
         PowerMockito.when(apiPersistenceInstance.getMediationPolicy(any(Organization.class), any(String.class), any(String.class))).thenReturn(mediationPolicy);
 
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        APIProviderImplWrapper apiProvider =
+                new APIProviderImplWrapper(operationPolicyProviderInstance, apiPersistenceInstance, apimgtDAO, scopesDAO);
         APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0", apiuuid);
         API api = new API(apiId);
         api.setUuid(apiuuid);

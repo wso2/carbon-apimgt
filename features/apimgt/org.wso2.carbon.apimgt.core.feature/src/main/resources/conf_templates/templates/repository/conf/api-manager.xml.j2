@@ -1464,4 +1464,14 @@
              </OAuth>
           </MediatorConfigs>
       {% endif %}
+
+      {% if apim.operation_policy is defined %}
+      <OperationPolicyConfigs>
+         <Properties>
+            {% for key,value in apim.operation_policy.items() %}
+               <Property name="{{key}}">{{value}}</Property>
+            {% endfor %}
+        </Properties>
+      </OperationPolicyConfigs>
+      {% endif %}
 </APIManager>
