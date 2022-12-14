@@ -806,6 +806,28 @@
           }
         }
       }
+    },
+    "/correlation-configs" : {
+      "get" : {
+        "tags" : [ "Logging" ],
+        "summary" : "Retrieve persisted correlation configs data.",
+        "description" : "This retrieve the persisted correlation configs data for updating correlation logs.\n",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of correlation component configs",
+            "schema" : {
+              "$ref" : "#/definitions/CorrelationComponentsList"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions" : {
@@ -1814,6 +1836,52 @@
         }
       },
       "title" : "API Info object with log details"
+    },
+    "CorrelationComponentsList" : {
+      "properties" : {
+        "components" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/CorrelationComponent"
+          }
+        }
+      },
+      "title" : "correlation-components"
+    },
+    "CorrelationComponent" : {
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "example" : "http"
+        },
+        "enabled" : {
+          "type" : "string",
+          "example" : "true"
+        },
+        "properties" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/CorrelationComponentProperty"
+          }
+        }
+      },
+      "title" : "Correlation Component INFO object"
+    },
+    "CorrelationComponentProperty" : {
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "example" : "deniedThreads"
+        },
+        "value" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "example" : "MessageDeliveryTaskPool"
+          }
+        }
+      },
+      "title" : "Properties for correlation components"
     }
   },
   "parameters" : {

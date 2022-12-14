@@ -15,6 +15,7 @@
   <jaxrs:server id="services" address="/">
     <jaxrs:serviceBeans>
       <bean class="org.wso2.carbon.apimgt.rest.api.devops.TenantLogsApi"/>
+      <bean class="org.wso2.carbon.apimgt.rest.api.devops.ConfigApi"/>
     </jaxrs:serviceBeans>
     <jaxrs:providers>
       <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

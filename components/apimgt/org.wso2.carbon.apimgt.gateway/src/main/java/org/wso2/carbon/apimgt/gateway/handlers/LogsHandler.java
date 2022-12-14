@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.logging.APILogHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.correlation.MethodCallsCorrelationConfigDataHolder;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -44,8 +45,6 @@ import javax.xml.stream.XMLStreamException;
  */
 public class LogsHandler extends AbstractSynapseHandler {
     private static final Log log = LogFactory.getLog(APIConstants.CORRELATION_LOGGER);
-    private static boolean isEnabled = false;
-    private static boolean isSet = false;
     private String apiTo = null;
 
     private static final String AUTH_HEADER = "AUTH_HEADER";
@@ -71,14 +70,7 @@ public class LogsHandler extends AbstractSynapseHandler {
     }
 
     private boolean isEnabled() {
-        if(!isSet) {
-            String config = System.getProperty(APIConstants.ENABLE_CORRELATION_LOGS);
-            if (config != null && !config.equals("")) {
-                isEnabled = Boolean.parseBoolean(config);
-                isSet = true;
-            }
-        }
-        return isEnabled;
+        return MethodCallsCorrelationConfigDataHolder.isEnable();
     }
 
     public boolean handleRequestInFlow(MessageContext messageContext) {
