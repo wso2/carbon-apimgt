@@ -1964,7 +1964,7 @@
         <carbon.apimgt.version>9.28.19-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <carbon.analytics.common.version>5.3.1</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.3.2</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.8.0-alpha</carbon.kernel.version>
         <carbon.kernel.feature.version>4.8.0-alpha</carbon.kernel.feature.version>
