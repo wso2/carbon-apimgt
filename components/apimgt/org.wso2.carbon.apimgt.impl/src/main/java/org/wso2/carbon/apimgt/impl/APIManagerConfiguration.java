@@ -2173,12 +2173,4 @@ public class APIManagerConfiguration {
     public Map<String, Environment> getGatewayEnvironments() {
         return apiGatewayEnvironments;
     }
-
-    public HttpClientConfigurationDTO getHttpClientConfiguration() {
-        return httpClientConfiguration;
-    }
-
-    public void setHttpClientConfiguration(HttpClientConfigurationDTO httpClientConfiguration) {
-        this.httpClientConfiguration = httpClientConfiguration;
-    }
 }

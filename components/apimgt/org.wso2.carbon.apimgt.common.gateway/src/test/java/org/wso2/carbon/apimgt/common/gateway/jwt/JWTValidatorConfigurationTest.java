@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.common.gateway.jwt;
 
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -35,7 +34,6 @@ public class JWTValidatorConfigurationTest {
         long timeStampSkewInSeconds = 1L;
         boolean enableCertificateBoundAccessToken = true;
         KeyStore trustStore = Mockito.mock(KeyStore.class);
-        CloseableHttpClient httpClient = Mockito.mock(CloseableHttpClient.class);
 
         JWTValidatorConfiguration configuration = new JWTValidatorConfiguration.Builder()
                 .jwtIssuer(tokenIssuerDto)
@@ -43,7 +41,6 @@ public class JWTValidatorConfigurationTest {
                 .enableCertificateBoundAccessToken(enableCertificateBoundAccessToken)
                 .trustStore(trustStore)
                 .jwtTransformer(jwtTransformer)
-                .httpClient(httpClient)
                 .build();
         Assert.assertNotNull(configuration);
         Assert.assertEquals("TokenIssuerDTO is not populated", tokenIssuerDto, configuration.getJwtIssuer());
@@ -54,6 +51,5 @@ public class JWTValidatorConfigurationTest {
         Assert.assertEquals("enableCertificateBoundAccessToken is not populated",
                 enableCertificateBoundAccessToken, configuration.isEnableCertificateBoundAccessToken());
         Assert.assertEquals("trustStore is not populated", trustStore, configuration.getTrustStore());
-        Assert.assertEquals("httpClient is not populated", httpClient, configuration.getHttpClient());
     }
 }

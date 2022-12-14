@@ -17,8 +17,6 @@
  */
 package org.wso2.carbon.apimgt.common.gateway.jwt;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 
@@ -34,7 +32,6 @@ public class JWTValidatorConfiguration {
     private long timeStampSkewInSeconds;
     private TokenIssuerDto jwtIssuer;
     private KeyStore trustStore;
-    private CloseableHttpClient httpClient;
 
 
     public boolean isEnableCertificateBoundAccessToken() {
@@ -57,10 +54,6 @@ public class JWTValidatorConfiguration {
         return trustStore;
     }
 
-    public HttpClient getHttpClient() {
-        return httpClient;
-    }
-
     /**
      * Builder class for the JWTValidatorConfiguration.
      */
@@ -70,8 +63,6 @@ public class JWTValidatorConfiguration {
         private long timeStampSkewInSeconds;
         private TokenIssuerDto jwtIssuer;
         private KeyStore trustStore;
-
-        private CloseableHttpClient httpClient;
 
         public Builder enableCertificateBoundAccessToken(boolean enableCertificateBoundAccessToken) {
             this.enableCertificateBoundAccessToken = enableCertificateBoundAccessToken;
@@ -98,11 +89,6 @@ public class JWTValidatorConfiguration {
             return this;
         }
 
-        public Builder httpClient(CloseableHttpClient httpClient) {
-            this.httpClient = httpClient;
-            return this;
-        }
-
         public JWTValidatorConfiguration build() {
             JWTValidatorConfiguration jwtValidatorConfiguration = new JWTValidatorConfiguration();
             jwtValidatorConfiguration.jwtIssuer = this.jwtIssuer;
@@ -110,7 +96,6 @@ public class JWTValidatorConfiguration {
             jwtValidatorConfiguration.timeStampSkewInSeconds = this.timeStampSkewInSeconds;
             jwtValidatorConfiguration.enableCertificateBoundAccessToken = this.enableCertificateBoundAccessToken;
             jwtValidatorConfiguration.trustStore = this.trustStore;
-            jwtValidatorConfiguration.httpClient = this.httpClient;
             return jwtValidatorConfiguration;
         }
     }

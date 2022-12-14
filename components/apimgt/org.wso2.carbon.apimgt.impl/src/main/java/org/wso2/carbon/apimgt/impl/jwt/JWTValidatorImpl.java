@@ -18,40 +18,32 @@
 
 package org.wso2.carbon.apimgt.impl.jwt;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.jwt.util.DateUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.common.gateway.exception.CommonGatewayException;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
+import org.wso2.carbon.apimgt.common.gateway.jwt.CommonJWTValidatorImpl;
+import org.wso2.carbon.apimgt.common.gateway.jwt.JWTValidatorConfiguration;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.DefaultJWTTransformer;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-import java.io.IOException;
-import java.security.interfaces.RSAPublicKey;
-import java.text.ParseException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 @Deprecated
-public class JWTValidatorImpl implements JWTValidator {
+public class JWTValidatorImpl extends CommonJWTValidatorImpl implements JWTValidator {
 
-    TokenIssuerDto tokenIssuer;
     private Log log = LogFactory.getLog(JWTValidatorImpl.class);
-    JWTTransformer jwtTransformer;
-    private JWKSet jwkSet;
 
     @Override
     public JWTValidationInfo validateToken(SignedJWTInfo signedJWTInfo) throws APIManagementException {
@@ -89,36 +81,13 @@ public class JWTValidatorImpl implements JWTValidator {
                 jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                 return jwtValidationInfo;
             }
-        } catch (ParseException | JWTGeneratorException e) {
+        } catch (JWTGeneratorException e) {
             throw new APIManagementException("Error while parsing JWT", e);
+        } catch (CommonGatewayException e) {
+            throw new APIManagementException("Error while validating the JWT signature");
         }
     }
-    private boolean isValidCertificateBoundAccessToken(SignedJWTInfo signedJWTInfo) { //Holder of Key token
 
-        if (isCertificateBoundAccessTokenEnabled()) {
-            if (signedJWTInfo.getClientCertificate() == null ||
-                    StringUtils.isEmpty(signedJWTInfo.getClientCertificateHash())) {
-                return true; // If cnf is not available - 200 success
-            }
-            if (signedJWTInfo.getClientCertificateHash().equals(signedJWTInfo.getCertificateThumbprint())) {
-                return true; // if cnf matches with truststore cert - 200 success
-            }
-            return false; // if cert is not in truststore or thumbprint does not match with the cert
-        }
-        return true; /// if config is not enabled - 200 success
-    }
-
-    private boolean isCertificateBoundAccessTokenEnabled() {
-
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        if (config != null) {
-            String firstProperty = config
-                    .getFirstProperty(APIConstants.ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN);
-            return Boolean.parseBoolean(firstProperty);
-        }
-        return false;
-    }
     @Override
     public void loadTokenIssuerConfiguration(TokenIssuerDto tokenIssuerConfigurations) {
 
@@ -130,102 +99,24 @@ public class JWTValidatorImpl implements JWTValidator {
             this.jwtTransformer = new DefaultJWTTransformer();
         }
         this.jwtTransformer.loadConfiguration(tokenIssuer);
-    }
+        boolean enableCertificateBoundAccessToken = false;
 
-    protected boolean validateSignature(SignedJWT signedJWT) throws APIManagementException {
+        JWTValidatorConfiguration.Builder builder = new JWTValidatorConfiguration.Builder()
+                .jwtTransformer(ServiceReferenceHolder.getInstance().getJWTTransformer(tokenIssuer.getIssuer()))
+                .jwtIssuer(tokenIssuerConfigurations)
+                .trustStore(ServiceReferenceHolder.getInstance().getTrustStore());
 
-        String certificateAlias = APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
-        try {
-            String keyID = signedJWT.getHeader().getKeyID();
-            if (StringUtils.isNotEmpty(keyID)) {
-                if (tokenIssuer.getJwksConfigurationDTO().isEnabled() &&
-                        StringUtils.isNotEmpty(tokenIssuer.getJwksConfigurationDTO().getUrl())) {
-                    // Check JWKSet Available in Cache
-                    if (jwkSet == null) {
-                        jwkSet = retrieveJWKSet();
-                    }
-                    if (jwkSet.getKeyByKeyId(keyID) == null) {
-                        jwkSet = retrieveJWKSet();
-                    }
-                    if (jwkSet.getKeyByKeyId(keyID) instanceof RSAKey) {
-                        RSAKey keyByKeyId = (RSAKey) jwkSet.getKeyByKeyId(keyID);
-                        RSAPublicKey rsaPublicKey = keyByKeyId.toRSAPublicKey();
-                        if (rsaPublicKey != null) {
-                            return JWTUtil.verifyTokenSignature(signedJWT, rsaPublicKey);
-                        }
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Key Algorithm not supported");
-                        }
-                        return false; // return false to produce 401 unauthenticated response
-                    }
-                } else if (tokenIssuer.getCertificate() != null) {
-                    log.debug("Retrieve certificate from Token issuer and validating");
-                    RSAPublicKey rsaPublicKey = (RSAPublicKey) tokenIssuer.getCertificate().getPublicKey();
-                    return JWTUtil.verifyTokenSignature(signedJWT, rsaPublicKey);
-                } else {
-                    return JWTUtil.verifyTokenSignature(signedJWT, keyID);
-                }
-            }
-            return JWTUtil.verifyTokenSignature(signedJWT, certificateAlias);
-        } catch (ParseException | JOSEException | IOException e) {
-            log.error("Error while parsing JWT", e);
-            throw new APIManagementException("Error while parsing JWT", e);
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        if (config != null) {
+            String firstProperty = config
+                    .getFirstProperty(APIConstants.ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN);
+            // TODO: (VirajSalaka) Check the default behavior
+            builder.enableCertificateBoundAccessToken(Boolean.parseBoolean(firstProperty));
         }
-
-    }
-
-    protected boolean validateTokenExpiry(JWTClaimsSet jwtClaimsSet) {
-
         long timestampSkew =
                 ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getTimeStampSkewInSeconds();
-        Date now = new Date();
-        Date exp = jwtClaimsSet.getExpirationTime();
-        return exp == null || DateUtils.isAfter(exp, now, timestampSkew);
-    }
-
-    protected JWTClaimsSet transformJWTClaims(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
-
-        return jwtTransformer.transform(jwtClaimsSet);
-    }
-
-    protected String getConsumerKey(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
-
-        return jwtTransformer.getTransformedConsumerKey(jwtClaimsSet);
-    }
-
-    protected List<String> getScopes(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
-
-        return jwtTransformer.getTransformedScopes(jwtClaimsSet);
-    }
-
-    protected Boolean getIsAppToken(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
-
-        return jwtTransformer.getTransformedIsAppTokenType(jwtClaimsSet);
-    }
-
-    private void createJWTValidationInfoFromJWT(JWTValidationInfo jwtValidationInfo,
-                                                JWTClaimsSet jwtClaimsSet)
-            throws ParseException {
-
-        jwtValidationInfo.setIssuer(jwtClaimsSet.getIssuer());
-        jwtValidationInfo.setValid(true);
-        jwtValidationInfo.setClaims(new HashMap<>(jwtClaimsSet.getClaims()));
-        if (jwtClaimsSet.getExpirationTime() != null){
-            jwtValidationInfo.setExpiryTime(jwtClaimsSet.getExpirationTime().getTime());
-        }
-        if (jwtClaimsSet.getIssueTime() != null){
-            jwtValidationInfo.setIssuedTime(jwtClaimsSet.getIssueTime().getTime());
-        }
-        jwtValidationInfo.setUser(jwtClaimsSet.getSubject());
-        jwtValidationInfo.setJti(jwtClaimsSet.getJWTID());
-    }
-
-    private JWKSet retrieveJWKSet() throws IOException, ParseException {
-
-        String jwksInfo = JWTUtil
-                .retrieveJWKSConfiguration(tokenIssuer.getJwksConfigurationDTO().getUrl());
-        jwkSet = JWKSet.parse(jwksInfo);
-        return jwkSet;
+        builder.timeStampSkewInSeconds(timestampSkew);
+        super.loadConfiguration(builder.build());
     }
 }

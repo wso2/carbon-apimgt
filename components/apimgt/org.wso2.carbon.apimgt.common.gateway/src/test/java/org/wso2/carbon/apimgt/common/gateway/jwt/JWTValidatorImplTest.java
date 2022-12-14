@@ -31,8 +31,13 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.common.gateway.bootstrap.Bootstrap;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
@@ -52,6 +57,8 @@ import java.util.Objects;
 
 import static org.mockito.ArgumentMatchers.any;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(Bootstrap.class)
 public class JWTValidatorImplTest {
     private final String keyId = "keyId";
     private final String jwksURL = "https://localhost:9443/oauth2/jwks";
@@ -126,13 +133,16 @@ public class JWTValidatorImplTest {
         JWTValidatorConfiguration jwtValidatorConfiguration = PowerMockito.mock(JWTValidatorConfiguration.class);
         Mockito.when(jwtValidatorConfiguration.getJwtIssuer()).thenReturn(tokenIssuerDto);
         Mockito.when(jwtValidatorConfiguration.getTrustStore()).thenReturn(trustStore);
-        Mockito.when(jwtValidatorConfiguration.getHttpClient()).thenReturn(httpClient);
         try {
             Mockito.when(signedJWT.verify(any(JWSVerifier.class))).thenReturn(true);
         } catch (JOSEException e) {
             Assert.fail();
         }
 
+        Bootstrap bootstrap = Mockito.mock(Bootstrap.class);
+        Mockito.when(bootstrap.getHttpClient()).thenReturn(httpClient);
+        PowerMockito.mockStatic(Bootstrap.class);
+        BDDMockito.given(Bootstrap.getInstance()).willReturn(bootstrap);
         JWTValidator jwtValidator = new JWTValidatorImpl();
         jwtValidator.loadValidatorConfiguration(jwtValidatorConfiguration);
         JWTValidationInfo jwtValidationInfo = null;

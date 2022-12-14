@@ -176,20 +176,6 @@ public class JWTUtil {
                 .jwtTransformer(jwtTransformer)
                 .trustStore(trustStore)
                 .jwtIssuer(tokenIssuer);
-        // TODO: (VirajSalaka) handle with try finally and check the availability of httpClient when necessary.
-        if (tokenIssuer.getJwksConfigurationDTO() != null &&
-                StringUtils.isNotEmpty(tokenIssuer.getJwksConfigurationDTO().getUrl())) {
-            URL url;
-            try {
-                url = new URL(tokenIssuer.getJwksConfigurationDTO().getUrl());
-                CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil
-                        .getHttpClient(url.getPort(), url.getProtocol());
-                builder.httpClient(httpClient);
-            } catch (MalformedURLException e) {
-                log.error("Error while initializing JWT Validator due to malformed URL provided within the JWKS " +
-                        "configuration. HttpClient will not be added to the JwtValidator", e);
-            }
-        }
         return builder.build();
     }
 

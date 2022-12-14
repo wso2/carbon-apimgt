@@ -134,6 +134,7 @@ import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.quotalimiter.OnPremQuotaLimiter;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
+import org.wso2.carbon.apimgt.common.gateway.bootstrap.Bootstrap;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.JWTSignatureAlg;
@@ -5094,16 +5095,22 @@ public final class APIUtil {
     }
 
     /**
-     * Return a http client instance
+     * Return a http client instance based on the common gateway bootstrap http client configuration.
      *
      * @param protocol- service endpoint protocol http/https
-     * @return
      */
+    @Deprecated
     public static HttpClient getHttpClient(int port, String protocol) {
+        return getHttpClient();
+    }
 
-        HttpClientConfigurationDTO configuration = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration().getHttpClientConfiguration();
-        return CommonAPIUtil.getHttpClient(protocol, configuration);
+    /**
+     * Return a http client instance based on the common gateway bootstrap http client configuration.
+     *
+     * @return {@link HttpClient} instance.
+     */
+    public static HttpClient getHttpClient() {
+        return Bootstrap.getInstance().getHttpClient();
     }
 
 
