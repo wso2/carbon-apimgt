@@ -3565,6 +3565,10 @@ public class SQLConstants {
 
         public static final String DELETE_KEY_MANAGER =
                 "DELETE FROM AM_KEY_MANAGER WHERE UUID = ? AND ORGANIZATION = ?";
+
+        public static final String GET_KEY_MANAGER_BY_EXT_REF_ID =
+                "SELECT * FROM AM_KEY_MANAGER WHERE EXTERNAL_REFERENCE_ID = ?";
+
     }
 
     /**
