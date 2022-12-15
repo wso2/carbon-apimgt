@@ -153,6 +153,7 @@ public final class JWTUtil {
             throw new JWTGeneratorException("Error in generating public certificate thumbprint", e);
         }
     }
+    
     private static String generateThumbprint(String hashType,Certificate publicCert) throws CertificateEncodingException,
             UnsupportedEncodingException, NoSuchAlgorithmException {
         MessageDigest digestValue;
