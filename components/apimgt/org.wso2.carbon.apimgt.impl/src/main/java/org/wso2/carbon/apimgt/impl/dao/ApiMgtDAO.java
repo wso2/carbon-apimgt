@@ -16423,8 +16423,13 @@ public class ApiMgtDAO {
                 insertOperationPolicyMappingStatement.executeBatch();
 
                 // Adding to AM_API_CLIENT_CERTIFICATE
-                PreparedStatement getClientCertificatesStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES);
+                String getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES;
+                String driverName = connection.getMetaData().getDriverName();
+                if (driverName.contains("Oracle")) {
+                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_ORACLE_SQL;
+                }
+
+                PreparedStatement getClientCertificatesStatement = connection.prepareStatement(getClientCertificatesQuery);
                 getClientCertificatesStatement.setInt(1, apiId);
                 List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
                 try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {
@@ -17612,8 +17617,13 @@ public class ApiMgtDAO {
                 insertProductResourceMappingStatement.executeBatch();
 
                 // Adding to AM_API_CLIENT_CERTIFICATE
-                PreparedStatement getClientCertificatesStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES);
+                String getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES;
+                String driverName = connection.getMetaData().getDriverName();
+                if (driverName.contains("Oracle")) {
+                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_ORACLE_SQL;
+                }
+                
+                PreparedStatement getClientCertificatesStatement = connection.prepareStatement(getClientCertificatesQuery);
                 getClientCertificatesStatement.setInt(1, apiId);
                 List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
                 try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {
