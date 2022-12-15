@@ -41,7 +41,7 @@ public class JWTConfigurationDto {
     private Certificate publicCert;
     private PrivateKey privateKey;
     private long ttl;
-    private boolean useKid;
+    private boolean useKid = true; // Initialized to true
 
     public JWTConfigurationDto(JWTConfigurationDto jwtConfigurationDto) {
 

@@ -81,7 +81,8 @@ public final class JWTUtil {
      * @throws JWTGeneratorException
      */
 
-    public static String generateHeader(Certificate publicCert, String signatureAlgorithm) throws JWTGeneratorException {
+    public static String generateHeader(Certificate publicCert, String signatureAlgorithm)
+            throws JWTGeneratorException {
         return generateHeader(publicCert, signatureAlgorithm, false);
     }
 
@@ -111,10 +112,10 @@ public final class JWTUtil {
             jwtHeader.append("\",");
             if (useKid) {
                 jwtHeader.append("\"kid\":\"");
-                jwtHeader.append(generateThumbprint("SHA-2",publicCert));
+                jwtHeader.append(generateThumbprint("SHA-256", publicCert));
             } else {
                 jwtHeader.append("\"x5t\":\"");
-                jwtHeader.append(generateThumbprint("SHA-1",publicCert));
+                jwtHeader.append(generateThumbprint("SHA-1", publicCert));
             }
             jwtHeader.append("\"}");
             return jwtHeader.toString();
@@ -122,8 +123,9 @@ public final class JWTUtil {
             throw new JWTGeneratorException("Error in generating public certificate thumbprint", e);
         }
     }
-    
-    private static String generateThumbprint(String hashType, Certificate publicCert) throws CertificateEncodingException,
+
+    private static String generateThumbprint(String hashType, Certificate publicCert)
+            throws CertificateEncodingException,
             UnsupportedEncodingException, NoSuchAlgorithmException {
         MessageDigest digestValue;
         byte[] der = publicCert.getEncoded();
