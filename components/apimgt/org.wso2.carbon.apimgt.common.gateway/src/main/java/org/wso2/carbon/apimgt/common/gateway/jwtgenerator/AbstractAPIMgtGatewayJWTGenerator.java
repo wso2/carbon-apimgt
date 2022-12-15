@@ -147,7 +147,6 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         }
     }
 
-
     public String buildBody(JWTInfoDto jwtInfoDto) {
 
         JWTClaimsSet.Builder jwtClaimSetBuilder = new JWTClaimsSet.Builder();
