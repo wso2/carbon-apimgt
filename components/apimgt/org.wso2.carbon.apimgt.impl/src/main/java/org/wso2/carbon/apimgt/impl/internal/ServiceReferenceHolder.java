@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl.internal;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
@@ -33,6 +34,7 @@ import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
+import org.wso2.carbon.apimgt.impl.workflow.DefaultWorkflowTaskService;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -75,6 +77,7 @@ public class ServiceReferenceHolder {
     private Map<String, ExternalGatewayDeployer> externalGatewayDeployers = new HashMap<>();
     private Map<String, ExternalEnvironment> externalEnvironmentsMap = new HashMap<>();
     private Map<String, APIDefinition> apiDefinitionMap = new HashMap<>();
+    private WorkflowTaskService workflowTaskService;
 
     private ServiceReferenceHolder() {
 
@@ -361,6 +364,18 @@ public class ServiceReferenceHolder {
     public void removeAPIDefinitionParser(String type) {
 
         apiDefinitionMap.remove(type);
+    }
+
+    public WorkflowTaskService getWorkflowTaskService() {
+        if (workflowTaskService == null) {
+            this.workflowTaskService = new DefaultWorkflowTaskService();
+        }
+        return workflowTaskService;
+    }
+
+    public void setWorkflowTaskService(WorkflowTaskService workflowTaskService) {
+
+        this.workflowTaskService = workflowTaskService;    
     }
 
 }
