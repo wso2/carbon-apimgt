@@ -125,7 +125,7 @@ public final class JWTUtil {
      * @throws JWTGeneratorException
      */
 
-    public static String generateHeader(Certificate publicCert, String signatureAlgorithm,boolean useKid) throws
+    public static String generateHeader(Certificate publicCert, String signatureAlgorithm, boolean useKid) throws
             JWTGeneratorException {
 
         /*
