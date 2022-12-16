@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.EventType;
@@ -195,6 +196,8 @@ public class GatewayJMSMessageListener implements MessageListener {
                                         endTenantFlow();
                                     }
                                 }
+                                DataHolder.getInstance().removeAPIFromAllTenantMap(gatewayEvent.getContext(),
+                                        gatewayEvent.getTenantDomain());
                             }
                         }
 
@@ -217,11 +220,12 @@ public class GatewayJMSMessageListener implements MessageListener {
         } else if (EventType.API_UPDATE.toString().equals(eventType)) {
             APIEvent event = new Gson().fromJson(eventJson, APIEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateAPI(event);
+            DataHolder.getInstance().addAPIMetaData(event);
         } else if (EventType.API_LIFECYCLE_CHANGE.toString().equals(eventType)) {
             APIEvent event = new Gson().fromJson(eventJson, APIEvent.class);
-            if (APIStatus.CREATED.toString().equals(event.getApiStatus())
-                    || APIStatus.RETIRED.toString().equals(event.getApiStatus())) {
+            if (APIStatus.RETIRED.toString().equals(event.getApiStatus())) {
                 ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeAPI(event);
+                DataHolder.getInstance().removeAPIFromAllTenantMap(event.getApiContext(),event.getTenantDomain());
             } else {
                 ServiceReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateAPI(event);
             }
@@ -247,7 +251,8 @@ public class GatewayJMSMessageListener implements MessageListener {
             ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().deleteScope(event);
         } else if (EventType.POLICY_CREATE.toString().equals(eventType) ||
-                EventType.POLICY_DELETE.toString().equals(eventType)) {
+            EventType.POLICY_DELETE.toString().equals(eventType) ||
+            EventType.POLICY_UPDATE.toString().equals(eventType)) {
             PolicyEvent event = new Gson().fromJson(eventJson, PolicyEvent.class);
             boolean updatePolicy = false;
             boolean deletePolicy = false;

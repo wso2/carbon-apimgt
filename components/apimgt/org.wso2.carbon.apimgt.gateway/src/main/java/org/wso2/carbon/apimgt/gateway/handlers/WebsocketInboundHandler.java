@@ -29,6 +29,7 @@ import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.CorruptedWebSocketFrameException;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.Attribute;
@@ -154,10 +155,13 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
                 ctx.writeAndFlush(httpResponse);
             }
-        } else if ((msg instanceof CloseWebSocketFrame) || (msg instanceof PingWebSocketFrame)) {
+        } else if (msg instanceof CloseWebSocketFrame) {
             //remove inbound message context from data holder
             InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().remove(channelId);
             //if the inbound frame is a closed frame, throttling, analytics will not be published.
+            ctx.fireChannelRead(msg);
+        } else if (msg instanceof PingWebSocketFrame || msg instanceof PongWebSocketFrame) {
+            //if the inbound frame is a ping/pong frame, throttling, analytics will not be published.
             ctx.fireChannelRead(msg);
         } else if (msg instanceof WebSocketFrame) {
             InboundProcessorResponseDTO responseDTO =

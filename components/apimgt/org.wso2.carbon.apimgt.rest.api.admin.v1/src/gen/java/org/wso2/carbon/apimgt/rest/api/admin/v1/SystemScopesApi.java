@@ -104,7 +104,7 @@ SystemScopesApiService delegate = new SystemScopesApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Particular scope exists for the given user. ", response = ScopeSettingsDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response systemScopesScopeNameGet(@ApiParam(value = "scope name to be validated ",required=true) @PathParam("scopeName") String scopeName,  @ApiParam(value = "")  @QueryParam("username") String username) throws APIManagementException{
+    public Response systemScopesScopeNameGet(@ApiParam(value = "Base64 URL encoded value of the scope name to be validated ",required=true) @PathParam("scopeName") String scopeName,  @ApiParam(value = "")  @QueryParam("username") String username) throws APIManagementException{
         return delegate.systemScopesScopeNameGet(scopeName, username, securityContext);
     }
 

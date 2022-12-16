@@ -270,6 +270,8 @@ public class ImportUtils {
                 apiProvider.updateAPI(importedApi, oldAPI);
             }
 
+            apiProvider =  RestApiCommonUtil.getLoggedInUserProvider();
+
             // Retrieving the life cycle actions to do the lifecycle state change explicitly later
             lifecycleActions = getLifeCycleActions(currentStatus, targetStatus);
 
@@ -1694,6 +1696,12 @@ public class ImportUtils {
                             log.debug("Found documents definition file " + pathToJsonFile);
                         }
                         jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
+                    } else {
+                        // Handle no document files scenario
+                        if (log.isDebugEnabled()) {
+                            log.debug("No documents definition file found");
+                        }
+                        continue;
                     }
 
                     JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject()

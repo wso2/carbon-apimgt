@@ -57,6 +57,7 @@ import java.util.Map;
 public class PolicyUtil {
 
     private static final Log log = LogFactory.getLog(PolicyUtil.class);
+    private static final String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
 
     /**
      * Deploy the given throttle policy in the Traffic Manager.
@@ -156,7 +157,10 @@ public class PolicyUtil {
         PolicyRetriever policyRetriever = new PolicyRetriever();
         try {
             // Deploy all the policies retrieved from the database
-            SubscriptionPolicyList subscriptionPolicies = policyRetriever.getAllSubscriptionPolicies();
+            SubscriptionPolicyList subscriptionPolicies = new SubscriptionPolicyList();
+            if (migrationEnabled == null) {
+                subscriptionPolicies = policyRetriever.getAllSubscriptionPolicies();
+            }
             for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies.getList()) {
                 if (!(APIConstants.UNLIMITED_TIER.equalsIgnoreCase(subscriptionPolicy.getName())
                         || APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED.

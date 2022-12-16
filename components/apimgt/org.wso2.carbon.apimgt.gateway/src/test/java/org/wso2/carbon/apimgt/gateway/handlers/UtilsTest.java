@@ -25,6 +25,8 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
@@ -33,21 +35,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({SubscriptionDataHolder.class})
+@PrepareForTest({DataHolder.class, GatewayUtils.class})
 
 public class UtilsTest {
     @Before
     public void init() {
-        PowerMockito.mockStatic(SubscriptionDataHolder.class);
+        PowerMockito.mockStatic(DataHolder.class);
+        PowerMockito.mockStatic(GatewayUtils.class);
     }
 
     @Test
     public void getSelectedAPI() {
-        SubscriptionDataHolder subscriptionDataHolder = Mockito.mock(SubscriptionDataHolder.class);
-        Mockito.when(SubscriptionDataHolder.getInstance()).thenReturn(subscriptionDataHolder);
-        SubscriptionDataStore subscriptionDataStore = Mockito.mock(SubscriptionDataStore.class);
-        Mockito.when(subscriptionDataHolder.getTenantSubscriptionStore("carbon.super")).thenReturn(subscriptionDataStore);
-        Mockito.when(subscriptionDataStore.getAllAPIsByContextList()).thenReturn(apiMap());
+        DataHolder dataHolder = Mockito.mock(DataHolder.class);
+        Mockito.when(DataHolder.getInstance()).thenReturn(dataHolder);
+        Map<String,Map<String,API>> tenantAPIMap = new HashMap<>();
+        Mockito.when(dataHolder.getTenantAPIMap()).thenReturn(tenantAPIMap);
+        tenantAPIMap.put("carbon.super",apiMap());
+        PowerMockito.when(GatewayUtils.isOnDemandLoading()).thenReturn(true);
         Map<String, API> selectedAPIList = Utils.getSelectedAPIList("/api1/cde?c=y", "carbon.super");
         Assert.assertEquals(selectedAPIList.size(), 1);
         Assert.assertEquals(selectedAPIList.keySet().iterator().next(), "/api1");
@@ -55,11 +59,12 @@ public class UtilsTest {
 
     @Test
     public void getSelectedAPI2() {
-        SubscriptionDataHolder subscriptionDataHolder = Mockito.mock(SubscriptionDataHolder.class);
-        Mockito.when(SubscriptionDataHolder.getInstance()).thenReturn(subscriptionDataHolder);
-        SubscriptionDataStore subscriptionDataStore = Mockito.mock(SubscriptionDataStore.class);
-        Mockito.when(subscriptionDataHolder.getTenantSubscriptionStore("carbon.super")).thenReturn(subscriptionDataStore);
-        Mockito.when(subscriptionDataStore.getAllAPIsByContextList()).thenReturn(apiMap());
+        DataHolder dataHolder = Mockito.mock(DataHolder.class);
+        Mockito.when(DataHolder.getInstance()).thenReturn(dataHolder);
+        Map<String,Map<String,API>> tenantAPIMap = new HashMap<>();
+        Mockito.when(dataHolder.getTenantAPIMap()).thenReturn(tenantAPIMap);
+        tenantAPIMap.put("carbon.super",apiMap());
+        PowerMockito.when(GatewayUtils.isOnDemandLoading()).thenReturn(true);
         Map<String, API> selectedAPIList = Utils.getSelectedAPIList("/api1/abc/cde?c=y", "carbon.super");
         Assert.assertEquals(selectedAPIList.size(), 2);
         Assert.assertEquals(selectedAPIList.keySet().iterator().next(), "/api1/abc");
@@ -67,11 +72,12 @@ public class UtilsTest {
 
     @Test
     public void getSelectedAPI3() {
-        SubscriptionDataHolder subscriptionDataHolder = Mockito.mock(SubscriptionDataHolder.class);
-        Mockito.when(SubscriptionDataHolder.getInstance()).thenReturn(subscriptionDataHolder);
-        SubscriptionDataStore subscriptionDataStore = Mockito.mock(SubscriptionDataStore.class);
-        Mockito.when(subscriptionDataHolder.getTenantSubscriptionStore("carbon.super")).thenReturn(subscriptionDataStore);
-        Mockito.when(subscriptionDataStore.getAllAPIsByContextList()).thenReturn(apiMap());
+        DataHolder dataHolder = Mockito.mock(DataHolder.class);
+        Mockito.when(DataHolder.getInstance()).thenReturn(dataHolder);
+        Map<String,Map<String,API>> tenantAPIMap = new HashMap<>();
+        Mockito.when(dataHolder.getTenantAPIMap()).thenReturn(tenantAPIMap);
+        tenantAPIMap.put("carbon.super",apiMap());
+        PowerMockito.when(GatewayUtils.isOnDemandLoading()).thenReturn(true);
         Map<String, API> selectedAPIList = Utils.getSelectedAPIList("/api1/1.0.0/cde?c=y", "carbon.super");
         Assert.assertEquals(selectedAPIList.size(), 2);
         Assert.assertEquals(selectedAPIList.keySet().iterator().next(), "/api1/1.0.0");
@@ -79,11 +85,12 @@ public class UtilsTest {
 
     @Test
     public void getSelectedAPI4() {
-        SubscriptionDataHolder subscriptionDataHolder = Mockito.mock(SubscriptionDataHolder.class);
-        Mockito.when(SubscriptionDataHolder.getInstance()).thenReturn(subscriptionDataHolder);
-        SubscriptionDataStore subscriptionDataStore = Mockito.mock(SubscriptionDataStore.class);
-        Mockito.when(subscriptionDataHolder.getTenantSubscriptionStore("carbon.super")).thenReturn(subscriptionDataStore);
-        Mockito.when(subscriptionDataStore.getAllAPIsByContextList()).thenReturn(apiMap());
+        DataHolder dataHolder = Mockito.mock(DataHolder.class);
+        Mockito.when(DataHolder.getInstance()).thenReturn(dataHolder);
+        Map<String,Map<String,API>> tenantAPIMap = new HashMap<>();
+        tenantAPIMap.put("carbon.super",apiMap());
+        Mockito.when(dataHolder.getTenantAPIMap()).thenReturn(tenantAPIMap);
+        PowerMockito.when(GatewayUtils.isOnDemandLoading()).thenReturn(true);
         Map<String, API> selectedAPIList = Utils.getSelectedAPIList("/api1/abc/1.0.0/cde?c=y", "carbon.super");
         Assert.assertEquals(selectedAPIList.size(), 3);
         Assert.assertEquals(selectedAPIList.keySet().iterator().next(), "/api1/abc/1.0.0");

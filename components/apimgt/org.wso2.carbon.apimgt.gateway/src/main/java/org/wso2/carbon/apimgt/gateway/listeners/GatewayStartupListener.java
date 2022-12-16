@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
 import org.wso2.carbon.apimgt.gateway.throttling.util.BlockingConditionRetriever;
 import org.wso2.carbon.apimgt.gateway.throttling.util.KeyTemplateRetriever;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.webhooks.WebhooksDataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
@@ -44,6 +45,10 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.Artifac
 import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataLoader;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
+import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 import org.wso2.carbon.base.CarbonBaseUtils;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.ServerShutdownHandler;
@@ -57,6 +62,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -104,18 +110,22 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
 
     @Override
     public void completingServerStartup() {
-
-        try {
-            CertificateMgtUtils.backupOriginalTrustStore();
-            CertificateMgtUtils.startListenerCertificateReLoader();
-        } catch (CertificateManagementException e) {
-            log.error("Error while Backup Truststore", e);
+        String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
+        if (migrationEnabled == null) {
+            try {
+                CertificateMgtUtils.backupOriginalTrustStore();
+                CertificateMgtUtils.startListenerCertificateReLoader();
+            } catch (CertificateManagementException e) {
+                log.error("Error while Backup Truststore", e);
+            }
+            log.debug("Registering ServerStartupListener for SubscriptionStore for the tenant domain : " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            log.debug("Registered ServerStartupListener for SubscriptionStore for the tenant domain : " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            SubscriptionDataHolder.getInstance().initializeSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            cleanDeployment(CarbonUtils.getCarbonRepository());
+        } else {
+            log.info("Running on migration enabled mode: Stopped at gateway startup listener completing");
         }
-        log.debug("Registering ServerStartupListener for SubscriptionStore for the tenant domain : " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        log.debug("Registered ServerStartupListener for SubscriptionStore for the tenant domain : " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        SubscriptionDataHolder.getInstance().initializeSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        cleanDeployment(CarbonUtils.getCarbonRepository());
     }
 
     private boolean deployArtifactsAtStartup(String tenantDomain) throws ArtifactSynchronizerException {
@@ -155,36 +165,60 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
 
     @Override
     public void completedServerStartup() {
+        String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
+        if (migrationEnabled == null) {
+            new Thread(() -> {
 
-        new Thread(() -> {
-
-            try {
-                new EndpointCertificateDeployer(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)
-                        .deployCertificatesAtStartup();
-                new GoogleAnalyticsConfigDeployer(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME).deploy();
-            } catch (APIManagementException e) {
-                log.error(e);
+                try {
+                    new EndpointCertificateDeployer(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)
+                            .deployCertificatesAtStartup();
+                    new GoogleAnalyticsConfigDeployer(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME).deploy();
+                } catch (APIManagementException e) {
+                    log.error(e);
+                }
+            }).start();
+            SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            if (GatewayUtils.isOnDemandLoading()) {
+                try {
+                    retrieveAllAPIMetadata();
+                } catch (DataLoadingException e) {
+                    log.error("Error while loading All API Metadata", e);
+                }
+                try {
+                    new EndpointCertificateDeployer().deployAllCertificatesAtStartup();
+                } catch (APIManagementException e) {
+                    log.error("Error while loading All certificate", e);
+                }
             }
-        }).start();
-        SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        ServiceReferenceHolder.getInstance().addLoadedTenant(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        retrieveAndDeployArtifacts(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        retrieveBlockConditionsAndKeyTemplates();
-        WebhooksDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        jmsTransportHandlerForTrafficManager
-                .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_THROTTLE_DATA, new JMSMessageListener());
-        jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION,
-                new GatewayTokenRevocationMessageListener());
-        jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_CACHE_INVALIDATION,
-                new APIMgtGatewayCacheMessageListener());
-        jmsTransportHandlerForEventHub
-                .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION, new GatewayJMSMessageListener());
-        jmsTransportHandlerForEventHub
-                .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_THROTTLE_DATA, new JMSMessageListener());
-        jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_ASYNC_WEBHOOKS_DATA,
-                new GatewayJMSMessageListener());
-        copyTenantArtifacts();
-        APILoggerManager.getInstance().initializeAPILoggerList();
+            ServiceReferenceHolder.getInstance().addLoadedTenant(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            retrieveAndDeployArtifacts(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            retrieveBlockConditionsAndKeyTemplates();
+            WebhooksDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            jmsTransportHandlerForTrafficManager
+                    .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_THROTTLE_DATA, new JMSMessageListener());
+            jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION,
+                    new GatewayTokenRevocationMessageListener());
+            jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_CACHE_INVALIDATION,
+                    new APIMgtGatewayCacheMessageListener());
+            jmsTransportHandlerForEventHub
+                    .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION, new GatewayJMSMessageListener());
+            jmsTransportHandlerForEventHub
+                    .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_THROTTLE_DATA, new JMSMessageListener());
+            jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_ASYNC_WEBHOOKS_DATA,
+                    new GatewayJMSMessageListener());
+            copyTenantArtifacts();
+            APILoggerManager.getInstance().initializeAPILoggerList();
+        } else {
+            log.info("Running on migration enabled mode: Stopped at Gateway Startup listener completed");
+        }
+    }
+
+    private void retrieveAllAPIMetadata() throws DataLoadingException {
+        SubscriptionDataLoader subscriptionDataLoader = new SubscriptionDataLoaderImpl();
+        List<API> apis = subscriptionDataLoader.loadAllTenantApiMetadata();
+        if (apis != null && !apis.isEmpty()) {
+            apis.forEach(api -> DataHolder.getInstance().addAPIMetaData(api));
+        }
     }
 
     private void copyTenantArtifacts() {
@@ -346,6 +380,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         ServiceReferenceHolder.getInstance().removeUnloadedTenant(tenantDomain);
+        DataHolder.getInstance().markApisAsUnDeployedInTenant(tenantDomain);
         log.debug("UNRegistering ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
         SubscriptionDataHolder.getInstance().unregisterTenantSubscriptionStore(tenantDomain);
         log.debug("UNRegistered ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);

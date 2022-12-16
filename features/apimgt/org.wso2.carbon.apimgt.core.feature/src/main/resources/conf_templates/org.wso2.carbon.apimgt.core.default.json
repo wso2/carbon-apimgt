@@ -124,7 +124,7 @@
   "apim.workflow.service_url": "https://localhost:9445/bpmn",
   "apim.workflow.wf_engine_user": "${admin.username}",
   "apim.workflow.wf_engine_pass": "${admin.password}",
-  "apim.workflow.callback_endpoint": "https://localhost:${mgt.transport.https.port}/api/am/admin/v3/workflows/update-workflow-status",
+  "apim.workflow.callback_endpoint": "https://localhost:${mgt.transport.https.port}/api/am/admin/v4/workflows/update-workflow-status",
   "apim.workflow.token_endpoint": "https://localhost:${mgt.transport.https.port}/oauth2/token",
   "apim.workflow.client_registration_endpoint": "https://localhost:${mgt.transport.https.port}/client-registration/v0.17/register",
   "apim.workflow.client_registration_username": "${admin.username}",
@@ -179,5 +179,7 @@
   "apim.sync_runtime_artifacts.gateway.deployment_retry_duration": "15000",
   "apim.sync_runtime_artifacts.gateway.data_retrieval_mode": "async",
   "apim.sync_runtime_artifacts.gateway.event_waiting_time": "5000",
-  "apim.sync_runtime_artifacts.gateway.enable": true
+  "apim.sync_runtime_artifacts.gateway.enable": true,
+  "apim.sync_runtime_artifacts.gateway.enable_on_demand_loading": false,
+  "apim.correlation_logs.components": ["http","jdbc","ldap","synapse","method-calls"]
 }

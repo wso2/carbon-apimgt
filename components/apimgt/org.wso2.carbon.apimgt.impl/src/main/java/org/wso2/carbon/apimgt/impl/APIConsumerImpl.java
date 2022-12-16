@@ -3573,18 +3573,22 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 List<Object> apiList = new ArrayList<>();
                 for (DevPortalAPIInfo devPortalAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(devPortalAPIInfo);
-                    mappedAPI.setRating(APIUtil.getAverageRating(mappedAPI.getUuid()));
-                    Set<String> tierNameSet = devPortalAPIInfo.getAvailableTierNames();
-                    String tiers = null;
-                    if (tierNameSet != null) {
-                        tiers = String.join("||", tierNameSet);
+                    try {
+                        mappedAPI.setRating(APIUtil.getAverageRating(mappedAPI.getUuid()));
+                        Set<String> tierNameSet = devPortalAPIInfo.getAvailableTierNames();
+                        String tiers = null;
+                        if (tierNameSet != null) {
+                            tiers = String.join("||", tierNameSet);
+                        }
+                        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+                        Set<Tier> availableTiers =
+                                APIUtil.getAvailableTiers(definedTiers, tiers, mappedAPI.getId().getApiName());
+                        mappedAPI.removeAllTiers();
+                        mappedAPI.setAvailableTiers(availableTiers);
+                        apiList.add(mappedAPI);
+                    } catch (APIManagementException e) {
+                        log.warn("Retrieving API details from DB failed for API: " + mappedAPI.getUuid() + " " + e);
                     }
-                    Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
-                    Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers,
-                            mappedAPI.getId().getApiName());
-                    mappedAPI.removeAllTiers();
-                    mappedAPI.setAvailableTiers(availableTiers);
-                    apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);
                 result.put("apis", apiSet);

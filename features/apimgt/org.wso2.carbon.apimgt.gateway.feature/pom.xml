@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.27.5-SNAPSHOT</version>
+        <version>9.28.24-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -175,6 +175,10 @@
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-httpclient</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -299,6 +303,7 @@
                                 <bundleDef>io.swagger:swagger-core</bundleDef>
                                 <bundleDef>io.swagger:swagger-models</bundleDef>
                                 <bundleDef>io.swagger:swagger-annotations</bundleDef>
+                                <bundleDef>io.github.openfeign:feign-httpclient:${openfeign.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>
