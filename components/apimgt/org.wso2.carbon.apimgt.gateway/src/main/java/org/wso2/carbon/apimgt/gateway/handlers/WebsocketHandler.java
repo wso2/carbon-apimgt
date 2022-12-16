@@ -21,6 +21,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.CombinedChannelDuplexHandler;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
@@ -75,24 +76,26 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
                     System.currentTimeMillis());
         }
 
-        if ((msg instanceof CloseWebSocketFrame) || (msg instanceof PongWebSocketFrame)) {
-            //remove inbound message context from data holder
-            InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().remove(channelId);
-            InboundProcessorResponseDTO responseDTO = inboundHandler().getWebSocketProcessor().handleResponse(
-                    (WebSocketFrame) msg, inboundMessageContext);
-            if ((msg instanceof CloseWebSocketFrame) && ((CloseWebSocketFrame) msg).statusCode() > 1001) {
-                log.info("ERROR_CODE = " + ((CloseWebSocketFrame) msg).statusCode() + ", ERROR_MESSAGE = " +
-                        ((CloseWebSocketFrame) msg).reasonText());
+        if (msg instanceof CloseWebSocketFrame) {
+            if (((CloseWebSocketFrame) msg).statusCode() > 1001) {
+                log.info("ERROR_CODE = " + ((CloseWebSocketFrame) msg).statusCode() + ", ERROR_MESSAGE = "
+                                 + ((CloseWebSocketFrame) msg).reasonText());
+                InboundProcessorResponseDTO responseDTO = inboundHandler().getWebSocketProcessor().handleResponse(
+                        (WebSocketFrame) msg, inboundMessageContext);
                 responseDTO.setErrorCode(((CloseWebSocketFrame) msg).statusCode());
                 responseDTO.setErrorMessage(((CloseWebSocketFrame) msg).reasonText());
                 responseDTO.setError(true);
                 handleSubscribeFrameErrorEvent(ctx,responseDTO);
             }
+            //remove inbound message context from data holder
+            InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().remove(channelId);
 
 
             //if the inbound frame is a closed frame, throttling, analytics will not be published.
             outboundHandler().write(ctx, msg, promise);
-
+        } else if (msg instanceof PongWebSocketFrame || msg instanceof PingWebSocketFrame) {
+            //if the inbound frame is a ping/pong frame, throttling, analytics will not be published.
+            outboundHandler().write(ctx, msg, promise);
         } else if (msg instanceof WebSocketFrame) {
             InboundProcessorResponseDTO responseDTO = inboundHandler().getWebSocketProcessor().handleResponse(
                     (WebSocketFrame) msg, inboundMessageContext);
