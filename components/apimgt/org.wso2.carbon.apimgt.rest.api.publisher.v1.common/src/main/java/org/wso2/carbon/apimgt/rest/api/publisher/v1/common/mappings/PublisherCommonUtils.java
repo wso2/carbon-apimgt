@@ -893,22 +893,27 @@ public class PublisherCommonUtils {
      */
     public static boolean isValidWSAPI(APIDTO api) {
 
-        boolean isValid = false;
-
+        boolean containsEndpoint = false;
+        boolean isValidProdUrl = true;
+        boolean isValidSandboxUrl = true;
         if (api.getEndpointConfig() != null) {
             Map endpointConfig = (Map) api.getEndpointConfig();
-            String prodEndpointUrl = String
-                    .valueOf(((Map) endpointConfig.get("production_endpoints")).get("url"));
-            String sandboxEndpointUrl = String
-                    .valueOf(((Map) endpointConfig.get("sandbox_endpoints")).get("url"));
-            isValid = prodEndpointUrl.startsWith("ws://") || prodEndpointUrl.startsWith("wss://");
-
-            if (isValid) {
-                isValid = sandboxEndpointUrl.startsWith("ws://") || sandboxEndpointUrl.startsWith("wss://");
+            if (endpointConfig.containsKey(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+                String prodEndpointUrl = String.valueOf(((Map) endpointConfig.get(
+                        APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)).get(APIConstants.API_DATA_URL));
+                isValidProdUrl = prodEndpointUrl.startsWith(APIConstants.WS_PROTOCOL_URL_PREFIX)
+                        || prodEndpointUrl.startsWith(APIConstants.WSS_PROTOCOL_URL_PREFIX);
+                containsEndpoint = true;
+            }
+            if (endpointConfig.containsKey(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+                String sandboxEndpointUrl = String.valueOf(((Map) endpointConfig.get(
+                        APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)).get(APIConstants.API_DATA_URL));
+                isValidSandboxUrl = sandboxEndpointUrl.startsWith(APIConstants.WS_PROTOCOL_URL_PREFIX)
+                        || sandboxEndpointUrl.startsWith(APIConstants.WSS_PROTOCOL_URL_PREFIX);
+                containsEndpoint = true;
             }
         }
-
-        return isValid;
+        return containsEndpoint && isValidProdUrl && isValidSandboxUrl;
     }
 
     /**
