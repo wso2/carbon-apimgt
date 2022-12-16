@@ -1044,12 +1044,14 @@ public class APIManagerConfiguration {
             if (propertiesElement != null) {
                 Iterator<OMElement> properties = propertiesElement.getChildElements();
                 if (properties != null) {
-                    Properties workflowProperties = new Properties();
+                    Properties workflowConfigProperties = new Properties();
                     while (properties.hasNext()) {
                         OMElement property = (OMElement) properties.next();
-                        String value = MiscellaneousUtil.resolve(property, secretResolver);
-                        workflowProperties.put(property.getLocalName(), APIUtil.replaceSystemProperty(value));
+                        String name = property.getAttributeValue(new QName("name"));
+                        String value = property.getText();
+                        workflowConfigProperties.put(name, value);
                     }
+                    workflowProperties.setProperties(workflowConfigProperties);
                 }
             }
 
