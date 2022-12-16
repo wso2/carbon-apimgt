@@ -89,8 +89,6 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
             }
             //remove inbound message context from data holder
             InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().remove(channelId);
-
-
             //if the inbound frame is a closed frame, throttling, analytics will not be published.
             outboundHandler().write(ctx, msg, promise);
         } else if (msg instanceof PongWebSocketFrame || msg instanceof PingWebSocketFrame) {
