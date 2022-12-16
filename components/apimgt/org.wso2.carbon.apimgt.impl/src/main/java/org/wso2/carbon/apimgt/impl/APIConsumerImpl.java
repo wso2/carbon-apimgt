@@ -3646,6 +3646,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 throw new APIMgtResourceNotFoundException(msg);
             }
         } catch (APIPersistenceException | OASPersistenceException | ParseException e) {
+            if (e.getMessage().contains("does not have permission")){
+                throw new APIManagementException(e.getMessage(), ExceptionCodes.INVALID_PERMISSION);
+            }
             String msg = "Failed to get API";
             throw new APIManagementException(msg, e);
         }
