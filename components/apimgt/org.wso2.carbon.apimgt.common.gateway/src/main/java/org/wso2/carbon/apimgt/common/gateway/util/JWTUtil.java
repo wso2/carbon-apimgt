@@ -126,8 +126,8 @@ public final class JWTUtil {
         byte[] digestInBytes = digestValue.digest();
         String publicCertThumbprint = hexify(digestInBytes);
         String base64UrlEncodedThumbPrint;
-        base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
-                .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
+        base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder().withoutPadding()
+                .encodeToString(publicCertThumbprint.getBytes(StandardCharsets.UTF_8));
         return base64UrlEncodedThumbPrint;
     }
 
