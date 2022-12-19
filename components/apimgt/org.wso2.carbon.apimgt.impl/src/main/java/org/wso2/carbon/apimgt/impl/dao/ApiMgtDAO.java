@@ -8393,6 +8393,7 @@ public class ApiMgtDAO {
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
                 application.setDescription(rs.getString("DESCRIPTION"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
+                application.setTokenType(rs.getString("APP_TOKEN_TYPE"));
                 workflowDTO.setApplication(application);
                 workflowDTO.setKeyType(rs.getString("TOKEN_TYPE"));
                 workflowDTO.setUserName(subscriber.getName());

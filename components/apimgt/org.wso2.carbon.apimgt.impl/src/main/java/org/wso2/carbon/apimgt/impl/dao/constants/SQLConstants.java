@@ -1958,6 +1958,7 @@ public class SQLConstants {
             "   APP.NAME," +
             "   APP.SUBSCRIBER_ID," +
             "   APP.APPLICATION_TIER," +
+            "   APP.TOKEN_TYPE AS APP_TOKEN_TYPE," +
             "   REG.TOKEN_TYPE," +
             "   REG.TOKEN_SCOPE," +
             "   APP.CALLBACK_URL," +
