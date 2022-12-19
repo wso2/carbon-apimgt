@@ -98,10 +98,7 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
         String persistentNotifierPassword = properties
                 .getProperty("password", defaultPersistentNotifierPassword);
         String etcdEndpoint = persistentNotifierHostname + revokedToken;
-        URL etcdEndpointURL = new URL(etcdEndpoint);
-        String etcdEndpointProtocol = etcdEndpointURL.getProtocol();
-        int etcdEndpointPort = etcdEndpointURL.getPort();
-        HttpClient etcdEPClient = APIUtil.getHttpClient(etcdEndpointPort, etcdEndpointProtocol);
+        HttpClient etcdEPClient = APIUtil.getHttpClient();
         HttpPut httpETCDPut = new HttpPut(etcdEndpoint);
         byte[] encodedAuth = Base64.encodeBase64((persistentNotifierUsername + ":" + persistentNotifierPassword).
                 getBytes(StandardCharsets.UTF_8));

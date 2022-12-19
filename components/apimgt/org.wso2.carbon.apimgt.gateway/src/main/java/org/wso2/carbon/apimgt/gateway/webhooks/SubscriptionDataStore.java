@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -154,10 +153,7 @@ public class SubscriptionDataStore {
                     WebhooksUtils.getEventHubConfiguration().getPassword()).getBytes(StandardCharsets.UTF_8));
             method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
             method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
-            URL eventHubURL = new URL(url);
-            int eventHubPort = eventHubURL.getPort();
-            String eventHubProtocol = eventHubURL.getProtocol();
-            HttpClient httpClient = APIUtil.getHttpClient(eventHubPort, eventHubProtocol);
+            HttpClient httpClient = APIUtil.getHttpClient();
             HttpResponse httpResponse = null;
             int retryCount = 0;
             boolean retry;

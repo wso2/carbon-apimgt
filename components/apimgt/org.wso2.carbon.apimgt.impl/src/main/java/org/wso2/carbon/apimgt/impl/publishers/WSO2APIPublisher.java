@@ -634,14 +634,6 @@ public class WSO2APIPublisher implements APIPublisher {
      * @throws APIManagementException If an error occurs due to malformed URL.
      */
     protected CloseableHttpClient getHttpClient(String storeEndpoint) throws APIManagementException {
-
-        try {
-            URL storeURL = new URL(storeEndpoint);
-            int externalStorePort = storeURL.getPort();
-            String externalStoreProtocol = storeURL.getProtocol();
-            return (CloseableHttpClient) APIUtil.getHttpClient(externalStorePort, externalStoreProtocol);
-        } catch (MalformedURLException e) {
-            throw new APIManagementException("Error while initializing HttpClient due to malformed URL", e);
-        }
+        return (CloseableHttpClient) APIUtil.getHttpClient();
     }
 }

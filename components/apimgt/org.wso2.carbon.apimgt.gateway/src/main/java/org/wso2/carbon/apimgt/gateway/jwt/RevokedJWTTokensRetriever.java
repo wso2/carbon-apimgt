@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -69,10 +68,7 @@ public class RevokedJWTTokensRetriever extends TimerTask {
             byte[] credentials = Base64.encodeBase64((getEventHubConfiguration().getUsername() + ":" +
                     getEventHubConfiguration().getPassword()).getBytes(StandardCharsets.UTF_8));
             method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
-            URL keyMgtURL = new URL(url);
-            int keyMgtPort = keyMgtURL.getPort();
-            String keyMgtProtocol = keyMgtURL.getProtocol();
-            HttpClient httpClient = APIUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
+            HttpClient httpClient = APIUtil.getHttpClient();
             HttpResponse httpResponse = null;
             int retryCount = 0;
             boolean retry;

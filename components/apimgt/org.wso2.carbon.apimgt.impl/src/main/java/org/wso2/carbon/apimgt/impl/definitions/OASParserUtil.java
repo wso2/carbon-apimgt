@@ -98,8 +98,6 @@ import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.HashSet;
@@ -1046,7 +1044,7 @@ public class OASParserUtil {
         try {
             URL urlObj = new URL(url);
             String host = urlObj.getHost();
-            HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
+            HttpClient httpClient = APIUtil.getHttpClient();
             HttpGet httpGet = new HttpGet(url);
 
             HttpResponse response = httpClient.execute(httpGet);

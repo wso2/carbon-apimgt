@@ -43,7 +43,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Set;
@@ -393,12 +392,9 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         AccessTokenGenerator accessTokenGenerator = ServiceReferenceHolder.getInstance().getAccessTokenGenerator();
         try {
             String userID = apiMgtDAO.getUserID(userName);
-            URL serverURL = new URL(recommendationEndpointURL);
-            int serverPort = serverURL.getPort();
-            String serverProtocol = serverURL.getProtocol();
 
             HttpGet method = new HttpGet(recommendationEndpointURL);
-            HttpClient httpClient = APIUtil.getHttpClient(serverPort, serverProtocol);
+            HttpClient httpClient = APIUtil.getHttpClient();
             if (recommendationEnvironment.getOauthURL() != null) {
                 String accessToken = accessTokenGenerator.getAccessToken();
                 method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,

@@ -135,10 +135,8 @@ import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.quotalimiter.OnPremQuotaLimiter;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.bootstrap.Bootstrap;
-import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.JWTSignatureAlg;
-import org.wso2.carbon.apimgt.common.gateway.util.CommonAPIUtil;
 import org.wso2.carbon.apimgt.eventing.EventPublisher;
 import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
 import org.wso2.carbon.apimgt.eventing.EventPublisherException;
@@ -5083,15 +5081,7 @@ public final class APIUtil {
      */
 
     public static HttpClient getHttpClient(String url) throws APIManagementException {
-        URL configUrl = null;
-        try {
-            configUrl = new URL(url);
-        } catch (MalformedURLException e) {
-            handleException("URL is malformed", e);
-        }
-        int port = configUrl.getPort();
-        String protocol = configUrl.getProtocol();
-        return APIUtil.getHttpClient(port, protocol);
+        return getHttpClient();
     }
 
     /**
@@ -7285,58 +7275,50 @@ public final class APIUtil {
         byte[] encodedAuth = Base64
                 .encodeBase64((spUserName + ":" + spPassword).getBytes(Charset.forName("ISO-8859-1")));
         String authHeader = "Basic " + new String(encodedAuth);
-        URL spURL;
-        try {
-            spURL = new URL(spEndpoint);
-            HttpClient httpClient = APIUtil.getHttpClient(spURL.getPort(), spURL.getProtocol());
-            HttpPost httpPost = new HttpPost(spEndpoint);
 
-            httpPost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
-            JSONObject obj = new JSONObject();
-            obj.put("appName", appName);
-            obj.put("query", query);
+        HttpClient httpClient = APIUtil.getHttpClient();
+        HttpPost httpPost = new HttpPost(spEndpoint);
 
-            if (log.isDebugEnabled()) {
-                log.debug("Request from SP: " + obj.toJSONString());
-            }
+        httpPost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+        JSONObject obj = new JSONObject();
+        obj.put("appName", appName);
+        obj.put("query", query);
 
-            StringEntity requestEntity = new StringEntity(obj.toJSONString(), ContentType.APPLICATION_JSON);
-
-            httpPost.setEntity(requestEntity);
-
-            HttpResponse response;
-            try {
-                response = httpClient.execute(httpPost);
-                HttpEntity entity = response.getEntity();
-                if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                    String error = "Error while invoking SP rest api :  " + response.getStatusLine().getStatusCode()
-                            + " " + response.getStatusLine().getReasonPhrase();
-                    log.error(error);
-                    throw new APIManagementException(error);
-                }
-                String responseStr = EntityUtils.toString(entity);
-                if (log.isDebugEnabled()) {
-                    log.debug("Response from SP: " + responseStr);
-                }
-                JSONParser parser = new JSONParser();
-                return (JSONObject) parser.parse(responseStr);
-
-            } catch (ClientProtocolException e) {
-                handleException("Error while connecting to the server ", e);
-            } catch (IOException e) {
-                handleException("Error while connecting to the server ", e);
-            } catch (ParseException e) {
-                handleException("Error while parsing the response ", e);
-            } finally {
-                httpPost.reset();
-            }
-
-        } catch (MalformedURLException e) {
-            handleException("Error while parsing the stream processor url", e);
+        if (log.isDebugEnabled()) {
+            log.debug("Request from SP: " + obj.toJSONString());
         }
 
-        return null;
+        StringEntity requestEntity = new StringEntity(obj.toJSONString(), ContentType.APPLICATION_JSON);
 
+        httpPost.setEntity(requestEntity);
+
+        HttpResponse response;
+        try {
+            response = httpClient.execute(httpPost);
+            HttpEntity entity = response.getEntity();
+            if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                String error = "Error while invoking SP rest api :  " + response.getStatusLine().getStatusCode()
+                        + " " + response.getStatusLine().getReasonPhrase();
+                log.error(error);
+                throw new APIManagementException(error);
+            }
+            String responseStr = EntityUtils.toString(entity);
+            if (log.isDebugEnabled()) {
+                log.debug("Response from SP: " + responseStr);
+            }
+            JSONParser parser = new JSONParser();
+            return (JSONObject) parser.parse(responseStr);
+
+        } catch (ClientProtocolException e) {
+            handleException("Error while connecting to the server ", e);
+        } catch (IOException e) {
+            handleException("Error while connecting to the server ", e);
+        } catch (ParseException e) {
+            handleException("Error while parsing the response ", e);
+        } finally {
+            httpPost.reset();
+        }
+        return null;
     }
 
     /**

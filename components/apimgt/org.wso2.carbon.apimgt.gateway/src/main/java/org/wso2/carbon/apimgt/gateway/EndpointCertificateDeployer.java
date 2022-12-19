@@ -39,7 +39,6 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.net.URL;
 import java.util.List;
 
 /**
@@ -117,20 +116,17 @@ public class EndpointCertificateDeployer {
             ArtifactSynchronizerException {
 
         HttpGet method = new HttpGet(endpoint);
-        URL url = new URL(endpoint);
         String username = eventHubConfigurationDto.getUsername();
         String password = eventHubConfigurationDto.getPassword();
         byte[] credentials = Base64.encodeBase64((username + APIConstants.DELEM_COLON + password).
                 getBytes(APIConstants.DigestAuthConstants.CHARSET));
-        int port = url.getPort();
-        String protocol = url.getProtocol();
         method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BASIC
                 + new String(credentials, APIConstants.DigestAuthConstants.CHARSET));
         if (tenantDomain != null) {
             method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
         }
 
-        HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+        HttpClient httpClient = APIUtil.getHttpClient();
         try {
             return APIUtil.executeHTTPRequest(method, httpClient);
         } catch (APIManagementException e) {

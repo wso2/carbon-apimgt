@@ -51,7 +51,6 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 /*
@@ -79,10 +78,7 @@ public class WebhooksUtils {
                 getEventHubConfiguration().getPassword()).getBytes(StandardCharsets.UTF_8));
         method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
         method.setHeader(APIConstants.KeyManager.KEY_MANAGER_TYPE_HEADER, eventType);
-        URL eventHubURL = new URL(url);
-        int eventHubPort = eventHubURL.getPort();
-        String eventHubProtocol = eventHubURL.getProtocol();
-        HttpClient httpClient = APIUtil.getHttpClient(eventHubPort, eventHubProtocol);
+        HttpClient httpClient = APIUtil.getHttpClient();
         int retryCount = 0;
         HttpResponse httpResponse = null;
         boolean retry;

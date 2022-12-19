@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -100,16 +99,13 @@ public class APILoggerManager {
         String serviceURLStr = eventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP);
         HttpGet method = new HttpGet(serviceURLStr + path);
 
-        URL serviceURL = new URL(serviceURLStr + path);
         byte[] credentials = getServiceCredentials(eventHubConfigurationDto);
-        int servicePort = serviceURL.getPort();
-        String serviceProtocol = serviceURL.getProtocol();
         method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BASIC
                 + new String(credentials, StandardCharsets.UTF_8));
         if (tenantDomain != null) {
             method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
         }
-        HttpClient httpClient = APIUtil.getHttpClient(servicePort, serviceProtocol);
+        HttpClient httpClient = APIUtil.getHttpClient();
 
         HttpResponse httpResponse = null;
         int retryCount = 0;

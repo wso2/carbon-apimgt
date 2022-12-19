@@ -39,7 +39,6 @@ import org.wso2.carbon.localentry.LocalEntryAdminException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 
 public class GoogleAnalyticsConfigDeployer {
 
@@ -103,20 +102,17 @@ public class GoogleAnalyticsConfigDeployer {
             ArtifactSynchronizerException {
 
         HttpGet method = new HttpGet(endpoint);
-        URL url = new URL(endpoint);
         String username = eventHubConfigurationDto.getUsername();
         String password = eventHubConfigurationDto.getPassword();
         byte[] credentials = Base64.encodeBase64((username + APIConstants.DELEM_COLON + password).
                 getBytes(APIConstants.DigestAuthConstants.CHARSET));
-        int port = url.getPort();
-        String protocol = url.getProtocol();
         method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BASIC
                 + new String(credentials, APIConstants.DigestAuthConstants.CHARSET));
         if (tenantDomain != null) {
             method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
         }
 
-        HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+        HttpClient httpClient = APIUtil.getHttpClient();
         try {
             return APIUtil.executeHTTPRequest(method, httpClient);
         } catch (APIManagementException e) {

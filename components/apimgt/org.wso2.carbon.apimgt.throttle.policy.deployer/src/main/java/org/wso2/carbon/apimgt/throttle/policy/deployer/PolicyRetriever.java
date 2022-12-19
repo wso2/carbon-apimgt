@@ -41,7 +41,6 @@ import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicyLis
 import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyDeployerException;
 
 import java.io.IOException;
-import java.net.URL;
 
 /**
  * Used to retrieve policy metadata using internal REST APIs
@@ -225,17 +224,14 @@ public class PolicyRetriever {
     private CloseableHttpResponse invokeService(String endpoint, String tenantDomain)
             throws IOException, ThrottlePolicyDeployerException {
         HttpGet method = new HttpGet(endpoint);
-        URL url = new URL(endpoint);
         String username = eventHubConfigurationDto.getUsername();
         String password = eventHubConfigurationDto.getPassword();
         byte[] credentials = Base64.encodeBase64((username + APIConstants.DELEM_COLON + password).
                 getBytes(APIConstants.DigestAuthConstants.CHARSET));
-        int port = url.getPort();
-        String protocol = url.getProtocol();
         method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
         method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BASIC
                 + new String(credentials, APIConstants.DigestAuthConstants.CHARSET));
-        HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+        HttpClient httpClient = APIUtil.getHttpClient();
         try {
             return APIUtil.executeHTTPRequest(method, httpClient);
         } catch (APIManagementException e) {

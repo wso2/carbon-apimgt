@@ -33,7 +33,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
-import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.ByteArrayInputStream;
@@ -60,7 +59,7 @@ public class KeyTemplateRetrieverTest {
         StatusLine status = Mockito.mock(StatusLine.class);
         Mockito.when(status.getStatusCode()).thenReturn(200);
         Mockito.when(httpResponse.getStatusLine()).thenReturn(status);
-        BDDMockito.given(APIUtil.getHttpClient(Mockito.anyInt(),Mockito.anyString())).willReturn(httpClient);
+        BDDMockito.given(APIUtil.getHttpClient()).willReturn(httpClient);
 
         EventHubConfigurationDto eventHubConfigurationDto = new EventHubConfigurationDto();
         eventHubConfigurationDto.setUsername("admin");

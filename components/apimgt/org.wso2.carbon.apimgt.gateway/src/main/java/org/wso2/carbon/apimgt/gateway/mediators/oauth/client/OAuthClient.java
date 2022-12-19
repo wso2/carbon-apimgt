@@ -70,13 +70,11 @@ public class OAuthClient {
             log.debug("Initializing token generation request: [token-endpoint] " + url);
         }
 
-        URL urlObject;
         String credentials = Base64.getEncoder().encodeToString((clientId + ":" + clientSecret).getBytes());
 
-        urlObject = new URL(url);
         StringBuilder payload = new StringBuilder();
         try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil
-                .getHttpClient(urlObject.getPort(), urlObject.getProtocol())) {
+                .getHttpClient()) {
             HttpPost httpPost = new HttpPost(url);
             // Set authorization header
             httpPost.setHeader(APIConstants.OAuthConstants.AUTHORIZATION_HEADER, "Basic " + credentials);

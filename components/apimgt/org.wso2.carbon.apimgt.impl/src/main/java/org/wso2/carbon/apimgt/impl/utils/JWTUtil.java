@@ -24,7 +24,6 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -32,7 +31,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.common.gateway.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.common.gateway.jwt.JWTValidatorConfiguration;
@@ -45,8 +43,6 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
@@ -55,7 +51,6 @@ public class JWTUtil {
 
     private static final Log log = LogFactory.getLog(JWTUtil.class);
 
-    @Deprecated
     /**
      * This method used to retrieve JWKS keys from endpoint
      *
@@ -63,11 +58,11 @@ public class JWTUtil {
      * @return
      * @throws IOException
      */
+    @Deprecated
     public static String retrieveJWKSConfiguration(String jwksEndpoint) throws IOException {
 
-        URL url = new URL(jwksEndpoint);
         try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil
-                .getHttpClient(url.getPort(), url.getProtocol())) {
+                .getHttpClient()) {
             HttpGet httpGet = new HttpGet(jwksEndpoint);
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
                 if (response.getStatusLine().getStatusCode() == 200) {

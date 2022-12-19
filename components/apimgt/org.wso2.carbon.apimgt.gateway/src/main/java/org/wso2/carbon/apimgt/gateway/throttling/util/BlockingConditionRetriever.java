@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -67,10 +66,7 @@ public class BlockingConditionRetriever extends TimerTask {
                     (StandardCharsets.UTF_8));
             HttpGet method = new HttpGet(url);
             method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
-            URL eventHubUrl = new URL(url);
-            int keyMgtPort = eventHubUrl.getPort();
-            String protocol = eventHubUrl.getProtocol();
-            HttpClient httpClient = APIUtil.getHttpClient(keyMgtPort, protocol);
+            HttpClient httpClient = APIUtil.getHttpClient();
             HttpResponse httpResponse = null;
             int retryCount = 0;
             boolean retry = true;

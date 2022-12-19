@@ -35,7 +35,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -112,23 +111,16 @@ public class AccessTokenGenerator {
 
         try {
             String revokeEndpoint;
-            URL oauthURL;
-            int serverPort;
 
             if (StringUtils.isNotEmpty(this.revokeEndpoint)) {
                 revokeEndpoint = this.revokeEndpoint;
-                oauthURL = new URL(revokeEndpoint);
-                serverPort = oauthURL.getPort();
             } else {
-                oauthURL = new URL(oauthUrl);
                 revokeEndpoint = oauthUrl.concat("/revoke");
-                serverPort = oauthURL.getPort();
             }
 
-            String serverProtocol = oauthURL.getProtocol();
 
             HttpPost request = new HttpPost(revokeEndpoint);
-            HttpClient httpClient = APIUtil.getHttpClient(serverPort, serverProtocol);
+            HttpClient httpClient = APIUtil.getHttpClient();
 
             byte[] credentials = org.apache.commons.codec.binary.Base64
                     .encodeBase64((consumerKey + ":" + consumerSecret).getBytes(StandardCharsets.UTF_8));
@@ -158,22 +150,15 @@ public class AccessTokenGenerator {
 
         try {
             String tokenEndpoint;
-            int serverPort;
 
-            URL oauthURL;
             if (StringUtils.isNotEmpty(this.tokenEndpoint)){
                 tokenEndpoint = this.tokenEndpoint;
-                oauthURL = new URL(tokenEndpoint);
-                serverPort = oauthURL.getPort();
             }else{
-                oauthURL = new URL(oauthUrl);
-                serverPort = oauthURL.getPort();
                 tokenEndpoint = oauthUrl.concat("/token");
             }
-            String serverProtocol = oauthURL.getProtocol();
 
             HttpPost request = new HttpPost(tokenEndpoint);
-            HttpClient httpClient = APIUtil.getHttpClient(serverPort, serverProtocol);
+            HttpClient httpClient = APIUtil.getHttpClient();
 
             byte[] credentials = org.apache.commons.codec.binary.Base64
                     .encodeBase64((consumerKey + ":" + consumerSecret).getBytes(StandardCharsets.UTF_8));

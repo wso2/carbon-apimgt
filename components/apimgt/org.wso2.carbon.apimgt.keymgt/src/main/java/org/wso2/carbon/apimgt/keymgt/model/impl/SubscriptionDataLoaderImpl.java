@@ -459,15 +459,13 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
             URL serviceURL = new URL(serviceURLStr + path);
             byte[] credentials = getServiceCredentials(getEventHubConfigurationDto);
-            int servicePort = serviceURL.getPort();
-            String serviceProtocol = serviceURL.getProtocol();
             method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
                     APIConstants.AUTHORIZATION_BASIC +
                             new String(credentials, StandardCharsets.UTF_8));
             if (tenantDomain != null) {
                 method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
             }
-            HttpClient httpClient = APIUtil.getHttpClient(servicePort, serviceProtocol);
+            HttpClient httpClient = APIUtil.getHttpClient();
 
             HttpResponse httpResponse = null;
             int retryCount = 0;

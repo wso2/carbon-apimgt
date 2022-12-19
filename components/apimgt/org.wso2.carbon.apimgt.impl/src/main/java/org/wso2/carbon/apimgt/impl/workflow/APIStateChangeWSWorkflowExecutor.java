@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.axis2.util.URL;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -49,7 +48,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
@@ -182,9 +180,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
                     serviceEndpoint = workflowProperties.getServerUrl();
                 }
 
-                URL serviceEndpointURL = new URL(serviceEndpoint);
-                HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(),
-                        serviceEndpointURL.getProtocol());
+                HttpClient httpClient = APIUtil.getHttpClient();
                 HttpPost httpPost = new HttpPost(serviceEndpoint + RUNTIME_INSTANCE_RESOURCE_PATH);
                 //Generate the basic auth header using provided user credentials
                 String authHeader = getBasicAuthHeader();
@@ -290,8 +286,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
                     .getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
             serviceEndpoint = workflowProperties.getServerUrl();
         }
-        URL serviceEndpointURL = new URL(serviceEndpoint);
-        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpClient httpClient = APIUtil.getHttpClient();
 
         // get the basic auth header value to connect to the bpmn process
         String authHeader = getBasicAuthHeader();
@@ -489,9 +484,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
             payload.put(PayloadConstants.KEY_OAUTH_OWNER, dcrUsername);
             payload.put(PayloadConstants.KEY_OAUTH_SAASAPP, "true");
             payload.put(PayloadConstants.KEY_OAUTH_GRANT_TYPES, WorkflowConstants.WORKFLOW_OAUTH_APP_GRANT_TYPES);
-            URL serviceEndpointURL = new URL(workflowProperties.getdCREndPoint());
-            HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(),
-                    serviceEndpointURL.getProtocol());
+            HttpClient httpClient = APIUtil.getHttpClient();
             HttpPost httpPost = new HttpPost(workflowProperties.getdCREndPoint());
             String authHeader = "Basic " + new String(encodedAuth);
             httpPost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);

@@ -352,10 +352,9 @@ public class ApisApiServiceImplUtils {
         }
 
         String getUrl = baseUrl + "/" + auditUuid + APIConstants.ASSESSMENT_REPORT;
-        URL getReportUrl = new URL(getUrl);
 
         try (CloseableHttpClient getHttpClient = (CloseableHttpClient) APIUtil
-                .getHttpClient(getReportUrl.getPort(), getReportUrl.getProtocol())) {
+                .getHttpClient()) {
             HttpGet httpGet = new HttpGet(getUrl);
             // Set the header properties of the request
             httpGet.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
@@ -416,9 +415,8 @@ public class ApisApiServiceImplUtils {
         jsonBody.put("specfile", Base64Utils.encode(apiDefinition.getBytes(StandardCharsets.UTF_8)));
         // Logic for HTTP Request
         String putUrl = baseUrl + "/" + auditUuid;
-        URL updateApiUrl = new URL(putUrl);
         try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil
-                .getHttpClient(updateApiUrl.getPort(), updateApiUrl.getProtocol())) {
+                .getHttpClient()) {
             HttpPut httpPut = new HttpPut(putUrl);
             // Set the header properties of the request
             httpPut.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);

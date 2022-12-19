@@ -18,7 +18,6 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -50,10 +49,7 @@ public class KeyManagerConfigurationDataRetriever extends TimerTask {
                     HttpGet method = new HttpGet(url);
                     method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
                     method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
-                    URL configUrl = new URL(url);
-                    int port = configUrl.getPort();
-                    String protocol = configUrl.getProtocol();
-                    HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+                    HttpClient httpClient = APIUtil.getHttpClient();
                     HttpResponse httpResponse = null;
                     int retryCount = 0;
                     boolean retry;

@@ -42,7 +42,6 @@ import org.wso2.carbon.logging.correlation.bean.CorrelationLogConfig;
 import org.wso2.carbon.logging.correlation.utils.CorrelationLogHolder;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -152,14 +151,11 @@ public class CorrelationConfigManager {
         String serviceURLStr = eventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP);
         HttpGet method = new HttpGet(serviceURLStr + path);
 
-        URL serviceURL = new URL(serviceURLStr + path);
         byte[] credentials = getServiceCredentials(eventHubConfigurationDto);
-        int servicePort = serviceURL.getPort();
-        String serviceProtocol = serviceURL.getProtocol();
         method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
                 APIConstants.AUTHORIZATION_BASIC + new String(credentials, StandardCharsets.UTF_8));
         method.setHeader(APIConstants.HEADER_TENANT, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        HttpClient httpClient = APIUtil.getHttpClient(servicePort, serviceProtocol);
+        HttpClient httpClient = APIUtil.getHttpClient();
 
         HttpResponse httpResponse = null;
         int retryCount = 0;
