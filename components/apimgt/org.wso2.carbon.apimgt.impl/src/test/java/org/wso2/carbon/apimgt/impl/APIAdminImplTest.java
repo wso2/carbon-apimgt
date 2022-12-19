@@ -34,11 +34,13 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -191,5 +193,36 @@ public class APIAdminImplTest {
         } catch (APIManagementException ex) {
             Assert.fail(ex.getMessage());
         }
+    }
+
+    @Test
+    public void testWorkflowDefaultPendingList() throws Exception {
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito
+                .mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        WorkflowProperties workflowProperties = Mockito.mock(WorkflowProperties.class);
+        Mockito.when(apiManagerConfiguration.getWorkflowProperties()).thenReturn(workflowProperties);
+        Mockito.when(workflowProperties.isListTasks()).thenReturn(true);
+
+        String workflowType = "AM_APPLICATION_CREATION";
+        String status = "CREATED";
+        String tenantDomain = "carbon.super";
+        String reference = "1234";
+
+        Workflow[] pendingTasks = new Workflow[1];
+        Workflow pendingTask = new Workflow();
+        pendingTask.setExternalWorkflowReference(reference);
+        pendingTasks[0] = pendingTask;
+        Mockito.when(apiMgtDAO.getworkflows(workflowType, status, tenantDomain)).thenReturn(pendingTasks);
+
+        APIAdmin apiAdmin = new APIAdminImpl();
+        Workflow[] returnedWorkflows = apiAdmin.getworkflows(workflowType, status, tenantDomain);
+        Assert.assertNotNull("Workflow array null", returnedWorkflows);
+        Assert.assertEquals("Workflow array length mismatch", 1, returnedWorkflows.length);
+        Assert.assertEquals("Invalid workflow", reference, returnedWorkflows[0].getExternalWorkflowReference());
+
     }
 }
