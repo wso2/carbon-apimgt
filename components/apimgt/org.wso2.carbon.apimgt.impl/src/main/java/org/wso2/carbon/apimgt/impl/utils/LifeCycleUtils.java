@@ -235,7 +235,8 @@ public class LifeCycleUtils {
                     if (oldAPI.getId().getApiName().equals(api.getId().getApiName())
                             && versionComparator.compare(oldAPI, api) < 0
                             && (APIConstants.PUBLISHED.equals(oldAPI.getStatus()))) {
-                        apiProvider.changeLifeCycleStatus(organization, new ApiTypeWrapper(oldAPI),
+                        apiProvider.changeLifeCycleStatus(organization, new ApiTypeWrapper(
+                                        apiProvider.getAPIbyUUID(oldAPI.getUuid(), organization)),
                                 APIConstants.API_LC_ACTION_DEPRECATE, null);
 
                     }
