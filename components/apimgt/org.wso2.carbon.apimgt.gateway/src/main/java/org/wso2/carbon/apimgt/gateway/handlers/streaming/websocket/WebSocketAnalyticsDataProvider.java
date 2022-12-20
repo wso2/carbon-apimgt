@@ -288,6 +288,11 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
+    public String getUserName() {
+        return getEndUserName();
+    }
+
+    @Override
     public String getEndUserIP() {
         Object userIp = WebSocketUtils.getPropertyFromChannel(Constants.USER_IP_PROPERTY, ctx);
         if (userIp != null) {

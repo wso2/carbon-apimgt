@@ -306,6 +306,11 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
+    public String getUserName() {
+        return getEndUserName();
+    }
+
+    @Override
     public String getEndUserIP() {
 
         if (messageContext.getPropertyKeySet().contains(Constants.USER_IP_PROPERTY)) {
