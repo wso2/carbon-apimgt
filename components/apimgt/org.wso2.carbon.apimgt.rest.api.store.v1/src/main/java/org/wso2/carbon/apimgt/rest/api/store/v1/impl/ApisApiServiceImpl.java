@@ -983,7 +983,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    private APIDTO getAPIByAPIId(String apiId, String organization) {
+    private APIDTO getAPIByAPIId(String apiId, String organization) throws APIManagementException {
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
@@ -1006,8 +1006,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
-                String errorMessage = "Error while retrieving API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                throw e;
             }
         }
         return null;
