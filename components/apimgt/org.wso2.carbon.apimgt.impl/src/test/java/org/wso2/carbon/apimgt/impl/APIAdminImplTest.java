@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Workflow;
+import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
@@ -43,11 +44,13 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.workflow.DefaultWorkflowTaskService;
+import org.wso2.carbon.context.CarbonContext;
 
 import java.io.File;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class})
+@PrepareForTest({ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class, CarbonContext.class})
 public class APIAdminImplTest {
 
     ServiceReferenceHolder serviceReferenceHolder;
@@ -60,6 +63,7 @@ public class APIAdminImplTest {
 
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.mockStatic(CarbonContext.class);
         apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
         PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
         apimConfigService = Mockito.mock(APIMConfigService.class);
@@ -207,6 +211,8 @@ public class APIAdminImplTest {
         Mockito.when(apiManagerConfiguration.getWorkflowProperties()).thenReturn(workflowProperties);
         Mockito.when(workflowProperties.isListTasks()).thenReturn(true);
 
+        WorkflowTaskService task = new DefaultWorkflowTaskService();
+        Mockito.when(serviceReferenceHolder.getWorkflowTaskService()).thenReturn(task);
         String workflowType = "AM_APPLICATION_CREATION";
         String status = "CREATED";
         String tenantDomain = "carbon.super";
@@ -218,11 +224,39 @@ public class APIAdminImplTest {
         pendingTasks[0] = pendingTask;
         Mockito.when(apiMgtDAO.getworkflows(workflowType, status, tenantDomain)).thenReturn(pendingTasks);
 
+
+        CarbonContext context = Mockito.mock(CarbonContext.class);
+        PowerMockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(context);
+
         APIAdmin apiAdmin = new APIAdminImpl();
         Workflow[] returnedWorkflows = apiAdmin.getworkflows(workflowType, status, tenantDomain);
         Assert.assertNotNull("Workflow array null", returnedWorkflows);
         Assert.assertEquals("Workflow array length mismatch", 1, returnedWorkflows.length);
         Assert.assertEquals("Invalid workflow", reference, returnedWorkflows[0].getExternalWorkflowReference());
+
+    }
+    
+    @Test
+    public void testWorkflowPendingListWithListingDisabled() throws Exception {
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito
+                .mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        WorkflowProperties workflowProperties = Mockito.mock(WorkflowProperties.class);
+        Mockito.when(apiManagerConfiguration.getWorkflowProperties()).thenReturn(workflowProperties);
+        Mockito.when(workflowProperties.isListTasks()).thenReturn(false);
+
+        String workflowType = "AM_APPLICATION_CREATION";
+        String status = "CREATED";
+        String tenantDomain = "carbon.super";
+
+        APIAdmin apiAdmin = new APIAdminImpl();
+        Workflow[] returnedWorkflows = apiAdmin.getworkflows(workflowType, status, tenantDomain);
+        Assert.assertNotNull("Workflow array null", returnedWorkflows);
+        Assert.assertEquals("Workflow array length mismatch", 0, returnedWorkflows.length);
+
 
     }
 }
