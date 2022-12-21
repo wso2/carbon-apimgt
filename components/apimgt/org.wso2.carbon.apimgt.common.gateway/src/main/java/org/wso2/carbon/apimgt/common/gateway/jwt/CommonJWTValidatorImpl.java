@@ -180,13 +180,15 @@ public class CommonJWTValidatorImpl {
      */
     public String retrieveJWKSConfiguration(String jwksEndpoint) throws IOException {
         // TODO: (VirajSalaka) httpClient initialization in bootstrap
+        StringBuilder stringBuilder = new StringBuilder();
         try (CloseableHttpClient httpClient = Bootstrap.getInstance().getHttpClient()) {
             HttpGet httpGet = new HttpGet(jwksEndpoint);
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
                 if (response.getStatusLine().getStatusCode() == 200) {
                     HttpEntity entity = response.getEntity();
                     try (InputStream content = entity.getContent()) {
-                        return IOUtils.toString(content);
+                        stringBuilder.append(IOUtils.toString(content));
+                        return stringBuilder.toString();
                     }
                 } else {
                     return null;
