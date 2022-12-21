@@ -30,6 +30,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
@@ -60,20 +61,29 @@ import static org.mockito.ArgumentMatchers.any;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Bootstrap.class)
 public class JWTValidatorImplTest {
-    private final String keyId = "keyId";
+    private static final String keyId = "keyId";
     private final String jwksURL = "https://localhost:9443/oauth2/jwks";
     private static final String CERT_HASH =  "HXKfuMRo6tggoqC-StuPur7ZqxuhJsnSFGbFcG6OTTA";
 
+    private static JWSHeader jwsHeader;
+
+    @BeforeClass
+    public static void setup() {
+        jwsHeader = new JWSHeader(JWSAlgorithm.RS256);
+        jwsHeader = new JWSHeader.Builder(jwsHeader).keyID(keyId).build();
+    }
+
     @Test
     public void validateTokenWithJWKSTest() {
-        JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.RS256);
-        jwsHeader = new JWSHeader.Builder(jwsHeader).keyID(keyId).build();
         SignedJWTInfo signedJWTInfo = new SignedJWTInfo();
+
         SignedJWT signedJWT = Mockito.mock(SignedJWT.class);
         Mockito.when(signedJWT.getHeader()).thenReturn(jwsHeader);
         signedJWTInfo.setSignedJWT(signedJWT);
+
         Calendar now = Calendar.getInstance();
         now.add(Calendar.HOUR, 1);
+
         JSONObject transportCertHash = new JSONObject();
         transportCertHash.put("x5t#S256", CERT_HASH);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
@@ -99,6 +109,7 @@ public class JWTValidatorImplTest {
             Assert.fail(e.getMessage());
         }
 
+        // Mocks the HTTP Client such that we can test various behaviors related JWKS endpoint calls
         CloseableHttpClient httpClient = PowerMockito.mock(CloseableHttpClient.class);
         CloseableHttpResponse response = PowerMockito.mock(CloseableHttpResponse.class);
         StatusLine statusLine = PowerMockito.mock(StatusLine.class);
@@ -130,6 +141,8 @@ public class JWTValidatorImplTest {
         tokenIssuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
         jwksConfigurationDTO.setEnabled(true);
         jwksConfigurationDTO.setUrl(jwksURL);
+
+        // JWTValidatorConfiguration is mocked in order to test JWT Validator for different configurations.
         JWTValidatorConfiguration jwtValidatorConfiguration = PowerMockito.mock(JWTValidatorConfiguration.class);
         Mockito.when(jwtValidatorConfiguration.getJwtIssuer()).thenReturn(tokenIssuerDto);
         Mockito.when(jwtValidatorConfiguration.getTrustStore()).thenReturn(trustStore);
@@ -139,10 +152,14 @@ public class JWTValidatorImplTest {
             Assert.fail();
         }
 
+        // Bootstrap class needs to be mocked as it is where the HttpClient is configured.
         Bootstrap bootstrap = Mockito.mock(Bootstrap.class);
         Mockito.when(bootstrap.getHttpClient()).thenReturn(httpClient);
         PowerMockito.mockStatic(Bootstrap.class);
         BDDMockito.given(Bootstrap.getInstance()).willReturn(bootstrap);
+
+        // This corresponds to the happy path where JWKS endpoint is used for validation, JWKS response is received,
+        // And the signedJWT is verified against the JWK.
         JWTValidator jwtValidator = new JWTValidatorImpl();
         jwtValidator.loadValidatorConfiguration(jwtValidatorConfiguration);
         JWTValidationInfo jwtValidationInfo = null;
@@ -153,6 +170,8 @@ public class JWTValidatorImplTest {
         }
         Assert.assertNotNull(jwtValidationInfo);
         Assert.assertTrue(jwtValidationInfo.isValid());
+        // Apart from validation, here it asserts if the claims are properly populated in the JWTValidationInfo
+        // for the happy path scenario
         Assert.assertEquals("testConsumerKey", jwtValidationInfo.getConsumerKey());
         Assert.assertNotNull(jwtValidationInfo.getScopes());
         Assert.assertEquals("testScope", jwtValidationInfo.getScopes().get(0));
@@ -163,12 +182,12 @@ public class JWTValidatorImplTest {
         Assert.assertEquals("testCustomClaim",
                 String.valueOf(jwtValidationInfo.getClaims().get("customClaim")));
 
+        // Here tests the behavior when the returned JWKS response does not verify the signature of the JWT.
         try {
             Mockito.when(signedJWT.verify(any(JWSVerifier.class))).thenReturn(false);
         } catch (JOSEException e) {
             Assert.fail();
         }
-
         try {
             jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
         } catch (CommonGatewayException e) {
@@ -177,12 +196,12 @@ public class JWTValidatorImplTest {
         Assert.assertNotNull(jwtValidationInfo);
         Assert.assertFalse(jwtValidationInfo.isValid());
 
+        // Here tests the behavior if some exception is thrown while signature verification is done.
         try {
             Mockito.when(signedJWT.verify(any(JWSVerifier.class))).thenThrow(new JOSEException(""));
         } catch (JOSEException e) {
             Assert.fail();
         }
-
         try {
             jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
         } catch (CommonGatewayException e) {
@@ -191,6 +210,7 @@ public class JWTValidatorImplTest {
         Assert.assertNotNull(jwtValidationInfo);
         Assert.assertFalse(jwtValidationInfo.isValid());
 
+        // Test if the token validation fails where signature is valid but the token is expired.
         Calendar pastDate = Calendar.getInstance();
         pastDate.add(Calendar.HOUR, -1);
         JWTClaimsSet jwtClaimsSetWithExpiry = new JWTClaimsSet.Builder()
