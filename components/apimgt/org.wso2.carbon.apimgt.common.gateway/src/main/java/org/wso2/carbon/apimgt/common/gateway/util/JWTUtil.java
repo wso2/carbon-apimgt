@@ -105,11 +105,11 @@ public final class JWTUtil {
             if (useKid) {
                 jwtHeader.append("\"kid\":\"");
                 // No padding
-                jwtHeader.append(generateThumbprint("SHA-256",publicCert,false));
+                jwtHeader.append(generateThumbprint("SHA-256", publicCert, false));
             } else {
                 jwtHeader.append("\"x5t\":\"");
                 // Has padding for legacy support
-                jwtHeader.append(generateThumbprint("SHA-1", publicCert,true));
+                jwtHeader.append(generateThumbprint("SHA-1", publicCert, true));
             }
             jwtHeader.append("\"}");
             return jwtHeader.toString();
