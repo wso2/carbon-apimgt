@@ -66,15 +66,35 @@ public class JWTValidatorImplTest {
     private static final String CERT_HASH =  "HXKfuMRo6tggoqC-StuPur7ZqxuhJsnSFGbFcG6OTTA";
 
     private static JWSHeader jwsHeader;
+    private static CloseableHttpClient httpClient;
+
+    private static KeyStore trustStore;
 
     @BeforeClass
     public static void setup() {
         jwsHeader = new JWSHeader(JWSAlgorithm.RS256);
         jwsHeader = new JWSHeader.Builder(jwsHeader).keyID(keyId).build();
+
+        httpClient = PowerMockito.mock(CloseableHttpClient.class);
+        // Bootstrap class needs to be mocked as it is where the HttpClient is configured.
+        Bootstrap bootstrap = Mockito.mock(Bootstrap.class);
+        Mockito.when(bootstrap.getHttpClient()).thenReturn(httpClient);
+        PowerMockito.mockStatic(Bootstrap.class);
+        BDDMockito.given(Bootstrap.getInstance()).willReturn(bootstrap);
+
+        String trustStorePath = Objects.requireNonNull(JWTValidatorImplTest.class.getClassLoader()
+                .getResource("security/client-truststore.jks")).getPath();
+
+        try (InputStream trustStoreContent = Files.newInputStream(Paths.get(trustStorePath))) {
+            trustStore = KeyStore.getInstance("JKS");
+            trustStore.load(trustStoreContent, "wso2carbon".toCharArray());
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
     }
 
     @Test
-    public void validateTokenWithJWKSTest() {
+    public void validateTokenWithJWKSTestSuccess() {
         SignedJWTInfo signedJWTInfo = new SignedJWTInfo();
 
         SignedJWT signedJWT = Mockito.mock(SignedJWT.class);
@@ -98,19 +118,7 @@ public class JWTValidatorImplTest {
         signedJWTInfo.setJwtClaimsSet(jwtClaimsSet);
         signedJWTInfo.setToken("tokenPayload");
 
-        String trustStorePath = Objects.requireNonNull(JWTValidatorImplTest.class.getClassLoader()
-                .getResource("security/client-truststore.jks")).getPath();
-
-        KeyStore trustStore = null;
-        try (InputStream trustStoreContent = Files.newInputStream(Paths.get(trustStorePath))) {
-            trustStore = KeyStore.getInstance("JKS");
-            trustStore.load(trustStoreContent, "wso2carbon".toCharArray());
-        } catch (Exception e) {
-            Assert.fail(e.getMessage());
-        }
-
         // Mocks the HTTP Client such that we can test various behaviors related JWKS endpoint calls
-        CloseableHttpClient httpClient = PowerMockito.mock(CloseableHttpClient.class);
         CloseableHttpResponse response = PowerMockito.mock(CloseableHttpResponse.class);
         StatusLine statusLine = PowerMockito.mock(StatusLine.class);
         Mockito.when(statusLine.getStatusCode()).thenReturn(200);
@@ -151,12 +159,6 @@ public class JWTValidatorImplTest {
         } catch (JOSEException e) {
             Assert.fail();
         }
-
-        // Bootstrap class needs to be mocked as it is where the HttpClient is configured.
-        Bootstrap bootstrap = Mockito.mock(Bootstrap.class);
-        Mockito.when(bootstrap.getHttpClient()).thenReturn(httpClient);
-        PowerMockito.mockStatic(Bootstrap.class);
-        BDDMockito.given(Bootstrap.getInstance()).willReturn(bootstrap);
 
         // This corresponds to the happy path where JWKS endpoint is used for validation, JWKS response is received,
         // And the signedJWT is verified against the JWK.
@@ -252,18 +254,6 @@ public class JWTValidatorImplTest {
                 .build();
         signedJWTInfo.setJwtClaimsSet(jwtClaimsSet);
 
-        String trustStorePath = Objects.requireNonNull(JWTValidatorImplTest.class
-                .getClassLoader().getResource("security/client-truststore.jks")).getPath();
-
-        KeyStore trustStore = null;
-        try (InputStream trustStoreContent = Files.newInputStream(Paths.get(trustStorePath))) {
-            trustStore = KeyStore.getInstance("JKS");
-            trustStore.load(trustStoreContent, "wso2carbon".toCharArray());
-        } catch (Exception e) {
-            Assert.fail(e.getMessage());
-        }
-
-        CloseableHttpClient httpClient = PowerMockito.mock(CloseableHttpClient.class);
         CloseableHttpResponse response = PowerMockito.mock(CloseableHttpResponse.class);
         StatusLine statusLine = PowerMockito.mock(StatusLine.class);
         Mockito.when(statusLine.getStatusCode()).thenReturn(200);
