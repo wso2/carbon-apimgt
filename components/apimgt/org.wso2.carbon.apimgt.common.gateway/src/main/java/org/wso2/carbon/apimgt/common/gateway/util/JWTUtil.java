@@ -104,7 +104,9 @@ public final class JWTUtil {
             jwtHeader.append("\",");
             if (useKid) {
                 jwtHeader.append("\"kid\":\"");
-                jwtHeader.append(generateThumbprint("SHA-256", publicCert));
+                jwtHeader.append(generateThumbprint("SHA-256", publicCert))
+                        .append("_")
+                        .append(getJWSCompliantAlgorithmCode(signatureAlgorithm));
             } else {
                 jwtHeader.append("\"x5t\":\"");
                 jwtHeader.append(generateThumbprint("SHA-1", publicCert));
@@ -116,7 +118,7 @@ public final class JWTUtil {
         }
     }
 
-    private static String generateThumbprint(String hashType, Certificate publicCert)
+    public static String generateThumbprint(String hashType, Certificate publicCert)
             throws CertificateEncodingException,
             UnsupportedEncodingException, NoSuchAlgorithmException {
         MessageDigest digestValue;
