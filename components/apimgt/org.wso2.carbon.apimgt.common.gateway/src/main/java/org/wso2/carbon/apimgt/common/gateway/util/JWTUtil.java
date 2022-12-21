@@ -104,10 +104,12 @@ public final class JWTUtil {
             jwtHeader.append("\",");
             if (useKid) {
                 jwtHeader.append("\"kid\":\"");
-                jwtHeader.append(generateThumbprint("SHA-256", publicCert));
+                // No padding
+                jwtHeader.append(generateThumbprint("SHA-256",publicCert,false));
             } else {
                 jwtHeader.append("\"x5t\":\"");
-                jwtHeader.append(generateThumbprint("SHA-1", publicCert));
+                // Has padding for legacy support
+                jwtHeader.append(generateThumbprint("SHA-1", publicCert,true));
             }
             jwtHeader.append("\"}");
             return jwtHeader.toString();
@@ -116,7 +118,7 @@ public final class JWTUtil {
         }
     }
 
-    private static String generateThumbprint(String hashType, Certificate publicCert)
+    public static String generateThumbprint(String hashType, Certificate publicCert, boolean usePadding)
             throws CertificateEncodingException,
             UnsupportedEncodingException, NoSuchAlgorithmException {
         MessageDigest digestValue;
@@ -126,8 +128,13 @@ public final class JWTUtil {
         byte[] digestInBytes = digestValue.digest();
         String publicCertThumbprint = hexify(digestInBytes);
         String base64UrlEncodedThumbPrint;
-        base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
-                .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
+        if (usePadding) {
+            base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
+                    .encodeToString(publicCertThumbprint.getBytes(StandardCharsets.UTF_8));
+        } else {
+            base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder().withoutPadding()
+                    .encodeToString(publicCertThumbprint.getBytes(StandardCharsets.UTF_8));
+        }
         return base64UrlEncodedThumbPrint;
     }
 
