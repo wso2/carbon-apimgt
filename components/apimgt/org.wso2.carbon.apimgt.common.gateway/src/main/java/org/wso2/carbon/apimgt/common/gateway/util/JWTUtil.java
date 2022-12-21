@@ -104,7 +104,7 @@ public final class JWTUtil {
             jwtHeader.append("\",");
             if (useKid) {
                 jwtHeader.append("\"kid\":\"");
-                jwtHeader.append(generateThumbprint("SHA-256", publicCert));
+                jwtHeader.append(generateThumbprint(publicCert));
             } else {
                 jwtHeader.append("\"x5t\":\"");
                 jwtHeader.append(generateThumbprint("SHA-1", publicCert));
@@ -116,7 +116,7 @@ public final class JWTUtil {
         }
     }
 
-    private static String generateThumbprint(String hashType, Certificate publicCert)
+    public static String generateThumbprint(String hashType, Certificate publicCert)
             throws CertificateEncodingException,
             UnsupportedEncodingException, NoSuchAlgorithmException {
         MessageDigest digestValue;
@@ -126,8 +126,24 @@ public final class JWTUtil {
         byte[] digestInBytes = digestValue.digest();
         String publicCertThumbprint = hexify(digestInBytes);
         String base64UrlEncodedThumbPrint;
+        // Has padding for legacy support
         base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
-                .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
+                .encodeToString(publicCertThumbprint.getBytes(StandardCharsets.UTF_8));
+        return base64UrlEncodedThumbPrint;
+    }
+
+    public static String generateThumbprint(Certificate publicCert)
+            throws CertificateEncodingException, NoSuchAlgorithmException {
+        MessageDigest digestValue;
+        byte[] der = publicCert.getEncoded();
+        digestValue = MessageDigest.getInstance("SHA-256");
+        digestValue.update(der);
+        byte[] digestInBytes = digestValue.digest();
+        String publicCertThumbprint = hexify(digestInBytes);
+        String base64UrlEncodedThumbPrint;
+        // No padding
+        base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder().withoutPadding()
+                .encodeToString(publicCertThumbprint.getBytes(StandardCharsets.UTF_8));
         return base64UrlEncodedThumbPrint;
     }
 
