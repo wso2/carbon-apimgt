@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.notification;
 
-import org.apache.axis2.util.URL;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

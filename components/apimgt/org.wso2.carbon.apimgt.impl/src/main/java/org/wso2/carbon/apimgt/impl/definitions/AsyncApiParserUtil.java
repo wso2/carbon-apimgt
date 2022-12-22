@@ -20,6 +20,7 @@ import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -57,6 +58,7 @@ public class AsyncApiParserUtil {
         try {
             HttpClient httpClient = APIUtil.getHttpClient();
             HttpGet httpGet = new HttpGet(url);
+            URL urlObj = new URL(url);
 
             HttpResponse response = httpClient.execute(httpGet);
 
