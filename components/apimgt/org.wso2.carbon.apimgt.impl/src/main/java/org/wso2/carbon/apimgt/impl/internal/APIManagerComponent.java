@@ -277,6 +277,8 @@ public class APIManagerComponent {
                 }
                 // Adding default throttle policies
                 addDefaultAdvancedThrottlePolicies(tenantDomain, tenantId);
+                addDefaultAsyncThrottlePolicies(tenantDomain, tenantId);
+
                 //Adding default correlation configs at initial server start up
                 APIUtil.addDefaultCorrelationConfigs();
                 // Update all NULL THROTTLING_TIER values to Unlimited
@@ -581,6 +583,10 @@ public class APIManagerComponent {
 
     private void addDefaultAdvancedThrottlePolicies(String tenantDomain, int tenantId) throws APIManagementException {
         APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
+    }
+
+    private void addDefaultAsyncThrottlePolicies(String tenantDomain, int tenantId) throws APIManagementException {
+        APIUtil.addDefaultTenantAsyncThrottlePolicies(tenantDomain, tenantId);
     }
 
     @Reference(
