@@ -123,6 +123,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private static final Log log = LogFactory.getLog(APIProviderImpl.class);
     private ServiceCatalogDAO serviceCatalogDAO = ServiceCatalogDAO.getInstance();
+    private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig:";
 
     private final String userNameWithoutChange;
     private CertificateManager certificateManager;
@@ -132,7 +133,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private RecommendationEnvironment recommendationEnvironment;
     String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
     private GlobalMediationPolicyImpl globalMediationPolicyImpl;
-    private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig:";
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
@@ -4786,7 +4786,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             if (searchAPIs != null) {
                 List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
-                List<API> apiList = new ArrayList<>();
+                List<API> apiList = new ArrayList<>(list.size());
                 for (PublisherAPIInfo publisherAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
                     populateAPIStatus(mappedAPI);
