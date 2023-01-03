@@ -110,7 +110,7 @@ public class AnalyticsDataPublisher {
                         metricReporters.add(metricReporter);
                     }
                     catch (MetricCreationException e){
-                        log.error("Error while creating a reporter out of multiple metric reporters.", e);
+                        log.error("Error while creating reporter " +reporterClassName+" out of multiple metric reporters.", e);
                     }
                 }
             } else if (reporterType != null && !reporterType.equals("")) {

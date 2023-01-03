@@ -44,28 +44,35 @@ public abstract class AbstractRequestDataPublisher implements RequestDataPublish
     @Override
     public void publish(Event analyticsEvent) {
         Map<String, Object> dataMap = OBJECT_MAPPER.convertValue(analyticsEvent, MAP_TYPE_REFERENCE);
-        List<CounterMetric> multipleCounterMetrics= this.getMultipleCounterMetrics();
+        List<CounterMetric> multipleCounterMetrics = this.getMultipleCounterMetrics();
 
-        for(CounterMetric counterMetric : multipleCounterMetrics) {
+        for (CounterMetric counterMetric : multipleCounterMetrics) {
             if (counterMetric == null) {
                 log.error("counterMetric cannot be null.");
-                return;
-            }
-
-            MetricEventBuilder builder = counterMetric.getEventBuilder();
-            for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
-                try {
-                    builder.addAttribute(entry.getKey(), entry.getValue());
-                } catch (MetricReportingException e) {
-                    log.error("Error adding data to the event stream.", e);
-                    return;
+            } else {
+                String counterMetricClassName = counterMetric.getClass().toString().
+                        replaceAll("[\r\n]", "").split(" ")[1];
+                log.info("Started adding data to counterMetric "+counterMetricClassName);
+                boolean caughtException = false;
+                MetricEventBuilder builder = counterMetric.getEventBuilder();
+                for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
+                    try {
+                        builder.addAttribute(entry.getKey(), entry.getValue());
+                    } catch (MetricReportingException e) {
+                        caughtException = true;
+                        log.error("Error adding data to the event stream. counterMetric: "+counterMetricClassName
+                                ,e);
+                        break;
+                    }
                 }
-            }
-
-            try {
-                counterMetric.incrementCount(builder);
-            } catch (MetricReportingException e) {
-                log.error("Error occurred when publishing event.", e);
+                if (!caughtException) {
+                    try {
+                        counterMetric.incrementCount(builder);
+                    } catch (MetricReportingException e) {
+                        log.error("Error occurred when publishing event. counterMetric: "+counterMetricClassName
+                                ,e);
+                    }
+                }
             }
         }
     }
