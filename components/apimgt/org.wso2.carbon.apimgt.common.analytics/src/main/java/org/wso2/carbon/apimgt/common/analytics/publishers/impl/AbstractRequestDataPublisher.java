@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.common.analytics.publishers.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
@@ -42,28 +43,30 @@ public abstract class AbstractRequestDataPublisher implements RequestDataPublish
 
     @Override
     public void publish(Event analyticsEvent) {
-
-        CounterMetric counterMetric = this.getCounterMetric();
-        if (counterMetric == null) {
-            log.error("counterMetric cannot be null.");
-            return;
-        }
-
         Map<String, Object> dataMap = OBJECT_MAPPER.convertValue(analyticsEvent, MAP_TYPE_REFERENCE);
-        MetricEventBuilder builder = counterMetric.getEventBuilder();
-        for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
-            try {
-                builder.addAttribute(entry.getKey(), entry.getValue());
-            } catch (MetricReportingException e) {
-                log.error("Error adding data to the event stream.", e);
+        List<CounterMetric> multipleCounterMetrics= this.getMultipleCounterMetrics();
+
+        for(CounterMetric counterMetric : multipleCounterMetrics) {
+            if (counterMetric == null) {
+                log.error("counterMetric cannot be null.");
                 return;
             }
-        }
 
-        try {
-            counterMetric.incrementCount(builder);
-        } catch (MetricReportingException e) {
-            log.error("Error occurred when publishing event.", e);
+            MetricEventBuilder builder = counterMetric.getEventBuilder();
+            for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
+                try {
+                    builder.addAttribute(entry.getKey(), entry.getValue());
+                } catch (MetricReportingException e) {
+                    log.error("Error adding data to the event stream.", e);
+                    return;
+                }
+            }
+
+            try {
+                counterMetric.incrementCount(builder);
+            } catch (MetricReportingException e) {
+                log.error("Error occurred when publishing event.", e);
+            }
         }
     }
 }

@@ -16,6 +16,7 @@
  */
 package org.wso2.carbon.apimgt.common.analytics.publishers;
 
+import java.util.List;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Event;
 
@@ -27,4 +28,6 @@ public interface RequestDataPublisher {
     void publish(Event analyticsEvent);
 
     CounterMetric getCounterMetric();
+
+    List<CounterMetric> getMultipleCounterMetrics();
 }

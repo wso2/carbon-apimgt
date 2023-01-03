@@ -58,7 +58,7 @@ public class AnalyticsDataPublisher {
         List<String> reporterClasses = new ArrayList<>();
         List<String> reporterKeys = configs.keySet()
                 .stream()
-                .filter(s -> s.matches("address"))
+                .filter(s -> s.matches("^publisher\\.reporter[1-9][0-9]*\\.class$"))
                 .collect(Collectors.toList());
 
         for(String key : reporterKeys){
