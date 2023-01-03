@@ -41,6 +41,7 @@ public class JWTConfigurationDto {
     private Certificate publicCert;
     private PrivateKey privateKey;
     private long ttl;
+    private boolean useKid;
 
     public JWTConfigurationDto(JWTConfigurationDto jwtConfigurationDto) {
 
@@ -53,6 +54,15 @@ public class JWTConfigurationDto {
         this.tokenIssuerDtoMap = jwtConfigurationDto.tokenIssuerDtoMap;
         this.jwtExcludedClaims = jwtConfigurationDto.jwtExcludedClaims;
         this.ttl = jwtConfigurationDto.ttl;
+        this.useKid = jwtConfigurationDto.useKid;
+    }
+
+    public boolean useKid() {
+        return useKid;
+    }
+
+    public void setUseKid(boolean useKid) {
+        this.useKid = useKid;
     }
 
     public JWTConfigurationDto() {
