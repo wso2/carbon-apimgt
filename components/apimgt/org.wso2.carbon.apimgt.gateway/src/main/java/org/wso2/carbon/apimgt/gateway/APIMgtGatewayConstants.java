@@ -155,6 +155,9 @@ public class APIMgtGatewayConstants {
     public static final String SPAN_API_VERSION = "span.api.version";
     public static final String SPAN_APPLICATION_CONSUMER_KEY = "span.consumerkey";
     public static final String SPAN_ENDPOINT = "span.endpoint";
+    public static final String SPAN_HTTP_RESPONSE_STATUS_CODE = "span.http.response.status.code";
+    public static final String SPAN_HTTP_RESPONSE_STATUS_CODE_DESCRIPTION =
+            "span.http.response.status.code.description";
 
     public static final String INTERNAL_KEY = "Internal-Key";
 
