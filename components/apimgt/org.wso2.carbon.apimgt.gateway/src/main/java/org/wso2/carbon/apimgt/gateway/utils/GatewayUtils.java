@@ -1126,6 +1126,19 @@ public class GatewayUtils {
             TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_NAME, api.getApiName());
             TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_VERSION, api.getApiVersion());
         }
+
+        Object httpStatusCode = ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(HTTP_SC);
+        if (httpStatusCode != null) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_HTTP_RESPONSE_STATUS_CODE,
+                    httpStatusCode.toString());
+        }
+        Object httpStatusCodeDescription =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(HTTP_SC_DESC);
+        if (httpStatusCodeDescription != null) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_HTTP_RESPONSE_STATUS_CODE_DESCRIPTION,
+                    httpStatusCodeDescription.toString());
+        }
+
         Object consumerKey = messageContext.getProperty(APIMgtGatewayConstants.CONSUMER_KEY);
         if (consumerKey != null) {
             TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_APPLICATION_CONSUMER_KEY,
