@@ -5770,6 +5770,15 @@ public final class APIUtil {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
+        /* Check if 'Unlimited' policy is available in AM_POLICY_APPLICATION table, to determine whether the default policies are loaded
+         into the database at least once. If yes, default policies won't be added to database again. */
+
+        if (apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_APP, tenantId, APIConstants.DEFAULT_APP_POLICY_UNLIMITED)) {
+            log.debug(
+                    "Default Throttling Policies are not written into the database again, as they were added once at initial server startup");
+            return;
+        }
+
         Map<String, Long> defualtLimits = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getThrottleProperties().getDefaultThrottleTierLimits();
         long tenPerMinTier = defualtLimits.containsKey(APIConstants.DEFAULT_APP_POLICY_TEN_REQ_PER_MIN) ?
@@ -5949,61 +5958,7 @@ public final class APIUtil {
             SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantId);
             deployRetrievedSubscriptionPolicy(tenantId, retrievedPolicy);
         }
-
-        //Adding Event based Webhooks API specific policies (WEBSUB)
-        long[] eventCountWHSubPolicyValues = new long[]{10000, 5000, 1000, Integer.MAX_VALUE};
-        int[] subscriptionCountValues = new int[]{1000, 500, 100, Integer.MAX_VALUE};
-        String[] eventCountWHSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED};
-        String[] eventCountWHSubPolicyDescriptions = new String[]{
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER_DESC,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED_DESC};
-
-        for (int i = 0; i < eventCountWHSubPolicyNames.length; i++) {
-            policyName = eventCountWHSubPolicyNames[i];
-            boolean needDeployment = false;
-            SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(policyName);
-            subscriptionPolicy.setDisplayName(policyName);
-            subscriptionPolicy.setDescription(eventCountWHSubPolicyDescriptions[i]);
-            subscriptionPolicy.setTenantId(tenantId);
-            subscriptionPolicy.setDeployed(true);
-            QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
-            EventCountLimit eventCountLimit = new EventCountLimit();
-            eventCountLimit.setEventCount(eventCountWHSubPolicyValues[i]);
-            eventCountLimit.setUnitTime(1);
-            eventCountLimit.setTimeUnit(APIConstants.TIME_UNIT_MONTH);
-            defaultQuotaPolicy.setType(PolicyConstants.EVENT_COUNT_TYPE);
-            defaultQuotaPolicy.setLimit(eventCountLimit);
-            subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
-            subscriptionPolicy.setStopOnQuotaReach(true);
-            subscriptionPolicy.setBillingPlan(APIConstants.BILLING_PLAN_FREE);
-            subscriptionPolicy.setSubscriberCount(subscriptionCountValues[i]);
-
-            if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
-                apiMgtDAO.addSubscriptionPolicy(subscriptionPolicy);
-                needDeployment = true;
-            }
-
-            if (!needDeployment) {
-                continue;
-            }
-            String superTenantDomain = null;
-            try {
-                superTenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                        getSuperTenantDomain();
-            } catch (UserStoreException e) {
-                handleInternalException("Error in getting the super tenant domain", e);
-
-            }
-                boolean isSuperTenant = tenantDomain.equals(superTenantDomain);
-                if (isSuperTenant) {
-                    continue;
-                }
-                SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantId);
-                deployRetrievedSubscriptionPolicy(tenantId, retrievedPolicy);
-
-        }
-
+        
         long tenThousandPerMinTier = defualtLimits.containsKey(APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN) ?
                 defualtLimits.get(APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN) : 10000;
         long twentyThousandPerMinTier = defualtLimits.containsKey(
@@ -6074,6 +6029,72 @@ public final class APIUtil {
                         retrievedPolicy.getDefaultQuotaPolicy().getType(), addedConditionGroupIds, null);
                 APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
             }
+        }
+    }
+
+    public static void addDefaultTenantAsyncThrottlePolicies(String tenantDomain, int tenantId) throws APIManagementException {
+
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        String policyName;
+
+        if (apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED)) {
+            log.debug(
+                    "Default Throttling Policies are not written into the database again, as they were added once at initial server startup");
+            return;
+        }
+
+        //Adding Event based Webhooks API specific policies (WEBSUB)
+        long[] eventCountWHSubPolicyValues = new long[]{10000, 5000, 1000, Integer.MAX_VALUE};
+        int[] subscriptionCountValues = new int[]{1000, 500, 100, Integer.MAX_VALUE};
+        String[] eventCountWHSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED};
+        String[] eventCountWHSubPolicyDescriptions = new String[]{
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED_DESC};
+
+        for (int i = 0; i < eventCountWHSubPolicyNames.length; i++) {
+            policyName = eventCountWHSubPolicyNames[i];
+            boolean needDeployment = false;
+            SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(policyName);
+            subscriptionPolicy.setDisplayName(policyName);
+            subscriptionPolicy.setDescription(eventCountWHSubPolicyDescriptions[i]);
+            subscriptionPolicy.setTenantId(tenantId);
+            subscriptionPolicy.setDeployed(true);
+            QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+            EventCountLimit eventCountLimit = new EventCountLimit();
+            eventCountLimit.setEventCount(eventCountWHSubPolicyValues[i]);
+            eventCountLimit.setUnitTime(1);
+            eventCountLimit.setTimeUnit(APIConstants.TIME_UNIT_MONTH);
+            defaultQuotaPolicy.setType(PolicyConstants.EVENT_COUNT_TYPE);
+            defaultQuotaPolicy.setLimit(eventCountLimit);
+            subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+            subscriptionPolicy.setStopOnQuotaReach(true);
+            subscriptionPolicy.setBillingPlan(APIConstants.BILLING_PLAN_FREE);
+            subscriptionPolicy.setSubscriberCount(subscriptionCountValues[i]);
+
+            if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
+                apiMgtDAO.addSubscriptionPolicy(subscriptionPolicy);
+                needDeployment = true;
+            }
+
+            if (!needDeployment) {
+                continue;
+            }
+            String superTenantDomain = null;
+            try {
+                superTenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                        getSuperTenantDomain();
+            } catch (UserStoreException e) {
+                handleInternalException("Error in getting the super tenant domain", e);
+            }
+
+            boolean isSuperTenant = tenantDomain.equals(superTenantDomain);
+            if (isSuperTenant) {
+                continue;
+            }
+
+            SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantId);
+            deployRetrievedSubscriptionPolicy(tenantId, retrievedPolicy);
         }
     }
 
