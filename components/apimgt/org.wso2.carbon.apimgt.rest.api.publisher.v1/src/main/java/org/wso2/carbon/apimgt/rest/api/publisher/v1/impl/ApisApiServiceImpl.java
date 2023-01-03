@@ -1724,6 +1724,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             }
+            if (apiIdentifier == null) {
+                throw new APIManagementException("Error while getting the api identifier for the API:" +
+                        apiId, ExceptionCodes.INVALID_API_ID);
+            }
             return PublisherCommonUtils.getLifecycleStateInformation(apiIdentifier, organization);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
