@@ -54,37 +54,38 @@ public class AnalyticsDataPublisher {
         return instance;
     }
 
-    private List<String> getReportersClassesOrNull(Map<String, String> configs){
+    private List<String> getReportersClassesOrNull(Map<String, String> configs) {
         List<String> reporterClasses = new ArrayList<>();
         List<String> reporterKeys = configs.keySet()
                 .stream()
                 .filter(s -> s.matches("^publisher\\.reporter[1-9][0-9]*\\.class$"))
                 .collect(Collectors.toList());
 
-        for(String key : reporterKeys){
+        for (String key : reporterKeys) {
             String reporterClass = configs.get(key);
-            if(reporterClass != null && !reporterClass.equals("")){
+            if (reporterClass != null && !reporterClass.equals("")) {
                 reporterClasses.add(reporterClass);
             }
         }
-        if(reporterClasses.size() > 0){
+        if (reporterClasses.size() > 0) {
             return reporterClasses;
         }
         return null;
     }
 
-    private List<CounterMetric> getSuccessOrFaultyCounterMetrics(List<MetricReporter> metricReporters,String name, MetricSchema schema) {
+    private List<CounterMetric> getSuccessOrFaultyCounterMetrics(List<MetricReporter> metricReporters, String name,
+                                                                 MetricSchema schema) {
         List<CounterMetric> counterMetricsList = new ArrayList<>();
-        for(MetricReporter metricReporter : metricReporters){
+        for (MetricReporter metricReporter : metricReporters) {
             String reporterClassName = metricReporter.getClass().toString().replaceAll("[\r\n]", "");
-            try{
-                CounterMetric counterMetric = metricReporter.createCounterMetric(name,schema);
-                if (counterMetric == null){
+            try {
+                CounterMetric counterMetric = metricReporter.createCounterMetric(name, schema);
+                if (counterMetric == null) {
                     throw new MetricCreationException("AnalyticsDataPublisher is not initialized.");
                 }
                 counterMetricsList.add(counterMetric);
             } catch (MetricCreationException | IllegalArgumentException e) {
-                log.error("Error initializing event publisher for the Reporter of type "+reporterClassName, e);
+                log.error("Error initializing event publisher for the Reporter of type " + reporterClassName, e);
             }
         }
         return counterMetricsList;
@@ -103,14 +104,14 @@ public class AnalyticsDataPublisher {
                         .createMetricReporter(reporterClass, configs);
                 metricReporters.add(metricReporter);
             } else if (reporterClasses != null) {
-                for (String reporterClassName : reporterClasses){
+                for (String reporterClassName : reporterClasses) {
                     try {
                         metricReporter = MetricReporterFactory.getInstance()
                                 .createMetricReporter(reporterClassName, configs);
                         metricReporters.add(metricReporter);
-                    }
-                    catch (MetricCreationException e){
-                        log.error("Error while creating reporter " +reporterClassName+" out of multiple metric reporters.", e);
+                    } catch (MetricCreationException e) {
+                        log.error("Error while creating reporter " + reporterClassName +
+                                " out of multiple metric reporters.", e);
                     }
                 }
             } else if (reporterType != null && !reporterType.equals("")) {
@@ -123,17 +124,23 @@ public class AnalyticsDataPublisher {
 
             if (!StringUtils.isEmpty(commonConfig.getResponseSchema())) {
 
-                this.successMetricReporters = getSuccessOrFaultyCounterMetrics(metricReporters, Constants.RESPONSE_METRIC_NAME,
-                        MetricSchema.valueOf(commonConfig.getResponseSchema()));
+                this.successMetricReporters =
+                        getSuccessOrFaultyCounterMetrics(metricReporters, Constants.RESPONSE_METRIC_NAME,
+                                MetricSchema.valueOf(commonConfig.getResponseSchema()));
             } else {
-                this.successMetricReporters = getSuccessOrFaultyCounterMetrics(metricReporters,Constants.RESPONSE_METRIC_NAME, MetricSchema.RESPONSE);
+                this.successMetricReporters =
+                        getSuccessOrFaultyCounterMetrics(metricReporters, Constants.RESPONSE_METRIC_NAME,
+                                MetricSchema.RESPONSE);
             }
 
             if (!StringUtils.isEmpty(commonConfig.getFaultSchema())) {
-                this.faultyMetricReporters = getSuccessOrFaultyCounterMetrics(metricReporters,Constants.FAULTY_METRIC_NAME,
-                        MetricSchema.valueOf(commonConfig.getFaultSchema()));
+                this.faultyMetricReporters =
+                        getSuccessOrFaultyCounterMetrics(metricReporters, Constants.FAULTY_METRIC_NAME,
+                                MetricSchema.valueOf(commonConfig.getFaultSchema()));
             } else {
-                this.faultyMetricReporters = getSuccessOrFaultyCounterMetrics(metricReporters,Constants.FAULTY_METRIC_NAME, MetricSchema.ERROR);
+                this.faultyMetricReporters =
+                        getSuccessOrFaultyCounterMetrics(metricReporters, Constants.FAULTY_METRIC_NAME,
+                                MetricSchema.ERROR);
             }
 
             // not necessary to handle IllegalArgumentException here

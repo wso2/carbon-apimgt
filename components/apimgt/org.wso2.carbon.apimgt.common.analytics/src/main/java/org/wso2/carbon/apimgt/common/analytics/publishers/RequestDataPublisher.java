@@ -16,10 +16,9 @@
  */
 package org.wso2.carbon.apimgt.common.analytics.publishers;
 
-import java.util.List;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Event;
-
+import java.util.List;
 /**
  * interface for data publisher.
  */
