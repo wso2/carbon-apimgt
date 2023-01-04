@@ -102,6 +102,8 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         }
     }
 
+
+
     public String buildHeader() throws JWTGeneratorException {
         String jwtHeader = null;
 
@@ -140,7 +142,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
 
         try {
             Certificate publicCert = jwtConfigurationDto.getPublicCert();
-            return JWTUtil.generateHeader(publicCert, signatureAlgorithm);
+            return JWTUtil.generateHeader(publicCert, signatureAlgorithm, jwtConfigurationDto.useKid());
         } catch (Exception e) {
             String error = "Error in obtaining keystore";
             throw new JWTGeneratorException(error, e);
