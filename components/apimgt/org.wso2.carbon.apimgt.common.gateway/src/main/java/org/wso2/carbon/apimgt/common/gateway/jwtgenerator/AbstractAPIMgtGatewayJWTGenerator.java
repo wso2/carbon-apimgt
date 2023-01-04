@@ -102,8 +102,6 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         }
     }
 
-
-
     public String buildHeader() throws JWTGeneratorException {
         String jwtHeader = null;
 
