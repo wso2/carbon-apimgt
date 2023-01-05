@@ -16,9 +16,10 @@
  */
 
 package org.wso2.carbon.apimgt.common.analytics.publishers.impl;
+import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 
 import java.util.List;
-import org.wso2.am.analytics.publisher.reporter.CounterMetric;
+
 
 /**
  * Fault event publisher implementation.

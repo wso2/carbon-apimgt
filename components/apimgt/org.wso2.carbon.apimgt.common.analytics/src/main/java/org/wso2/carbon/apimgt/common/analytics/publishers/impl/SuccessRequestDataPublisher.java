@@ -17,11 +17,11 @@
 
 package org.wso2.carbon.apimgt.common.analytics.publishers.impl;
 
-import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 
+import java.util.List;
 /**
  * Success event publisher implementation.
  */
