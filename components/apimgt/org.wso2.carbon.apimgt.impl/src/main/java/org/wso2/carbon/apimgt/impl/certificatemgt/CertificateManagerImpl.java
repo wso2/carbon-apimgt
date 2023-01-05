@@ -574,4 +574,27 @@ public class CertificateManagerImpl implements CertificateManager {
         }
         return success;
     }
+
+    @Override
+    public boolean addAllCertificateToGateway(String certificate, String alias, int tenantId) {
+        // Check whether the api is invoked via the APIGatewayAdmin service.
+        alias = alias + "_" + tenantId;
+
+        return addCertificateToListenerOrSenderProfile(certificate, alias, false);
+    }
+
+    @Override
+    public List<CertificateMetadataDTO> getAllCertificates() {
+        List<CertificateMetadataDTO> certificates = null;
+
+        if (log.isDebugEnabled()) {
+            log.debug("Get all the certificates");
+        }
+        try {
+            certificates = certificateMgtDAO.getAllCertificates();
+        } catch (CertificateManagementException e) {
+            log.error("Error retrieving certificates ", e);
+        }
+        return certificates;
+    }
 }

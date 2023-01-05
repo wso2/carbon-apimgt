@@ -1432,6 +1432,7 @@
          {% endif %}
         </LocalEntries>
         </SkipList>
+        <EnableOnDemandLoadingAPIS>{{apim.sync_runtime_artifacts.gateway.enable_on_demand_loading}}</EnableOnDemandLoadingAPIS>
     </SyncRuntimeArtifactsGateway>
     {% endif %}
 
@@ -1477,4 +1478,11 @@
              </OAuth>
           </MediatorConfigs>
       {% endif %}
+
+      <!-- Default Correlation Log Components -->
+      <CorrelationLogComponents>
+      {%for component in apim.correlation_logs.components%}
+          <CorrelationLogComponent>{{component}}</CorrelationLogComponent>
+      {% endfor %}
+      </CorrelationLogComponents>
 </APIManager>

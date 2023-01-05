@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.27.17-SNAPSHOT</version>
+        <version>9.28.29-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -414,6 +414,10 @@
         <dependency>
             <groupId>org.wso2.orbit.com.amazonaws</groupId>
             <artifactId>awslambda</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.logging.correlation</artifactId>
         </dependency>
     </dependencies>
     <build>

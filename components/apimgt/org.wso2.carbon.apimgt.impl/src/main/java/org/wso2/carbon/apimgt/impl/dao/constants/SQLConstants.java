@@ -1958,6 +1958,7 @@ public class SQLConstants {
             "   APP.NAME," +
             "   APP.SUBSCRIBER_ID," +
             "   APP.APPLICATION_TIER," +
+            "   APP.TOKEN_TYPE AS APP_TOKEN_TYPE," +
             "   REG.TOKEN_TYPE," +
             "   REG.TOKEN_SCOPE," +
             "   APP.CALLBACK_URL," +
@@ -3037,6 +3038,27 @@ public class SQLConstants {
     public static final String API_UUID_REGEX = "_API_UUIDS_";
     public static final int API_ID_CHUNK_SIZE = 25;
 
+    public static final String RETRIEVE_CORRELATION_CONFIGS = "SELECT AM_CORRELATION_CONFIGS.COMPONENT_NAME, " +
+            "AM_CORRELATION_CONFIGS.ENABLED FROM AM_CORRELATION_CONFIGS";
+    public static final String RETRIEVE_CORRELATION_COMPONENT_NAMES = "SELECT AM_CORRELATION_CONFIGS.COMPONENT_NAME " +
+            " FROM AM_CORRELATION_CONFIGS";
+    public static final String RETRIEVE_CORRELATION_CONFIG_PROPERTIES = "SELECT " +
+            "AM_CORRELATION_PROPERTIES.PROPERTY_NAME , AM_CORRELATION_PROPERTIES.PROPERTY_VALUE " +
+            "FROM AM_CORRELATION_PROPERTIES WHERE AM_CORRELATION_PROPERTIES.COMPONENT_NAME=?";
+
+    public static final String INSERT_CORRELATION_CONFIGS =  "INSERT INTO AM_CORRELATION_CONFIGS " +
+        "(COMPONENT_NAME, ENABLED) VALUES ( ? , ?)";
+
+    public static final String DELETE_CORRELATION_CONFIGS = "DELETE FROM AM_CORRELATION_CONFIGS WHERE COMPONENT_NAME=?";
+
+    public static final String INSERT_CORRELATION_CONFIG_PROPERTIES = "INSERT INTO AM_CORRELATION_PROPERTIES" +
+        "(PROPERTY_NAME, COMPONENT_NAME, PROPERTY_VALUE) VALUES ( ? , ?, ?)";
+
+    public static final String UPDATE_CORRELATION_CONFIGS = "UPDATE AM_CORRELATION_CONFIGS SET ENABLED=? " +
+            "WHERE COMPONENT_NAME=?";
+    public static final String UPDATE_CORRELATION_CONFIG_PROPERTIES = "UPDATE AM_CORRELATION_PROPERTIES SET " +
+            "PROPERTY_VALUE=? WHERE COMPONENT_NAME=? AND PROPERTY_NAME=?";
+
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{
@@ -3249,6 +3271,8 @@ public class SQLConstants {
                 + "WHERE ALIAS=?";
         public static final String CERTIFICATE_EXIST =
                 "SELECT 1 FROM AM_CERTIFICATE_METADATA WHERE ALIAS=? AND TENANT_ID=?";
+
+        public static final String GET_ALL_CERTIFICATES = "SELECT * FROM AM_CERTIFICATE_METADATA";
     }
 
     public static class ClientCertificateConstants{
@@ -3608,7 +3632,11 @@ public class SQLConstants {
         public static final String INSERT_URL_MAPPINGS = "INSERT INTO AM_API_URL_MAPPING(API_ID, HTTP_METHOD," +
                 " AUTH_SCHEME, URL_PATTERN, THROTTLING_TIER, REVISION_UUID) VALUES(?,?,?,?,?,?)";
         public static final String GET_CLIENT_CERTIFICATES = "SELECT ALIAS, CERTIFICATE," +
-                " TIER_NAME FROM AM_API_CLIENT_CERTIFICATE WHERE API_ID = ? AND REVISION_UUID='Current API'";
+                " TIER_NAME FROM AM_API_CLIENT_CERTIFICATE WHERE API_ID = ? AND REVISION_UUID='Current API' AND REMOVED=FALSE";
+
+        public static final String GET_CLIENT_CERTIFICATES_ORACLE_SQL = "SELECT ALIAS, CERTIFICATE," +
+                " TIER_NAME FROM AM_API_CLIENT_CERTIFICATE WHERE API_ID = ? AND REVISION_UUID='Current API' AND REMOVED=0";
+
         public static final String INSERT_CLIENT_CERTIFICATES = "INSERT INTO AM_API_CLIENT_CERTIFICATE(TENANT_ID, " +
                 "ALIAS, API_ID, CERTIFICATE, REMOVED, TIER_NAME, REVISION_UUID) VALUES(?,?,?,?,?,?,?)";
         public static final String GET_GRAPHQL_COMPLEXITY = "SELECT TYPE, FIELD, COMPLEXITY_VALUE " +

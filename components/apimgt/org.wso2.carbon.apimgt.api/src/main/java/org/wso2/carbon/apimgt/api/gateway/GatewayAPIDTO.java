@@ -36,6 +36,7 @@ public class GatewayAPIDTO implements Serializable {
     private String provider;
     private String tenantDomain;
     private String apiId;
+    private String apiContext;
     private String apiDefinition;
     private String graphQLSchema;
     private GatewayContentDTO[] sequenceToBeAdd;
@@ -225,5 +226,13 @@ public class GatewayAPIDTO implements Serializable {
     public void setKeyManagers(List<String> keyManagers) {
 
         this.keyManagers = keyManagers;
+    }
+
+    public String getApiContext() {
+        return apiContext;
+    }
+
+    public void setApiContext(String apiContext) {
+        this.apiContext = apiContext;
     }
 }

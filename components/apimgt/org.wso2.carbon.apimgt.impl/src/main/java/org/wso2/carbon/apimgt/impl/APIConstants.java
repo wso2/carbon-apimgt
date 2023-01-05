@@ -2173,6 +2173,7 @@ public final class APIConstants {
     public static final String CORRELATION_LOGGER = "correlation";
     public static final String LOG_ALL_METHODS = "logAllMethods";
     public static final String AM_ACTIVITY_ID = "activityid";
+    public static final String CORRELATION_LOG_COMPONENTS = "CorrelationLogComponents.CorrelationLogComponent";
 
     /**
      * Constants for API logging
@@ -2303,7 +2304,7 @@ public final class APIConstants {
 
     public static class RestApiConstants {
 
-        public static final String REST_API_PUBLISHER_DEFAULT_VERSION = "v3";
+        public static final String REST_API_PUBLISHER_DEFAULT_VERSION = "v4";
         public static final String REST_API_OLD_VERSION = "v0.17";
         public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
         public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
@@ -2576,7 +2577,8 @@ public final class APIConstants {
         SUBSCRIPTIONS,
         SCOPE,
         CERTIFICATE,
-        GA_CONFIG
+        GA_CONFIG,
+        CORRELATION_CONFIG
     }
 
     // Supported Event Types
@@ -2605,7 +2607,8 @@ public final class APIConstants {
         ENDPOINT_CERTIFICATE_UPDATE,
         ENDPOINT_CERTIFICATE_REMOVE,
         GA_CONFIG_UPDATE,
-        UDATE_API_LOG_LEVEL
+        UDATE_API_LOG_LEVEL,
+        UPDATE_CORRELATION_CONFIGS
     }
 
     public enum EventAction {
@@ -2637,6 +2640,7 @@ public final class APIConstants {
         public static final String API_ID = "apiId";
         public static final String LABEL = "label";
         public static final String LABELS = "labels";
+        public static final String EnableOnDemandLoadingAPIS = "EnableOnDemandLoadingAPIS";
 
     }
 

@@ -38,7 +38,7 @@ public class SubscriptionPoliciesApiServiceImpl implements SubscriptionPoliciesA
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
-            if (APIConstants.CHAR_ASTERIX.equals(xWSO2Tenant)) {
+            if (APIConstants.CHAR_ASTERIX.equals(xWSO2Tenant) || APIConstants.ORG_ALL_QUERY_PARAM.equals(xWSO2Tenant)) {
                 return Response.ok().entity(SubscriptionValidationDataUtil.
                         fromSubscriptionPolicyToSubscriptionPolicyListDTO(subscriptionValidationDAO.
                                 getAllSubscriptionPolicies())).build();

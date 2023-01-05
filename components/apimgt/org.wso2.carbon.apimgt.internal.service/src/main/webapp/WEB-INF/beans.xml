@@ -34,6 +34,7 @@
             <bean class="org.wso2.carbon.apimgt.internal.service.EndpointCertificatesApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.GaConfigApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.ApiLoggingConfigsApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.CorrelationConfigsApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

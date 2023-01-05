@@ -69,6 +69,7 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
 
                         try {
                             APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
+                            APIUtil.addDefaultTenantAsyncThrottlePolicies(tenantDomain, tenantId);
                         } catch (APIManagementException e) {
                             log.error("Error while deploying throttle policies", e);
                         }

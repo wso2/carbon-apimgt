@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.27.17-SNAPSHOT</version>
+        <version>9.28.29-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -206,7 +206,7 @@
                             <directory>src/main/webapp</directory>
                         </resource>
                     </webResources>
-                    <warName>api#am#devops#v1</warName>
+                    <warName>api#am#devops#v0</warName>
                 </configuration>
             </plugin>
             <plugin>

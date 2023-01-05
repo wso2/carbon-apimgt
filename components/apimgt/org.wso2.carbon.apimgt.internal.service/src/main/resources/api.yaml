@@ -607,6 +607,22 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /correlation-configs:
+    get:
+      summary: Retrieve persisted correlation configs data.
+      description: |
+        This retrieve the persisted correlation configs data for updating correlation logs.
+      tags:
+        - 'Logging'
+      responses:
+        200:
+          description: An array of correlation component configs
+          schema:
+            $ref: '#/definitions/CorrelationComponentsList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -839,6 +855,10 @@ definitions:
         type: string
         description: Type of the API.
         example: APIProduct
+      organization:
+        type: string
+        description: Organization of the API.
+        example: wso2.com
       isDefaultVersion:
         type: boolean
         description: Whether this is the default version of the API.
@@ -1485,3 +1505,38 @@ definitions:
       logLevel:
         type: string
         example: all
+
+  #-----------------------------------------------------
+  # Correlation Configs Components List
+  #-----------------------------------------------------
+  CorrelationComponentsList:
+    title: correlation-components
+    properties:
+      components:
+        type: array
+        items:
+          $ref: "#/definitions/CorrelationComponent"
+  CorrelationComponent:
+    title: Correlation Component INFO object
+    properties:
+      name:
+        type: string
+        example: http
+      enabled:
+        type: string
+        example: true
+      properties:
+        type: array
+        items:
+          $ref: "#/definitions/CorrelationComponentProperty"
+  CorrelationComponentProperty:
+    title: Properties for correlation components
+    properties:
+      name:
+        type: string
+        example: "deniedThreads"
+      value:
+        type: array
+        items:
+          type: string
+          example: "MessageDeliveryTaskPool"

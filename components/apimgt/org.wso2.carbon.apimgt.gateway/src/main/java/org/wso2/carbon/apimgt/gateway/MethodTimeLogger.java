@@ -17,7 +17,7 @@
  */
 
 package org.wso2.carbon.apimgt.gateway;
-
+import org.apache.axis2.context.MessageContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,10 +26,9 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.apache.axis2.context.MessageContext;
 import org.slf4j.MDC;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-
+import org.wso2.carbon.apimgt.impl.correlation.MethodCallsCorrelationConfigDataHolder;
 import java.util.Map;
 import java.util.UUID;
 
@@ -37,12 +36,9 @@ import java.util.UUID;
  * This class provides AspectJ configurations
  */
 @Aspect
-public class MethodTimeLogger
-{
+public class MethodTimeLogger {
     private static final Log log = LogFactory.getLog(APIConstants.CORRELATION_LOGGER);
-    private static boolean isEnabled = false;
     private static boolean logAllMethods = false;
-    private static boolean isSet = false;
     private static boolean isLogAllSet = false;
 
     /**
@@ -63,14 +59,12 @@ public class MethodTimeLogger
      *
      * @return true if the property value matches this package name
      */
-    @Pointcut("execution(* *(..)) && if()")
+    @Pointcut("execution(* *(..)) && " +
+            "!execution(* org.wso2.carbon.apimgt.gateway.ConfigurableCorrelationLogService.*(..)) && if()")
     public static boolean pointCutAll() {
         if (!isLogAllSet) {
-            String config = System.getProperty(APIConstants.LOG_ALL_METHODS);
-            if (StringUtils.isNotEmpty(config)) {
-                logAllMethods = config.contains("org.wso2.carbon.apimgt.gateway");
-                isLogAllSet = true;
-            }
+            logAllMethods = ConfigurableCorrelationLogService.isLogAllMethods();
+            isLogAllSet = true;
         }
         return logAllMethods;
     }
@@ -82,14 +76,7 @@ public class MethodTimeLogger
      */
     @Pointcut("if()")
     public static boolean isConfigEnabled() {
-        if (!isSet) {
-            String config = System.getProperty(APIConstants.ENABLE_CORRELATION_LOGS);
-            if (StringUtils.isNotEmpty(config)) {
-                isEnabled = Boolean.parseBoolean(config);
-                isSet = true;
-            }
-        }
-        return isEnabled;
+        return MethodCallsCorrelationConfigDataHolder.isEnable();
     }
 
     /**

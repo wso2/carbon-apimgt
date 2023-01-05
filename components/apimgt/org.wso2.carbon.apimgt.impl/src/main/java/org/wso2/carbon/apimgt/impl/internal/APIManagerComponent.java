@@ -76,6 +76,7 @@ import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.CertificateNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.CorrelationConfigNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ExternalGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ExternallyDeployedApiNotifier;
@@ -205,6 +206,7 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(),new GoogleAnalyticsNotifier(),null);
             bundleContext.registerService(Notifier.class.getName(),new ExternalGatewayNotifier(),null);
             bundleContext.registerService(Notifier.class.getName(),new ExternallyDeployedApiNotifier(),null);
+            bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             APIMgtDBUtil.initialize();
@@ -275,6 +277,10 @@ public class APIManagerComponent {
                 }
                 // Adding default throttle policies
                 addDefaultAdvancedThrottlePolicies(tenantDomain, tenantId);
+                addDefaultAsyncThrottlePolicies(tenantDomain, tenantId);
+
+                //Adding default correlation configs at initial server start up
+                APIUtil.addDefaultCorrelationConfigs();
                 // Update all NULL THROTTLING_TIER values to Unlimited
                 boolean isNullThrottlingTierConversionEnabled = APIUtil.updateNullThrottlingTierAtStartup();
                 try {
@@ -577,6 +583,10 @@ public class APIManagerComponent {
 
     private void addDefaultAdvancedThrottlePolicies(String tenantDomain, int tenantId) throws APIManagementException {
         APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
+    }
+
+    private void addDefaultAsyncThrottlePolicies(String tenantDomain, int tenantId) throws APIManagementException {
+        APIUtil.addDefaultTenantAsyncThrottlePolicies(tenantDomain, tenantId);
     }
 
     @Reference(

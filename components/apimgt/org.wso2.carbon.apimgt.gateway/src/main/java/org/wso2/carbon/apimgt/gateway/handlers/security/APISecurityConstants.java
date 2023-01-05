@@ -24,6 +24,10 @@ public class APISecurityConstants {
     public static final String API_AUTH_GENERAL_ERROR_MESSAGE = "Unclassified Authentication Failure";
 
     public static final int API_AUTH_INVALID_CREDENTIALS = 900901;
+
+    public static final String SIGNATURE_VERIFICATION_FAILURE_MESSAGE =
+            "Invalid JWT token. Signature verification failed.";
+
     public static final String API_AUTH_INVALID_CREDENTIALS_MESSAGE = "Invalid Credentials";
     public static final String API_AUTH_INVALID_CREDENTIALS_DESCRIPTION =
             "Make sure you have provided the correct security credentials";
