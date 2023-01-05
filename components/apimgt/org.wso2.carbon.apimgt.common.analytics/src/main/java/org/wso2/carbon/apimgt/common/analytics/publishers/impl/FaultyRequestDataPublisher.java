@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.common.analytics.publishers.impl;
 
+import java.util.List;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 
 /**
@@ -27,5 +28,10 @@ public class FaultyRequestDataPublisher extends AbstractRequestDataPublisher {
     @Override
     public CounterMetric getCounterMetric() {
         return AnalyticsDataPublisher.getInstance().getFaultyMetricReporter();
+    }
+
+    @Override
+    public List<CounterMetric> getMultipleCounterMetrics() {
+        return AnalyticsDataPublisher.getInstance().getFaultyMetricReporters();
     }
 }

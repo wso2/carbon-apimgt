@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.common.analytics.publishers.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
@@ -27,6 +28,7 @@ import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.carbon.apimgt.common.analytics.publishers.RequestDataPublisher;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Event;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,27 +45,37 @@ public abstract class AbstractRequestDataPublisher implements RequestDataPublish
     @Override
     public void publish(Event analyticsEvent) {
 
-        CounterMetric counterMetric = this.getCounterMetric();
-        if (counterMetric == null) {
-            log.error("counterMetric cannot be null.");
-            return;
-        }
-
         Map<String, Object> dataMap = OBJECT_MAPPER.convertValue(analyticsEvent, MAP_TYPE_REFERENCE);
-        MetricEventBuilder builder = counterMetric.getEventBuilder();
-        for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
-            try {
-                builder.addAttribute(entry.getKey(), entry.getValue());
-            } catch (MetricReportingException e) {
-                log.error("Error adding data to the event stream.", e);
-                return;
-            }
-        }
+        List<CounterMetric> multipleCounterMetrics = this.getMultipleCounterMetrics();
 
-        try {
-            counterMetric.incrementCount(builder);
-        } catch (MetricReportingException e) {
-            log.error("Error occurred when publishing event.", e);
+        for (CounterMetric counterMetric : multipleCounterMetrics) {
+            if (counterMetric == null) {
+                log.error("counterMetric cannot be null.");
+            } else {
+                String counterMetricClassName = counterMetric.getClass().toString().
+                        replaceAll("[\r\n]", "").split(" ")[1];
+                log.info("Started adding data to counterMetric " + counterMetricClassName);
+                boolean caughtException = false;
+                MetricEventBuilder builder = counterMetric.getEventBuilder();
+                for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
+                    try {
+                        builder.addAttribute(entry.getKey(), entry.getValue());
+                    } catch (MetricReportingException e) {
+                        caughtException = true;
+                        log.error("Error adding data to the event stream. counterMetric: " + counterMetricClassName
+                                , e);
+                        break;
+                    }
+                }
+                if (!caughtException) {
+                    try {
+                        counterMetric.incrementCount(builder);
+                    } catch (MetricReportingException e) {
+                        log.error("Error occurred when publishing event. counterMetric: " + counterMetricClassName
+                                , e);
+                    }
+                }
+            }
         }
     }
 }
