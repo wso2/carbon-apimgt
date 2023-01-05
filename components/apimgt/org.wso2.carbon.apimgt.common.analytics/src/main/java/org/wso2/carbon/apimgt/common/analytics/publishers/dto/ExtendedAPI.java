@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.common.analytics.publishers.dto;
 
 /**
- * Extended API Object with organization ID
+ * Extended API Object with organization ID.
  */
 public class ExtendedAPI extends API {
     private String organizationId;
@@ -33,7 +33,11 @@ public class ExtendedAPI extends API {
         this.organizationId = organizationId;
     }
 
-    public void setApiContext(String apiContext){this.apiContext=apiContext;}
+    public String getApiContext() {
+        return this.apiContext;
+    }
 
-    public String getApiContext(){return this.apiContext;}
+    public void setApiContext(String apiContext) {
+        this.apiContext = apiContext;
+    }
 }
