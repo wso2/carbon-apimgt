@@ -79,7 +79,8 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
     @ApiOperation(value = "Get all registered Environments", notes = "Get all Registered Environments ", response = EnvironmentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:environment_read", description = "Retrieve gateway environments")
+            @AuthorizationScope(scope = "apim:environment_read", description = "Retrieve gateway environments"),
+            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
         })
     }, tags={ "Environments",  })
     @ApiResponses(value = { 
