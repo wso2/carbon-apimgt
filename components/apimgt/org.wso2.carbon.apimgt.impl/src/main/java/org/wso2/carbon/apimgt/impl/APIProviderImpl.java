@@ -2630,6 +2630,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException(message);
             }
         }
+        // TODO: (VirajSalaka) -
     }
 
     @Override
@@ -4733,6 +4734,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 /////////////////// Do processing on the data object//////////
                 populateRevisionInformation(api, uuid);
                 populateAPIInformation(uuid, organization, api);
+                populateAPILevelThrottleLimit(api);
                 if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                         || APIUtil.isSequenceDefined(api.getFaultSequence())) {
                     loadMediationPoliciesAsOperationPoliciesToAPI(api, organization);

@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import javax.validation.constraints.*;
@@ -141,6 +142,7 @@ return null;
     @Scope(name = "apim:api_publish", description="", value ="")
     @Scope(name = "apim:api_manage", description="", value ="")
     private String apiThrottlingPolicy = null;
+    private ThrottlingLimitDTO apiThrottlingTier = null;
     private String authorizationHeader = null;
     private List<String> securityScheme = new ArrayList<String>();
     private APIMaxTpsDTO maxTps = null;
@@ -717,6 +719,24 @@ return null;
   }
   public void setApiThrottlingPolicy(String apiThrottlingPolicy) {
     this.apiThrottlingPolicy = apiThrottlingPolicy;
+  }
+
+  /**
+   **/
+  public APIDTO apiThrottlingTier(ThrottlingLimitDTO apiThrottlingTier) {
+    this.apiThrottlingTier = apiThrottlingTier;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("apiThrottlingTier")
+  public ThrottlingLimitDTO getApiThrottlingTier() {
+    return apiThrottlingTier;
+  }
+  public void setApiThrottlingTier(ThrottlingLimitDTO apiThrottlingTier) {
+    this.apiThrottlingTier = apiThrottlingTier;
   }
 
   /**
@@ -1342,6 +1362,7 @@ return null;
         Objects.equals(tags, API.tags) &&
         Objects.equals(policies, API.policies) &&
         Objects.equals(apiThrottlingPolicy, API.apiThrottlingPolicy) &&
+        Objects.equals(apiThrottlingTier, API.apiThrottlingTier) &&
         Objects.equals(authorizationHeader, API.authorizationHeader) &&
         Objects.equals(securityScheme, API.securityScheme) &&
         Objects.equals(maxTps, API.maxTps) &&
@@ -1379,7 +1400,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, scopePrefix, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, apiThrottlingTier, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, scopePrefix, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols);
   }
 
   @Override
@@ -1410,6 +1431,7 @@ return null;
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
     sb.append("    apiThrottlingPolicy: ").append(toIndentedString(apiThrottlingPolicy)).append("\n");
+    sb.append("    apiThrottlingTier: ").append(toIndentedString(apiThrottlingTier)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    maxTps: ").append(toIndentedString(maxTps)).append("\n");

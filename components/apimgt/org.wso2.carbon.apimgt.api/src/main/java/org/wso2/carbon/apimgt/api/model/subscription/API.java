@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
+import org.wso2.carbon.apimgt.api.model.ThrottleLimit;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +40,7 @@ public class API implements CacheableEntity<String> {
     private String environment;
     private String status;
     private String revision;
+    private ThrottleLimit throttleLimit;
 
     public String getRevision() {
 
@@ -189,5 +192,13 @@ public class API implements CacheableEntity<String> {
     public void setStatus(String status) {
 
         this.status = status;
+    }
+
+    public ThrottleLimit getThrottleLimit() {
+        return throttleLimit;
+    }
+
+    public void setThrottleLimit(ThrottleLimit throttleLimit) {
+        this.throttleLimit = throttleLimit;
     }
 }

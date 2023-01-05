@@ -61,6 +61,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.ThrottleLimit;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -348,6 +349,13 @@ public class PublisherCommonUtils {
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
         apiToUpdate.setGatewayType(apiDtoToUpdate.getGatewayType());
+
+        if (apiDtoToUpdate.getApiThrottlingTier() != null) {
+            ThrottleLimit throttleLimit = new ThrottleLimit();
+            throttleLimit.setRequestCount(apiDtoToUpdate.getApiThrottlingTier().getRequestCount());
+            throttleLimit.setUnit(apiDtoToUpdate.getApiThrottlingTier().getUnit().value());
+            apiToUpdate.setThrottleLimit(throttleLimit);
+        }
 
         //validate API categories
         List<APICategory> apiCategories = apiToUpdate.getApiCategories();

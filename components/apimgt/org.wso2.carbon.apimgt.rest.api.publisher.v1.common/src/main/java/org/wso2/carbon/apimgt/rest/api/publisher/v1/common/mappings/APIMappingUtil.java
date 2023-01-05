@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
+import org.wso2.carbon.apimgt.api.model.ThrottleLimit;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
@@ -112,6 +113,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoDTO;
@@ -283,6 +285,13 @@ public class APIMappingUtil {
         }
         model.addAvailableTiers(apiTiers);
         model.setApiLevelPolicy(dto.getApiThrottlingPolicy());
+
+        if (dto.getApiThrottlingTier() != null) {
+            ThrottleLimit throttleLimit = new ThrottleLimit();
+            throttleLimit.setRequestCount(dto.getApiThrottlingTier().getRequestCount());
+            throttleLimit.setUnit(dto.getApiThrottlingTier().getUnit().value());
+            model.setThrottleLimit(throttleLimit);
+        }
 
         String transports = StringUtils.join(dto.getTransport(), ',');
         model.setTransports(transports);
@@ -1126,6 +1135,46 @@ public class APIMappingUtil {
         dto.setPolicies(tiersToReturn);
         dto.setApiThrottlingPolicy(model.getApiLevelPolicy());
 
+        if (model.getThrottleLimit() != null) {
+            ThrottlingLimitDTO throttleLimitDTO = new ThrottlingLimitDTO();
+            throttleLimitDTO.setRequestCount(model.getThrottleLimit().getRequestCount());
+            ThrottlingLimitDTO.UnitEnum unitEnum;
+            switch(model.getThrottleLimit().getUnit()) {
+                case "DAY":
+                    unitEnum = ThrottlingLimitDTO.UnitEnum.DAY;
+                    break;
+                case "MIN":
+                default:
+                    unitEnum = ThrottlingLimitDTO.UnitEnum.MIN;
+            }
+            throttleLimitDTO.setUnit(unitEnum);
+            dto.setApiThrottlingTier(throttleLimitDTO);
+            // If the throttleLimit is already available, it means that the console is under the new format.
+            dto.setApiThrottlingPolicy(constructAPIPolicyFromThrottleLimit(model.getThrottleLimit()));
+            // If the current API does not have throttlingLimit assigned but apiPolicy is available
+            // the API Policy should be able to populate the data relevant to the throttlingLimit in the console.
+        } else if (model.getApiLevelPolicy() != null) {
+            ThrottlingLimitDTO throttleLimitDTO = new ThrottlingLimitDTO();
+            throttleLimitDTO.setUnit(ThrottlingLimitDTO.UnitEnum.MIN);
+            switch (model.getApiLevelPolicy()) {
+                case "10KPerMin":
+                    throttleLimitDTO.setRequestCount(10000);
+                    break;
+                case "20KPerMin":
+                    throttleLimitDTO.setRequestCount(20000);
+                    break;
+                case "30KPerMin":
+                    throttleLimitDTO.setRequestCount(30000);
+                    break;
+                case "Unlimited":
+                    throttleLimitDTO.setRequestCount(-1);
+                    break;
+            }
+            if (throttleLimitDTO.getRequestCount() != 0) {
+                dto.setApiThrottlingTier(throttleLimitDTO);
+            }
+        }
+
         //APIs created with type set to "NULL" will be considered as "HTTP"
         if (model.getType() == null || model.getType().toLowerCase().equals("null")) {
             dto.setType(APIDTO.TypeEnum.HTTP);
@@ -1278,6 +1327,21 @@ public class APIMappingUtil {
         }
 
         return dto;
+    }
+
+    private static String constructAPIPolicyFromThrottleLimit(ThrottleLimit throttleLimit) {
+        int requestCount = throttleLimit.getRequestCount();
+        StringBuilder sb = new StringBuilder();
+        if (requestCount % 1000 == 0) {
+            sb.append(requestCount / 1000);
+            sb.append("K");
+        } else {
+            sb.append(requestCount);
+        }
+        sb.append("Per");
+        // TODO: (VirajSalaka) Minutes -> Min conversion
+        sb.append(throttleLimit.getUnit());
+        return sb.toString();
     }
 
     private static List<ScopeDTO> getScopesFromAsyncAPI(String asyncAPIDefinition) {

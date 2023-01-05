@@ -186,6 +186,7 @@ public class TemplateBuilderUtil {
         }
         String apiSecurity = api.getApiSecurity();
         String apiLevelPolicy = api.getApiLevelPolicy();
+        // TODO: (VirajSalaka)
         authProperties.put(APIConstants.API_SECURITY, apiSecurity);
         authProperties.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
         if (clientCertificateObject != null) {

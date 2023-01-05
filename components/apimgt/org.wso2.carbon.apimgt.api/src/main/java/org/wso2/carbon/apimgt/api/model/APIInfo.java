@@ -29,6 +29,8 @@ public class APIInfo {
     private String context;
     private String contextTemplate;
     private String apiTier;
+    // TODO: (VirajSalaka) check the usage
+    private ThrottleLimit apiThrottlingLimit;
     private String apiType;
     private String createdTime;
     private String createdBy;
@@ -207,6 +209,10 @@ public class APIInfo {
         isRevision = revision;
     }
 
+    public ThrottleLimit getApiThrottlingLimit() {
+        return apiThrottlingLimit;
+    }
+
     public static class Builder {
 
         private String id;
@@ -225,6 +231,8 @@ public class APIInfo {
         private int revisionsCreated;
         private boolean isRevision;
         private String organization;
+
+        private ThrottleLimit apiThrottlingLimit;
 
         public Builder id(String id) {
 
@@ -316,6 +324,11 @@ public class APIInfo {
             return this;
         }
 
+        public Builder apiThrottlingLimit(ThrottleLimit apiThrottlingLimit) {
+            this.apiThrottlingLimit = apiThrottlingLimit;
+            return this;
+        }
+
         public APIInfo build() {
 
             APIInfo apiInfo = new APIInfo();
@@ -335,6 +348,7 @@ public class APIInfo {
             apiInfo.revisionsCreated = revisionsCreated;
             apiInfo.isRevision = isRevision;
             apiInfo.organization = organization;
+            apiInfo.apiThrottlingLimit = apiThrottlingLimit;
             return apiInfo;
         }
 

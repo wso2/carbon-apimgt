@@ -28,6 +28,7 @@ import java.util.Set;
  * Intermediate model used to store data required for swagger processing
  */
 public class SwaggerData {
+
     /**
      * Maps to Swagger PathItem/Operation
      */
@@ -125,6 +126,7 @@ public class SwaggerData {
     private String apiLevelPolicy;
     private Set<Resource> resources = new LinkedHashSet<>();
     private Set<Scope> scopes = new HashSet<>();
+    private ThrottleLimit throttleLimit;
 
     public SwaggerData(API api) {
         title = api.getId().getName();
@@ -157,6 +159,7 @@ public class SwaggerData {
         transportType = api.getType();
         security = api.getApiSecurity();
         apiLevelPolicy = api.getApiLevelPolicy();
+        throttleLimit = api.getThrottleLimit();
         Set<Scope> scopes = api.getScopes();
         if (scopes != null) {
             this.scopes.addAll(scopes);

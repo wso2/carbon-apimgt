@@ -75,6 +75,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.ThrottleLimit;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -5343,6 +5344,9 @@ public class ApiMgtDAO {
                     .getTenantAwareUsername(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             recordAPILifeCycleEvent(apiId, null, APIStatus.CREATED.toString(), tenantUserName, tenantId,
                     connection);
+            // persist throttle Limit
+            addThrottleLimit(api, connection);
+
             //If the api is selected as default version, it is added/replaced into AM_API_DEFAULT_VERSION table
             if (api.isDefaultVersion()) {
                 addUpdateAPIAsDefaultVersion(api, connection);
@@ -5366,6 +5370,16 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return apiId;
+    }
+
+    private void addThrottleLimit(API api, Connection connection) throws SQLException {
+
+        String query = SQLConstants.ADD_API_THROTTLE_LIMIT_SQL;
+        try (PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            prepStmt.setString(1, api.getUuid() != null ? api.getUuid() : api.getUUID());
+            prepStmt.setString(2, new Gson().toJson(api.getThrottleLimit()));
+            prepStmt.execute();
+        }
     }
 
     public String getDefaultVersion(APIIdentifier apiId) throws APIManagementException {
@@ -5733,6 +5747,7 @@ public class ApiMgtDAO {
                 uriMappingPrepStmt.setString(2, uriTemplate.getHTTPVerb());
                 uriMappingPrepStmt.setString(3, uriTemplate.getAuthType());
                 uriMappingPrepStmt.setString(4, uriTemplate.getUriTemplate());
+                // TODO: (VirajSalaka) -
                 //If API policy is available then set it for all the resources.
                 if (StringUtils.isEmpty(api.getApiLevelPolicy())) {
                     uriMappingPrepStmt.setString(5, (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) ?
@@ -6761,7 +6776,6 @@ public class ApiMgtDAO {
                 //Remove the {version} part from the context template.
                 contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
             }
-
             // For Choreo-Connect gateway, gateway vendor type in the DB will be "wso2/choreo-connect".
             // This value is determined considering the gateway type comes with the request.
             api.setGatewayVendor(APIUtil.setGatewayVendorBeforeInsertion(
@@ -6797,6 +6811,7 @@ public class ApiMgtDAO {
                 int tenantID = APIUtil.getTenantId(username);
                 updateAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), tenantID, connection);
             }
+            updateAPIThrottleLimit(connection, api);
             connection.commit();
         } catch (SQLException e) {
             try {
@@ -6811,6 +6826,14 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
+    }
+
+    private void updateAPIThrottleLimit(Connection connection, API api) throws SQLException {
+        String query = SQLConstants.UPDATE_API_THROTTLE_LIMIT_SQL;
+        PreparedStatement prepStmt = connection.prepareStatement(query);
+        prepStmt.setString(1, new Gson().toJson(api.getThrottleLimit()));
+        prepStmt.setString(2, api.getUuid());
+        prepStmt.execute();
     }
 
     public int getAPIID(String uuid) throws APIManagementException {
@@ -9395,6 +9418,7 @@ public class ApiMgtDAO {
     }
 
     /**
+     * // TODO: (VirajSalaka) -
      * Retrieve basic information about the given API by the UUID quering only from AM_API
      *
      * @param apiId UUID of the API
@@ -9431,10 +9455,15 @@ public class ApiMgtDAO {
                                 .organization(resultSet.getString("ORGANIZATION"))
                                 .isRevision(apiRevision != null).organization(resultSet.getString("ORGANIZATION"));
                         if (apiRevision != null) {
-                            apiInfoBuilder = apiInfoBuilder.apiTier(getAPILevelTier(connection,
-                                    apiRevision.getApiUUID(), apiId));
+                            apiInfoBuilder = apiInfoBuilder
+                                    .apiTier(getAPILevelTier(connection, apiRevision.getApiUUID(), apiId))
+                                    .apiThrottlingLimit(getAPIThrottlingLimit(connection, apiRevision.getApiUUID(),
+                                            apiRevision.getRevisionUUID()));
                         } else {
-                            apiInfoBuilder = apiInfoBuilder.apiTier(resultSet.getString("API_TIER"));
+                            apiInfoBuilder = apiInfoBuilder
+                                    .apiTier(resultSet.getString(APIConstants.AmAPI.API_TIER))
+                                    .apiThrottlingLimit(getAPIThrottlingLimit(connection,
+                                            resultSet.getString(APIConstants.AmAPI.API_UUID_COLUMN)));
                         }
                         return apiInfoBuilder.build();
                     }
@@ -13391,6 +13420,48 @@ public class ApiMgtDAO {
         return apiLevelTier;
     }
 
+    public ThrottleLimit getAPIThrottlingLimit(String uuid) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement selectPreparedStatement = null;
+        ResultSet resultSet = null;
+        ThrottleLimit apiLevelTier = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(true);
+            apiLevelTier = getAPIThrottlingLimit(connection, uuid);
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to rollback getting API Details", ex);
+                }
+            }
+            handleException("Failed to get API Details", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+        }
+        return apiLevelTier;
+    }
+
+    public ThrottleLimit getAPIThrottlingLimit(Connection connection, String uuid) throws SQLException {
+        String apiLevelTierJson = null;
+        String query = SQLConstants.GET_API_THROTTLE_LIMIT_SQL;
+        try (PreparedStatement selectPreparedStatement
+                     = connection.prepareStatement(query + " WHERE API_UUID = ?")) {
+            selectPreparedStatement.setString(1, uuid);
+            ResultSet resultSet = selectPreparedStatement.executeQuery();
+            while (resultSet.next()) {
+                apiLevelTierJson = resultSet.getString(APIConstants.AmAPI.API_THROTTLE_LIMIT_COLUMN);
+            }
+            if (apiLevelTierJson != null) {
+                return new Gson().fromJson(apiLevelTierJson, ThrottleLimit.class);
+            }
+        }
+        return null;
+    }
+
     private String getAPILevelTier(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
 
         try (PreparedStatement preparedStatement =
@@ -13399,7 +13470,26 @@ public class ApiMgtDAO {
             preparedStatement.setString(2, revisionUUID);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return resultSet.getString("API_TIER");
+                    return resultSet.getString(APIConstants.AmAPI.API_TIER);
+                }
+            }
+        }
+        return null;
+    }
+
+    private ThrottleLimit getAPIThrottlingLimit(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.GET_REVISIONED_API_THROTTLE_LIMIT_SQL)) {
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, revisionUUID);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    String apiLevelTierJson = resultSet.getString(APIConstants.AmAPI.API_THROTTLE_LIMIT_COLUMN);
+                    // TODO: (VirajSalaka) omit null check if not necessary
+                    if (apiLevelTierJson != null) {
+                        return new Gson().fromJson(apiLevelTierJson, ThrottleLimit.class);
+                    }
                 }
             }
         }
@@ -13410,6 +13500,16 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             return getAPILevelTier(connection, apiUUID, revisionUUID);
+        } catch (SQLException e) {
+            handleException("Failed to retrieve Connection", e);
+        }
+        return null;
+    }
+
+    public ThrottleLimit getAPIThrottlingLimit(String apiUUID, String revisionUUID) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            return getAPIThrottlingLimit(connection, apiUUID, revisionUUID);
         } catch (SQLException e) {
             handleException("Failed to retrieve Connection", e);
         }
@@ -16370,6 +16470,7 @@ public class ApiMgtDAO {
                 insertGraphQLComplexityStatement.executeBatch();
                 updateLatestRevisionNumber(connection, apiRevision.getApiUUID(), apiRevision.getId());
                 addAPIRevisionMetaData(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+                addAPIRevisionTierInfo(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -17557,6 +17658,7 @@ public class ApiMgtDAO {
                 insertGraphQLComplexityStatement.executeBatch();
                 updateLatestRevisionNumber(connection, apiRevision.getApiUUID(), apiRevision.getId());
                 addAPIRevisionMetaData(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+                addAPIRevisionTierInfo(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -18047,6 +18149,18 @@ public class ApiMgtDAO {
             preparedStatement.setString(2, revisionUUID);
             preparedStatement.setString(3, apiUUID);
             preparedStatement.setString(4, apiUUID);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    private void addAPIRevisionTierInfo(Connection connection, String apiUUID, String revisionUUID)
+            throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.ADD_API_REVISION_THROTTLE_LIMIT_INFO)) {
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, revisionUUID);
+            preparedStatement.setString(3, apiUUID);
             preparedStatement.executeUpdate();
         }
     }

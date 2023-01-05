@@ -1081,6 +1081,7 @@ public abstract class AbstractAPIManager implements APIManager {
         int internalId = apiMgtDAO.getAPIID(currentApiUuid);
         apiId.setId(internalId);
         apiMgtDAO.setServiceStatusInfoToAPI(api, internalId);
+
         // api level tier
         String apiLevelTier;
         if (api.isRevision()) {
@@ -1091,6 +1092,7 @@ public abstract class AbstractAPIManager implements APIManager {
             apiLevelTier = apiMgtDAO.getAPILevelTier(internalId);
         }
         api.setApiLevelPolicy(apiLevelTier);
+
         // available tier
         String tiers = null;
         Set<Tier> tiersSet = api.getAvailableTiers();
@@ -1212,6 +1214,16 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
+    protected void populateAPILevelThrottleLimit(API api) throws APIManagementException{
+        ThrottleLimit throttleLimit;
+        if (api.isRevision()) {
+            throttleLimit = apiMgtDAO.getAPIThrottlingLimit(api.getRevisionedApiId(), api.getUuid());
+        } else {
+            throttleLimit = apiMgtDAO.getAPIThrottlingLimit(api.getUuid());
+        }
+        api.setThrottleLimit(throttleLimit);
+    }
+
     protected void populateDevPortalAPIInformation(String uuid, String organization, API api)
             throws APIManagementException, OASPersistenceException, ParseException {
         Organization org = new Organization(organization);
@@ -1240,6 +1252,9 @@ public abstract class AbstractAPIManager implements APIManager {
         // api level tier
         String apiLevelTier = apiMgtDAO.getAPILevelTier(internalId);
         api.setApiLevelPolicy(apiLevelTier);
+
+        // populate api level throttle limit
+        populateAPILevelThrottleLimit(api);
 
         // available tier
         String tiers = null;

@@ -35,6 +35,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -45,6 +47,7 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.ThrottleLimit;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -846,6 +849,83 @@ public class APIMgtDAOTest {
         assertNotNull(gatewayVendor);
         assertTrue(gatewayVendor.equals("wso2"));
         apiMgtDAO.deleteAPI(api.getUuid());
+    }
+
+    @Test
+    public void testAPIAndUpdateThrottleLimit() throws Exception {
+        APIIdentifier apiId = new APIIdentifier("getAPIThrottleLimit",
+                "getAPIThrottleLimit", "1.0.0");
+        API api = new API(apiId);
+        api.setContext("/getAPIThrottleLimit");
+        api.setContextTemplate("/getAPIThrottleLimit/{version}");
+        String apiUUID = UUID.randomUUID().toString();
+        api.setUUID(apiUUID);
+        api.setUuid(apiUUID);
+        ThrottleLimit throttleLimit = new ThrottleLimit();
+        throttleLimit.setUnit("MIN");
+        throttleLimit.setRequestCount(1000);
+        api.setThrottleLimit(throttleLimit);
+        apiMgtDAO.addAPI(api, -1234, "testOrg");
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            ThrottleLimit throttleLimit1 = apiMgtDAO.getAPIThrottlingLimit(connection, apiUUID);
+            Assert.assertNotNull("ThrottleLimit should not be null", throttleLimit1);
+            Assert.assertEquals("RequestCount mismatch",1000, throttleLimit1.getRequestCount());
+            Assert.assertEquals("TimeUnit mismatch", "MIN", throttleLimit1.getUnit());
+        }
+        ThrottleLimit throttleLimit2 = new ThrottleLimit();
+        throttleLimit2.setUnit("DAY");
+        throttleLimit2.setRequestCount(5000);
+        api.setThrottleLimit(throttleLimit2);
+        apiMgtDAO.updateAPI(api);
+        ThrottleLimit throttleLimit1 = apiMgtDAO.getAPIThrottlingLimit(apiUUID);
+        Assert.assertNotNull("ThrottleLimit should not be null", throttleLimit1);
+        Assert.assertEquals("RequestCount mismatch",5000, throttleLimit1.getRequestCount());
+        Assert.assertEquals("TimeUnit mismatch", "DAY", throttleLimit1.getUnit());
+
+        apiMgtDAO.deleteAPI(api.getUuid());
+    }
+
+    @Test
+    public void testRevisionThrottleLimit() throws Exception {
+        APIIdentifier apiId = new APIIdentifier("getAPIRevisionThrottleLimit",
+                "getAPIRevisionThrottleLimit", "1.0.0");
+        API api = new API(apiId);
+        api.setContext("/getAPIRevisionThrottleLimit");
+        api.setContextTemplate("/getAPIRevisionThrottleLimit/{version}");
+        String apiUUID = UUID.randomUUID().toString();
+        api.setApiLevelPolicy("10KPerMin");
+        api.setUuid(apiUUID);
+        ThrottleLimit throttleLimit = new ThrottleLimit();
+        throttleLimit.setUnit("MIN");
+        throttleLimit.setRequestCount(1000);
+        api.setThrottleLimit(throttleLimit);
+        apiMgtDAO.addAPI(api, -1234, "testOrg");
+
+        APIRevision apiRevision = new APIRevision();
+        apiRevision.setApiUUID(apiUUID);
+        apiRevision.setDescription("test description revision 1");
+        String revisionUUID = UUID.randomUUID().toString();
+        apiRevision.setRevisionUUID(revisionUUID);
+        try {
+            apiMgtDAO.addAPIRevision(apiRevision, "testOrg");
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+
+        List<APIRevision> list = apiMgtDAO.getRevisionsListByAPIUUID(apiUUID);
+        Assert.assertNotNull(list);
+        Assert.assertEquals(1, list.size());
+        APIRevision returnedRevision = list.get(0);
+        Assert.assertEquals("Revision Mismatched", revisionUUID, returnedRevision.getRevisionUUID());
+
+        ThrottleLimit revisionThrottleLimit = apiMgtDAO.getAPIThrottlingLimit(apiUUID, revisionUUID);
+        Assert.assertNotNull("RevisionThrottleLimit should not be null", revisionThrottleLimit);
+        Assert.assertEquals("RevisionThrottleLimit RequestCount mismatch",
+                throttleLimit.getRequestCount(), revisionThrottleLimit.getRequestCount());
+        Assert.assertEquals("RevisionThrottleLimit Time Unit mismatch",
+                throttleLimit.getUnit(), revisionThrottleLimit.getUnit());
+        apiMgtDAO.deleteAPI(apiUUID);
     }
 
     @Test

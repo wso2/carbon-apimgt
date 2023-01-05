@@ -927,9 +927,15 @@ public class OAS3Parser extends APIDefinition {
         if (api.getAuthorizationHeader() != null) {
             openAPI.addExtension(APIConstants.X_WSO2_AUTH_HEADER, api.getAuthorizationHeader());
         }
+
         if (api.getApiLevelPolicy() != null) {
             openAPI.addExtension(APIConstants.X_THROTTLING_TIER, api.getApiLevelPolicy());
         }
+        // TODO: (VirajSalaka)
+        if (api.getThrottleLimit() != null) {
+            openAPI.addExtension("x-throttling-tier", api.getThrottleLimit());
+        }
+
         openAPI.addExtension(APIConstants.X_WSO2_CORS, api.getCorsConfiguration());
         Object prodEndpointObj = OASParserUtil.generateOASConfigForEndpoints(api, true);
         if (prodEndpointObj != null) {

@@ -1358,6 +1358,7 @@ public class SQLConstants {
             "SELECT API_ID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? "
                     + "AND API_VERSION = ? AND API_TYPE = '" + APIConstants.API_PRODUCT + "'";
 
+    // TODO: (VirajSalaka)
     public static final String GET_API_PRODUCT_SQL =
             "SELECT API_ID, API_TIER FROM AM_API WHERE API_UUID = ? AND API_TYPE = '" + APIConstants.API_PRODUCT + "'";
 
@@ -1453,6 +1454,8 @@ public class SQLConstants {
                     "CREATED_TIME,API_TIER,API_TYPE,API_UUID,STATUS,ORGANIZATION,GATEWAY_VENDOR,VERSION_COMPARABLE," +
                     "SCOPE_PREFIX)" +
                     " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    public static final String ADD_API_THROTTLE_LIMIT_SQL =
+            " INSERT INTO AM_API_THROTTLE_LIMIT (API_UUID,API_THROTTLE_LIMIT) VALUES (?,?)";
 
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
@@ -1678,6 +1681,13 @@ public class SQLConstants {
                     "   API_TYPE = ?, " +
                     "   GATEWAY_VENDOR = ?, " +
                     "   SCOPE_PREFIX = ? " +
+                    " WHERE " +
+                    "   API_UUID = ? ";
+
+    public static final String UPDATE_API_THROTTLE_LIMIT_SQL =
+            "UPDATE AM_API_THROTTLE_LIMIT " +
+                    "SET " +
+                    "   API_THROTTLE_LIMIT = ? " +
                     " WHERE " +
                     "   API_UUID = ? ";
 
@@ -2643,6 +2653,7 @@ public class SQLConstants {
 
     public static final String GET_API_DETAILS_SQL = "SELECT * FROM AM_API ";
 
+    public static final String GET_API_THROTTLE_LIMIT_SQL = "SELECT * FROM AM_API_THROTTLE_LIMIT ";
 
     public static final String REMOVE_GROUP_ID_MAPPING_SQL =
             "DELETE FROM AM_APPLICATION_GROUP_MAPPING WHERE APPLICATION_ID = ? ";
@@ -2720,6 +2731,7 @@ public class SQLConstants {
             "DELETE FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? AND API_TYPE = '"
                     + APIConstants.API_PRODUCT + "'";
 
+    // TODO: (VirajSalaka)
     public static final String UPDATE_PRODUCT_SQL =
             " UPDATE AM_API " +
             " SET" +
@@ -2743,6 +2755,7 @@ public class SQLConstants {
             "SELECT URL_PATTERN , URL_MAPPING_ID, HTTP_METHOD FROM AM_API API , AM_API_URL_MAPPING URL "
                     + "WHERE API.API_ID = URL.API_ID AND API.API_UUID =? AND URL.REVISION_UUID IS NULL";
 
+    // TODO: (VirajSalaka)
     public static final String ADD_API_PRODUCT =
             "INSERT INTO "
             + "AM_API(API_PROVIDER, API_NAME, API_VERSION, CONTEXT,"
@@ -3072,6 +3085,10 @@ public class SQLConstants {
             "? AND REVISION_UUID = ?";
     public static final String GET_REVISIONED_API_TIER_SQL = "SELECT API_TIER FROM AM_API_REVISION_METADATA WHERE " +
             "API_UUID = ? AND REVISION_UUID = ?";
+    public static final String GET_REVISIONED_API_THROTTLE_LIMIT_SQL = "SELECT API_THROTTLE_LIMIT FROM " +
+            "AM_API_REVISION_THROTTLE_LIMIT WHERE API_UUID = ? AND REVISION_UUID = ?";
+    public static final String ADD_API_REVISION_THROTTLE_LIMIT_INFO = "INSERT INTO AM_API_REVISION_THROTTLE_LIMIT (API_UUID," +
+            "REVISION_UUID,API_THROTTLE_LIMIT) VALUES(?,?,(SELECT API_THROTTLE_LIMIT FROM AM_API_THROTTLE_LIMIT WHERE API_UUID = ? ))";
     public static final String RESTORE_API_REVISION_METADATA = "UPDATE AM_API SET API_TIER = (SELECT API_TIER FROM " +
             "AM_API_REVISION_METADATA WHERE API_UUID = ? AND REVISION_UUID = ?) WHERE API_UUID = ?";
     public static final String ADD_PER_API_LOGGING_SQL =
@@ -3562,6 +3579,7 @@ public class SQLConstants {
         public static final String ADD_UNSUBSCRIPTION =
                 "INSERT INTO AM_WEBHOOKS_UNSUBSCRIPTION (API_UUID, APPLICATION_ID, TENANT_DOMAIN, " +
                         "HUB_CALLBACK_URL, HUB_TOPIC, HUB_SECRET, HUB_LEASE_SECONDS, ADDED_AT) VALUES (?,?,?,?,?,?,?,?)";
+        // TODO: (VirajSalaka)
         public static final String GET_ALL_VALID_SUBSCRIPTIONS =
                 "SELECT WH.API_UUID AS API_UUID, " +
                         "WH.APPLICATION_ID AS APPLICATION_ID, " +
@@ -3588,6 +3606,7 @@ public class SQLConstants {
                         "AND API.API_UUID = WH.API_UUID " +
                         "AND APP.SUBSCRIBER_ID = SUBSCRIBER.SUBSCRIBER_ID ";
 
+        // TODO: (VirajSalaka)
         public static final String GET_ALL_VALID_SUBSCRIPTIONS_POSTGRE_SQL =
                 "SELECT WH.API_UUID AS API_UUID, " +
                         "WH.APPLICATION_ID AS APPLICATION_ID, " +

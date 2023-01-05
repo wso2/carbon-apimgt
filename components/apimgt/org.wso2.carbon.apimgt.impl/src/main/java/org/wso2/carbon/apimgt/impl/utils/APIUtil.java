@@ -133,6 +133,7 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
+import org.wso2.carbon.apimgt.api.model.ThrottleLimit;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -178,7 +179,6 @@ import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -616,6 +616,16 @@ public final class APIUtil {
             String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
             api.setApiLevelPolicy(apiLevelTier);
 
+            if ("ENABLED".equals(System.getenv("API_THROTTLING"))) {
+                ThrottleLimit throttleLimit;
+                if (api.isRevision()) {
+                    throttleLimit = ApiMgtDAO.getInstance().getAPIThrottlingLimit(api.getRevisionedApiId(), api.getUuid());
+                } else {
+                    throttleLimit = ApiMgtDAO.getInstance().getAPIThrottlingLimit(api.getUuid());
+                }
+                api.setThrottleLimit(throttleLimit);
+            }
+
             Set<Tier> availablePolicy = new HashSet<Tier>();
             String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, replaceEmailDomainBack(providerName));
             List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
@@ -737,6 +747,16 @@ public final class APIUtil {
             api.setCacheTimeout(cacheTimeout);
             String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
             api.setApiLevelPolicy(apiLevelTier);
+
+            if ("ENABLED".equals(System.getenv("API_THROTTLING"))) {
+                ThrottleLimit throttleLimit;
+                if (api.isRevision()) {
+                    throttleLimit = ApiMgtDAO.getInstance().getAPIThrottlingLimit(api.getRevisionedApiId(), api.getUuid());
+                } else {
+                    throttleLimit = ApiMgtDAO.getInstance().getAPIThrottlingLimit(api.getUuid());
+                }
+                api.setThrottleLimit(throttleLimit);
+            }
 
             Set<Tier> availablePolicy = new HashSet<Tier>();
             String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB,
@@ -2587,6 +2607,16 @@ public final class APIUtil {
 
             String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
             api.setApiLevelPolicy(apiLevelTier);
+
+            if ("ENABLED".equals(System.getenv("API_THROTTLING"))) {
+                ThrottleLimit throttleLimit;
+                if (api.isRevision()) {
+                    throttleLimit = ApiMgtDAO.getInstance().getAPIThrottlingLimit(api.getRevisionedApiId(), api.getUuid());
+                } else {
+                    throttleLimit = ApiMgtDAO.getInstance().getAPIThrottlingLimit(api.getUuid());
+                }
+                api.setThrottleLimit(throttleLimit);
+            }
 
             String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
             Map<String, Tier> definedTiers = getTiers(tenantId);

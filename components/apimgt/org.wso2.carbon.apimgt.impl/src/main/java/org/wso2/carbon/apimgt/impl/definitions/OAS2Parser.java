@@ -844,6 +844,10 @@ public class OAS2Parser extends APIDefinition {
         if (api.getApiLevelPolicy() != null) {
             swagger.setVendorExtension(APIConstants.X_THROTTLING_TIER, api.getApiLevelPolicy());
         }
+        // TODO: (VirajSalaka)
+        if (api.getThrottleLimit() != null) {
+            swagger.setVendorExtension("x-throttling-tier", api.getThrottleLimit());
+        }
         swagger.setVendorExtension(APIConstants.X_WSO2_CORS, api.getCorsConfiguration());
         Object prodEndpointObj = OASParserUtil.generateOASConfigForEndpoints(api, true);
         if (prodEndpointObj != null) {
