@@ -4035,6 +4035,10 @@ components:
           type: boolean
           readOnly: true
           example: false
+        dataPlaneId:
+          type: string
+          readOnly: true
+          example: sce92bdc-e1e6-325c-a6f2-626218a021e3
         vhosts:
           type: array
           minItems: 1

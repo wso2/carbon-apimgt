@@ -640,6 +640,8 @@ public class APIManagerConfiguration {
             environment.setDescription("");
         }
         environment.setReadOnly(true);
+        environment.setDataPlaneId(APIUtil.replaceSystemProperty(
+                environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_DATA_PLANE_ID)).getText()));
         List<VHost> vhosts = new LinkedList<>();
         environment.setVhosts(vhosts);
         environment.setEndpointsAsVhost();

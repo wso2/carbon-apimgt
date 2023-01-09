@@ -52,6 +52,7 @@ public class Environment implements Serializable {
     private boolean isReadOnly;
     private List<VHost> vhosts = new ArrayList<>();
     private String provider;
+    private String dataPlaneId;
     private Map<String, String> additionalProperties = new HashMap<>();
 
     public boolean isDefault() {
@@ -231,6 +232,14 @@ public class Environment implements Serializable {
         String[] endpoints = (apiGatewayEndpoint + "," + websocketGatewayEndpoint + "," + modifiedWebSubGatewayEndpoint)
                 .split(",", 6);
         getVhosts().add(VHost.fromEndpointUrls(endpoints));
+    }
+
+    public String getDataPlaneId() {
+        return dataPlaneId;
+    }
+
+    public void setDataPlaneId(String dataPlaneId) {
+        this.dataPlaneId = dataPlaneId;
     }
 
     @Override

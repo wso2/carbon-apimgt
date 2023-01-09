@@ -165,6 +165,11 @@
                 {% else %}
                 <GatewayWebSubEndpoint></GatewayWebSubEndpoint>
                 {% endif %}
+                {% if environment_name.data_plane_id is defined %}
+                <DataPlaneId>{{environment_name.data_plane_id}}</DataPlaneId>
+                {% else %}
+                <DataPlaneId></DataPlaneId>
+                {% endif %}
                 <VirtualHosts>
                     {% for vhost in environment_name.virtual_host %}
                     <VirtualHost>
