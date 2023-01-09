@@ -3566,7 +3566,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while updating the lifecycle of API " + apiId, e, log);
             } else {
-                RestApiUtil.handleInternalServerError("Error while updating lifecycle of API " + apiId, e, log);
+                RestApiUtil.handleBadRequest("Error while updating lifecycle of API " + apiId + " " +
+                        e.getMessage().toString(), log);
             }
         }
         return null;
