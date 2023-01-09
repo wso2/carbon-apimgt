@@ -1995,6 +1995,23 @@ public final class APIConstants {
         public static final String API_PRODUCT_NAME = "api_product_name";
         public static final String APPLICATION_NAME = "application_name";
         public static final String APPLICATION_ID = "application_id";
+
+        public static final String ADVANCED_POLICIES = "AdvancedPolicies";
+        public static final String APPLICATION_POLICIES = "ApplicationPolicies";
+        public static final String SUBSCRIPTION_POLICIES = "SubscriptionPolicies";
+        public static final String CUSTOM_POLICIES = "CustomPolicies";
+        public static final String DENY_POLICIES = "DenyPolicies";
+
+        public static final String TENANT_CONFIG = "TenantConfig";
+        public static final String TENANT_CONFIG_INFO = "User updated Tenant Config";
+
+        public static final String API_CATEGORIES = "APICategories";
+        public static final String APPLICATIONS = "Applications";
+        public static final String GATEWAY_ENVIRONMENTS = "GatewayEnvironments";
+        public static final String ROLES_FOR_SCOPE = "RolesForScope";
+        public static final String ROLES_FOR_SCOPE_INFO = "User updated roles for a scope";
+        public static final String SYSTEM_SCOPE_ROLE_ALIASES = "SystemScopesRoleAliases";
+        public static final String WORKFLOW_STATUS = "WorkflowStatus";
     }
 
     public static final String API_WORKFLOW_STATE_ATTR = "overview_workflowState";
