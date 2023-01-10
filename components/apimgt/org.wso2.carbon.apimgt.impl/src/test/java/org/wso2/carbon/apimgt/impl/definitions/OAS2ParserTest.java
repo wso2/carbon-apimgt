@@ -28,17 +28,14 @@ import io.swagger.parser.SwaggerParser;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.wso2.carbon.apimgt.api.APIDefinition;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -146,5 +143,18 @@ public class OAS2ParserTest extends OASTestBase {
         Swagger swagger = oas2Parser.getSwagger(swaggerWithResponsesObject);
         Assert.assertEquals(oas2Parser.removeResponsesObject(swagger,swaggerWithoutResponsesObject),
                 oas2Parser.removeResponsesObject(swagger,swaggerWithResponsesObject));
+    }
+    @Test
+    public void testSwaggerValidatorWithValidationLevel2() throws Exception {
+        String faultySwagger = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2"
+                        + File.separator + "oas_util_test_faulty_swagger.json"), StandardCharsets.UTF_8);
+        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true);
+        Assert.assertFalse(response.isValid());
+        Assert.assertEquals(3, response.getErrorItems().size());
+        Assert.assertEquals(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorCode(),
+                response.getErrorItems().get(0).getErrorCode());
+        Assert.assertEquals(ExceptionCodes.INVALID_OAS2_FOUND.getErrorCode(),
+                response.getErrorItems().get(1).getErrorCode());
     }
 }
