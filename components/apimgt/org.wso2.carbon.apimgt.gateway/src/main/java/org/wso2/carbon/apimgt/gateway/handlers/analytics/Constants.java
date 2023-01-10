@@ -51,11 +51,16 @@ public class Constants {
 
         public static final int TARGET_FAILURE_START = 101500;
         public static final int TARGET_FAILURE__END = 101600;
+
+        public static final int WS_TARGET_FAILURE_START = 1002;
+        public static final int WS_TARGET_FAILURE__END = 1015;
     }
 
     public static final int RESOURCE_NOT_FOUND_ERROR_CODE = 404;
     public static final int METHOD_NOT_ALLOWED_ERROR_CODE = 405;
     public static final int ENDPOINT_SUSPENDED_ERROR_CODE = 303001;
+
+    public static final int WS_BAD_GATEWAY_ERROR_CODE = 1014;
 
     public static final String API_GOOGLE_ANALYTICS_TRACKING_ENABLED = "Enabled";
     public static final String API_GOOGLE_ANALYTICS_TRACKING_ID = "TrackingID";
