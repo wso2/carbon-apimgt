@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ChoreoGatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
@@ -45,6 +46,8 @@ import java.util.Set;
 public class RuntimeArtifactGeneratorUtil {
 
     private static final GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
+    private static final ChoreoGatewayArtifactsMgtDAO choreoGatewayArtifactsMgtDAO
+            = ChoreoGatewayArtifactsMgtDAO.getInstance();
 
     public static RuntimeArtifactDto generateRuntimeArtifact(String apiId, String name, String version,
                                                              String gatewayLabel, String type, String tenantDomain)
@@ -185,6 +188,64 @@ public class RuntimeArtifactGeneratorUtil {
             }
         } else {
             throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
+        }
+    }
+
+    public static RuntimeArtifactDto generateAllRuntimeArtifact(String dataPlaneId, String type)
+            throws APIManagementException {
+
+        GatewayArtifactGenerator gatewayArtifactGenerator =
+                ServiceReferenceHolder.getInstance().getGatewayArtifactGenerator(type);
+        if (gatewayArtifactGenerator != null) {
+            List<APIRuntimeArtifactDto> gatewayArtifacts
+                    = choreoGatewayArtifactsMgtDAO.retrieveAllGatewayArtifactsByDataPlaneId(dataPlaneId);
+            if (gatewayArtifacts != null) {
+                if (gatewayArtifacts.isEmpty()) {
+                    throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
+                }
+                for (APIRuntimeArtifactDto apiRuntimeArtifactDto: gatewayArtifacts) {
+                    ArtifactSynchronizerUtil.setArtifactProperties(apiRuntimeArtifactDto);
+                }
+            }
+            if (gatewayArtifacts == null || gatewayArtifacts.isEmpty()) {
+                return null;
+            }
+            return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
+        } else {
+            Set<String> gatewayArtifactGeneratorTypes =
+                    ServiceReferenceHolder.getInstance().getGatewayArtifactGeneratorTypes();
+            throw new APIManagementException("Couldn't find gateway Type",
+                    ExceptionCodes.from(ExceptionCodes.GATEWAY_TYPE_NOT_FOUND, String.join(",",
+                            gatewayArtifactGeneratorTypes)));
+        }
+    }
+
+    public static RuntimeArtifactDto generateAllRuntimeArtifact(String organization, String dataPlaneId, String type)
+            throws APIManagementException {
+
+        GatewayArtifactGenerator gatewayArtifactGenerator =
+                ServiceReferenceHolder.getInstance().getGatewayArtifactGenerator(type);
+        if (gatewayArtifactGenerator != null) {
+            List<APIRuntimeArtifactDto> gatewayArtifacts = choreoGatewayArtifactsMgtDAO
+                    .retrieveAllGatewayArtifactsByOrganizationAndDataPlaneId(organization,dataPlaneId);
+            if (gatewayArtifacts != null) {
+                if (gatewayArtifacts.isEmpty()) {
+                    throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
+                }
+                for (APIRuntimeArtifactDto apiRuntimeArtifactDto: gatewayArtifacts) {
+                    ArtifactSynchronizerUtil.setArtifactProperties(apiRuntimeArtifactDto);
+                }
+            }
+            if (gatewayArtifacts == null || gatewayArtifacts.isEmpty()) {
+                return null;
+            }
+            return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
+        } else {
+            Set<String> gatewayArtifactGeneratorTypes =
+                    ServiceReferenceHolder.getInstance().getGatewayArtifactGeneratorTypes();
+            throw new APIManagementException("Couldn't find gateway Type",
+                    ExceptionCodes.from(ExceptionCodes.GATEWAY_TYPE_NOT_FOUND, String.join(",",
+                            gatewayArtifactGeneratorTypes)));
         }
     }
 

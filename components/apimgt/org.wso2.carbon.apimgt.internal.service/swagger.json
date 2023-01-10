@@ -651,6 +651,43 @@
         }
       }
     },
+    "/retrieve-runtime-artifacts" : {
+      "get" : {
+        "tags" : [ "Retrieving Runtime artifacts" ],
+        "summary" : "Get all the runtime artifacts for a given data-planeId",
+        "description" : "This will provide access to runtime artifacts in database.\n",
+        "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "type",
+          "in" : "query",
+          "description" : "**Search condition**.\n type of gateway\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "dataplaneId",
+          "in" : "query",
+          "description" : "**Search condition**.\n Data-plane ID\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "List of runtime Artifacts"
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/retrieve-api-artifacts" : {
       "post" : {
         "tags" : [ "Retrieve API artifacts" ],

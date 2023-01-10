@@ -510,6 +510,34 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /retrieve-runtime-artifacts:
+    get:
+      summary: Get all the runtime artifacts for a given data-planeId
+      description: |
+        This will provide access to runtime artifacts in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: type
+          in: query
+          description: |
+            **Search condition**.
+             type of gateway
+          type: string
+        - name: dataplaneId
+          in: query
+          description: |
+            **Search condition**.
+             Data-plane ID
+          type: string
+      tags:
+        - Retrieving Runtime artifacts
+      responses:
+        200:
+          description: List of runtime Artifacts
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /retrieve-api-artifacts:
     post:
       summary: Get API runtime artifacts from ID list
