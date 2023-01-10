@@ -3542,8 +3542,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response changeAPILifecycle(String action, String apiId, String lifecycleChecklist,
-                                            String ifMatch, MessageContext messageContext) {
+    public Response changeAPILifecycle(String action, String apiId, String lifecycleChecklist, String ifMatch,
+                                       MessageContext messageContext) throws APIManagementException {
 
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -3566,8 +3566,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while updating the lifecycle of API " + apiId, e, log);
             } else {
-                RestApiUtil.handleBadRequest("Error while updating lifecycle of API " + apiId + " " +
-                        e.getMessage().toString(), log);
+                throw e;
             }
         }
         return null;
