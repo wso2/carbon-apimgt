@@ -1582,6 +1582,7 @@ public class APIMappingUtil {
                 }
                 template.setThrottlingTier(operation.getThrottlingPolicy());
                 if (!operation.getThrottlingPolicy().isEmpty()) {
+                    // converts existing throttling policy to the new throttling limit format
                     template.setThrottlingLimit(operation.getThrottlingPolicy());
                 } else {
                     template.setThrottlingLimit(operation.getThrottlingLimit());
