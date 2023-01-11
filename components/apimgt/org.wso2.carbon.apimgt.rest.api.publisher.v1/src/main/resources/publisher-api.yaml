@@ -10449,6 +10449,9 @@ components:
         throttlingPolicy:
           type: string
           example: Unlimited
+        throttlingLimit:
+          type: string
+          example: Unlimited
         scopes:
           type: array
           example: []

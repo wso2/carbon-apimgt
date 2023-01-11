@@ -1520,6 +1520,7 @@ public final class APIConstants {
     public static final String SWAGGER_X_AMZN_RESOURCE_TIMEOUT = "x-amzn-resource-timeout";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
     public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
+    public static final String SWAGGER_X_THROTTLING_LIMIT = "x-throttling-limit";
     public static final String SWAGGER_X_THROTTLING_BANDWIDTH = "x-throttling-bandwidth";
     public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
     public static final String SWAGGER_X_WSO2_SECURITY = "x-wso2-security";
@@ -1821,6 +1822,7 @@ public final class APIConstants {
     public static final String DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN = "20KPerMin";
     public static final String DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN = "10KPerMin";
     public static final String DEFAULT_API_POLICY_UNLIMITED = "Unlimited";
+    public static final String DEFAULT_THROTTLING_LIMIT = "{ \"value\" : \"1234546\" , unit: \"min\" }";
 
     public static final String DEFAULT_API_POLICY_ULTIMATE_DESC = "Allows 50000 requests per minute";
     public static final String DEFAULT_API_POLICY_PLUS_DESC = "Allows 20000 requests per minute";
@@ -2884,8 +2886,8 @@ public final class APIConstants {
         SELF_SIGNUP
     }
 
-    public static final String  PROPERTY_QUERY_KEY = "query";
-    public static final String  PROPERTY_HEADERS_KEY = "headers";
+    public static final String PROPERTY_QUERY_KEY = "query";
+    public static final String PROPERTY_HEADERS_KEY = "headers";
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
 
     //Constants related to Operation Policies

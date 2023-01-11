@@ -39,6 +39,7 @@ public class URITemplate implements Serializable{
     private String applicableLevel;
     private String throttlingTier;
     private List<String> throttlingTiers = new ArrayList<String>();
+    private String throttlingLimit;
     private Scope scope;
     private String mediationScript;
     private List<Scope> scopes = new ArrayList<Scope>();
@@ -447,5 +448,31 @@ public class URITemplate implements Serializable{
 
     public void addOperationPolicy(OperationPolicy policy) {
         operationPolicies.add(policy);
+    }
+
+    public String getThrottlingLimit() {
+        return throttlingLimit;
+    }
+
+    public void setThrottlingLimit(String throttlingLimit) {
+        String convertedThrottlingLimit;
+        switch (throttlingLimit) {
+            case "10KPerMin":
+                convertedThrottlingLimit = "{ \"value\" : \"10000\" , \" unit \" : \"min\" }";
+                break;
+            case "20KPerMin":
+                convertedThrottlingLimit = "{ \"value\" : \"20000\" , \" unit \" : \"min\" }";
+                break;
+            case "50KPerMin":
+                convertedThrottlingLimit = "{ \"value\" : \"50000\" , \" unit \" : \"min\" }";
+                break;
+            case "Unlimited":
+                convertedThrottlingLimit = "{ \"value\" : \"123456\" , \" unit \" : \"min\" }";
+                break;
+            default:
+                convertedThrottlingLimit = throttlingLimit;
+                break;
+        }
+        this.throttlingLimit = convertedThrottlingLimit;
     }
 }

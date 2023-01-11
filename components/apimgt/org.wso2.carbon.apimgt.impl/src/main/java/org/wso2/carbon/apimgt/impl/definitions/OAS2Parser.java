@@ -387,6 +387,7 @@ public class OAS2Parser extends APIDefinition {
                         String throttlingTier = (String) extensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
                         template.setThrottlingTier(throttlingTier);
                         template.setThrottlingTiers(throttlingTier);
+                        template.setThrottlingLimit(throttlingTier);
                     }
                     if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
                         String mediationScript = (String) extensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
