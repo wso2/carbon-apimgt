@@ -1581,6 +1581,11 @@ public class APIMappingUtil {
                     authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                 }
                 template.setThrottlingTier(operation.getThrottlingPolicy());
+                if (!operation.getThrottlingPolicy().isEmpty()) {
+                    template.setThrottlingLimit(operation.getThrottlingPolicy());
+                } else {
+                    template.setThrottlingLimit(operation.getThrottlingLimit());
+                }
                 template.setThrottlingTiers(operation.getThrottlingPolicy());
                 template.setUriTemplate(uriTempVal);
                 template.setHTTPVerb(httpVerb.toUpperCase());
@@ -2099,6 +2104,7 @@ public class APIMappingUtil {
         operationsDTO.setOperationPolicies(
                 OperationPolicyMappingUtil.fromOperationPolicyListToDTO(uriTemplate.getOperationPolicies()));
         operationsDTO.setThrottlingPolicy(uriTemplate.getThrottlingTier());
+        operationsDTO.setThrottlingLimit(uriTemplate.getThrottlingLimit());
         Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
         List<String> usedProductIds = new ArrayList<>();
 

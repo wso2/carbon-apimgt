@@ -10124,4 +10124,25 @@ public final class APIUtil {
         }
         return  gatewayVendor;
     }
+
+    /**
+     * @param throttlingTier
+     * @return
+     */
+    public static String getThrottlingLimitFromThrottlingTier(String throttlingTier) {
+        String throttlingLimit;
+        switch (throttlingTier) {
+            case "10KPerMin":
+                throttlingLimit = "{ \"value\" : \"10000\" , \" unit \" : \"min\" }";
+            case "20KPerMin":
+                throttlingLimit = "{ \"value\" : \"20000\" , \" unit \" : \"min\" }";
+            case "50KPerMin":
+                throttlingLimit = "{ \"value\" : \"50000\" , \" unit \" : \"min\" }";
+            case "Unlimited":
+                throttlingLimit = "{ \"value\" : \"123456\" , \" unit \" : \"min\" }";
+            default:
+                throttlingLimit = throttlingTier;
+        }
+        return throttlingLimit;
+    }
 }
