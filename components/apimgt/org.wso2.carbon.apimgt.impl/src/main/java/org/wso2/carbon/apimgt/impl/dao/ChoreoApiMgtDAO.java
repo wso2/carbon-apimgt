@@ -40,8 +40,6 @@ public class ChoreoApiMgtDAO {
     private static final Log log = LogFactory.getLog(ChoreoApiMgtDAO.class);
     private static ChoreoApiMgtDAO INSTANCE = null;
 
-    private final ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-
     /**
      * Method to get the instance of the ChoreoApiMgtDAO.
      *
@@ -120,7 +118,7 @@ public class ChoreoApiMgtDAO {
      *
      * @param connection     connection
      * @param envUUID        UUID of the Environment
-     * @throws APIManagementException if failed to add mapping
+     * @throws APIManagementException if failed to get the dataPlaneId
      */
     public String getDataPlaneIdForEnvironment(Connection connection, String envUUID) throws APIManagementException {
         String dataPlaneId = null;
@@ -133,7 +131,7 @@ public class ChoreoApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to add Environment to Data-Plane mapping for environment UUID: " + envUUID, e);
+            handleException("Failed to get the Data-Plane ID for environment UUID: " + envUUID, e);
         }
         return dataPlaneId;
     }
@@ -170,7 +168,7 @@ public class ChoreoApiMgtDAO {
                     env.setDescription(description);
                     env.setProvider(provider);
                     env.setDataPlaneId(dataPlaneId);
-                    env.setVhosts(apiMgtDAO.getVhostGatewayEnvironments(connection, id));
+                    env.setVhosts(ApiMgtDAO.getInstance().getVhostGatewayEnvironments(connection, id));
                     envList.add(env);
                 }
             }
