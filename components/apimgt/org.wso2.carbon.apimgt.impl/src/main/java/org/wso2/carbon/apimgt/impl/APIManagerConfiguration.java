@@ -1040,6 +1040,20 @@ public class APIManagerConfiguration {
             if (listTasksElement != null) {
                 workflowProperties.setListTasks(JavaUtils.isTrueExplicitly(listTasksElement.getText()));
             }
+            OMElement propertiesElement = workflowConfigurationElement.getFirstChildWithName(new QName("Properties"));
+            if (propertiesElement != null) {
+                Iterator<OMElement> properties = propertiesElement.getChildElements();
+                if (properties != null) {
+                    Properties workflowConfigProperties = new Properties();
+                    while (properties.hasNext()) {
+                        OMElement property = (OMElement) properties.next();
+                        String name = property.getAttributeValue(new QName("name"));
+                        String value = property.getText();
+                        workflowConfigProperties.put(name, value);
+                    }
+                    workflowProperties.setProperties(workflowConfigProperties);
+                }
+            }
 
         }
     }
