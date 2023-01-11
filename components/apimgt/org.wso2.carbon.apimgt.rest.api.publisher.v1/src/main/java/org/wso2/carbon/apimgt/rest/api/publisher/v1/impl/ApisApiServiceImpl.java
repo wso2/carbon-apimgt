@@ -69,6 +69,7 @@ import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.ApiLifeCycle;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -3685,6 +3686,11 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         //validate whether the API is advertise only
         APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
+        // Reject the request if API lifecycle is 'RETIRED'.
+        if (apiDto.getLifeCycleStatus().equals(ApiLifeCycle.RETIRED.getName())) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Deploying API Revisions is not supported for retired APIs. ApiId: "
+                    + apiId).build();
+        }
         if (apiDto != null && apiDto.getAdvertiseInfo() != null && Boolean.TRUE.equals(apiDto.getAdvertiseInfo().isAdvertised())) {
             throw new APIManagementException("Deploying API Revisions is not supported for third party APIs: "
                     + apiId);
