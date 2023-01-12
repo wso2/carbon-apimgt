@@ -2562,7 +2562,6 @@ public final class APIUtil {
                     String groupId = groupingExtractor.getGroupingIdentifiers(response);
                     return new String[]{groupId};
                 }
-
             } catch (ClassNotFoundException e) {
                 String msg = groupingExtractorClass + " is not found in runtime";
                 log.error(msg, e);
