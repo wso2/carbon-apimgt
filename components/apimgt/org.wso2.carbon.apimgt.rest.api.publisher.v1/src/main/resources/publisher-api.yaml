@@ -10450,8 +10450,14 @@ components:
           type: string
           example: Unlimited
         throttlingLimit:
-          type: string
-          example: Unlimited
+          type: object
+          properties:
+            requestCount:
+              type: integer
+              example: 10000
+            unit:
+              type: string
+              example: min
         scopes:
           type: array
           example: []

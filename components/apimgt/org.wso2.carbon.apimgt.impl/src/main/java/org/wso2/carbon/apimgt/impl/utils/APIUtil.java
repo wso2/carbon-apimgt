@@ -132,6 +132,7 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -10123,5 +10124,39 @@ public final class APIUtil {
             gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;
         }
         return  gatewayVendor;
+    }
+
+    /**
+     * Provides the default throttling limit
+     *
+     * @return Throttling limit object with default values
+     */
+    public static ThrottlingLimit getDefaultThrottleLimit() {
+        ThrottlingLimit throttlingLimit = new ThrottlingLimit();
+        throttlingLimit.setRequestCount(-1);
+        throttlingLimit.setUnit("min");
+        return throttlingLimit;
+    }
+
+    /**
+     * Gives the throttling limit details from the string value relevant to the x-throttling-limit in API defnition file
+     *
+     * @param throttlingLimitStr x-throttling-limit string value
+     * @return Throttling limit object with relevant throttling data
+     * @throws APIManagementException If an error happens when parsing the string
+     */
+    public static ThrottlingLimit getThrottlingLimitFromAPIDefinitionString(String throttlingLimitStr) throws APIManagementException {
+        ThrottlingLimit throttlingLimit = new ThrottlingLimit();
+        JSONParser parser = new JSONParser();
+        JSONObject jsonObject;
+        try {
+            jsonObject = (JSONObject) parser.parse(throttlingLimitStr);
+        } catch (ParseException e) {
+            throw new APIManagementException("Error occurred while converting " +
+                    "x-throttling limit value to a JSON");
+        }
+        throttlingLimit.setRequestCount(((Long) jsonObject.get("requestCount")).intValue());
+        throttlingLimit.setUnit((String) jsonObject.get("unit"));
+        return throttlingLimit;
     }
 }

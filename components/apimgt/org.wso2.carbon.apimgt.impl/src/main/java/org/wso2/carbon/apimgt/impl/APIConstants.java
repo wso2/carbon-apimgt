@@ -1821,7 +1821,6 @@ public final class APIConstants {
     public static final String DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN = "20KPerMin";
     public static final String DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN = "10KPerMin";
     public static final String DEFAULT_API_POLICY_UNLIMITED = "Unlimited";
-    public static final String DEFAULT_THROTTLING_LIMIT = "{ \"value\" : \"1234546\" , unit: \"min\" }";
 
     public static final String DEFAULT_API_POLICY_ULTIMATE_DESC = "Allows 50000 requests per minute";
     public static final String DEFAULT_API_POLICY_PLUS_DESC = "Allows 20000 requests per minute";

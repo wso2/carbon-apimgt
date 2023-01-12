@@ -390,7 +390,8 @@ public class OAS2Parser extends APIDefinition {
                         template.setThrottlingLimit(throttlingTier);
                     }
                     if (extensions.containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
-                        template.setThrottlingLimit((String) extensions.get(APIConstants.SWAGGER_X_THROTTLING_LIMIT));
+                        String tlString = extensions.get(APIConstants.SWAGGER_X_THROTTLING_LIMIT).toString();
+                        template.setThrottlingLimit(APIUtil.getThrottlingLimitFromAPIDefinitionString(tlString));
                     }
                     if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
                         String mediationScript = (String) extensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
@@ -923,7 +924,9 @@ public class OAS2Parser extends APIDefinition {
         }
         operation.setVendorExtension(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
         operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
-        operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, resource.getThrottlingLimit());
+        // retrieves x-throttling-tier string value from the API definition file and converts it
+        // to the relevant throttling limit
+        operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, resource.getThrottlingLimit().toString());
         // AWS Lambda: set arn & timeout to swagger
         if (resource.getAmznResourceName() != null) {
             operation.setVendorExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME, resource.getAmznResourceName());
