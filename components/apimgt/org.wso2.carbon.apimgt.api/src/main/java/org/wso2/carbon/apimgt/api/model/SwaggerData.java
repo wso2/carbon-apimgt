@@ -36,7 +36,7 @@ public class SwaggerData {
         private String verb;
         private String authType;
         private String policy;
-        private String throttlingLimit;
+        private ThrottlingLimit throttlingLimit;
         private Scope scope;
         private List<Scope> scopes = new ArrayList<>();
         private String amznResourceName;
@@ -106,11 +106,11 @@ public class SwaggerData {
             this.scopes = scopes;
         }
 
-        public String getThrottlingLimit() {
+        public ThrottlingLimit getThrottlingLimit() {
             return throttlingLimit;
         }
 
-        public void setThrottlingLimit(String throttlingLimit) {
+        public void setThrottlingLimit(ThrottlingLimit throttlingLimit) {
             this.throttlingLimit = throttlingLimit;
         }
     }

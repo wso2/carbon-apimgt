@@ -39,7 +39,7 @@ public class URITemplate implements Serializable{
     private String applicableLevel;
     private String throttlingTier;
     private List<String> throttlingTiers = new ArrayList<String>();
-    private String throttlingLimit;
+    private ThrottlingLimit throttlingLimit;
     private Scope scope;
     private String mediationScript;
     private List<Scope> scopes = new ArrayList<Scope>();
@@ -450,29 +450,36 @@ public class URITemplate implements Serializable{
         operationPolicies.add(policy);
     }
 
-    public String getThrottlingLimit() {
+    public ThrottlingLimit getThrottlingLimit() {
         return throttlingLimit;
     }
 
     public void setThrottlingLimit(String throttlingLimit) {
-        String convertedThrottlingLimit;
+        ThrottlingLimit convertedThrottlingLimit = new ThrottlingLimit();
         switch (throttlingLimit) {
             case "10KPerMin":
-                convertedThrottlingLimit = "{ \"value\" : \"10000\" , \" unit \" : \"min\" }";
+                convertedThrottlingLimit.setRequestCount(10000);
+                convertedThrottlingLimit.setUnit("min");
                 break;
             case "20KPerMin":
-                convertedThrottlingLimit = "{ \"value\" : \"20000\" , \" unit \" : \"min\" }";
+                convertedThrottlingLimit.setRequestCount(20000);
+                convertedThrottlingLimit.setUnit("min");
                 break;
             case "50KPerMin":
-                convertedThrottlingLimit = "{ \"value\" : \"50000\" , \" unit \" : \"min\" }";
-                break;
-            case "Unlimited":
-                convertedThrottlingLimit = "{ \"value\" : \"123456\" , \" unit \" : \"min\" }";
+                convertedThrottlingLimit.setRequestCount(50000);
+                convertedThrottlingLimit.setUnit("min");
                 break;
             default:
-                convertedThrottlingLimit = throttlingLimit;
+            case "Unlimited":
+                convertedThrottlingLimit.setRequestCount(-1);
+                convertedThrottlingLimit.setUnit("min");
                 break;
+
         }
         this.throttlingLimit = convertedThrottlingLimit;
+    }
+
+    public void setThrottlingLimit(ThrottlingLimit throttlingLimit) {
+        this.throttlingLimit = throttlingLimit;
     }
 }

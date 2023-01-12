@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
+import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
@@ -78,6 +79,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsThrottlingLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
@@ -1584,8 +1586,11 @@ public class APIMappingUtil {
                 if (!operation.getThrottlingPolicy().isEmpty()) {
                     // converts existing throttling policy to the new throttling limit format
                     template.setThrottlingLimit(operation.getThrottlingPolicy());
-                } else {
-                    template.setThrottlingLimit(operation.getThrottlingLimit());
+                } else if (operation.getThrottlingLimit() != null) {
+                    APIOperationsThrottlingLimitDTO apiOperationsThrottlingLimitDTO = operation.getThrottlingLimit();
+                    ThrottlingLimit throttlingLimit = ThrottlingLimitMappingUtil.fromDTOToThrottlingLimit(
+                            apiOperationsThrottlingLimitDTO);
+                    template.setThrottlingLimit(throttlingLimit);
                 }
                 template.setThrottlingTiers(operation.getThrottlingPolicy());
                 template.setUriTemplate(uriTempVal);
@@ -2105,7 +2110,8 @@ public class APIMappingUtil {
         operationsDTO.setOperationPolicies(
                 OperationPolicyMappingUtil.fromOperationPolicyListToDTO(uriTemplate.getOperationPolicies()));
         operationsDTO.setThrottlingPolicy(uriTemplate.getThrottlingTier());
-        operationsDTO.setThrottlingLimit(uriTemplate.getThrottlingLimit());
+        operationsDTO.setThrottlingLimit(ThrottlingLimitMappingUtil.fromThrottlingLimitToDTO(
+                uriTemplate.getThrottlingLimit()));
         Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
         List<String> usedProductIds = new ArrayList<>();
 
