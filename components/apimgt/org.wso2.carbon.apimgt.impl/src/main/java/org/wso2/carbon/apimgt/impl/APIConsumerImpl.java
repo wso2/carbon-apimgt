@@ -2157,26 +2157,26 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                                          String[] allowedDomains, String validityTime,
                                                                          String tokenScope,
                                                                          String jsonString,
-                                                                         String keyManagerName, String tenantDomain,
+                                                                         String keyManagerName, String keyManagerOrganization,
                                                                          boolean isImportMode)
     throws APIManagementException {
 
         boolean isTenantFlowStarted = false;
-        if (StringUtils.isEmpty(tenantDomain)) {
-            tenantDomain = MultitenantUtils.getTenantDomain(userId);
+        String tenantDomain = APIUtil.getInternalOrganizationDomain(keyManagerOrganization);
+        if (StringUtils.isEmpty(keyManagerOrganization)) {
+            keyManagerOrganization = MultitenantUtils.getTenantDomain(userId);
         } else {
-            int tenantId = APIUtil.getInternalOrganizationId(tenantDomain);
-
-            // To handle choreo scenario.
-            if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
-                tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            //Resident Key Manager is common to all Choreo organizations and it resides in super tenant
+            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerName)) {
+                keyManagerOrganization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
             }
+
         }
 
         String keyManagerId = null;
         if (keyManagerName != null) {
             KeyManagerConfigurationDTO keyManagerConfiguration =
-                    apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+                    apiMgtDAO.getKeyManagerConfigurationByName(keyManagerOrganization, keyManagerName);
             if (keyManagerConfiguration == null) {
                 keyManagerConfiguration = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
                 if (keyManagerConfiguration != null) {
@@ -2188,7 +2188,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             if (keyManagerConfiguration == null || !keyManagerConfiguration.isEnabled()) {
                 throw new APIManagementException(
-                        "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
+                        "Key Manager " + keyManagerName + " doesn't exist in organization " + keyManagerOrganization,
                         ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
             }
             if (KeyManagerConfiguration.TokenType.EXCHANGED.toString().equals(keyManagerConfiguration.getTokenType())) {
@@ -2203,7 +2203,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     // passing null `clientId` is ok here since the id/secret pair is included
                     // in the `jsonString` and ApplicationUtils#createOauthAppRequest logic handles it.
                     return mapExistingOAuthClient(jsonString, userId, null, application.getName(), tokenType,
-                            APIConstants.DEFAULT_TOKEN_TYPE, keyManagerName, tenantDomain);
+                            APIConstants.DEFAULT_TOKEN_TYPE, keyManagerName, keyManagerOrganization);
                 } else {
                     throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
                             " Client Application", ExceptionCodes.KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION);
@@ -2278,7 +2278,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             OAuthAppRequest request =
                     ApplicationUtils
                             .createOauthAppRequest(application.getName(), null, callbackUrl, tokenScope, jsonString,
-                                    applicationTokenType, tenantDomain, keyManagerName);
+                                    applicationTokenType, keyManagerOrganization, keyManagerName);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_CALLBACK_URL, callbackUrl);
@@ -2289,7 +2289,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // information in the respective entities not in the workflowDTO.
             appRegWFDto.setStatus(WorkflowStatus.CREATED);
             appRegWFDto.setCreatedTime(System.currentTimeMillis());
-            appRegWFDto.setTenantDomain(tenantDomain);
+            appRegWFDto.setTenantDomain(keyManagerOrganization);
             appRegWFDto.setTenantId(tenantId);
             appRegWFDto.setExternalWorkflowReference(appRegistrationWorkflow.generateUUID());
             appRegWFDto.setWorkflowReference(appRegWFDto.getExternalWorkflowReference());
