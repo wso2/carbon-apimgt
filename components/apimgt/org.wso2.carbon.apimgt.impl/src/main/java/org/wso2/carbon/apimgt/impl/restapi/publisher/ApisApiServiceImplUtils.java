@@ -687,7 +687,7 @@ public class ApisApiServiceImplUtils {
     }
 
     /**
-     * @param api API
+     * @param api           API
      * @param soapOperation SOAP Operation
      * @return SOAP API Definition
      * @throws APIManagementException if an error occurred while parsing string to JSON Object
@@ -726,9 +726,9 @@ public class ApisApiServiceImplUtils {
         if (StringUtils.isNotBlank(url)) {
             swaggerStr = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(url);
         } else if (fileInputStream != null) {
-            if (filename.endsWith(".zip")) {
+            if (filename.endsWith(APIConstants.ZIP_FILE_EXTENSION)) {
                 swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlArchiveExtractedPath);
-            } else if (filename.endsWith(".wsdl")) {
+            } else if (filename.endsWith(APIConstants.WSDL_FILE_EXTENSION)) {
                 byte[] wsdlContent = APIUtil.toByteArray(fileInputStream);
                 swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlContent);
             } else {
