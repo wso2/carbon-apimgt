@@ -226,7 +226,13 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     @Override
     public Latencies getLatencies() {
         // Not applicable
-        return new Latencies();
+        long requestMediationLatency = getRequestMediationLatency();
+        long responseMediationLatency = getResponseMediationLatency();
+
+        Latencies latencies = new Latencies();
+        latencies.setRequestMediationLatency(requestMediationLatency);
+        latencies.setResponseMediationLatency(responseMediationLatency);
+        return latencies;
     }
 
     @Override
@@ -316,7 +322,7 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
 
         Object authContext = WebSocketUtils.getPropertyFromChannel(APISecurityUtils.API_AUTH_CONTEXT, ctx);
         if (authContext != null && authContext instanceof AuthenticationContext) {
-            return ((AuthenticationContext)authContext).getUsername();
+            return ((AuthenticationContext) authContext).getUsername();
         }
         return null;
     }
@@ -330,4 +336,24 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         return null;
     }
 
+    private long getRequestMediationLatency() {
+        if (WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) == null ||
+                (long) WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) == 0 &&
+                        WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_START_TIME_PROPERTY, ctx) != null &&
+                        WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_END_TIME_PROPERTY, ctx) != null) {
+            return (long) WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_END_TIME_PROPERTY, ctx) -
+                    (long) WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_START_TIME_PROPERTY, ctx);
+        }
+        return 0L;
+    }
+
+    private long getResponseMediationLatency() {
+        if (WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) != null &&
+                (long) WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) != 0 &&
+                WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_END_TIME_PROPERTY, ctx) != null) {
+            return (long) WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_END_TIME_PROPERTY, ctx) -
+                    (long) WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx);
+        }
+        return 0L;
+    }
 }

@@ -42,6 +42,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.SynapseConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
@@ -98,6 +99,13 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
+        if (APIUtil.isAnalyticsEnabled()) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, Constants.REQUEST_START_TIME_PROPERTY,
+                    System.currentTimeMillis());
+            // resets the property since context is shared
+            WebSocketUtils.setApiPropertyToChannel(ctx, Constants.BACKEND_START_TIME_PROPERTY,
+                    0L);
+        }
         String channelId = ctx.channel().id().asLongText();
 
         // This block is for the health check of the ports 8099 and 9099
@@ -204,6 +212,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 }
                 ctx.fireChannelRead(msg);
                 // publish analytics events if analytics is enabled
+                if (APIUtil.isAnalyticsEnabled()) {
+                    WebSocketUtils.setApiPropertyToChannel(ctx, Constants.REQUEST_END_TIME_PROPERTY,
+                            System.currentTimeMillis());
+                }
                 publishPublishEvent(ctx);
             }
         }

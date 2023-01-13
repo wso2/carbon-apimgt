@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.analytics;
  */
 public class Constants {
     public static final String REQUEST_START_TIME_PROPERTY = "apim.analytics.request.start.time";
+    public static final String REQUEST_END_TIME_PROPERTY = "apim.analytics.request.end.time";
     public static final String BACKEND_START_TIME_PROPERTY = "apim.analytics.backend.start.time";
     public static final String BACKEND_END_TIME_PROPERTY = "apim.analytics.backend.end.time";
     public static final String BACKEND_RESPONSE_CODE = "api.analytics.backend.response_code";
