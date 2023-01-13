@@ -3269,8 +3269,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response generateInternalAPIKey(String apiId, MessageContext messageContext) throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userName);
-        String token = apiProvider.generateApiKey(apiId);
+        String token = apiProvider.generateApiKey(apiId, organization);
         APIKeyDTO apiKeyDTO = new APIKeyDTO();
         apiKeyDTO.setApikey(token);
         apiKeyDTO.setValidityTime(60 * 1000);

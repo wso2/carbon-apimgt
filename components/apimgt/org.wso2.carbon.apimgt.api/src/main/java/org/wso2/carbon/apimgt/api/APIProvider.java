@@ -1428,7 +1428,7 @@ public interface APIProvider extends APIManager {
     void deleteAPIProductRevision(String apiProductId, String apiRevisionId, String organization)
             throws APIManagementException;
 
-    String generateApiKey(String apiId) throws APIManagementException;
+    String generateApiKey(String apiId, String organization) throws APIManagementException;
 
     List<APIRevisionDeployment> getAPIRevisionsDeploymentList(String apiId) throws APIManagementException;
 
