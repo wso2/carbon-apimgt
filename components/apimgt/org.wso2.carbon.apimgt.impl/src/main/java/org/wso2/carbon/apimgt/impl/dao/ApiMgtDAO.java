@@ -7963,7 +7963,9 @@ public class ApiMgtDAO {
                     String provider = resultSet.getString(1);
                     String name = resultSet.getString(2);
                     String version = resultSet.getString(3);
+                    String organization = resultSet.getString(4);
                     identifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version, uuid);
+                    identifier.setOrganization(organization);
                 }
             }
         } catch (SQLException e) {
@@ -7991,7 +7993,9 @@ public class ApiMgtDAO {
                     String provider = resultSet.getString(1);
                     String name = resultSet.getString(2);
                     String version = resultSet.getString(3);
+                    String organization = resultSet.getString(4);
                     identifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), name, version, uuid);
+                    identifier.setOrganization(organization);
                 }
             }
         } catch (SQLException e) {
@@ -17148,7 +17152,7 @@ public class ApiMgtDAO {
                                     if (!restoredPolicyMap.keySet().contains(policy.getPolicyName())) {
                                         String restoredPolicyId = restoreOperationPolicyRevision(connection,
                                                 apiRevision.getApiUUID(), policy.getPolicyId(), apiRevision.getId(),
-                                                tenantDomain);
+                                                apiIdentifier.getOrganization());
                                         // policy ID is stored in a map as same policy can be applied to multiple operations
                                         // and we only need to create the policy once.
                                         restoredPolicyMap.put(policy.getPolicyName(), restoredPolicyId);
@@ -17678,7 +17682,7 @@ public class ApiMgtDAO {
                                     if (!clonedPoliciesMap.keySet().contains(policy.getPolicyName())) {
                                         String policyId = restoreOperationPolicyRevision(connection,
                                                 apiRevision.getApiUUID(), policy.getPolicyId(), apiRevision.getId(),
-                                                tenantDomain);
+                                                apiProductIdentifier.getOrganization());
                                         clonedPoliciesMap.put(policy.getPolicyName(), policyId);
                                         usedClonedPolicies.add(policyId);
                                     }
