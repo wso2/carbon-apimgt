@@ -5081,6 +5081,12 @@ public final class APIUtil {
      */
 
     public static HttpClient getHttpClient(String url) throws APIManagementException {
+        URL configUrl = null;
+        try {
+            configUrl = new URL(url);
+        } catch (MalformedURLException e) {
+            handleException("URL is malformed", e);
+        }
         return getHttpClient();
     }
 
