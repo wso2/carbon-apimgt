@@ -666,13 +666,13 @@
           "name" : "type",
           "in" : "query",
           "description" : "**Search condition**.\n type of gateway\n",
-          "required" : false,
+          "required" : true,
           "type" : "string"
         }, {
-          "name" : "dataplaneId",
+          "name" : "dataPlaneId",
           "in" : "query",
           "description" : "**Search condition**.\n Data-plane ID\n",
-          "required" : false,
+          "required" : true,
           "type" : "string"
         } ],
         "responses" : {

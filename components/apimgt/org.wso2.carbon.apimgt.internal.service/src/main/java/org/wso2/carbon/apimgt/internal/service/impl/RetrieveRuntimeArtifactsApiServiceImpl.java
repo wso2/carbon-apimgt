@@ -45,7 +45,7 @@ import java.util.List;
 public class RetrieveRuntimeArtifactsApiServiceImpl implements RetrieveRuntimeArtifactsApiService {
 
     @Override
-    public Response retrieveRuntimeArtifactsGet(String xWSO2Tenant, String dataPlaneId, String type,
+    public Response retrieveRuntimeArtifactsGet(String xWSO2Tenant, String type, String dataPlaneId,
                                                 MessageContext messageContext) throws APIManagementException {
         RuntimeArtifactDto runtimeArtifactDto;
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);

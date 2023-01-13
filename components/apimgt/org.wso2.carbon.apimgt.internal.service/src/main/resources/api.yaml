@@ -523,12 +523,14 @@ paths:
             **Search condition**.
              type of gateway
           type: string
-        - name: dataplaneId
+          required: true
+        - name: dataPlaneId
           in: query
           description: |
             **Search condition**.
              Data-plane ID
           type: string
+          required: true
       tags:
         - Retrieving Runtime artifacts
       responses:
