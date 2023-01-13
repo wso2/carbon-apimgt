@@ -9262,6 +9262,8 @@ public class ApiMgtDAO {
                         createMode = APIConstants.OAuthAppMode.CREATED.name();
                     }
                     apiKey.setCreateMode(createMode);
+                    String keyManagerOrganization = resultSet.getString("ORGANIZATION");
+                    apiKey.setKeyManagerOrganization(keyManagerOrganization);
                     try (InputStream appInfo = resultSet.getBinaryStream("APP_INFO")) {
                         if (appInfo != null) {
                             apiKey.setAppMetaData(IOUtils.toString(appInfo));
@@ -13688,7 +13690,7 @@ public class ApiMgtDAO {
 
             rs = prepStmt.executeQuery();
             if (rs.next()) {
-                String applicationId = rs.getString("APPLICATION_ID");
+                int applicationId = rs.getInt("APPLICATION_ID");
                 String applicationName = rs.getString("NAME");
                 String applicationOwner = rs.getString("CREATED_BY");
 
@@ -13708,6 +13710,8 @@ public class ApiMgtDAO {
                 application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
                 application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
 
+                Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
+                application.setApplicationAttributes(applicationAttributes);
                 if (multiGroupAppSharingEnabled) {
                     if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
                         application.setGroupId(getGroupId(connection, application.getId()));

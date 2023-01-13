@@ -118,6 +118,7 @@ public enum ExceptionCodes implements ErrorHandler {
     API_OR_API_PRODUCT_NOT_FOUND(900361, "API or API Product Not Found", 404, "Requested API or API Product with id '%s' not found"),
     API_PRODUCT_NOT_FOUND(900362, "API Product Not Found", 404, "Requested API Product with id '%s' not found"),
     SUB_ORGANIZATION_NOT_IDENTIFIED(900363, "User's Organization Not Identified", 403, "User's Organization is not identified"),
+    API_OR_REVISION_UUID_NOT_FOUND(900364, "API Id or revision id is invalid", 404, "API Id %s or revision id %s is invalid"),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
@@ -400,7 +401,7 @@ public enum ExceptionCodes implements ErrorHandler {
     // Key Manager Related
     INVALID_KEY_MANAGER_TYPE(901400, "Key Manager Type not configured", 400, "Key Manager Type not configured"),
     REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING(901401,"Required Key Manager configuration missing",400,"Missing " +
-            "required configuration"),
+            "required configurations: %s"),
     KEY_MANAGER_ALREADY_EXIST(901402, "Key Manager Already Exists", 409, "Key Manager Already Exists"),
     KEY_MANAGER_NOT_REGISTERED(901403, "Key Manager not Registered", 400, "Key Manager not Registered"),
     KEY_MANAGER_NOT_FOUND(901411, "Key Manager not Found", 404, "Key Manager not found"),

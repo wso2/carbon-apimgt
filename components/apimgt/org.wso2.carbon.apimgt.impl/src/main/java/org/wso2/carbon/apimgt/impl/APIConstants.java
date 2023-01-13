@@ -1970,6 +1970,10 @@ public final class APIConstants {
         public static final String CREATED = "created";
         public static final String UPDATED = "updated";
         public static final String DELETED = "deleted";
+        public static final String DEPLOYED = "deployed";
+        public static final String UNDEPLOYED = "undeployed";
+        public static final String DEPLOYMENT_ACKED = "deployment_acked";
+        public static final String UNDEPLOYMENT_ACKED = "undeployment_acked";
         public static final String LIFECYCLE_CHANGED = "lifecycle-changed";
 
         public static final String API = "API";
@@ -1978,6 +1982,7 @@ public final class APIConstants {
         public static final String APPLICATION = "Application";
         public static final String SUBSCRIPTION = "Subscription";
         public static final String KEY_MANAGER = "KeyManager/IdP";
+        public static final String REVISION = "API Revision";
 
         public static final String NAME = "name";
         public static final String VERSION = "version";
@@ -1993,6 +1998,11 @@ public final class APIConstants {
         public static final String API_PRODUCT_NAME = "api_product_name";
         public static final String APPLICATION_NAME = "application_name";
         public static final String APPLICATION_ID = "application_id";
+        public static final String REVISION_DEPLOYMENTS = "revision_deployments";
+        public static final String API_ID = "api_id";
+        public static final String REVISION_ID = "revision_id";
+        public static final String ENVIRONMENT = "environment";
+        public static final String VHOST = "vhost";
     }
 
     public static final String API_WORKFLOW_STATE_ATTR = "overview_workflowState";

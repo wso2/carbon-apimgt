@@ -909,24 +909,14 @@ public abstract class AbstractAPIManager implements APIManager {
     protected Set<APIKey> getApplicationKeys(int applicationId, String xWso2Tenant) throws APIManagementException {
 
         Set<APIKey> apiKeyList = apiMgtDAO.getKeyMappingsFromApplicationId(applicationId);
-        
-        if (StringUtils.isNotEmpty(xWso2Tenant)) {
-            int tenantId = APIUtil.getInternalOrganizationId(xWso2Tenant);
-            // To handle choreo scenario. due to keymanagers are not per organization atm. using ST
-            if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
-                xWso2Tenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-            }
-        }
+
         Set<APIKey> resultantApiKeyList = new HashSet<>();
         for (APIKey apiKey : apiKeyList) {
             String keyManagerName = apiKey.getKeyManager();
             String consumerKey = apiKey.getConsumerKey();
-            String tenantDomain = this.tenantDomain;
-            if (StringUtils.isNotEmpty(xWso2Tenant)) {
-                tenantDomain = xWso2Tenant;
-            }
+            String keyManagerOrg = apiKey.getKeyManagerOrganization();
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
-                    apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+                    apiMgtDAO.getKeyManagerConfigurationByName(keyManagerOrg, keyManagerName);
             if (keyManagerConfigurationDTO == null) {
                 keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
                 if (keyManagerConfigurationDTO != null) {
@@ -936,13 +926,9 @@ public abstract class AbstractAPIManager implements APIManager {
                     continue;
                 }
             }
-            if (tenantDomain != null && !tenantDomain.equalsIgnoreCase(
-                    keyManagerConfigurationDTO.getOrganization())) {
-                continue;
-            }
             KeyManager keyManager = null;
             if (keyManagerConfigurationDTO.isEnabled()) {
-                keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+                keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerOrg, keyManagerName);
             } else {
                 continue;
             }

@@ -34,6 +34,7 @@ public class APIKey {
     private String keyManager;
     private String appMetaData;
     private String createMode;
+    private String keyManagerOrganization;
 
     public String getState() {
         return state;
@@ -171,5 +172,13 @@ public class APIKey {
     public String getCreateMode() {
 
         return createMode;
+    }
+
+    public void setKeyManagerOrganization(String keyManagerOrganization) {
+        this.keyManagerOrganization = keyManagerOrganization;
+    }
+
+    public String getKeyManagerOrganization() {
+        return keyManagerOrganization;
     }
 }

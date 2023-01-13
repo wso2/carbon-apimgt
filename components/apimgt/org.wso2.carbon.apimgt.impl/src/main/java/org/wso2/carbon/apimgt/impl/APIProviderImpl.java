@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -5438,6 +5439,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 sendUpdateEventToPreviousDefaultVersion(previousDefaultVersionIdentifier, organization);
             }
         }
+
+        JSONObject apiDeploymentLogObj = new JSONObject();
+        JSONArray deploymentLogObjects = new JSONArray();
+        for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
+            JSONObject deploymentLogObj = new JSONObject();
+            deploymentLogObj.put(APIConstants.AuditLogConstants.ENVIRONMENT, apiRevisionDeployment.getDeployment());
+            deploymentLogObj.put(APIConstants.AuditLogConstants.VHOST, apiRevisionDeployment.getVhost());
+            deploymentLogObjects.add(deploymentLogObj);
+        }
+        apiDeploymentLogObj.put(APIConstants.AuditLogConstants.API_ID, apiId);
+        apiDeploymentLogObj.put(APIConstants.AuditLogConstants.REVISION_ID, apiRevision.getRevisionUUID());
+        apiDeploymentLogObj.put(APIConstants.AuditLogConstants.API_NAME, api.getId().getApiName());
+        apiDeploymentLogObj.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
+        apiDeploymentLogObj.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+        apiDeploymentLogObj.put(APIConstants.AuditLogConstants.REVISION_DEPLOYMENTS, deploymentLogObjects);
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.REVISION, apiDeploymentLogObj.toString(),
+                APIConstants.AuditLogConstants.DEPLOYED, this.username);
     }
 
     /**
@@ -5582,6 +5601,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet());
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, apiRevisionId, environmentsToRemove);
+
+        JSONObject apiDeploymentLogObj = new JSONObject();
+        JSONArray deploymentLogObjects = new JSONArray();
+        for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
+            JSONObject deploymentLogObj = new JSONObject();
+            deploymentLogObj.put(APIConstants.AuditLogConstants.ENVIRONMENT, apiRevisionDeployment.getDeployment());
+            deploymentLogObj.put(APIConstants.AuditLogConstants.VHOST, apiRevisionDeployment.getVhost());
+            deploymentLogObjects.add(deploymentLogObj);
+        }
+        apiDeploymentLogObj.put(APIConstants.AuditLogConstants.API_ID, apiId);
+        apiDeploymentLogObj.put(APIConstants.AuditLogConstants.REVISION_ID, apiRevision.getRevisionUUID());
+        apiDeploymentLogObj.put(APIConstants.AuditLogConstants.API_NAME, api.getId().getApiName());
+        apiDeploymentLogObj.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
+        apiDeploymentLogObj.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+        apiDeploymentLogObj.put(APIConstants.AuditLogConstants.REVISION_DEPLOYMENTS, deploymentLogObjects);
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.REVISION_ID, apiDeploymentLogObj.toString(),
+                APIConstants.AuditLogConstants.UNDEPLOYED, this.username);
     }
 
     /**

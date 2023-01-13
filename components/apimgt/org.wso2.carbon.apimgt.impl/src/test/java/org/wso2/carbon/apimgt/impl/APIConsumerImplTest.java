@@ -963,11 +963,13 @@ public class APIConsumerImplTest {
         apiKey1.setType(APIConstants.API_KEY_TYPE_PRODUCTION);
         apiKey1.setState(UUID.randomUUID().toString());
         apiKey1.setKeyManager(APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
+        apiKey1.setKeyManagerOrganization("carbon.super");
         APIKey apiKey2 = new APIKey();
         apiKey2.setConsumerKey(UUID.randomUUID().toString());
         apiKey2.setType(APIConstants.API_KEY_TYPE_SANDBOX);
         apiKey2.setState(UUID.randomUUID().toString());
         apiKey2.setKeyManager(APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
+        apiKey2.setKeyManagerOrganization("carbon.super");
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Map<String, String> consumerKeyMap = new HashMap<>();
         consumerKeyMap.put("default", apiKey1.getConsumerKey());

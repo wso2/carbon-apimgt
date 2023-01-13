@@ -28,8 +28,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -47,7 +50,6 @@ import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.context.CarbonContext;
 
 public class ApisApiServiceImpl implements ApisApiService {
 
@@ -109,7 +111,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                         deployedAPIRevisionDTO.getApiId(), organizationFromQueryParam);
             }
             if (revisionUUID == null) {
-                return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
+                throw new APIManagementException("API id " + deployedAPIRevisionDTO.getApiId() + " or revision id "
+                        + deployedAPIRevisionDTO.getRevisionId() + " is invalid", ExceptionCodes.from(
+                                ExceptionCodes.API_OR_REVISION_UUID_NOT_FOUND, deployedAPIRevisionDTO.getApiId(),
+                        Integer.toString(deployedAPIRevisionDTO.getRevisionId())));
             }
             if (!revisionUUIDs.contains(revisionUUID)) {
                 revisionUUIDs.add(revisionUUID);
@@ -133,6 +138,22 @@ public class ApisApiServiceImpl implements ApisApiService {
                     deployedAPIRevisions.add(deployedAPIRevision);
                 }
                 apiProvider.addDeployedAPIRevision(deployedAPIRevisionDTO.getApiId(), revisionUUID, deployedAPIRevisions);
+
+                //audit log
+                JSONObject apiDeploymentLogObj = new JSONObject();
+                JSONArray deploymentLogObjects = new JSONArray();
+                for (DeployedAPIRevision deployedAPIRevision : deployedAPIRevisions) {
+                    JSONObject deploymentLogObj = new JSONObject();
+                    deploymentLogObj.put(APIConstants.AuditLogConstants.ENVIRONMENT, deployedAPIRevision.getDeployment());
+                    deploymentLogObj.put(APIConstants.AuditLogConstants.VHOST, deployedAPIRevision.getVhost());
+                    deploymentLogObjects.add(deploymentLogObj);
+                }
+                apiDeploymentLogObj.put(APIConstants.AuditLogConstants.API_ID, deployedAPIRevisionDTO.getApiId());
+                apiDeploymentLogObj.put(APIConstants.AuditLogConstants.REVISION_ID, revisionUUID);
+                apiDeploymentLogObj.put(APIConstants.AuditLogConstants.REVISION_DEPLOYMENTS, deploymentLogObjects);
+
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.REVISION_ID, apiDeploymentLogObj.toString(),
+                        APIConstants.AuditLogConstants.DEPLOYMENT_ACKED, RestApiCommonUtil.getLoggedInUsername());
             }
         }
 
@@ -144,6 +165,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         apiProvider.removeUnDeployedAPIRevision(unDeployedAPIRevisionDTO.getApiUUID(), unDeployedAPIRevisionDTO.getRevisionUUID(),
                 unDeployedAPIRevisionDTO.getEnvironment());
+        JSONObject apiUndeployDeployLogObj = new JSONObject();
+        apiUndeployDeployLogObj.put(APIConstants.AuditLogConstants.API_ID, unDeployedAPIRevisionDTO.getApiUUID());
+        apiUndeployDeployLogObj.put(APIConstants.AuditLogConstants.REVISION_ID, unDeployedAPIRevisionDTO.getRevisionUUID());
+        apiUndeployDeployLogObj.put(APIConstants.AuditLogConstants.ENVIRONMENT, unDeployedAPIRevisionDTO.getEnvironment());
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.REVISION_ID, apiUndeployDeployLogObj.toString(),
+                APIConstants.AuditLogConstants.UNDEPLOYMENT_ACKED, RestApiCommonUtil.getLoggedInUsername());
         return Response.ok().build();
     }
 
