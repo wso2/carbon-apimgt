@@ -1430,16 +1430,6 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.wso2.orbit.io.swagger</groupId>
-                <artifactId>swagger-parser</artifactId>
-                <version>${swagger.parser.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.orbit.io.swagger</groupId>
-                <artifactId>swagger-codegen</artifactId>
-                <version>${swagger.codegen.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-codegen</artifactId>
                 <version>${io.swagger.codegen.version}</version>
@@ -2124,10 +2114,8 @@
         <pdfbox.version>2.0.25</pdfbox.version>
         <event.processor.stub.version>2.3.5</event.processor.stub.version>
         <event.processor.core.version>2.3.5</event.processor.core.version>
-        <swagger.codegen.version>2.3.1.wso2v2</swagger.codegen.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
         <swagger.inflector.oas3.version>2.0.5.wso2v2</swagger.inflector.oas3.version>
-        <swagger.parser.version>1.0.57.wso2v1</swagger.parser.version>
         <swagger.parser.v3.version>2.1.10.wso2v1</swagger.parser.v3.version>
         <swagger.core.version>1.6.9</swagger.core.version>
         <swagger.models.version>1.6.9</swagger.models.version>
