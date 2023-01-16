@@ -1,0 +1,91 @@
+openapi: 3.0.3
+info:
+  title: CheckoutAPI
+  description: Checkout API
+  version: v1
+servers:
+  - url: https://localhost:8243/checkout/v1
+paths:
+  /{company}/{division}/{customer}:
+    post:
+      parameters:
+        - name: company
+          in: path
+          description: company id
+          required: true
+          schema:
+            type: string
+        - name: division
+          in: path
+          description: division id
+          required: true
+          schema:
+            type: string
+        - name: customer
+          in: path
+          description: customer id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/CheckoutRequest'
+                - $ref: '#/components/schemas/CheckoutCartIdRequest'
+            examples:
+              CheckoutRequest:
+                value:
+                  firstName: 'John'
+                  lastName: 'Doe'
+                  sport: 'football'
+              CheckoutCartIdRequest:
+                value:
+                  vehicle: 'Car'
+                  price: '100000'
+        required: true
+      responses:
+        200:
+          description: OK - Correct processing
+        400:
+          description: Bad Request - Some of the request parameters are incorrect
+        403:
+          description: Forbidden - The token is incorrect or you are not authorized
+            to perform the operation
+        500:
+          description: Internal Server Error - An error has occurred in server
+components:
+  schemas:
+    CheckoutRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - sport
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        sport:
+          type: string
+      additionalProperties: false
+      example:
+        firstName: 'John'
+        lastName: 'Doe'
+        sport: 'football'
+    CheckoutCartIdRequest:
+      type: object
+      required:
+        - vehicle
+        - price
+      properties:
+        vehicle:
+          type: string
+        price:
+          type: integer
+      additionalProperties: true
+      example:
+        vehicle: 'car'
+        price: '100000'

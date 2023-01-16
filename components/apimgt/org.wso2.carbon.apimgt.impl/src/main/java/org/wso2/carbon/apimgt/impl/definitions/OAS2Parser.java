@@ -665,8 +665,8 @@ public class OAS2Parser extends APIDefinition {
                 errorItem.setMessage(ExceptionCodes.INVALID_OAS2_FOUND.getErrorMessage());
                 errorItem.setDescription(ExceptionCodes.INVALID_OAS2_FOUND.getErrorMessage());
                 validationResponse.getErrorItems().add(errorItem);
-                swaggerErrorFound = true;
             }
+            swaggerErrorFound = true;
         }
         if (parseAttemptForV2.getSwagger() == null || swaggerErrorFound) {
             validationResponse.setValid(false);
