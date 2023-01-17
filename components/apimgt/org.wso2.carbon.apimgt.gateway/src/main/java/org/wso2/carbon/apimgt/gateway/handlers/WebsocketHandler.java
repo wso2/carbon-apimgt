@@ -103,7 +103,8 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
                 if (responseDTO.isCloseConnection()) {
                     InboundMessageContextDataHolder.getInstance().removeInboundMessageContextForConnection(channelId);
                     if (log.isDebugEnabled()) {
-                        log.debug("Error while handling Outbound Websocket frame. Closing connection for "
+                        log.debug(channelId + " -- Websocket API request [outbound] : Error while handling Outbound " +
+                                "Websocket frame. Closing connection for "
                                 + ctx.channel().toString());
                     }
                     handleSubscribeFrameErrorEvent(ctx, responseDTO);
@@ -118,7 +119,8 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
                 }
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Sending Outbound Websocket frame." + ctx.channel().toString());
+                    log.debug(channelId + " -- Websocket API request [outbound] : Sending Outbound Websocket frame." +
+                            ctx.channel().toString());
                 }
                 outboundHandler().write(ctx, msg, promise);
                 // publish analytics events if analytics is enabled
@@ -130,21 +132,25 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
     }
 
     private void handleSubscribeFrameErrorEvent(ChannelHandlerContext ctx, InboundProcessorResponseDTO responseDTO) {
+        String channelId = ctx.channel().id().asLongText();
         if (responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR
                 || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_COMPLEX
                 || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP) {
             if (log.isDebugEnabled()) {
-                log.debug("Inbound WebSocket frame is throttled. " + ctx.channel().toString());
+                log.debug(channelId + " -- Websocket API request [inbound] : Inbound WebSocket frame is throttled. " +
+                        ctx.channel().toString());
             }
         } else if (responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_ERROR
                 || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS
                 || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR) {
             if (log.isDebugEnabled()) {
-                log.debug("Inbound WebSocket frame failed due to auth error. " + ctx.channel().toString());
+                log.debug(channelId + " -- Websocket API request [inbound] : Inbound WebSocket frame failed due to " +
+                        "auth error. " + ctx.channel().toString());
             }
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Unclassified error in Inbound WebSocket frame. " + ctx.channel().toString());
+                log.debug(channelId + " -- Websocket API request [inbound] : Unclassified error in Inbound WebSocket " +
+                        "frame. " + ctx.channel().toString());
             }
         }
         publishSubscribeFrameErrorEvent(ctx, responseDTO);
