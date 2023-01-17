@@ -178,5 +178,7 @@ public class APIMgtGatewayConstants {
     public static final String SUBSCRIBER_LINK_HEADER_SELF = "; rel=\"self\" ";
 
     public static final String SUBSCRIBER_LINK_HEADER_PROPERTY = "SUBSCRIBER_LINK_HEADER";
+
+    public static final String ADDITIONAL_ANALYTICS_PROPS = "ADDITIONAL_ANALYTICS_PROPS_TO_PUBLISH";
 }
 
