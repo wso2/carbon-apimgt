@@ -149,18 +149,18 @@ public class AnalyticsDataPublisher {
         }
     }
 
-    public List<CounterMetric> getSuccessMetricReporters() {
+    public List<CounterMetric> getSuccessMetricReporters() throws MetricCreationException {
 
         if (this.successMetricReporters.isEmpty()) {
-            throw new RuntimeException("None of AnalyticsDataPublishers are initialized.");
+            throw new MetricCreationException("None of AnalyticsDataPublishers are initialized.");
         }
         return successMetricReporters;
     }
 
-    public List<CounterMetric> getFaultyMetricReporters() {
+    public List<CounterMetric> getFaultyMetricReporters() throws MetricCreationException {
 
         if (this.faultyMetricReporters.isEmpty()) {
-            throw new RuntimeException("None of AnalyticsDataPublishers are initialized.");
+            throw new MetricCreationException("None of AnalyticsDataPublishers are initialized.");
         }
         return faultyMetricReporters;
     }
