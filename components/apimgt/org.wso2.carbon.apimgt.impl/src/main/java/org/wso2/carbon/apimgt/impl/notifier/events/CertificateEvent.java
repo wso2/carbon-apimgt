@@ -60,4 +60,17 @@ public class CertificateEvent extends Event {
 
         this.endpoint = endpoint;
     }
+
+    @Override
+    public String toString() {
+        return "CertificateEvent{" +
+                "alias='" + alias + '\'' +
+                ", endpoint='" + endpoint + '\'' +
+                ", eventId='" + eventId + '\'' +
+                ", timeStamp=" + timeStamp +
+                ", type='" + type + '\'' +
+                ", tenantId=" + tenantId +
+                ", tenantDomain='" + tenantDomain + '\'' +
+                '}';
+    }
 }

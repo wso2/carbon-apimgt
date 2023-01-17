@@ -5617,7 +5617,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiDeploymentLogObj.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
         apiDeploymentLogObj.put(APIConstants.AuditLogConstants.REVISION_DEPLOYMENTS, deploymentLogObjects);
 
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.REVISION_ID, apiDeploymentLogObj.toString(),
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.REVISION, apiDeploymentLogObj.toString(),
                 APIConstants.AuditLogConstants.UNDEPLOYED, this.username);
     }
 

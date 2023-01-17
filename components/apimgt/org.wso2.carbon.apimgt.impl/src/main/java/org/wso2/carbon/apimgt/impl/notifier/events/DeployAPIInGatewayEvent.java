@@ -155,4 +155,24 @@ public class DeployAPIInGatewayEvent extends Event {
 
         this.uuid = uuid;
     }
+
+    @Override
+    public String toString() {
+        return "DeployAPIInGatewayEvent{" +
+                "apiId=" + apiId +
+                ", uuid='" + uuid + '\'' +
+                ", name='" + name + '\'' +
+                ", version='" + version + '\'' +
+                ", provider='" + provider + '\'' +
+                ", apiType='" + apiType + '\'' +
+                ", gatewayLabels=" + gatewayLabels +
+                ", associatedApis=" + associatedApis +
+                ", context='" + context + '\'' +
+                ", eventId='" + eventId + '\'' +
+                ", timeStamp=" + timeStamp +
+                ", type='" + type + '\'' +
+                ", tenantId=" + tenantId +
+                ", tenantDomain='" + tenantDomain + '\'' +
+                '}';
+    }
 }
