@@ -643,7 +643,7 @@ public class APIManagerConfiguration {
         OMElement dataPlaneId =
                 environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_DATA_PLANE_ID));
         if (dataPlaneId != null && dataPlaneId.getText() != null && !"".equals(dataPlaneId.getText())) {
-            environment.setDataPlaneId(APIUtil.replaceSystemProperty((dataPlaneId.getText())));
+            environment.setDataPlaneId((dataPlaneId.getText()));
         } else {
             // set environment name as the dataPlaneId if dataPlaneId is not configured
             environment.setDataPlaneId(APIUtil.replaceSystemProperty(

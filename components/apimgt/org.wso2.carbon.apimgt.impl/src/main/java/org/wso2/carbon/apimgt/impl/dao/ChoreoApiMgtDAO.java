@@ -69,7 +69,8 @@ public class ChoreoApiMgtDAO {
             prepStmt.setString(2, dataplaneId);
             prepStmt.executeUpdate();
         } catch (SQLException e) {
-            handleException("Failed to add Environment to Data-Plane mapping for environment UUID: " + envUUID, e);
+            throw new APIManagementException(
+                    "Failed to add Environment to Data-Plane mapping for environment UUID: " + envUUID, e);
         }
     }
 
@@ -90,7 +91,8 @@ public class ChoreoApiMgtDAO {
             prepStmt.setString(2, envUUID);
             prepStmt.executeUpdate();
         } catch (SQLException e) {
-            handleException("Failed to update Environment to Data-Plane mapping for environment UUID: " + envUUID, e);
+            throw new APIManagementException(
+                    "Failed to update Environment to Data-Plane mapping for environment UUID: " + envUUID, e);
         }
     }
 
@@ -109,7 +111,8 @@ public class ChoreoApiMgtDAO {
             prepStmt.setString(1, envUUID);
             prepStmt.executeUpdate();
         } catch (SQLException e) {
-            handleException("Failed to delete Environment to Data-Plane mapping for environment UUID: " + envUUID, e);
+            throw new APIManagementException(
+                    "Failed to delete Environment to Data-Plane mapping for environment UUID: " + envUUID, e);
         }
     }
 
@@ -131,7 +134,7 @@ public class ChoreoApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get the Data-Plane ID for environment UUID: " + envUUID, e);
+            throw new APIManagementException("Failed to get the Data-Plane ID for environment UUID: " + envUUID, e);
         }
         return dataPlaneId;
     }
@@ -173,13 +176,8 @@ public class ChoreoApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get Environments of Organization: " + organization, e);
+            throw new APIManagementException("Failed to get Environments of Organization: " + organization, e);
         }
         return envList;
-    }
-
-    private void handleException(String msg, Throwable t) throws APIManagementException {
-        log.error(msg, t);
-        throw new APIManagementException(msg, t);
     }
 }

@@ -164,6 +164,13 @@ public enum ExceptionCodes implements ErrorHandler {
             400, "A Gateway Environment cannot exists with duplicate virtual hosts"),
     READONLY_GATEWAY_ENVIRONMENT_NAME(900510, "Names of Gateway Environment cannot be changed",
             400, "Name of the gateway is read only"),
+    CANNOT_RETRIEVE_RUNTIME_ARTIFACT_APIM_ERROR(900511, "Error resolving vhost while retrieving runtime artifact",
+            500, "Error resolving vhost while retrieving runtime artifact for API %s, gateway environment \"%s\". Skipping runtime artifact for the API. Reason: %s"),
+    CANNOT_RETRIEVE_RUNTIME_ARTIFACT_IO_ERROR(900512, "Error occurred retrieving input stream from byte array",
+            500, "Error occurred retrieving input stream from byte array of API: %s, gateway environment \"%s\". Reason: %s"),
+    CANNOT_RETRIEVE_RUNTIME_ARTIFACT_SQL_ERROR(900513, "Failed to retrieve Gateway Artifact of API",
+            500, "Failed to retrieve Gateway Artifact of API: %s, gateway environment \"%s\". Reason: %s"),
+
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
@@ -607,5 +614,15 @@ public enum ExceptionCodes implements ErrorHandler {
         }
         return new ErrorItem(message, description, errorHandler.getErrorCode(), errorHandler.getHttpStatusCode(),
                 errorHandler.printStackTrace());
+    }
+
+    @Override
+    public String toString() {
+        return "ExceptionCodes{" +
+                "errorCode=" + errorCode +
+                ", errorMessage='" + errorMessage + '\'' +
+                ", httpStatusCode=" + httpStatusCode +
+                ", errorDescription='" + errorDescription + '\'' +
+                '}';
     }
 }

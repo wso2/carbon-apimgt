@@ -13933,9 +13933,9 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
+            ChoreoApiMgtDAO.getInstance().deleteEnvToDataPlaneMapping(connection, uuid);
             try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_ENVIRONMENT_SQL)) {
                 prepStmt.setString(1, uuid);
-                ChoreoApiMgtDAO.getInstance().deleteEnvToDataPlaneMapping(connection, uuid);
                 prepStmt.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {

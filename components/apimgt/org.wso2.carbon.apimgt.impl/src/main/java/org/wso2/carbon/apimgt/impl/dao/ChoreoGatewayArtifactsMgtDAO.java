@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -65,12 +66,6 @@ public class ChoreoGatewayArtifactsMgtDAO {
         return choreoGatewayArtifactsMgtDAO;
     }
 
-    private void handleException(String msg, Throwable t) throws APIManagementException {
-
-        log.error(msg, t);
-        throw new APIManagementException(msg, t);
-    }
-
     public List<APIRuntimeArtifactDto> retrieveAllGatewayArtifactsByOrganizationAndDataPlaneId(String organization,
                                                                                                String dataPlaneId)
             throws APIManagementException {
@@ -109,22 +104,21 @@ public class ChoreoGatewayArtifactsMgtDAO {
                         apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
                     } catch (APIManagementException e) {
                         // handle exception inside the loop and continue with other API artifacts
-                        log.error(String.format("Error resolving vhost while retrieving runtime artifact for API %s, "
-                                + "gateway environment \"%s\"." +
-                                "Skipping runtime artifact for the API.", apiId, label), e);
+                        log.error(ExceptionCodes.from(ExceptionCodes.CANNOT_RETRIEVE_RUNTIME_ARTIFACT_APIM_ERROR,
+                                apiId, label, e.getMessage()).toString());
                     } catch (IOException e) {
                         // handle exception inside the loop and continue with other API artifacts
-                        log.error(String.format("Error occurred retrieving input stream from byte array of " +
-                                "API: %s, gateway environment \"%s\".", apiId, label), e);
+                        log.error(ExceptionCodes.from(ExceptionCodes.CANNOT_RETRIEVE_RUNTIME_ARTIFACT_IO_ERROR,
+                                apiId, label, e.getMessage()).toString());
                     } catch (SQLException e) {
                         // handle exception inside the loop and continue with other API artifacts
-                        log.error(String.format("Failed to retrieve Gateway Artifact of API: %s, " +
-                                "gateway environment \"%s\".", apiId, label), e);
+                        log.error(ExceptionCodes.from(ExceptionCodes.CANNOT_RETRIEVE_RUNTIME_ARTIFACT_SQL_ERROR,
+                                apiId, label, e.getMessage()).toString());
                     }
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve Gateway Artifact for DataPlaneId : "
+            throw new APIManagementException("Failed to retrieve Gateway Artifact for DataPlaneId : "
                     + StringUtils.join(",", dataPlaneId), e);
         }
         return apiRuntimeArtifactDtoList;
@@ -166,22 +160,21 @@ public class ChoreoGatewayArtifactsMgtDAO {
                         apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
                     } catch (APIManagementException e) {
                         // handle exception inside the loop and continue with other API artifacts
-                        log.error(String.format("Error resolving vhost while retrieving runtime artifact for API %s, "
-                                + "gateway environment \"%s\"." +
-                                "Skipping runtime artifact for the API.", apiId, label), e);
+                        log.error(ExceptionCodes.from(ExceptionCodes.CANNOT_RETRIEVE_RUNTIME_ARTIFACT_APIM_ERROR,
+                                apiId, label, e.getMessage()).toString());
                     } catch (IOException e) {
                         // handle exception inside the loop and continue with other API artifacts
-                        log.error(String.format("Error occurred retrieving input stream from byte array of " +
-                                "API: %s, gateway environment \"%s\".", apiId, label), e);
+                        log.error(ExceptionCodes.from(ExceptionCodes.CANNOT_RETRIEVE_RUNTIME_ARTIFACT_IO_ERROR,
+                                apiId, label, e.getMessage()).toString());
                     } catch (SQLException e) {
                         // handle exception inside the loop and continue with other API artifacts
-                        log.error(String.format("Failed to retrieve Gateway Artifact of API: %s, " +
-                                "gateway environment \"%s\".", apiId, label), e);
+                        log.error(ExceptionCodes.from(ExceptionCodes.CANNOT_RETRIEVE_RUNTIME_ARTIFACT_SQL_ERROR,
+                                apiId, label, e.getMessage()).toString());
                     }
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve Gateway Artifact for DataPlaneId : "
+            throw new APIManagementException("Failed to retrieve Gateway Artifact for DataPlaneId : "
                     + StringUtils.join(",", dataPlaneId), e);
         }
         return apiRuntimeArtifactDtoList;
