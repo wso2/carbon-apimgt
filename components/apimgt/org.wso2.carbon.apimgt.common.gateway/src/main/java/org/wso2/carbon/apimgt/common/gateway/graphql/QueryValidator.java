@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * This class contains methods using for Graphql query payload validation using schema.
@@ -50,7 +51,7 @@ public class QueryValidator {
 
         String validationErrorMessage = null;
         ArrayList<String> validationErrorMessageList = new ArrayList<>();
-        List<ValidationError> validationErrors = validator.validateDocument(schema, document);
+        List<ValidationError> validationErrors = validator.validateDocument(schema, document, Locale.ENGLISH);
         if (validationErrors != null && validationErrors.size() > 0) {
             if (log.isDebugEnabled()) {
                 log.debug("Validation failed for " + document);

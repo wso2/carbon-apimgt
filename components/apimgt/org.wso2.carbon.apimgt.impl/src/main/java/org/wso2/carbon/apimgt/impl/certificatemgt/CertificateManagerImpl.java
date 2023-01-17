@@ -341,7 +341,7 @@ public class CertificateManagerImpl implements CertificateManager {
 
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Retrieving certificate metadata for alias: " + alias + " and tenant:-> " + tenantId);
+                log.debug("Retrieving certificate metadata for alias: " + alias + " and tenant: " + tenantId);
             }
             certificateMetadataList = certificateMgtDAO.getCertificates(alias, "", tenantId);
             if (certificateMetadataList != null && certificateMetadataList.size() == 1) {

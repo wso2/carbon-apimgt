@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.28.29-SNAPSHOT</version>
+        <version>9.28.37-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -246,10 +246,6 @@
         <dependency>
             <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-inflector-oas3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.io.swagger</groupId>
-            <artifactId>swagger-parser</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.io.swagger.v3</groupId>

@@ -52,6 +52,7 @@ public class SchemaValidator extends AbstractHandler {
                         LevelResolver.create()
                                 .withLevel("validation.schema.required", ValidationReport.Level.INFO)
                                 .withLevel("validation.response.body.missing", ValidationReport.Level.INFO)
+                                .withLevel("validation.schema.additionalProperties", ValidationReport.Level.IGNORE)
                                 .build())
                 .build();
     }

@@ -150,7 +150,9 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     private boolean isTargetFaultRequest() {
-        return false;
+        int errorCode = getErrorCode();
+        return (errorCode >= Constants.ERROR_CODE_RANGES.WS_TARGET_FAILURE_START
+                && errorCode <= Constants.ERROR_CODE_RANGES.WS_TARGET_FAILURE__END);
     }
 
     @Override

@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.http.BrowserHostnameVerifier;
@@ -1053,6 +1054,19 @@ public class APIManagerComponent {
         }
         configuration.setHttpClientConfiguration(builder.withConnectionParams(maxTotal, defaultMaxPerRoute)
                 .withSSLContext(sslContext, hostnameVerifier).build());
+    }
+    @Reference(
+            name = "apim.workflow.task.service",
+            service = org.wso2.carbon.apimgt.api.model.WorkflowTaskService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetWorkflowTaskService")
+    protected void setWorkflowTaskService(WorkflowTaskService workflowTaskService) {
+        ServiceReferenceHolder.getInstance().setWorkflowTaskService(workflowTaskService);
+    }
+
+    protected void unsetWorkflowTaskService(WorkflowTaskService workflowTaskService) {
+        ServiceReferenceHolder.getInstance().setWorkflowTaskService(null);
     }
 }
 
