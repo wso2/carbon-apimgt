@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
+import java.util.Properties;
+
 public class WorkflowProperties {
     private boolean enabled;
     private String serverUrl;
@@ -29,6 +31,7 @@ public class WorkflowProperties {
     private String dCREndpointUser;
     private String dCREndpointPassword;
     private boolean listTasks = true; //default true
+    private Properties properties;
     
     public String getdCREndpointUser() {
         return dCREndpointUser;
@@ -89,5 +92,11 @@ public class WorkflowProperties {
     }
     public void setListTasks(boolean listTasks) {
         this.listTasks = listTasks;
+    }
+    public Properties getProperties() {
+        return properties;
+    }
+    public void setProperties(Properties properties) {
+        this.properties = properties;
     }    
 }
