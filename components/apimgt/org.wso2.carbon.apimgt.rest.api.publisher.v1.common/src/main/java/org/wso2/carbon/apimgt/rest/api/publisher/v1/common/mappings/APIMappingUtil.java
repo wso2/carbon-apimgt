@@ -153,6 +153,8 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 public class APIMappingUtil {
 
     private static final Log log = LogFactory.getLog(APIMappingUtil.class);
+    private static final String FORWARD_SLASH = "/";
+    private static final String EMPTY_STRING = "";
 
     private static String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
 
@@ -168,11 +170,11 @@ public class APIMappingUtil {
         String context = dto.getContext();
         final String originalContext = context;
 
-        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
-            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        if (context.endsWith(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM, EMPTY_STRING);
         }
 
-        context = context.startsWith("/") ? context : ("/" + context);
+        context = context.startsWith(FORWARD_SLASH) ? context : (FORWARD_SLASH + context);
         String providerDomain = MultitenantUtils.getTenantDomain(provider);
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain) && dto.getId() == null
                 && !context.contains("/t/" + providerDomain)) {
@@ -638,8 +640,8 @@ public class APIMappingUtil {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setDescription(api.getDescription());
         String context = api.getContextTemplate();
-        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
-            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        if (context.endsWith(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM, EMPTY_STRING);
         }
         apiInfoDTO.setContext(context);
         apiInfoDTO.setId(api.getUUID());
@@ -705,8 +707,8 @@ public class APIMappingUtil {
     public static APIMetadataDTO fromAPIToAPIMetadataDTO(API api) {
 
         String context = api.getContextTemplate();
-        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
-            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        if (context.endsWith(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM, EMPTY_STRING);
         }
 
         APIMetadataDTO apiMetadataDTO = new APIMetadataDTO();
@@ -804,8 +806,8 @@ public class APIMappingUtil {
 
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
-        String paginatedPrevious = "";
-        String paginatedNext = "";
+        String paginatedPrevious = EMPTY_STRING;
+        String paginatedNext = EMPTY_STRING;
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
             paginatedPrevious = RestApiCommonUtil
@@ -838,8 +840,8 @@ public class APIMappingUtil {
 
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
-        String paginatedPrevious = "";
-        String paginatedNext = "";
+        String paginatedPrevious = EMPTY_STRING;
+        String paginatedNext = EMPTY_STRING;
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
             paginatedPrevious = RestApiCommonUtil
@@ -864,8 +866,8 @@ public class APIMappingUtil {
         // This is to support the new Pluggable version strategy
         // if the context does not contain any {version} segment, we use the default version strategy.
         if (!context.contains(RestApiConstants.API_VERSION_PARAM)) {
-            if (!context.endsWith("/")) {
-                context = context + "/";
+            if (!context.endsWith(FORWARD_SLASH)) {
+                context = context + FORWARD_SLASH;
             }
             context = context + RestApiConstants.API_VERSION_PARAM;
         }
@@ -915,7 +917,7 @@ public class APIMappingUtil {
         if (version == null) {
             // context template patterns - /{version}/foo or /foo/{version}
             // if the version is null, then we remove the /{version} part from the context
-            context = contextVal.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+            context = contextVal.replace(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM, EMPTY_STRING);
         } else {
             context = context.replace(RestApiConstants.API_VERSION_PARAM, version);
         }
@@ -963,8 +965,8 @@ public class APIMappingUtil {
         dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         dto.setId(model.getUUID());
         String context = model.getContextTemplate();
-        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
-            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        if (context.endsWith(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM, EMPTY_STRING);
         }
         dto.setContext(context);
         dto.setCreatedTime(model.getCreatedTime());
@@ -1484,7 +1486,7 @@ public class APIMappingUtil {
             if (checkEndpointSecurityPasswordEnabled(tenantDomain) || preserveCredentials) {
                 endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, api.getEndpointUTPassword());
             } else {
-                endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
+                endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, EMPTY_STRING);
             }
             if (api.isEndpointAuthDigest()) {
                 endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_TYPE,
@@ -1561,7 +1563,7 @@ public class APIMappingUtil {
                 LifecycleStateAvailableTransitionsDTO transitionDTO = new LifecycleStateAvailableTransitionsDTO();
                 transitionDTO.setEvent(state);
                 //todo: Set target state properly
-                transitionDTO.setTargetState("");
+                transitionDTO.setTargetState(EMPTY_STRING);
                 transitionDTOList.add(transitionDTO);
             }
             lifecycleStateDTO.setAvailableTransitions(transitionDTOList);
@@ -1806,15 +1808,15 @@ public class APIMappingUtil {
 //        if (endpoints != null && endpoints.size() > 0) {
 //            sb.append("{");
 //            for (APIEndpointDTO endpoint : endpoints) {
-//                sb.append("\"")
+//                sb.append("\EMPTY_STRING)
 //                        .append(endpoint.getType())
-//                        .append("\": {\"url\":\"")
+//                        .append("\": {\"url\":\EMPTY_STRING)
 //                        .append(endpoint.getInline().getEndpointConfig().getList().get(0).getUrl())
-//                        .append("\",\"timeout\":\"")
+//                        .append("\",\"timeout\":\EMPTY_STRING)
 //                        .append(endpoint.getInline().getEndpointConfig().getList().get(0).getTimeout())
 //                        .append("\"},");
 //            }
-//            sb.append("\"endpoint_type\" : \"")
+//            sb.append("\"endpoint_type\" : \EMPTY_STRING)
 //                    .append(endpoints.get(0).getInline().getType())//assuming all the endpoints are same type
 //                    .append("\"}\n");
 //        }
@@ -1904,7 +1906,7 @@ public class APIMappingUtil {
     public static String getSecurityScheme(List<String> securitySchemes) {
 
         if (securitySchemes == null || securitySchemes.size() <= 0) {
-            return "";
+            return EMPTY_STRING;
         }
         StringBuilder apiSecurityScheme = new StringBuilder();
         if (securitySchemes != null) {
@@ -1997,7 +1999,7 @@ public class APIMappingUtil {
         List<ErrorListItemDTO> errorListItemDTOs = new ArrayList<>();
         for (ErrorHandler handler : errorHandlers) {
             ErrorListItemDTO dto = new ErrorListItemDTO();
-            dto.setCode(handler.getErrorCode() + "");
+            dto.setCode(handler.getErrorCode() + EMPTY_STRING);
             dto.setMessage(handler.getErrorMessage());
             dto.setDescription(handler.getErrorDescription());
             errorListItemDTOs.add(dto);
@@ -2009,7 +2011,7 @@ public class APIMappingUtil {
 
         List<ErrorListItemDTO> errorListItemDTOs = new ArrayList<>();
         ErrorListItemDTO dto = new ErrorListItemDTO();
-        dto.setCode(error.getErrorCode() + "");
+        dto.setCode(error.getErrorCode() + EMPTY_STRING);
         dto.setMessage(error.getErrorMessage());
         dto.setDescription(error.getErrorDescription());
         errorListItemDTOs.add(dto);
@@ -2029,13 +2031,13 @@ public class APIMappingUtil {
             if (i == 0) {
                 ErrorListItemDTO elementAt0 = errorListItemDTOs.get(0);
                 errorDTO.setCode(Long.parseLong(elementAt0.getCode()));
-                errorDTO.setMoreInfo("");
+                errorDTO.setMoreInfo(EMPTY_STRING);
                 errorDTO.setMessage(elementAt0.getMessage());
                 errorDTO.setDescription(elementAt0.getDescription());
             } else {
                 org.wso2.carbon.apimgt.rest.api.common.dto.ErrorListItemDTO errorListItemDTO
                         = new org.wso2.carbon.apimgt.rest.api.common.dto.ErrorListItemDTO();
-                errorListItemDTO.setCode(errorListItemDTOs.get(i).getCode() + "");
+                errorListItemDTO.setCode(errorListItemDTOs.get(i).getCode() + EMPTY_STRING);
                 errorListItemDTO.setMessage(errorListItemDTOs.get(i).getMessage());
                 errorListItemDTO.setDescription(errorListItemDTOs.get(i).getDescription());
                 errorDTO.getError().add(errorListItemDTO);
@@ -2165,7 +2167,7 @@ public class APIMappingUtil {
     private static APIOperationsDTO getOperationFromURITemplate(URITemplate uriTemplate) {
 
         APIOperationsDTO operationsDTO = new APIOperationsDTO();
-        operationsDTO.setId(""); //todo: Set ID properly
+        operationsDTO.setId(EMPTY_STRING); //todo: Set ID properly
         if (APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.equals(uriTemplate.getAuthType())) {
             operationsDTO.setAuthType(APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER);
         } else if (APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN.equals(uriTemplate.getAuthType())) {
@@ -2504,11 +2506,11 @@ public class APIMappingUtil {
 
         String context = dto.getContext();
 
-        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
-            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        if (context.endsWith(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM, EMPTY_STRING);
         }
 
-        context = context.startsWith("/") ? context : ("/" + context);
+        context = context.startsWith(FORWARD_SLASH) ? context : (FORWARD_SLASH + context);
         String providerDomain = MultitenantUtils.getTenantDomain(provider);
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain) &&
                 dto.getId() == null) {
@@ -2516,7 +2518,7 @@ public class APIMappingUtil {
             context = "/t/" + providerDomain + context;
         }
 
-        product.setType(APIConstants.API_PRODUCT_IDENTIFIER_TYPE.replaceAll("\\s", ""));
+        product.setType(APIConstants.API_PRODUCT_IDENTIFIER_TYPE.replaceAll("\\s", EMPTY_STRING));
         product.setContext(context);
         context = checkAndSetVersionParam(context);
         product.setContextTemplate(context);
@@ -2735,8 +2737,8 @@ public class APIMappingUtil {
                                                                  int limit, int size) {
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
-        String paginatedPrevious = "";
-        String paginatedNext = "";
+        String paginatedPrevious = EMPTY_STRING;
+        String paginatedNext = EMPTY_STRING;
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
             paginatedPrevious = RestApiCommonUtil
@@ -2769,8 +2771,8 @@ public class APIMappingUtil {
 
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
-        String paginatedPrevious = "";
-        String paginatedNext = "";
+        String paginatedPrevious = EMPTY_STRING;
+        String paginatedNext = EMPTY_STRING;
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
             paginatedPrevious = RestApiCommonUtil
@@ -3033,11 +3035,11 @@ public class APIMappingUtil {
             JSONObject sandboxEndpointSecurity =
                     (JSONObject) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
             if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
-                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
+                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, EMPTY_STRING);
                 if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE)
                         .equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
-                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_ID, "");
-                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
+                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_ID, EMPTY_STRING);
+                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, EMPTY_STRING);
                 }
             }
         }
@@ -3045,11 +3047,11 @@ public class APIMappingUtil {
             JSONObject productionEndpointSecurity =
                     (JSONObject) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
             if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
-                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
+                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, EMPTY_STRING);
                 if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE)
                         .equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
-                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_ID, "");
-                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
+                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_ID, EMPTY_STRING);
+                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, EMPTY_STRING);
                 }
             }
         }

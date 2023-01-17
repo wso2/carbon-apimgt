@@ -188,6 +188,66 @@ public class TestSchemaValidator {
         assertValidRequest();
     }
 
+    @Test
+    public void testValidOneOfSchema1() throws IOException, XMLStreamException {
+        Map<String, String> headers = new HashMap<>();
+        String contentType = "application/json";
+        headers.put(CONTENT_TYPE_HEADER_LOWERCASE, contentType);
+        Mockito.when(axis2MsgContext.getProperty(TRANSPORT_HEADERS)).thenReturn(headers);
+        setMockedRequestWithOpenApiYaml("POST", "/100/002/107066", "<jsonObject>" +
+                "<firstName>John</firstName><lastName>Doe</lastName><sport>Football</sport>" +
+                "</jsonObject>");
+        assertValidRequest();
+    }
+
+    @Test
+    public void testValidOneOfSchema2() throws IOException, XMLStreamException {
+        Map<String, String> headers = new HashMap<>();
+        String contentType = "application/json";
+        headers.put(CONTENT_TYPE_HEADER_LOWERCASE, contentType);
+        Mockito.when(axis2MsgContext.getProperty(TRANSPORT_HEADERS)).thenReturn(headers);
+        setMockedRequestWithOpenApiYaml("POST", "/100/002/107066", "<jsonObject>" +
+                "<vehicle>Car</vehicle><price>10</price>" +
+                "</jsonObject>");
+        assertValidRequest();
+    }
+
+    @Test
+    public void testInvalidOneOfSchema() throws IOException, XMLStreamException {
+        Map<String, String> headers = new HashMap<>();
+        String contentType = "application/json";
+        headers.put(CONTENT_TYPE_HEADER_LOWERCASE, contentType);
+        Mockito.when(axis2MsgContext.getProperty(TRANSPORT_HEADERS)).thenReturn(headers);
+        setMockedRequestWithOpenApiYaml("POST", "/100/002/107066", "<jsonObject>" +
+                "<type>Computer</type><model>Desktop</model>" +
+                "</jsonObject>");
+        assertBadRequest();
+    }
+
+    @Test
+    public void testNonAllowedAdditionalProperties() throws IOException, XMLStreamException {
+        Map<String, String> headers = new HashMap<>();
+        String contentType = "application/json";
+        headers.put(CONTENT_TYPE_HEADER_LOWERCASE, contentType);
+        Mockito.when(axis2MsgContext.getProperty(TRANSPORT_HEADERS)).thenReturn(headers);
+        setMockedRequestWithOpenApiYaml("POST", "/100/002/107066", "<jsonObject>" +
+                "<firstName>John</firstName><lastName>Doe</lastName><sport>Football</sport><age>Twenty</age>" +
+                "</jsonObject>");
+        assertBadRequest();
+    }
+
+    @Test
+    public void testAllowedAdditionalProperties() throws IOException, XMLStreamException {
+        Map<String, String> headers = new HashMap<>();
+        String contentType = "application/json";
+        headers.put(CONTENT_TYPE_HEADER_LOWERCASE, contentType);
+        Mockito.when(axis2MsgContext.getProperty(TRANSPORT_HEADERS)).thenReturn(headers);
+        setMockedRequestWithOpenApiYaml("POST", "/100/002/107066", "<jsonObject>" +
+                "<vehicle>Car</vehicle><price>10</price><color>Red</color>" +
+                "</jsonObject>");
+        assertValidRequest();
+    }
+
     private void assertValidRequest() {
         Assert.assertTrue(schemaValidator.handleRequest(messageContext));
         Mockito.verify(messageContext, Mockito.times(0))
@@ -199,7 +259,24 @@ public class TestSchemaValidator {
         Mockito.verify(messageContext).setProperty(APIMgtGatewayConstants.THREAT_FOUND, true);
     }
 
-    private void setMockedRequest(String httpMethod, String resourcePath, String xmlMessage) throws XMLStreamException, IOException {
+    private void setMockedRequestWithOpenApiYaml(String httpMethod, String resourcePath, String xmlMessage)
+            throws IOException, XMLStreamException {
+        File openApiYamlFile = new File(Thread.currentThread().getContextClassLoader().
+                getResource("swaggerEntry/openapi.yaml").getFile());
+        String swaggerValue = FileUtils.readFileToString(openApiYamlFile);
+        setMockedRequest(httpMethod, resourcePath, xmlMessage, swaggerValue);
+    }
+
+    private void setMockedRequest(String httpMethod, String resourcePath, String xmlMessage)
+            throws XMLStreamException, IOException {
+        File swaggerJsonFile = new File(Thread.currentThread().getContextClassLoader().
+                getResource("swaggerEntry/swagger.json").getFile());
+        String swaggerValue = FileUtils.readFileToString(swaggerJsonFile);
+        setMockedRequest(httpMethod, resourcePath, xmlMessage, swaggerValue);
+    }
+
+    private void setMockedRequest(String httpMethod, String resourcePath, String xmlMessage, String swaggerValue)
+            throws XMLStreamException {
         SOAPFactory fac = OMAbstractFactory.getSOAP12Factory();
         SOAPEnvelope env = fac.createSOAPEnvelope();
         fac.createSOAPBody(env);
@@ -208,9 +285,6 @@ public class TestSchemaValidator {
         log.info(" Running the test case to validate the request content against the defined schemas.");
         String contentType = "application/json";
         String ApiId = "admin-SwaggerPetstore-1.0.0";
-        File swaggerJsonFile = new File(Thread.currentThread().getContextClassLoader().
-                getResource("swaggerEntry/swagger.json").getFile());
-        String swaggerValue = FileUtils.readFileToString(swaggerJsonFile);
 
         OpenAPIParser parser = new OpenAPIParser();
         ParseOptions parseOptions = new ParseOptions();
