@@ -1098,6 +1098,11 @@
           "example" : "APIProduct",
           "description" : "Type of the API."
         },
+        "organization" : {
+          "type" : "string",
+          "example" : "wso2.com",
+          "description" : "Organization of the API."
+        },
         "isDefaultVersion" : {
           "type" : "boolean",
           "example" : false,
