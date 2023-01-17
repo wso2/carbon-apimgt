@@ -40,8 +40,7 @@ public class AnalyticsDataPublisher {
 
     private static final Log log = LogFactory.getLog(AnalyticsDataPublisher.class);
     private static AnalyticsDataPublisher instance = new AnalyticsDataPublisher();
-    private CounterMetric successMetricReporter;
-    private CounterMetric faultyMetricReporter;
+
     private List<CounterMetric> successMetricReporters;
     private List<CounterMetric> faultyMetricReporters;
 
@@ -148,22 +147,6 @@ public class AnalyticsDataPublisher {
         } catch (MetricCreationException e) {
             log.error("Error while creating the metric reporter", e);
         }
-    }
-
-    public CounterMetric getSuccessMetricReporter() {
-
-        if (this.successMetricReporter == null) {
-            throw new RuntimeException("AnalyticsDataPublisher is not initialized.");
-        }
-        return successMetricReporter;
-    }
-
-    public CounterMetric getFaultyMetricReporter() {
-
-        if (this.faultyMetricReporter == null) {
-            throw new RuntimeException("AnalyticsDataPublisher is not initialized.");
-        }
-        return faultyMetricReporter;
     }
 
     public List<CounterMetric> getSuccessMetricReporters() {
