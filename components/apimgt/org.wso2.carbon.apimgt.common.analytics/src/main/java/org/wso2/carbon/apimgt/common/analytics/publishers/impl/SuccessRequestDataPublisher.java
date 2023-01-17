@@ -23,6 +23,7 @@ import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 
 import java.util.List;
+
 /**
  * Success event publisher implementation.
  */

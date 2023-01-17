@@ -47,7 +47,7 @@ public abstract class AbstractRequestDataPublisher implements RequestDataPublish
 
         Map<String, Object> dataMap = OBJECT_MAPPER.convertValue(analyticsEvent, MAP_TYPE_REFERENCE);
         List<CounterMetric> multipleCounterMetrics = this.getMultipleCounterMetrics();
-        if(multipleCounterMetrics == null){
+        if (multipleCounterMetrics == null) {
             log.error("All the counterMetrics are invalid. Event will be dropped.");
             return;
         }

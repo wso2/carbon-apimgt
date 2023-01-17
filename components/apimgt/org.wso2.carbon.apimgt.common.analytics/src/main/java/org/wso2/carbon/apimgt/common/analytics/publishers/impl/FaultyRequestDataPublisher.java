@@ -16,6 +16,7 @@
  */
 
 package org.wso2.carbon.apimgt.common.analytics.publishers.impl;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
@@ -30,6 +31,7 @@ import java.util.List;
 public class FaultyRequestDataPublisher extends AbstractRequestDataPublisher {
 
     private static final Log log = LogFactory.getLog(FaultyRequestDataPublisher.class);
+
     @Override
     public CounterMetric getCounterMetric() {
         return null;
