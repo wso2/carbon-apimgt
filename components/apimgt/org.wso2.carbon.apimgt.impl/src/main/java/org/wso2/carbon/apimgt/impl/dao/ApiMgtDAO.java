@@ -8393,6 +8393,7 @@ public class ApiMgtDAO {
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
                 application.setDescription(rs.getString("DESCRIPTION"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
+                application.setTokenType(rs.getString("APP_TOKEN_TYPE"));
                 workflowDTO.setApplication(application);
                 workflowDTO.setKeyType(rs.getString("TOKEN_TYPE"));
                 workflowDTO.setUserName(subscriber.getName());
@@ -8558,7 +8559,8 @@ public class ApiMgtDAO {
 
     /**
      * Get external workflow reference by internal workflow reference and workflow type
-     * @param internalRef Internal reference of the workflow
+     *
+     * @param internalRef  Internal reference of the workflow
      * @param workflowType Workflow type of the workflow
      * @return External workflow reference for the given internal reference and workflow type if present. Null otherwise
      * @throws APIManagementException If an SQL exception occurs in database interactions
@@ -16422,8 +16424,13 @@ public class ApiMgtDAO {
                 insertOperationPolicyMappingStatement.executeBatch();
 
                 // Adding to AM_API_CLIENT_CERTIFICATE
-                PreparedStatement getClientCertificatesStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES);
+                String getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES;
+                String driverName = connection.getMetaData().getDriverName();
+                if (driverName.contains("Oracle")) {
+                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_ORACLE_SQL;
+                }
+
+                PreparedStatement getClientCertificatesStatement = connection.prepareStatement(getClientCertificatesQuery);
                 getClientCertificatesStatement.setInt(1, apiId);
                 List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
                 try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {
@@ -17611,8 +17618,13 @@ public class ApiMgtDAO {
                 insertProductResourceMappingStatement.executeBatch();
 
                 // Adding to AM_API_CLIENT_CERTIFICATE
-                PreparedStatement getClientCertificatesStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES);
+                String getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES;
+                String driverName = connection.getMetaData().getDriverName();
+                if (driverName.contains("Oracle")) {
+                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_ORACLE_SQL;
+                }
+                
+                PreparedStatement getClientCertificatesStatement = connection.prepareStatement(getClientCertificatesQuery);
                 getClientCertificatesStatement.setInt(1, apiId);
                 List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
                 try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {

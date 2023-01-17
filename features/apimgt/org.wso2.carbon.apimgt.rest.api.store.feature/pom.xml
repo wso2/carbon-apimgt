@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.28.9-SNAPSHOT</version>
+        <version>9.28.39-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -147,10 +147,6 @@
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.io.swagger</groupId>
-            <artifactId>swagger-codegen</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.io.swagger</groupId>
@@ -324,8 +320,6 @@
                             </importFeatures>
                             <importBundles>
                                 <importBundleDef>commons-io.wso2:commons-io:${commons-io.version}</importBundleDef>
-                                <importBundleDef>org.wso2.orbit.io.swagger:swagger-codegen:${swagger.codegen.version}
-                                </importBundleDef>
                                 <importBundleDef>org.apache.commons:commons-lang3:${apache.commons.lang3.version}
                                 </importBundleDef>
                                 <importBundleDef>

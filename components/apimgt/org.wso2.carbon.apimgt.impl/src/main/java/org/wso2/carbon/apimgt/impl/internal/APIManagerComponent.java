@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.http.BrowserHostnameVerifier;
@@ -76,6 +77,7 @@ import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.CertificateNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.CorrelationConfigNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ExternalGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ExternallyDeployedApiNotifier;
@@ -205,6 +207,7 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(),new GoogleAnalyticsNotifier(),null);
             bundleContext.registerService(Notifier.class.getName(),new ExternalGatewayNotifier(),null);
             bundleContext.registerService(Notifier.class.getName(),new ExternallyDeployedApiNotifier(),null);
+            bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             APIMgtDBUtil.initialize();
@@ -275,6 +278,10 @@ public class APIManagerComponent {
                 }
                 // Adding default throttle policies
                 addDefaultAdvancedThrottlePolicies(tenantDomain, tenantId);
+                addDefaultAsyncThrottlePolicies(tenantDomain, tenantId);
+
+                //Adding default correlation configs at initial server start up
+                APIUtil.addDefaultCorrelationConfigs();
                 // Update all NULL THROTTLING_TIER values to Unlimited
                 boolean isNullThrottlingTierConversionEnabled = APIUtil.updateNullThrottlingTierAtStartup();
                 try {
@@ -577,6 +584,10 @@ public class APIManagerComponent {
 
     private void addDefaultAdvancedThrottlePolicies(String tenantDomain, int tenantId) throws APIManagementException {
         APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
+    }
+
+    private void addDefaultAsyncThrottlePolicies(String tenantDomain, int tenantId) throws APIManagementException {
+        APIUtil.addDefaultTenantAsyncThrottlePolicies(tenantDomain, tenantId);
     }
 
     @Reference(
@@ -1043,6 +1054,19 @@ public class APIManagerComponent {
         }
         configuration.setHttpClientConfiguration(builder.withConnectionParams(maxTotal, defaultMaxPerRoute)
                 .withSSLContext(sslContext, hostnameVerifier).build());
+    }
+    @Reference(
+            name = "apim.workflow.task.service",
+            service = org.wso2.carbon.apimgt.api.model.WorkflowTaskService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetWorkflowTaskService")
+    protected void setWorkflowTaskService(WorkflowTaskService workflowTaskService) {
+        ServiceReferenceHolder.getInstance().setWorkflowTaskService(workflowTaskService);
+    }
+
+    protected void unsetWorkflowTaskService(WorkflowTaskService workflowTaskService) {
+        ServiceReferenceHolder.getInstance().setWorkflowTaskService(null);
     }
 }
 

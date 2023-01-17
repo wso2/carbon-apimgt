@@ -983,6 +983,13 @@
         <DCREndPoint>{{apim.workflow.client_registration_endpoint}}</DCREndPoint>
         <DCREndPointUser>{{apim.workflow.client_registration_username}}</DCREndPointUser>
         <DCREndPointPassword>{{apim.workflow.client_registration_password}}</DCREndPointPassword>
+        {% if apim.workflow.properties %}
+        <Properties>
+            {% for key,value in apim.workflow.properties.items() %}
+            <Property name="{{key}}">{{value}}</Property>
+            {% endfor %}
+        </Properties>
+        {% endif %}
     </WorkflowConfigurations>
 
     <SwaggerCodegen>
@@ -1478,4 +1485,11 @@
              </OAuth>
           </MediatorConfigs>
       {% endif %}
+
+      <!-- Default Correlation Log Components -->
+      <CorrelationLogComponents>
+      {%for component in apim.correlation_logs.components%}
+          <CorrelationLogComponent>{{component}}</CorrelationLogComponent>
+      {% endfor %}
+      </CorrelationLogComponents>
 </APIManager>

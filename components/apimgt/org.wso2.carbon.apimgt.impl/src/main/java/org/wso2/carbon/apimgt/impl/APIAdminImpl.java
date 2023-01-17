@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.Workflow;
+import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -1130,7 +1131,11 @@ public class APIAdminImpl implements APIAdmin {
         WorkflowProperties workflowConfig = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.
                 getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
         if (workflowConfig.isListTasks()) {
-            return apiMgtDAO.getworkflows(workflowType, status, tenantDomain);
+            Workflow[] workflows = apiMgtDAO.getworkflows(workflowType, status, tenantDomain);
+            WorkflowTaskService taskService = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.
+            getInstance().getWorkflowTaskService();
+            return taskService.getFilteredPendingTasks(workflows,
+                    CarbonContext.getThreadLocalCarbonContext().getUsername(), tenantDomain);
         } else {
             return new Workflow[0];
         }

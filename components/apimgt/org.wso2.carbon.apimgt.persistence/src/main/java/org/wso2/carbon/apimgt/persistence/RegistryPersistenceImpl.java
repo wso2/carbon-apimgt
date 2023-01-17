@@ -838,6 +838,14 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     registry.delete(apiProviderPath);
                 }
             }
+
+            /*remove revision directory with UUID*/
+            String revisionDirectoryPath = APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                    apiId;
+            if (registry.resourceExists(revisionDirectoryPath)) {
+                registry.delete(revisionDirectoryPath);
+            }
+
             registry.commitTransaction();
             transactionCommitted = true;
         } catch (RegistryException e) {
@@ -3461,6 +3469,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     }
                     registry.delete(productProviderPath);
                 }
+            }
+            /*remove revision directory with UUID*/
+            String revisionDirectoryPath = APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                    apiId;
+            if (registry.resourceExists(revisionDirectoryPath)) {
+                registry.delete(revisionDirectoryPath);
             }
 
         } catch (RegistryException e) {

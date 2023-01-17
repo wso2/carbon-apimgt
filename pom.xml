@@ -6,7 +6,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>9.28.9-SNAPSHOT</version>
+    <version>9.28.39-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>https://wso2.org</url>
 
@@ -1430,16 +1430,6 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.wso2.orbit.io.swagger</groupId>
-                <artifactId>swagger-parser</artifactId>
-                <version>${swagger.parser.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.orbit.io.swagger</groupId>
-                <artifactId>swagger-codegen</artifactId>
-                <version>${swagger.codegen.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-codegen</artifactId>
                 <version>${io.swagger.codegen.version}</version>
@@ -1940,6 +1930,11 @@
                 <version>${mockserver.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.logging.correlation</artifactId>
+                <version>${carbon.kernel.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -1956,24 +1951,24 @@
 
         <!-- APIM Component Version -->
         <hamcrest.version>1.3</hamcrest.version>
-        <carbon.apimgt.version>9.28.9-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>9.28.39-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <carbon.analytics.common.version>5.3.1</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.3.2</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.8.0-m2</carbon.kernel.version>
-        <carbon.kernel.feature.version>4.8.0-m2</carbon.kernel.feature.version>
+        <carbon.kernel.version>4.8.0-alpha</carbon.kernel.version>
+        <carbon.kernel.feature.version>4.8.0-alpha</carbon.kernel.feature.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
         <carbon.commons.version>4.9.2</carbon.commons.version>
 
         <carbon.registry.version>4.8.9</carbon.registry.version>
-        <carbon.mediation.version>4.7.147</carbon.mediation.version>
+        <carbon.mediation.version>4.7.156</carbon.mediation.version>
 
         <mongodb.driver.version>4.1.0</mongodb.driver.version>
 
         <!-- Carbon Identity versions -->
-        <carbon.identity.version>5.24.3</carbon.identity.version>
+        <carbon.identity.version>5.24.4</carbon.identity.version>
         <carbon.identity.governance.version>1.7.2</carbon.identity.governance.version>
         <carbon.identity-inbound-auth-oauth.version>6.9.4</carbon.identity-inbound-auth-oauth.version>
         <carbon.identity-oauth2-grant-jwt.version>2.1.1</carbon.identity-oauth2-grant-jwt.version>
@@ -1984,7 +1979,7 @@
         <saml.common.util.version>1.2.1</saml.common.util.version>
         <saml.common.util.version.range>[1.0.0,2.0.0)</saml.common.util.version.range>
 
-        <graphql.java.version>18.2.wso2v1</graphql.java.version>
+        <graphql.java.version>19.2.wso2v2</graphql.java.version>
 
         <carbon.governance.version>4.8.29</carbon.governance.version>
         <carbon.deployment.version>4.11.4</carbon.deployment.version>
@@ -2047,7 +2042,7 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-        <synapse.version>4.0.0-wso2v1</synapse.version>
+        <synapse.version>4.0.0-wso2v5</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
@@ -2078,7 +2073,7 @@
         <commons-logging.version>1.1.1</commons-logging.version>
         <commons-io.version>2.4.0.wso2v1</commons-io.version>
         <commons-httpclient.version>3.1</commons-httpclient.version>
-        <google.code.gson.version>2.8.5</google.code.gson.version>
+        <google.code.gson.version>2.8.9</google.code.gson.version>
         <httpcomponents.version>4.5.10</httpcomponents.version>
         <commons-codec.version>1.14</commons-codec.version>
         <com.nimbusds.wso2.version>7.3.0.wso2v1</com.nimbusds.wso2.version>
@@ -2087,7 +2082,7 @@
         <org.slf4j.version>1.7.0</org.slf4j.version>
         <slf4j.api.version>1.7.29</slf4j.api.version>
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
-        <spring-web.version>5.1.13.RELEASE</spring-web.version>
+        <spring-web.version>5.3.23</spring-web.version>
         <hibernate-validator.version>6.0.23.Final</hibernate-validator.version>
         <swagger-jaxrs.version>1.6.1</swagger-jaxrs.version>
         <junit.version>4.13.1</junit.version>
@@ -2111,7 +2106,7 @@
         <carbon.throttle.module.version>4.2.1</carbon.throttle.module.version>
 
         <!-- apache cxf version -->
-        <cxf.version>3.5.3</cxf.version>
+        <cxf.version>3.5.4</cxf.version>
 
 
         <carbon.metrics.version>1.3.12</carbon.metrics.version>
@@ -2119,27 +2114,25 @@
         <pdfbox.version>2.0.25</pdfbox.version>
         <event.processor.stub.version>2.3.5</event.processor.stub.version>
         <event.processor.core.version>2.3.5</event.processor.core.version>
-        <swagger.codegen.version>2.3.1.wso2v2</swagger.codegen.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
         <swagger.inflector.oas3.version>2.0.5.wso2v2</swagger.inflector.oas3.version>
-        <swagger.parser.version>1.0.57.wso2v1</swagger.parser.version>
-        <swagger.parser.v3.version>2.0.29.wso2v1</swagger.parser.v3.version>
-        <swagger.core.version>1.6.5</swagger.core.version>
-        <swagger.models.version>1.6.5</swagger.models.version>
-        <swagger.annotations.version>1.6.5</swagger.annotations.version>
+        <swagger.parser.v3.version>2.1.10.wso2v1</swagger.parser.v3.version>
+        <swagger.core.version>1.6.9</swagger.core.version>
+        <swagger.models.version>1.6.9</swagger.models.version>
+        <swagger.annotations.version>1.6.9</swagger.annotations.version>
         <servicemix.bundles.jedis.version>3.3.0_1</servicemix.bundles.jedis.version>
         <google.guava.version>31.0.1-jre</google.guava.version>
         <xercesImpl.version>2.8.1.wso2v2</xercesImpl.version>
         <commons.scxml.version>0.9.0.wso2v2</commons.scxml.version>
         <velocity.version>2.1</velocity.version>
-        <fasterxml.jackson.version>2.13.1</fasterxml.jackson.version>
-        <fasterxml.jackson.databind.version>2.13.1</fasterxml.jackson.databind.version>
-        <fasterxml.jackson.core.version>2.13.1</fasterxml.jackson.core.version>
+        <fasterxml.jackson.version>2.14.1</fasterxml.jackson.version>
+        <fasterxml.jackson.databind.version>2.14.1</fasterxml.jackson.databind.version>
+        <fasterxml.jackson.core.version>2.14.1</fasterxml.jackson.core.version>
         <javax.validation-api>2.0.1.Final</javax.validation-api>
         <carbon.broker.version>3.3.26</carbon.broker.version>
         <andes.version>3.3.24</andes.version>
         <waffle-jna.version>1.6.wso2v7</waffle-jna.version>
-        <version.snake.yaml>1.28</version.snake.yaml>
+        <version.snake.yaml>1.33</version.snake.yaml>
         <wsdl4j.version>1.6.3.wso2v3</wsdl4j.version>
         <slf4j.test.version>1.7.29</slf4j.test.version>
         <reflection.version>0.9.11</reflection.version>
@@ -2153,20 +2146,20 @@
         <reflection.version>0.9.11</reflection.version>
         <woodstox-core.version>6.2.1</woodstox-core.version>
         <apache.commons.version>2.8.0</apache.commons.version>
-        <apache.commons.lang3.version>3.10</apache.commons.lang3.version>
+        <apache.commons.lang3.version>3.12.0</apache.commons.lang3.version>
         <io.swagger.codegen.version>2.4.11</io.swagger.codegen.version>
         <openapi-codegen-maven-plugin.version>4.3.1</openapi-codegen-maven-plugin.version>
 
         <maven.checkstyleplugin.version>2.17</maven.checkstyleplugin.version>
         <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
-        <httpcore.version>4.4.15.wso2v1</httpcore.version>
+        <httpcore.version>4.4.16.wso2v1</httpcore.version>
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
         <re2j.version>1.2.wso2v1</re2j.version>
         <maven-site-plugin.version>3.3</maven-site-plugin.version>
         <maven-project-info-reports-plugin.version>2.7</maven-project-info-reports-plugin.version>
         <swagger-codegen-maven-plugin.version>2.3.1</swagger-codegen-maven-plugin.version>
         <swagger3-codegen-maven-plugin.version>3.0.19</swagger3-codegen-maven-plugin.version>
-        <swagger3.core.version>2.1.12</swagger3.core.version>
+        <swagger3.core.version>2.2.8</swagger3.core.version>
         <javax.enterprise.version>2.0</javax.enterprise.version>
         <jaeger.client.version>1.8.0.wso2v1</jaeger.client.version>
         <zipkin.sender.okhttp3.version>2.16.3</zipkin.sender.okhttp3.version>

@@ -1724,6 +1724,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             }
+            if (apiIdentifier == null) {
+                throw new APIManagementException("Error while getting the api identifier for the API:" +
+                        apiId, ExceptionCodes.INVALID_API_ID);
+            }
             return PublisherCommonUtils.getLifecycleStateInformation(apiIdentifier, organization);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
@@ -3124,8 +3128,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response changeAPILifecycle(String action, String apiId, String lifecycleChecklist,
-                                            String ifMatch, MessageContext messageContext) {
+    public Response changeAPILifecycle(String action, String apiId, String lifecycleChecklist, String ifMatch,
+                                       MessageContext messageContext) throws APIManagementException{
 
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -3148,7 +3152,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while updating the lifecycle of API " + apiId, e, log);
             } else {
-                RestApiUtil.handleInternalServerError("Error while updating lifecycle of API " + apiId, e, log);
+                throw e;
             }
         }
         return null;
@@ -3681,6 +3685,11 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         //validate whether the API is advertise only
         APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
+        // Reject the request if API lifecycle is 'RETIRED'.
+        if (apiDto.getLifeCycleStatus().equals(APIConstants.RETIRED)) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Deploying API Revisions is not supported for retired APIs. ApiId: "
+                    + apiId).build();
+        }
         if (apiDto != null && apiDto.getAdvertiseInfo() != null && Boolean.TRUE.equals(apiDto.getAdvertiseInfo().isAdvertised())) {
             throw new APIManagementException("Deploying API Revisions is not supported for third party APIs: "
                     + apiId);

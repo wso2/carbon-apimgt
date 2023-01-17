@@ -5,6 +5,7 @@ import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
 import io.apicurio.datamodels.asyncapi.models.AaiDocument;
 import io.apicurio.datamodels.asyncapi.models.AaiOperation;
 import io.apicurio.datamodels.asyncapi.models.AaiOperationBindings;
+import io.apicurio.datamodels.asyncapi.models.AaiServer;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20ChannelItem;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20ImplicitOAuthFlow;
@@ -1936,15 +1937,18 @@ public class AsyncApiParser extends APIDefinition {
         if (!APIConstants.API_TYPE_WEBSUB.equals(api.getType())) {
             JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
 
-            Aai20Server prodServer = (Aai20Server) aaiDocument.createServer("production");
-            prodServer.url = endpointConfig.getJSONObject("production_endpoints").getString("url");
-            prodServer.protocol = api.getType().toLowerCase();
-            aaiDocument.addServer("production", prodServer);
-
-            Aai20Server sandBoxServer = (Aai20Server) aaiDocument.createServer("sandbox");
-            sandBoxServer.url = endpointConfig.getJSONObject("sandbox_endpoints").getString("url");
-            sandBoxServer.protocol = api.getType().toLowerCase();
-            aaiDocument.addServer("sandbox", sandBoxServer);
+            if (endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+                AaiServer prodServer = getAaiServer(api, aaiDocument, endpointConfig,
+                                                    APIConstants.GATEWAY_ENV_TYPE_PRODUCTION,
+                                                    APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+                aaiDocument.addServer(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, prodServer);
+            }
+            if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+                AaiServer sandboxServer = getAaiServer(api, aaiDocument, endpointConfig,
+                                                    APIConstants.GATEWAY_ENV_TYPE_SANDBOX,
+                                                    APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+                aaiDocument.addServer(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxServer);
+            }
         }
 
         Map<String, AaiChannelItem> channels = new HashMap<>();
@@ -1960,6 +1964,25 @@ public class AsyncApiParser extends APIDefinition {
         }
         aaiDocument.channels = channels;
         return Library.writeDocumentToJSONString(aaiDocument);
+    }
+
+    /**
+     * Configure Aai server from endpoint configurations
+     *
+     * @param api            API
+     * @param aaiDocument    AAI Document
+     * @param endpointConfig Endpoint configuration
+     * @param serverName     Name of the server
+     * @param endpoint       Endpoint to be configured
+     * @return Configured AaiServer
+     */
+    private AaiServer getAaiServer(API api, Aai20Document aaiDocument, JSONObject endpointConfig, String serverName,
+                                   String endpoint) {
+
+        Aai20Server server = (Aai20Server) aaiDocument.createServer(serverName);
+        server.url = endpointConfig.getJSONObject(endpoint).getString(APIConstants.API_DATA_URL);
+        server.protocol = api.getType().toLowerCase();
+        return server;
     }
 
     /**
@@ -2052,19 +2075,18 @@ public class AsyncApiParser extends APIDefinition {
         if (StringUtils.isNotEmpty(endpointConfigString)) {
             JSONObject endpointConfig = new JSONObject(endpointConfigString);
 
-            Aai20Server prodServer = (Aai20Server) document.createServer("production");
-            if (endpointConfig.has("production_endpoints")) {
-                prodServer.url = endpointConfig.getJSONObject("production_endpoints").getString("url");
+            if (endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+                AaiServer prodServer = getAaiServer(apiToUpdate, document, endpointConfig,
+                                                    APIConstants.GATEWAY_ENV_TYPE_PRODUCTION,
+                                                    APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+                document.addServer(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, prodServer);
             }
-            prodServer.protocol = apiToUpdate.getType().toLowerCase();
-            document.addServer("production", prodServer);
-
-            Aai20Server sandBoxServer = (Aai20Server) document.createServer("sandbox");
-            if (endpointConfig.has("sandbox_endpoints")) {
-                sandBoxServer.url = endpointConfig.getJSONObject("sandbox_endpoints").getString("url");
+            if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+                AaiServer sandboxServer = getAaiServer(apiToUpdate, document, endpointConfig,
+                                                       APIConstants.GATEWAY_ENV_TYPE_SANDBOX,
+                                                       APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+                document.addServer(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxServer);
             }
-            sandBoxServer.protocol = apiToUpdate.getType().toLowerCase();
-            document.addServer("sandbox", sandBoxServer);
         }
         return Library.writeDocumentToJSONString(document);
     }
