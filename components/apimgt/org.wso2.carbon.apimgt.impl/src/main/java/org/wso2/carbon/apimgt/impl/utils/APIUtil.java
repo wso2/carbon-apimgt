@@ -252,15 +252,7 @@ import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
-import java.security.InvalidKeyException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -9920,5 +9912,30 @@ public final class APIUtil {
         }
 
         correlationConfigDAO.addDefaultCorrelationConfigs();
+    }
+
+    /**
+     * Generate code verifier for PKCE
+     * @return code verifier
+     */
+    public static String generateCodeVerifier () {
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] codeVerifier = new byte[32];
+        secureRandom.nextBytes(codeVerifier);
+        return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(codeVerifier);
+    }
+
+    /**
+     * Generate code challenge for PKCE
+     * @param codeVerifier verifier
+     * @return code challenge
+     */
+    public static String generateCodeChallenge(String codeVerifier) throws UnsupportedEncodingException,
+            NoSuchAlgorithmException {
+        byte[] bytes = codeVerifier.getBytes(APIConstants.US_ASCII);
+        MessageDigest messageDigest = MessageDigest.getInstance(APIConstants.SHA_256);
+        messageDigest.update(bytes, 0, bytes.length);
+        byte[] digest = messageDigest.digest();
+        return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
     }
 }
