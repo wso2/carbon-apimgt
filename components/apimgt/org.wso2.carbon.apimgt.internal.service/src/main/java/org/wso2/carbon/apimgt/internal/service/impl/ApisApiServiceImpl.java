@@ -152,7 +152,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiDeploymentLogObj.put(APIConstants.AuditLogConstants.REVISION_ID, revisionUUID);
                 apiDeploymentLogObj.put(APIConstants.AuditLogConstants.REVISION_DEPLOYMENTS, deploymentLogObjects);
 
-                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.REVISION_ID, apiDeploymentLogObj.toString(),
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.REVISION, apiDeploymentLogObj.toString(),
                         APIConstants.AuditLogConstants.DEPLOYMENT_ACKED, RestApiCommonUtil.getLoggedInUsername());
             }
         }
@@ -170,7 +170,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         apiUndeployDeployLogObj.put(APIConstants.AuditLogConstants.REVISION_ID, unDeployedAPIRevisionDTO.getRevisionUUID());
         apiUndeployDeployLogObj.put(APIConstants.AuditLogConstants.ENVIRONMENT, unDeployedAPIRevisionDTO.getEnvironment());
 
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.REVISION_ID, apiUndeployDeployLogObj.toString(),
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.REVISION, apiUndeployDeployLogObj.toString(),
                 APIConstants.AuditLogConstants.UNDEPLOYMENT_ACKED, RestApiCommonUtil.getLoggedInUsername());
         return Response.ok().build();
     }
