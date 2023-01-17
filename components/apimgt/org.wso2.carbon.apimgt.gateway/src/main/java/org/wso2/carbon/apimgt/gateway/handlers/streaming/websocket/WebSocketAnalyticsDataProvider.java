@@ -289,7 +289,11 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public String getUserName() {
-        return getEndUserName();
+        Object authContext = WebSocketUtils.getPropertyFromChannel(APISecurityUtils.API_AUTH_CONTEXT, ctx);
+        if (authContext != null && authContext instanceof AuthenticationContext) {
+            return ((AuthenticationContext)authContext).getUsername();
+        }
+        return null;
     }
 
     @Override
@@ -310,21 +314,9 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         } else {
             customProperties = new HashMap<>();
         }
-        customProperties.put(Constants.API_USER_NAME_KEY, getEndUserName());
+        customProperties.put(Constants.API_USER_NAME_KEY, getUserName());
         customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
         return customProperties;
-    }
-
-    // previously was getUserName
-    // with the modifications in AnalyticsDataProvider
-    // there will be access modifier clash, so renamed as getEndUserName
-    private String getEndUserName() {
-
-        Object authContext = WebSocketUtils.getPropertyFromChannel(APISecurityUtils.API_AUTH_CONTEXT, ctx);
-        if (authContext != null && authContext instanceof AuthenticationContext) {
-            return ((AuthenticationContext)authContext).getUsername();
-        }
-        return null;
     }
 
     private String getApiContext() {
