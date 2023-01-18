@@ -516,7 +516,6 @@ paths:
       description: |
         This will provide access to runtime artifacts in database.
       parameters:
-        - $ref: '#/parameters/requestedTenant'
         - name: type
           in: query
           description: |

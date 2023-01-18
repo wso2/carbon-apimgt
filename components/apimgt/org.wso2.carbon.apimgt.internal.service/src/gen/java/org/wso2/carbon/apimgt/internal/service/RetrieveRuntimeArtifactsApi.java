@@ -43,7 +43,7 @@ RetrieveRuntimeArtifactsApiService delegate = new RetrieveRuntimeArtifactsApiSer
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "List of runtime Artifacts", response = Void.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response retrieveRuntimeArtifactsGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @NotNull @ApiParam(value = "**Search condition**.  type of gateway ",required=true)  @QueryParam("type") String type,  @NotNull @ApiParam(value = "**Search condition**.  Data-plane ID ",required=true)  @QueryParam("dataPlaneId") String dataPlaneId) throws APIManagementException{
-        return delegate.retrieveRuntimeArtifactsGet(xWSO2Tenant, type, dataPlaneId, securityContext);
+    public Response retrieveRuntimeArtifactsGet( @NotNull @ApiParam(value = "**Search condition**.  type of gateway ",required=true)  @QueryParam("type") String type,  @NotNull @ApiParam(value = "**Search condition**.  Data-plane ID ",required=true)  @QueryParam("dataPlaneId") String dataPlaneId) throws APIManagementException{
+        return delegate.retrieveRuntimeArtifactsGet(type, dataPlaneId, securityContext);
     }
 }

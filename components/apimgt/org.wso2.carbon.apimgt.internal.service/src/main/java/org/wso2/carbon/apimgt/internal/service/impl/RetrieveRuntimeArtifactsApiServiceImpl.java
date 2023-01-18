@@ -28,10 +28,8 @@ import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.RuntimeArtifactGeneratorUtil;
 import org.wso2.carbon.apimgt.internal.service.RetrieveRuntimeArtifactsApiService;
 import org.wso2.carbon.apimgt.internal.service.dto.SynapseArtifactListDTO;
-import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -45,16 +43,17 @@ import java.util.List;
 public class RetrieveRuntimeArtifactsApiServiceImpl implements RetrieveRuntimeArtifactsApiService {
 
     @Override
-    public Response retrieveRuntimeArtifactsGet(String xWSO2Tenant, String type, String dataPlaneId,
-                                                MessageContext messageContext) throws APIManagementException {
+    public Response retrieveRuntimeArtifactsGet(String type, String dataPlaneId, MessageContext messageContext)
+            throws APIManagementException {
         RuntimeArtifactDto runtimeArtifactDto;
-        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         String organization = RestApiUtil.getOrganization(messageContext);
-        if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
-            xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
+        if (StringUtils.isEmpty(organization)) {
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(RestApiUtil.getErrorDTO(ExceptionCodes.ORGANIZATION_NOT_FOUND))
+                    .build();
         }
-        if (StringUtils.isNotEmpty(organization) && organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) &&
-                xWSO2Tenant.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+        if (organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
             runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(dataPlaneId, type);
         } else {
             runtimeArtifactDto
