@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -80,6 +81,8 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
         Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenantWithoutRoleMappings(MultitenantUtils
                 .getTenantDomain(RestApiCommonUtil.getLoggedInUsername()));
         ScopeListDTO scopeListDTO = SystemScopesMappingUtil.fromScopeListToScopeListDTO(scopeRoleMapping);
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ROLES_FOR_SCOPE, APIConstants.AuditLogConstants.ROLES_FOR_SCOPE_INFO,
+                APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
         return Response.ok().entity(scopeListDTO).build();
     }
 
@@ -110,6 +113,8 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
             roleAliasListDTO = SystemScopesMappingUtil.fromRoleAliasListToRoleAliasListDTO(
                     SystemScopesMappingUtil.createMapOfRoleMapping((roleMapping)));
         }
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SYSTEM_SCOPE_ROLE_ALIASES, new Gson().toJson(roleAliasListDTO),
+                APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
         return Response.ok().entity(roleAliasListDTO).build();
     }
 }
