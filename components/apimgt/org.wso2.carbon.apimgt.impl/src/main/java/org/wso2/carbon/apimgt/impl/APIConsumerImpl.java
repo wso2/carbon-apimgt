@@ -869,7 +869,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             } catch (WorkflowException e) {
                 //If the workflow execution fails, roll back transaction by removing the subscription entry.
                 apiMgtDAO.removeSubscriptionById(subscriptionId);
-                log.error("Could not execute Workflow", e);
                 throw new APIManagementException("Could not execute Workflow", e);
             } finally {
                 if (isTenantFlowStarted) {
@@ -2393,7 +2392,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             return keyDetails;
         } catch (WorkflowException e) {
-            log.error("Could not execute Workflow", e);
             throw new APIManagementException(e);
         } finally {
             if (isTenantFlowStarted) {
