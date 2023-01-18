@@ -396,7 +396,6 @@ public class JWTValidator {
      * Validates token for Websocket requests.
      *
      * @param signedJWTInfo  SignedJWT Info
-     * @param tokenSignature Token Signature
      * @param jti            JTI
      * @return JWT Validation Info
      * @throws APISecurityException If an error occurs
