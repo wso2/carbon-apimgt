@@ -18,10 +18,14 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 /**
  * This class represents throttling limit relevant information
  */
-public class ThrottlingLimit {
+public class ThrottlingLimit implements Serializable {
+    private static final long serialVersionUID = 1L;
     private int requestCount;
     private String unit;
 
@@ -44,5 +48,20 @@ public class ThrottlingLimit {
     @Override
     public String toString() {
         return "{ \"requestCount\" : " + this.getRequestCount() + " , \"unit\" : \"" + this.getUnit() + "\" }";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        ThrottlingLimit throttlingLimit = (ThrottlingLimit) o;
+        return requestCount == throttlingLimit.getRequestCount() && unit.equals(throttlingLimit.getUnit());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(requestCount, unit);
     }
 }

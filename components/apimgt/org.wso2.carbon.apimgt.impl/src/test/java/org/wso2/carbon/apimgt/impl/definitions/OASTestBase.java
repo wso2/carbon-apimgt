@@ -27,9 +27,11 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -42,6 +44,8 @@ public class OASTestBase {
     private URITemplate petPost;
     private URITemplate itemPost;
     private URITemplate itemGet;
+    private URITemplate bookGet;
+    private ThrottlingLimit throttlingLimit = new ThrottlingLimit();
 
     public OASTestBase() {
         sampleScope = new Scope();
@@ -64,6 +68,7 @@ public class OASTestBase {
         petGet.setHttpVerbs("GET");
         petGet.setThrottlingTier("Unlimited");
         petGet.setThrottlingTiers("Unlimited");
+        petGet.setThrottlingLimit("Unlimited");
         petGet.setScope(sampleScope);
         petGet.setScopes(sampleScope);
 
@@ -75,6 +80,7 @@ public class OASTestBase {
         petPost.setHttpVerbs("POST");
         petPost.setThrottlingTier("Unlimited");
         petPost.setThrottlingTiers("Unlimited");
+        petPost.setThrottlingLimit("Unlimited");
         petPost.setScope(sampleScope);
         petPost.setScopes(sampleScope);
 
@@ -86,6 +92,7 @@ public class OASTestBase {
         itemPost.setHttpVerbs("POST");
         itemPost.setThrottlingTier("Unlimited");
         itemPost.setThrottlingTiers("Unlimited");
+        itemPost.setThrottlingLimit("Unlimited");
         itemPost.setScope(sampleScope);
         itemPost.setScopes(sampleScope);
 
@@ -97,8 +104,23 @@ public class OASTestBase {
         itemGet.setHttpVerbs("GET");
         itemGet.setThrottlingTier("Unlimited");
         itemGet.setThrottlingTiers("Unlimited");
+        itemGet.setThrottlingLimit("Unlimited");
         itemGet.setScope(sampleScope);
         itemGet.setScopes(sampleScope);
+
+        bookGet = new URITemplate();
+        bookGet.setUriTemplate("/books");
+        bookGet.setAuthType("Application & Application User");
+        bookGet.setAuthTypes("Application & Application User");
+        bookGet.setHTTPVerb("GET");
+        bookGet.setHttpVerbs("GET");
+        bookGet.setThrottlingTier("");
+        bookGet.setThrottlingTiers(new ArrayList<>());
+        throttlingLimit.setRequestCount(12310);
+        throttlingLimit.setUnit("min");
+        bookGet.setThrottlingLimit(throttlingLimit);
+        bookGet.setScope(sampleScope);
+        bookGet.setScopes(sampleScope);
     }
 
     public void testGetURITemplates(APIDefinition parser, String content) throws Exception {
@@ -112,6 +134,7 @@ public class OASTestBase {
         exUriTemplate.setHttpVerbs("GET");
         exUriTemplate.setThrottlingTier("Unlimited");
         exUriTemplate.setThrottlingTiers("Unlimited");
+        exUriTemplate.setThrottlingLimit("Unlimited");
         exUriTemplate.setScope(extensionScope);
         exUriTemplate.setScopes(extensionScope);
 
@@ -129,6 +152,11 @@ public class OASTestBase {
         uriTemplates = parser.getURITemplates(scopesInExtensionAndSec);
         Assert.assertEquals(1, uriTemplates.size());
         Assert.assertTrue(uriTemplates.contains(petGet));
+
+        String throttlingLimitExtensionUriTemplate = jsonObject.getJSONObject("throttlingLimitInExtension").toString();
+        uriTemplates = parser.getURITemplates(throttlingLimitExtensionUriTemplate);
+        Assert.assertEquals(1, uriTemplates.size());
+        Assert.assertTrue(uriTemplates.contains(bookGet));
     }
 
     public void testGetScopes(APIDefinition parser, String content) throws Exception {
@@ -231,17 +259,18 @@ public class OASTestBase {
 
         // Add operation and path to API object
         String lessResourcesInDefinition = jsonObject.getJSONObject("lessResourcesInDefinition").toString();
-        api.setUriTemplates(new HashSet<>(Arrays.asList(petGet, petPost, itemGet, itemPost)));
+        api.setUriTemplates(new HashSet<>(Arrays.asList(petGet, petPost, itemGet, itemPost, bookGet)));
         definition = parser.generateAPIDefinition(new SwaggerData(api), lessResourcesInDefinition);
         response = parser.validateAPIDefinition(definition, false);
         Assert.assertTrue(response.isValid());
         Assert.assertTrue(response.getParser().getClass().equals(parser.getClass()));
         uriTemplates = parser.getURITemplates(definition);
-        Assert.assertEquals(4, uriTemplates.size());
+        Assert.assertEquals(5, uriTemplates.size());
         Assert.assertTrue(uriTemplates.contains(petGet));
         Assert.assertTrue(uriTemplates.contains(petPost));
         Assert.assertTrue(uriTemplates.contains(itemGet));
         Assert.assertTrue(uriTemplates.contains(itemPost));
+        Assert.assertTrue(uriTemplates.contains(bookGet));
     }
 
     public String testGenerateAPIDefinitionWithExtension(APIDefinition parser, String content) throws Exception {
@@ -262,6 +291,7 @@ public class OASTestBase {
         updatedItemGet.setHttpVerbs("GET");
         updatedItemGet.setThrottlingTier("Unlimited");
         updatedItemGet.setThrottlingTiers("Unlimited");
+        updatedItemGet.setThrottlingLimit("Unlimited");
         updatedItemGet.setScope(newScope);
         updatedItemGet.setScopes(newScope);
 
@@ -285,6 +315,7 @@ public class OASTestBase {
         uriTemplate.setUriTemplate(uriTemplateString);
         uriTemplate.setThrottlingTier("Unlimited");
         uriTemplate.setThrottlingTiers("Unlimited");
+        uriTemplate.setThrottlingLimit("Unlimited");
         uriTemplate.setScope(null);
         return uriTemplate;
     }
