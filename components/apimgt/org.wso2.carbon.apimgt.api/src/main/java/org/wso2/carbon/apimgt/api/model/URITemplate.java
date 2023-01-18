@@ -353,7 +353,7 @@ public class URITemplate implements Serializable{
         if (applicableLevel != null ? !applicableLevel.equals(that.applicableLevel) : that.applicableLevel != null) {
             return false;
         }
-        if (!throttlingTier.equals(that.throttlingTier)) {
+        if (throttlingTier!= null && !throttlingTier.equals(that.throttlingTier)) {
             return false;
         }
         if (!throttlingTiers.equals(that.throttlingTiers)) {
@@ -366,6 +366,9 @@ public class URITemplate implements Serializable{
             return false;
         }
         if (scopes != null ? !scopes.equals(that.scopes) : that.scopes != null) {
+            return false;
+        }
+        if (throttlingLimit != null ? !throttlingLimit.equals(that.throttlingLimit) : that.throttlingLimit != null) {
             return false;
         }
         if (mediationScripts != null ? !mediationScripts.equals(that.mediationScripts) : that.mediationScripts !=
@@ -388,6 +391,7 @@ public class URITemplate implements Serializable{
         result = 31 * result + (throttlingConditions != null ? throttlingConditions.hashCode() : 0);
         result = 31 * result + (applicableLevel != null ? applicableLevel.hashCode() : 0);
         result = 31 * result + (throttlingTier != null ? throttlingTier.hashCode() : 0);
+        result = 31 * result + (throttlingLimit != null ? throttlingLimit.hashCode() : 0);
         result = 31 * result + (throttlingTiers != null ? throttlingTiers.hashCode() : 0);
         result = 31 * result + (scope != null ? scope.hashCode() : 0);
         result = 31 * result + (mediationScript != null ? mediationScript.hashCode() : 0);
@@ -470,11 +474,10 @@ public class URITemplate implements Serializable{
                 convertedThrottlingLimit.setUnit("min");
                 break;
             default:
-            case "Unlimited":
+                // handles Unlimited value unmatched throttle tier values
                 convertedThrottlingLimit.setRequestCount(-1);
                 convertedThrottlingLimit.setUnit("min");
                 break;
-
         }
         this.throttlingLimit = convertedThrottlingLimit;
     }

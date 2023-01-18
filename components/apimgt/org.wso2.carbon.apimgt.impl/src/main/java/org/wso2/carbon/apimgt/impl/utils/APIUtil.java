@@ -10158,13 +10158,14 @@ public final class APIUtil {
     }
 
     /**
-     * Gives the throttling limit details from the string value relevant to the x-throttling-limit in API defnition file
+     * Gives the throttling limit details from the string value relevant to the x-throttling-limit in API definition file
      *
      * @param throttlingLimitStr x-throttling-limit string value
      * @return Throttling limit object with relevant throttling data
      * @throws APIManagementException If an error happens when parsing the string
      */
-    public static ThrottlingLimit getThrottlingLimitFromAPIDefinitionString(String throttlingLimitStr) throws APIManagementException {
+    public static ThrottlingLimit getThrottlingLimitFromXThrottlingLimitString(String throttlingLimitStr) throws
+            APIManagementException {
         ThrottlingLimit throttlingLimit = new ThrottlingLimit();
         JSONParser parser = new JSONParser();
         JSONObject jsonObject;
@@ -10176,6 +10177,37 @@ public final class APIUtil {
         }
         throttlingLimit.setRequestCount(((Long) jsonObject.get("requestCount")).intValue());
         throttlingLimit.setUnit((String) jsonObject.get("unit"));
+        return throttlingLimit;
+    }
+
+    /**
+     * Existing APIs contains the throttling tier value as a string. This method assigns the throttling limit in
+     * SwaggerData object's throttleLimit field considering the throttling tier string value.
+     *
+     * @param throttlingTierStr String value relevant to the throttling tier
+     * @return ThrottleLimit object from throttling tier String value
+     */
+    public static ThrottlingLimit getThrottlingLimitFromThrottlingTier(String throttlingTierStr) {
+        ThrottlingLimit throttlingLimit = new ThrottlingLimit();
+        switch (throttlingTierStr) {
+            case "10KPerMin":
+                throttlingLimit.setRequestCount(10000);
+                throttlingLimit.setUnit("min");
+                break;
+            case "20KPerMin":
+                throttlingLimit.setRequestCount(20000);
+                throttlingLimit.setUnit("min");
+                break;
+            case "50KPerMin":
+                throttlingLimit.setRequestCount(50000);
+                throttlingLimit.setUnit("min");
+                break;
+            default:
+                // handles Unlimited value unmatched throttle tier values
+                throttlingLimit.setRequestCount(-1);
+                throttlingLimit.setUnit("min");
+                break;
+        }
         return throttlingLimit;
     }
 }
