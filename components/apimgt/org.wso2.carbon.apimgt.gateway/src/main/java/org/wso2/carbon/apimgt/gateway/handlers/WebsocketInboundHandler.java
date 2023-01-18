@@ -100,8 +100,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
         if (APIUtil.isAnalyticsEnabled()) {
-            WebSocketUtils.setApiPropertyToChannel(ctx, Constants.REQUEST_START_TIME_PROPERTY,
-                    System.currentTimeMillis());
             // Resets the property since context is shared. 
             // If this property is non-zero, it means that the frame is coming from backend, to client.
             // If not, it means that the frame is coming from client, to backend.
