@@ -353,7 +353,7 @@ public class URITemplate implements Serializable{
         if (applicableLevel != null ? !applicableLevel.equals(that.applicableLevel) : that.applicableLevel != null) {
             return false;
         }
-        if (throttlingTier!= null && !throttlingTier.equals(that.throttlingTier)) {
+        if (throttlingTier != null && !throttlingTier.equals(that.throttlingTier)) {
             return false;
         }
         if (!throttlingTiers.equals(that.throttlingTiers)) {
