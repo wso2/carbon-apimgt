@@ -67,6 +67,11 @@ public abstract class AbstractRequestDataPublisher implements RequestDataPublish
                         break;
                     }
                 }
+                try {
+                    counterMetric.incrementCount(builder);
+                } catch (MetricReportingException e) {
+                    log.error("Error occurred when publishing event.", e);
+                }
             }
         }
     }
