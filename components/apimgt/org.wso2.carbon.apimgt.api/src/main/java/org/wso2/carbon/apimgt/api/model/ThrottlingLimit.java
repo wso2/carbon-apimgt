@@ -46,11 +46,6 @@ public class ThrottlingLimit implements Serializable {
     }
 
     @Override
-    public String toString() {
-        return "{ \"requestCount\" : " + this.getRequestCount() + " , \"unit\" : \"" + this.getUnit() + "\" }";
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o)
             return true;

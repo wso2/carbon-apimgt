@@ -400,8 +400,8 @@ public class OAS2Parser extends APIDefinition {
                             APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
                         // retrieves x-throttling-tier string value from the API definition file and converts it
                         // to the relevant throttling limit
-                        String tlString = extensions.get(APIConstants.SWAGGER_X_THROTTLING_LIMIT).toString();
-                        template.setThrottlingLimit(APIUtil.getThrottlingLimitFromXThrottlingLimitString(tlString));
+                        template.setThrottlingLimit(OASParserUtil.getThrottlingLimitFromJSON(
+                                extensions.get(APIConstants.SWAGGER_X_THROTTLING_LIMIT)));
                     } else {
                         template.setThrottlingLimit(APIUtil.getDefaultThrottleLimit().toString());
                     }
@@ -944,14 +944,15 @@ public class OAS2Parser extends APIDefinition {
         // assigns x-throttling-limit extension
         if (resource.getThrottlingLimit() != null) {
             if (!resource.getThrottlingLimit().toString().isEmpty()) {
-                operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, resource.getThrottlingLimit().toString());
+                operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil
+                        .getThrottlingLimitJSON(resource.getThrottlingLimit()));
             } else {
                 operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
-                        APIUtil.getThrottlingLimitFromThrottlingTier(resource.getPolicy()).toString());
+                        APIUtil.getThrottlingLimitFromThrottlingTier(resource.getPolicy()));
             }
         } else {
             operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
-                    APIUtil.getDefaultThrottleLimit().toString());
+                    APIUtil.getDefaultThrottleLimit());
         }
         // AWS Lambda: set arn & timeout to swagger
         if (resource.getAmznResourceName() != null) {

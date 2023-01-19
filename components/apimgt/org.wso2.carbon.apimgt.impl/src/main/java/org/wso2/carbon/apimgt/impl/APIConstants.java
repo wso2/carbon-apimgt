@@ -1526,6 +1526,8 @@ public final class APIConstants {
     public static final String WSO2_APP_SECURITY_TYPES = "security-types";
     public static final String OPTIONAL = "optional";
     public static final String MANDATORY = "mandatory";
+    public static final String REQUEST_COUNT = "requestCount";
+    public static final String REQUEST_COUNT_UNIT = "unit";
     public static final String RESPONSE_CACHING_ENABLED = "enabled";
     public static final String RESPONSE_CACHING_TIMEOUT = "cacheTimeoutInSeconds";
     public static final String SWAGGER_X_WSO2_SCOPES = "x-wso2-scopes";

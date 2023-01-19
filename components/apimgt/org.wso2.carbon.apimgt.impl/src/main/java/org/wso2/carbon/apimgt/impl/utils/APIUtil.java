@@ -10184,7 +10184,7 @@ public final class APIUtil {
                 throttlingLimit.setUnit("min");
                 break;
             default:
-                // handles Unlimited value unmatched throttle tier values
+                // handles Unlimited value and unmatched throttle tier values
                 throttlingLimit.setRequestCount(-1);
                 throttlingLimit.setUnit("min");
                 break;

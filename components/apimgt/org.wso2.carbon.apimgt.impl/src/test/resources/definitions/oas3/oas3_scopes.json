@@ -210,7 +210,10 @@
           }],
           "x-auth-type": "Application & Application User",
           "x-throttling-tier": "",
-          "x-throttling-limit": "{ \"requestCount\" : 12310 , \"unit\" : \"min\" }"
+          "x-throttling-limit": {
+            "requestCount" : 12310 ,
+            "unit" : "min"
+          }
         }
       }
     },
