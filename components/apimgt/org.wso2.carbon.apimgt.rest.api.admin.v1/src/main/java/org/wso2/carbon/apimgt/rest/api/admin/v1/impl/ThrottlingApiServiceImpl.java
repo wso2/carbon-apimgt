@@ -549,7 +549,6 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
         }
 
         log.debug("Extracting query info...");
-
         try{
             filters = Splitter.on(" ").withKeyValueSeparator(":").split(query);
         } catch (IllegalArgumentException ex) {
