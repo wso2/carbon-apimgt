@@ -457,12 +457,8 @@ public class OAS3Parser extends APIDefinition {
                         // assigns x-throttling-limit value if x-throttling-tier is not available
                         if (template.getThrottlingLimit() == null && extensions.containsKey(
                                 APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
-                            // retrieves x-throttling-tier string value from the API definition file and converts it
-                            // to the relevant throttling limit
-                            String tlString = extensions.get(APIConstants.SWAGGER_X_THROTTLING_LIMIT).toString();
-                            template.setThrottlingLimit(APIUtil.getThrottlingLimitFromXThrottlingLimitString(tlString));
-                        } else {
-                            template.setThrottlingLimit(APIUtil.getDefaultThrottleLimit().toString());
+                            template.setThrottlingLimit(OASParserUtil.getThrottlingLimitFromJSON(
+                                    extensions.get(APIConstants.SWAGGER_X_THROTTLING_LIMIT)));
                         }
                         if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
                             String mediationScript = (String) extensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
@@ -1204,14 +1200,15 @@ public class OAS3Parser extends APIDefinition {
         // assigns x-throttling-limit extension
         if (resource.getThrottlingLimit() != null) {
             if (!resource.getThrottlingLimit().toString().isEmpty()) {
-                operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, resource.getThrottlingLimit().toString());
+                operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil.getThrottlingLimitJSON(
+                        resource.getThrottlingLimit()));
             } else {
-                operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
-                        APIUtil.getThrottlingLimitFromThrottlingTier(resource.getPolicy()).toString());
+                operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil.getThrottlingLimitJSON(
+                        APIUtil.getThrottlingLimitFromThrottlingTier(resource.getPolicy())));
             }
         } else {
             operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
-                    APIUtil.getDefaultThrottleLimit().toString());
+                    OASParserUtil.getThrottlingLimitJSON(APIUtil.getDefaultThrottleLimit()));
         }
         // AWS Lambda: set arn & timeout to swagger
         if (resource.getAmznResourceName() != null) {

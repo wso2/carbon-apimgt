@@ -474,7 +474,7 @@ public class URITemplate implements Serializable{
                 convertedThrottlingLimit.setUnit("min");
                 break;
             default:
-                // handles Unlimited value unmatched throttle tier values
+                // handles Unlimited value and unmatched throttle tier values
                 convertedThrottlingLimit.setRequestCount(-1);
                 convertedThrottlingLimit.setUnit("min");
                 break;

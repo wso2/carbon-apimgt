@@ -83,6 +83,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -1394,6 +1395,34 @@ public class OASParserUtil {
         endpointResult.set(APIConstants.WSO2_APP_SECURITY_TYPES, appSecurityTypes);
         endpointResult.put(APIConstants.OPTIONAL, appSecurityOptional);
         return endpointResult;
+    }
+
+    /**
+     * Generated x-throttling-limit value for the API definition
+     *
+     * @param throttlingLimit provides throttling limit details
+     * @return JsonNode relevant to the x-throttling-limit
+     */
+    static JsonNode getThrottlingLimitJSON(ThrottlingLimit throttlingLimit) {
+        ObjectNode throttlingLimitJson = objectMapper.createObjectNode();
+        throttlingLimitJson.put(APIConstants.REQUEST_COUNT, throttlingLimit.getRequestCount());
+        throttlingLimitJson.put(APIConstants.REQUEST_COUNT_UNIT, throttlingLimit.getUnit());
+        return throttlingLimitJson;
+    }
+
+    /**
+     * Generates throttling limit details from the x-throttling-limit in API definition
+     *
+     * @param throttlingLimitJSON Value relevant to the x-throttling-limit field
+     * @return throttling limit details
+     */
+    static ThrottlingLimit getThrottlingLimitFromJSON(Object throttlingLimitJSON) {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode tlObjectNode = mapper.convertValue(throttlingLimitJSON, ObjectNode.class);
+        ThrottlingLimit throttlingLimit = new ThrottlingLimit();
+        throttlingLimit.setRequestCount(mapper.convertValue(tlObjectNode.get(APIConstants.REQUEST_COUNT), Integer.class));
+        throttlingLimit.setUnit(mapper.convertValue(tlObjectNode.get(APIConstants.REQUEST_COUNT_UNIT), String.class));
+        return throttlingLimit;
     }
 
     /**
