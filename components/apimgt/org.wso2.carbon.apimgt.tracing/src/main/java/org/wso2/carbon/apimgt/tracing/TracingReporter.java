@@ -99,28 +99,30 @@ public class TracingReporter implements Reporter {
      * @return structured log message format String
      */
     private String toStructuredMessage(Instant timeStamp, SpanData span) {
-        try (StringWriter writer = new StringWriter();
-             JsonGenerator generator = this.jsonFactory.createGenerator(writer)) {
-            generator.writeStartObject();
-            generator.writeNumberField(TracingConstants.LATENCY, Duration.between(span.startAt, timeStamp).toMillis());
-            generator.writeStringField(TracingConstants.OPERATION_NAME, span.operationName);
-            generator.writeObjectFieldStart(TracingConstants.TAGS);
-            Iterator<Map.Entry<String, Object>> itr = span.tags.entrySet().iterator();
+        try (StringWriter writer = new StringWriter()) {
+            try (JsonGenerator generator = this.jsonFactory.createGenerator(writer)) {
+                generator.writeStartObject();
+                generator.writeNumberField(TracingConstants.LATENCY, Duration.between(span.startAt,
+                        timeStamp).toMillis());
+                generator.writeStringField(TracingConstants.OPERATION_NAME, span.operationName);
+                generator.writeObjectFieldStart(TracingConstants.TAGS);
+                Iterator<Map.Entry<String, Object>> itr = span.tags.entrySet().iterator();
 
-            Map.Entry<String, Object> map;
-            Object value;
-            while (itr.hasNext()) {
-                map = itr.next();
-                value = map.getValue();
-                if (value instanceof String) {
-                    generator.writeStringField(map.getKey(), (String) value);
-                } else if (value instanceof Number) {
-                    generator.writeNumberField(map.getKey(), ((Number) value).doubleValue());
-                } else if (value instanceof Boolean) {
-                    generator.writeBooleanField(map.getKey(), (Boolean) value);
+                Map.Entry<String, Object> map;
+                Object value;
+                while (itr.hasNext()) {
+                    map = itr.next();
+                    value = map.getValue();
+                    if (value instanceof String) {
+                        generator.writeStringField(map.getKey(), (String) value);
+                    } else if (value instanceof Number) {
+                        generator.writeNumberField(map.getKey(), ((Number) value).doubleValue());
+                    } else if (value instanceof Boolean) {
+                        generator.writeBooleanField(map.getKey(), (Boolean) value);
+                    }
                 }
+                generator.writeEndObject();
             }
-            generator.writeEndObject();
             return writer.toString();
         } catch (IOException e) {
             log.error("Error in structured message", e);
