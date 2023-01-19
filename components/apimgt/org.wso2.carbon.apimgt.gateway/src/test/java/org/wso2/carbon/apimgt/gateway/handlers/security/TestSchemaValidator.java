@@ -322,5 +322,7 @@ public class TestSchemaValidator {
         headers.put(CONTENT_TYPE_HEADER, contentType);
         Mockito.when(axis2MsgContext.getProperty(TRANSPORT_HEADERS)).thenReturn(headers);
         Mockito.when(messageContext.getProperty(RESOURCE_TAG)).thenReturn(resourcePath);
+        Mockito.when((String) messageContext.getProperty((RESTConstants.REST_FULL_REQUEST_PATH))).
+                thenReturn(resourcePath);
     }
 }
