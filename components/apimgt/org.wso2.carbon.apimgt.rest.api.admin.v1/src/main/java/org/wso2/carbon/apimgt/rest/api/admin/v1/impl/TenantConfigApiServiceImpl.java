@@ -23,6 +23,8 @@ import com.google.gson.JsonArray;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.*;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
 
@@ -55,6 +57,8 @@ public class TenantConfigApiServiceImpl implements TenantConfigApiService {
     public Response updateTenantConfig(String body, MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         apiAdmin.updateTenantConfig(RestApiCommonUtil.getLoggedInUserTenantDomain(), body);
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.TENANT_CONFIG, APIConstants.AuditLogConstants.TENANT_CONFIG_INFO,
+                APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
         return Response.ok().entity(body)
                 .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_JSON).build();
     }
