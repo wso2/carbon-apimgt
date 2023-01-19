@@ -9655,6 +9655,9 @@ public final class APIUtil {
                 policyDefinition = new OperationPolicyDefinition();
                 policyDefinition.setContent(yamlContent);
                 policyDefinition.setMd5Hash(getMd5OfOperationPolicyDefinition(policyDefinition));
+                if (StringUtils.equals(APIConstants.CC_POLICY_DEFINITION_EXTENSION, fileExtension)) {
+                    policyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
+                }
             }
         } catch (IOException e) {
             throw new APIManagementException("Error while reading policy specification from path: "
