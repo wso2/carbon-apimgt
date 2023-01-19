@@ -20,7 +20,11 @@ package org.wso2.carbon.apimgt.common.gateway;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
+
+import java.nio.charset.StandardCharsets;
+import java.security.cert.Certificate;
 
 /**
  * Test cases for {@link JWTUtil}
@@ -46,5 +50,19 @@ public class JWTUtilTestCase {
     @Test
     public void testGetJWTClaimsWhenJWTNotAvailable() {
         Assert.assertNull(JWTUtil.getJWTClaims(null));
+    }
+
+    @Test
+    public void testJWTHeader() throws Exception {
+        // Characters are arbitrary
+        String certEncoded = "asdasndlaskjdlaskdjald1321k3jladksj1i3";
+        Certificate cert = Mockito.mock(Certificate.class);
+        Mockito.when(cert.getEncoded()).thenReturn(certEncoded.getBytes(StandardCharsets.UTF_8));
+        String jwt = JWTUtil.generateHeader(cert, "SHA256withRSA", true);
+        Assert.assertNotNull(jwt);
+        Assert.assertTrue(jwt.contains("kid"));
+        jwt = JWTUtil.generateHeader(cert, "SHA256withRSA", false);
+        Assert.assertNotNull(jwt);
+        Assert.assertTrue(jwt.contains("x5t"));
     }
 }

@@ -65,6 +65,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             boolean applicationUpdated = apiConsumer.updateApplicationOwner(owner, organization, application);
             if (applicationUpdated) {
+                String info = "Application ID:" + applicationId + " owner has been changed to " + owner;
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATIONS, info,
+                        APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
                 return Response.ok().build();
             } else {
                 RestApiUtil.handleInternalServerError("Error while updating application owner " + applicationId, log);
