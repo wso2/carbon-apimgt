@@ -71,7 +71,7 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         this.analyticsCustomDataProvider = analyticsCustomDataProvider;
     }
 
-    private AuthenticationContext getAuthenticationContext()  {
+    private AuthenticationContext getAuthenticationContext() {
         Object authContext = WebSocketUtils.getPropertyFromChannel(APISecurityUtils.API_AUTH_CONTEXT, ctx);
         if (authContext != null) {
             return (AuthenticationContext) authContext;
@@ -337,10 +337,7 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     private long getRequestMediationLatency() {
-        if (WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) == null ||
-                (long) WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) == 0 &&
-                        WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_START_TIME_PROPERTY, ctx) != null &&
-                        WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_END_TIME_PROPERTY, ctx) != null) {
+        if (isFrameFromInboundHandler()) {
             return (long) WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_END_TIME_PROPERTY, ctx) -
                     (long) WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_START_TIME_PROPERTY, ctx);
         }
@@ -348,12 +345,23 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     private long getResponseMediationLatency() {
-        if (WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) != null &&
-                (long) WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) != 0 &&
-                WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_END_TIME_PROPERTY, ctx) != null) {
+        if (isFrameFromBackend()) {
             return (long) WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_END_TIME_PROPERTY, ctx) -
                     (long) WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx);
         }
         return 0L;
+    }
+
+    private boolean isFrameFromBackend() {
+        return (WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) != null &&
+                (long) WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) != 0 &&
+                WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_END_TIME_PROPERTY, ctx) != null);
+    }
+
+    private boolean isFrameFromInboundHandler() {
+        return (WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) == null ||
+                (long) WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) == 0 &&
+                        WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_START_TIME_PROPERTY, ctx) != null &&
+                        WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_END_TIME_PROPERTY, ctx) != null);
     }
 }
