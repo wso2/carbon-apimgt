@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketAnalyticsMetricsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
@@ -57,7 +58,10 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-
+        if (APIUtil.isAnalyticsEnabled()) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, Constants.BACKEND_START_TIME_PROPERTY,
+                    System.currentTimeMillis());
+        }
         String channelId = ctx.channel().id().asLongText();
         InboundMessageContext inboundMessageContext;
         if (InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().containsKey(channelId)) {
@@ -71,8 +75,7 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
         }
 
         if (APIUtil.isAnalyticsEnabled()) {
-            WebSocketUtils.setApiPropertyToChannel(ctx,
-                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_START_TIME_PROPERTY,
+            WebSocketUtils.setApiPropertyToChannel(ctx, Constants.REQUEST_START_TIME_PROPERTY,
                     System.currentTimeMillis());
         }
 
@@ -123,11 +126,19 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
                             ctx.channel().toString());
                 }
                 outboundHandler().write(ctx, msg, promise);
+                if (APIUtil.isAnalyticsEnabled()) {
+                    WebSocketUtils.setApiPropertyToChannel(ctx, Constants.BACKEND_END_TIME_PROPERTY,
+                            System.currentTimeMillis());
+                }
                 // publish analytics events if analytics is enabled
                 publishSubscribeEvent(ctx);
             }
         } else {
             outboundHandler().write(ctx, msg, promise);
+            if (APIUtil.isAnalyticsEnabled()) {
+                WebSocketUtils.setApiPropertyToChannel(ctx, Constants.BACKEND_END_TIME_PROPERTY,
+                        System.currentTimeMillis());
+            }
         }
     }
 
