@@ -474,6 +474,7 @@ public class InboundWebsocketProcessorUtil {
                         if (info != null) {
                             inboundMessageContext.setKeyType(info.getType());
                             inboundMessageContext.setInfoDTO(info);
+                            inboundMessageContext.setToken(info.getEndUserToken());
                             return info.isAuthorized();
                         }
                     }
