@@ -16,6 +16,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -23,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ApiCategoriesApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APICategoryDTO;
@@ -85,6 +87,8 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
             APICategoryDTO categoryDTO = APICategoryMappingUtil.
                     fromCategoryToCategoryDTO(apiAdmin.addCategory(apiCategory, userName, organization));
             URI location = new URI(RestApiConstants.RESOURCE_PATH_CATEGORY + "/" + categoryDTO.getId());
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API_CATEGORIES, new Gson().toJson(categoryDTO),
+                    APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());
             return Response.created(location).entity(categoryDTO).build();
         } catch (APIManagementException | URISyntaxException e) {
             String errorMessage = "Error while adding new API Category '" + body.getName() + "' - " + e.getMessage();
@@ -125,6 +129,8 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
             apiAdmin.updateCategory(apiCategoryToUpdate);
             APICategory updatedAPICategory = apiAdmin.getAPICategoryByID(apiCategoryId);
             APICategoryDTO updatedAPICategoryDTO = APICategoryMappingUtil.fromCategoryToCategoryDTO(updatedAPICategory);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API_CATEGORIES, new Gson().toJson(updatedAPICategoryDTO),
+                    APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
             return Response.ok().entity(updatedAPICategoryDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating API Category '" + body.getName() + "' - " + e.getMessage();
@@ -139,6 +145,9 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
             APIAdmin apiAdmin = new APIAdminImpl();
             String userName = RestApiCommonUtil.getLoggedInUsername();
             apiAdmin.deleteCategory(apiCategoryId, userName);
+            String info = "{'id':'" + apiCategoryId + "'}";
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API_CATEGORIES, info,
+                    APIConstants.AuditLogConstants.DELETED, RestApiCommonUtil.getLoggedInUsername());
             return Response.ok().build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting API Category '" + apiCategoryId + "' - " + e.getMessage();

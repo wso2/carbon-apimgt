@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.keymgt.token;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -226,12 +228,13 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                     String claimURI = it.next();
                     String claimVal = standardClaims.get(claimURI);
                     List<String> claimList = new ArrayList<String>();
-                    if (claimVal != null && claimVal.contains("{")) {
-                        ObjectMapper mapper = new ObjectMapper();
+                    if (claimVal != null && ((claimVal.startsWith("[") && claimVal.endsWith("]"))
+                            || claimVal.contains("{"))) {
+                        JSONParser jsonParser = new JSONParser(JSONParser.ACCEPT_SIMPLE_QUOTE);
                         try {
-                            Map<String, String> map = mapper.readValue(claimVal, Map.class);
-                            jwtClaimsSetBuilder.claim(claimURI, map);
-                        } catch (IOException e) {
+                            Object jsonObj = jsonParser.parse(claimVal);
+                            jwtClaimsSetBuilder.claim(claimURI, jsonObj);
+                        } catch (ParseException e) {
                             // Exception isn't thrown in order to generate jwt without claim, even if an error is
                             // occurred during the retrieving claims.
                             log.error(String.format("Error while reading claim values for %s", claimVal), e);

@@ -71,7 +71,7 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         this.analyticsCustomDataProvider = analyticsCustomDataProvider;
     }
 
-    private AuthenticationContext getAuthenticationContext()  {
+    private AuthenticationContext getAuthenticationContext() {
         Object authContext = WebSocketUtils.getPropertyFromChannel(APISecurityUtils.API_AUTH_CONTEXT, ctx);
         if (authContext != null) {
             return (AuthenticationContext) authContext;
@@ -226,7 +226,13 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     @Override
     public Latencies getLatencies() {
         // Not applicable
-        return new Latencies();
+        long requestMediationLatency = getRequestMediationLatency();
+        long responseMediationLatency = getResponseMediationLatency();
+
+        Latencies latencies = new Latencies();
+        latencies.setRequestMediationLatency(requestMediationLatency);
+        latencies.setResponseMediationLatency(responseMediationLatency);
+        return latencies;
     }
 
     @Override
@@ -290,15 +296,6 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
-    public String getUserName() {
-        Object authContext = WebSocketUtils.getPropertyFromChannel(APISecurityUtils.API_AUTH_CONTEXT, ctx);
-        if (authContext != null && authContext instanceof AuthenticationContext) {
-            return ((AuthenticationContext)authContext).getUsername();
-        }
-        return null;
-    }
-
-    @Override
     public String getEndUserIP() {
         Object userIp = WebSocketUtils.getPropertyFromChannel(Constants.USER_IP_PROPERTY, ctx);
         if (userIp != null) {
@@ -320,6 +317,16 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
         return customProperties;
     }
+    
+    @Override
+    public String getUserName() {
+
+        Object authContext = WebSocketUtils.getPropertyFromChannel(APISecurityUtils.API_AUTH_CONTEXT, ctx);
+        if (authContext != null && authContext instanceof AuthenticationContext) {
+            return ((AuthenticationContext) authContext).getUsername();
+        }
+        return null;
+    }
 
     private String getApiContext() {
 
@@ -330,4 +337,32 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         return null;
     }
 
+    private long getRequestMediationLatency() {
+        if (isFrameFromInboundHandler()) {
+            return (long) WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_END_TIME_PROPERTY, ctx) -
+                    (long) WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_START_TIME_PROPERTY, ctx);
+        }
+        return 0L;
+    }
+
+    private long getResponseMediationLatency() {
+        if (isFrameFromBackend()) {
+            return (long) WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_END_TIME_PROPERTY, ctx) -
+                    (long) WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx);
+        }
+        return 0L;
+    }
+
+    private boolean isFrameFromBackend() {
+        return (WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) != null &&
+                (long) WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) != 0 &&
+                WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_END_TIME_PROPERTY, ctx) != null);
+    }
+
+    private boolean isFrameFromInboundHandler() {
+        return (WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) == null ||
+                (long) WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) == 0 &&
+                        WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_START_TIME_PROPERTY, ctx) != null &&
+                        WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_END_TIME_PROPERTY, ctx) != null);
+    }
 }
