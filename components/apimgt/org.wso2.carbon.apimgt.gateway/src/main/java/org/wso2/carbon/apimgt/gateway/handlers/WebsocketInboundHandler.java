@@ -36,6 +36,8 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
+import org.apache.axis2.description.TransportOutDescription;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -157,6 +159,24 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     }
                     if (StringUtils.isEmpty(backendJwtHeader)) {
                         backendJwtHeader = APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER;
+                    }
+                    boolean isSSLEnabled = ctx.channel().pipeline().get("ssl") != null;
+                    String prefix = null;
+                    AxisConfiguration axisConfiguration = ServiceReferenceHolder.getInstance()
+                            .getServerConfigurationContext().getAxisConfiguration();
+                    TransportOutDescription transportOut;
+                    if (isSSLEnabled) {
+                        transportOut = axisConfiguration.getTransportOut(APIMgtGatewayConstants.WS_SECURED);
+                    } else {
+                        transportOut = axisConfiguration.getTransportOut(APIMgtGatewayConstants.WS_NOT_SECURED);
+                    }
+                    if (transportOut != null
+                            && transportOut.getParameter(APIMgtGatewayConstants.WS_CUSTOM_HEADER) != null) {
+                        prefix = String.valueOf(transportOut.getParameter(APIMgtGatewayConstants.WS_CUSTOM_HEADER)
+                                .getValue());
+                    }
+                    if (StringUtils.isNotEmpty(prefix)) {
+                        backendJwtHeader = prefix + backendJwtHeader;
                     }
                     req.headers().set(backendJwtHeader, inboundMessageContext.getToken());
                 }
