@@ -41,7 +41,7 @@ public class FaultyRequestDataPublisher extends AbstractRequestDataPublisher {
         try {
             return AnalyticsDataPublisher.getInstance().getFaultyMetricReporters();
         } catch (MetricCreationException e) {
-            log.error("Unable to get faulty counter metrics",e);
+            log.error("Unable to get faulty counter metrics", e);
             return null;
         }
     }

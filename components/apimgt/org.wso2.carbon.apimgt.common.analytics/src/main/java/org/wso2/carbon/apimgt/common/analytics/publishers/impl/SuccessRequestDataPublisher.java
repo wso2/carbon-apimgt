@@ -41,7 +41,7 @@ public class SuccessRequestDataPublisher extends AbstractRequestDataPublisher {
         try {
             return AnalyticsDataPublisher.getInstance().getSuccessMetricReporters();
         } catch (MetricCreationException e) {
-            log.error("Unable to get success counter metrics",e);
+            log.error("Unable to get success counter metrics", e);
             return null;
         }
     }
