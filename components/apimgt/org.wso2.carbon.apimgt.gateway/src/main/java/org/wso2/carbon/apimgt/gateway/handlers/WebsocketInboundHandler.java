@@ -41,6 +41,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.SynapseConstants;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
@@ -54,6 +55,7 @@ import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContextDataHolder;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundWebSocketProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -147,7 +149,16 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 setApiAuthPropertiesToChannel(ctx, inboundMessageContext);
                 setApiPropertiesMapToChannel(ctx, inboundMessageContext);
                 if (StringUtils.isNotEmpty(inboundMessageContext.getToken())) {
-                    req.headers().set(APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER, inboundMessageContext.getToken());
+                    String backendJwtHeader = null;
+                    JWTConfigurationDto jwtConfigurationDto = ServiceReferenceHolder.getInstance()
+                            .getAPIManagerConfiguration().getJwtConfigurationDto();
+                    if (jwtConfigurationDto != null) {
+                        backendJwtHeader = jwtConfigurationDto.getJwtHeader();
+                    }
+                    if (StringUtils.isEmpty(backendJwtHeader)) {
+                        backendJwtHeader = APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER;
+                    }
+                    req.headers().set(backendJwtHeader, inboundMessageContext.getToken());
                 }
                 ctx.fireChannelRead(req);
                 publishHandshakeEvent(ctx, inboundMessageContext);
