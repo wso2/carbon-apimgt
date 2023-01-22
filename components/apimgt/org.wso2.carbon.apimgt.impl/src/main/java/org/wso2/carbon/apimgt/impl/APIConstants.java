@@ -1384,6 +1384,9 @@ public final class APIConstants {
         public static final String ENDPOINT_SECURITY_TYPE = "type";
         public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
         public static final String ENDPOINT_SECURITY_USERNAME = "username";
+        public static final String TOKEN_ENDPOINT_AUTH_METHOD = "token_endpoint_auth_method";
+        public static final String TOKEN_ENDPOINT_AUTH_BASIC = "client_secret_basic";
+        public static final String TOKEN_ENDPOINT_AUTH_NONE = "none";
 
         private OAuthConstants() {
 

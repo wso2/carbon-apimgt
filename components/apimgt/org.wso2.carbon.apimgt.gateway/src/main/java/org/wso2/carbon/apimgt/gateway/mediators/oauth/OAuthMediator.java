@@ -120,6 +120,14 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
             log.debug("Token Response is empty...");
         }
         messageContext.setProperty(APIMgtGatewayConstants.OAUTH_ENDPOINT_INSTANCE, oAuthEndpoint);
+        Object tokenEndpointAuthMethodProperty = messageContext
+                .getProperty(APIConstants.OAuthConstants.TOKEN_ENDPOINT_AUTH_METHOD);
+        if (tokenEndpointAuthMethodProperty != null) {
+            String tokenEndpointAuthMethod = (String) tokenEndpointAuthMethodProperty;
+            if (StringUtils.isNotEmpty(tokenEndpointAuthMethod)) {
+                oAuthEndpoint.setTokenEndpointAuthMethod(tokenEndpointAuthMethod);
+            }
+        }
         return true;
     }
 

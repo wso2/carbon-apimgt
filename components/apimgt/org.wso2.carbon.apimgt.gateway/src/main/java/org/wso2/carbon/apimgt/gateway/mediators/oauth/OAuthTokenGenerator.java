@@ -115,7 +115,7 @@ public class OAuthTokenGenerator {
         TokenResponse tokenResponse = OAuthClient.generateToken(oAuthEndpoint.getTokenApiUrl(),
                 oAuthEndpoint.getClientId(), oAuthEndpoint.getClientSecret(), oAuthEndpoint.getUsername(),
                 oAuthEndpoint.getPassword(), oAuthEndpoint.getGrantType(), oAuthEndpoint.getCustomParameters(),
-                refreshToken);
+                refreshToken, oAuthEndpoint.getTokenEndpointAuthMethod());
 
         assert tokenResponse != null;
         if (tokenResponse.getExpiresIn() != null) {

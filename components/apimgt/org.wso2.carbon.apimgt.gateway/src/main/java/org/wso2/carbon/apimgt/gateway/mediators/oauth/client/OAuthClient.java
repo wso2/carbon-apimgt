@@ -65,22 +65,58 @@ public class OAuthClient {
      * @throws APIManagementException In the event of an unexpected HTTP status code from the backend
      */
     public static TokenResponse generateToken(String url, String clientId, String clientSecret,
-            String username, char[] password, String grantType, JSONObject customParameters, String refreshToken)
+                                              String username, char[] password, String grantType, JSONObject customParameters, String refreshToken)
             throws IOException, APIManagementException, ParseException {
+        return generateToken(url, clientId, clientSecret, username, password, grantType, customParameters, refreshToken,
+                APIConstants.OAuthConstants.TOKEN_ENDPOINT_AUTH_BASIC);
+    }
+
+
+    /**
+     * Method to generate the access token for an OAuth backend
+     * @param url The token url of the backend
+     * @param clientId The Client ID
+     * @param clientSecret The Client Secret
+     * @param username The username
+     * @param password The password
+     * @param grantType The grant type
+     * @param customParameters The custom parameters JSON Object
+     * @param refreshToken The refresh token
+     * @param tokenEndpointAuthMethod       Token Endpoint Auth Type
+     *                                          client_secret_basic
+     *                                          none
+     * @return TokenResponse object
+     * @throws IOException In the event of a problem parsing the response from the backend
+     * @throws APIManagementException In the event of an unexpected HTTP status code from the backend
+     */
+    public static TokenResponse generateToken(String url, String clientId, String clientSecret,
+            String username, char[] password, String grantType, JSONObject customParameters, String refreshToken,
+                                              String tokenEndpointAuthMethod) throws IOException,
+            APIManagementException, ParseException {
+
         if(log.isDebugEnabled()) {
             log.debug("Initializing token generation request: [token-endpoint] " + url);
         }
-
+        if (tokenEndpointAuthMethod == null) {
+            tokenEndpointAuthMethod = APIConstants.OAuthConstants.TOKEN_ENDPOINT_AUTH_BASIC;
+        }
         URL urlObject;
-        String credentials = Base64.getEncoder().encodeToString((clientId + ":" + clientSecret).getBytes());
 
         urlObject = new URL(url);
         StringBuilder payload = new StringBuilder();
         try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil
                 .getHttpClient(urlObject.getPort(), urlObject.getProtocol())) {
             HttpPost httpPost = new HttpPost(url);
-            // Set authorization header
-            httpPost.setHeader(APIConstants.OAuthConstants.AUTHORIZATION_HEADER, "Basic " + credentials);
+
+            if (APIConstants.OAuthConstants.TOKEN_ENDPOINT_AUTH_BASIC.equalsIgnoreCase(tokenEndpointAuthMethod)) {
+                String credentials = Base64.getEncoder().encodeToString((clientId + ":" + clientSecret).getBytes());
+                httpPost.setHeader(APIConstants.OAuthConstants.AUTHORIZATION_HEADER, "Basic " + credentials);
+            } else if (APIConstants.OAuthConstants.TOKEN_ENDPOINT_AUTH_NONE.equalsIgnoreCase(tokenEndpointAuthMethod)) {
+                // Not setting any headers since the auth type is none.
+            } else {
+                throw new APIManagementException("Unsupported token endpoint auth method: " + tokenEndpointAuthMethod);
+            }
+
             httpPost.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.OAuthConstants.APPLICATION_X_WWW_FORM_URLENCODED);
             if (refreshToken != null) {
                 payload.append(APIConstants.OAuthConstants.REFRESH_TOKEN_GRANT_TYPE)
