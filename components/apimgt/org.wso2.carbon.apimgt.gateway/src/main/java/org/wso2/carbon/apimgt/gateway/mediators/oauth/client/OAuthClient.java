@@ -98,7 +98,11 @@ public class OAuthClient {
             log.debug("Initializing token generation request: [token-endpoint] " + url);
         }
         if (tokenEndpointAuthMethod == null) {
+            Object tokenEndpointAuthMethodObject = customParameters.get(APIConstants.OAuthConstants.TOKEN_ENDPOINT_AUTH_METHOD);
             tokenEndpointAuthMethod = APIConstants.OAuthConstants.TOKEN_ENDPOINT_AUTH_BASIC;
+            if (tokenEndpointAuthMethodObject != null) {
+                tokenEndpointAuthMethod = String.valueOf(tokenEndpointAuthMethodObject);
+            }
         }
         URL urlObject;
 
