@@ -466,6 +466,13 @@ public class InboundWebsocketProcessorUtil {
                     }
                 } else {
                     log.debug("The token was identified as an OAuth token");
+                    // Check token available in invalidToken Cache
+                    String revokedCachedToken = (String) CacheProvider.getInvalidTokenCache().get(apiKey);
+                    if (revokedCachedToken != null) {
+                        // Token is revoked/invalid or expired
+                        return false;
+                    }
+
                     //If the key have already been validated
                     if (WebsocketUtil.isGatewayTokenCacheEnabled()) {
                         cacheKey = WebsocketUtil.getAccessTokenCacheKey(apiKey, inboundMessageContext.getApiContext(),

@@ -145,6 +145,16 @@ public class APIKeyValidator {
                 httpVerb, authenticationScheme);
         //If Gateway key caching is enabled.
         if (gatewayKeyCacheEnabled) {
+            // Check token available in invalidToken Cache
+            String revokedCachedToken = (String) getInvalidTokenCache().get(apiKey);
+            if (revokedCachedToken != null) {
+                // Token is revoked/invalid or expired
+                APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+                apiKeyValidationInfoDTO.setAuthorized(false);
+                apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus
+                        .API_AUTH_INVALID_CREDENTIALS);
+                return apiKeyValidationInfoDTO;
+            }
             //Get the access token from the first level cache.
             String cachedToken = (String) getGatewayTokenCache().get(apiKey);
 
@@ -166,17 +176,6 @@ public class APIKeyValidator {
                         getInvalidTokenCache().put(apiKey, cachedToken);
                     }
                     return info;
-                }
-            } else {
-                // Check token available in invalidToken Cache
-                String revokedCachedToken = (String) getInvalidTokenCache().get(apiKey);
-                if (revokedCachedToken != null) {
-                    // Token is revoked/invalid or expired
-                    APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
-                    apiKeyValidationInfoDTO.setAuthorized(false);
-                    apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus
-                            .API_AUTH_INVALID_CREDENTIALS);
-                    return apiKeyValidationInfoDTO;
                 }
             }
         }
