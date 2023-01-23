@@ -640,6 +640,15 @@ public class APIManagerConfiguration {
             environment.setDescription("");
         }
         environment.setReadOnly(true);
+        OMElement dataPlaneId =
+                environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_DATA_PLANE_ID));
+        if (dataPlaneId != null && dataPlaneId.getText() != null && !"".equals(dataPlaneId.getText())) {
+            environment.setDataPlaneId((dataPlaneId.getText()));
+        } else {
+            // set environment name as the dataPlaneId if dataPlaneId is not configured
+            environment.setDataPlaneId(APIUtil.replaceSystemProperty(
+                    environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_NAME)).getText()));
+        }
         List<VHost> vhosts = new LinkedList<>();
         environment.setVhosts(vhosts);
         environment.setEndpointsAsVhost();

@@ -31,6 +31,7 @@ public class EnvironmentDTO   {
     private String provider = null;
     private String description = null;
     private Boolean isReadOnly = null;
+    private String dataPlaneId = null;
     private List<VHostDTO> vhosts = new ArrayList<VHostDTO>();
     private List<GatewayEnvironmentProtocolURIDTO> endpointURIs = new ArrayList<GatewayEnvironmentProtocolURIDTO>();
     private List<AdditionalPropertyDTO> additionalProperties = new ArrayList<AdditionalPropertyDTO>();
@@ -140,6 +141,23 @@ public class EnvironmentDTO   {
 
   /**
    **/
+  public EnvironmentDTO dataPlaneId(String dataPlaneId) {
+    this.dataPlaneId = dataPlaneId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "sce92bdc-e1e6-325c-a6f2-626218a021e3", value = "")
+  @JsonProperty("dataPlaneId")
+  public String getDataPlaneId() {
+    return dataPlaneId;
+  }
+  public void setDataPlaneId(String dataPlaneId) {
+    this.dataPlaneId = dataPlaneId;
+  }
+
+  /**
+   **/
   public EnvironmentDTO vhosts(List<VHostDTO> vhosts) {
     this.vhosts = vhosts;
     return this;
@@ -209,6 +227,7 @@ public class EnvironmentDTO   {
         Objects.equals(provider, environment.provider) &&
         Objects.equals(description, environment.description) &&
         Objects.equals(isReadOnly, environment.isReadOnly) &&
+        Objects.equals(dataPlaneId, environment.dataPlaneId) &&
         Objects.equals(vhosts, environment.vhosts) &&
         Objects.equals(endpointURIs, environment.endpointURIs) &&
         Objects.equals(additionalProperties, environment.additionalProperties);
@@ -216,7 +235,7 @@ public class EnvironmentDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, provider, description, isReadOnly, vhosts, endpointURIs, additionalProperties);
+    return Objects.hash(id, name, displayName, provider, description, isReadOnly, dataPlaneId, vhosts, endpointURIs, additionalProperties);
   }
 
   @Override
@@ -230,6 +249,7 @@ public class EnvironmentDTO   {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    isReadOnly: ").append(toIndentedString(isReadOnly)).append("\n");
+    sb.append("    dataPlaneId: ").append(toIndentedString(dataPlaneId)).append("\n");
     sb.append("    vhosts: ").append(toIndentedString(vhosts)).append("\n");
     sb.append("    endpointURIs: ").append(toIndentedString(endpointURIs)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");

@@ -1702,6 +1702,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:environment_read
+            - apim:environment_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4034,6 +4035,10 @@ components:
           type: boolean
           readOnly: true
           example: false
+        dataPlaneId:
+          type: string
+          readOnly: true
+          example: sce92bdc-e1e6-325c-a6f2-626218a021e3
         vhosts:
           type: array
           minItems: 1

@@ -13794,6 +13794,7 @@ public class ApiMgtDAO {
                     env.setDisplayName(displayName);
                     env.setDescription(description);
                     env.setProvider(provider);
+                    env.setDataPlaneId(ChoreoApiMgtDAO.getInstance().getDataPlaneIdForEnvironment(connection, uuid));
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                 }
             }
@@ -13835,6 +13836,7 @@ public class ApiMgtDAO {
                     id = rs.getInt(1);
                 }
                 addGatewayVhosts(conn, id, environment.getVhosts());
+                ChoreoApiMgtDAO.getInstance().addEnvToDataPlaneMapping(conn, uuid, environment.getDataPlaneId());
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -13899,7 +13901,7 @@ public class ApiMgtDAO {
      * @param envId      Environment id.
      * @return list of vhosts belongs to the gateway environments.
      */
-    private List<VHost> getVhostGatewayEnvironments(Connection connection, Integer envId) throws APIManagementException {
+    public List<VHost> getVhostGatewayEnvironments(Connection connection, Integer envId) throws APIManagementException {
 
         List<VHost> vhosts = new ArrayList<>();
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_VHOSTS_BY_ID_SQL)) {
@@ -13939,6 +13941,7 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
+            ChoreoApiMgtDAO.getInstance().deleteEnvToDataPlaneMapping(connection, uuid);
             try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_ENVIRONMENT_SQL)) {
                 prepStmt.setString(1, uuid);
                 prepStmt.executeUpdate();
@@ -13970,6 +13973,7 @@ public class ApiMgtDAO {
                 prepStmt.executeUpdate();
                 deleteGatewayVhosts(connection, environment.getId());
                 addGatewayVhosts(connection, environment.getId(), environment.getVhosts());
+                ChoreoApiMgtDAO.getInstance().updateEnvToDataPlaneMapping(connection, environment.getUuid());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();

@@ -66,6 +66,7 @@ public class EnvironmentMappingUtil {
                 .collect(Collectors.toList()));
         envDTO.setAdditionalProperties(fromAdditionalPropertiesToAdditionalPropertiesDTO
                 (env.getAdditionalProperties()));
+        envDTO.setDataPlaneId(env.getDataPlaneId());
         return envDTO;
     }
 
@@ -131,6 +132,7 @@ public class EnvironmentMappingUtil {
         env.setDescription(envDTO.getDescription());
         env.setProvider(envDTO.getProvider());
         env.setReadOnly(false);
+        env.setDataPlaneId(envDTO.getDataPlaneId());
         env.setVhosts(envDTO.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostDtoToVHost)
                 .collect(Collectors.toList()));
         env.setAdditionalProperties(fromAdditionalPropertiesDTOToAdditionalProperties
