@@ -642,7 +642,7 @@ public class JWTValidator {
             if (isGatewayTokenCacheEnabled) {
                 getGatewayTokenCache().remove(tokenIdentifier);
                 getGatewayJWTTokenCache().remove(tokenIdentifier);
-                getInvalidTokenCache().put(tokenIdentifier, tenantDomain);
+                CacheProvider.addInvalidTokenCache(tokenIdentifier, tenantDomain);
             }
             payload.setValid(false);
             payload.setValidationCode(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
@@ -673,7 +673,7 @@ public class JWTValidator {
                     jwtValidationInfo = tempJWTValidationInfo;
                 }
             } else if (SignedJWTInfo.ValidationStatus.INVALID.equals(signedJWTInfo.getValidationStatus())
-                    && getInvalidTokenCache().get(jti) != null) {
+                    && CacheProvider.getInvalidTokenCache().get(jti) != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token retrieved from the invalid token cache. Token: " + GatewayUtils
                             .getMaskedToken(jwtHeader));
@@ -698,7 +698,7 @@ public class JWTValidator {
                         getGatewayTokenCache().put(jti, tenantDomain);
                         getGatewayKeyCache().put(jti, jwtValidationInfo);
                     } else {
-                        getInvalidTokenCache().put(jti, tenantDomain);
+                        CacheProvider.addInvalidTokenCache(jti, tenantDomain);
                     }
 
                     if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -714,7 +714,7 @@ public class JWTValidator {
                             if (jwtValidationInfo.isValid()) {
                                 getGatewayTokenCache().put(jti, tenantDomain);
                             } else {
-                                getInvalidTokenCache().put(jti, tenantDomain);
+                                CacheProvider.addInvalidTokenCache(jti, tenantDomain);
                             }
                         } finally {
                             PrivilegedCarbonContext.endTenantFlow();
@@ -743,11 +743,6 @@ public class JWTValidator {
     protected Cache getGatewayTokenCache() {
 
         return CacheProvider.getGatewayTokenCache();
-    }
-
-    protected Cache getInvalidTokenCache() {
-
-        return CacheProvider.getInvalidTokenCache();
     }
 
     protected Cache getGatewayKeyCache() {

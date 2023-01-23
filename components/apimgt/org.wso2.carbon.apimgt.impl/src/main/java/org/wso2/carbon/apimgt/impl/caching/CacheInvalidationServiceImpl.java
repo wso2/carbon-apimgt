@@ -147,21 +147,19 @@ public class CacheInvalidationServiceImpl implements CacheInvalidationService {
             log.debug("No access tokens received to invalidate Gateway Token Cache.");
             return;
         }
-        Cache gatewayCache;
         boolean isSuperTenantFlowStarted = false;
         Map<String, String> cachedObjects = new HashMap<String, String>();
         // Removing from first Level gateway Cache and add it to invalid token Cache
         try {
             isSuperTenantFlowStarted = startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            gatewayCache = CacheProvider.getGatewayTokenCache();
-            Cache invalidGatewayCache = CacheProvider.getInvalidTokenCache();
+            Cache gatewayCache = CacheProvider.getGatewayTokenCache();
             for (String accessToken : accessTokens) {
                 Object cacheEntry = gatewayCache.get(accessToken);
                 if (cacheEntry != null) {
                     //cachePut(accessToken, tenantDomain)
                     cachedObjects.put(accessToken, cacheEntry.toString());
                     gatewayCache.remove(accessToken);
-                    invalidGatewayCache.put(accessToken, cacheEntry.toString());
+                    CacheProvider.addInvalidTokenCache(accessToken, cacheEntry.toString());
                 }
             }
         } finally {
@@ -217,14 +215,13 @@ public class CacheInvalidationServiceImpl implements CacheInvalidationService {
                 }
 
                 Cache tenantGatewayCache = CacheProvider.getGatewayTokenCache();
-                Cache invalidtTenantGatewayCache = CacheProvider.getInvalidTokenCache();
 
                 //Remove all cached tokens from the tenant's cache
                 //Note: Best solution would have been to use the removeAll method of the cache. But it currently throws
                 //an NPE if at least one key in the list doesn't exist in the cache.
                 for (String accessToken : tenantMap.get(tenantDomain)) {
                     tenantGatewayCache.remove(accessToken);
-                    invalidtTenantGatewayCache.put(accessToken, tenantDomain);
+                    CacheProvider.addInvalidTokenCache(accessToken, tenantDomain);
                 }
 
                 if (log.isDebugEnabled()) {

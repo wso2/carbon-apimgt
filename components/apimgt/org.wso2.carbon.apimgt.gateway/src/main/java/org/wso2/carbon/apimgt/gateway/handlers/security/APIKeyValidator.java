@@ -108,10 +108,6 @@ public class APIKeyValidator {
         return CacheProvider.getGatewayTokenCache();
     }
 
-    protected Cache getInvalidTokenCache() {
-        return CacheProvider.getInvalidTokenCache();
-    }
-
     @MethodStats
     protected Cache getResourceCache() {
         return CacheProvider.getResourceCache();
@@ -146,7 +142,7 @@ public class APIKeyValidator {
         //If Gateway key caching is enabled.
         if (gatewayKeyCacheEnabled) {
             // Check token available in invalidToken Cache
-            String revokedCachedToken = (String) getInvalidTokenCache().get(apiKey);
+            String revokedCachedToken = (String) CacheProvider.getInvalidTokenCache().get(apiKey);
             if (revokedCachedToken != null) {
                 // Token is revoked/invalid or expired
                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
@@ -173,7 +169,7 @@ public class APIKeyValidator {
                         //Remove from the first level token cache as well.
                         getGatewayTokenCache().remove(apiKey);
                         // Put into invalid token cache
-                        getInvalidTokenCache().put(apiKey, cachedToken);
+                        CacheProvider.addInvalidTokenCache(apiKey, cachedToken);
                     }
                     return info;
                 }
@@ -189,7 +185,7 @@ public class APIKeyValidator {
 
                 if (info.getValidationStatus() == APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS) {
                     // if Token is not valid token (expired,invalid,revoked) put into invalid token cache
-                    getInvalidTokenCache().put(apiKey, tenantDomain);
+                    CacheProvider.addInvalidTokenCache(apiKey, tenantDomain);
                 } else {
                     // Add into 1st level cache and Key cache
                     getGatewayTokenCache().put(apiKey, tenantDomain);
@@ -207,7 +203,7 @@ public class APIKeyValidator {
                                 .API_AUTH_INVALID_CREDENTIALS) {
                             // if Token is not valid token (expired,invalid,revoked) put into invalid token cache in
                             // tenant cache
-                            getInvalidTokenCache().put(apiKey, tenantDomain);
+                            CacheProvider.addInvalidTokenCache(apiKey, tenantDomain);
                         } else {
                             // add into to tenant token cache
                             getGatewayTokenCache().put(apiKey, tenantDomain);

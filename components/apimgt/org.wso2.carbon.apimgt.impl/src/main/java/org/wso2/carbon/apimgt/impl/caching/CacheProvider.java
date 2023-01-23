@@ -61,6 +61,21 @@ public class CacheProvider {
     }
 
     /**
+     * This method adds a key-value pair to the invalid token cache. The key and value are both of type Object.
+     * Before adding the new key-value pair, the method removes the key from the gateway key cache,
+     * gateway API key cache, gateway JWT token cache and gateway token cache.
+     * @param key
+     * @param value
+     */
+    public static void addInvalidTokenCache(Object key, Object value) {
+        getGatewayKeyCache().remove(key);
+        getGatewayApiKeyCache().remove(key);
+        getGatewayJWTTokenCache().remove(key);
+        getGatewayTokenCache().remove(key);
+        getInvalidTokenCache().put(key, value);
+    }
+
+    /**
      * @return resource cache
      */
     public static Cache getResourceCache() {

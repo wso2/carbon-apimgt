@@ -163,7 +163,7 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
     }
 
     protected void putInvalidTokenEntryIntoInvalidTokenCache(String cachedToken, String tenantDomain) {
-        CacheProvider.getInvalidTokenCache().put(cachedToken, tenantDomain);
+        CacheProvider.addInvalidTokenCache(cachedToken, tenantDomain);
     }
 
     protected String getCachedTenantDomain(String token) {
