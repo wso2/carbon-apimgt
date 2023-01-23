@@ -2225,7 +2225,7 @@ public class ImportUtils {
                 }
             }
 
-            APIProvider apiProvider = RestApiCommonUtil.getProvider(importedApiProductDTO.getProvider());
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             // Check whether the API resources are valid
             checkAPIProductResourcesValid(extractedFolderPath, userName, apiProvider, importedApiProductDTO,
