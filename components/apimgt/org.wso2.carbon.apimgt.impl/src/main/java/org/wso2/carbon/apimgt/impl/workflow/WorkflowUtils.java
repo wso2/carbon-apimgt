@@ -119,14 +119,14 @@ public class WorkflowUtils {
             if (sub.getAPIIdentifier() != null) {
                 subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(),
-                        subWFDto.getTenantId(), orgId,
+                        subWFDto.getTenantId(), subWFDto.getTenantDomain(),
                         Integer.parseInt(subWFDto.getWorkflowReference()), sub.getUUID(), sub.getIdentifier().getId(),
                         sub.getIdentifier().getUUID(), sub.getApplication().getId(), sub.getApplication().getUUID(),
                         sub.getTier().getName(), sub.getSubCreatedStatus());
             } else {
                 subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(),
-                        subWFDto.getTenantId(), orgId,
+                        subWFDto.getTenantId(), subWFDto.getTenantDomain(),
                         Integer.parseInt(subWFDto.getWorkflowReference()), sub.getUUID(), sub.getProductId().getId(),
                         sub.getProductId().getUUID(), sub.getApplication().getId(), sub.getApplication().getUUID(),
                         sub.getTier().getName(), sub.getSubCreatedStatus());
