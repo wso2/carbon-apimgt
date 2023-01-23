@@ -1316,6 +1316,8 @@ public final class APIConstants {
 
     public static final String SHA_256 = "SHA-256";
 
+    public static final String US_ASCII = "US-ASCII";
+
     public static class DigestAuthConstants {
 
         public static final String REALM = "realm";
