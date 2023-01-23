@@ -108,11 +108,13 @@ public class InboundWebsocketProcessorUtil {
         info.setApiTier(authenticationContext.getApiTier());
         info.setGraphQLMaxDepth(authenticationContext.getGraphQLMaxDepth());
         info.setGraphQLMaxComplexity(authenticationContext.getGraphQLMaxComplexity());
+        info.setEndUserToken(authenticationContext.getCallerToken());
 
         inboundMessageContext.setKeyType(info.getType());
         inboundMessageContext.setInfoDTO(info);
         inboundMessageContext.setAuthContext(authenticationContext);
         inboundMessageContext.setInfoDTO(info);
+        inboundMessageContext.setToken(info.getEndUserToken());
         return authenticationContext.isAuthenticated();
     }
 
