@@ -2722,6 +2722,11 @@ public final class APIUtil {
         return properties;
     }
 
+    /**
+     * Checks whether the Developer Portal is in anonymous mode.
+     *
+     * @return Ture if the dev portal is in anonymous mode, false otherwise.
+     */
     public static boolean isDevPortalAnonymous() {
 
         ConfigurationHolder config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
