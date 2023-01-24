@@ -478,6 +478,12 @@ public class InboundWebsocketProcessorUtil {
                             inboundMessageContext.setInfoDTO(info);
                             inboundMessageContext.setToken(info.getEndUserToken());
                             return info.isAuthorized();
+                        } else {
+                            String revokedCachedToken = (String) CacheProvider.getInvalidTokenCache().get(apiKey);
+                            if (revokedCachedToken != null) {
+                                // Token is revoked/invalid or expired
+                                return false;
+                            }
                         }
                     }
                     info = getApiKeyDataForWSClient(apiKey, inboundMessageContext.getTenantDomain(),
