@@ -3128,6 +3128,13 @@ public class APIMappingUtil {
         return apiRevisionListDTO;
     }
 
+    /**
+     * Get API Revision Deployment DTO from API Revision Deployment model
+     *
+     * @param model API Revision Deployment
+     * @return API Revision Deployment DTO
+     * @throws APIManagementException If error in deployment time
+     */
     public static APIRevisionDeploymentDTO fromAPIRevisionDeploymenttoDTO(APIRevisionDeployment model)
             throws APIManagementException {
 

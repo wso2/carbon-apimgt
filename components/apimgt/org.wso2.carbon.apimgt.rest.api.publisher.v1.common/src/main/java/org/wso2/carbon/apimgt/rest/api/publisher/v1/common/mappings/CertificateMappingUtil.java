@@ -50,6 +50,12 @@ public class CertificateMappingUtil {
         return certificateInfoDTO;
     }
 
+    /**
+     * Convert Certificate Metadata to Cert Metadata DTO
+     *
+     * @param certificateMetadata Certificate Metadata
+     * @return CertMetadataDTO
+     */
     public static CertMetadataDTO fromCertificateMetadataToDTO(CertificateMetadataDTO certificateMetadata) {
         CertMetadataDTO certificateDTO = new CertMetadataDTO();
         certificateDTO.setAlias(certificateMetadata.getAlias());
