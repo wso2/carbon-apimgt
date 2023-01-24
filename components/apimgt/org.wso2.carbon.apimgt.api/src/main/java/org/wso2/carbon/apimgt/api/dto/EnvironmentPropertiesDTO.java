@@ -24,8 +24,13 @@ package org.wso2.carbon.apimgt.api.dto;
 public class EnvironmentPropertiesDTO {
   
     private String productionEndpoint;
+
+    private String productionCertificate;
+
     private String sandboxEndpoint;
     private String sandboxEndpointChoreo;
+
+    private String sandboxCertificate;
 
     public String getProductionEndpoint() {
         return productionEndpoint;
@@ -49,6 +54,22 @@ public class EnvironmentPropertiesDTO {
 
     public void setSandboxEndpointChoreo(String sandboxEndpointChoreo) {
         this.sandboxEndpointChoreo = sandboxEndpointChoreo;
+    }
+
+    public String getProductionCertificate() {
+        return productionCertificate;
+    }
+
+    public void setProductionCertificate(String productionCertificate) {
+        this.productionCertificate = productionCertificate;
+    }
+
+    public String getSandboxCertificate() {
+        return sandboxCertificate;
+    }
+
+    public void setSandboxCertificate(String sandboxCertificate) {
+        this.sandboxCertificate = sandboxCertificate;
     }
 }
 
