@@ -30,7 +30,7 @@ public class EnvironmentPropertiesDTO {
     private String sandboxEndpoint;
     private String sandboxEndpointChoreo;
 
-    private String sandBoxCertificate;
+    private String sandboxCertificate;
 
     public String getProductionEndpoint() {
         return productionEndpoint;
