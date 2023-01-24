@@ -24,7 +24,6 @@ public class DefaultPasswordResolverImpl implements PasswordResolver {
 
     @Override
     public String getPassword(String encryptedPassword) {
-
         return encryptedPassword;
     }
 }

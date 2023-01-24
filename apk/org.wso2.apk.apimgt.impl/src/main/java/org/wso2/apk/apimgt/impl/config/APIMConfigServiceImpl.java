@@ -49,8 +49,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     }
 
     @Override
-    public void updateExternalStoreConfig(String organization, String externalStoreConfig)
-    {
+    public void updateExternalStoreConfig(String organization, String externalStoreConfig) {
     }
 
     @Override

@@ -36,8 +36,6 @@ public class PasswordResolverFactory {
      * @return PasswordResolver instance.
      */
     public static PasswordResolver getInstance() {
-
-//        return passwordResolver;
         return new DefaultPasswordResolverImpl(); //Dummy return
     }
 }
