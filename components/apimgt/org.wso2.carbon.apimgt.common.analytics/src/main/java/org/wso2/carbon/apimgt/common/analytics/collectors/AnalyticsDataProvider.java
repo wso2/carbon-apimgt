@@ -66,6 +66,8 @@ public interface AnalyticsDataProvider {
 
     String getUserAgentHeader();
 
+    String getUserName();
+
     String getEndUserIP();
 
     default Map<String, Object> getProperties() {

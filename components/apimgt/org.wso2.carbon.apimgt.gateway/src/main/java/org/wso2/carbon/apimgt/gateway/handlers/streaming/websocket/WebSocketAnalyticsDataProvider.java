@@ -317,8 +317,9 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
         return customProperties;
     }
-
-    private String getUserName() {
+    
+    @Override
+    public String getUserName() {
 
         Object authContext = WebSocketUtils.getPropertyFromChannel(APISecurityUtils.API_AUTH_CONTEXT, ctx);
         if (authContext != null && authContext instanceof AuthenticationContext) {
