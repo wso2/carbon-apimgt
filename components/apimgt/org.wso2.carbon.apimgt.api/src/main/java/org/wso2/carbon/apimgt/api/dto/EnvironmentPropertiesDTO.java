@@ -64,12 +64,12 @@ public class EnvironmentPropertiesDTO {
         this.productionCertificate = productionCertificate;
     }
 
-    public String getSandBoxCertificate() {
-        return sandBoxCertificate;
+    public String getSandboxCertificate() {
+        return sandboxCertificate;
     }
 
-    public void setSandBoxCertificate(String sandBoxCertificate) {
-        this.sandBoxCertificate = sandBoxCertificate;
+    public void setSandboxCertificate(String sandboxCertificate) {
+        this.sandboxCertificate = sandboxCertificate;
     }
 }
 
