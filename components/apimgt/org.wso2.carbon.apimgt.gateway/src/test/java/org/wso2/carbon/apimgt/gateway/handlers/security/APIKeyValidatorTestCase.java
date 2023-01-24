@@ -1157,7 +1157,6 @@ public class APIKeyValidatorTestCase {
                 return tokenCache;
             }
 
-            @Override
             protected Cache getInvalidTokenCache() {
 
                 return invalidTokenCache;
