@@ -42,6 +42,7 @@ public class PublisherAPIInfo {
     private String description;
     private String gatewayVendor;
     private boolean advertiseOnly;
+    private String updatedBy;
 
     public String getAudience() {
         return audience;
@@ -122,6 +123,14 @@ public class PublisherAPIInfo {
     public Date getUpdatedTime() { return updatedTime; }
 
     public void setUpdatedTime(Date updatedTime) { this.updatedTime = updatedTime; }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
 
     public String getDescription() {
         return description;
