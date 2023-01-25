@@ -963,6 +963,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 apiInfo.setAudience(artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCE));
                 apiInfo.setCreatedTime(String.valueOf(apiResource.getCreatedTime().getTime()));
                 apiInfo.setUpdatedTime(apiResource.getLastModified());
+                apiInfo.setUpdatedBy(apiResource.getLastUpdaterUserName());
                 apiInfo.setGatewayVendor(String.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR)));
                 apiInfo.setAdvertiseOnly(Boolean.parseBoolean(artifact
                         .getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
@@ -1318,6 +1319,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
                                 apiInfo.setCreatedTime(String.valueOf(resource.getCreatedTime().getTime()));
                                 apiInfo.setUpdatedTime(resource.getLastModified());
+                                apiInfo.setUpdatedBy(resource.getLastUpdaterUserName());
                                 apiInfo.setGatewayVendor(String.valueOf(
                                         artifact.getAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR)));
                                 //apiInfo.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));

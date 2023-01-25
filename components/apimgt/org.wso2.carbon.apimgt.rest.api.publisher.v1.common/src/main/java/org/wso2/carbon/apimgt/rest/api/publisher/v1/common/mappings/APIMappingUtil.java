@@ -665,6 +665,7 @@ public class APIMappingUtil {
             Date lastUpdatedTime = api.getLastUpdated();
             apiInfoDTO.setUpdatedTime(String.valueOf(lastUpdatedTime.getTime()));
         }
+        apiInfoDTO.updatedBy(api.getUpdatedBy());
         apiInfoDTO.setAdvertiseOnly(api.isAdvertiseOnly());
         if (api.getAdditionalProperties() != null) {
             JSONObject additionalProperties = api.getAdditionalProperties();
