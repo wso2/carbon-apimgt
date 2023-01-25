@@ -19,7 +19,10 @@ package org.wso2.carbon.apimgt.common.analytics.publishers.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
+
+import java.util.List;
 
 /**
  * Success event publisher implementation.
@@ -30,6 +33,16 @@ public class SuccessRequestDataPublisher extends AbstractRequestDataPublisher {
 
     @Override
     public CounterMetric getCounterMetric() {
-        return AnalyticsDataPublisher.getInstance().getSuccessMetricReporter();
+        return null;
+    }
+
+    @Override
+    public List<CounterMetric> getMultipleCounterMetrics() {
+        try {
+            return AnalyticsDataPublisher.getInstance().getSuccessMetricReporters();
+        } catch (MetricCreationException e) {
+            log.error("Unable to get success counter metrics", e);
+            return null;
+        }
     }
 }

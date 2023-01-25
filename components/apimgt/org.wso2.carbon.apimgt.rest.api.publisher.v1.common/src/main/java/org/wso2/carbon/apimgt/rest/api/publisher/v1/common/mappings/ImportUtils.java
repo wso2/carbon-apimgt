@@ -978,9 +978,12 @@ public class ImportUtils {
                 ccGatewayDefinition = APIUtil.getOperationPolicyDefinitionFromFile(pathToArchive, fileName,
                         APIConstants.CC_POLICY_DEFINITION_EXTENSION);
 
-                if (ccGatewayDefinition == null && synapseGatewayDefinition == null) {
-                    throw new APIManagementException("Either one of the Gateway Definition files should be present",
-                            ExceptionCodes.OPERATION_POLICY_GATEWAY_ERROR);
+                if (synapseGatewayDefinition == null) {
+                    List<String> supportedGateways = operationPolicyData.getSpecification().getSupportedGateways();
+                    if (supportedGateways.contains(APIConstants.OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE)) {
+                        throw new APIManagementException("Synpase Gateway Definition file should be present",
+                                ExceptionCodes.OPERATION_POLICY_GATEWAY_ERROR);
+                    }
                 }
 
                 if (ccGatewayDefinition != null) {
@@ -2225,7 +2228,7 @@ public class ImportUtils {
                 }
             }
 
-            APIProvider apiProvider = RestApiCommonUtil.getProvider(importedApiProductDTO.getProvider());
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             // Check whether the API resources are valid
             checkAPIProductResourcesValid(extractedFolderPath, userName, apiProvider, importedApiProductDTO,

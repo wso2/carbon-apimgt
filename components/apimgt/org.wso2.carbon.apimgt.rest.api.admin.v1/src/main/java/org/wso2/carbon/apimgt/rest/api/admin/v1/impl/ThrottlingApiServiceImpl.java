@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import com.google.gson.Gson;
 
 import javax.ws.rs.core.Response;
 import java.io.File;
@@ -132,6 +133,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             APIPolicy newApiPolicy = apiProvider.getAPIPolicy(userName, body.getPolicyName());
             AdvancedThrottlePolicyDTO policyDTO =
                     AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyToDTO(newApiPolicy);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ADVANCED_POLICIES, new Gson().toJson(policyDTO),
+                    APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());
             return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_ADVANCED + "/"
                     + policyDTO.getPolicyId())).entity(policyDTO).build();
         } catch (APIManagementException e) {
@@ -207,6 +210,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             APIPolicy newApiPolicy = apiProvider.getAPIPolicyByUUID(policyId);
             AdvancedThrottlePolicyDTO policyDTO =
                     AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyToDTO(newApiPolicy);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ADVANCED_POLICIES, new Gson().toJson(policyDTO),
+                    APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
             return Response.ok().entity(policyDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -249,6 +254,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                             existingPolicy.getPolicyName()));
         }
         apiProvider.deletePolicy(username, PolicyConstants.POLICY_LEVEL_API, existingPolicy.getPolicyName());
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ADVANCED_POLICIES, new Gson().toJson(existingPolicy),
+                APIConstants.AuditLogConstants.DELETED, RestApiCommonUtil.getLoggedInUsername());
         return Response.ok().build();
     }
 
@@ -314,6 +321,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             ApplicationPolicy newAppPolicy = apiProvider.getApplicationPolicy(username, body.getPolicyName());
             ApplicationThrottlePolicyDTO policyDTO =
                     ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyToDTO(newAppPolicy);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION_POLICIES, new Gson().toJson(policyDTO),
+                    APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());
             return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_APPLICATION + "/"
                     + policyDTO.getPolicyId())).entity(policyDTO).build();
         } catch (APIManagementException e) {
@@ -391,6 +400,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             ApplicationPolicy newAppPolicy = apiProvider.getApplicationPolicyByUUID(policyId);
             ApplicationThrottlePolicyDTO policyDTO =
                     ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyToDTO(newAppPolicy);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION_POLICIES, new Gson().toJson(policyDTO),
+                    APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
             return Response.ok().entity(policyDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -427,6 +438,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 throw new APIManagementException(message);
             }
             apiProvider.deletePolicy(username, PolicyConstants.POLICY_LEVEL_APP, existingPolicy.getPolicyName());
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION_POLICIES, new Gson().toJson(existingPolicy),
+                    APIConstants.AuditLogConstants.DELETED, RestApiCommonUtil.getLoggedInUsername());
             return Response.ok().build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -511,6 +524,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
 
             //setting policy permissions
             setPolicyPermissionsToDTO(policyDTO);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION_POLICIES, new Gson().toJson(policyDTO),
+                    APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());
             return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_SUBSCRIPTION + "/"
                     + policyDTO.getPolicyId())).entity(policyDTO).build();
         } catch (ParseException e) {
@@ -794,6 +809,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                     SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyToDTO(newSubscriptionPolicy);
             //setting policy permissions
             setPolicyPermissionsToDTO(policyDTO);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION_POLICIES, new Gson().toJson(policyDTO),
+                    APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
             return Response.ok().entity(policyDTO).build();
         } catch (APIManagementException | ParseException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -831,6 +848,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 throw new APIManagementException(message);
             }
             apiProvider.deletePolicy(username, PolicyConstants.POLICY_LEVEL_SUB, existingPolicy.getPolicyName());
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION_POLICIES, new Gson().toJson(existingPolicy),
+                    APIConstants.AuditLogConstants.DELETED, RestApiCommonUtil.getLoggedInUsername());
             return Response.ok().build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -911,6 +930,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //retrieve the new policy and send back as the response
             GlobalPolicy newGlobalPolicy = apiProvider.getGlobalPolicy(body.getPolicyName());
             CustomRuleDTO policyDTO = GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyToDTO(newGlobalPolicy);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.CUSTOM_POLICIES, new Gson().toJson(policyDTO),
+                    APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());
             return Response.created(
                     new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL + "/" + policyDTO.getPolicyId()))
                     .entity(policyDTO).build();
@@ -996,6 +1017,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //retrieve the new policy and send back as the response
             GlobalPolicy newGlobalPolicy = apiProvider.getGlobalPolicyByUUID(ruleId);
             CustomRuleDTO policyDTO = GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyToDTO(newGlobalPolicy);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.CUSTOM_POLICIES, new Gson().toJson(policyDTO),
+                    APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
             return Response.ok().entity(policyDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -1030,6 +1053,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_CUSTOM_RULE, ruleId, log);
             }
             apiProvider.deletePolicy(username, PolicyConstants.POLICY_LEVEL_GLOBAL, existingPolicy.getPolicyName());
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.CUSTOM_POLICIES, new Gson().toJson(existingPolicy),
+                    APIConstants.AuditLogConstants.DELETED, RestApiCommonUtil.getLoggedInUsername());
             return Response.ok().build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -1407,6 +1432,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //retrieve the new blocking condition and send back as the response
             BlockConditionsDTO newBlockingCondition = apiProvider.getBlockConditionByUUID(uuid);
             BlockingConditionDTO dto = BlockingConditionMappingUtil.fromBlockingConditionToDTO(newBlockingCondition);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.DENY_POLICIES, new Gson().toJson(dto),
+                    APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());
             return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS + "/"
                     + uuid)).entity(dto).build();
         } catch (APIManagementException e) {
@@ -1477,6 +1504,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId, log);
             }
             apiProvider.deleteBlockConditionByUUID(conditionId);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.DENY_POLICIES, new Gson().toJson(existingCondition),
+                    APIConstants.AuditLogConstants.DELETED, RestApiCommonUtil.getLoggedInUsername());
             return Response.ok().build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -1516,6 +1545,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //retrieve the new blocking condition and send back as the response
             BlockConditionsDTO newBlockingCondition = apiProvider.getBlockConditionByUUID(conditionId);
             BlockingConditionDTO dto = BlockingConditionMappingUtil.fromBlockingConditionToDTO(newBlockingCondition);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.DENY_POLICIES, new Gson().toJson(dto),
+                    APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
             return Response.ok().entity(dto).build();
         } catch (APIManagementException | ParseException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {

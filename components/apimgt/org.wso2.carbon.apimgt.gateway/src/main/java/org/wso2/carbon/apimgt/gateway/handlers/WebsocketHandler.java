@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketAnalyticsMetricsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
@@ -57,7 +58,10 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-
+        if (APIUtil.isAnalyticsEnabled()) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, Constants.BACKEND_START_TIME_PROPERTY,
+                    System.currentTimeMillis());
+        }
         String channelId = ctx.channel().id().asLongText();
         InboundMessageContext inboundMessageContext;
         if (InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().containsKey(channelId)) {
@@ -71,8 +75,7 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
         }
 
         if (APIUtil.isAnalyticsEnabled()) {
-            WebSocketUtils.setApiPropertyToChannel(ctx,
-                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_START_TIME_PROPERTY,
+            WebSocketUtils.setApiPropertyToChannel(ctx, Constants.REQUEST_START_TIME_PROPERTY,
                     System.currentTimeMillis());
         }
 
@@ -103,7 +106,8 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
                 if (responseDTO.isCloseConnection()) {
                     InboundMessageContextDataHolder.getInstance().removeInboundMessageContextForConnection(channelId);
                     if (log.isDebugEnabled()) {
-                        log.debug("Error while handling Outbound Websocket frame. Closing connection for "
+                        log.debug(channelId + " -- Websocket API request [outbound] : Error while handling Outbound " +
+                                "Websocket frame. Closing connection for "
                                 + ctx.channel().toString());
                     }
                     handleSubscribeFrameErrorEvent(ctx, responseDTO);
@@ -118,33 +122,46 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
                 }
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Sending Outbound Websocket frame." + ctx.channel().toString());
+                    log.debug(channelId + " -- Websocket API request [outbound] : Sending Outbound Websocket frame." +
+                            ctx.channel().toString());
                 }
                 outboundHandler().write(ctx, msg, promise);
+                if (APIUtil.isAnalyticsEnabled()) {
+                    WebSocketUtils.setApiPropertyToChannel(ctx, Constants.BACKEND_END_TIME_PROPERTY,
+                            System.currentTimeMillis());
+                }
                 // publish analytics events if analytics is enabled
                 publishSubscribeEvent(ctx);
             }
         } else {
             outboundHandler().write(ctx, msg, promise);
+            if (APIUtil.isAnalyticsEnabled()) {
+                WebSocketUtils.setApiPropertyToChannel(ctx, Constants.BACKEND_END_TIME_PROPERTY,
+                        System.currentTimeMillis());
+            }
         }
     }
 
     private void handleSubscribeFrameErrorEvent(ChannelHandlerContext ctx, InboundProcessorResponseDTO responseDTO) {
+        String channelId = ctx.channel().id().asLongText();
         if (responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR
                 || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_COMPLEX
                 || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP) {
             if (log.isDebugEnabled()) {
-                log.debug("Inbound WebSocket frame is throttled. " + ctx.channel().toString());
+                log.debug(channelId + " -- Websocket API request [inbound] : Inbound WebSocket frame is throttled. " +
+                        ctx.channel().toString());
             }
         } else if (responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_ERROR
                 || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS
                 || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR) {
             if (log.isDebugEnabled()) {
-                log.debug("Inbound WebSocket frame failed due to auth error. " + ctx.channel().toString());
+                log.debug(channelId + " -- Websocket API request [inbound] : Inbound WebSocket frame failed due to " +
+                        "auth error. " + ctx.channel().toString());
             }
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Unclassified error in Inbound WebSocket frame. " + ctx.channel().toString());
+                log.debug(channelId + " -- Websocket API request [inbound] : Unclassified error in Inbound WebSocket " +
+                        "frame. " + ctx.channel().toString());
             }
         }
         publishSubscribeFrameErrorEvent(ctx, responseDTO);

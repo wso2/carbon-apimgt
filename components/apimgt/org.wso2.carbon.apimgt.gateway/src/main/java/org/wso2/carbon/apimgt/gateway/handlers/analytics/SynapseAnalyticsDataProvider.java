@@ -66,7 +66,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     public SynapseAnalyticsDataProvider(MessageContext messageContext,
-            AnalyticsCustomDataProvider analyticsCustomDataProvider) {
+                                        AnalyticsCustomDataProvider analyticsCustomDataProvider) {
 
         this.messageContext = messageContext;
         this.analyticsCustomDataProvider = analyticsCustomDataProvider;
@@ -306,6 +306,15 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
+    public String getUserName() {
+
+        if (messageContext.getPropertyKeySet().contains(APIMgtGatewayConstants.END_USER_NAME)) {
+            return (String) messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME);
+        }
+        return null;
+    }
+
+    @Override
     public String getEndUserIP() {
 
         if (messageContext.getPropertyKeySet().contains(Constants.USER_IP_PROPERTY)) {
@@ -326,14 +335,6 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         customProperties.put(Constants.API_USER_NAME_KEY, getUserName());
         customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
         return customProperties;
-    }
-
-    private String getUserName() {
-
-        if (messageContext.getPropertyKeySet().contains(APIMgtGatewayConstants.END_USER_NAME)) {
-            return (String) messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME);
-        }
-        return null;
     }
 
     private String getApiContext() {

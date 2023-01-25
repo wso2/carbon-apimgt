@@ -1,11 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.*;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -14,7 +16,9 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.EnvironmentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -40,6 +44,9 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         //String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         apiAdmin.deleteEnvironment(organization, environmentId);
+        String info = "{'id':'" + environmentId + "'}";
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.GATEWAY_ENVIRONMENTS, info,
+                APIConstants.AuditLogConstants.DELETED, RestApiCommonUtil.getLoggedInUsername());
         return Response.ok().build();
     }
 
@@ -65,6 +72,9 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             String errorMessage = "Error while updating Environment : " + environmentId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
+        String info = "{'id':'" + environmentId + "'}";
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.GATEWAY_ENVIRONMENTS, info,
+                APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
         return Response.ok(location).entity(body).build();
     }
 
@@ -98,6 +108,8 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             Environment env = EnvironmentMappingUtil.fromEnvDtoToEnv(body);
             EnvironmentDTO envDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(apiAdmin.addEnvironment(organization, env));
             URI location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + envDTO.getId());
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.GATEWAY_ENVIRONMENTS, new Gson().toJson(envDTO),
+                    APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());
             return Response.created(location).entity(envDTO).build();
         } catch (URISyntaxException e) {
             String errorMessage = "Error while adding gateway environment : " + body.getName() + "-" + e.getMessage();

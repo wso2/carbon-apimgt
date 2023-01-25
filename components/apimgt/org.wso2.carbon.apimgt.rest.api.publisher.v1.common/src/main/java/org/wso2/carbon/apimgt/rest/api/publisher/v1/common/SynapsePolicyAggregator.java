@@ -124,7 +124,7 @@ public class SynapsePolicyAggregator {
                                     // As we can't wrap the policy definition with a super parent, trying the build
                                     // OM element with the provided policy definition. This will select first child node
                                     // and drop the other child nodes if a parent node is not configured.
-                                    sanitizedPolicy = APIUtil.buildOMElement(
+                                    sanitizedPolicy = APIUtil.buildSecuredOMElement(
                                             new ByteArrayInputStream(renderedTemplate.getBytes())).toString();
                                 }
                                 caseBody.add(sanitizedPolicy);
@@ -161,7 +161,7 @@ public class SynapsePolicyAggregator {
 
         String updatedXmlString = "<root>" + xmlString + "</root>";
         OMElement sanitizedPolicyElement =
-                APIUtil.buildOMElement(new ByteArrayInputStream(updatedXmlString.getBytes()));
+                APIUtil.buildSecuredOMElement(new ByteArrayInputStream(updatedXmlString.getBytes()));
         StringBuilder filteredTemplate = new StringBuilder();
         for (Iterator childElements = sanitizedPolicyElement.getChildElements();
              childElements.hasNext(); ) {
