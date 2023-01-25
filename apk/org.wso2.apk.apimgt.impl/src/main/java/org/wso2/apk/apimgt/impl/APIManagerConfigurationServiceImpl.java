@@ -16,6 +16,9 @@
 
 package org.wso2.apk.apimgt.impl;
 
+/**
+ * API Manager Configuration Service Implementation
+ */
 public class APIManagerConfigurationServiceImpl implements APIManagerConfigurationService {
 
     private ConfigurationHolder configuration;

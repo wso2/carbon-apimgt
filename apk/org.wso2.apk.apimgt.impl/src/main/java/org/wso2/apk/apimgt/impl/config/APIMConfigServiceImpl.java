@@ -49,35 +49,12 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     }
 
     @Override
-    public void updateExternalStoreConfig(String organization, String externalStoreConfig)
-    {
+    public void updateExternalStoreConfig(String organization, String externalStoreConfig) {
     }
 
     @Override
     public String getExternalStoreConfig(String organization) throws APIManagementException {
 
-        //TODO registry implementation
-//        if (organization == null) {
-//            organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-//        }
-//        try {
-//            int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
-//            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-//                APIUtil.loadTenantRegistry(tenantId);
-//            }
-//            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-//                    .getGovernanceSystemRegistry(tenantId);
-//            if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
-//                Resource resource = registry.get(APIConstants.EXTERNAL_API_STORES_LOCATION);
-//                return new String((byte[]) resource.getContent(), Charset.defaultCharset());
-//            } else {
-//                return null;
-//            }
-//
-//        } catch (RegistryException e) {
-//            throw new APIManagementException(ERROR_WHILE_RETRIEVING_EXTERNAL_STORES_CONFIGURATION, e,
-//                    ExceptionCodes.ERROR_RETRIEVE_EXTERNAL_STORE_CONFIG);
-//        }
         return ""; //Dummy return
     }
 
