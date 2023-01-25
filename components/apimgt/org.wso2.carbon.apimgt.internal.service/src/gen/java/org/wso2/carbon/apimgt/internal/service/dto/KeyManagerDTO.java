@@ -20,6 +20,7 @@ public class KeyManagerDTO   {
     private String type = null;
     private Boolean enabled = null;
     private String tenantDomain = null;
+    private String organization = null;
     private Object _configuration = null;
 
     @XmlType(name="TokenTypeEnum")
@@ -125,6 +126,23 @@ return null;
 
   /**
    **/
+  public KeyManagerDTO organization(String organization) {
+    this.organization = organization;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("organization")
+  public String getOrganization() {
+    return organization;
+  }
+  public void setOrganization(String organization) {
+    this.organization = organization;
+  }
+
+  /**
+   **/
   public KeyManagerDTO _configuration(Object _configuration) {
     this._configuration = _configuration;
     return this;
@@ -172,13 +190,14 @@ return null;
         Objects.equals(type, keyManager.type) &&
         Objects.equals(enabled, keyManager.enabled) &&
         Objects.equals(tenantDomain, keyManager.tenantDomain) &&
+        Objects.equals(organization, keyManager.organization) &&
         Objects.equals(_configuration, keyManager._configuration) &&
         Objects.equals(tokenType, keyManager.tokenType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, type, enabled, tenantDomain, _configuration, tokenType);
+    return Objects.hash(name, type, enabled, tenantDomain, organization, _configuration, tokenType);
   }
 
   @Override
@@ -190,6 +209,7 @@ return null;
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
     sb.append("    tenantDomain: ").append(toIndentedString(tenantDomain)).append("\n");
+    sb.append("    organization: ").append(toIndentedString(organization)).append("\n");
     sb.append("    _configuration: ").append(toIndentedString(_configuration)).append("\n");
     sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
     sb.append("}");

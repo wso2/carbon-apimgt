@@ -441,12 +441,12 @@ public class APIAdminImpl implements APIAdmin {
             throws APIManagementException {
 
         List<KeyManagerConfigurationDTO> keyManagerConfigurations = apiMgtDAO.getKeyManagerConfigurations();
-        Map<String, List<KeyManagerConfigurationDTO>> keyManagerConfigurationsByTenant = new HashMap<>();
+        Map<String, List<KeyManagerConfigurationDTO>> keyManagerConfigurationsByOrg = new HashMap<>();
         for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
             List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS;
-            if (keyManagerConfigurationsByTenant.containsKey(keyManagerConfiguration.getOrganization())) {
+            if (keyManagerConfigurationsByOrg.containsKey(keyManagerConfiguration.getOrganization())) {
                 keyManagerConfigurationDTOS =
-                        keyManagerConfigurationsByTenant.get(keyManagerConfiguration.getOrganization());
+                        keyManagerConfigurationsByOrg.get(keyManagerConfiguration.getOrganization());
             } else {
                 keyManagerConfigurationDTOS = new ArrayList<>();
             }
@@ -454,10 +454,10 @@ public class APIAdminImpl implements APIAdmin {
                 APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfiguration);
             }
             keyManagerConfigurationDTOS.add(keyManagerConfiguration);
-            keyManagerConfigurationsByTenant
+            keyManagerConfigurationsByOrg
                     .put(keyManagerConfiguration.getOrganization(), keyManagerConfigurationDTOS);
         }
-        return keyManagerConfigurationsByTenant;
+        return keyManagerConfigurationsByOrg;
     }
 
     @Override

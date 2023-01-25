@@ -33,6 +33,7 @@ public class KeyManagerConfiguration {
     private String type;
     private boolean enabled;
     private String tenantDomain;
+    private String organization;
 
     public enum TokenType {
         EXCHANGED, DIRECT, BOTH
@@ -95,6 +96,14 @@ public class KeyManagerConfiguration {
     public void setTenantDomain(String tenantDomain) {
 
         this.tenantDomain = tenantDomain;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
+    public String getOrganization() {
+        return organization;
     }
 
     public Map<String, Object> getConfiguration() {

@@ -72,6 +72,7 @@ public class KeyManagerJMSMessageListener implements MessageListener {
                                 keyManagerConfiguration.setName(name);
                                 keyManagerConfiguration.setType(type);
                                 keyManagerConfiguration.setTenantDomain(organization);
+                                keyManagerConfiguration.setOrganization(organization);
                                 if (APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD.equals(action)) {
                                     ServiceReferenceHolder.getInstance().getKeyManagerService()
                                             .addKeyManagerConfiguration(organization, name, type,
