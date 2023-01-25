@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers;
 
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -34,7 +33,6 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
-import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
@@ -148,51 +146,50 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             InboundProcessorResponseDTO responseDTO =
                     webSocketProcessor.handleHandshake(req, ctx, inboundMessageContext);
             if (!responseDTO.isError()) {
-                setApiAuthPropertiesToChannel(ctx, inboundMessageContext);
-                setApiPropertiesMapToChannel(ctx, inboundMessageContext);
-                if (StringUtils.isNotEmpty(inboundMessageContext.getToken())) {
-                    String backendJwtHeader = null;
-                    JWTConfigurationDto jwtConfigurationDto = ServiceReferenceHolder.getInstance()
-                            .getAPIManagerConfiguration().getJwtConfigurationDto();
-                    if (jwtConfigurationDto != null) {
-                        backendJwtHeader = jwtConfigurationDto.getJwtHeader();
+                responseDTO = WebsocketUtil.validateDenyPolicies(inboundMessageContext);
+                if (!responseDTO.isError()) {
+                    setApiAuthPropertiesToChannel(ctx, inboundMessageContext);
+                    setApiPropertiesMapToChannel(ctx, inboundMessageContext);
+                    if (StringUtils.isNotEmpty(inboundMessageContext.getToken())) {
+                        String backendJwtHeader = null;
+                        JWTConfigurationDto jwtConfigurationDto = ServiceReferenceHolder.getInstance()
+                                .getAPIManagerConfiguration().getJwtConfigurationDto();
+                        if (jwtConfigurationDto != null) {
+                            backendJwtHeader = jwtConfigurationDto.getJwtHeader();
+                        }
+                        if (StringUtils.isEmpty(backendJwtHeader)) {
+                            backendJwtHeader = APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER;
+                        }
+                        boolean isSSLEnabled = ctx.channel().pipeline().get("ssl") != null;
+                        String prefix = null;
+                        AxisConfiguration axisConfiguration = ServiceReferenceHolder.getInstance()
+                                .getServerConfigurationContext().getAxisConfiguration();
+                        TransportOutDescription transportOut;
+                        if (isSSLEnabled) {
+                            transportOut = axisConfiguration.getTransportOut(APIMgtGatewayConstants.WS_SECURED);
+                        } else {
+                            transportOut = axisConfiguration.getTransportOut(APIMgtGatewayConstants.WS_NOT_SECURED);
+                        }
+                        if (transportOut != null
+                                && transportOut.getParameter(APIMgtGatewayConstants.WS_CUSTOM_HEADER) != null) {
+                            prefix = String.valueOf(transportOut.getParameter(APIMgtGatewayConstants.WS_CUSTOM_HEADER)
+                                    .getValue());
+                        }
+                        if (StringUtils.isNotEmpty(prefix)) {
+                            backendJwtHeader = prefix + backendJwtHeader;
+                        }
+                        req.headers().set(backendJwtHeader, inboundMessageContext.getToken());
                     }
-                    if (StringUtils.isEmpty(backendJwtHeader)) {
-                        backendJwtHeader = APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER;
-                    }
-                    boolean isSSLEnabled = ctx.channel().pipeline().get("ssl") != null;
-                    String prefix = null;
-                    AxisConfiguration axisConfiguration = ServiceReferenceHolder.getInstance()
-                            .getServerConfigurationContext().getAxisConfiguration();
-                    TransportOutDescription transportOut;
-                    if (isSSLEnabled) {
-                        transportOut = axisConfiguration.getTransportOut(APIMgtGatewayConstants.WS_SECURED);
-                    } else {
-                        transportOut = axisConfiguration.getTransportOut(APIMgtGatewayConstants.WS_NOT_SECURED);
-                    }
-                    if (transportOut != null
-                            && transportOut.getParameter(APIMgtGatewayConstants.WS_CUSTOM_HEADER) != null) {
-                        prefix = String.valueOf(transportOut.getParameter(APIMgtGatewayConstants.WS_CUSTOM_HEADER)
-                                .getValue());
-                    }
-                    if (StringUtils.isNotEmpty(prefix)) {
-                        backendJwtHeader = prefix + backendJwtHeader;
-                    }
-                    req.headers().set(backendJwtHeader, inboundMessageContext.getToken());
+                } else {
+                    handleHandshakeError(channelId, responseDTO, ctx, inboundMessageContext, msg,
+                        APISecurityConstants.API_BLOCKED_MESSAGE, APISecurityConstants.API_BLOCKED,
+                        HttpResponseStatus.FORBIDDEN.code());
                 }
-                ctx.fireChannelRead(req);
-                publishHandshakeEvent(ctx, inboundMessageContext);
-                InboundWebsocketProcessorUtil.publishGoogleAnalyticsData(inboundMessageContext,
-                        ctx.channel().remoteAddress().toString());
             } else {
-                ReferenceCountUtil.release(msg);
-                InboundMessageContextDataHolder.getInstance().removeInboundMessageContextForConnection(channelId);
-                FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-                        HttpResponseStatus.valueOf(responseDTO.getErrorCode()),
-                        Unpooled.copiedBuffer(responseDTO.getErrorMessage(), CharsetUtil.UTF_8));
-                httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
-                httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
-                ctx.writeAndFlush(httpResponse);
+                handleHandshakeError(channelId, responseDTO, ctx, inboundMessageContext, msg,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        HttpResponseStatus.UNAUTHORIZED.code());
             }
         } else if (msg instanceof CloseWebSocketFrame) {
             //remove inbound message context from data holder
@@ -252,6 +249,31 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 publishPublishEvent(ctx);
             }
         }
+    }
+
+    /**
+     * Handle error flow in handshake phase.
+     *
+     * @param channelId              Channel Id of the web socket connection
+     * @param responseDTO            InboundProcessorResponseDTO
+     * @param ctx                    ChannelHandlerContext
+     * @param inboundMessageContext  InboundMessageContext
+     * @param msg                    WebsocketFrame that was received
+     * @param errorMessage           Error message
+     * @param errorCode              Error code
+     * @param httpResponseStatusCode Http response status code
+     */
+    private void handleHandshakeError(String channelId, InboundProcessorResponseDTO responseDTO,
+                                      ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext,
+                                      Object msg, String errorMessage, int errorCode, int httpResponseStatusCode) {
+        ReferenceCountUtil.release(msg);
+        InboundMessageContextDataHolder.getInstance().removeInboundMessageContextForConnection(channelId);
+        if (StringUtils.isEmpty(responseDTO.getErrorMessage())) {
+            responseDTO.setErrorMessage(errorMessage);
+        }
+        responseDTO.setErrorCode(httpResponseStatusCode);
+        WebsocketUtil.sendHandshakeErrorMessage(ctx, inboundMessageContext, responseDTO, errorMessage,
+                errorCode);
     }
 
     private void handlePublishFrameErrorEvent(ChannelHandlerContext ctx, InboundProcessorResponseDTO responseDTO) {

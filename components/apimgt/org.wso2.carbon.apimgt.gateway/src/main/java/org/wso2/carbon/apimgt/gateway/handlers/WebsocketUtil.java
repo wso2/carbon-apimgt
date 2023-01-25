@@ -17,6 +17,10 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers;
 
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.*;
+import io.netty.util.CharsetUtil;
 import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
@@ -29,6 +33,10 @@ import org.apache.synapse.core.axis2.MessageContextCreatorForAxis2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -228,4 +236,71 @@ public class WebsocketUtil {
 		return axis2MsgCtx;
 	}
 
+	/**
+	 * Send error messages in handshake phase for API request message
+	 *
+	 * @param ctx                   Channel handler context
+	 * @param inboundMessageContext InboundMessageContext
+	 * @param responseDTO           InboundProcessorResponseDTO
+	 * @param errorMessage          Error message
+	 * @param errorCode             Error code
+	 */
+	public static void sendHandshakeErrorMessage(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext,
+												 InboundProcessorResponseDTO responseDTO, String errorMessage,
+												 int errorCode) {
+		FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+		HttpResponseStatus.valueOf(responseDTO.getErrorCode()),
+		Unpooled.copiedBuffer(responseDTO.getErrorMessage(), CharsetUtil.UTF_8));
+		httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+		httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
+		ctx.writeAndFlush(httpResponse);
+		if (log.isDebugEnabled()) {
+			log.debug("API request failed due to " + errorMessage + " for the websocket API: "
+					+ inboundMessageContext.getApiContext());
+		}
+//		throw new APISecurityException(errorCode, errorMessage);
+	}
+
+	/**
+	 * Validates whether there any active deny policies and set error values in InboundProcessorResponseDTO.
+	 *
+	 * @param inboundMessageContext InboundMessageContext
+	 * @return InboundProcessorResponseDTO
+	 */
+	public static InboundProcessorResponseDTO validateDenyPolicies(InboundMessageContext inboundMessageContext) {
+		APIKeyValidationInfoDTO infoDTO = inboundMessageContext.getInfoDTO();
+		String clientIp = inboundMessageContext.getUserIP();
+		String apiTenantDomain = inboundMessageContext.getTenantDomain();
+		String apiContext = inboundMessageContext.getApiContext();
+		String apiVersion = inboundMessageContext.getVersion();
+		InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+		boolean isBlockedRequest = false;
+		String appLevelBlockingKey = "";
+		String subscriptionLevelBlockingKey = "";
+
+		if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().isBlockingConditionsPresent()) {
+			appLevelBlockingKey = infoDTO.getSubscriber() + ":" + infoDTO.getApplicationName();
+			subscriptionLevelBlockingKey = apiContext + ":" + apiVersion + ":" + infoDTO.getSubscriber() + ":"
+					+ infoDTO.getApplicationName() + ":" + infoDTO.getType();
+			isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder()
+					.isRequestBlocked(apiContext, appLevelBlockingKey, infoDTO.getEndUserName(), clientIp,
+							apiTenantDomain, subscriptionLevelBlockingKey);
+		}
+
+		if (isBlockedRequest) {
+			responseDTO = getFrameErrorDTO(GraphQLConstants.FrameErrorConstants.BLOCKED_REQUEST,
+					GraphQLConstants.FrameErrorConstants.BLOCKED_REQUEST_MESSAGE, true);
+		}
+		return responseDTO;
+	}
+
+	private static InboundProcessorResponseDTO getFrameErrorDTO(int errorCode, String errorMessage, boolean closeConnection) {
+		InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
+		inboundProcessorResponseDTO.setError(true);
+		inboundProcessorResponseDTO.setErrorCode(errorCode);
+		inboundProcessorResponseDTO.setErrorMessage(errorMessage);
+		inboundProcessorResponseDTO.setCloseConnection(closeConnection);
+		return inboundProcessorResponseDTO;
+
+	}
 }

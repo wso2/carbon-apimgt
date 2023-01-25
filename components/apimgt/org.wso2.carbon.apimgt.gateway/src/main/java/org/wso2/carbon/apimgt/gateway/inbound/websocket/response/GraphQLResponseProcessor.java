@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.inbound.websocket.response;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.dto.GraphQLOperationDTO;
@@ -45,10 +46,13 @@ public class GraphQLResponseProcessor extends ResponseProcessor {
     @Override
     public InboundProcessorResponseDTO handleResponse(int msgSize, String msgText,
                                                       InboundMessageContext inboundMessageContext) {
-
         InboundProcessorResponseDTO responseDTO =
                 InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext);
         JSONObject graphQLMsg = new JSONObject(msgText);
+
+        if (!responseDTO.isError()) {
+            responseDTO = WebsocketUtil.validateDenyPolicies(inboundMessageContext);
+        }
         if (!responseDTO.isError() && checkIfSubscribeMessageResponse(graphQLMsg)) {
             if (graphQLMsg.has(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID)
                     && graphQLMsg.getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID) != null) {

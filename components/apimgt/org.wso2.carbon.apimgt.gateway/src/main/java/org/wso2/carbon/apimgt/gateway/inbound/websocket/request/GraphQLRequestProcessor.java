@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.common.gateway.graphql.QueryAnalyzer;
 import org.wso2.carbon.apimgt.common.gateway.graphql.QueryValidator;
 import org.wso2.carbon.apimgt.gateway.dto.GraphQLOperationDTO;
 import org.wso2.carbon.apimgt.common.gateway.graphql.GraphQLProcessorUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
@@ -71,12 +72,14 @@ public class GraphQLRequestProcessor extends RequestProcessor {
     @Override
     public InboundProcessorResponseDTO handleRequest(int msgSize, String msgText,
                                                      InboundMessageContext inboundMessageContext) {
-
         InboundProcessorResponseDTO responseDTO;
         JSONObject graphQLMsg = new JSONObject(msgText);
         responseDTO = InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext);
         Parser parser = new Parser();
 
+        if (!responseDTO.isError()) {
+            responseDTO = WebsocketUtil.validateDenyPolicies(inboundMessageContext);
+        }
         //for gql subscription operation payloads
         if (!responseDTO.isError() && checkIfSubscribeMessage(graphQLMsg)) {
             String operationId = graphQLMsg.getString(

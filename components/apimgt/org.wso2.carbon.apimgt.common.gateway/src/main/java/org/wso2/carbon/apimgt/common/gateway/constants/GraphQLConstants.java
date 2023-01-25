@@ -63,4 +63,19 @@ public class GraphQLConstants {
         public static final String PAYLOAD_FIELD_NAME_ID = "id";
         public static final String PAYLOAD_FIELD_TYPE_ERROR = "error";
     }
+
+    public static class FrameErrorConstants {
+        public static final int RESOURCE_FORBIDDEN_ERROR = 4002;
+        public static final String RESOURCE_FORBIDDEN_ERROR_MESSAGE = "User NOT authorized to access the resource";
+        public static final int INTERNAL_SERVER_ERROR = 4004;
+        public static final int BAD_REQUEST = 4005;
+        public static final int BLOCKED_REQUEST = 4006;
+        public static final String BLOCKED_REQUEST_MESSAGE = "Blocked from accessing the API";
+        public static final int GRAPHQL_QUERY_TOO_DEEP = 4020;
+        public static final String GRAPHQL_QUERY_TOO_DEEP_MESSAGE = "QUERY TOO DEEP";
+        public static final int GRAPHQL_QUERY_TOO_COMPLEX = 4021;
+        public static final String GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE = "QUERY TOO COMPLEX";
+        public static final int GRAPHQL_INVALID_QUERY = 4022;
+        public static final String GRAPHQL_INVALID_QUERY_MESSAGE = "INVALID QUERY";
+    }
 }
