@@ -69,6 +69,7 @@ public class CorrelationConfigDAO {
 
         for (CorrelationConfigDTO correlationConfigDTO : correlationConfigDTOList) {
             String componentName = correlationConfigDTO.getName().trim();
+            log.debug("Updating Correlation Configs for component - " + componentName);
             if (!correlationComponents.contains(componentName)) {
                 throw new APIManagementException("Invalid Component Name : " + componentName,
                         ExceptionCodes.from(ExceptionCodes.CORRELATION_CONFIG_BAD_REQUEST_INVALID_NAME));
@@ -77,9 +78,7 @@ public class CorrelationConfigDAO {
         String queryConfigs = SQLConstants.UPDATE_CORRELATION_CONFIGS;
         String queryProps = SQLConstants.UPDATE_CORRELATION_CONFIG_PROPERTIES;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-
             connection.setAutoCommit(false);
-            log.debug("Updating Correlation Configs");
             try (PreparedStatement preparedStatementConfigs = connection.prepareStatement(queryConfigs)) {
                 for (CorrelationConfigDTO correlationConfigDTO : correlationConfigDTOList) {
                     String componentName = correlationConfigDTO.getName().trim();
