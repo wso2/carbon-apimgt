@@ -83,6 +83,7 @@ public class OAuthAuthenticator implements Authenticator {
     private boolean removeDefaultAPIHeaderFromOutMessage = true;
     private String requestOrigin;
     private boolean isMandatory;
+    private ThreadLocal<String> remainingAuthHeader = new ThreadLocal<String>();
 
     public OAuthAuthenticator() {
     }
@@ -106,7 +107,7 @@ public class OAuthAuthenticator implements Authenticator {
     public AuthenticationResponse authenticate(MessageContext synCtx) throws APIManagementException {
         boolean isJwtToken = false;
         String accessToken = null;
-        String remainingAuthHeader = "";
+        remainingAuthHeader.set("");
         boolean defaultVersionInvoked = false;
         Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
@@ -166,7 +167,7 @@ public class OAuthAuthenticator implements Authenticator {
                         }
                     }
                 }
-                remainingAuthHeader = String.join(oauthHeaderSplitter, remainingAuthHeaders);
+                remainingAuthHeader.set(String.join(oauthHeaderSplitter, remainingAuthHeaders));
             }
 
             if (log.isDebugEnabled()) {
@@ -182,7 +183,7 @@ public class OAuthAuthenticator implements Authenticator {
 
         if (removeOAuthHeadersFromOutMessage) {
             //Remove authorization headers sent for authentication at the gateway and pass others to the backend
-            if (StringUtils.isNotBlank(remainingAuthHeader)) {
+            if (StringUtils.isNotBlank(remainingAuthHeader.get())) {
                 if (log.isDebugEnabled()) {
                     log.debug("Removing OAuth key from Authorization header");
                 }
