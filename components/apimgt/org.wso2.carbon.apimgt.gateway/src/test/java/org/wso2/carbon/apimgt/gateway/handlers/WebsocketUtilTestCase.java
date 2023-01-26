@@ -26,6 +26,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -33,14 +34,15 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import java.util.UUID;
 
 /**
  * Test class for WebsocketUtil
@@ -64,8 +66,7 @@ public class WebsocketUtilTestCase {
     private ServiceReferenceHolder serviceReferenceHolder;
     private Cache gwTokenCache;
     private Cache gwKeyCache;
-
-
+    private API graphQLAPI;
 
     @Before
     public void setup() {
@@ -94,6 +95,8 @@ public class WebsocketUtilTestCase {
         Mockito.when(cacheManager.getCache(APIConstants.GATEWAY_KEY_CACHE_NAME)).thenReturn(gwKeyCache);
         Mockito.when(cacheManager.getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME)).thenReturn(gwTokenCache);
         PowerMockito.mockStatic(APIUtil.class);
+        graphQLAPI = new API(UUID.randomUUID().toString(), 2, "admin", "GraphQLAPI", "1.0.0", "/graphql", "Unlimited",
+                APIConstants.GRAPHQL_API, "PUBLISHED", false);
     }
 
     @Test
@@ -151,5 +154,28 @@ public class WebsocketUtilTestCase {
     public void testIsRemoveOAuthHeadersFromOutMessage() {
         Assert.assertEquals("235erwytgtkyb:/ishara:/resource",
                             WebsocketUtil.getAccessTokenCacheKey(cachedToken, apiContext, resource));
+    }
+
+    @Test
+    public void testValidateDenyPolicies() {
+        InboundMessageContext inboundMessageContext = createApiMessageContext(graphQLAPI);
+        ThrottleDataHolder throttleDataHolder = Mockito.mock(ThrottleDataHolder.class);
+        Mockito.when(serviceReferenceHolder.getThrottleDataHolder()).thenReturn(throttleDataHolder);
+        Mockito.when(serviceReferenceHolder.getThrottleDataHolder().isBlockingConditionsPresent()).thenReturn(true);
+        Mockito.when(serviceReferenceHolder.getThrottleDataHolder().isRequestBlocked(Mockito.any(), Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(true);
+        Mockito.when(APIUtil.isAnalyticsEnabled()).thenReturn(false);
+        Assert.assertEquals(4006, WebsocketUtil.validateDenyPolicies(inboundMessageContext).getErrorCode());
+    }
+
+    private InboundMessageContext createApiMessageContext(API api) {
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        inboundMessageContext.setTenantDomain("carbon.super");
+        inboundMessageContext.setElectedAPI(api);
+        inboundMessageContext.setToken("test-backend-jwt-token");
+        inboundMessageContext.setUserIP("127.0.0.1");
+        inboundMessageContext.setApiContext("/graphql/1.0.0");
+        inboundMessageContext.setVersion("1.0.0");
+        return inboundMessageContext;
     }
 }
