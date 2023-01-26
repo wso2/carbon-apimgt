@@ -232,7 +232,7 @@
           "x-throttling-tier": "",
           "x-throttling-limit": {
             "requestCount" : 12310 ,
-            "unit" : "min"
+            "unit" : "Min"
           },
           "x-scope": "sample",
           "security": [

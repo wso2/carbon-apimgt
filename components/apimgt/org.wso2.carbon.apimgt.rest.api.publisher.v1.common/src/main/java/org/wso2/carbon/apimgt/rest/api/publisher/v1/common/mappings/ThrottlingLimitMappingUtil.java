@@ -36,7 +36,7 @@ public class ThrottlingLimitMappingUtil {
     public static ThrottlingLimit fromDTOToThrottlingLimit(APIOperationsThrottlingLimitDTO dto) {
         ThrottlingLimit throttlingLimit = new ThrottlingLimit();
         throttlingLimit.setRequestCount(dto.getRequestCount());
-        throttlingLimit.setUnit(dto.getUnit());
+        throttlingLimit.setUnit(dto.getUnit().toString());
         return throttlingLimit;
     }
 
@@ -49,7 +49,7 @@ public class ThrottlingLimitMappingUtil {
     public static APIOperationsThrottlingLimitDTO fromThrottlingLimitToDTO(ThrottlingLimit throttlingLimit) {
         APIOperationsThrottlingLimitDTO dto = new APIOperationsThrottlingLimitDTO();
         dto.setRequestCount(throttlingLimit.getRequestCount());
-        dto.setUnit(throttlingLimit.getUnit());
+        dto.setUnit(APIOperationsThrottlingLimitDTO.UnitEnum.valueOf(throttlingLimit.getUnit()));
         return dto;
     }
 }

@@ -10457,7 +10457,9 @@ components:
               example: 10000
             unit:
               type: string
-              example: min
+              enum:
+                - min
+                - hour
         scopes:
           type: array
           example: []

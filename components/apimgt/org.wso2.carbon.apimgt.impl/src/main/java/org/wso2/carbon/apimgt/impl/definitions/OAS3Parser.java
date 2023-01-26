@@ -57,8 +57,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIEndpointUrlExtractor;
@@ -72,6 +70,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.endpointurlextractor.EndpointUrl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -442,23 +441,29 @@ public class OAS3Parser extends APIDefinition {
                             template.setAuthType("Any");
                             template.setAuthTypes("Any");
                         }
-                        if (extensions.containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER) &&
-                                !extensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER).toString().isEmpty()) {
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER) && !StringUtils.isEmpty(
+                                extensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER).toString())) {
                             String throttlingTier = (String) extensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
                             template.setThrottlingTier(throttlingTier);
                             template.setThrottlingTiers(throttlingTier);
                             // existing APIs do not have the throttling limit value. To support those APIs below
                             // assignment is performing
-                            template.setThrottlingLimit(throttlingTier);
-                        } else {
-                            template.setThrottlingTier("");
-                            template.setThrottlingTiers(new ArrayList<>());
+                            if (!extensions.containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
+                                template.setThrottlingLimit(throttlingTier);
+                            }
                         }
                         // assigns x-throttling-limit value if x-throttling-tier is not available
-                        if (template.getThrottlingLimit() == null && extensions.containsKey(
-                                APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
-                            template.setThrottlingLimit(OASParserUtil.getThrottlingLimitFromJSON(
-                                    extensions.get(APIConstants.SWAGGER_X_THROTTLING_LIMIT)));
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
+                            ThrottlingLimit throttlingLimit = OASParserUtil.getThrottlingLimitFromJSON(
+                                    extensions.get(APIConstants.SWAGGER_X_THROTTLING_LIMIT));
+                            template.setThrottlingLimit(throttlingLimit);
+                            if (template.getThrottlingTier() == null) {
+                                // maps throttlingLimit to throttlingTier
+                                template.setThrottlingTier(
+                                        APIUtil.getThrottlingTierFromThrottlingLimit(throttlingLimit));
+                                template.setThrottlingTiers(
+                                        APIUtil.getThrottlingTierFromThrottlingLimit(throttlingLimit));
+                            }
                         }
                         if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
                             String mediationScript = (String) extensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
@@ -1192,14 +1197,15 @@ public class OAS3Parser extends APIDefinition {
         }
         operation.addExtension(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
         // handle x-throttling-tier extension
-        if (resource.getPolicy() != null && !resource.getPolicy().isEmpty()) {
+        if (resource.getPolicy() != null && !StringUtils.isEmpty(resource.getPolicy())) {
             operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
         } else {
-            operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, "");
+            operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_TIER,
+                    APIUtil.getThrottlingTierFromThrottlingLimit(resource.getThrottlingLimit()));
         }
         // assigns x-throttling-limit extension
         if (resource.getThrottlingLimit() != null) {
-            if (!resource.getThrottlingLimit().toString().isEmpty()) {
+            if (!StringUtils.isEmpty(resource.getThrottlingLimit().toString())) {
                 operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil.getThrottlingLimitJSON(
                         resource.getThrottlingLimit()));
             } else {
