@@ -10158,29 +10158,6 @@ public final class APIUtil {
     }
 
     /**
-     * Gives the throttling limit details from the string value relevant to the x-throttling-limit in API definition file
-     *
-     * @param throttlingLimitStr x-throttling-limit string value
-     * @return Throttling limit object with relevant throttling data
-     * @throws APIManagementException If an error happens when parsing the string
-     */
-    public static ThrottlingLimit getThrottlingLimitFromXThrottlingLimitString(String throttlingLimitStr) throws
-            APIManagementException {
-        ThrottlingLimit throttlingLimit = new ThrottlingLimit();
-        JSONParser parser = new JSONParser();
-        JSONObject jsonObject;
-        try {
-            jsonObject = (JSONObject) parser.parse(throttlingLimitStr);
-        } catch (ParseException e) {
-            throw new APIManagementException("Error occurred while converting " +
-                    "x-throttling limit value to a JSON");
-        }
-        throttlingLimit.setRequestCount(((Long) jsonObject.get("requestCount")).intValue());
-        throttlingLimit.setUnit((String) jsonObject.get("unit"));
-        return throttlingLimit;
-    }
-
-    /**
      * Existing APIs contains the throttling tier value as a string. This method assigns the throttling limit in
      * SwaggerData object's throttleLimit field considering the throttling tier string value.
      *
@@ -10202,12 +10179,36 @@ public final class APIUtil {
                 throttlingLimit.setRequestCount(50000);
                 throttlingLimit.setUnit("min");
                 break;
-            default:
-                // handles Unlimited value and unmatched throttle tier values
+            case "Unlimited":
                 throttlingLimit.setRequestCount(-1);
                 throttlingLimit.setUnit("min");
                 break;
         }
         return throttlingLimit;
+    }
+
+    /**
+     * Gives throttling tier value relevant to the throttling limit
+     *
+     * @param throttlingLimit throttling limit details
+     * @return throttling tier value
+     */
+    public static String getThrottlingTierFromThrottlingLimit(ThrottlingLimit throttlingLimit) {
+        String requestCount = "";
+        String prefix = "";
+        if (throttlingLimit != null) {
+            if (throttlingLimit.getRequestCount() % 100000 == 0) {
+                requestCount = Integer.toString(throttlingLimit.getRequestCount() / 1000000);
+                prefix = "M";
+            } else if (throttlingLimit.getRequestCount() % 1000 == 0) {
+                requestCount = Integer.toString(throttlingLimit.getRequestCount() / 1000);
+                prefix = "K";
+            } else {
+                requestCount = Integer.toString(throttlingLimit.getRequestCount());
+            }
+        } else {
+            log.warn("Could not create a throttling tier value. Hence returning an empty value.");
+        }
+        return requestCount + prefix + "Per" + throttlingLimit.getUnit();
     }
 }

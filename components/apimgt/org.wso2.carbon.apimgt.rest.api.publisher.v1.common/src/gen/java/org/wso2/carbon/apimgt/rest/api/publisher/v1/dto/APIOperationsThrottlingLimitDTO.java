@@ -21,7 +21,38 @@ import javax.validation.Valid;
 public class APIOperationsThrottlingLimitDTO   {
   
     private Integer requestCount = null;
-    private String unit = null;
+
+    @XmlType(name="UnitEnum")
+    @XmlEnum(String.class)
+    public enum UnitEnum {
+        MIN("min"),
+        HOUR("hour");
+        private String value;
+
+        UnitEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static UnitEnum fromValue(String v) {
+            for (UnitEnum b : UnitEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private UnitEnum unit = null;
 
   /**
    **/
@@ -42,18 +73,18 @@ public class APIOperationsThrottlingLimitDTO   {
 
   /**
    **/
-  public APIOperationsThrottlingLimitDTO unit(String unit) {
+  public APIOperationsThrottlingLimitDTO unit(UnitEnum unit) {
     this.unit = unit;
     return this;
   }
 
   
-  @ApiModelProperty(example = "min", value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("unit")
-  public String getUnit() {
+  public UnitEnum getUnit() {
     return unit;
   }
-  public void setUnit(String unit) {
+  public void setUnit(UnitEnum unit) {
     this.unit = unit;
   }
 
