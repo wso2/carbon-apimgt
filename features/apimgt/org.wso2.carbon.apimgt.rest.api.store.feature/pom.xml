@@ -292,7 +292,7 @@
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.common.gateway:${carbon.apimgt.version}
                                 </bundleDef>
                                 <bundleDef>org.apache.woden.wso2:woden</bundleDef>
-                                <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
+                                <bundleDef>com.googlecode.json-simple:json-simple</bundleDef>
                                 <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
                                 <bundleDef>net.sf.ehcache.wso2:ehcache</bundleDef>
                                 <bundleDef>org.json.wso2:json:${orbit.version.json}</bundleDef>

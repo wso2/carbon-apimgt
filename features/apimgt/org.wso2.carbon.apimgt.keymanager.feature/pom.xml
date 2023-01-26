@@ -115,7 +115,7 @@
                                 <bundleDef>
                                     org.wso2.carbon.identity.framework:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}
                                 </bundleDef>
-                                <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
+                                <bundleDef>com.googlecode.json-simple:json-simple</bundleDef>
                                 <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
                                 <bundleDef>net.sf.ehcache.wso2:ehcache</bundleDef>
                                 <bundleDef>org.json.wso2:json:${orbit.version.json}</bundleDef>

@@ -1246,7 +1246,7 @@
             </dependency>
 
             <dependency>
-                <groupId>com.googlecode.json-simple.wso2</groupId>
+                <groupId>com.googlecode.json-simple</groupId>
                 <artifactId>json-simple</artifactId>
                 <version>${json-simple.wso2.version}</version>
             </dependency>
@@ -2062,7 +2062,7 @@
         <javax.xml.soap.imp.pkg.version>0.0.0</javax.xml.soap.imp.pkg.version>
         <javax.xml.stream.imp.pkg.version>[1.0.1, 1.1.0)</javax.xml.stream.imp.pkg.version>
 
-        <json-simple.wso2.version>1.1.wso2v1</json-simple.wso2.version>
+        <json-simple.wso2.version>1.1.1</json-simple.wso2.version>
         <apache.woden.version>1.0.0.M9-wso2v1</apache.woden.version>
         <apache.poi.version>3.9.0.wso2v3</apache.poi.version>
         <rhino.js.version>1.7.0.R4.wso2v1</rhino.js.version>
