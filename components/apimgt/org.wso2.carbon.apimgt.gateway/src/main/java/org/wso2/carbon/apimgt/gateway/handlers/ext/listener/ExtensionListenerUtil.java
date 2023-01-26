@@ -267,11 +267,12 @@ public class ExtensionListenerUtil {
         //Extract customProperty from DTO
         Map<String, Object> customProperty = extensionResponseDTO.getCustomProperty();
         //set Additional analytics Properties to the message context.
-        if(customProperty != null && customProperty.get(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS) != null) {
+        if (customProperty != null && customProperty.get(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS) != null) {
             Object customElkAttributes = customProperty.get(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS);
             messageContext.setProperty(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS, customElkAttributes);
             //removing additional analytics props as those are irrelevant to throttle stream
-            customProperty.remove(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS); }
+            customProperty.remove(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS);
+        }
         // set customProperty map to send in throttle stream
         if (customProperty != null) {
             messageContext.setProperty(APIMgtGatewayConstants.CUSTOM_PROPERTY, customProperty);
