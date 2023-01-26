@@ -258,7 +258,6 @@ public class WebsocketUtil {
 			log.debug("API request failed due to " + errorMessage + " for the websocket API: "
 					+ inboundMessageContext.getApiContext());
 		}
-//		throw new APISecurityException(errorCode, errorMessage);
 	}
 
 	/**
