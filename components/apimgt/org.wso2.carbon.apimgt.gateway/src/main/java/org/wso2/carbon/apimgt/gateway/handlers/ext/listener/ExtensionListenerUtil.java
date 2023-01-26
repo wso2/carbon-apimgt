@@ -264,10 +264,18 @@ public class ExtensionListenerUtil {
         }
         // handle payload
         processResponsePayload(extensionResponseDTO, messageContext);
+        //Extract customProperty from DTO
+        Map<String, Object> customProperty = extensionResponseDTO.getCustomProperty();
+        //set Additional analytics Properties to the message context.
+        if (customProperty != null && customProperty.get(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS) != null) {
+            Object customElkAttributes = customProperty.get(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS);
+            messageContext.setProperty(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS, customElkAttributes);
+            //removing additional analytics props as those are irrelevant to throttle stream
+            customProperty.remove(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS);
+        }
         // set customProperty map to send in throttle stream
-        if (extensionResponseDTO.getCustomProperty() != null) {
-            messageContext
-                    .setProperty(APIMgtGatewayConstants.CUSTOM_PROPERTY, extensionResponseDTO.getCustomProperty());
+        if (customProperty != null) {
+            messageContext.setProperty(APIMgtGatewayConstants.CUSTOM_PROPERTY, customProperty);
         }
         // set Http Response status code
         messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE,
