@@ -430,12 +430,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 Util.setTag(keyTracingSpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
             }
 
-            // Get application information to be logged in API authentication failure (only requestURI for JWT tokens)
-            String applicationName = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME);
-            String endUserName = (String) messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME);
-            String requestURI = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
-            String warnDetails = "";
-
             if (log.isDebugEnabled()) {
                     // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
                     // to all the gateway calls that is happening.
@@ -452,17 +446,14 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     log.error("API authentication failure due to "
                             + APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
                 } else {
-                    if (applicationName != null) {
-                        warnDetails = " for appName=" + applicationName;
-                    }
-                    if (endUserName != null) {
-                        warnDetails = warnDetails + " userName=" + endUserName;
-                    }
-                    if (requestURI != null) {
-                        warnDetails = warnDetails + " for requestURI=" + requestURI;
-                    }
+                    String warnDetails = getWarnDetails(messageContext);
                     // We do not need to log known authentication failures as errors since these are not product errors.
                     log.warn("API authentication failure due to " + errorMessage + warnDetails);
+                    // Sample Error String (JWT): APIAuthenticationHandler API authentication failure due to The access
+                    // token does not allow you to access the requested resource for requestURI=/pizzashack/1.0.0/order
+                    // Sample Error String (default): APIAuthenticationHandler API authentication failure due to The
+                    // access token does not allow you to access the requested resource for appName=test
+                    // userName=admin@carbon.super for requestURI=/pizzashack/1.0.0/order
 
                     if (log.isDebugEnabled()) {
                         log.debug("API authentication failed with error " + e.getErrorCode(), e);
@@ -737,6 +728,24 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             logMessage = logMessage + " from clientIP=" + remoteIP;
         }
         return logMessage;
+    }
+
+    private String getWarnDetails(MessageContext messageContext) {
+        // Get application information to be logged in API authentication failure (only requestURI for JWT tokens)
+        String applicationName = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME);
+        String endUserName = (String) messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME);
+        String requestURI = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
+        String warnDetails = "";
+        if (applicationName != null) {
+            warnDetails = " for appName=" + applicationName;
+        }
+        if (endUserName != null) {
+            warnDetails = warnDetails + " userName=" + endUserName;
+        }
+        if (requestURI != null) {
+            warnDetails = warnDetails + " for requestURI=" + requestURI;
+        }
+        return warnDetails;
     }
 
     protected void setAPIParametersToMessageContext(MessageContext messageContext) {
