@@ -31,6 +31,8 @@ public class SearchApiServiceImplUtil {
     }
 
     /**
+     * Get API List from API search results
+     *
      * @param resultsMap API search result map
      * @return API List
      */

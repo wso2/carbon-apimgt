@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.impl.restapi;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -98,7 +97,7 @@ public class CommonUtils {
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         Set<Scope> sharedAPIScopes = new HashSet<>();
 
-        for (org.wso2.carbon.apimgt.api.model.Scope scope : api.getScopes()) {
+        for (Scope scope : api.getScopes()) {
             String scopeName = scope.getKey();
             if (!(APIUtil.isAllowedScope(scopeName))) {
                 // Check if each scope key is already assigned as a local scope to a different API which is also not a

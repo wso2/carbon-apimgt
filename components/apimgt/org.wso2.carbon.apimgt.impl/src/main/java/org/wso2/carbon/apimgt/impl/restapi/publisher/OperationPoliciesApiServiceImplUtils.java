@@ -84,6 +84,8 @@ public class OperationPoliciesApiServiceImplUtils {
     }
 
     /**
+     * Get query parameters from the string
+     *
      * @param query Request query
      * @return Map of query params
      */

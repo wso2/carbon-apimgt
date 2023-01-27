@@ -2014,7 +2014,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * Cleans the pending approval tasks associated with the given application subjected to be deleted
      * Pending approvals for Application creation, Subscription Creation, Subscription Deletion, Subscription Update will be deleted
      * @param applicationId ID of the application which the associated pending tasks should be removed
-     * @throws APIManagementException IF any issue occurred in retrieving workflow references for the given applicationId
+     * @throws APIManagementException If any issue occurred in retrieving workflow references for the given applicationId
      */
     @Override
     public void cleanupPendingTasksForApplicationDeletion(int applicationId) throws APIManagementException {
