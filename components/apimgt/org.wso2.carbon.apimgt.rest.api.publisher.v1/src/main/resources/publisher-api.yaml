@@ -8484,6 +8484,9 @@ components:
         updatedTime:
           type: string
           example : 2021-02-11 09:57:25
+        updatedBy:
+          type: string
+          example: wso2.system.user
         gatewayVendor:
           type: string
           example: wso2

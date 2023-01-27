@@ -269,16 +269,23 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             // check whether keys need to be skipped while import
             if (skipApplicationKeys == null || !skipApplicationKeys) {
                 // if this is an update, old keys will be removed and the OAuth app will be overridden with new values
-                if (update) {
-                    if (applicationDTO.getKeys().size() > 0 && importedApplication.getKeys().size() > 0) {
-                        importedApplication.getKeys().clear();
+                List<String> availableTypes = new ArrayList();
+                if (importedApplication.getKeys().size() != 0) {
+                    for (APIKey appKey : importedApplication.getKeys()) {
+                        availableTypes.add(appKey.getType());
                     }
                 }
+
                 // Add application keys if present and keys does not exists in the current application
-                if (applicationDTO.getKeys().size() > 0 && importedApplication.getKeys().size() == 0) {
+                if (applicationDTO.getKeys().size() > 0) {
                     for (ApplicationKeyDTO applicationKeyDTO : applicationDTO.getKeys()) {
-                        ImportUtils.addApplicationKey(ownerId, importedApplication, applicationKeyDTO, apiConsumer,
-                                update);
+                        if (!availableTypes.contains(applicationKeyDTO.getKeyType().value())) {
+                            ImportUtils.addApplicationKey(ownerId, importedApplication, applicationKeyDTO, apiConsumer,
+                                    false);
+                        } else {
+                            ImportUtils.addApplicationKey(ownerId, importedApplication, applicationKeyDTO, apiConsumer,
+                                    update);
+                        }
                     }
                 }
             }
