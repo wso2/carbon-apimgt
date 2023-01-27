@@ -1421,7 +1421,8 @@ public class OASParserUtil {
         ObjectNode tlObjectNode = mapper.convertValue(throttlingLimitJSON, ObjectNode.class);
         ThrottlingLimit throttlingLimit = new ThrottlingLimit();
         throttlingLimit.setRequestCount(mapper.convertValue(tlObjectNode.get(APIConstants.REQUEST_COUNT), Integer.class));
-        throttlingLimit.setUnit(mapper.convertValue(tlObjectNode.get(APIConstants.REQUEST_COUNT_UNIT), String.class));
+        throttlingLimit.setUnit(mapper.convertValue(tlObjectNode.get(
+                APIConstants.REQUEST_COUNT_UNIT), String.class).toUpperCase());
         return throttlingLimit;
     }
 

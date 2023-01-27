@@ -25,8 +25,10 @@ public class APIOperationsThrottlingLimitDTO   {
     @XmlType(name="UnitEnum")
     @XmlEnum(String.class)
     public enum UnitEnum {
-        MIN("min"),
-        HOUR("hour");
+        SECOND("Second"),
+        MINUTE("Minute"),
+        HOUR("Hour"),
+        DAY("Day");
         private String value;
 
         UnitEnum (String v) {
@@ -79,8 +81,9 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("unit")
+  @NotNull
   public UnitEnum getUnit() {
     return unit;
   }

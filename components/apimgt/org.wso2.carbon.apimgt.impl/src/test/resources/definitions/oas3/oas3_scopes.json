@@ -209,10 +209,10 @@
             ]
           }],
           "x-auth-type": "Application & Application User",
-          "x-throttling-tier": "",
+          "x-throttling-tier": "12310PerMinute",
           "x-throttling-limit": {
             "requestCount" : 12310 ,
-            "unit" : "Min"
+            "unit" : "Minute"
           }
         }
       }

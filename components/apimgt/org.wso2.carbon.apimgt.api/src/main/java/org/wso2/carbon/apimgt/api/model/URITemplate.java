@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONValue;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -27,6 +29,7 @@ import java.util.*;
 public class URITemplate implements Serializable{
 
     private static final long serialVersionUID = 1L;
+    private static final Log log = LogFactory.getLog(URITemplate.class);
 
     private String uriTemplate;
     private String resourceURI;
@@ -458,25 +461,25 @@ public class URITemplate implements Serializable{
         return throttlingLimit;
     }
 
-    public void setThrottlingLimit(String throttlingLimit) {
+    public void setThrottlingLimit(String throttlingTier) {
         ThrottlingLimit convertedThrottlingLimit = new ThrottlingLimit();
-        switch (throttlingLimit) {
+        convertedThrottlingLimit.setUnit("MINUTE");
+        switch (throttlingTier) {
             case "10KPerMin":
                 convertedThrottlingLimit.setRequestCount(10000);
-                convertedThrottlingLimit.setUnit("min");
                 break;
             case "20KPerMin":
                 convertedThrottlingLimit.setRequestCount(20000);
-                convertedThrottlingLimit.setUnit("min");
                 break;
             case "50KPerMin":
                 convertedThrottlingLimit.setRequestCount(50000);
-                convertedThrottlingLimit.setUnit("min");
                 break;
             case "Unlimited":
                 convertedThrottlingLimit.setRequestCount(-1);
-                convertedThrottlingLimit.setUnit("min");
                 break;
+            default:
+                log.warn("Invalid throttling tier value received");
+                return;
         }
         this.throttlingLimit = convertedThrottlingLimit;
     }
