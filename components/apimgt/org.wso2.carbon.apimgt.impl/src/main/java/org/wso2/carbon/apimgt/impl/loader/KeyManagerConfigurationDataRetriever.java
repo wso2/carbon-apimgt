@@ -70,7 +70,7 @@ public class KeyManagerConfigurationDataRetriever extends TimerTask {
                                         try {
                                             ServiceReferenceHolder.getInstance().getKeyManagerConfigurationService()
                                                     .addKeyManagerConfiguration(
-                                                            keyManagerConfiguration.getTenantDomain(),
+                                                            keyManagerConfiguration.getOrganization(),
                                                             keyManagerConfiguration.getName(),
                                                             keyManagerConfiguration.getType(),
                                                             keyManagerConfiguration);
