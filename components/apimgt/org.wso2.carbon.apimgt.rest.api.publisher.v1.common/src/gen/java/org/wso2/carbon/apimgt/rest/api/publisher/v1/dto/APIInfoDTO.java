@@ -73,6 +73,7 @@ return null;
     private List<String> securityScheme = new ArrayList<String>();
     private String createdTime = null;
     private String updatedTime = null;
+    private String updatedBy = null;
     private String gatewayVendor = null;
     private Boolean advertiseOnly = null;
 
@@ -355,6 +356,23 @@ return null;
 
   /**
    **/
+  public APIInfoDTO updatedBy(String updatedBy) {
+    this.updatedBy = updatedBy;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "wso2.system.user", value = "")
+  @JsonProperty("updatedBy")
+  public String getUpdatedBy() {
+    return updatedBy;
+  }
+  public void setUpdatedBy(String updatedBy) {
+    this.updatedBy = updatedBy;
+  }
+
+  /**
+   **/
   public APIInfoDTO gatewayVendor(String gatewayVendor) {
     this.gatewayVendor = gatewayVendor;
     return this;
@@ -413,13 +431,14 @@ return null;
         Objects.equals(securityScheme, apIInfo.securityScheme) &&
         Objects.equals(createdTime, apIInfo.createdTime) &&
         Objects.equals(updatedTime, apIInfo.updatedTime) &&
+        Objects.equals(updatedBy, apIInfo.updatedBy) &&
         Objects.equals(gatewayVendor, apIInfo.gatewayVendor) &&
         Objects.equals(advertiseOnly, apIInfo.advertiseOnly);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, gatewayVendor, advertiseOnly);
+    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, updatedBy, gatewayVendor, advertiseOnly);
   }
 
   @Override
@@ -443,6 +462,7 @@ return null;
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
+    sb.append("    updatedBy: ").append(toIndentedString(updatedBy)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    advertiseOnly: ").append(toIndentedString(advertiseOnly)).append("\n");
     sb.append("}");
