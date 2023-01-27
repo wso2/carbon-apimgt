@@ -62,7 +62,7 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         this.ctx = ctx;
     }
 
-    private AuthenticationContext getAuthenticationContext()  {
+    private AuthenticationContext getAuthenticationContext() {
         Object authContext = WebSocketUtils.getPropertyFromChannel(APISecurityUtils.API_AUTH_CONTEXT, ctx);
         if (authContext != null) {
             return (AuthenticationContext) authContext;
@@ -186,7 +186,8 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         Operation operation = new Operation();
         String method = (String) WebSocketUtils.getPropertyFromChannel(APIMgtGatewayConstants.HTTP_METHOD, ctx);
         operation.setApiMethod(method);
-        String matchingResource = (String) WebSocketUtils.getPropertyFromChannel(APIConstants.API_ELECTED_RESOURCE, ctx);
+        String matchingResource =
+                (String) WebSocketUtils.getPropertyFromChannel(APIConstants.API_ELECTED_RESOURCE, ctx);
         operation.setApiResourceTemplate(matchingResource);
         return operation;
     }
@@ -269,6 +270,16 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     @Override
     public String getUserAgentHeader() {
         return (String) WebSocketUtils.getPropertyFromChannel(Constants.USER_AGENT_PROPERTY, ctx);
+    }
+
+    @Override
+    public String getUserName() {
+
+        Object authContext = WebSocketUtils.getPropertyFromChannel(APISecurityUtils.API_AUTH_CONTEXT, ctx);
+        if (authContext != null && authContext instanceof AuthenticationContext) {
+            return ((AuthenticationContext) authContext).getUsername();
+        }
+        return null;
     }
 
     @Override

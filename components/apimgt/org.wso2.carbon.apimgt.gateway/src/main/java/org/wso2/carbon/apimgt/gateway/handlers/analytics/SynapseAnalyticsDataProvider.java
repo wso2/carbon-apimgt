@@ -295,6 +295,14 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
+    public String getUserName() {
+        if (messageContext.getPropertyKeySet().contains(APIMgtGatewayConstants.END_USER_NAME)) {
+            return (String) messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME);
+        }
+        return null;
+    }
+
+    @Override
     public String getEndUserIP() {
 
         if (messageContext.getPropertyKeySet().contains(Constants.USER_IP_PROPERTY)) {
