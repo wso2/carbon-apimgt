@@ -119,48 +119,6 @@ public class InboundWebsocketProcessorUtil {
     }
 
     /**
-     * Authenticates JWT token in incoming GraphQL subscription requests.
-     *
-     * @param inboundMessageContext InboundMessageContext
-     * @return true if authenticated
-     * @throws APIManagementException if an internal error occurs
-     * @throws APISecurityException   if authentication fails
-     */
-    public static boolean authenticateGraphQLJWTToken(InboundMessageContext inboundMessageContext)
-            throws APIManagementException, APISecurityException {
-
-        AuthenticationContext authenticationContext;
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(inboundMessageContext.getTenantDomain(),
-                true);
-        JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), inboundMessageContext.getTenantDomain());
-        authenticationContext = jwtValidator.
-                authenticateForGraphQLSubscription(inboundMessageContext.getSignedJWTInfo(),
-                        inboundMessageContext.getApiContext(), inboundMessageContext.getVersion());
-        return validateAuthenticationContext(authenticationContext, inboundMessageContext);
-    }
-
-    /**
-     * Authenticates JWT token in incoming Websocket handshake requests.
-     *
-     * @param inboundMessageContext InboundMessageContext
-     * @return true if authenticated
-     * @throws APIManagementException if an internal error occurs
-     * @throws APISecurityException   if authentication fails
-     */
-    public static boolean authenticateWSJWTToken(InboundMessageContext inboundMessageContext)
-            throws APIManagementException, APISecurityException {
-
-        AuthenticationContext authenticationContext;
-        JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), inboundMessageContext.getTenantDomain());
-        authenticationContext = jwtValidator.
-                authenticateForWebSocket(inboundMessageContext.getSignedJWTInfo(),
-                        inboundMessageContext.getApiContext(), inboundMessageContext.getVersion(),
-                        inboundMessageContext.getMatchingResource());
-        return validateAuthenticationContext(authenticationContext, inboundMessageContext);
-    }
-
-    /**
      * Validate scopes of JWT token for incoming GraphQL subscription messages.
      *
      * @param matchingResource      Invoking GraphQL subscription operation
@@ -402,13 +360,11 @@ public class InboundWebsocketProcessorUtil {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
                     inboundMessageContext.getTenantDomain(), true);
-            APIKeyValidationInfoDTO info;
             String authorizationHeader = inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader);
             String[] auth = authorizationHeader.split(StringUtils.SPACE);
             List<String> keyManagerList =
                     DataHolder.getInstance().getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid());
             if (APIConstants.CONSUMER_KEY_SEGMENT.equals(auth[0])) {
-                String cacheKey;
                 boolean isJwtToken = false;
                 String apiKey = auth[1];
                 if (WebsocketUtil.isRemoveOAuthHeadersFromOutMessage()) {
@@ -461,52 +417,111 @@ public class InboundWebsocketProcessorUtil {
                 if (isJwtToken) {
                     log.debug("The token was identified as a JWT token");
                     inboundMessageContext.setJWTToken(true);
-                    if (APIConstants.GRAPHQL_API.equals(inboundMessageContext.getElectedAPI().getApiType())) {
-                        return InboundWebsocketProcessorUtil.authenticateGraphQLJWTToken(inboundMessageContext);
-                    } else {
-                        return InboundWebsocketProcessorUtil.authenticateWSJWTToken(inboundMessageContext);
-                    }
-                } else {
-                    log.debug("The token was identified as an OAuth token");
-                    //If the key have already been validated
-                    if (WebsocketUtil.isGatewayTokenCacheEnabled()) {
-                        cacheKey = WebsocketUtil.getAccessTokenCacheKey(apiKey, inboundMessageContext.getApiContext(),
-                                inboundMessageContext.getMatchingResource());
-                        info = WebsocketUtil.validateCache(apiKey, cacheKey);
-                        if (info != null) {
-                            inboundMessageContext.setKeyType(info.getType());
-                            inboundMessageContext.setInfoDTO(info);
-                            inboundMessageContext.setToken(info.getEndUserToken());
-                            return info.isAuthorized();
-                        } else {
-                            String revokedCachedToken = (String) CacheProvider.getInvalidTokenCache().get(apiKey);
-                            if (revokedCachedToken != null) {
-                                // Token is revoked/invalid or expired
-                                return false;
-                            }
-                        }
-                    }
-                    info = getApiKeyDataForWSClient(apiKey, inboundMessageContext.getTenantDomain(),
-                            inboundMessageContext.getApiContext(), inboundMessageContext.getVersion(), keyManagerList);
-                    if (info == null || !info.isAuthorized()) {
-                        return false;
-                    }
-                    if (WebsocketUtil.isGatewayTokenCacheEnabled()) {
-                        cacheKey = WebsocketUtil.getAccessTokenCacheKey(apiKey,
-                                inboundMessageContext.getApiContext(), inboundMessageContext.getMatchingResource());
-                        WebsocketUtil.putCache(info, apiKey, cacheKey);
-                    }
-                    inboundMessageContext.setKeyType(info.getType());
-                    inboundMessageContext.setToken(info.getEndUserToken());
-                    inboundMessageContext.setInfoDTO(info);
-                    return true;
                 }
+                inboundMessageContext.setToken(apiKey);
+                boolean isGQL = APIConstants.GRAPHQL_API.equals(inboundMessageContext.getElectedAPI().getApiType());
+                boolean authenticated = !(authenticateToken(inboundMessageContext, !isGQL).isError());
+                return authenticated;
             } else {
                 return false;
             }
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
+    }
+
+    /**
+     * Authenticate token during inbound websocket request (frame) execution, without validating the scopes.
+     *
+     * @param inboundMessageContext InboundMessageContext
+     * @return InboundProcessorResponseDTO
+     */
+    public static InboundProcessorResponseDTO authenticateToken(InboundMessageContext inboundMessageContext) {
+        return authenticateToken(inboundMessageContext, false);
+    }
+
+    /**
+     * Authenticate token during inbound websocket request (frame) execution.
+     *
+     * @param inboundMessageContext InboundMessageContext
+     * @param validateScopes flag to denote whether to validate the scopes or not
+     * @return InboundProcessorResponseDTO
+     */
+    public static InboundProcessorResponseDTO authenticateToken(InboundMessageContext inboundMessageContext, boolean validateScopes) {
+
+        InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
+        try {
+            //validate token and subscriptions
+            if (inboundMessageContext.isJWTToken()) {
+                JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(),
+                        inboundMessageContext.getTenantDomain());
+                AuthenticationContext authenticationContext;
+                String matchingResources = validateScopes ? inboundMessageContext.getMatchingResource() : null;
+                authenticationContext = jwtValidator.
+                        authenticateForWebSocket(inboundMessageContext.getSignedJWTInfo(),
+                                inboundMessageContext.getApiContext(), inboundMessageContext.getVersion(),
+                                matchingResources, validateScopes);
+                if (!validateAuthenticationContext(authenticationContext, inboundMessageContext)) {
+                    inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
+                            WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS,
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, true);
+                }
+            } else {
+                log.debug("Authentication not supported for Opaque tokens");
+                String apiKey = inboundMessageContext.getToken();
+                APIKeyValidationInfoDTO info;
+                String cacheKey;
+                //If the key have already been validated
+                if (WebsocketUtil.isGatewayTokenCacheEnabled()) {
+                    cacheKey = WebsocketUtil.getAccessTokenCacheKey(apiKey, inboundMessageContext.getApiContext(),
+                            inboundMessageContext.getMatchingResource());
+                    info = WebsocketUtil.validateCache(apiKey, cacheKey);
+                    if (info != null) {
+                        inboundMessageContext.setKeyType(info.getType());
+                        inboundMessageContext.setInfoDTO(info);
+                        inboundMessageContext.setToken(info.getEndUserToken());
+                    } else {
+                        String revokedCachedToken = (String) CacheProvider.getInvalidTokenCache().get(apiKey);
+                        if (revokedCachedToken != null) {
+                            // Token is revoked/invalid or expired
+                            info.setAuthorized(false);
+                        }
+                    }
+                }
+                List<String> keyManagerList =
+                        DataHolder.getInstance().getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid());
+                info = getApiKeyDataForWSClient(apiKey, inboundMessageContext.getTenantDomain(),
+                        inboundMessageContext.getApiContext(), inboundMessageContext.getVersion(), keyManagerList);
+                if (info == null || !info.isAuthorized()) {
+                    info.setAuthorized(false);
+                }
+                if (WebsocketUtil.isGatewayTokenCacheEnabled()) {
+                    cacheKey = WebsocketUtil.getAccessTokenCacheKey(apiKey,
+                            inboundMessageContext.getApiContext(), inboundMessageContext.getMatchingResource());
+                    WebsocketUtil.putCache(info, apiKey, cacheKey);
+                }
+                inboundMessageContext.setKeyType(info.getType());
+                inboundMessageContext.setToken(info.getEndUserToken());
+                inboundMessageContext.setInfoDTO(info);
+                if (info.isAuthorized()) {
+                    return inboundProcessorResponseDTO;
+                }
+                return InboundWebsocketProcessorUtil.getFrameErrorDTO(
+                        WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, true);
+            }
+        } catch (APIManagementException e) {
+            log.error(WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_MESSAGE, e);
+            inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
+                    WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_ERROR,
+                    WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_MESSAGE, true);
+        } catch (APISecurityException e) {
+            log.error(WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS, e);
+            inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
+                    WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS,
+                    e.getMessage(), true);
+        }
+        return inboundProcessorResponseDTO;
     }
 
     /**
@@ -671,39 +686,6 @@ public class InboundWebsocketProcessorUtil {
         inboundProcessorResponseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.BAD_REQUEST);
         inboundProcessorResponseDTO.setErrorMessage(errorMessage);
         inboundProcessorResponseDTO.setId(operationId);
-        return inboundProcessorResponseDTO;
-    }
-
-    /**
-     * Authenticate token during inbound websocket request (frame) execution.
-     *
-     * @param inboundMessageContext InboundMessageContext
-     * @return InboundProcessorResponseDTO
-     */
-    public static InboundProcessorResponseDTO authenticateToken(InboundMessageContext inboundMessageContext) {
-
-        InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
-        try {
-            //validate token and subscriptions
-            if (inboundMessageContext.isJWTToken() && !InboundWebsocketProcessorUtil.authenticateGraphQLJWTToken(
-                    inboundMessageContext)) {
-                inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
-                        WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS,
-                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, true);
-            } else {
-                log.debug("Authentication not supported for Opaque tokens");
-            }
-        } catch (APIManagementException e) {
-            log.error(WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_MESSAGE, e);
-            inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
-                    WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_ERROR,
-                    WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_MESSAGE, true);
-        } catch (APISecurityException e) {
-            log.error(WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS, e);
-            inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
-                    WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS,
-                    e.getMessage(), true);
-        }
         return inboundProcessorResponseDTO;
     }
 

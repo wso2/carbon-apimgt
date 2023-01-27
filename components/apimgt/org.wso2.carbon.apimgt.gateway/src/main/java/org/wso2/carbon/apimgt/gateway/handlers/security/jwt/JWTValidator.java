@@ -346,53 +346,6 @@ public class JWTValidator {
     }
 
     /**
-     * Authenticates the given WebSocket handshake request with a JWT token to see if an API consumer is allowed to
-     * access a particular API or not.
-     *
-     * @param signedJWTInfo    The JWT token sent with the API request
-     * @param apiContext       The context of the invoked API
-     * @param apiVersion       The version of the invoked API
-     * @param matchingResource template of matching api resource
-     * @return an AuthenticationContext object which contains the authentication information
-     * @throws APISecurityException in case of authentication failure
-     */
-    @MethodStats
-    public AuthenticationContext authenticateForWebSocket(SignedJWTInfo signedJWTInfo, String apiContext,
-                                                          String apiVersion, String matchingResource)
-            throws APISecurityException {
-
-        String tokenSignature = signedJWTInfo.getSignedJWT().getSignature().toString();
-        JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
-        String jti = getJWTTokenIdentifier(signedJWTInfo);
-        JWTValidationInfo jwtValidationInfo = validateTokenForWS(signedJWTInfo, jti);
-
-        if (jwtValidationInfo != null && jwtValidationInfo.isValid()) {
-            APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validateSubscriptionsForWS(jwtValidationInfo, apiContext,
-                    apiVersion);
-            if (apiKeyValidationInfoDTO.isAuthorized()) {
-                validateScopes(apiContext, apiVersion, matchingResource,
-                               WebSocketApiConstants.WEBSOCKET_DUMMY_HTTP_METHOD_NAME, jwtValidationInfo,
-                               signedJWTInfo);
-                log.debug("JWT authentication successful. user: " + apiKeyValidationInfoDTO.getEndUserName());
-                String endUserToken = generateBackendJWTForWS(jwtValidationInfo, apiKeyValidationInfoDTO, apiContext,
-                        apiVersion, tokenSignature);
-                return generateAuthenticationContextForWS(jti, jwtValidationInfo, apiKeyValidationInfoDTO, endUserToken,
-                        apiVersion);
-            } else {
-                String message = "User is NOT authorized to access the Resource. API Subscription validation failed.";
-                log.debug(message);
-                throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(), message);
-            }
-        } else if (!jwtValidationInfo.isValid()) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                    "Invalid JWT token");
-        }
-        throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
-    }
-
-
-    /**
      * Validates token for Websocket requests.
      *
      * @param signedJWTInfo  SignedJWT Info
@@ -486,42 +439,50 @@ public class JWTValidator {
         return context;
     }
 
-
     /**
-     * Authenticate for GraphQL subscriptions API requests. This method validates the token signature, expire time and
-     * subscription. The token request scopes are added to the AuthenticationContxt to validate later.
+     * Authenticates the given WebSocket handshake request with a JWT token to see if an API consumer is allowed to
+     * access a particular API or not.
      *
-     * @param signedJWTInfo SignedJWTInfo
-     * @param apiContext    API context
-     * @param apiVersion    API version
-     * @return AuthenticationContext
-     * @throws APISecurityException if an error occurs
+     * @param signedJWTInfo    The JWT token sent with the API request
+     * @param apiContext       The context of the invoked API
+     * @param apiVersion       The version of the invoked API
+     * @param matchingResource template of matching api resource
+     * @return an AuthenticationContext object which contains the authentication information
+     * @throws APISecurityException in case of authentication failure
      */
-    public AuthenticationContext authenticateForGraphQLSubscription(SignedJWTInfo signedJWTInfo, String apiContext,
-                                                                    String apiVersion) throws APISecurityException {
+    @MethodStats
+    public AuthenticationContext authenticateForWebSocket(SignedJWTInfo signedJWTInfo, String apiContext,
+                                                          String apiVersion, String matchingResource,
+                                                          boolean validateScopes)
+            throws APISecurityException {
 
         String tokenSignature = signedJWTInfo.getSignedJWT().getSignature().toString();
         JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
         String jti = jwtClaimsSet.getJWTID();
         JWTValidationInfo jwtValidationInfo = validateTokenForWS(signedJWTInfo, jti);
+
         if (jwtValidationInfo != null && jwtValidationInfo.isValid()) {
             APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validateSubscriptionsForWS(jwtValidationInfo, apiContext,
                     apiVersion);
             if (apiKeyValidationInfoDTO.isAuthorized()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("JWT authentication successful. user: " + apiKeyValidationInfoDTO.getEndUserName());
+                if (validateScopes) {
+                    validateScopes(apiContext, apiVersion, matchingResource,
+                            WebSocketApiConstants.WEBSOCKET_DUMMY_HTTP_METHOD_NAME, jwtValidationInfo,
+                            signedJWTInfo);
                 }
+                log.debug("JWT authentication successful. user: " + apiKeyValidationInfoDTO.getEndUserName());
                 String endUserToken = generateBackendJWTForWS(jwtValidationInfo, apiKeyValidationInfoDTO, apiContext,
                         apiVersion, tokenSignature);
                 return generateAuthenticationContextForWS(jti, jwtValidationInfo, apiKeyValidationInfoDTO, endUserToken,
                         apiVersion);
             } else {
                 String message = "User is NOT authorized to access the Resource. API Subscription validation failed.";
-                log.error(message);
+                log.debug(message);
                 throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(), message);
             }
         } else if (!jwtValidationInfo.isValid()) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
+            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    "Invalid JWT token");
         }
         throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                 APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);

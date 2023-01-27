@@ -921,7 +921,7 @@ public class JWTValidatorTest {
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
         AuthenticationContext authenticate = jwtValidator
-                .authenticateForGraphQLSubscription(signedJWTInfo, apiContext, apiVersion);
+                .authenticateForWebSocket(signedJWTInfo, apiContext, apiVersion, null, false);
         Assert.assertNotNull(authenticate);
         Assert.assertEquals(authenticate.getApiName(), "GraphQLAPI");
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
@@ -934,7 +934,7 @@ public class JWTValidatorTest {
         Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo)).thenReturn(jwtValidationInfo);
         APISecurityException apiSecurityException = null;
         try {
-            jwtValidator.authenticateForGraphQLSubscription(signedJWTInfo, apiContext, apiVersion);
+            jwtValidator.authenticateForWebSocket(signedJWTInfo, apiContext, apiVersion, null, false);
         } catch (APISecurityException exception) {
             apiSecurityException = exception;
             Assert.assertEquals(exception.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
@@ -948,7 +948,7 @@ public class JWTValidatorTest {
         apiKeyValidationInfoDTO.setAuthorized(false);
         apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
         try {
-            jwtValidator.authenticateForGraphQLSubscription(signedJWTInfo, apiContext, apiVersion);
+            jwtValidator.authenticateForWebSocket(signedJWTInfo, apiContext, apiVersion, null, false);
         } catch (APISecurityException exception) {
             Assert.assertEquals(exception.getErrorCode(), apiKeyValidationInfoDTO.getValidationStatus());
             Assert.assertEquals(exception.getMessage(),
