@@ -429,7 +429,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             } else if (Util.tracingEnabled()) {
                 Util.setTag(keyTracingSpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
             }
-
             if (log.isDebugEnabled()) {
                     // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
                     // to all the gateway calls that is happening.
@@ -448,12 +447,12 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 } else {
                     String warnDetails = getWarnDetails(messageContext);
                     // We do not need to log known authentication failures as errors since these are not product errors.
-                    log.warn("API authentication failure due to " + errorMessage + warnDetails);
-                    // Sample Error String (JWT): APIAuthenticationHandler API authentication failure due to The access
+                    // Sample Warn String (JWT): APIAuthenticationHandler API authentication failure due to The access
                     // token does not allow you to access the requested resource for requestURI=/pizzashack/1.0.0/order
-                    // Sample Error String (default): APIAuthenticationHandler API authentication failure due to The
+                    // Sample Warn String (default): APIAuthenticationHandler API authentication failure due to The
                     // access token does not allow you to access the requested resource for appName=test
                     // userName=admin@carbon.super for requestURI=/pizzashack/1.0.0/order
+                    log.warn("API authentication failure due to " + errorMessage + warnDetails);
 
                     if (log.isDebugEnabled()) {
                         log.debug("API authentication failed with error " + e.getErrorCode(), e);
