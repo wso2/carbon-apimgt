@@ -10153,7 +10153,7 @@ public final class APIUtil {
     public static ThrottlingLimit getDefaultThrottleLimit() {
         ThrottlingLimit throttlingLimit = new ThrottlingLimit();
         throttlingLimit.setRequestCount(-1);
-        throttlingLimit.setUnit("min");
+        throttlingLimit.setUnit("MINUTE");
         return throttlingLimit;
     }
 
@@ -10166,23 +10166,23 @@ public final class APIUtil {
      */
     public static ThrottlingLimit getThrottlingLimitFromThrottlingTier(String throttlingTierStr) {
         ThrottlingLimit throttlingLimit = new ThrottlingLimit();
+        throttlingLimit.setUnit("MINUTE");
         switch (throttlingTierStr) {
             case "10KPerMin":
                 throttlingLimit.setRequestCount(10000);
-                throttlingLimit.setUnit("min");
                 break;
             case "20KPerMin":
                 throttlingLimit.setRequestCount(20000);
-                throttlingLimit.setUnit("min");
                 break;
             case "50KPerMin":
                 throttlingLimit.setRequestCount(50000);
-                throttlingLimit.setUnit("min");
                 break;
             case "Unlimited":
                 throttlingLimit.setRequestCount(-1);
-                throttlingLimit.setUnit("min");
                 break;
+            default:
+                log.warn("Invalid throttling tier value received");
+                return null;
         }
         return throttlingLimit;
     }
@@ -10196,7 +10196,10 @@ public final class APIUtil {
     public static String getThrottlingTierFromThrottlingLimit(ThrottlingLimit throttlingLimit) {
         String requestCount = "";
         String prefix = "";
+        String throttlingTier = "";
         if (throttlingLimit != null) {
+            if (throttlingLimit.getRequestCount() == -1)
+                return APIConstants.UNLIMITED_TIER;
             if (throttlingLimit.getRequestCount() % 100000 == 0) {
                 requestCount = Integer.toString(throttlingLimit.getRequestCount() / 1000000);
                 prefix = "M";
@@ -10206,9 +10209,10 @@ public final class APIUtil {
             } else {
                 requestCount = Integer.toString(throttlingLimit.getRequestCount());
             }
+            throttlingTier = requestCount + prefix + "Per" + throttlingLimit.getUnit();
         } else {
             log.warn("Could not create a throttling tier value. Hence returning an empty value.");
         }
-        return requestCount + prefix + "Per" + throttlingLimit.getUnit();
+        return throttlingTier;
     }
 }

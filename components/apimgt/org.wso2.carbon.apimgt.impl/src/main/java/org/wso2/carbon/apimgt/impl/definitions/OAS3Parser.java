@@ -1199,19 +1199,19 @@ public class OAS3Parser extends APIDefinition {
         // handle x-throttling-tier extension
         if (resource.getPolicy() != null && !StringUtils.isEmpty(resource.getPolicy())) {
             operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
-        } else {
+        } else if (resource.getThrottlingLimit() != null) {
             operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_TIER,
                     APIUtil.getThrottlingTierFromThrottlingLimit(resource.getThrottlingLimit()));
+        } else {
+            operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, APIConstants.DEFAULT_API_POLICY_UNLIMITED);
         }
         // assigns x-throttling-limit extension
         if (resource.getThrottlingLimit() != null) {
-            if (!StringUtils.isEmpty(resource.getThrottlingLimit().toString())) {
-                operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil.getThrottlingLimitJSON(
-                        resource.getThrottlingLimit()));
-            } else {
-                operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil.getThrottlingLimitJSON(
-                        APIUtil.getThrottlingLimitFromThrottlingTier(resource.getPolicy())));
-            }
+            operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil.getThrottlingLimitJSON(
+                    resource.getThrottlingLimit()));
+        } else if (resource.getPolicy() != null) {
+            operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil.getThrottlingLimitJSON(
+                    APIUtil.getThrottlingLimitFromThrottlingTier(resource.getPolicy())));
         } else {
             operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
                     OASParserUtil.getThrottlingLimitJSON(APIUtil.getDefaultThrottleLimit()));

@@ -10451,6 +10451,8 @@ components:
           example: Unlimited
         throttlingLimit:
           type: object
+          required:
+            - unit
           properties:
             requestCount:
               type: integer
@@ -10458,8 +10460,10 @@ components:
             unit:
               type: string
               enum:
-                - min
-                - hour
+                - Second
+                - Minute
+                - Hour
+                - Day
         scopes:
           type: array
           example: []
