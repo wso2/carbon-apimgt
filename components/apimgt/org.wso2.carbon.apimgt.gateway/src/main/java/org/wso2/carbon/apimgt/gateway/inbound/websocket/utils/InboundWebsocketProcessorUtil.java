@@ -418,7 +418,6 @@ public class InboundWebsocketProcessorUtil {
                     log.debug("The token was identified as a JWT token");
                     inboundMessageContext.setJWTToken(true);
                 }
-                inboundMessageContext.setToken(apiKey);
                 boolean isGQL = APIConstants.GRAPHQL_API.equals(inboundMessageContext.getElectedAPI().getApiType());
                 boolean authenticated = !(authenticateToken(inboundMessageContext, !isGQL).isError());
                 return authenticated;
@@ -468,7 +467,13 @@ public class InboundWebsocketProcessorUtil {
                 }
             } else {
                 log.debug("Authentication not supported for Opaque tokens");
-                String apiKey = inboundMessageContext.getToken();
+                String apiKey;
+                if (inboundMessageContext.getToken() == null) {
+                    String authHeader = inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader);
+                    apiKey = getTokenFromAuthHeader(authHeader);
+                } else {
+                    apiKey = inboundMessageContext.getToken();
+                }
                 APIKeyValidationInfoDTO info;
                 String cacheKey;
                 //If the key have already been validated
@@ -484,7 +489,9 @@ public class InboundWebsocketProcessorUtil {
                         String revokedCachedToken = (String) CacheProvider.getInvalidTokenCache().get(apiKey);
                         if (revokedCachedToken != null) {
                             // Token is revoked/invalid or expired
-                            info.setAuthorized(false);
+                            return InboundWebsocketProcessorUtil.getFrameErrorDTO(
+                                    WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS,
+                                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, true);
                         }
                     }
                 }
@@ -724,5 +731,17 @@ public class InboundWebsocketProcessorUtil {
                     operationId);
         }
         return responseDTO;
+    }
+
+    private static String getTokenFromAuthHeader(String authHeader) {
+        if (StringUtils.isEmpty(authHeader)) {
+            return StringUtils.EMPTY;
+        }
+        String[] auth = authHeader.split(StringUtils.SPACE);
+        if (auth.length > 1) {
+            return auth[1];
+        } else {
+            return StringUtils.EMPTY;
+        }
     }
 }
