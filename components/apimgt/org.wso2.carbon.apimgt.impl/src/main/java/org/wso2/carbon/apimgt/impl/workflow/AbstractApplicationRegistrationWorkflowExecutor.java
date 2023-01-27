@@ -136,9 +136,9 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             //Here the default flow is set expecting an ID as the keymanager as this flow only involves new applications
             String keyManagerId = workflowDTO.getKeyManager();
             KeyManagerConfigurationDTO km = dao.getKeyManagerConfigurationByUUID(keyManagerId);
-            String tenantDomain = km.getOrganization();
+            String organization = km.getOrganization();
             String keyManagerName = km.getName();
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(organization, keyManagerName);
             if (keyManager == null){
                 throw new APIManagementException("Key Manager " + keyManagerName + " not configured");
             }

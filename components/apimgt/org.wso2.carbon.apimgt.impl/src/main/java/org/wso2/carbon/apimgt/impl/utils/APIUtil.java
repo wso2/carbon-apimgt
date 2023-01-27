@@ -87,6 +87,7 @@ import org.apache.xerces.util.SecurityManager;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -7394,6 +7395,25 @@ public final class APIUtil {
         Map configuration = new Gson().fromJson(decodedString, Map.class);
         keyManagerConfiguration.setConfiguration(configuration);
         return keyManagerConfiguration;
+    }
+
+    public static KeyManagerConfiguration toKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationToStore) {
+        KeyManagerConfiguration configuration = new KeyManagerConfiguration();
+        configuration.setName(keyManagerConfigurationToStore.getName());
+        configuration.setConfiguration(keyManagerConfigurationToStore.getAdditionalProperties());
+        configuration.setEnabled(keyManagerConfigurationToStore.isEnabled());
+        configuration.setOrganization(keyManagerConfigurationToStore.getOrganization());
+        // Choreo runs only in ST mode
+        configuration.setTenantDomain(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        if (KeyManagerConfiguration.TokenType.BOTH.toString()
+                .equalsIgnoreCase(keyManagerConfigurationToStore.getTokenType())) {
+            configuration.setTokenType(KeyManagerConfiguration.TokenType.BOTH);
+        } else if (KeyManagerConfiguration.TokenType.DIRECT.toString()
+                .equalsIgnoreCase(keyManagerConfigurationToStore.getTokenType())) {
+            configuration.setTokenType(KeyManagerConfiguration.TokenType.DIRECT);
+        }
+        configuration.setType(keyManagerConfigurationToStore.getType());
+        return configuration;
     }
 
     /**

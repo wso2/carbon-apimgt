@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -75,6 +76,7 @@ import org.wso2.carbon.identity.application.common.util.IdentityApplicationConst
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.idp.mgt.IdentityProviderManager;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -559,8 +561,20 @@ public class APIAdminImpl implements APIAdmin {
                 new KeyManagerConfigurationDTO(keyManagerConfigurationDTO);
         encryptKeyManagerConfigurationValues(null, keyManagerConfigurationToStore);
         apiMgtDAO.addKeyManagerConfiguration(keyManagerConfigurationToStore);
-        new KeyMgtNotificationSender()
-                .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD);
+
+        //unless the type is exchange, we need to register as a direct key manager and send notifications
+        if (!KeyManagerConfiguration.TokenType.EXCHANGED.toString()
+                .equalsIgnoreCase(keyManagerConfigurationToStore.getTokenType())) {
+            KeyManagerConfiguration configuration = APIUtil.toKeyManagerConfiguration(keyManagerConfigurationToStore);
+            ServiceReferenceHolder.getInstance().getKeyManagerConfigurationService()
+                    .addKeyManagerConfiguration(
+                            keyManagerConfigurationToStore.getOrganization(),
+                            keyManagerConfigurationToStore.getName(),
+                            keyManagerConfigurationToStore.getType(), configuration);
+
+            new KeyMgtNotificationSender()
+                    .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD);
+        }
         return keyManagerConfigurationDTO;
     }
 
@@ -743,10 +757,23 @@ public class APIAdminImpl implements APIAdmin {
         }
         encryptKeyManagerConfigurationValues(oldKeyManagerConfiguration, keyManagerConfigurationDTO);
         apiMgtDAO.updateKeyManagerConfiguration(keyManagerConfigurationDTO);
-        KeyManagerConfigurationDTO decryptedKeyManagerConfiguration =
-                decryptKeyManagerConfigurationValues(keyManagerConfigurationDTO);
-        new KeyMgtNotificationSender()
-                .notify(decryptedKeyManagerConfiguration, APIConstants.KeyManager.KeyManagerEvent.ACTION_UPDATE);
+
+        // unless the type is exchange, we need to update it in the internal direct KM list and send notifications
+        if (!KeyManagerConfiguration.TokenType.EXCHANGED.toString()
+                .equalsIgnoreCase(keyManagerConfigurationDTO.getTokenType())) {
+            KeyManagerConfiguration configuration = APIUtil.toKeyManagerConfiguration(keyManagerConfigurationDTO);
+            ServiceReferenceHolder.getInstance().getKeyManagerConfigurationService()
+                    .updateKeyManagerConfiguration(
+                            keyManagerConfigurationDTO.getOrganization(),
+                            keyManagerConfigurationDTO.getName(),
+                            keyManagerConfigurationDTO.getType(), configuration);
+
+            //send notifications
+            KeyManagerConfigurationDTO decryptedKeyManagerConfiguration =
+                    decryptKeyManagerConfigurationValues(keyManagerConfigurationDTO);
+            new KeyMgtNotificationSender()
+                    .notify(decryptedKeyManagerConfiguration, APIConstants.KeyManager.KeyManagerEvent.ACTION_UPDATE);
+        }
         return keyManagerConfigurationDTO;
     }
 
@@ -838,8 +865,14 @@ public class APIAdminImpl implements APIAdmin {
             if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(kmConfig.getName())) {
                 deleteIdentityProvider(organization, kmConfig);
                 apiMgtDAO.deleteKeyManagerConfigurationById(kmConfig.getUuid(), organization);
-                new KeyMgtNotificationSender()
-                        .notify(kmConfig, APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE);
+                // send notifications and delete from internal direct KM list if the KM is a direct typed KM
+                if (!KeyManagerConfiguration.TokenType.EXCHANGED.toString()
+                        .equalsIgnoreCase(kmConfig.getTokenType())) {
+                    ServiceReferenceHolder.getInstance().getKeyManagerConfigurationService().
+                            removeKeyManagerConfiguration(organization, kmConfig.getName());
+                    new KeyMgtNotificationSender()
+                            .notify(kmConfig, APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE);
+                }
             } else {
                 throw new APIManagementException(APIConstants.KeyManager.DEFAULT_KEY_MANAGER + " couldn't delete",
                         ExceptionCodes.INTERNAL_ERROR);

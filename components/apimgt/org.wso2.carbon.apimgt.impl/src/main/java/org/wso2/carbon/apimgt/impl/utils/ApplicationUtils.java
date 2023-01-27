@@ -74,14 +74,14 @@ public class ApplicationUtils {
      * @param callbackURL This is the call back URL of the application
      * @param tokenScope The token scope
      * @param clientDetails The client details
-     * @param tenantDomain
+     * @param organization
      * @param keyManagerName
      * @return appRequest object of OauthAppRequest.
      * @throws APIManagementException
      */
     public static OAuthAppRequest createOauthAppRequest(String clientName, String clientId, String callbackURL,
                                                         String tokenScope, String clientDetails, String tokenType,
-                                                        String tenantDomain, String keyManagerName)
+                                                        String organization, String keyManagerName)
             throws
             APIManagementException {
 
@@ -98,7 +98,7 @@ public class ApplicationUtils {
 
             //parse json string and set applicationInfo parameters.
 
-            KeyManager keyManagerInstance = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+            KeyManager keyManagerInstance = KeyManagerHolder.getKeyManagerInstance(organization, keyManagerName);
             if (keyManagerInstance != null) {
                 authApplicationInfo = keyManagerInstance.buildFromJSON(authApplicationInfo, clientDetails);
             }
