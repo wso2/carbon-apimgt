@@ -1108,6 +1108,8 @@ definitions:
         type: boolean
       tenantDomain:
         type: string
+      organization:
+        type: string
       configuration:
         type: object
       tokenType:

@@ -221,9 +221,9 @@ public class KeyManagerHolder {
         return null;
     }
 
-    public static KeyManager getKeyManagerInstance(String tenantDomain, String keyManagerName) {
+    public static KeyManager getKeyManagerInstance(String organization, String keyManagerName) {
 
-        OrganizationKeyManagerDto organizationKeyManagerDto = getTenantKeyManagerDto(tenantDomain);
+        OrganizationKeyManagerDto organizationKeyManagerDto = getTenantKeyManagerDto(organization);
         if (organizationKeyManagerDto != null) {
             KeyManagerDto keyManagerDto = organizationKeyManagerDto.getKeyManagerByName(keyManagerName);
             if (keyManagerDto == null) {

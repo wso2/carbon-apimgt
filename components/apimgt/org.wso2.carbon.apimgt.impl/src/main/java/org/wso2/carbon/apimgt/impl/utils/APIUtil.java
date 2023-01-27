@@ -7397,6 +7397,25 @@ public final class APIUtil {
         return keyManagerConfiguration;
     }
 
+    public static KeyManagerConfiguration toKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationToStore) {
+        KeyManagerConfiguration configuration = new KeyManagerConfiguration();
+        configuration.setName(keyManagerConfigurationToStore.getName());
+        configuration.setConfiguration(keyManagerConfigurationToStore.getAdditionalProperties());
+        configuration.setEnabled(keyManagerConfigurationToStore.isEnabled());
+        configuration.setOrganization(keyManagerConfigurationToStore.getOrganization());
+        // Choreo runs only in ST mode
+        configuration.setTenantDomain(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        if (KeyManagerConfiguration.TokenType.BOTH.toString()
+                .equalsIgnoreCase(keyManagerConfigurationToStore.getTokenType())) {
+            configuration.setTokenType(KeyManagerConfiguration.TokenType.BOTH);
+        } else if (KeyManagerConfiguration.TokenType.DIRECT.toString()
+                .equalsIgnoreCase(keyManagerConfigurationToStore.getTokenType())) {
+            configuration.setTokenType(KeyManagerConfiguration.TokenType.DIRECT);
+        }
+        configuration.setType(keyManagerConfigurationToStore.getType());
+        return configuration;
+    }
+
     /**
      * Get if there any tenant-specific application configurations from the tenant
      * registry
