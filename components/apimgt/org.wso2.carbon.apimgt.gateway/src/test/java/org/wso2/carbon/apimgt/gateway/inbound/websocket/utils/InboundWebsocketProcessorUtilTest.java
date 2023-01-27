@@ -201,7 +201,6 @@ public class InboundWebsocketProcessorUtilTest {
                 .thenReturn(keyManagers);
         inboundMessageContext.getRequestHeaders().put(WebsocketUtil.authorizationHeader, authenticationHeader);
         JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
-//        Mockito.when(jwtValidator.authenticateForWebSocket()).thenReturn(null);
         PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
         PowerMockito.stub(PowerMockito.method(InboundWebsocketProcessorUtil.class, "validateAuthenticationContext"))
                 .toReturn(true);
@@ -220,7 +219,6 @@ public class InboundWebsocketProcessorUtilTest {
         WebsocketWSClient websocketWSClient = Mockito.mock(WebsocketWSClient.class);
         PowerMockito.whenNew(WebsocketWSClient.class).withNoArguments().thenReturn(websocketWSClient);
         JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
-//        Mockito.when(jwtValidator.authenticateForWebSocket(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(null);
         PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = Mockito.mock(APIKeyValidationInfoDTO.class);
         Mockito.when(websocketWSClient.getAPIKeyData(inboundMessageContext.getApiContext(),
@@ -235,7 +233,6 @@ public class InboundWebsocketProcessorUtilTest {
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
         inboundMessageContext.setJWTToken(true);
         JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
-//        Mockito.when(jwtValidator.authenticateForWebSocket(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(null);
         PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
         PowerMockito.stub(PowerMockito.method(InboundWebsocketProcessorUtil.class, "validateAuthenticationContext"))
                 .toReturn(true);
@@ -249,7 +246,6 @@ public class InboundWebsocketProcessorUtilTest {
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
         inboundMessageContext.setJWTToken(true);
         JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
-//        Mockito.when(jwtValidator.authenticateForWebSocket(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(null);
         PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
         PowerMockito.stub(PowerMockito.method(InboundWebsocketProcessorUtil.class, "validateAuthenticationContext"))
                 .toReturn(false);
