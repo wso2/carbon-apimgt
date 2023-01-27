@@ -364,7 +364,7 @@ public class JWTValidator {
         String tokenSignature = signedJWTInfo.getSignedJWT().getSignature().toString();
         JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
         String jti = getJWTTokenIdentifier(signedJWTInfo);
-        JWTValidationInfo jwtValidationInfo = validateTokenForWS(signedJWTInfo, tokenSignature, jti);
+        JWTValidationInfo jwtValidationInfo = validateTokenForWS(signedJWTInfo, jti);
 
         if (jwtValidationInfo != null && jwtValidationInfo.isValid()) {
             APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validateSubscriptionsForWS(jwtValidationInfo, apiContext,
@@ -396,18 +396,17 @@ public class JWTValidator {
      * Validates token for Websocket requests.
      *
      * @param signedJWTInfo  SignedJWT Info
-     * @param tokenSignature Token Signature
      * @param jti            JTI
      * @return JWT Validation Info
      * @throws APISecurityException If an error occurs
      */
-    private JWTValidationInfo validateTokenForWS(SignedJWTInfo signedJWTInfo, String tokenSignature, String jti)
+    private JWTValidationInfo validateTokenForWS(SignedJWTInfo signedJWTInfo, String jti)
             throws APISecurityException {
 
         JWTValidationInfo jwtValidationInfo;
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
         jwtValidationInfo = getJwtValidationInfo(signedJWTInfo, jti);
-        if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
+        if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(jti)) {
             if (log.isDebugEnabled()) {
                 log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
                         getMaskedToken(jwtHeader));
@@ -504,7 +503,7 @@ public class JWTValidator {
         String tokenSignature = signedJWTInfo.getSignedJWT().getSignature().toString();
         JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
         String jti = jwtClaimsSet.getJWTID();
-        JWTValidationInfo jwtValidationInfo = validateTokenForWS(signedJWTInfo, tokenSignature, jti);
+        JWTValidationInfo jwtValidationInfo = validateTokenForWS(signedJWTInfo, jti);
         if (jwtValidationInfo != null && jwtValidationInfo.isValid()) {
             APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validateSubscriptionsForWS(jwtValidationInfo, apiContext,
                     apiVersion);
