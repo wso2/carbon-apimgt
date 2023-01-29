@@ -126,7 +126,7 @@ public class SwaggerData {
     private String apiLevelPolicy;
     private Set<Resource> resources = new LinkedHashSet<>();
     private Set<Scope> scopes = new HashSet<>();
-    private ThrottleLimit throttleLimit;
+    private ThrottlingLimit throttleLimit;
 
     public SwaggerData(API api) {
         title = api.getId().getName();

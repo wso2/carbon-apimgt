@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
-import org.wso2.carbon.apimgt.api.model.ThrottleLimit;
+import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -1317,7 +1317,8 @@ public class SubscriptionValidationDAO {
         return null;
     }
 
-    private ThrottleLimit getAPILevelThrottleLimit(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
+    private ThrottlingLimit getAPILevelThrottleLimit(Connection connection, String apiUUID, String revisionUUID)
+            throws SQLException {
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement(SQLConstants.GET_REVISIONED_API_THROTTLE_LIMIT_SQL)) {
@@ -1328,7 +1329,7 @@ public class SubscriptionValidationDAO {
                     String apiLevelTierJson = resultSet.getString(APIConstants.AmAPI.API_THROTTLE_LIMIT_COLUMN);
                     // TODO: (VirajSalaka) omit null check if not necessary
                     if (apiLevelTierJson != null) {
-                        return new Gson().fromJson(apiLevelTierJson, ThrottleLimit.class);
+                        return new Gson().fromJson(apiLevelTierJson, ThrottlingLimit.class);
                     }
                 }
             }

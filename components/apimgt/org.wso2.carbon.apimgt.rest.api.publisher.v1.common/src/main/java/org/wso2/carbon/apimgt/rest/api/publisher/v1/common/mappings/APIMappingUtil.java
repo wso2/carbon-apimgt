@@ -54,7 +54,6 @@ import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
-import org.wso2.carbon.apimgt.api.model.ThrottleLimit;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
@@ -287,7 +286,7 @@ public class APIMappingUtil {
         model.setApiLevelPolicy(dto.getApiThrottlingPolicy());
 
         if (dto.getApiThrottlingTier() != null) {
-            ThrottleLimit throttleLimit = new ThrottleLimit();
+            ThrottlingLimit throttleLimit = new ThrottlingLimit();
             throttleLimit.setRequestCount(dto.getApiThrottlingTier().getRequestCount());
             throttleLimit.setUnit(dto.getApiThrottlingTier().getUnit().value());
             model.setThrottleLimit(throttleLimit);
@@ -1329,7 +1328,7 @@ public class APIMappingUtil {
         return dto;
     }
 
-    private static String constructAPIPolicyFromThrottleLimit(ThrottleLimit throttleLimit) {
+    private static String constructAPIPolicyFromThrottleLimit(ThrottlingLimit throttleLimit) {
         int requestCount = throttleLimit.getRequestCount();
         StringBuilder sb = new StringBuilder();
         if (requestCount % 1000 == 0) {

@@ -75,7 +75,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.ThrottleLimit;
+import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -13420,12 +13420,12 @@ public class ApiMgtDAO {
         return apiLevelTier;
     }
 
-    public ThrottleLimit getAPIThrottlingLimit(String uuid) throws APIManagementException {
+    public ThrottlingLimit getAPIThrottlingLimit(String uuid) throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement selectPreparedStatement = null;
         ResultSet resultSet = null;
-        ThrottleLimit apiLevelTier = null;
+        ThrottlingLimit apiLevelTier = null;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(true);
@@ -13445,7 +13445,7 @@ public class ApiMgtDAO {
         return apiLevelTier;
     }
 
-    public ThrottleLimit getAPIThrottlingLimit(Connection connection, String uuid) throws SQLException {
+    public ThrottlingLimit getAPIThrottlingLimit(Connection connection, String uuid) throws SQLException {
         String apiLevelTierJson = null;
         String query = SQLConstants.GET_API_THROTTLE_LIMIT_SQL;
         try (PreparedStatement selectPreparedStatement
@@ -13456,7 +13456,7 @@ public class ApiMgtDAO {
                 apiLevelTierJson = resultSet.getString(APIConstants.AmAPI.API_THROTTLE_LIMIT_COLUMN);
             }
             if (apiLevelTierJson != null) {
-                return new Gson().fromJson(apiLevelTierJson, ThrottleLimit.class);
+                return new Gson().fromJson(apiLevelTierJson, ThrottlingLimit.class);
             }
         }
         return null;
@@ -13477,7 +13477,8 @@ public class ApiMgtDAO {
         return null;
     }
 
-    private ThrottleLimit getAPIThrottlingLimit(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
+    private ThrottlingLimit getAPIThrottlingLimit(Connection connection, String apiUUID, String revisionUUID)
+            throws SQLException {
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement(SQLConstants.GET_REVISIONED_API_THROTTLE_LIMIT_SQL)) {
@@ -13488,7 +13489,7 @@ public class ApiMgtDAO {
                     String apiLevelTierJson = resultSet.getString(APIConstants.AmAPI.API_THROTTLE_LIMIT_COLUMN);
                     // TODO: (VirajSalaka) omit null check if not necessary
                     if (apiLevelTierJson != null) {
-                        return new Gson().fromJson(apiLevelTierJson, ThrottleLimit.class);
+                        return new Gson().fromJson(apiLevelTierJson, ThrottlingLimit.class);
                     }
                 }
             }
@@ -13506,7 +13507,7 @@ public class ApiMgtDAO {
         return null;
     }
 
-    public ThrottleLimit getAPIThrottlingLimit(String apiUUID, String revisionUUID) throws APIManagementException {
+    public ThrottlingLimit getAPIThrottlingLimit(String apiUUID, String revisionUUID) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             return getAPIThrottlingLimit(connection, apiUUID, revisionUUID);

@@ -67,7 +67,7 @@ public class API implements Serializable {
     private Set<Policy> availableSubscriptionLevelPolicies = new LinkedHashSet<Policy>();
     private String apiLevelPolicy;
 
-    private ThrottleLimit throttleLimit;
+    private ThrottlingLimit throttleLimit;
     private AuthorizationPolicy authorizationPolicy;
     private Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
     private String organization;
@@ -1346,11 +1346,11 @@ public class API implements Serializable {
         this.asyncTransportProtocols = asyncTransportProtocols;
     }
 
-    public ThrottleLimit getThrottleLimit() {
+    public ThrottlingLimit getThrottleLimit() {
         return throttleLimit;
     }
 
-    public void setThrottleLimit(ThrottleLimit throttleLimit) {
+    public void setThrottleLimit(ThrottlingLimit throttleLimit) {
         this.throttleLimit = throttleLimit;
     }
 }

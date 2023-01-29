@@ -1215,7 +1215,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     protected void populateAPILevelThrottleLimit(API api) throws APIManagementException{
-        ThrottleLimit throttleLimit;
+        ThrottlingLimit throttleLimit;
         if (api.isRevision()) {
             throttleLimit = apiMgtDAO.getAPIThrottlingLimit(api.getRevisionedApiId(), api.getUuid());
         } else {

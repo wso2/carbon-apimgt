@@ -30,7 +30,7 @@ public class APIInfo {
     private String contextTemplate;
     private String apiTier;
     // TODO: (VirajSalaka) check the usage
-    private ThrottleLimit apiThrottlingLimit;
+    private ThrottlingLimit apiThrottlingLimit;
     private String apiType;
     private String createdTime;
     private String createdBy;
@@ -209,7 +209,7 @@ public class APIInfo {
         isRevision = revision;
     }
 
-    public ThrottleLimit getApiThrottlingLimit() {
+    public ThrottlingLimit getApiThrottlingLimit() {
         return apiThrottlingLimit;
     }
 
@@ -232,7 +232,7 @@ public class APIInfo {
         private boolean isRevision;
         private String organization;
 
-        private ThrottleLimit apiThrottlingLimit;
+        private ThrottlingLimit apiThrottlingLimit;
 
         public Builder id(String id) {
 
@@ -324,7 +324,7 @@ public class APIInfo {
             return this;
         }
 
-        public Builder apiThrottlingLimit(ThrottleLimit apiThrottlingLimit) {
+        public Builder apiThrottlingLimit(ThrottlingLimit apiThrottlingLimit) {
             this.apiThrottlingLimit = apiThrottlingLimit;
             return this;
         }
