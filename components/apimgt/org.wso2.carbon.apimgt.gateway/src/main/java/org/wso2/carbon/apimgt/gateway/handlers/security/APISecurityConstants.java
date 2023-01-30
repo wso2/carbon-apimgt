@@ -168,4 +168,9 @@ public class APISecurityConstants {
     public static final int DEFAULT_MAX_VALID_KEYS = 250;
     public static final int DEFAULT_MAX_INVALID_KEYS = 100;
     public static final String API_BLOCKED_SEQUENCE = "_api_blocked_sequence_";
+
+    /* This constant is to handle CNF claim validation
+     * Property value should be set to 'true' in Axis2MessageContext to skip the validation
+     */
+    public static final String DISABLE_CNF_VALIDATION = "disable_cnf_validation";
 }
