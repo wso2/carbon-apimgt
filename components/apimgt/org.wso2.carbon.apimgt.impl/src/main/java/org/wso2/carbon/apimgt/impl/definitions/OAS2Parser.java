@@ -384,8 +384,7 @@ public class OAS2Parser extends APIDefinition {
                         template.setAuthType("Any");
                         template.setAuthTypes("Any");
                     }
-                    if (extensions.containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER) &&
-                            !StringUtils.isEmpty(extensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER).toString())) {
+                    if (StringUtils.isNotEmpty((String) extensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER))) {
                         String throttlingTier = (String) extensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
                         template.setThrottlingTier(throttlingTier);
                         template.setThrottlingTiers(throttlingTier);
