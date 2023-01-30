@@ -933,7 +933,7 @@ public class OAS3Parser extends APIDefinition {
         }
         // TODO: (VirajSalaka)
         if (api.getThrottleLimit() != null) {
-            openAPI.addExtension("x-throttling-tier", api.getThrottleLimit());
+            openAPI.addExtension("x-throttling-limit", api.getThrottleLimit());
         }
 
         openAPI.addExtension(APIConstants.X_WSO2_CORS, api.getCorsConfiguration());

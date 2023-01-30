@@ -2619,6 +2619,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void validateAPIThrottlingTier(API api, String tenantDomain) throws APIManagementException {
+        if (api.getThrottleLimit() != null) {
+            log.debug("Validating apiLevelPolicy is skipped as the value is constructed from ThrottleLimit");
+            return;
+        }
         if (log.isDebugEnabled()) {
             log.debug("Validating apiLevelPolicy defined in the API");
         }
@@ -2630,7 +2634,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException(message);
             }
         }
-        // TODO: (VirajSalaka) -
     }
 
     @Override
