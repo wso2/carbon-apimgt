@@ -425,7 +425,6 @@ public class SubscriptionValidationDAO {
                         if (isExpand) {
                             String revision = resultSet.getString("REVISION_UUID");
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
-                            // TODO: (VirajSalaka) closing connections
                             api.setThrottleLimit(getAPILevelThrottleLimit(connection, apiUuid, revision));
                             if (APIConstants.API_PRODUCT.equals(apiType)) {
                                 attachURlMappingDetailsOfApiProduct(connection, api);
@@ -1327,7 +1326,6 @@ public class SubscriptionValidationDAO {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     String apiLevelTierJson = resultSet.getString(APIConstants.AmAPI.API_THROTTLE_LIMIT_COLUMN);
-                    // TODO: (VirajSalaka) omit null check if not necessary
                     if (apiLevelTierJson != null) {
                         return new Gson().fromJson(apiLevelTierJson, ThrottlingLimit.class);
                     }

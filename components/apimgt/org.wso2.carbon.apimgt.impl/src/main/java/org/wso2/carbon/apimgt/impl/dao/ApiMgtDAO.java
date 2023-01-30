@@ -13487,7 +13487,6 @@ public class ApiMgtDAO {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     String apiLevelTierJson = resultSet.getString(APIConstants.AmAPI.API_THROTTLE_LIMIT_COLUMN);
-                    // TODO: (VirajSalaka) omit null check if not necessary
                     if (apiLevelTierJson != null) {
                         return new Gson().fromJson(apiLevelTierJson, ThrottlingLimit.class);
                     }

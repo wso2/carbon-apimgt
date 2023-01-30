@@ -1358,7 +1358,6 @@ public class SQLConstants {
             "SELECT API_ID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? "
                     + "AND API_VERSION = ? AND API_TYPE = '" + APIConstants.API_PRODUCT + "'";
 
-    // TODO: (VirajSalaka)
     public static final String GET_API_PRODUCT_SQL =
             "SELECT API_ID, API_TIER FROM AM_API WHERE API_UUID = ? AND API_TYPE = '" + APIConstants.API_PRODUCT + "'";
 
@@ -2731,7 +2730,6 @@ public class SQLConstants {
             "DELETE FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? AND API_TYPE = '"
                     + APIConstants.API_PRODUCT + "'";
 
-    // TODO: (VirajSalaka)
     public static final String UPDATE_PRODUCT_SQL =
             " UPDATE AM_API " +
             " SET" +
@@ -2755,7 +2753,6 @@ public class SQLConstants {
             "SELECT URL_PATTERN , URL_MAPPING_ID, HTTP_METHOD FROM AM_API API , AM_API_URL_MAPPING URL "
                     + "WHERE API.API_ID = URL.API_ID AND API.API_UUID =? AND URL.REVISION_UUID IS NULL";
 
-    // TODO: (VirajSalaka)
     public static final String ADD_API_PRODUCT =
             "INSERT INTO "
             + "AM_API(API_PROVIDER, API_NAME, API_VERSION, CONTEXT,"

@@ -1154,7 +1154,7 @@ public class APIMappingUtil {
             throttleLimitDTO.setUnit(unitEnum);
             dto.setThrottlingLimit(throttleLimitDTO);
             // If the throttleLimit is already available, it means that the console is under the new format.
-            dto.setApiThrottlingPolicy(constructAPIPolicyFromThrottleLimit(model.getThrottleLimit()));
+            dto.setApiThrottlingPolicy(APIUtil.getThrottlingTierFromThrottlingLimit(model.getThrottleLimit()));
             // If the current API does not have throttlingLimit assigned but apiPolicy is available
             // the API Policy should be able to populate the data relevant to the throttlingLimit in the console.
         } else if (model.getApiLevelPolicy() != null) {
@@ -1331,21 +1331,6 @@ public class APIMappingUtil {
         }
 
         return dto;
-    }
-
-    private static String constructAPIPolicyFromThrottleLimit(ThrottlingLimit throttleLimit) {
-        int requestCount = throttleLimit.getRequestCount();
-        StringBuilder sb = new StringBuilder();
-        if (requestCount % 1000 == 0) {
-            sb.append(requestCount / 1000);
-            sb.append("K");
-        } else {
-            sb.append(requestCount);
-        }
-        sb.append("Per");
-        // TODO: (VirajSalaka) Minutes -> Min conversion
-        sb.append(throttleLimit.getUnit());
-        return sb.toString();
     }
 
     private static List<ScopeDTO> getScopesFromAsyncAPI(String asyncAPIDefinition) {

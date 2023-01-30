@@ -931,9 +931,9 @@ public class OAS3Parser extends APIDefinition {
         if (api.getApiLevelPolicy() != null) {
             openAPI.addExtension(APIConstants.X_THROTTLING_TIER, api.getApiLevelPolicy());
         }
-        // TODO: (VirajSalaka)
+
         if (api.getThrottleLimit() != null) {
-            openAPI.addExtension("x-throttling-limit", api.getThrottleLimit());
+            openAPI.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, api.getThrottleLimit());
         }
 
         openAPI.addExtension(APIConstants.X_WSO2_CORS, api.getCorsConfiguration());
