@@ -47,7 +47,7 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.ThrottleLimit;
+import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -861,23 +861,23 @@ public class APIMgtDAOTest {
         String apiUUID = UUID.randomUUID().toString();
         api.setUUID(apiUUID);
         api.setUuid(apiUUID);
-        ThrottleLimit throttleLimit = new ThrottleLimit();
-        throttleLimit.setUnit("MIN");
+        ThrottlingLimit throttleLimit = new ThrottlingLimit();
+        throttleLimit.setUnit("MINUTE");
         throttleLimit.setRequestCount(1000);
         api.setThrottleLimit(throttleLimit);
         apiMgtDAO.addAPI(api, -1234, "testOrg");
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            ThrottleLimit throttleLimit1 = apiMgtDAO.getAPIThrottlingLimit(connection, apiUUID);
+            ThrottlingLimit throttleLimit1 = apiMgtDAO.getAPIThrottlingLimit(connection, apiUUID);
             Assert.assertNotNull("ThrottleLimit should not be null", throttleLimit1);
             Assert.assertEquals("RequestCount mismatch",1000, throttleLimit1.getRequestCount());
-            Assert.assertEquals("TimeUnit mismatch", "MIN", throttleLimit1.getUnit());
+            Assert.assertEquals("TimeUnit mismatch", "MINUTE", throttleLimit1.getUnit());
         }
-        ThrottleLimit throttleLimit2 = new ThrottleLimit();
+        ThrottlingLimit throttleLimit2 = new ThrottlingLimit();
         throttleLimit2.setUnit("DAY");
         throttleLimit2.setRequestCount(5000);
         api.setThrottleLimit(throttleLimit2);
         apiMgtDAO.updateAPI(api);
-        ThrottleLimit throttleLimit1 = apiMgtDAO.getAPIThrottlingLimit(apiUUID);
+        ThrottlingLimit throttleLimit1 = apiMgtDAO.getAPIThrottlingLimit(apiUUID);
         Assert.assertNotNull("ThrottleLimit should not be null", throttleLimit1);
         Assert.assertEquals("RequestCount mismatch",5000, throttleLimit1.getRequestCount());
         Assert.assertEquals("TimeUnit mismatch", "DAY", throttleLimit1.getUnit());
@@ -895,8 +895,8 @@ public class APIMgtDAOTest {
         String apiUUID = UUID.randomUUID().toString();
         api.setApiLevelPolicy("10KPerMin");
         api.setUuid(apiUUID);
-        ThrottleLimit throttleLimit = new ThrottleLimit();
-        throttleLimit.setUnit("MIN");
+        ThrottlingLimit throttleLimit = new ThrottlingLimit();
+        throttleLimit.setUnit("MINUTE");
         throttleLimit.setRequestCount(1000);
         api.setThrottleLimit(throttleLimit);
         apiMgtDAO.addAPI(api, -1234, "testOrg");
@@ -919,7 +919,7 @@ public class APIMgtDAOTest {
         APIRevision returnedRevision = list.get(0);
         Assert.assertEquals("Revision Mismatched", revisionUUID, returnedRevision.getRevisionUUID());
 
-        ThrottleLimit revisionThrottleLimit = apiMgtDAO.getAPIThrottlingLimit(apiUUID, revisionUUID);
+        ThrottlingLimit revisionThrottleLimit = apiMgtDAO.getAPIThrottlingLimit(apiUUID, revisionUUID);
         Assert.assertNotNull("RevisionThrottleLimit should not be null", revisionThrottleLimit);
         Assert.assertEquals("RevisionThrottleLimit RequestCount mismatch",
                 throttleLimit.getRequestCount(), revisionThrottleLimit.getRequestCount());

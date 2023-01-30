@@ -10232,7 +10232,12 @@ public final class APIUtil {
             } else {
                 requestCount = Integer.toString(throttlingLimit.getRequestCount());
             }
-            throttlingTier = requestCount + prefix + "Per" + throttlingLimit.getUnit();
+            // To make it compatible with the previously existing throttling policy
+            if ("MINUTE".equals(throttlingLimit.getUnit())) {
+                throttlingTier = requestCount + prefix + "PerMin";
+            } else {
+                throttlingTier = requestCount + prefix + "Per" + throttlingLimit.getUnit();
+            }
         } else {
             log.warn("Could not create a throttling tier value. Hence returning an empty value.");
         }

@@ -25,8 +25,10 @@ public class ThrottlingLimitDTO   {
     @XmlType(name="UnitEnum")
     @XmlEnum(String.class)
     public enum UnitEnum {
-        MIN("MIN"),
-        DAY("DAY");
+        SECOND("Second"),
+        MINUTE("Minute"),
+        HOUR("Hour"),
+        DAY("Day");
         private String value;
 
         UnitEnum (String v) {
@@ -52,10 +54,9 @@ public class ThrottlingLimitDTO   {
 return null;
         }
     }
-    private UnitEnum unit = UnitEnum.MIN;
+    private UnitEnum unit = null;
 
   /**
-   * Number of requests per time window. 
    **/
   public ThrottlingLimitDTO requestCount(Integer requestCount) {
     this.requestCount = requestCount;
@@ -63,7 +64,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "1000", value = "Number of requests per time window. ")
+  @ApiModelProperty(example = "10000", value = "")
   @JsonProperty("requestCount")
   public Integer getRequestCount() {
     return requestCount;
@@ -73,7 +74,6 @@ return null;
   }
 
   /**
-   * Number of requests per time window. 
    **/
   public ThrottlingLimitDTO unit(UnitEnum unit) {
     this.unit = unit;
@@ -81,8 +81,9 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Number of requests per time window. ")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("unit")
+  @NotNull
   public UnitEnum getUnit() {
     return unit;
   }

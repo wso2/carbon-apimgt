@@ -350,10 +350,10 @@ public class PublisherCommonUtils {
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
         apiToUpdate.setGatewayType(apiDtoToUpdate.getGatewayType());
 
-        if (apiDtoToUpdate.getApiThrottlingTier() != null) {
+        if (apiDtoToUpdate.getThrottlingLimit() != null) {
             ThrottlingLimit throttleLimit = new ThrottlingLimit();
-            throttleLimit.setRequestCount(apiDtoToUpdate.getApiThrottlingTier().getRequestCount());
-            throttleLimit.setUnit(apiDtoToUpdate.getApiThrottlingTier().getUnit().value());
+            throttleLimit.setRequestCount(apiDtoToUpdate.getThrottlingLimit().getRequestCount());
+            throttleLimit.setUnit(apiDtoToUpdate.getThrottlingLimit().getUnit().value());
             apiToUpdate.setThrottleLimit(throttleLimit);
         }
 

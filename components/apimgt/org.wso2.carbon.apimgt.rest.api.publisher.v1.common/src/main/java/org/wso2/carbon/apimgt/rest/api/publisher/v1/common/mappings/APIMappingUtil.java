@@ -79,7 +79,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsThrottlingLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
@@ -285,10 +284,10 @@ public class APIMappingUtil {
         model.addAvailableTiers(apiTiers);
         model.setApiLevelPolicy(dto.getApiThrottlingPolicy());
 
-        if (dto.getApiThrottlingTier() != null) {
+        if (dto.getThrottlingLimit() != null) {
             ThrottlingLimit throttleLimit = new ThrottlingLimit();
-            throttleLimit.setRequestCount(dto.getApiThrottlingTier().getRequestCount());
-            throttleLimit.setUnit(dto.getApiThrottlingTier().getUnit().value());
+            throttleLimit.setRequestCount(dto.getThrottlingLimit().getRequestCount());
+            throttleLimit.setUnit(dto.getThrottlingLimit().getUnit().value());
             model.setThrottleLimit(throttleLimit);
         }
 
@@ -1138,23 +1137,29 @@ public class APIMappingUtil {
             ThrottlingLimitDTO throttleLimitDTO = new ThrottlingLimitDTO();
             throttleLimitDTO.setRequestCount(model.getThrottleLimit().getRequestCount());
             ThrottlingLimitDTO.UnitEnum unitEnum;
-            switch(model.getThrottleLimit().getUnit()) {
+            switch (model.getThrottleLimit().getUnit()) {
                 case "DAY":
                     unitEnum = ThrottlingLimitDTO.UnitEnum.DAY;
                     break;
-                case "MIN":
+                case "HOUR":
+                    unitEnum = ThrottlingLimitDTO.UnitEnum.HOUR;
+                    break;
+                case "SECOND":
+                    unitEnum = ThrottlingLimitDTO.UnitEnum.SECOND;
+                    break;
+                case "MINUTE":
                 default:
-                    unitEnum = ThrottlingLimitDTO.UnitEnum.MIN;
+                    unitEnum = ThrottlingLimitDTO.UnitEnum.MINUTE;
             }
             throttleLimitDTO.setUnit(unitEnum);
-            dto.setApiThrottlingTier(throttleLimitDTO);
+            dto.setThrottlingLimit(throttleLimitDTO);
             // If the throttleLimit is already available, it means that the console is under the new format.
             dto.setApiThrottlingPolicy(constructAPIPolicyFromThrottleLimit(model.getThrottleLimit()));
             // If the current API does not have throttlingLimit assigned but apiPolicy is available
             // the API Policy should be able to populate the data relevant to the throttlingLimit in the console.
         } else if (model.getApiLevelPolicy() != null) {
             ThrottlingLimitDTO throttleLimitDTO = new ThrottlingLimitDTO();
-            throttleLimitDTO.setUnit(ThrottlingLimitDTO.UnitEnum.MIN);
+            throttleLimitDTO.setUnit(ThrottlingLimitDTO.UnitEnum.MINUTE);
             switch (model.getApiLevelPolicy()) {
                 case "10KPerMin":
                     throttleLimitDTO.setRequestCount(10000);
@@ -1170,7 +1175,7 @@ public class APIMappingUtil {
                     break;
             }
             if (throttleLimitDTO.getRequestCount() != 0) {
-                dto.setApiThrottlingTier(throttleLimitDTO);
+                dto.setThrottlingLimit(throttleLimitDTO);
             }
         }
 
@@ -1650,7 +1655,7 @@ public class APIMappingUtil {
                     // converts existing throttling policy to the new throttling limit format
                     template.setThrottlingLimit(operation.getThrottlingPolicy());
                 } else if (operation.getThrottlingLimit() != null) {
-                    APIOperationsThrottlingLimitDTO apiOperationsThrottlingLimitDTO = operation.getThrottlingLimit();
+                    ThrottlingLimitDTO apiOperationsThrottlingLimitDTO = operation.getThrottlingLimit();
                     ThrottlingLimit throttlingLimit = ThrottlingLimitMappingUtil.fromDTOToThrottlingLimit(
                             apiOperationsThrottlingLimitDTO);
                     template.setThrottlingLimit(throttlingLimit);

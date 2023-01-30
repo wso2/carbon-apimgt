@@ -829,7 +829,7 @@ public class AbstractAPIManagerTestCase {
         abstractAPIManager.populateAPILevelThrottleLimit(api);
 
         // When there is no revision
-        ThrottleLimit throttleLimit = Mockito.mock(ThrottleLimit.class);
+        ThrottlingLimit throttleLimit = Mockito.mock(ThrottlingLimit.class);
         Mockito.when(throttleLimit.getRequestCount()).thenReturn(100);
         Mockito.when(throttleLimit.getUnit()).thenReturn("MIN");
         Mockito.when(apiMgtDAO.getAPIThrottlingLimit(anyString())).thenReturn(throttleLimit);
@@ -838,14 +838,14 @@ public class AbstractAPIManagerTestCase {
         Assert.assertNotNull("API Throttle Limit is null", api.getThrottleLimit());
         Assert.assertEquals("API Throttle Limit request count is not properly set.", 100,
                 api.getThrottleLimit().getRequestCount());
-        Assert.assertEquals("API Throttle Limit timeunit is not properly set.", "MIN",
+        Assert.assertEquals("API Throttle Limit timeunit is not properly set.", "MINUTE",
                 api.getThrottleLimit().getUnit());
 
         // When there is a revision
         api.setRevision(true);
         api.setRevisionedApiId("randomRevisionUUID");
 
-        ThrottleLimit throttleLimit2 = Mockito.mock(ThrottleLimit.class);
+        ThrottlingLimit throttleLimit2 = Mockito.mock(ThrottlingLimit.class);
         Mockito.when(throttleLimit2.getRequestCount()).thenReturn(200);
         Mockito.when(throttleLimit2.getUnit()).thenReturn("MIN");
         Mockito.when(apiMgtDAO.getAPIThrottlingLimit(anyString(), anyString())).thenReturn(throttleLimit2);

@@ -8461,11 +8461,10 @@ components:
           x-otherScopes:
             - apim:api_publish
             - apim:api_manage
-        apiThrottlingTier:
+        throttlingLimit:
           $ref: '#/components/schemas/ThrottlingLimit'
           description: The API level throttling policy selected for the particular
             API
-          example: Unlimited
           x-otherScopes:
             - apim:api_publish
             - apim:api_manage
@@ -10458,20 +10457,8 @@ components:
           type: string
           example: Unlimited
         throttlingLimit:
-          type: object
-          required:
-            - unit
-          properties:
-            requestCount:
-              type: integer
-              example: 10000
-            unit:
-              type: string
-              enum:
-                - Second
-                - Minute
-                - Hour
-                - Day
+          $ref: '#/components/schemas/ThrottlingLimit'
+          description: The API level throttling policy selected for the particular API
         scopes:
           type: array
           example: []
@@ -11646,22 +11633,21 @@ components:
             type: string
             example: ["GET","POST","PUT"]
     ThrottlingLimit:
-      title: Throttling Limit
       type: object
+      title: throttlingLimit
+      required:
+        - unit
       properties:
         requestCount:
           type: integer
-          description: |
-            Number of requests per time window.
-          example: 1000
+          example: 10000
         unit:
           type: string
-          default: MIN
-          description: |
-            Number of requests per time window.
           enum:
-            - MIN
-            - DAY
+            - Second
+            - Minute
+            - Hour
+            - Day
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
