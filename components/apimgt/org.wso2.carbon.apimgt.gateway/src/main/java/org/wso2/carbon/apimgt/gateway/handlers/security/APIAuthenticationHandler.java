@@ -445,8 +445,14 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     log.error("API authentication failure due to "
                             + APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
                 } else {
+                    String warnDetails = getWarnDetails(messageContext);
                     // We do not need to log known authentication failures as errors since these are not product errors.
-                    log.warn("API authentication failure due to " + errorMessage);
+                    // Sample Warn String (JWT): APIAuthenticationHandler API authentication failure due to The access
+                    // token does not allow you to access the requested resource for requestURI=/pizzashack/1.0.0/order
+                    // Sample Warn String (default): APIAuthenticationHandler API authentication failure due to The
+                    // access token does not allow you to access the requested resource for appName=test
+                    // userName=admin@carbon.super for requestURI=/pizzashack/1.0.0/order
+                    log.warn("API authentication failure due to " + errorMessage + warnDetails);
 
                     if (log.isDebugEnabled()) {
                         log.debug("API authentication failed with error " + e.getErrorCode(), e);
@@ -721,6 +727,24 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             logMessage = logMessage + " from clientIP=" + remoteIP;
         }
         return logMessage;
+    }
+
+    private String getWarnDetails(MessageContext messageContext) {
+        // Get application information to be logged in API authentication failure (only requestURI for JWT tokens)
+        String applicationName = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME);
+        String endUserName = (String) messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME);
+        String requestURI = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
+        String warnDetails = "";
+        if (applicationName != null) {
+            warnDetails = " for appName=" + applicationName;
+        }
+        if (endUserName != null) {
+            warnDetails = warnDetails + " userName=" + endUserName;
+        }
+        if (requestURI != null) {
+            warnDetails = warnDetails + " for requestURI=" + requestURI;
+        }
+        return warnDetails;
     }
 
     protected void setAPIParametersToMessageContext(MessageContext messageContext) {
