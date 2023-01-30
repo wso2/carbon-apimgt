@@ -2112,8 +2112,8 @@
         <carbon.metrics.version>1.3.12</carbon.metrics.version>
         <!-- apache pdfbox version -->
         <pdfbox.version>2.0.25</pdfbox.version>
-        <event.processor.stub.version>2.3.5</event.processor.stub.version>
-        <event.processor.core.version>2.3.5</event.processor.core.version>
+        <event.processor.stub.version>2.3.6</event.processor.stub.version>
+        <event.processor.core.version>2.3.6</event.processor.core.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
         <swagger.inflector.oas3.version>2.0.5.wso2v2</swagger.inflector.oas3.version>
         <swagger.parser.v3.version>2.1.10.wso2v1</swagger.parser.v3.version>
