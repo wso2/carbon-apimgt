@@ -1954,7 +1954,7 @@
         <carbon.apimgt.version>9.28.59-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <carbon.analytics.common.version>5.3.2</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.3.3</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.8.0-alpha</carbon.kernel.version>
         <carbon.kernel.feature.version>4.8.0-alpha</carbon.kernel.feature.version>
@@ -1968,7 +1968,7 @@
         <mongodb.driver.version>4.1.0</mongodb.driver.version>
 
         <!-- Carbon Identity versions -->
-        <carbon.identity.version>5.24.4</carbon.identity.version>
+        <carbon.identity.version>5.24.5</carbon.identity.version>
         <carbon.identity.governance.version>1.7.2</carbon.identity.governance.version>
         <carbon.identity-inbound-auth-oauth.version>6.9.5</carbon.identity-inbound-auth-oauth.version>
         <carbon.identity-oauth2-grant-jwt.version>2.1.1</carbon.identity-oauth2-grant-jwt.version>
