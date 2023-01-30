@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.api.model;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.Serializable;
@@ -67,7 +68,7 @@ public class API implements Serializable {
     private Set<Policy> availableSubscriptionLevelPolicies = new LinkedHashSet<Policy>();
     private String apiLevelPolicy;
 
-    private ThrottlingLimit throttleLimit;
+    private ThrottlingLimit throttlingLimit;
     private AuthorizationPolicy authorizationPolicy;
     private Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
     private String organization;
@@ -1024,6 +1025,29 @@ public class API implements Serializable {
     }
 
     public String getApiLevelPolicy() {
+        if (throttlingLimit != null) {
+            String requestCount;
+            String shortenerSuffix = "";
+            if (throttlingLimit.getRequestCount() == -1)
+                return APIConstants.UNLIMITED_TIER;
+            if (throttlingLimit.getRequestCount() % 100000 == 0) {
+                requestCount = Integer.toString(throttlingLimit.getRequestCount() / 1000000);
+                shortenerSuffix = "M";
+            } else if (throttlingLimit.getRequestCount() % 1000 == 0) {
+                requestCount = Integer.toString(throttlingLimit.getRequestCount() / 1000);
+                shortenerSuffix = "K";
+            } else {
+                requestCount = Integer.toString(throttlingLimit.getRequestCount());
+            }
+            // To make it compatible with the previously existing throttling policy
+            StringBuilder sb = new StringBuilder();
+            if ("MINUTE".equals(throttlingLimit.getUnit())) {
+                sb.append(requestCount).append(shortenerSuffix).append("PerMin");
+            } else {
+                sb.append(requestCount).append(shortenerSuffix).append("Per").append(throttlingLimit.getUnit());
+            }
+            return sb.toString();
+        }
         return apiLevelPolicy;
     }
 
@@ -1347,10 +1371,10 @@ public class API implements Serializable {
     }
 
     public ThrottlingLimit getThrottleLimit() {
-        return throttleLimit;
+        return throttlingLimit;
     }
 
     public void setThrottleLimit(ThrottlingLimit throttleLimit) {
-        this.throttleLimit = throttleLimit;
+        this.throttlingLimit = throttleLimit;
     }
 }
