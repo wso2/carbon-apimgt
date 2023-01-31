@@ -871,6 +871,8 @@ public class APIMgtDAOTest {
             Assert.assertNotNull("ThrottleLimit should not be null", throttleLimit1);
             Assert.assertEquals("RequestCount mismatch",1000, throttleLimit1.getRequestCount());
             Assert.assertEquals("TimeUnit mismatch", "MINUTE", throttleLimit1.getUnit());
+            Assert.assertNotNull("APILevelPolicy should not be null", api.getApiLevelPolicy());
+            Assert.assertEquals("APILevelPolicy mismatch", "1KPerMin", api.getApiLevelPolicy());
         }
         ThrottlingLimit throttleLimit2 = new ThrottlingLimit();
         throttleLimit2.setUnit("DAY");
@@ -881,6 +883,45 @@ public class APIMgtDAOTest {
         Assert.assertNotNull("ThrottleLimit should not be null", throttleLimit1);
         Assert.assertEquals("RequestCount mismatch",5000, throttleLimit1.getRequestCount());
         Assert.assertEquals("TimeUnit mismatch", "DAY", throttleLimit1.getUnit());
+        Assert.assertNotNull("APILevelPolicy should not be null", api.getApiLevelPolicy());
+        Assert.assertEquals("APILevelPolicy mismatch", "5KPerDAY", api.getApiLevelPolicy());
+
+        apiMgtDAO.deleteAPI(api.getUuid());
+    }
+
+    /**
+     * To preserve the compatibility with old property, throttle limit should be populated based on that value.
+     * @throws Exception
+     */
+    @Test
+    public void testOverrideOldPolicyWithNewThrottleLimit() throws Exception {
+        APIIdentifier apiId = new APIIdentifier("getAPIThrottleLimit",
+                "getAPIThrottleLimit", "1.0.0");
+        API api = new API(apiId);
+        api.setContext("/getAPIThrottleLimit");
+        api.setContextTemplate("/getAPIThrottleLimit/{version}");
+        String apiUUID = UUID.randomUUID().toString();
+        api.setUUID(apiUUID);
+        api.setUuid(apiUUID);
+        api.setApiLevelPolicy("10KPerMin");
+        apiMgtDAO.addAPI(api, -1234, "testOrg");
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            ThrottlingLimit throttleLimit1 = apiMgtDAO.getAPIThrottlingLimit(connection, apiUUID);
+            Assert.assertNull("ThrottleLimit should be null", throttleLimit1);
+            Assert.assertNotNull("APILevelPolicy should not be null", api.getApiLevelPolicy());
+            Assert.assertEquals("APILevelPolicy mismatch", "10KPerMin", api.getApiLevelPolicy());
+        }
+        ThrottlingLimit throttleLimit2 = new ThrottlingLimit();
+        throttleLimit2.setUnit("HOUR");
+        throttleLimit2.setRequestCount(5000);
+        api.setThrottleLimit(throttleLimit2);
+        apiMgtDAO.updateAPI(api);
+        ThrottlingLimit throttleLimit1 = apiMgtDAO.getAPIThrottlingLimit(apiUUID);
+        Assert.assertNotNull("ThrottleLimit should not be null", throttleLimit1);
+        Assert.assertEquals("RequestCount mismatch",5000, throttleLimit1.getRequestCount());
+        Assert.assertEquals("TimeUnit mismatch", "HOUR", throttleLimit1.getUnit());
+        Assert.assertNotNull("APILevelPolicy should not be null", api.getApiLevelPolicy());
+        Assert.assertEquals("APILevelPolicy mismatch", "5KPerHOUR", api.getApiLevelPolicy());
 
         apiMgtDAO.deleteAPI(api.getUuid());
     }
