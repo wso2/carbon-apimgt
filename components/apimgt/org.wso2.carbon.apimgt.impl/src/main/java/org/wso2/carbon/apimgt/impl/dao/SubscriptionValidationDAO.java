@@ -1096,6 +1096,7 @@ public class SubscriptionValidationDAO {
                         api.setStatus(resultSet.getString("STATUS"));
                         api.setPolicy(resultSet.getString("API_TIER"));
                         api.setContext(resultSet.getString("CONTEXT"));
+                        // TODO: (VirajSalaka)
                         String publishedDefaultApiVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
                         if (StringUtils.isNotBlank(publishedDefaultApiVersion)) {
                             api.setIsDefaultVersion(true);
@@ -1309,7 +1310,7 @@ public class SubscriptionValidationDAO {
             preparedStatement.setString(2, revisionUUID);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return resultSet.getString(APIConstants.AmAPI.API_THROTTLE_LIMIT_COLUMN);
+                    return resultSet.getString(SQLConstants.ColumnName.API_THROTTLE_LIMIT);
                 }
             }
         }
@@ -1325,7 +1326,7 @@ public class SubscriptionValidationDAO {
             preparedStatement.setString(2, revisionUUID);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    String apiLevelTierJson = resultSet.getString(APIConstants.AmAPI.API_THROTTLE_LIMIT_COLUMN);
+                    String apiLevelTierJson = resultSet.getString(SQLConstants.ColumnName.API_THROTTLE_LIMIT);
                     if (apiLevelTierJson != null) {
                         return new Gson().fromJson(apiLevelTierJson, ThrottlingLimit.class);
                     }

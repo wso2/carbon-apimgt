@@ -9456,14 +9456,10 @@ public class ApiMgtDAO {
                                 .isRevision(apiRevision != null).organization(resultSet.getString("ORGANIZATION"));
                         if (apiRevision != null) {
                             apiInfoBuilder = apiInfoBuilder
-                                    .apiTier(getAPILevelTier(connection, apiRevision.getApiUUID(), apiId))
-                                    .apiThrottlingLimit(getAPIThrottlingLimit(connection, apiRevision.getApiUUID(),
-                                            apiRevision.getRevisionUUID()));
+                                    .apiTier(getAPILevelTier(connection, apiRevision.getApiUUID(), apiId));
                         } else {
                             apiInfoBuilder = apiInfoBuilder
-                                    .apiTier(resultSet.getString(APIConstants.AmAPI.API_TIER))
-                                    .apiThrottlingLimit(getAPIThrottlingLimit(connection,
-                                            resultSet.getString(APIConstants.AmAPI.API_UUID_COLUMN)));
+                                    .apiTier(resultSet.getString(SQLConstants.ColumnName.API_TIER));
                         }
                         return apiInfoBuilder.build();
                     }
@@ -13453,7 +13449,7 @@ public class ApiMgtDAO {
             selectPreparedStatement.setString(1, uuid);
             ResultSet resultSet = selectPreparedStatement.executeQuery();
             while (resultSet.next()) {
-                apiLevelTierJson = resultSet.getString(APIConstants.AmAPI.API_THROTTLE_LIMIT_COLUMN);
+                apiLevelTierJson = resultSet.getString(SQLConstants.ColumnName.API_THROTTLE_LIMIT);
             }
             if (apiLevelTierJson != null) {
                 return new Gson().fromJson(apiLevelTierJson, ThrottlingLimit.class);
@@ -13470,7 +13466,7 @@ public class ApiMgtDAO {
             preparedStatement.setString(2, revisionUUID);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return resultSet.getString(APIConstants.AmAPI.API_TIER);
+                    return resultSet.getString(SQLConstants.ColumnName.API_TIER);
                 }
             }
         }
@@ -13486,7 +13482,7 @@ public class ApiMgtDAO {
             preparedStatement.setString(2, revisionUUID);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    String apiLevelTierJson = resultSet.getString(APIConstants.AmAPI.API_THROTTLE_LIMIT_COLUMN);
+                    String apiLevelTierJson = resultSet.getString(SQLConstants.ColumnName.API_THROTTLE_LIMIT);
                     if (apiLevelTierJson != null) {
                         return new Gson().fromJson(apiLevelTierJson, ThrottlingLimit.class);
                     }

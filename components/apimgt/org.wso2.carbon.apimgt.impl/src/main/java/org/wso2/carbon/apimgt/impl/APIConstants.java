@@ -2958,12 +2958,6 @@ public final class APIConstants {
         public static final String NAME = "name";
     }
 
-    public static class AmAPI {
-        public static final String API_THROTTLE_LIMIT_COLUMN = "API_THROTTLE_LIMIT";
-        public static final String API_UUID_COLUMN = "API_UUID";
-        public static final String API_TIER = "API_TIER";
-    }
-
     // Constants related to basic health check APIs
     public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
 }

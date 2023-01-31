@@ -22,6 +22,12 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class SQLConstants {
+    public static class ColumnName {
+        public static final String API_THROTTLE_LIMIT= "API_THROTTLE_LIMIT";
+        public static final String API_UUID = "API_UUID";
+        public static final String API_TIER = "API_TIER";
+    }
+
     public static final String GET_API_FOR_CONTEXT_TEMPLATE_SQL =
             " SELECT " +
             "   API.API_NAME," +
