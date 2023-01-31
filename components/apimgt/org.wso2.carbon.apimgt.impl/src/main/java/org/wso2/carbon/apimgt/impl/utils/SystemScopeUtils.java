@@ -230,6 +230,7 @@ public class SystemScopeUtils {
     public static JSONObject getTenantRESTAPIScopesConfig(String tenantDomain) throws APIManagementException {
 
         JSONObject restAPIConfigJSON = null;
+        APIUtil.loadAndSyncTenantConf(tenantDomain);
         JSONObject tenantConfJson = APIUtil.getTenantConfig(tenantDomain);
         if (tenantConfJson != null) {
             restAPIConfigJSON = getRESTAPIScopesFromTenantConfig(tenantConfJson);
