@@ -2129,7 +2129,7 @@
         <fasterxml.jackson.databind.version>2.14.1</fasterxml.jackson.databind.version>
         <fasterxml.jackson.core.version>2.14.1</fasterxml.jackson.core.version>
         <javax.validation-api>2.0.1.Final</javax.validation-api>
-        <carbon.broker.version>3.3.26</carbon.broker.version>
+        <carbon.broker.version>3.3.27</carbon.broker.version>
         <andes.version>3.3.24</andes.version>
         <waffle-jna.version>1.6.wso2v7</waffle-jna.version>
         <version.snake.yaml>1.33</version.snake.yaml>
