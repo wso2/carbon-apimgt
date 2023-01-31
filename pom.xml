@@ -1981,7 +1981,7 @@
 
         <graphql.java.version>19.2.wso2v2</graphql.java.version>
 
-        <carbon.governance.version>4.8.29</carbon.governance.version>
+        <carbon.governance.version>4.8.30</carbon.governance.version>
         <carbon.deployment.version>4.11.7</carbon.deployment.version>
         <carbon.multitenancy.version>4.9.20</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
