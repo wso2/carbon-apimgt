@@ -700,9 +700,14 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String environmentName,
-            String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
+            String ifNoneMatch, String xWSO2Tenant, String xWSO2TenantQ, MessageContext messageContext) {
         try {
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            String organization;
+            if (StringUtils.isNotEmpty(xWSO2TenantQ) && StringUtils.isEmpty(xWSO2Tenant)) {
+                organization = RestApiUtil.getRequestedTenantDomain(xWSO2TenantQ);
+            } else {
+                organization = RestApiUtil.getValidatedOrganization(messageContext);
+            }
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
 
             API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
