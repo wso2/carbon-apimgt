@@ -16,12 +16,14 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.interceptors.auth;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -37,7 +39,7 @@ import java.util.TreeMap;
 public class TokenMergeInterceptor extends AbstractPhaseInterceptor {
 
     private static final Log logger = LogFactory.getLog(TokenMergeInterceptor.class);
-
+    private static final String QUERY_STRING = "org.apache.cxf.message.Message.QUERY_STRING";
     public TokenMergeInterceptor() {
         //We will use PRE_INVOKE phase as we need to process message before hit actual service
         super(Phase.PRE_INVOKE);
@@ -49,6 +51,19 @@ public class TokenMergeInterceptor extends AbstractPhaseInterceptor {
         String accessToken = RestApiUtil
                 .extractOAuthAccessTokenFromMessage(message, RestApiConstants.REGEX_BEARER_PATTERN,
                         RestApiConstants.AUTH_HEADER_NAME);
+        if (accessToken == null) {
+            String queryString = (String) message.get(QUERY_STRING);
+            if (StringUtils.isNotEmpty(queryString)) {
+                String[] queryParams = queryString.split(APIConstants.SEARCH_AND_TAG);
+                String tokenFromQueryParam = Arrays.stream(queryParams)
+                        .filter(name -> name.contains(APIConstants.AccessTokenConstants.ACCESS_TOKEN))
+                        .findFirst().orElse(StringUtils.EMPTY);
+                String[] tokenParts = tokenFromQueryParam.split("=");
+                if (tokenParts.length == 2) {
+                    accessToken = tokenParts[1];
+                }
+            }
+        }
         if (accessToken == null) {
             return;
         }

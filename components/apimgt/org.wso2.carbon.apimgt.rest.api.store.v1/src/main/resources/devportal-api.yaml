@@ -249,6 +249,7 @@ paths:
         - $ref: '#/components/parameters/environmentName'
         - $ref: '#/components/parameters/If-None-Match'
         - $ref: '#/components/parameters/requestedTenant'
+        - $ref: '#/components/parameters/requestedTenant-Q'
       responses:
         200:
           description: |
@@ -5878,6 +5879,14 @@ components:
       in: query
       description: |
         **API ID** consisting of the **UUID** of the API.
+      schema:
+        type: string
+    requestedTenant-Q:
+      name: X-WSO2-Tenant-Q
+      in: query
+      description: |
+        For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
+          retirieved from.
       schema:
         type: string
     apiType-Q:
