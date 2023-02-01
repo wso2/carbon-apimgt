@@ -2649,7 +2649,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
         if (tierMap != null) {
             for (URITemplate template : uriTemplates) {
-                if (template.getThrottlingTier() != null && !tierMap.containsKey(template.getThrottlingTier())) {
+                if (template.getThrottlingTier() != null && !tierMap.containsKey(template.getThrottlingTier()) &&
+                        template.getThrottlingLimit() == null) {
                     String message = "Invalid x-throttling tier " + template.getThrottlingTier() +
                             " found in api definition for resource " + template.getHTTPVerb() + " " +
                             template.getUriTemplate();

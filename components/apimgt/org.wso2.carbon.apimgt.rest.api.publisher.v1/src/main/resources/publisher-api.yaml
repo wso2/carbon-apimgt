@@ -10449,6 +10449,21 @@ components:
         throttlingPolicy:
           type: string
           example: Unlimited
+        throttlingLimit:
+          type: object
+          required:
+            - unit
+          properties:
+            requestCount:
+              type: integer
+              example: 10000
+            unit:
+              type: string
+              enum:
+                - Second
+                - Minute
+                - Hour
+                - Day
         scopes:
           type: array
           example: []
