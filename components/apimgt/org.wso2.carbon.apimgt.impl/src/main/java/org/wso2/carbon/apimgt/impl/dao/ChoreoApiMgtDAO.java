@@ -30,7 +30,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class represent the ChoreoApiMgtDAO.
@@ -179,5 +182,37 @@ public class ChoreoApiMgtDAO {
             throw new APIManagementException("Failed to get Environments of Organization: " + organization, e);
         }
         return envList;
+    }
+
+    /**
+     * Retrieve dataPlaneId to Environment mapping.
+     *
+     * @param environmentsSet   Environment name set
+     * @throws APIManagementException if failed to retrieve mapping
+     */
+    public Map<String, String> getEnvironmentToDataPlaneMapping(Set<String> environmentsSet, String organization)
+            throws APIManagementException {
+        Map<String, String> envToDataPlaneIdMap = new HashMap<>();
+        if (environmentsSet == null || environmentsSet.size() == 0) {
+            return envToDataPlaneIdMap;
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            for (String envName: environmentsSet) {
+                try (PreparedStatement prepStmt =
+                             connection.prepareStatement(SQLConstants.GET_ENVIRONMENTS_TO_DATA_PLANE_ID_MAPPING_SQL)) {
+                    prepStmt.setString(1, envName);
+                    prepStmt.setString(2, organization);
+                    try (ResultSet rs = prepStmt.executeQuery()) {
+                        if (rs.next()) {
+                            envToDataPlaneIdMap.put(envName, rs.getString("DATA_PLANE_ID"));
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Failed to get Environment to DataPlaneId Mapping for EnvironmentsSet: "
+                    + environmentsSet + " of Organization: " + organization, e);
+        }
+        return envToDataPlaneIdMap;
     }
 }

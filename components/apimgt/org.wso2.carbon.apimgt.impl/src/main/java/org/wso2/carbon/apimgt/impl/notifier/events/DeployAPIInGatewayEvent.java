@@ -1,6 +1,8 @@
 package org.wso2.carbon.apimgt.impl.notifier.events;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class DeployAPIInGatewayEvent extends Event {
@@ -15,9 +17,12 @@ public class DeployAPIInGatewayEvent extends Event {
     private Set<APIEvent> associatedApis;
     private String context;
 
+    private Map<String, String> envToDataPlaneIdMap;
+
     public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenantDomain, int apiId,
                                    String uuid, Set<String> gatewayLabels, String name, String version, String provider,
-                                   String apiType, String context, Set<APIEvent> associatedApis) {
+                                   String apiType, String context, Set<APIEvent> associatedApis,
+                                   Map<String, String> envToDataPlaneIdMap) {
         this.uuid = uuid;
         this.eventId = eventId;
         this.timeStamp = timestamp;
@@ -33,6 +38,7 @@ public class DeployAPIInGatewayEvent extends Event {
         this.provider = provider;
         this.apiType = apiType;
         this.associatedApis = associatedApis;
+        this.envToDataPlaneIdMap = envToDataPlaneIdMap;
     }
 
     /**
@@ -51,7 +57,7 @@ public class DeployAPIInGatewayEvent extends Event {
      */
     public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenantDomain, int apiId,
                                    String uuid, Set<String> gatewayLabels, String name, String version, String provider,
-                                   String apiType, String context) {
+                                   String apiType, String context, Map<String, String> envToDataPlaneIdMap) {
         this.uuid = uuid;
         this.eventId = eventId;
         this.timeStamp = timestamp;
@@ -68,6 +74,7 @@ public class DeployAPIInGatewayEvent extends Event {
         this.apiType = apiType;
         this.context = context;
         this.associatedApis = new HashSet<>();
+        this.envToDataPlaneIdMap = envToDataPlaneIdMap;
     }
 
     public Set<String> getGatewayLabels() {
@@ -156,6 +163,14 @@ public class DeployAPIInGatewayEvent extends Event {
         this.uuid = uuid;
     }
 
+    public Map<String, String> getEnvToDataPlaneIdMap() {
+        return envToDataPlaneIdMap;
+    }
+
+    public void setEnvToDataPlaneIdMap(Map<String, String> envToDataPlaneIdMap) {
+        this.envToDataPlaneIdMap = envToDataPlaneIdMap;
+    }
+
     @Override
     public String toString() {
         return "DeployAPIInGatewayEvent{" +
@@ -166,6 +181,7 @@ public class DeployAPIInGatewayEvent extends Event {
                 ", provider='" + provider + '\'' +
                 ", apiType='" + apiType + '\'' +
                 ", gatewayLabels=" + gatewayLabels +
+                ", envToDataPlaneIdMap=" + envToDataPlaneIdMap +
                 ", associatedApis=" + associatedApis +
                 ", context='" + context + '\'' +
                 ", eventId='" + eventId + '\'' +

@@ -56,6 +56,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -374,7 +375,8 @@ public class InMemoryAPIDeployer {
                                 APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain,
                                 retrievedAPI.getApiId(), retrievedAPI.getUuid(), gatewayLabels, apiName, version,
                                 retrievedAPI.getApiProvider(),
-                                retrievedAPI.getApiType(), retrievedAPI.getContext());
+                                retrievedAPI.getApiType(), retrievedAPI.getContext(),
+                                new HashMap<>());
                 deployAPI(deployAPIInGatewayEvent);
             }
         }
@@ -393,7 +395,8 @@ public class InMemoryAPIDeployer {
                         new DeployAPIInGatewayEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                                 APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain,
                                 retrievedAPI.getApiId(), retrievedAPI.getUuid(), gatewayLabels, apiName, version,
-                                retrievedAPI.getApiProvider(), retrievedAPI.getApiType(), retrievedAPI.getContext());
+                                retrievedAPI.getApiProvider(), retrievedAPI.getApiType(), retrievedAPI.getContext(),
+                                new HashMap<>());
                 unDeployAPI(deployAPIInGatewayEvent);
             }
         }

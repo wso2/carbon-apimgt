@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.ChoreoApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
@@ -1749,7 +1750,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void removeFromGateway(API api, Set<APIRevisionDeployment> gatewaysToRemove,
-                                   Set<String> environmentsToAdd) {
+                                   Set<String> environmentsToAdd, String organization) throws APIManagementException {
         Set<String> environmentsToAddSet = new HashSet<>(environmentsToAdd);
         Set<String> environmentsToRemove = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : gatewaysToRemove) {
@@ -1757,7 +1758,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         environmentsToRemove.removeAll(environmentsToAdd);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        gatewayManager.unDeployFromGateway(api, tenantDomain, environmentsToRemove);
+        Map<String, String> envToDataPlaneIdMap =
+                ChoreoApiMgtDAO.getInstance().getEnvironmentToDataPlaneMapping(environmentsToRemove, organization);
+        gatewayManager.unDeployFromGateway(api, tenantDomain, environmentsToRemove, envToDataPlaneIdMap);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
                     + " deleted from gateway";
@@ -3832,7 +3835,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     protected void removeFromGateway(APIProduct apiProduct, String tenantDomain, Set<APIRevisionDeployment> gatewaysToRemove,
-                                     Set<String> gatewaysToAdd)
+                                     Set<String> gatewaysToAdd, String organization)
             throws APIManagementException {
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         Set<API> associatedAPIs = getAssociatedAPIs(apiProduct);
@@ -3841,7 +3844,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
         }
         environmentsToRemove.removeAll(gatewaysToAdd);
-        gatewayManager.unDeployFromGateway(apiProduct, tenantDomain, associatedAPIs, environmentsToRemove);
+        Map<String, String> envToDataPlaneIdMap =
+                ChoreoApiMgtDAO.getInstance().getEnvironmentToDataPlaneMapping(environmentsToRemove, organization);
+        gatewayManager.unDeployFromGateway(
+                apiProduct, tenantDomain, associatedAPIs, environmentsToRemove, envToDataPlaneIdMap);
     }
 
     protected int getTenantId(String tenantDomain) throws UserStoreException {
@@ -5417,15 +5423,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         if (environmentsToRemove.size() > 0) {
             apiMgtDAO.removeAPIRevisionDeployment(apiId, environmentsToRemove);
-            removeFromGateway(api, environmentsToRemove, environmentsToAdd);
+            removeFromGateway(api, environmentsToRemove, environmentsToAdd, organization);
         }
         GatewayArtifactsMgtDAO.getInstance()
                 .addAndRemovePublishedGatewayLabels(apiId, apiRevisionId, environmentsToAdd, gatewayVhosts,
                         environmentsToRemove);
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         if (environmentsToAdd.size() > 0) {
+            Map<String, String> envToDataPlaneIdMap =
+                    ChoreoApiMgtDAO.getInstance().getEnvironmentToDataPlaneMapping(environmentsToAdd, organization);
             // TODO remove this to organization once the microgateway can build gateway based on organization.
-            gatewayManager.deployToGateway(api, organization, environmentsToAdd);
+            gatewayManager.deployToGateway(api, organization, environmentsToAdd, envToDataPlaneIdMap);
         }
         String publishedDefaultVersion = getPublishedDefaultVersion(apiIdentifier);
         String defaultVersion = getDefaultVersion(apiIdentifier);
@@ -5599,7 +5607,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
         }
-        removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet());
+        removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet(), organization);
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, apiRevisionId, environmentsToRemove);
 
@@ -5791,14 +5799,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         if (environmentsToRemove.size() > 0) {
             apiMgtDAO.removeAPIRevisionDeployment(apiProductId,environmentsToRemove);
-            removeFromGateway(product, tenantDomain, environmentsToRemove, environmentsToAdd);
+            // NOTE: Once Choreo Gateway Supports API Product, we need to pass organization instead of tenantDomain for
+            // organization parameter
+            removeFromGateway(product, tenantDomain, environmentsToRemove, environmentsToAdd, tenantDomain);
         }
         GatewayArtifactsMgtDAO.getInstance()
                 .addAndRemovePublishedGatewayLabels(apiProductId, apiRevisionId, environmentsToAdd, gatewayVhosts,
                         environmentsToRemove);
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         if (environmentsToAdd.size() > 0) {
-            gatewayManager.deployToGateway(product, tenantDomain, environmentsToAdd);
+            // NOTE: Once Choreo Gateway Supports API Product, we need to pass organization instead of tenantDomain for
+            // organization parameter
+            Map<String, String> envToDataPlaneIdMap =
+                    ChoreoApiMgtDAO.getInstance().getEnvironmentToDataPlaneMapping(environmentsToAdd, tenantDomain);
+            gatewayManager.deployToGateway(product, tenantDomain, environmentsToAdd, envToDataPlaneIdMap);
         }
 
     }
@@ -5858,7 +5872,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
         }
         product.setEnvironments(environmentsToRemove);
-        removeFromGateway(product, tenantDomain, new HashSet<>(apiRevisionDeployments),Collections.emptySet());
+        // NOTE: Once Choreo Gateway Supports API Product, we need to pass organization instead of tenantDomain for
+        // organization parameter
+        removeFromGateway(
+                product, tenantDomain, new HashSet<>(apiRevisionDeployments), Collections.emptySet(), tenantDomain);
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         if (environmentsToRemove.size() > 0) {
             GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiProductId, apiRevisionId,
