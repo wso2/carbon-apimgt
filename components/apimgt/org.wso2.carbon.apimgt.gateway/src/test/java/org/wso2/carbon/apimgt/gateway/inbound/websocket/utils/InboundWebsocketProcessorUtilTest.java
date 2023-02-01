@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketWSClient;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
@@ -183,7 +184,7 @@ public class InboundWebsocketProcessorUtilTest {
     }
 
     @Test
-    public void isAuthenticatedJWT() throws APISecurityException, APIManagementException {
+    public void isAuthenticatedJWT() throws Exception {
         String authenticationHeader = "Bearer eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFpUQTNNV0kyTkRBelpHU"
                 + "XpOR00wWkdSbE5qSmtPREZrWkRSaU9URmtNV0ZoTXpVMlpHVmxOZyIsImtpZCI6Ik16WXhNbUZrT0dZd01XSTBaV05tTkRjeE5HW"
                 + "XdZbU00WlRBM01XSTJOREF6WkdRek5HTTBaR1JsTmpKa09ERmtaRFJpT1RGa01XRmhNelUyWkdWbE5nX1JTMjU2IiwiYWxnIjoiU"
@@ -199,7 +200,9 @@ public class InboundWebsocketProcessorUtilTest {
         Mockito.when(dataHolder.getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid()))
                 .thenReturn(keyManagers);
         inboundMessageContext.getRequestHeaders().put(WebsocketUtil.authorizationHeader, authenticationHeader);
-        PowerMockito.stub(PowerMockito.method(InboundWebsocketProcessorUtil.class, "authenticateWSJWTToken"))
+        JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
+        PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
+        PowerMockito.stub(PowerMockito.method(InboundWebsocketProcessorUtil.class, "validateAuthenticationContext"))
                 .toReturn(true);
         InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext);
         Assert.assertTrue(inboundMessageContext.isJWTToken());
@@ -215,6 +218,8 @@ public class InboundWebsocketProcessorUtilTest {
         inboundMessageContext.getRequestHeaders().put(WebsocketUtil.authorizationHeader, authenticationHeader);
         WebsocketWSClient websocketWSClient = Mockito.mock(WebsocketWSClient.class);
         PowerMockito.whenNew(WebsocketWSClient.class).withNoArguments().thenReturn(websocketWSClient);
+        JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
+        PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = Mockito.mock(APIKeyValidationInfoDTO.class);
         Mockito.when(websocketWSClient.getAPIKeyData(inboundMessageContext.getApiContext(),
                         inboundMessageContext.getVersion(), apiKey, inboundMessageContext.getTenantDomain(), keyManagers))
@@ -224,10 +229,12 @@ public class InboundWebsocketProcessorUtilTest {
     }
 
     @Test
-    public void authenticateToken() {
+    public void authenticateToken() throws Exception {
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
         inboundMessageContext.setJWTToken(true);
-        PowerMockito.stub(PowerMockito.method(InboundWebsocketProcessorUtil.class, "authenticateGraphQLJWTToken"))
+        JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
+        PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
+        PowerMockito.stub(PowerMockito.method(InboundWebsocketProcessorUtil.class, "validateAuthenticationContext"))
                 .toReturn(true);
         InboundProcessorResponseDTO responseDTO = InboundWebsocketProcessorUtil.authenticateToken(
                 inboundMessageContext);
@@ -235,10 +242,12 @@ public class InboundWebsocketProcessorUtilTest {
     }
 
     @Test
-    public void authenticateTokenFailure() {
+    public void authenticateTokenFailure() throws Exception {
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
         inboundMessageContext.setJWTToken(true);
-        PowerMockito.stub(PowerMockito.method(InboundWebsocketProcessorUtil.class, "authenticateGraphQLJWTToken"))
+        JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
+        PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
+        PowerMockito.stub(PowerMockito.method(InboundWebsocketProcessorUtil.class, "validateAuthenticationContext"))
                 .toReturn(false);
         InboundProcessorResponseDTO responseDTO = InboundWebsocketProcessorUtil.authenticateToken(
                 inboundMessageContext);
