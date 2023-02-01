@@ -48,8 +48,13 @@ public class ThrottlingLimitMappingUtil {
      */
     public static APIOperationsThrottlingLimitDTO fromThrottlingLimitToDTO(ThrottlingLimit throttlingLimit) {
         APIOperationsThrottlingLimitDTO dto = new APIOperationsThrottlingLimitDTO();
-        dto.setRequestCount(throttlingLimit.getRequestCount());
-        dto.setUnit(APIOperationsThrottlingLimitDTO.UnitEnum.valueOf(throttlingLimit.getUnit()));
+        if (throttlingLimit == null) {
+            dto.setRequestCount(-1);
+            dto.setUnit(APIOperationsThrottlingLimitDTO.UnitEnum.MINUTE);
+        } else {
+            dto.setRequestCount(throttlingLimit.getRequestCount());
+            dto.setUnit(APIOperationsThrottlingLimitDTO.UnitEnum.valueOf(throttlingLimit.getUnit()));
+        }
         return dto;
     }
 }
