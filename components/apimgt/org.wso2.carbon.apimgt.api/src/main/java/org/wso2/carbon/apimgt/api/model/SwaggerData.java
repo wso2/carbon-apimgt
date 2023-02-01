@@ -36,7 +36,6 @@ public class SwaggerData {
         private String verb;
         private String authType;
         private String policy;
-        private ThrottlingLimit throttlingLimit;
         private Scope scope;
         private List<Scope> scopes = new ArrayList<>();
         private String amznResourceName;
@@ -106,13 +105,6 @@ public class SwaggerData {
             this.scopes = scopes;
         }
 
-        public ThrottlingLimit getThrottlingLimit() {
-            return throttlingLimit;
-        }
-
-        public void setThrottlingLimit(ThrottlingLimit throttlingLimit) {
-            this.throttlingLimit = throttlingLimit;
-        }
     }
 
     private String title;
@@ -146,7 +138,6 @@ public class SwaggerData {
             resource.verb = uriTemplate.getHTTPVerb();
             resource.authType = uriTemplate.getAuthType();
             resource.policy = uriTemplate.getThrottlingTier();
-            resource.throttlingLimit = uriTemplate.getThrottlingLimit();
             resource.scope = uriTemplate.getScope();
             resource.scopes = uriTemplate.retrieveAllScopes();
             resource.amznResourceName = uriTemplate.getAmznResourceName();

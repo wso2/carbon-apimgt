@@ -132,7 +132,6 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -10143,76 +10142,5 @@ public final class APIUtil {
             gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;
         }
         return  gatewayVendor;
-    }
-
-    /**
-     * Provides the default throttling limit
-     *
-     * @return Throttling limit object with default values
-     */
-    public static ThrottlingLimit getDefaultThrottleLimit() {
-        ThrottlingLimit throttlingLimit = new ThrottlingLimit();
-        throttlingLimit.setRequestCount(-1);
-        throttlingLimit.setUnit("MINUTE");
-        return throttlingLimit;
-    }
-
-    /**
-     * Existing APIs contains the throttling tier value as a string. This method assigns the throttling limit in
-     * SwaggerData object's throttleLimit field considering the throttling tier string value.
-     *
-     * @param throttlingTierStr String value relevant to the throttling tier
-     * @return ThrottleLimit object from throttling tier String value
-     */
-    public static ThrottlingLimit getThrottlingLimitFromThrottlingTier(String throttlingTierStr) {
-        ThrottlingLimit throttlingLimit = new ThrottlingLimit();
-        throttlingLimit.setUnit("MINUTE");
-        switch (throttlingTierStr) {
-            case "10KPerMin":
-                throttlingLimit.setRequestCount(10000);
-                break;
-            case "20KPerMin":
-                throttlingLimit.setRequestCount(20000);
-                break;
-            case "50KPerMin":
-                throttlingLimit.setRequestCount(50000);
-                break;
-            case "Unlimited":
-                throttlingLimit.setRequestCount(-1);
-                break;
-            default:
-                log.warn("Invalid throttling tier value received");
-                return null;
-        }
-        return throttlingLimit;
-    }
-
-    /**
-     * Gives throttling tier value relevant to the throttling limit
-     *
-     * @param throttlingLimit throttling limit details
-     * @return throttling tier value
-     */
-    public static String getThrottlingTierFromThrottlingLimit(ThrottlingLimit throttlingLimit) {
-        String requestCount = "";
-        String prefix = "";
-        String throttlingTier = "";
-        if (throttlingLimit != null) {
-            if (throttlingLimit.getRequestCount() == -1)
-                return APIConstants.UNLIMITED_TIER;
-            if (throttlingLimit.getRequestCount() % 100000 == 0) {
-                requestCount = Integer.toString(throttlingLimit.getRequestCount() / 1000000);
-                prefix = "M";
-            } else if (throttlingLimit.getRequestCount() % 1000 == 0) {
-                requestCount = Integer.toString(throttlingLimit.getRequestCount() / 1000);
-                prefix = "K";
-            } else {
-                requestCount = Integer.toString(throttlingLimit.getRequestCount());
-            }
-            throttlingTier = requestCount + prefix + "Per" + throttlingLimit.getUnit();
-        } else {
-            log.warn("Could not create a throttling tier value. Hence returning an empty value.");
-        }
-        return throttlingTier;
     }
 }

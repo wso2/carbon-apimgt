@@ -7,7 +7,6 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsThrottlingLimitDTO;
 import javax.validation.constraints.*;
 
 
@@ -29,7 +28,6 @@ public class APIOperationsDTO   {
     private String verb = null;
     private String authType = "Any";
     private String throttlingPolicy = null;
-    private APIOperationsThrottlingLimitDTO throttlingLimit = null;
     private List<String> scopes = new ArrayList<String>();
     private List<String> usedProductIds = new ArrayList<String>();
     private String amznResourceName = null;
@@ -121,24 +119,6 @@ public class APIOperationsDTO   {
   }
   public void setThrottlingPolicy(String throttlingPolicy) {
     this.throttlingPolicy = throttlingPolicy;
-  }
-
-  /**
-   **/
-  public APIOperationsDTO throttlingLimit(APIOperationsThrottlingLimitDTO throttlingLimit) {
-    this.throttlingLimit = throttlingLimit;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("throttlingLimit")
-  public APIOperationsThrottlingLimitDTO getThrottlingLimit() {
-    return throttlingLimit;
-  }
-  public void setThrottlingLimit(APIOperationsThrottlingLimitDTO throttlingLimit) {
-    this.throttlingLimit = throttlingLimit;
   }
 
   /**
@@ -276,7 +256,6 @@ public class APIOperationsDTO   {
         Objects.equals(verb, apIOperations.verb) &&
         Objects.equals(authType, apIOperations.authType) &&
         Objects.equals(throttlingPolicy, apIOperations.throttlingPolicy) &&
-        Objects.equals(throttlingLimit, apIOperations.throttlingLimit) &&
         Objects.equals(scopes, apIOperations.scopes) &&
         Objects.equals(usedProductIds, apIOperations.usedProductIds) &&
         Objects.equals(amznResourceName, apIOperations.amznResourceName) &&
@@ -288,7 +267,7 @@ public class APIOperationsDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, target, verb, authType, throttlingPolicy, throttlingLimit, scopes, usedProductIds, amznResourceName, amznResourceTimeout, payloadSchema, uriMapping, operationPolicies);
+    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds, amznResourceName, amznResourceTimeout, payloadSchema, uriMapping, operationPolicies);
   }
 
   @Override
@@ -301,7 +280,6 @@ public class APIOperationsDTO   {
     sb.append("    verb: ").append(toIndentedString(verb)).append("\n");
     sb.append("    authType: ").append(toIndentedString(authType)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
-    sb.append("    throttlingLimit: ").append(toIndentedString(throttlingLimit)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    usedProductIds: ").append(toIndentedString(usedProductIds)).append("\n");
     sb.append("    amznResourceName: ").append(toIndentedString(amznResourceName)).append("\n");

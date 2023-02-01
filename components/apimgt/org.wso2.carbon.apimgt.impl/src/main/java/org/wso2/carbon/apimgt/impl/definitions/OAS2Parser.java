@@ -72,7 +72,6 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
-import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.endpointurlextractor.EndpointUrl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -384,29 +383,10 @@ public class OAS2Parser extends APIDefinition {
                         template.setAuthType("Any");
                         template.setAuthTypes("Any");
                     }
-                    if (extensions.containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER) &&
-                            !StringUtils.isEmpty(extensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER).toString())) {
+                    if (extensions.containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER)) {
                         String throttlingTier = (String) extensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
                         template.setThrottlingTier(throttlingTier);
                         template.setThrottlingTiers(throttlingTier);
-                        // existing APIs do not have the throttling limit value. To support those APIs below
-                        // assignment is performing
-                        if (!extensions.containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
-                            template.setThrottlingLimit(throttlingTier);
-                        }
-                    }
-                    // assigns x-throttling-limit value if x-throttling-tier is not available
-                    if (extensions.containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
-                        ThrottlingLimit throttlingLimit = OASParserUtil.getThrottlingLimitFromJSON(
-                                extensions.get(APIConstants.SWAGGER_X_THROTTLING_LIMIT));
-                        template.setThrottlingLimit(throttlingLimit);
-                        if (template.getThrottlingTier() == null) {
-                            // maps throttlingLimit to throttlingTier
-                            template.setThrottlingTier(
-                                    APIUtil.getThrottlingTierFromThrottlingLimit(throttlingLimit));
-                            template.setThrottlingTiers(
-                                    APIUtil.getThrottlingTierFromThrottlingLimit(throttlingLimit));
-                        }
                     }
                     if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
                         String mediationScript = (String) extensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
@@ -938,27 +918,7 @@ public class OAS2Parser extends APIDefinition {
             authType = APIConstants.OASResourceAuthTypes.APPLICATION;
         }
         operation.setVendorExtension(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
-        // handle x-throttling-tier extension
-        if (resource.getPolicy() != null && !StringUtils.isEmpty(resource.getPolicy())) {
-            operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
-        } else if (resource.getThrottlingLimit() != null) {
-            operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER,
-                    APIUtil.getThrottlingTierFromThrottlingLimit(resource.getThrottlingLimit()));
-        } else {
-            operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER,
-                    APIConstants.DEFAULT_API_POLICY_UNLIMITED);
-        }
-        // assigns x-throttling-limit extension
-        if (resource.getThrottlingLimit() != null) {
-            operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil
-                    .getThrottlingLimitJSON(resource.getThrottlingLimit()));
-        } else if (resource.getPolicy() != null) {
-            operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil
-                    .getThrottlingLimitJSON(APIUtil.getThrottlingLimitFromThrottlingTier(resource.getPolicy())));
-        } else {
-            operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil.getThrottlingLimitJSON(
-                    APIUtil.getDefaultThrottleLimit()));
-        }
+        operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
         // AWS Lambda: set arn & timeout to swagger
         if (resource.getAmznResourceName() != null) {
             operation.setVendorExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME, resource.getAmznResourceName());

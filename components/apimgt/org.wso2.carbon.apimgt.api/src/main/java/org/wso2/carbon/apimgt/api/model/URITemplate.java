@@ -17,8 +17,6 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONValue;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -29,7 +27,6 @@ import java.util.*;
 public class URITemplate implements Serializable{
 
     private static final long serialVersionUID = 1L;
-    private static final Log log = LogFactory.getLog(URITemplate.class);
 
     private String uriTemplate;
     private String resourceURI;
@@ -42,7 +39,6 @@ public class URITemplate implements Serializable{
     private String applicableLevel;
     private String throttlingTier;
     private List<String> throttlingTiers = new ArrayList<String>();
-    private ThrottlingLimit throttlingLimit;
     private Scope scope;
     private String mediationScript;
     private List<Scope> scopes = new ArrayList<Scope>();
@@ -356,7 +352,7 @@ public class URITemplate implements Serializable{
         if (applicableLevel != null ? !applicableLevel.equals(that.applicableLevel) : that.applicableLevel != null) {
             return false;
         }
-        if (throttlingTier != null && !throttlingTier.equals(that.throttlingTier)) {
+        if (!throttlingTier.equals(that.throttlingTier)) {
             return false;
         }
         if (!throttlingTiers.equals(that.throttlingTiers)) {
@@ -369,9 +365,6 @@ public class URITemplate implements Serializable{
             return false;
         }
         if (scopes != null ? !scopes.equals(that.scopes) : that.scopes != null) {
-            return false;
-        }
-        if (throttlingLimit != null ? !throttlingLimit.equals(that.throttlingLimit) : that.throttlingLimit != null) {
             return false;
         }
         if (mediationScripts != null ? !mediationScripts.equals(that.mediationScripts) : that.mediationScripts !=
@@ -394,7 +387,6 @@ public class URITemplate implements Serializable{
         result = 31 * result + (throttlingConditions != null ? throttlingConditions.hashCode() : 0);
         result = 31 * result + (applicableLevel != null ? applicableLevel.hashCode() : 0);
         result = 31 * result + (throttlingTier != null ? throttlingTier.hashCode() : 0);
-        result = 31 * result + (throttlingLimit != null ? throttlingLimit.hashCode() : 0);
         result = 31 * result + (throttlingTiers != null ? throttlingTiers.hashCode() : 0);
         result = 31 * result + (scope != null ? scope.hashCode() : 0);
         result = 31 * result + (mediationScript != null ? mediationScript.hashCode() : 0);
@@ -455,36 +447,5 @@ public class URITemplate implements Serializable{
 
     public void addOperationPolicy(OperationPolicy policy) {
         operationPolicies.add(policy);
-    }
-
-    public ThrottlingLimit getThrottlingLimit() {
-        return throttlingLimit;
-    }
-
-    public void setThrottlingLimit(String throttlingTier) {
-        ThrottlingLimit convertedThrottlingLimit = new ThrottlingLimit();
-        convertedThrottlingLimit.setUnit("MINUTE");
-        switch (throttlingTier) {
-            case "10KPerMin":
-                convertedThrottlingLimit.setRequestCount(10000);
-                break;
-            case "20KPerMin":
-                convertedThrottlingLimit.setRequestCount(20000);
-                break;
-            case "50KPerMin":
-                convertedThrottlingLimit.setRequestCount(50000);
-                break;
-            case "Unlimited":
-                convertedThrottlingLimit.setRequestCount(-1);
-                break;
-            default:
-                log.warn("Invalid throttling tier value received");
-                return;
-        }
-        this.throttlingLimit = convertedThrottlingLimit;
-    }
-
-    public void setThrottlingLimit(ThrottlingLimit throttlingLimit) {
-        this.throttlingLimit = throttlingLimit;
     }
 }

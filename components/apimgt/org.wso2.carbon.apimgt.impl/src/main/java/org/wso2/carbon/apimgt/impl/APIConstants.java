@@ -1520,15 +1520,12 @@ public final class APIConstants {
     public static final String SWAGGER_X_AMZN_RESOURCE_TIMEOUT = "x-amzn-resource-timeout";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
     public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
-    public static final String SWAGGER_X_THROTTLING_LIMIT = "x-throttling-limit";
     public static final String SWAGGER_X_THROTTLING_BANDWIDTH = "x-throttling-bandwidth";
     public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
     public static final String SWAGGER_X_WSO2_SECURITY = "x-wso2-security";
     public static final String WSO2_APP_SECURITY_TYPES = "security-types";
     public static final String OPTIONAL = "optional";
     public static final String MANDATORY = "mandatory";
-    public static final String REQUEST_COUNT = "requestCount";
-    public static final String REQUEST_COUNT_UNIT = "unit";
     public static final String RESPONSE_CACHING_ENABLED = "enabled";
     public static final String RESPONSE_CACHING_TIMEOUT = "cacheTimeoutInSeconds";
     public static final String SWAGGER_X_WSO2_SCOPES = "x-wso2-scopes";
@@ -2887,8 +2884,8 @@ public final class APIConstants {
         SELF_SIGNUP
     }
 
-    public static final String PROPERTY_QUERY_KEY = "query";
-    public static final String PROPERTY_HEADERS_KEY = "headers";
+    public static final String  PROPERTY_QUERY_KEY = "query";
+    public static final String  PROPERTY_HEADERS_KEY = "headers";
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
 
     //Constants related to Operation Policies
