@@ -1,5 +1,4 @@
 /*
- *
  *  Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
  *
  *  WSO2 LLC. licenses this file to you under the Apache License,
@@ -46,6 +45,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
 /**
  * Correlation Config Manager to configure correlation components and
  * invoke the internal API.
@@ -116,7 +116,6 @@ public class CorrelationConfigManager {
     }
 
     public void updateCorrelationConfigs(List<CorrelationConfigDTO> correlationConfigDTOList) {
-
         boolean configEnable = true;
         List<String> configComponentNames = new ArrayList<>();
         String[] configDeniedThreads = deniedThreads;

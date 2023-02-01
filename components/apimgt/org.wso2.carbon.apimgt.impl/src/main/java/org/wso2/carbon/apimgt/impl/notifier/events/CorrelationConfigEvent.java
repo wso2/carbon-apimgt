@@ -28,8 +28,7 @@ import java.util.List;
 public class CorrelationConfigEvent extends Event {
 
     private List<CorrelationConfigDTO> correlationConfigDTOList;
-
-
+    
     public CorrelationConfigEvent(List<CorrelationConfigDTO> correlationConfigDTOList, String type) {
         this.correlationConfigDTOList = correlationConfigDTOList;
         this.type = type;

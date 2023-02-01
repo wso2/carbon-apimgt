@@ -37,6 +37,12 @@ public class ConfigCorrelationImpl {
     private static final String INVALID_LOGGING_PERMISSION = "Invalid logging permission";
     private static final String LOGGING_PERMISSION_PATH = "/permission/protected";
 
+    /**
+     * Update correlation configs
+     *
+     * @param correlationConfigDTOList Correlation config list
+     * @return results 
+     */
     public boolean updateCorrelationConfigs(List<CorrelationConfigDTO> correlationConfigDTOList) throws
             APIManagementException {
         if (!APIUtil.hasPermission(RestApiCommonUtil.getLoggedInUsername(), LOGGING_PERMISSION_PATH)) {
@@ -50,13 +56,22 @@ public class ConfigCorrelationImpl {
         return result;
     }
 
+    /**
+     * Publish correlation config data
+     *
+     * @param correlationConfigDTOList Correlation config list
+     */
     private void publishCorrelationConfigData(List<CorrelationConfigDTO> correlationConfigDTOList) {
-
         CorrelationConfigEvent event = new CorrelationConfigEvent(correlationConfigDTOList,
                 APIConstants.EventType.UPDATE_CORRELATION_CONFIGS.name());
         APIUtil.sendNotification(event, APIConstants.NotifierType.CORRELATION_CONFIG.name());
     }
 
+    /**
+     * Get correlation configs
+     *
+     * @return Correlation configs List
+     */
     public List<CorrelationConfigDTO> getCorrelationConfigs() throws APIManagementException {
         if (!APIUtil.hasPermission(RestApiCommonUtil.getLoggedInUsername(), APIConstants.Permissions.APIM_ADMIN)) {
             throw new APIManagementException(INVALID_LOGGING_PERMISSION,
@@ -64,5 +79,4 @@ public class ConfigCorrelationImpl {
         }
         return CorrelationConfigDAO.getInstance().getCorrelationConfigsList();
     }
-
 }
