@@ -1460,7 +1460,7 @@ public class SQLConstants {
                     "SCOPE_PREFIX)" +
                     " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
     public static final String ADD_API_THROTTLE_LIMIT_SQL =
-            " INSERT INTO AM_API_THROTTLE_LIMIT (API_UUID,API_THROTTLE_LIMIT) VALUES (?,?)";
+            " INSERT INTO CHOREO_AM_API (API_UUID,API_THROTTLE_LIMIT) VALUES (?,?)";
 
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
@@ -1690,7 +1690,7 @@ public class SQLConstants {
                     "   API_UUID = ? ";
 
     public static final String UPDATE_API_THROTTLE_LIMIT_SQL =
-            "UPDATE AM_API_THROTTLE_LIMIT " +
+            "UPDATE CHOREO_AM_API " +
                     "SET " +
                     "   API_THROTTLE_LIMIT = ? " +
                     " WHERE " +
@@ -2658,7 +2658,7 @@ public class SQLConstants {
 
     public static final String GET_API_DETAILS_SQL = "SELECT * FROM AM_API ";
 
-    public static final String GET_API_THROTTLE_LIMIT_SQL = "SELECT * FROM AM_API_THROTTLE_LIMIT ";
+    public static final String GET_API_THROTTLE_LIMIT_SQL = "SELECT * FROM CHOREO_AM_API ";
 
     public static final String REMOVE_GROUP_ID_MAPPING_SQL =
             "DELETE FROM AM_APPLICATION_GROUP_MAPPING WHERE APPLICATION_ID = ? ";
@@ -3089,9 +3089,9 @@ public class SQLConstants {
     public static final String GET_REVISIONED_API_TIER_SQL = "SELECT API_TIER FROM AM_API_REVISION_METADATA WHERE " +
             "API_UUID = ? AND REVISION_UUID = ?";
     public static final String GET_REVISIONED_API_THROTTLE_LIMIT_SQL = "SELECT API_THROTTLE_LIMIT FROM " +
-            "AM_API_REVISION_THROTTLE_LIMIT WHERE API_UUID = ? AND REVISION_UUID = ?";
-    public static final String ADD_API_REVISION_THROTTLE_LIMIT_INFO = "INSERT INTO AM_API_REVISION_THROTTLE_LIMIT (API_UUID," +
-            "REVISION_UUID,API_THROTTLE_LIMIT) VALUES(?,?,(SELECT API_THROTTLE_LIMIT FROM AM_API_THROTTLE_LIMIT WHERE API_UUID = ? ))";
+            "CHOREO_AM_API_REVISION_METADATA WHERE API_UUID = ? AND REVISION_UUID = ?";
+    public static final String ADD_API_REVISION_THROTTLE_LIMIT_INFO = "INSERT INTO CHOREO_AM_API_REVISION_METADATA (API_UUID," +
+            "REVISION_UUID,API_THROTTLE_LIMIT) VALUES(?,?,(SELECT API_THROTTLE_LIMIT FROM CHOREO_AM_API WHERE API_UUID = ? ))";
     public static final String RESTORE_API_REVISION_METADATA = "UPDATE AM_API SET API_TIER = (SELECT API_TIER FROM " +
             "AM_API_REVISION_METADATA WHERE API_UUID = ? AND REVISION_UUID = ?) WHERE API_UUID = ?";
     public static final String ADD_PER_API_LOGGING_SQL =
