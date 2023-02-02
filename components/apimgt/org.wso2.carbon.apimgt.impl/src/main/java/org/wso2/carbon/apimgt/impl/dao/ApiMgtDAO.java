@@ -16428,6 +16428,8 @@ public class ApiMgtDAO {
                 String driverName = connection.getMetaData().getDriverName();
                 if (driverName.contains("Oracle")) {
                     getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_ORACLE_SQL;
+                } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
+                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_MSSQL;
                 }
 
                 PreparedStatement getClientCertificatesStatement = connection.prepareStatement(getClientCertificatesQuery);
@@ -17622,6 +17624,8 @@ public class ApiMgtDAO {
                 String driverName = connection.getMetaData().getDriverName();
                 if (driverName.contains("Oracle")) {
                     getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_ORACLE_SQL;
+                } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
+                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_MSSQL;
                 }
                 
                 PreparedStatement getClientCertificatesStatement = connection.prepareStatement(getClientCertificatesQuery);
