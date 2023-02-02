@@ -1075,9 +1075,9 @@
             <Port>{{apim.open_telemetry.remote_tracer.port}}</Port>
             <Properties>
                 {% for property in apim.open_telemetry.remote_tracer.properties %}
-                 <{{property.name}}>{{property.value}}</{{property.name}}>
-                 {% endfor %}
-             </Properties>
+                <{{property.name}}>{{property.value}}</{{property.name}}>
+                {% endfor %}
+            </Properties>
         </RemoteTracer>
         <LogTracer>
             <Enabled>{{apim.open_telemetry.log_tracer.enable}}</Enabled>
