@@ -290,7 +290,7 @@ public class ExportUtils {
         }
         // Set API Product status to created if the status is not preserved
         if (!preserveStatus) {
-            apiProductDtoToReturn.setState(APIProductDTO.StateEnum.CREATED);
+            apiProductDtoToReturn.setState(APIConstants.CREATED);
         }
         addGatewayEnvironmentsToArchive(archivePath, apiProductDtoToReturn.getId(), exportFormat, apiProvider);
         addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat,

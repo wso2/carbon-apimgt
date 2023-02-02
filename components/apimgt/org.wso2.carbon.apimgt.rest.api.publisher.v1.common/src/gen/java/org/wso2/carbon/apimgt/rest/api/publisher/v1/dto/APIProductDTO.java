@@ -37,42 +37,7 @@ public class APIProductDTO   {
     private String description = null;
     private String provider = null;
     private Boolean hasThumbnail = null;
-
-    @XmlType(name="StateEnum")
-    @XmlEnum(String.class)
-    public enum StateEnum {
-        CREATED("CREATED"),
-        PUBLISHED("PUBLISHED"),
-        DEPRECATED("DEPRECATED"),
-        RETIRED("RETIRED"),
-        BLOCKED("BLOCKED"),
-        PROTOTYPED("PROTOTYPED");
-        private String value;
-
-        StateEnum (String v) {
-            value = v;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static StateEnum fromValue(String v) {
-            for (StateEnum b : StateEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-return null;
-        }
-    }
-    private StateEnum state = StateEnum.CREATED;
+    private String state = "CREATED";
     private Boolean enableSchemaValidation = null;
     private Boolean isRevision = null;
     private String revisionedApiProductId = null;
@@ -344,18 +309,18 @@ return null;
   /**
    * State of the API product. Only published API products are visible on the Developer Portal 
    **/
-  public APIProductDTO state(StateEnum state) {
+  public APIProductDTO state(String state) {
     this.state = state;
     return this;
   }
 
   
-  @ApiModelProperty(value = "State of the API product. Only published API products are visible on the Developer Portal ")
+  @ApiModelProperty(example = "CREATED", value = "State of the API product. Only published API products are visible on the Developer Portal ")
   @JsonProperty("state")
-  public StateEnum getState() {
+  public String getState() {
     return state;
   }
-  public void setState(StateEnum state) {
+  public void setState(String state) {
     this.state = state;
   }
 

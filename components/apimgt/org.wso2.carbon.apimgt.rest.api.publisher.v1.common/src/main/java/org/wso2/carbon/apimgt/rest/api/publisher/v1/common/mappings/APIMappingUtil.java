@@ -83,7 +83,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionAPIInfoDTO;
@@ -2253,8 +2252,7 @@ public class APIMappingUtil {
             productDto.setProvider(APIUtil.replaceEmailDomainBack(apiProduct.getId().getProviderName()));
             productDto.setContext(apiProduct.getContext());
             productDto.setDescription(apiProduct.getDescription());
-            productDto.setState(org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO.StateEnum
-                    .valueOf(apiProduct.getState()));
+            productDto.setState(apiProduct.getState());
             productDto.setId(apiProduct.getUuid());
             productDto.setHasThumbnail(!StringUtils.isBlank(apiProduct.getThumbnailUrl()));
             if (apiProduct.getApiSecurity() != null) {
@@ -2280,6 +2278,7 @@ public class APIMappingUtil {
         productDto.setDescription(product.getDescription());
         productDto.setApiType(APIProductDTO.ApiTypeEnum.fromValue(APIConstants.AuditLogConstants.API_PRODUCT));
         productDto.setAuthorizationHeader(product.getAuthorizationHeader());
+        productDto.setState(product.getState());
         if (product.getGatewayVendor() == null) {
             productDto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
         } else {
@@ -2326,7 +2325,6 @@ public class APIMappingUtil {
         apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAccessControlAllowCredentials());
         productDto.setCorsConfiguration(apiCorsConfigurationDTO);
 
-        productDto.setState(StateEnum.valueOf(product.getState()));
         productDto.setWorkflowStatus(product.getWorkflowStatus());
 
         //Aggregate API resources to each relevant API.
