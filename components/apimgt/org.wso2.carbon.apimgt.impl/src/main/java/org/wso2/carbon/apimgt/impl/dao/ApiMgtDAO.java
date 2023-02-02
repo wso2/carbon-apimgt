@@ -5344,8 +5344,8 @@ public class ApiMgtDAO {
                     .getTenantAwareUsername(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             recordAPILifeCycleEvent(apiId, null, APIStatus.CREATED.toString(), tenantUserName, tenantId,
                     connection);
-            // persist throttle Limit
-            addThrottleLimit(api, connection);
+            // persist choreo specific api information
+            addChoreoAPIInformation(api, connection);
 
             //If the api is selected as default version, it is added/replaced into AM_API_DEFAULT_VERSION table
             if (api.isDefaultVersion()) {
@@ -5372,11 +5372,17 @@ public class ApiMgtDAO {
         return apiId;
     }
 
-    private void addThrottleLimit(API api, Connection connection) throws SQLException {
+    /**
+     * Persist choreo specific api information.
+     *
+     * @param api        {@link API} object
+     * @param connection {@link Connection} object
+     */
+    private void addChoreoAPIInformation(API api, Connection connection) throws SQLException {
 
-        String query = SQLConstants.ADD_API_THROTTLE_LIMIT_SQL;
+        String query = SQLConstants.ADD_CHOREO_AM_API_SQL;
         try (PreparedStatement prepStmt = connection.prepareStatement(query)) {
-            prepStmt.setString(1, api.getUuid() != null ? api.getUuid() : api.getUUID());
+            prepStmt.setString(1, api.getUuid());
             prepStmt.setString(2, new Gson().toJson(api.getThrottleLimit()));
             prepStmt.execute();
         }
@@ -5747,7 +5753,6 @@ public class ApiMgtDAO {
                 uriMappingPrepStmt.setString(2, uriTemplate.getHTTPVerb());
                 uriMappingPrepStmt.setString(3, uriTemplate.getAuthType());
                 uriMappingPrepStmt.setString(4, uriTemplate.getUriTemplate());
-                // TODO: (VirajSalaka) -
                 //If API policy is available then set it for all the resources.
                 if (StringUtils.isEmpty(api.getApiLevelPolicy())) {
                     uriMappingPrepStmt.setString(5, (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) ?
@@ -16466,7 +16471,7 @@ public class ApiMgtDAO {
                 insertGraphQLComplexityStatement.executeBatch();
                 updateLatestRevisionNumber(connection, apiRevision.getApiUUID(), apiRevision.getId());
                 addAPIRevisionMetaData(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
-                addAPIRevisionTierInfo(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+                addChoreoAPIRevisionMetadata(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -17654,7 +17659,7 @@ public class ApiMgtDAO {
                 insertGraphQLComplexityStatement.executeBatch();
                 updateLatestRevisionNumber(connection, apiRevision.getApiUUID(), apiRevision.getId());
                 addAPIRevisionMetaData(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
-                addAPIRevisionTierInfo(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+                addChoreoAPIRevisionMetadata(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -18149,11 +18154,11 @@ public class ApiMgtDAO {
         }
     }
 
-    private void addAPIRevisionTierInfo(Connection connection, String apiUUID, String revisionUUID)
+    private void addChoreoAPIRevisionMetadata(Connection connection, String apiUUID, String revisionUUID)
             throws SQLException {
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement(SQLConstants.ADD_API_REVISION_THROTTLE_LIMIT_INFO)) {
+                     connection.prepareStatement(SQLConstants.ADD_CHOREO_API_REVISION_METADATA)) {
             preparedStatement.setString(1, apiUUID);
             preparedStatement.setString(2, revisionUUID);
             preparedStatement.setString(3, apiUUID);

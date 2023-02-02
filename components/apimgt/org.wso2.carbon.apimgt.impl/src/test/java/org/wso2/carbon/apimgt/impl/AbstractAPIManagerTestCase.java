@@ -826,14 +826,14 @@ public class AbstractAPIManagerTestCase {
         API api = new API(apiIdentifier);
         api.setUuid("randomUUID");
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiPersistenceInstance);
-        abstractAPIManager.populateAPILevelThrottleLimit(api);
+        abstractAPIManager.populateChoreoAPIInformation(api);
 
         // When there is no revision
         ThrottlingLimit throttleLimit = Mockito.mock(ThrottlingLimit.class);
         Mockito.when(throttleLimit.getRequestCount()).thenReturn(100);
         Mockito.when(throttleLimit.getUnit()).thenReturn("MIN");
         Mockito.when(apiMgtDAO.getAPIThrottlingLimit(anyString())).thenReturn(throttleLimit);
-        abstractAPIManager.populateAPILevelThrottleLimit(api);
+        abstractAPIManager.populateChoreoAPIInformation(api);
 
         Assert.assertNotNull("API Throttle Limit is null", api.getThrottleLimit());
         Assert.assertEquals("API Throttle Limit request count is not properly set.", 100,
@@ -849,7 +849,7 @@ public class AbstractAPIManagerTestCase {
         Mockito.when(throttleLimit2.getRequestCount()).thenReturn(200);
         Mockito.when(throttleLimit2.getUnit()).thenReturn("MIN");
         Mockito.when(apiMgtDAO.getAPIThrottlingLimit(anyString(), anyString())).thenReturn(throttleLimit2);
-        abstractAPIManager.populateAPILevelThrottleLimit(api);
+        abstractAPIManager.populateChoreoAPIInformation(api);
 
         Assert.assertNotNull("API Throttle Limit is null", api.getThrottleLimit());
         Assert.assertEquals("API Throttle Limit request count is not properly set.", 200,

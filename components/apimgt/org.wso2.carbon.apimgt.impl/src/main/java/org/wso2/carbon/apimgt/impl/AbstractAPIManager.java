@@ -1214,7 +1214,12 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
-    protected void populateAPILevelThrottleLimit(API api) throws APIManagementException{
+    /**
+     * Populate choreo specific API Information.
+     *
+     * @param api modified {@link API} object with choreo specific information
+     */
+    protected void populateChoreoAPIInformation(API api) throws APIManagementException {
         ThrottlingLimit throttleLimit;
         if (api.isRevision()) {
             throttleLimit = apiMgtDAO.getAPIThrottlingLimit(api.getRevisionedApiId(), api.getUuid());
@@ -1254,7 +1259,7 @@ public abstract class AbstractAPIManager implements APIManager {
         api.setApiLevelPolicy(apiLevelTier);
 
         // populate api level throttle limit
-        populateAPILevelThrottleLimit(api);
+        populateChoreoAPIInformation(api);
 
         // available tier
         String tiers = null;
