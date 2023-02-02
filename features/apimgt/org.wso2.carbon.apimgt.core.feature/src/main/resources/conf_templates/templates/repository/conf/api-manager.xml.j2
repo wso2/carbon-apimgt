@@ -1074,10 +1074,15 @@
             <HostName>{{apim.open_telemetry.remote_tracer.hostname}}</HostName>
             <Port>{{apim.open_telemetry.remote_tracer.port}}</Port>
             <Properties>
-                {% for property in apim.open_telemetry.remote_tracer.properties %}
-                <{{property.name}}>{{property.value}}</{{property.name}}>
-                {% endfor %}
-            </Properties>
+                 <HostName>{{apim.open_tracer.remote_tracer.properties.hostname}}</HostName>
+                 <Port>{{apim.open_tracer.remote_tracer.properties.port}}</Port>
+                  {% if apim.open_tracer.remote_tracer.properties.sampler_type is defined %}
+                 <SamplerType>{{apim.open_tracer.remote_tracer.properties.sampler_type}}</SamplerType>
+                 {% endif %}
+                 {% if apim.open_tracer.remote_tracer.properties.sampler_param is defined %}
+                 <SamplerParam>{{apim.open_tracer.remote_tracer.properties.sampler_param}}</SamplerParam>
+                 {% endif %}
+             </Properties>
         </RemoteTracer>
         <LogTracer>
             <Enabled>{{apim.open_telemetry.log_tracer.enable}}</Enabled>
