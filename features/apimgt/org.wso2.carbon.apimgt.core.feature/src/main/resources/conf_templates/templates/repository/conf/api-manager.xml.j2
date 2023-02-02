@@ -1074,7 +1074,7 @@
             <HostName>{{apim.open_telemetry.remote_tracer.hostname}}</HostName>
             <Port>{{apim.open_telemetry.remote_tracer.port}}</Port>
             <Properties>
-               {% for property in apim.open_telemetry.remote_tracer.properties %}
+                {% for property in apim.open_telemetry.remote_tracer.properties %}
                  <{{property.name}}>{{property.value}}</{{property.name}}>
                  {% endfor %}
              </Properties>
