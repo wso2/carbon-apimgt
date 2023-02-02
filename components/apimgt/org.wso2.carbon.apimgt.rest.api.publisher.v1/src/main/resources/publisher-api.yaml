@@ -9220,13 +9220,6 @@ components:
           type: string
           description: |
             State of the API product. Only published API products are visible on the Developer Portal
-          enum:
-            - CREATED
-            - PUBLISHED
-            - DEPRECATED
-            - RETIRED
-            - BLOCKED
-            - PROTOTYPED
         securityScheme:
           type: array
           description: |
@@ -9277,16 +9270,10 @@ components:
           example: false
         state:
           type: string
+          example: CREATED
           description: |
             State of the API product. Only published API products are visible on the Developer Portal
           default: CREATED
-          enum:
-            - CREATED
-            - PUBLISHED
-            - DEPRECATED
-            - RETIRED
-            - BLOCKED
-            - PROTOTYPED
         enableSchemaValidation:
           type: boolean
           example: false
