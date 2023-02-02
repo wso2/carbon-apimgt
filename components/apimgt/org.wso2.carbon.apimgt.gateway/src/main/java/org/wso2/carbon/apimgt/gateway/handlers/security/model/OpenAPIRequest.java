@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.utils.SchemaValidationUtils;
 
@@ -38,6 +39,8 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -95,7 +98,12 @@ public class OpenAPIRequest implements Request {
                     "Content-Type" : headerKey.toLowerCase(Locale.ROOT);
             headers.put(headerKey, value);
         }
-        String apiResource = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE).toString();
+        String apiResource = "/";
+        Pattern pattern = Pattern.compile(APIMgtGatewayConstants.RESOURCE_PATTERN);
+        Matcher matcher = pattern.matcher((String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH));
+        if (matcher.find()) {
+            apiResource = matcher.group(1);
+        }
         //Extracting query params
         try {
             queryParams = SchemaValidationUtils.getQueryParams(apiResource, (String)
