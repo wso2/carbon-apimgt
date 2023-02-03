@@ -2072,12 +2072,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId, e, log);
-            } else if (e.getErrorHandler() != null && e.getErrorHandler() == ExceptionCodes.INVALID_API_ID) {
-                throw new APIManagementException("Requested API with id " + apiId + " not found", e,
-                        ExceptionCodes.from(ExceptionCodes.INVALID_API_ID, apiId));
             } else {
-                String errorMessage = "Error while deleting API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                throw e;
             }
         }
         return null;
