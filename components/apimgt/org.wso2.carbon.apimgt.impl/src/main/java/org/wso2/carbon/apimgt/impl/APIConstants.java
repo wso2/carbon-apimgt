@@ -2616,7 +2616,8 @@ public final class APIConstants {
         ENDPOINT_CERTIFICATE_UPDATE,
         ENDPOINT_CERTIFICATE_REMOVE,
         GA_CONFIG_UPDATE,
-        UDATE_API_LOG_LEVEL
+        UDATE_API_LOG_LEVEL,
+        KEY_MANAGER_CONFIGURATION
     }
 
     public enum EventAction {

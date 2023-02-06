@@ -9,10 +9,11 @@ import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notifier.events.KeyManagerEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.databridge.commons.Event;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.util.Collections;
+import java.util.UUID;
 
 public class KeyMgtNotificationSender {
 
@@ -22,13 +23,16 @@ public class KeyMgtNotificationSender {
             String additionalProperties = new Gson().toJson(keyManagerConfigurationDTO.getAdditionalProperties());
             encodedString = new String(Base64.encodeBase64(additionalProperties.getBytes()));
         }
-        Object[] objects = new Object[]{APIConstants.KeyManager.KeyManagerEvent.KEY_MANAGER_CONFIGURATION, action,
+        //handle only super tenant mode in choreo
+        KeyManagerEvent keyManagerEvent = new KeyManagerEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, action,
                 keyManagerConfigurationDTO.getName(), keyManagerConfigurationDTO.getType(),
                 keyManagerConfigurationDTO.isEnabled(), encodedString,
-                keyManagerConfigurationDTO.getOrganization(), keyManagerConfigurationDTO.getTokenType()};
-            Event keyManagerEvent = new Event(APIConstants.KeyManager.KeyManagerEvent.KEY_MANAGER_STREAM_ID,
-                System.currentTimeMillis(),
-                null, null, objects);
+                keyManagerConfigurationDTO.getOrganization(), keyManagerConfigurationDTO.getTokenType());
+
+        byte[] bytesEncoded = Base64.encodeBase64(new Gson().toJson(keyManagerEvent).getBytes());
+        Object[] eventObjects = new Object[]{APIConstants.EventType.KEY_MANAGER_CONFIGURATION.name(),
+                keyManagerEvent.getTimeStamp(), new String(bytesEncoded)};
         EventHubConfigurationDto eventHubConfigurationDto =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                         .getEventHubConfigurationDto();
@@ -38,9 +42,9 @@ public class KeyMgtNotificationSender {
                 && !KeyManagerConfiguration.TokenType.EXCHANGED.toString().equals(
                 keyManagerConfigurationDTO.getTokenType())) {
             EventPublisherEvent notificationEvent =
-                    new EventPublisherEvent(APIConstants.KeyManager.KeyManagerEvent.KEY_MANAGER_STREAM_ID,
-                    System.currentTimeMillis(), objects, keyManagerEvent.toString());
-            APIUtil.publishEvent(EventPublisherType.KEYMGT_EVENT, notificationEvent, keyManagerEvent.toString());
+                    new EventPublisherEvent(APIConstants.NOTIFICATION_STREAM_ID,
+                    System.currentTimeMillis(), eventObjects, keyManagerEvent.toString());
+            APIUtil.publishEvent(EventPublisherType.NOTIFICATION, notificationEvent, keyManagerEvent.toString());
         }
     }
 }
