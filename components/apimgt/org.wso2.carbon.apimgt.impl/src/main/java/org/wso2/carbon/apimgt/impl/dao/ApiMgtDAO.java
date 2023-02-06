@@ -16674,6 +16674,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_APIID_BY_REVISION_UUID)) {
+            connection.setAutoCommit(true);
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
