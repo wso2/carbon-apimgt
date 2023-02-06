@@ -13424,27 +13424,13 @@ public class ApiMgtDAO {
 
     public ThrottlingLimit getAPIThrottlingLimit(String uuid) throws APIManagementException {
 
-        Connection connection = null;
-        PreparedStatement selectPreparedStatement = null;
-        ResultSet resultSet = null;
-        ThrottlingLimit apiLevelTier = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(true);
-            apiLevelTier = getAPIThrottlingLimit(connection, uuid);
+        ThrottlingLimit apiLevelLimit = null;
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            apiLevelLimit = getAPIThrottlingLimit(connection, uuid);
         } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    handleException("Failed to rollback getting API Details", ex);
-                }
-            }
-            handleException("Failed to get API Details", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+            handleException(String.format("Failed to get API Throttling Limit for the API %s", uuid), e);
         }
-        return apiLevelTier;
+        return apiLevelLimit;
     }
 
     public ThrottlingLimit getAPIThrottlingLimit(Connection connection, String uuid) throws SQLException {
