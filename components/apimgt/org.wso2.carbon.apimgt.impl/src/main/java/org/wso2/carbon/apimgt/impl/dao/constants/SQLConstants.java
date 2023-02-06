@@ -1689,7 +1689,7 @@ public class SQLConstants {
                     " WHERE " +
                     "   API_UUID = ? ";
 
-    public static final String UPDATE_API_THROTTLE_LIMIT_SQL =
+    public static final String UPDATE_CHOREO_AM_API_SQL =
             "UPDATE CHOREO_AM_API " +
                     "SET " +
                     "   API_THROTTLE_LIMIT = ? " +

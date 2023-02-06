@@ -1257,10 +1257,8 @@ public abstract class AbstractAPIManager implements APIManager {
         // api level tier
         String apiLevelTier = apiMgtDAO.getAPILevelTier(internalId);
         api.setApiLevelPolicy(apiLevelTier);
-
-        // populate api level throttle limit
+        // populate choreo specific api information
         populateChoreoAPIInformation(api);
-
         // available tier
         String tiers = null;
         Set<Tier> tiersSet = api.getAvailableTiers();

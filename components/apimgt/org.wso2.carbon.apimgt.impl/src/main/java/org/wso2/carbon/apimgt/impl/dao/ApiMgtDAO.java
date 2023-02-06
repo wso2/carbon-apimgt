@@ -6816,7 +6816,7 @@ public class ApiMgtDAO {
                 int tenantID = APIUtil.getTenantId(username);
                 updateAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), tenantID, connection);
             }
-            updateAPIThrottleLimit(connection, api);
+            updateChoreoAPI(connection, api);
             connection.commit();
         } catch (SQLException e) {
             try {
@@ -6833,12 +6833,13 @@ public class ApiMgtDAO {
         }
     }
 
-    private void updateAPIThrottleLimit(Connection connection, API api) throws SQLException {
-        String query = SQLConstants.UPDATE_API_THROTTLE_LIMIT_SQL;
-        PreparedStatement prepStmt = connection.prepareStatement(query);
-        prepStmt.setString(1, new Gson().toJson(api.getThrottleLimit()));
-        prepStmt.setString(2, api.getUuid());
-        prepStmt.execute();
+    private void updateChoreoAPI(Connection connection, API api) throws SQLException {
+        String query = SQLConstants.UPDATE_CHOREO_AM_API_SQL;
+        try (PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            prepStmt.setString(1, new Gson().toJson(api.getThrottleLimit()));
+            prepStmt.setString(2, api.getUuid());
+            prepStmt.execute();
+        }
     }
 
     public int getAPIID(String uuid) throws APIManagementException {
