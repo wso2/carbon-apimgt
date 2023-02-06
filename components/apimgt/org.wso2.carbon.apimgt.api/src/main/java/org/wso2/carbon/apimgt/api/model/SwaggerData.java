@@ -29,6 +29,14 @@ import java.util.Set;
  */
 public class SwaggerData {
 
+    public ThrottlingLimit getThrottlingLimit() {
+        return throttlingLimit;
+    }
+
+    public void setThrottlingLimit(ThrottlingLimit throttlingLimit) {
+        this.throttlingLimit = throttlingLimit;
+    }
+
     /**
      * Maps to Swagger PathItem/Operation
      */
@@ -126,7 +134,7 @@ public class SwaggerData {
     private String apiLevelPolicy;
     private Set<Resource> resources = new LinkedHashSet<>();
     private Set<Scope> scopes = new HashSet<>();
-    private ThrottlingLimit throttleLimit;
+    private ThrottlingLimit throttlingLimit;
 
     public SwaggerData(API api) {
         title = api.getId().getName();
@@ -159,7 +167,7 @@ public class SwaggerData {
         transportType = api.getType();
         security = api.getApiSecurity();
         apiLevelPolicy = api.getApiLevelPolicy();
-        throttleLimit = api.getThrottleLimit();
+        setThrottlingLimit(api.getThrottleLimit());
         Set<Scope> scopes = api.getScopes();
         if (scopes != null) {
             this.scopes.addAll(scopes);

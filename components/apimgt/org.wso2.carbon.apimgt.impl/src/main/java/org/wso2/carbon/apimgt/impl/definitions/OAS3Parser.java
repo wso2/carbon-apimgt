@@ -451,18 +451,11 @@ public class OAS3Parser extends APIDefinition {
                                 template.setThrottlingLimit(throttlingTier);
                             }
                         }
-                        // assigns x-throttling-limit value if x-throttling-tier is not available
+                        // assigns x-throttling-limit value
                         if (extensions.containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
                             ThrottlingLimit throttlingLimit = OASParserUtil.getThrottlingLimitFromJSON(
                                     extensions.get(APIConstants.SWAGGER_X_THROTTLING_LIMIT));
                             template.setThrottlingLimit(throttlingLimit);
-                            if (template.getThrottlingTier() == null) {
-                                // maps throttlingLimit to throttlingTier
-                                template.setThrottlingTier(
-                                        APIUtil.getThrottlingTierFromThrottlingLimit(throttlingLimit));
-                                template.setThrottlingTiers(
-                                        APIUtil.getThrottlingTierFromThrottlingLimit(throttlingLimit));
-                            }
                         }
                         if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
                             String mediationScript = (String) extensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);

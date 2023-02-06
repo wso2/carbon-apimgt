@@ -615,14 +615,6 @@ public final class APIUtil {
             String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
             api.setApiLevelPolicy(apiLevelTier);
 
-            ThrottlingLimit throttleLimit;
-            if (api.isRevision()) {
-                throttleLimit = ApiMgtDAO.getInstance().getAPIThrottlingLimit(api.getRevisionedApiId(), api.getUuid());
-            } else {
-                throttleLimit = ApiMgtDAO.getInstance().getAPIThrottlingLimit(api.getUuid());
-            }
-            api.setThrottleLimit(throttleLimit);
-
             Set<Tier> availablePolicy = new HashSet<Tier>();
             String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, replaceEmailDomainBack(providerName));
             List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
@@ -744,14 +736,6 @@ public final class APIUtil {
             api.setCacheTimeout(cacheTimeout);
             String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
             api.setApiLevelPolicy(apiLevelTier);
-
-            ThrottlingLimit throttleLimit;
-            if (api.isRevision()) {
-                throttleLimit = ApiMgtDAO.getInstance().getAPIThrottlingLimit(api.getRevisionedApiId(), api.getUuid());
-            } else {
-                throttleLimit = ApiMgtDAO.getInstance().getAPIThrottlingLimit(api.getUuid());
-            }
-            api.setThrottleLimit(throttleLimit);
 
             Set<Tier> availablePolicy = new HashSet<Tier>();
             String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB,
@@ -2602,14 +2586,6 @@ public final class APIUtil {
 
             String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
             api.setApiLevelPolicy(apiLevelTier);
-
-            ThrottlingLimit throttleLimit;
-            if (api.isRevision()) {
-                throttleLimit = ApiMgtDAO.getInstance().getAPIThrottlingLimit(api.getRevisionedApiId(), api.getUuid());
-            } else {
-                throttleLimit = ApiMgtDAO.getInstance().getAPIThrottlingLimit(api.getUuid());
-            }
-            api.setThrottleLimit(throttleLimit);
 
             String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
             Map<String, Tier> definedTiers = getTiers(tenantId);

@@ -3582,7 +3582,6 @@ public class SQLConstants {
         public static final String ADD_UNSUBSCRIPTION =
                 "INSERT INTO AM_WEBHOOKS_UNSUBSCRIPTION (API_UUID, APPLICATION_ID, TENANT_DOMAIN, " +
                         "HUB_CALLBACK_URL, HUB_TOPIC, HUB_SECRET, HUB_LEASE_SECONDS, ADDED_AT) VALUES (?,?,?,?,?,?,?,?)";
-        // TODO: (VirajSalaka)
         public static final String GET_ALL_VALID_SUBSCRIPTIONS =
                 "SELECT WH.API_UUID AS API_UUID, " +
                         "WH.APPLICATION_ID AS APPLICATION_ID, " +
@@ -3608,8 +3607,6 @@ public class SQLConstants {
                         "AND WH.APPLICATION_ID = SUB.APPLICATION_ID " +
                         "AND API.API_UUID = WH.API_UUID " +
                         "AND APP.SUBSCRIBER_ID = SUBSCRIBER.SUBSCRIBER_ID ";
-
-        // TODO: (VirajSalaka)
         public static final String GET_ALL_VALID_SUBSCRIPTIONS_POSTGRE_SQL =
                 "SELECT WH.API_UUID AS API_UUID, " +
                         "WH.APPLICATION_ID AS APPLICATION_ID, " +

@@ -17,11 +17,13 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONValue;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.util.ModelUtil;
 
 import java.io.Serializable;
 import java.util.*;
@@ -127,6 +129,9 @@ public class URITemplate implements Serializable{
     }
 
     public String getThrottlingTier() {
+        if (StringUtils.isEmpty(throttlingTier) && throttlingLimit != null) {
+            return ModelUtil.generateThrottlePolicyFromThrottleLimit(throttlingLimit);
+        }
         return throttlingTier;
     }
 
@@ -458,6 +463,9 @@ public class URITemplate implements Serializable{
     }
 
     public ThrottlingLimit getThrottlingLimit() {
+        if (throttlingLimit == null & StringUtils.isNotEmpty(throttlingTier)) {
+            return ModelUtil.generateThrottlingLimitFromThrottlingTier(throttlingTier);
+        }
         return throttlingLimit;
     }
 
