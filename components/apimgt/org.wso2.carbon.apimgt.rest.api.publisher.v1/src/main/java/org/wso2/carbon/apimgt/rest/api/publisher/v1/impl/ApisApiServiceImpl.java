@@ -1715,7 +1715,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param organization organization
      * @return API Lifecycle state information
      */
-    private LifecycleStateDTO getLifecycleState(String apiId, String organization) {
+    private LifecycleStateDTO getLifecycleState(String apiId, String organization) throws APIManagementException {
 
         try {
             APIIdentifier apiIdentifier;
@@ -1736,8 +1736,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId, e, log);
             } else {
-                String errorMessage = "Error while deleting API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                throw e;
             }
         }
         return null;
