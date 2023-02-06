@@ -148,42 +148,54 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             InboundProcessorResponseDTO responseDTO =
                     webSocketProcessor.handleHandshake(req, ctx, inboundMessageContext);
             if (!responseDTO.isError()) {
-                setApiAuthPropertiesToChannel(ctx, inboundMessageContext);
-                setApiPropertiesMapToChannel(ctx, inboundMessageContext);
-                if (StringUtils.isNotEmpty(inboundMessageContext.getToken())) {
-                    String backendJwtHeader = null;
-                    JWTConfigurationDto jwtConfigurationDto = ServiceReferenceHolder.getInstance()
-                            .getAPIManagerConfiguration().getJwtConfigurationDto();
-                    if (jwtConfigurationDto != null) {
-                        backendJwtHeader = jwtConfigurationDto.getJwtHeader();
+                responseDTO = WebsocketUtil.validateDenyPolicies(inboundMessageContext);
+                if (!responseDTO.isError()) {
+                    setApiAuthPropertiesToChannel(ctx, inboundMessageContext);
+                    setApiPropertiesMapToChannel(ctx, inboundMessageContext);
+                    if (StringUtils.isNotEmpty(inboundMessageContext.getToken())) {
+                        String backendJwtHeader = null;
+                        JWTConfigurationDto jwtConfigurationDto = ServiceReferenceHolder.getInstance()
+                                .getAPIManagerConfiguration().getJwtConfigurationDto();
+                        if (jwtConfigurationDto != null) {
+                            backendJwtHeader = jwtConfigurationDto.getJwtHeader();
+                        }
+                        if (StringUtils.isEmpty(backendJwtHeader)) {
+                            backendJwtHeader = APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER;
+                        }
+                        boolean isSSLEnabled = ctx.channel().pipeline().get("ssl") != null;
+                        String prefix = null;
+                        AxisConfiguration axisConfiguration = ServiceReferenceHolder.getInstance()
+                                .getServerConfigurationContext().getAxisConfiguration();
+                        TransportOutDescription transportOut;
+                        if (isSSLEnabled) {
+                            transportOut = axisConfiguration.getTransportOut(APIMgtGatewayConstants.WS_SECURED);
+                        } else {
+                            transportOut = axisConfiguration.getTransportOut(APIMgtGatewayConstants.WS_NOT_SECURED);
+                        }
+                        if (transportOut != null
+                                && transportOut.getParameter(APIMgtGatewayConstants.WS_CUSTOM_HEADER) != null) {
+                            prefix = String.valueOf(transportOut.getParameter(APIMgtGatewayConstants.WS_CUSTOM_HEADER)
+                                    .getValue());
+                        }
+                        if (StringUtils.isNotEmpty(prefix)) {
+                            backendJwtHeader = prefix + backendJwtHeader;
+                        }
+                        req.headers().set(backendJwtHeader, inboundMessageContext.getToken());
                     }
-                    if (StringUtils.isEmpty(backendJwtHeader)) {
-                        backendJwtHeader = APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER;
-                    }
-                    boolean isSSLEnabled = ctx.channel().pipeline().get("ssl") != null;
-                    String prefix = null;
-                    AxisConfiguration axisConfiguration = ServiceReferenceHolder.getInstance()
-                            .getServerConfigurationContext().getAxisConfiguration();
-                    TransportOutDescription transportOut;
-                    if (isSSLEnabled) {
-                        transportOut = axisConfiguration.getTransportOut(APIMgtGatewayConstants.WS_SECURED);
-                    } else {
-                        transportOut = axisConfiguration.getTransportOut(APIMgtGatewayConstants.WS_NOT_SECURED);
-                    }
-                    if (transportOut != null
-                            && transportOut.getParameter(APIMgtGatewayConstants.WS_CUSTOM_HEADER) != null) {
-                        prefix = String.valueOf(transportOut.getParameter(APIMgtGatewayConstants.WS_CUSTOM_HEADER)
-                                .getValue());
-                    }
-                    if (StringUtils.isNotEmpty(prefix)) {
-                        backendJwtHeader = prefix + backendJwtHeader;
-                    }
-                    req.headers().set(backendJwtHeader, inboundMessageContext.getToken());
+                    ctx.fireChannelRead(req);
+                    publishHandshakeEvent(ctx, inboundMessageContext);
+                    InboundWebsocketProcessorUtil.publishGoogleAnalyticsData(inboundMessageContext,
+                            ctx.channel().remoteAddress().toString());
+                } else {
+                    ReferenceCountUtil.release(msg);
+                    InboundMessageContextDataHolder.getInstance().removeInboundMessageContextForConnection(channelId);
+                    FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                            HttpResponseStatus.valueOf(responseDTO.getErrorCode()),
+                            Unpooled.copiedBuffer(responseDTO.getErrorMessage(), CharsetUtil.UTF_8));
+                    httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+                    httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
+                    ctx.writeAndFlush(httpResponse);
                 }
-                ctx.fireChannelRead(req);
-                publishHandshakeEvent(ctx, inboundMessageContext);
-                InboundWebsocketProcessorUtil.publishGoogleAnalyticsData(inboundMessageContext,
-                        ctx.channel().remoteAddress().toString());
             } else {
                 ReferenceCountUtil.release(msg);
                 InboundMessageContextDataHolder.getInstance().removeInboundMessageContextForConnection(channelId);

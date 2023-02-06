@@ -63,4 +63,12 @@ public class GraphQLConstants {
         public static final String PAYLOAD_FIELD_NAME_ID = "id";
         public static final String PAYLOAD_FIELD_TYPE_ERROR = "error";
     }
+
+    /**
+     * Constants related to WebSocket/GraphQL frame errors.
+     */
+    public static class FrameErrorConstants {
+        public static final int BLOCKED_REQUEST = 4006;
+        public static final String BLOCKED_REQUEST_MESSAGE = "Blocked from accessing the API";
+    }
 }

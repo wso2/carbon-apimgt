@@ -44,6 +44,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
@@ -70,7 +71,7 @@ import java.util.UUID;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ WebSocketUtils.class, InboundWebsocketProcessorUtil.class,
-        APIUtil.class, WebsocketInboundHandler.class, ServiceReferenceHolder.class })
+        APIUtil.class, WebsocketInboundHandler.class, ServiceReferenceHolder.class, WebsocketUtil.class})
 public class WebsocketInboundHandlerTestCase {
 
     private static final String channelIdString = "11111";
@@ -123,6 +124,14 @@ public class WebsocketInboundHandlerTestCase {
         };
         websocketAPI = new API(UUID.randomUUID().toString(), 1, "admin", "WSAPI", "1.0.0", "/wscontext", "Unlimited",
                 APIConstants.API_TYPE_WS, APIConstants.PUBLISHED_STATUS, false);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        PowerMockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+
+        PowerMockito.mockStatic(WebsocketUtil.class);
     }
 
     @Test
@@ -171,6 +180,7 @@ public class WebsocketInboundHandlerTestCase {
         Mockito.when(channelHandlerContext.channel().pipeline()).thenReturn(channelPipeline);
         Mockito.when(inboundWebSocketProcessor.handleHandshake(fullHttpRequest, channelHandlerContext,
                 inboundMessageContext)).thenReturn(responseDTO);
+        PowerMockito.when(WebsocketUtil.validateDenyPolicies(Mockito.anyObject())).thenReturn(responseDTO);
         websocketInboundHandler.channelRead(channelHandlerContext, fullHttpRequest);
         validateApiProperties(apiProperties, infoDTO, inboundMessageContext);
 
@@ -207,6 +217,7 @@ public class WebsocketInboundHandlerTestCase {
         Mockito.when(msg.content()).thenReturn(content);
         InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
         Mockito.when(inboundWebSocketProcessor.handleRequest(msg, inboundMessageContext)).thenReturn(responseDTO);
+        PowerMockito.when(WebsocketUtil.validateDenyPolicies(Mockito.anyObject())).thenReturn(responseDTO);
         websocketInboundHandler.channelRead(channelHandlerContext, msg);
         Assert.assertTrue((InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap()
                 .containsKey(channelIdString)));// No error has occurred context exists in data-holder map.
