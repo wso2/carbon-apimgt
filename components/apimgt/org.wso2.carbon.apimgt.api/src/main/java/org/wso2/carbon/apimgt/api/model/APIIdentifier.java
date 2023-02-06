@@ -35,14 +35,17 @@ public class APIIdentifier implements Serializable, Identifier {
     private final String apiName;
     private final String version;
     private String tier;
+    @Deprecated
     private String applicationId;
     private String uuid;
     private int id;
     private String organization;
+
+    @Deprecated
     public String getApplicationId() {
         return applicationId;
     }
-
+    @Deprecated
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }

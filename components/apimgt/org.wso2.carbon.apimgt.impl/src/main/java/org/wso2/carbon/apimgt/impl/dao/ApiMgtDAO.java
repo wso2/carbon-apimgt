@@ -6140,6 +6140,7 @@ public class ApiMgtDAO {
                     application.setUUID(rs.getString("UUID"));
                     application.setTier(rs.getString("APPLICATION_TIER"));
                     application.setTokenType(rs.getString("TOKEN_TYPE"));
+                    application.setOrganization(rs.getString("ORGANIZATION"));
                     subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
                     if (rs.getTimestamp("CREATED_TIME") != null) {
                         application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME")

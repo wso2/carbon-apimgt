@@ -379,6 +379,34 @@ public interface KeyManager {
     }
 
     /**
+     * This method will be used to reflect a given subscription addition (application + api) in the key manager side
+     *
+     * @param subscriptionId    Identifier(UUID) of the subscription
+     * @param apiIdentifier     API Identifier of the subscription
+     * @param application       application of the subscription
+     * @throws APIManagementException if an error occurs while adding the subscription
+     */
+    default void addAPISubscription(String subscriptionId, APIIdentifier apiIdentifier, Application application)
+            throws APIManagementException {
+        // Doing nothing in default implementation. If KM supports adding subscriptions, override the
+        // implementation.
+    }
+
+    /**
+     * This method will be used to reflect a given subscription removal (application + api) in the key manager side
+     *
+     * @param subscriptionId    Identifier(UUID) of the subscription
+     * @param apiIdentifier     API Identifier of the subscription
+     * @param application       application of the subscription
+     * @throws APIManagementException if an error occurs while adding the subscription
+     */
+    default void removeAPISubscription(String subscriptionId, APIIdentifier apiIdentifier, Application application)
+            throws APIManagementException {
+        // Doing nothing in default implementation. If KM supports removing subscriptions, override the
+        // implementation.
+    }
+
+    /**
      * This method returns the type of key manager
      * @return keymanager type
      */

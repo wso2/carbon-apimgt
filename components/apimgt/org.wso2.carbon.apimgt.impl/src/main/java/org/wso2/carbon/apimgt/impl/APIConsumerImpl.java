@@ -86,6 +86,7 @@ import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -782,6 +783,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             product = apiTypeWrapper.getApiProduct();
             state = product.getState();
             identifier = product.getId();
+            identifier.setOrganization(product.getOrganization());
             apiId = product.getProductId();
             apiUUID = product.getUuid();
             apiContext = product.getContext();
@@ -790,6 +792,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             api = apiTypeWrapper.getApi();
             state = api.getStatus();
             identifier = api.getId();
+            identifier.setOrganization(api.getOrganization());
             apiId = api.getId().getId();
             apiUUID = api.getUuid();
             apiContext = api.getContext();
@@ -923,8 +926,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // only send the notification if approved
             // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
             int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             if (wfDTO != null) {
                 if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
@@ -932,6 +933,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             apiOrgId, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
                             application.getId(), application.getUUID(), identifier.getTier(), subscriptionStatus);
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
+                    // inform key managers about the api subscription addition
+                    if (!isApiProduct) {
+                        updateKeyManagersWithSubscriptionAddition(subscriptionUUID, application, (APIIdentifier) identifier, apiOrgId);
+                    } // api products are not supported here
                 }
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
@@ -939,6 +944,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         apiOrgId, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
                         application.getId(), application.getUUID(), identifier.getTier(), subscriptionStatus);
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
+                // inform key managers about the api subscription addition
+                if (!isApiProduct) {
+                    updateKeyManagersWithSubscriptionAddition(subscriptionUUID, application, (APIIdentifier) identifier, apiOrgId);
+                } // api products are not supported here
             }
 
             if (log.isDebugEnabled()) {
@@ -951,6 +960,25 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } else {
             throw new APIMgtResourceNotFoundException("Subscriptions not allowed on APIs/API Products in the state: " +
                     state);
+        }
+    }
+
+    private void updateKeyManagersWithSubscriptionAddition(String subscriptionId, Application application, APIIdentifier apiIdentifier,
+                                                           String organization) {
+        Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(organization);
+        for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
+            KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
+            if (keyManager != null) {
+                try {
+                    keyManager.addAPISubscription(subscriptionId, apiIdentifier, application);
+                } catch (APIManagementException e) {
+                    log.error("Error while adding the subscription (" +
+                                    "subscription: " + subscriptionId + ", " +
+                                    "api: " + apiIdentifier.getUUID() + " , " +
+                                    "app: " + application.getUUID() + ", " +
+                                    "org: " + organization + ") in Key Manager: " + keyManagerDtoEntry.getKey(), e);
+                }
+            }
         }
     }
 
@@ -1339,6 +1367,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
+    @Deprecated // to be removed
     @Override
     public void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId,
                                             String organization) throws APIManagementException {
@@ -1406,6 +1435,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             identifier.getUUID(), application.getId(), application.getUUID(), identifier.getTier(),
                             subscription.getSubStatus());
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
+                    // inform key managers about the api subscription removal
+                    if (subscription.getApiId() != null) {
+                        updateKeyManagersWithSubscriptionRemoval(subscription.getUUID(), subscription.getApiId(),
+                                application, organization);
+                    } // api products are not supported here
                 }
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
@@ -1414,6 +1448,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         identifier.getUUID(), application.getId(), application.getUUID(), identifier.getTier(),
                         subscription.getSubStatus());
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
+                // inform key managers about the api subscription removal
+                if (subscription.getApiId() != null) {
+                    updateKeyManagersWithSubscriptionRemoval(subscription.getUUID(), subscription.getApiId(),
+                            application, organization);
+                } // api products are not supported here
             }
         } else {
             throw new APIManagementException(String.format("Subscription for UUID:%s does not exist.",
@@ -1421,7 +1460,23 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-
+    private void updateKeyManagersWithSubscriptionRemoval(String subscriptionId, APIIdentifier apiIdentifier, Application application, String organization) {
+        Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(organization);
+        for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
+            KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
+            if (keyManager != null) {
+                try {
+                    keyManager.removeAPISubscription(subscriptionId, apiIdentifier, application);
+                } catch (APIManagementException e) {
+                    log.error("Error while removing the subscription (" +
+                            "subscription: " + subscriptionId + ", " +
+                            "api: " + apiIdentifier.getUUID() + " , " +
+                            "app: " + application.getUUID() + ", " +
+                            "org: " + organization + ") in Key Manager: " + keyManagerDtoEntry.getKey(), e);
+                }
+            }
+        }
+    }
 
     @Override
     public void removeSubscriber(APIIdentifier identifier, String userId)

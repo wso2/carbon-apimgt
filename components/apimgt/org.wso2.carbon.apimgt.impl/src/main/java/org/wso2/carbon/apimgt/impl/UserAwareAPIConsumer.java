@@ -102,7 +102,9 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     public void removeApplication(Application application, String username) throws APIManagementException {
         super.removeApplication(application, username);
     }
-     @Override
+
+    @Deprecated // to be removed
+    @Override
     public void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId,
                                    String organization) throws APIManagementException {
         super.removeSubscription(identifier, userId, applicationId, groupId, organization);

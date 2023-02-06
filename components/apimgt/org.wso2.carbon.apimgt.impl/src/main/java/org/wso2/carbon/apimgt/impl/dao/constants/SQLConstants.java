@@ -1573,7 +1573,7 @@ public class SQLConstants {
             "   APP.GROUP_ID," +
             "   APP.CREATED_BY," +
             "   APP.UUID, " +
-            "   APP.ORGANIZATION, " +
+            "   APP.ORGANIZATION ORGANIZATION, " +
             "   APP.TOKEN_TYPE " +
             " FROM " +
             "   AM_SUBSCRIBER SUB," +
