@@ -101,4 +101,22 @@ public class KeyManagerEvent extends Event {
     public void setKeyManagerType(String keyManagerType) {
         this.keyManagerType = keyManagerType;
     }
+
+    @Override
+    public String toString() {
+        return "KeyManagerEvent{" +
+                "eventId='" + eventId + '\'' +
+                ", timeStamp=" + timeStamp +
+                ", type='" + type + '\'' +
+                ", tenantId=" + tenantId +
+                ", tenantDomain='" + tenantDomain + '\'' +
+                ", name='" + name + '\'' +
+                ", enabled=" + enabled +
+                ", value='" + value + '\'' +
+                ", action='" + action + '\'' +
+                ", organization='" + organization + '\'' +
+                ", keyManagerType='" + keyManagerType + '\'' +
+                ", tokenType='" + tokenType + '\'' +
+                '}';
+    }
 }
