@@ -14451,6 +14451,7 @@ public class ApiMgtDAO {
 
             //add the duplicate resources in each API in the API product.
             for (APIProductResource apiProductResource : productResources) {
+                List<OperationPolicyData> toBeClonedPolicyDetails = new ArrayList<>();
                 APIProductIdentifier productIdentifier = apiProductResource.getProductIdentifier();
                 String uuid;
                 if (productIdentifier.getUUID() != null) {
@@ -14491,7 +14492,8 @@ public class ApiMgtDAO {
                             // Adding api id to uri template id just to store value
                             uriTemplate.setId(rs.getInt("API_ID"));
                         }
-                        List<OperationPolicy> operationPolicies = getOperationPoliciesOfURITemplate(urlMappingId);
+                        List<OperationPolicy> operationPolicies = getOperationPoliciesOfURITemplate(connection,
+                                urlMappingId);
                         uriTemplate.setOperationPolicies(operationPolicies);
                         urlMappingList.add(uriTemplate);
                     }
@@ -14580,9 +14582,10 @@ public class ApiMgtDAO {
                         while (rs.next()) {
                             for (OperationPolicy policy : urlMapping.getOperationPolicies()) {
                                 if (!clonedPoliciesMap.keySet().contains(policy.getPolicyId())) {
+                                    //Check whether API Specific policies available
                                     OperationPolicyData existingPolicy =
-                                            getAPISpecificOperationPolicyByPolicyID(policy.getPolicyId(), uuid,
-                                                    tenantDomain, false);
+                                            getAPISpecificOperationPolicyByPolicyID(connection,
+                                                    policy.getPolicyId(), uuid, tenantDomain, false);
                                     String clonedPolicyId = policy.getPolicyId();
                                     if (existingPolicy != null) {
                                         if (existingPolicy.isClonedPolicy()) {
@@ -14595,8 +14598,12 @@ public class ApiMgtDAO {
                                         clonedPolicyId = getClonedPolicyIdForCommonPolicyId(connection,
                                                 policy.getPolicyId(), uuid);
                                         if (clonedPolicyId == null) {
-                                            clonedPolicyId = cloneOperationPolicy(connection,null ,policy.getPolicyId(),
-                                                    uuid, null);
+                                            clonedPolicyId = UUID.randomUUID().toString();
+                                            OperationPolicyData toBeClonedSinglePolicyData = new OperationPolicyData();
+                                            toBeClonedSinglePolicyData.setPolicyId(policy.getPolicyId());
+                                            toBeClonedSinglePolicyData.setApiUUID(uuid);
+                                            toBeClonedSinglePolicyData.setClonedCommonPolicyId(clonedPolicyId);
+                                            toBeClonedPolicyDetails.add(toBeClonedSinglePolicyData);
                                         }
                                         usedClonedPolicies.add(clonedPolicyId);
                                         //usedClonedPolicies set will not contain used API specific policies that are not cloned.
@@ -14618,11 +14625,16 @@ public class ApiMgtDAO {
                                 insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
                                 insertOperationPolicyMappingStatement.setString(4, paramJSON);
                                 insertOperationPolicyMappingStatement.setInt(5, policy.getOrder());
-                                insertOperationPolicyMappingStatement.executeUpdate();
+                                insertOperationPolicyMappingStatement.addBatch();
                             }
                         }
                     }
                 }
+                for (OperationPolicyData toBeClonedPolicyData : toBeClonedPolicyDetails) {
+                    cloneOperationPolicy(connection, toBeClonedPolicyData.getClonedCommonPolicyId(),
+                            toBeClonedPolicyData.getPolicyId(), toBeClonedPolicyData.getApiUUID(), null);
+                }
+                insertOperationPolicyMappingStatement.executeBatch();
                 insertScopeResourceMappingStatement.executeBatch();
                 insertProductResourceMappingStatement.executeBatch();
             }
@@ -17594,7 +17606,7 @@ public class ApiMgtDAO {
                     try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
                         while (rs.next()) {
                             for (OperationPolicy policy : urlMapping.getOperationPolicies()) {
-                                String clonedPolicyId = null;
+                                String clonedPolicyId;
                                 if (!clonedPoliciesMap.keySet().contains(policy.getPolicyId())) {
                                     // Since we are creating a new revision, we need to clone all the policies from current status.
                                     // If the policy is not cloned from a previous policy, we have to clone.
@@ -18745,12 +18757,14 @@ public class ApiMgtDAO {
      * @throws SQLException
      * @throws APIManagementException
      */
-    private List<OperationPolicy> getOperationPoliciesOfURITemplate(int urlMappingId)
+    private List<OperationPolicy> getOperationPoliciesOfURITemplate(Connection connection, int urlMappingId)
             throws SQLException, APIManagementException {
 
+        if (connection == null) {
+            connection = APIMgtDBUtil.getConnection();
+        }
         List<OperationPolicy> operationPolicies = new ArrayList<>();
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
+        try (PreparedStatement ps = connection.prepareStatement(
                      SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID)) {
             ps.setInt(1, urlMappingId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -18961,9 +18975,10 @@ public class ApiMgtDAO {
                 organization, true);
         // Since we import all the policies to API at API update, getting the policy from API specific policy list is enough
         if (policyData != null) {
+            String clonedCommonPolicyId = policyData.getClonedCommonPolicyId();
             policyData.setClonedCommonPolicyId(null);
             return addAPISpecificOperationPolicy(connection, apiUUID, revisionUUID, policyData,
-                    policyData.getClonedCommonPolicyId());
+                    clonedCommonPolicyId);
         } else {
             throw new APIManagementException("Cannot create a revision of policy with ID " + policyId
                     + " as it does not exists.");
