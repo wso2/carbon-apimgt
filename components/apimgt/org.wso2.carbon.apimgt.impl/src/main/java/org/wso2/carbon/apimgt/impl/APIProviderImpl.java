@@ -611,7 +611,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
             if (keyManager != null) {
                 try {
-                    Map registeredResource = keyManager.getResourceByApiId(api.getUuid());
+                    Map registeredResource = keyManager.getResourceByApiId(api.getUuid(), organization);
                     if (registeredResource == null) {
                         boolean isNewResourceRegistered = keyManager.registerNewResource(api, null);
                         if (!isNewResourceRegistered) {
@@ -2082,7 +2082,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
                 if (keyManager != null) {
                     try {
-                        keyManager.deleteRegisteredResourceByAPIId(apiUuid);
+                        keyManager.deleteRegisteredResourceByAPIId(apiUuid, organization);
                         log.debug("API " + apiUuid + " on organization " + organization +
                                 " has successfully removed from the Key Manager " + keyManagerDtoEntry.getKey());
                     } catch (APIManagementException e) {

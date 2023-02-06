@@ -191,6 +191,18 @@ public interface KeyManager {
     Map getResourceByApiId(String apiId) throws APIManagementException;
 
     /**
+     * This method will be used to retrieve registered resource by given API ID and organization.
+     *
+     * @param apiId APIM api id.
+     * @param organization organization of the API
+     * @return It will return a Map with registered resource details.
+     * @throws APIManagementException
+     */
+    default Map getResourceByApiId(String apiId, String organization) throws APIManagementException {
+        return getResourceByApiId(apiId);
+    }
+
+    /**
      * This method is responsible for update given APIResource  by its resourceId.
      *
      * @param api                this is a API object which contains all details about a API.
@@ -207,6 +219,17 @@ public interface KeyManager {
      * @throws APIManagementException
      */
     void deleteRegisteredResourceByAPIId(String apiID) throws APIManagementException;
+
+    /**
+     * This method will accept API id and organization as a parameter  and will delete the registered resource.
+     *
+     * @param apiID API id.
+     * @param organization organization of the API
+     * @throws APIManagementException
+     */
+    default void deleteRegisteredResourceByAPIId(String apiID, String organization) throws APIManagementException {
+        deleteRegisteredResourceByAPIId(apiID);
+    }
 
     /**
      * This method will be used to delete mapping records of oAuth applications.
