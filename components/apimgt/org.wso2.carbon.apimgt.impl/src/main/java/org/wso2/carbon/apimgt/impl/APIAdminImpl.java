@@ -1008,7 +1008,7 @@ public class APIAdminImpl implements APIAdmin {
         APIProviderImpl apiProvider = new APIProviderImpl(username);
         //no need to add type prefix here since we need to ge the total number of category associations including both
         //APIs and API categories
-        String searchQuery = APIConstants.CATEGORY_SEARCH_TYPE_PREFIX + "=*" + category.getName() + "*";
+        String searchQuery = APIConstants.CATEGORY_SEARCH_TYPE_PREFIX + ":*" + category.getName() + "*";
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         Map<String, Object> result = apiProvider.searchPaginatedAPIs(searchQuery, tenantDomain, 0, Integer.MAX_VALUE, null, null);
         return (int) (Integer) result.get("length");
