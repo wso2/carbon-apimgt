@@ -454,7 +454,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setAccessControlRoles(null);
         }
         //notify key manager with API addition
-        registerOrUpdateResourceInKeyManager(api, tenantDomain);
+        registerOrUpdateResourceInKeyManager(api, api.getOrganization());
         return api;
 
     }
@@ -601,17 +601,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Notify the key manager with API update or addition
      *
      * @param api API
-     * @param tenantDomain
+     * @param organization
      * @throws APIManagementException when error occurs when register/update API at Key Manager side
      */
-    private void registerOrUpdateResourceInKeyManager(API api, String tenantDomain) throws APIManagementException {
+    private void registerOrUpdateResourceInKeyManager(API api, String organization) throws APIManagementException {
         //get new key manager instance for  resource registration.
-        Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
+        Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(organization);
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
             if (keyManager != null) {
                 try {
-                    Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
+                    Map registeredResource = keyManager.getResourceByApiId(api.getUuid());
                     if (registeredResource == null) {
                         boolean isNewResourceRegistered = keyManager.registerNewResource(api, null);
                         if (!isNewResourceRegistered) {
@@ -833,7 +833,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
         //notify key manager with API update
-        registerOrUpdateResourceInKeyManager(api, tenantDomain);
+        registerOrUpdateResourceInKeyManager(api, api.getOrganization());
 
         int apiId = apiMgtDAO.getAPIID(api.getUuid());
         if (publishedDefaultVersion != null) {
@@ -2077,12 +2077,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // Deleting Resource Registration from key managers
         if (api != null && api.getId() != null && api.getId().toString() != null) {
-            Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
+            Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(api.getOrganization());
             for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
                 KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
                 if (keyManager != null) {
                     try {
-                        keyManager.deleteRegisteredResourceByAPIId(api.getId().toString());
+                        keyManager.deleteRegisteredResourceByAPIId(apiUuid);
                         log.debug("API " + apiUuid + " on organization " + organization +
                                 " has successfully removed from the Key Manager " + keyManagerDtoEntry.getKey());
                     } catch (APIManagementException e) {
