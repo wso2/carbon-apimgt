@@ -1460,7 +1460,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-    private void updateKeyManagersWithSubscriptionRemoval(String subscriptionId, APIIdentifier apiIdentifier, Application application, String organization) {
+    private void updateKeyManagersWithSubscriptionRemoval(String subscriptionId, APIIdentifier apiIdentifier,
+                                                          Application application, String organization) {
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(organization);
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
