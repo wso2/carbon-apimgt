@@ -17,10 +17,6 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers;
 
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.*;
-import io.netty.util.CharsetUtil;
 import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
@@ -33,8 +29,6 @@ import org.apache.synapse.core.axis2.MessageContextCreatorForAxis2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -46,11 +40,11 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+
+import javax.cache.Cache;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.cache.Cache;
 
 public class WebsocketUtil {
 	private static Logger log = LoggerFactory.getLogger(WebsocketUtil.class);
@@ -237,30 +231,6 @@ public class WebsocketUtil {
 	}
 
 	/**
-	 * Send error messages in handshake phase for API request message
-	 *
-	 * @param ctx                   Channel handler context
-	 * @param inboundMessageContext InboundMessageContext
-	 * @param responseDTO           InboundProcessorResponseDTO
-	 * @param errorMessage          Error message
-	 * @param errorCode             Error code
-	 */
-	public static void sendHandshakeErrorMessage(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext,
-												 InboundProcessorResponseDTO responseDTO, String errorMessage,
-												 int errorCode) {
-		FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-		HttpResponseStatus.valueOf(responseDTO.getErrorCode()),
-		Unpooled.copiedBuffer(responseDTO.getErrorMessage(), CharsetUtil.UTF_8));
-		httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
-		httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
-		ctx.writeAndFlush(httpResponse);
-		if (log.isDebugEnabled()) {
-			log.debug("API request failed due to " + errorMessage + " for the websocket API: "
-					+ inboundMessageContext.getApiContext());
-		}
-	}
-
-	/**
 	 * Validates whether there any active deny policies and set error values in InboundProcessorResponseDTO.
 	 *
 	 * @param inboundMessageContext InboundMessageContext
@@ -287,8 +257,7 @@ public class WebsocketUtil {
 		}
 
 		if (isBlockedRequest) {
-			responseDTO = getFrameErrorDTO(GraphQLConstants.FrameErrorConstants.BLOCKED_REQUEST,
-					GraphQLConstants.FrameErrorConstants.BLOCKED_REQUEST_MESSAGE, true);
+			responseDTO = getFrameErrorDTO(4006, "Blocked from accessing the API", true);
 		}
 		return responseDTO;
 	}
@@ -300,6 +269,5 @@ public class WebsocketUtil {
 		inboundProcessorResponseDTO.setErrorMessage(errorMessage);
 		inboundProcessorResponseDTO.setCloseConnection(closeConnection);
 		return inboundProcessorResponseDTO;
-
 	}
 }

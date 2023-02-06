@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers;
 
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -33,6 +34,7 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
@@ -180,16 +182,29 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                         }
                         req.headers().set(backendJwtHeader, inboundMessageContext.getToken());
                     }
+                    ctx.fireChannelRead(req);
+                    publishHandshakeEvent(ctx, inboundMessageContext);
+                    InboundWebsocketProcessorUtil.publishGoogleAnalyticsData(inboundMessageContext,
+                            ctx.channel().remoteAddress().toString());
                 } else {
-                    handleHandshakeError(channelId, responseDTO, ctx, inboundMessageContext, msg,
-                        APISecurityConstants.API_BLOCKED_MESSAGE, APISecurityConstants.API_BLOCKED,
-                        HttpResponseStatus.FORBIDDEN.code());
+                    ReferenceCountUtil.release(msg);
+                    InboundMessageContextDataHolder.getInstance().removeInboundMessageContextForConnection(channelId);
+                    FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                            HttpResponseStatus.valueOf(responseDTO.getErrorCode()),
+                            Unpooled.copiedBuffer(responseDTO.getErrorMessage(), CharsetUtil.UTF_8));
+                    httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+                    httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
+                    ctx.writeAndFlush(httpResponse);
                 }
             } else {
-                handleHandshakeError(channelId, responseDTO, ctx, inboundMessageContext, msg,
-                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE,
-                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        HttpResponseStatus.UNAUTHORIZED.code());
+                ReferenceCountUtil.release(msg);
+                InboundMessageContextDataHolder.getInstance().removeInboundMessageContextForConnection(channelId);
+                FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                        HttpResponseStatus.valueOf(responseDTO.getErrorCode()),
+                        Unpooled.copiedBuffer(responseDTO.getErrorMessage(), CharsetUtil.UTF_8));
+                httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+                httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
+                ctx.writeAndFlush(httpResponse);
             }
         } else if (msg instanceof CloseWebSocketFrame) {
             //remove inbound message context from data holder
@@ -249,31 +264,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 publishPublishEvent(ctx);
             }
         }
-    }
-
-    /**
-     * Handle error flow in handshake phase.
-     *
-     * @param channelId              Channel Id of the web socket connection
-     * @param responseDTO            InboundProcessorResponseDTO
-     * @param ctx                    ChannelHandlerContext
-     * @param inboundMessageContext  InboundMessageContext
-     * @param msg                    WebsocketFrame that was received
-     * @param errorMessage           Error message
-     * @param errorCode              Error code
-     * @param httpResponseStatusCode Http response status code
-     */
-    private void handleHandshakeError(String channelId, InboundProcessorResponseDTO responseDTO,
-                                      ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext,
-                                      Object msg, String errorMessage, int errorCode, int httpResponseStatusCode) {
-        ReferenceCountUtil.release(msg);
-        InboundMessageContextDataHolder.getInstance().removeInboundMessageContextForConnection(channelId);
-        if (StringUtils.isEmpty(responseDTO.getErrorMessage())) {
-            responseDTO.setErrorMessage(errorMessage);
-        }
-        responseDTO.setErrorCode(httpResponseStatusCode);
-        WebsocketUtil.sendHandshakeErrorMessage(ctx, inboundMessageContext, responseDTO, errorMessage,
-                errorCode);
     }
 
     private void handlePublishFrameErrorEvent(ChannelHandlerContext ctx, InboundProcessorResponseDTO responseDTO) {
