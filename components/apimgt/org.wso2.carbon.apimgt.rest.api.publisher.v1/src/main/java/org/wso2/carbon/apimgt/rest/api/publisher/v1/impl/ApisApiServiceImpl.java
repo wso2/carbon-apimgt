@@ -758,9 +758,16 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     private APIInfo validateAPIExistence(String apiId, String organization) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId, organization);
+        
+        APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+        
         if (apiInfo == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                    apiId));
+        }
+        else if (apiInfo.getOrganization().equals(organization)) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API of given organization : "
                     + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
                     apiId));
         }
