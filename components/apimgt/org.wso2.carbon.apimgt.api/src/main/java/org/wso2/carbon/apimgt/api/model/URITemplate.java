@@ -470,26 +470,7 @@ public class URITemplate implements Serializable{
     }
 
     public void setThrottlingLimit(String throttlingTier) {
-        ThrottlingLimit convertedThrottlingLimit = new ThrottlingLimit();
-        convertedThrottlingLimit.setUnit("MINUTE");
-        switch (throttlingTier) {
-            case "10KPerMin":
-                convertedThrottlingLimit.setRequestCount(10000);
-                break;
-            case "20KPerMin":
-                convertedThrottlingLimit.setRequestCount(20000);
-                break;
-            case "50KPerMin":
-                convertedThrottlingLimit.setRequestCount(50000);
-                break;
-            case "Unlimited":
-                convertedThrottlingLimit.setRequestCount(-1);
-                break;
-            default:
-                log.warn("Invalid throttling tier value received");
-                return;
-        }
-        this.throttlingLimit = convertedThrottlingLimit;
+        this.throttlingLimit = ModelUtil.generateThrottlingLimitFromThrottlingTier(throttlingTier);
     }
 
     public void setThrottlingLimit(ThrottlingLimit throttlingLimit) {

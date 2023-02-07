@@ -47,7 +47,7 @@ public class ModelUtil {
         }
         // To make it compatible with the previously existing throttling policy
         StringBuilder sb = new StringBuilder();
-        if ("MINUTE".equals(throttlingLimit.getUnit())) {
+        if ("MINUTE".equalsIgnoreCase(throttlingLimit.getUnit())) {
             sb.append(requestCount).append(shortenerSuffix).append("PerMin");
         } else {
             sb.append(requestCount).append(shortenerSuffix).append("Per").append(throttlingLimit.getUnit());
