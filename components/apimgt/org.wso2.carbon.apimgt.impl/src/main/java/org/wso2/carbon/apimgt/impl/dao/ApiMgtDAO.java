@@ -7991,10 +7991,19 @@ public class ApiMgtDAO {
      */
     public APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException {
 
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            return getAPIIdentifierFromUUID(uuid, connection);
+        } catch (SQLException e) {
+            handleException("Failed to retrieve the API Identifier details for UUID : " + uuid, e);
+        }
+        return null;
+    }
+
+    private APIIdentifier getAPIIdentifierFromUUID(String uuid, Connection connection) throws APIManagementException {
+
         APIIdentifier identifier = null;
         String sql = SQLConstants.GET_API_IDENTIFIER_BY_UUID_SQL;
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            PreparedStatement prepStmt = connection.prepareStatement(sql);
+        try (PreparedStatement prepStmt = connection.prepareStatement(sql)) {
             prepStmt.setString(1, uuid);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
@@ -8022,7 +8031,19 @@ public class ApiMgtDAO {
         APIProductIdentifier identifier = null;
         String sql = SQLConstants.GET_API_IDENTIFIER_BY_UUID_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            PreparedStatement prepStmt = connection.prepareStatement(sql);
+            return getAPIProductIdentifierFromUUID(uuid, connection);
+        } catch (SQLException e) {
+            handleException("Failed to retrieve the API Product Identifier details for UUID : " + uuid, e);
+        }
+        return identifier;
+    }
+
+    private APIProductIdentifier getAPIProductIdentifierFromUUID(String uuid, Connection connection)
+            throws APIManagementException {
+
+        APIProductIdentifier identifier = null;
+        String sql = SQLConstants.GET_API_IDENTIFIER_BY_UUID_SQL;
+        try (PreparedStatement prepStmt = connection.prepareStatement(sql)) {
             prepStmt.setString(1, uuid);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
@@ -16353,7 +16374,7 @@ public class ApiMgtDAO {
 
                 String migrate =  System.getProperty(APIConstants.MIGRATE);
                 if (migrate == null) {
-                    setOperationPoliciesToURITemplatesMap(apiRevision.getApiUUID(), uriTemplateMap);
+                    setOperationPoliciesToURITemplatesMap(connection, apiRevision.getApiUUID(), uriTemplateMap);
                 }
 
                 PreparedStatement insertURLMappingsStatement = connection
@@ -16683,8 +16704,18 @@ public class ApiMgtDAO {
      */
     public APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException {
 
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            return checkAPIUUIDIsARevisionUUID(connection, apiUUID);
+        } catch (SQLException e) {
+            handleException("Failed to search UUID: " + apiUUID + " in the revision db table", e);
+        }
+        return null;
+    }
+
+    public APIRevision checkAPIUUIDIsARevisionUUID(Connection connection,
+                                                   String apiUUID) throws APIManagementException {
+
+        try (PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_APIID_BY_REVISION_UUID)) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
@@ -17157,7 +17188,7 @@ public class ApiMgtDAO {
             try {
                 connection.setAutoCommit(false);
                 // Retrieve API ID
-                APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
+                APIIdentifier apiIdentifier = getAPIIdentifierFromUUID(apiRevision.getApiUUID(), connection);
                 int apiId = getAPIID(apiRevision.getApiUUID(), connection);
                 int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                 String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
@@ -17221,7 +17252,7 @@ public class ApiMgtDAO {
                     }
                 }
 
-                setOperationPoliciesToURITemplatesMap(apiRevision.getRevisionUUID(), uriTemplateMap);
+                setOperationPoliciesToURITemplatesMap(connection, apiRevision.getRevisionUUID(), uriTemplateMap);
 
                 PreparedStatement insertURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS_CURRENT_API);
@@ -17549,7 +17580,8 @@ public class ApiMgtDAO {
                     }
                 }
 
-                setAPIProductOperationPoliciesToURITemplatesMap(new Integer(apiId).toString(), uriTemplateMap);
+                setAPIProductOperationPoliciesToURITemplatesMap(connection,
+                        new Integer(apiId).toString(), uriTemplateMap);
 
                 PreparedStatement insertURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
@@ -17720,7 +17752,7 @@ public class ApiMgtDAO {
                 connection.setAutoCommit(false);
                 // Retrieve API ID
                 APIProductIdentifier apiProductIdentifier =
-                        APIUtil.getAPIProductIdentifierFromUUID(apiRevision.getApiUUID());
+                        getAPIProductIdentifierFromUUID(apiRevision.getApiUUID(), connection);
                 int apiId = getAPIID(apiRevision.getApiUUID(), connection);
                 int tenantId =
                         APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName()));
@@ -17781,7 +17813,8 @@ public class ApiMgtDAO {
                     }
                 }
 
-                setAPIProductOperationPoliciesToURITemplatesMap(apiRevision.getRevisionUUID(), urlMappingList);
+                setAPIProductOperationPoliciesToURITemplatesMap(connection,
+                        apiRevision.getRevisionUUID(), urlMappingList);
 
                 PreparedStatement insertURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
@@ -17961,7 +17994,7 @@ public class ApiMgtDAO {
                 connection.setAutoCommit(false);
                 // Retrieve API ID
                 APIProductIdentifier apiProductIdentifier =
-                        APIUtil.getAPIProductIdentifierFromUUID(apiRevision.getApiUUID());
+                        getAPIProductIdentifierFromUUID(apiRevision.getApiUUID());
                 int apiId = getAPIID(apiRevision.getApiUUID(), connection);
                 int tenantId =
                         APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName()));
@@ -18785,7 +18818,8 @@ public class ApiMgtDAO {
      * @throws SQLException
      * @throws APIManagementException
      */
-    private void setOperationPoliciesToURITemplatesMap(String uuid, Map<String, URITemplate> uriTemplates)
+    private void setOperationPoliciesToURITemplatesMap(Connection connection,
+                                                       String uuid, Map<String, URITemplate> uriTemplates)
             throws SQLException, APIManagementException {
 
         String currentApiUuid;
@@ -18801,8 +18835,10 @@ public class ApiMgtDAO {
             currentApiUuid = uuid;
         }
 
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
+        if (connection == null) {
+            connection = APIMgtDBUtil.getConnection();
+        }
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
             int apiId = getAPIID(currentApiUuid);
             ps.setInt(1, apiId);
             if (isRevision) {
@@ -18874,12 +18910,14 @@ public class ApiMgtDAO {
      * @throws SQLException
      * @throws APIManagementException
      */
-    private void setAPIProductOperationPoliciesToURITemplatesMap(String productRevisionId,
+    private void setAPIProductOperationPoliciesToURITemplatesMap(Connection connection, String productRevisionId,
                                                                  Map<String, URITemplate> uriTemplates)
             throws SQLException, APIManagementException {
 
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
+        if (connection == null ) {
+            connection = APIMgtDBUtil.getConnection();
+        }
+        try (PreparedStatement ps = connection.prepareStatement(
                      SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_API_PRODUCT_SQL)) {
             ps.setString(1, productRevisionId);
             try (ResultSet rs = ps.executeQuery()) {
