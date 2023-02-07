@@ -1634,14 +1634,15 @@ public class APIMappingUtil {
                     authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                 }
                 template.setThrottlingTier(operation.getThrottlingPolicy());
-                if (operation.getThrottlingPolicy() != null && !operation.getThrottlingPolicy().isEmpty()) {
-                    // converts existing throttling policy to the new throttling limit format
-                    template.setThrottlingLimit(operation.getThrottlingPolicy());
-                } else if (operation.getThrottlingLimit() != null) {
+                // ThrottlingLimit is prioritized over throttlingPolicy
+                if (operation.getThrottlingLimit() != null) {
                     ThrottlingLimitDTO apiOperationsThrottlingLimitDTO = operation.getThrottlingLimit();
                     ThrottlingLimit throttlingLimit = ThrottlingLimitMappingUtil.fromDTOToThrottlingLimit(
                             apiOperationsThrottlingLimitDTO);
                     template.setThrottlingLimit(throttlingLimit);
+                } else if (operation.getThrottlingPolicy() != null && !operation.getThrottlingPolicy().isEmpty()) {
+                    // converts existing throttling policy to the new throttling limit format
+                    template.setThrottlingLimit(operation.getThrottlingPolicy());
                 }
                 template.setThrottlingTiers(operation.getThrottlingPolicy());
                 template.setUriTemplate(uriTempVal);

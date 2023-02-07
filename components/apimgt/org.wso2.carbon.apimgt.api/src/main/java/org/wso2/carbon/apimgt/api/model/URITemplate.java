@@ -129,7 +129,8 @@ public class URITemplate implements Serializable{
     }
 
     public String getThrottlingTier() {
-        if (StringUtils.isEmpty(throttlingTier) && throttlingLimit != null) {
+        // ThrottlingLimit is prioritized
+        if (throttlingLimit != null) {
             return ModelUtil.generateThrottlePolicyFromThrottleLimit(throttlingLimit);
         }
         return throttlingTier;
