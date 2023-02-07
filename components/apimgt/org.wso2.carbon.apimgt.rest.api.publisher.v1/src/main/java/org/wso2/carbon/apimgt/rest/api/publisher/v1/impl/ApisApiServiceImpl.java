@@ -514,12 +514,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
 
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
-            APIInfo apiInfo = validateAPIExistence(apiId);
+            APIInfo apiInfo = validateAPIExistence(apiId, organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
             String schema = apiProvider.getGraphqlSchemaDefinition(apiId, organization);
@@ -554,7 +554,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         //validate if api exists
-        validateAPIExistence(apiId);
+        validateAPIExistence(apiId, organization);
         API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
         API updatedAPI = apiProvider.getAPIbyUUID(apiId, organization);
         //validate API update operation permitted based on the LC state
@@ -646,7 +646,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
-            validateAPIExistence(apiId);
+            validateAPIExistence(apiId, organization);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
             originalAPI.setOrganization(organization);
             //validate API update operation permitted based on the LC state
@@ -680,7 +680,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
-            validateAPIExistence(apiId);
+            validateAPIExistence(apiId, organization);
 
             // validate sandbox and production endpoints
             if (!PublisherCommonUtils.validateEndpoints(body)) {
@@ -749,15 +749,16 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
-     * Validate whether the given API with UUID exists in the DB
+     * Validate whether the given API with UUID exists under provided organization in the DB
      *
      * @param apiId API UUID
+     * @param organization organizationId
      * @return API details
      * @throws APIManagementException if the API doesn't exists in the DB
      */
-    private APIInfo validateAPIExistence(String apiId) throws APIManagementException {
+    private APIInfo validateAPIExistence(String apiId, String organization) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+        APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId, organization);
         if (apiInfo == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                     + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
@@ -1220,7 +1221,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
-            validateAPIExistence(apiId);
+            validateAPIExistence(apiId, organization);
 
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
@@ -1289,14 +1290,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                       Attachment certificateDetail, String tier,
                                                       MessageContext messageContext) {
         try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
-            validateAPIExistence(apiId);
+            validateAPIExistence(apiId, organization);
 
             ContentDisposition contentDisposition;
             String fileName;
             String base64EncodedCert = null;
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
             apiTypeWrapper.setOrganization(organization);
 
@@ -1405,7 +1406,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         "Certificate addition failed. Proper Certificate file should be provided", log);
             }
             //validate if api exists
-            validateAPIExistence(apiId);
+            validateAPIExistence(apiId, organization);
 
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
             apiTypeWrapper.setOrganization(organization);
@@ -1469,7 +1470,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIInfo apiInfo = null;
             try {
                 //validate if api exists
-                apiInfo = validateAPIExistence(apiId);
+                apiInfo = validateAPIExistence(apiId, organization);
                 isAPIExistDB = true;
             } catch (APIManagementException e) {
                 log.error("Error while validating API existence for deleting API " + apiId + " on organization "
@@ -1637,7 +1638,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //validate if api exists
-            APIInfo apiInfo = validateAPIExistence(apiId);
+            APIInfo apiInfo = validateAPIExistence(apiId, organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
             if (inputStream != null && inlineContent != null) {
@@ -1720,7 +1721,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             //validate if api exists
-            APIInfo apiInfo = validateAPIExistence(apiId);
+            APIInfo apiInfo = validateAPIExistence(apiId, organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
@@ -1793,7 +1794,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
-            APIInfo apiInfo = validateAPIExistence(apiId);
+            APIInfo apiInfo = validateAPIExistence(apiId, organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
@@ -1899,11 +1900,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response addAPIDocument(String apiId, DocumentDTO body, String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
-            APIInfo apiInfo = validateAPIExistence(apiId);
+            APIInfo apiInfo = validateAPIExistence(apiId, organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             Documentation documentation = PublisherCommonUtils.addDocumentationToAPI(body, apiId, organization);
             DocumentDTO newDocumentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
             String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID
@@ -2244,7 +2245,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             //validate if api exists
-            validateAPIExistence(apiId);
+            validateAPIExistence(apiId, organization);
             String jsonContent = "";
             OperationPolicyDefinition synapseDefinition = null;
             OperationPolicyDefinition ccPolicyDefinition = null;
@@ -2336,12 +2337,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                        MessageContext messageContext) {
 
         try {
-            validateAPIExistence(apiId);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            validateAPIExistence(apiId, organization);
             limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
             offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             // Lightweight API specific operation policy includes the policy ID and the policy specification.
             // Since policy definition is bit bulky, we don't query the definition unnecessarily.
@@ -2378,7 +2379,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             //validate whether api exists or not
-            validateAPIExistence(apiId);
+            validateAPIExistence(apiId, organization);
 
             OperationPolicyData existingPolicy =
                     apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization, false);
@@ -2425,7 +2426,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             //validate if api exists
-            validateAPIExistence(apiId);
+            validateAPIExistence(apiId, organization);
 
             OperationPolicyData policyData =
                     apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization, true);
@@ -2469,10 +2470,9 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
-            //validate if api exists
-            validateAPIExistence(apiId);
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            //validate if api exists
+            validateAPIExistence(apiId, organization);
             OperationPolicyData existingPolicy =
                     apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization, false);
             if (existingPolicy != null) {
@@ -2799,12 +2799,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response updateAPISwagger(String apiId, String ifMatch, String apiDefinition, String url,
                                      InputStream fileInputStream, Attachment fileDetail,MessageContext messageContext) {
         try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             String updatedSwagger;
             //validate if api exists
-            APIInfo apiInfo = validateAPIExistence(apiId);
+            APIInfo apiInfo = validateAPIExistence(apiId, organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().getStatus());
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             //Handle URL and file based definition imports
             if(url != null || fileInputStream != null) {
@@ -2906,13 +2906,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
-            APIInfo apiInfo = validateAPIExistence(apiId);
+            APIInfo apiInfo = validateAPIExistence(apiId, organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             String fileName = fileDetail.getDataHandler().getName();
             String extension = FilenameUtils.getExtension(fileName);
             if (!RestApiConstants.ALLOWED_THUMBNAIL_EXTENSIONS.contains(extension.toLowerCase())) {
@@ -3518,7 +3517,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
         //validate if api exists
-        APIInfo apiInfo = validateAPIExistence(apiId);
+        APIInfo apiInfo = validateAPIExistence(apiId, organization);
         //validate API update operation permitted based on the LC state
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
@@ -4065,7 +4064,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             //validate if api exists
-            APIInfo apiInfo = validateAPIExistence(apiId);
+            APIInfo apiInfo = validateAPIExistence(apiId, organization);
 
             //validate whether the API is advertise only
             APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
@@ -4136,7 +4135,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
         //validate if api exists
-        APIInfo apiInfo = validateAPIExistence(apiId);
+        APIInfo apiInfo = validateAPIExistence(apiId, organization);
         //validate API update operation permitted based on the LC state
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
@@ -4159,13 +4158,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                                       List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                       MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         //validate if api exists
-        APIInfo apiInfo = validateAPIExistence(apiId);
+        APIInfo apiInfo = validateAPIExistence(apiId, organization);
         //validate API update operation permitted based on the LC state
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
-
-        String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
         //validate whether the API is advertise only
         APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
@@ -4229,13 +4226,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                                         List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                         MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         //validate if api exists
-        APIInfo apiInfo = validateAPIExistence(apiId);
+        APIInfo apiInfo = validateAPIExistence(apiId, organization);
         //validate API update operation permitted based on the LC state
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-        String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
         if (revisionId == null && revisionNum != null) {
             revisionId = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
@@ -4286,7 +4282,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         //validate if api exists
-        APIInfo apiInfo = validateAPIExistence(apiId);
+        APIInfo apiInfo = validateAPIExistence(apiId, organization);
         //validate API update operation permitted based on the LC state
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
@@ -4481,7 +4477,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             //validate if api exists
-            APIInfo apiInfo = validateAPIExistence(apiId);
+            APIInfo apiInfo = validateAPIExistence(apiId, organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
@@ -4609,7 +4605,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
 
             //validate if api exists
-            APIInfo apiInfo = validateAPIExistence(apiId);
+            APIInfo apiInfo = validateAPIExistence(apiId, organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
@@ -4806,9 +4802,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response updateAPIDeployment(String apiId, String deploymentId, APIRevisionDeploymentDTO
             apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         //validate if api exists
-        APIInfo apiInfo = validateAPIExistence(apiId);
+        APIInfo apiInfo = validateAPIExistence(apiId, organization);
         //validate API update operation permitted based on the LC state
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
@@ -4845,12 +4841,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdEnvironmentsEnvIdKeysGet(String apiId, String envId, MessageContext messageContext)
             throws APIManagementException {
-        // validate api UUID
-        validateAPIExistence(apiId);
         // validate environment UUID
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         validateEnvironment(organization, envId);
-
+        // validate api UUID
+        validateAPIExistence(apiId, organization);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         // get properties
         EnvironmentPropertiesDTO properties = apiProvider.getEnvironmentSpecificAPIProperties(apiId, envId);
@@ -4863,12 +4858,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdEnvironmentsEnvIdKeysPut(String apiId, String envId, Map<String, String> requestBody,
             MessageContext messageContext) throws APIManagementException {
-        // validate api UUID
-        validateAPIExistence(apiId);
+        
         // validate environment UUID
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         validateEnvironment(organization, envId);
-
+        // validate api UUID
+        validateAPIExistence(apiId, organization);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         // adding properties
 
