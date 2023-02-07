@@ -190,6 +190,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.getAPIInfoByUUID(id);
     }
 
+
     protected TenantManager getTenantManager() {
 
         return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager();
