@@ -975,6 +975,8 @@ public class APIMgtDAOTest {
                 throttleLimit.getRequestCount(), revisionThrottleLimit.getRequestCount());
         Assert.assertEquals("RevisionThrottleLimit Time Unit mismatch",
                 throttleLimit.getUnit(), revisionThrottleLimit.getUnit());
+        Assert.assertEquals("ThrottlePolicy Mismatch", "1KPerMin",
+                apiMgtDAO.getAPILevelTier(apiUUID, revisionUUID));
         apiMgtDAO.deleteAPI(apiUUID);
     }
 
