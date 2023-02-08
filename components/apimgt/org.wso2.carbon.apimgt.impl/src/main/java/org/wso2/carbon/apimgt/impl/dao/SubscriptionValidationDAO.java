@@ -1096,7 +1096,6 @@ public class SubscriptionValidationDAO {
                         api.setStatus(resultSet.getString("STATUS"));
                         api.setPolicy(resultSet.getString("API_TIER"));
                         api.setContext(resultSet.getString("CONTEXT"));
-                        // TODO: (VirajSalaka)
                         String publishedDefaultApiVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
                         if (StringUtils.isNotBlank(publishedDefaultApiVersion)) {
                             api.setIsDefaultVersion(true);

@@ -1286,7 +1286,7 @@ public class PublisherCommonUtils {
         // update the API's scopes with scope prefix (if it is available)
         APIUtil.updateAPIScopesWithPrefix(existingAPI);
         PublisherCommonUtils.validateScopes(existingAPI);
-        // TODO: (VirajSalaka)
+        // TODO: (VirajSalaka) complete populating throttle limit from swagger update
         //Update API is called to update URITemplates and scopes of the API
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
