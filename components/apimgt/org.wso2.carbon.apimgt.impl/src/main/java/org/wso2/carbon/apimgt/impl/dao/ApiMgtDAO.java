@@ -19100,8 +19100,11 @@ public class ApiMgtDAO {
                             }
                             //This means the common policy is same with our revision. A clone is created and original
                             // common policy ID is referenced as the ClonedCommonPolicyId
+                            String clonedCommonPolicyID = revisionedPolicy.getClonedCommonPolicyId();
+                            //setting null, so that new UUID will be generated in the latter flow.
+                            revisionedPolicy.setClonedCommonPolicyId(null);
                             restoredPolicyId = addAPISpecificOperationPolicy(connection, apiUUID, null,
-                                    revisionedPolicy, revisionedPolicy.getClonedCommonPolicyId());
+                                    revisionedPolicy, clonedCommonPolicyID);
                         } else {
                             // This means the common policy is updated since we created the revision.
                             // we have to create a clone and since policy is different, we can't refer the original common
@@ -19113,6 +19116,8 @@ public class ApiMgtDAO {
                                             + " Restored from revision " + revisionId);
                             revisionedPolicy.setMd5Hash(APIUtil.getMd5OfOperationPolicy(revisionedPolicy));
                             revisionedPolicy.setRevisionUUID(null);
+                            //setting null, so that new UUID will be generated in the latter flow.
+                            revisionedPolicy.setClonedCommonPolicyId(null);
                             restoredPolicyId = addAPISpecificOperationPolicy(connection, apiUUID, null,
                                     revisionedPolicy, null);
                             if (log.isDebugEnabled()) {
@@ -19131,6 +19136,7 @@ public class ApiMgtDAO {
                                         + " Restored from revision " + revisionId);
                         revisionedPolicy.setMd5Hash(APIUtil.getMd5OfOperationPolicy(revisionedPolicy));
                         revisionedPolicy.setRevisionUUID(null);
+                        revisionedPolicy.setClonedCommonPolicyId(null);
                         restoredPolicyId = addAPISpecificOperationPolicy(connection, apiUUID, null, revisionedPolicy, null);
                         if (log.isDebugEnabled()) {
                             log.debug("No matching operation policy found. A new API specific operation " +
@@ -19141,6 +19147,7 @@ public class ApiMgtDAO {
                     // This means this is a completely new policy and we don't have any reference of a previous state in
                     // working copy. A new API specific policy will be created.
                     revisionedPolicy.setRevisionUUID(null);
+                    revisionedPolicy.setClonedCommonPolicyId(null);
                     restoredPolicyId = addAPISpecificOperationPolicy(connection, apiUUID, null, revisionedPolicy, null);
                     if (log.isDebugEnabled()) {
                         log.debug("No matching operation policy found. A new API specific operation " +
