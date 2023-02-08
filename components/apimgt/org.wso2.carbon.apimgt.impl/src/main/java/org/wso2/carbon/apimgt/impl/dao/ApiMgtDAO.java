@@ -13443,9 +13443,10 @@ public class ApiMgtDAO {
         try (PreparedStatement selectPreparedStatement
                      = connection.prepareStatement(query + " WHERE API_UUID = ?")) {
             selectPreparedStatement.setString(1, uuid);
-            ResultSet resultSet = selectPreparedStatement.executeQuery();
-            while (resultSet.next()) {
-                apiLevelTierJson = resultSet.getString(SQLConstants.ColumnName.API_THROTTLE_LIMIT);
+            try (ResultSet resultSet = selectPreparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    apiLevelTierJson = resultSet.getString(SQLConstants.ColumnName.API_THROTTLE_LIMIT);
+                }
             }
             if (apiLevelTierJson != null) {
                 return new Gson().fromJson(apiLevelTierJson, ThrottlingLimit.class);
