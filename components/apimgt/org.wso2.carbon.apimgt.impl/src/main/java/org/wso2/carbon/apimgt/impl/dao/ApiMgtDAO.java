@@ -6816,7 +6816,10 @@ public class ApiMgtDAO {
                 int tenantID = APIUtil.getTenantId(username);
                 updateAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), tenantID, connection);
             }
-            updateChoreoAPI(connection, api);
+            // Update would return false if such record does not exist in the table. We need to add the record there.
+            if (!updateChoreoAPI(connection, api)) {
+                addChoreoAPIInformation(api, connection);
+            }
             connection.commit();
         } catch (SQLException e) {
             try {
@@ -6833,12 +6836,12 @@ public class ApiMgtDAO {
         }
     }
 
-    private void updateChoreoAPI(Connection connection, API api) throws SQLException {
+    private boolean updateChoreoAPI(Connection connection, API api) throws SQLException {
         String query = SQLConstants.UPDATE_CHOREO_AM_API_SQL;
         try (PreparedStatement prepStmt = connection.prepareStatement(query)) {
             prepStmt.setString(1, new Gson().toJson(api.getThrottleLimit()));
             prepStmt.setString(2, api.getUuid());
-            prepStmt.execute();
+            return prepStmt.execute();
         }
     }
 
