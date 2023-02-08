@@ -766,10 +766,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                     + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
                     apiId));
         }
-        else if (apiInfo.getOrganization().equals(organization)) {
-            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API of given organization : "
-                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
-                    apiId));
+        else if (!apiInfo.getOrganization().equals(organization)) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: " + apiId + " for the "
+                    + "given organization: " + organization, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
         }
         return apiInfo;
     }
