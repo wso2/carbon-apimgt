@@ -784,6 +784,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             state = product.getState();
             identifier = product.getId();
             identifier.setOrganization(product.getOrganization());
+            identifier.setUuid(product.getUuid());
             apiId = product.getProductId();
             apiUUID = product.getUuid();
             apiContext = product.getContext();
@@ -793,6 +794,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             state = api.getStatus();
             identifier = api.getId();
             identifier.setOrganization(api.getOrganization());
+            identifier.setUuid(api.getUuid());
             apiId = api.getId().getId();
             apiUUID = api.getUuid();
             apiContext = api.getContext();
