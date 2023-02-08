@@ -1134,25 +1134,7 @@ public class APIMappingUtil {
         dto.setApiThrottlingPolicy(model.getApiLevelPolicy());
 
         if (model.getThrottleLimit() != null) {
-            ThrottlingLimitDTO throttleLimitDTO = new ThrottlingLimitDTO();
-            throttleLimitDTO.setRequestCount(model.getThrottleLimit().getRequestCount());
-            ThrottlingLimitDTO.UnitEnum unitEnum;
-            switch (model.getThrottleLimit().getUnit()) {
-                case "DAY":
-                    unitEnum = ThrottlingLimitDTO.UnitEnum.DAY;
-                    break;
-                case "HOUR":
-                    unitEnum = ThrottlingLimitDTO.UnitEnum.HOUR;
-                    break;
-                case "SECOND":
-                    unitEnum = ThrottlingLimitDTO.UnitEnum.SECOND;
-                    break;
-                case "MINUTE":
-                default:
-                    unitEnum = ThrottlingLimitDTO.UnitEnum.MINUTE;
-            }
-            throttleLimitDTO.setUnit(unitEnum);
-            dto.setThrottlingLimit(throttleLimitDTO);
+            dto.setThrottlingLimit(ThrottlingLimitMappingUtil.fromThrottlingLimitToDTO(model.getThrottleLimit()));
             // If the current API does not have throttlingLimit assigned but apiPolicy is available
             // the API Policy should be able to populate the data relevant to the throttlingLimit in the console.
         } else if (model.getApiLevelPolicy() != null) {
