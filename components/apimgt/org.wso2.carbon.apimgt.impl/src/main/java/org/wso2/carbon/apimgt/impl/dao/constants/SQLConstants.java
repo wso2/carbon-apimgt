@@ -1459,6 +1459,7 @@ public class SQLConstants {
                     "CREATED_TIME,API_TIER,API_TYPE,API_UUID,STATUS,ORGANIZATION,GATEWAY_VENDOR,VERSION_COMPARABLE," +
                     "SCOPE_PREFIX)" +
                     " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
     public static final String ADD_CHOREO_AM_API_SQL =
             " INSERT INTO CHOREO_AM_API (API_UUID,API_THROTTLE_LIMIT) VALUES (?,?)";
 
