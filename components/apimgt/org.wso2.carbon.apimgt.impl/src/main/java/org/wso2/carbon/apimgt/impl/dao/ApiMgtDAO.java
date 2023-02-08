@@ -9429,7 +9429,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * // TODO: (VirajSalaka) -
      * Retrieve basic information about the given API by the UUID quering only from AM_API
      *
      * @param apiId UUID of the API

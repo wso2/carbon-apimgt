@@ -852,6 +852,10 @@ public class APIMgtDAOTest {
     }
 
     @Test
+    /**
+     * Verify the DAO behavior related to throttleLimit update during the addition of API
+     * and after updating the same API .
+     */
     public void testAPIAndUpdateThrottleLimit() throws Exception {
         APIIdentifier apiId = new APIIdentifier("getAPIThrottleLimit",
                 "getAPIThrottleLimit", "1.0.0");
@@ -927,6 +931,9 @@ public class APIMgtDAOTest {
     }
 
     @Test
+    /**
+     * To check if the revision's throttle limit is properly assigned.
+     */
     public void testRevisionThrottleLimit() throws Exception {
         APIIdentifier apiId = new APIIdentifier("getAPIRevisionThrottleLimit",
                 "getAPIRevisionThrottleLimit", "1.0.0");
