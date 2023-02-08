@@ -229,7 +229,7 @@
             "application/json"
           ],
           "x-auth-type": "Application & Application User",
-          "x-throttling-tier": "12310PerMinute",
+          "x-throttling-tier": "12310PerMin",
           "x-throttling-limit": {
             "requestCount" : 12310 ,
             "unit" : "Minute"
