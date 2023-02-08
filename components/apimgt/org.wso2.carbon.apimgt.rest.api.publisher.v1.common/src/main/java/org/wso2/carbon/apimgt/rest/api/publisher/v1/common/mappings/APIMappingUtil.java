@@ -1165,14 +1165,14 @@ public class APIMappingUtil {
                 case "20KPerMin":
                     throttleLimitDTO.setRequestCount(20000);
                     break;
-                case "30KPerMin":
-                    throttleLimitDTO.setRequestCount(30000);
+                case "50KPerMin":
+                    throttleLimitDTO.setRequestCount(50000);
                     break;
                 case "Unlimited":
                     throttleLimitDTO.setRequestCount(-1);
                     break;
             }
-            if (throttleLimitDTO.getRequestCount() != 0) {
+            if (throttleLimitDTO.getRequestCount() != null) {
                 dto.setThrottlingLimit(throttleLimitDTO);
             }
         }
