@@ -549,7 +549,8 @@ public class SQLConstants {
                     "   SUBS.SUB_STATUS AS SUB_STATUS, " +
                     "   SUBS.UUID AS SUB_UUID, " +
                     "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
-                    "   APP.NAME AS APP_NAME " +
+                    "   APP.NAME AS APP_NAME, " +
+                    "   API.ORGANIZATION AS ORGANIZATION " +
                     " FROM " +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIPTION SUBS, " +
