@@ -981,6 +981,7 @@ public class ApiMgtDAO {
                 identifier.setOrganization(resultSet.getString("ORGANIZATION"));
                 int applicationId = resultSet.getInt("APPLICATION_ID");
                 Application application = getLightweightApplicationById(conn, applicationId);
+                application.setApplicationAttributes(getApplicationAttributes(conn, applicationId));
                 application.setSubscriptionCount(getSubscriptionCountByApplicationId(conn, application,
                         identifier.getOrganization()));
                 subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
