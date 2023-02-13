@@ -5803,8 +5803,8 @@ public class ApiMgtDAO {
                                 if (!updatedPoliciesMap.keySet().contains(policy.getPolicyId())) {
                                     //Check whether API Specific policies available
                                     OperationPolicyData existingPolicy =
-                                            getAPISpecificOperationPolicyByPolicyID(policy.getPolicyId(), api.getUuid(),
-                                                    tenantDomain, false);
+                                            getAPISpecificOperationPolicyByPolicyID(connection, policy.getPolicyId(),
+                                                    api.getUuid(), tenantDomain, false);
                                     clonedPolicyId = policy.getPolicyId();
                                     if (existingPolicy != null) {
                                         if (existingPolicy.isClonedPolicy()) {
@@ -5856,7 +5856,7 @@ public class ApiMgtDAO {
             if (migrationEnabled == null) {
                 for (ClonePolicyMetadataDTO toBeClonedPolicyData : toBeClonedPolicyDetails) {
                     cloneCommonPolicyToAPI(connection, toBeClonedPolicyData.getCurrentPolicyUUID(),
-                            toBeClonedPolicyData.getClonedPolicyUUID(), toBeClonedPolicyData.getApiUUID());
+                            toBeClonedPolicyData.getClonedPolicyUUID(), api.getUuid());
                 }
                 operationPolicyMappingPrepStmt.executeBatch();
                 cleanUnusedClonedOperationPolicies(connection, usedClonedPolicies, api.getUuid());
@@ -7203,7 +7203,7 @@ public class ApiMgtDAO {
 
                 setAssociatedAPIProducts(currentApiUuid, uriTemplates);
                 if (migrationEnabled == null) {
-                    setOperationPolicies(apiRevision.getRevisionUUID(), uriTemplates);
+                    setOperationPolicies(conn, apiRevision.getRevisionUUID(), uriTemplates);
                 }
             } catch (SQLException e) {
                 handleException("Failed to get URI Templates of API with UUID " + uuid, e);
@@ -7263,7 +7263,7 @@ public class ApiMgtDAO {
 
                 setAssociatedAPIProducts(currentApiUuid, uriTemplates);
                 if (migrationEnabled == null) {
-                    setOperationPolicies(currentApiUuid, uriTemplates);
+                    setOperationPolicies(conn, currentApiUuid, uriTemplates);
                 }
             } catch (SQLException e) {
                 handleException("Failed to get URI Templates of API with UUID " + currentApiUuid, e);
@@ -16351,7 +16351,7 @@ public class ApiMgtDAO {
 
                 String migrate =  System.getProperty(APIConstants.MIGRATE);
                 if (migrate == null) {
-                    setOperationPoliciesToURITemplatesMap(apiRevision.getApiUUID(), uriTemplateMap);
+                    setOperationPoliciesToURITemplatesMap(connection, apiRevision.getApiUUID(), uriTemplateMap);
                 }
 
                 PreparedStatement insertURLMappingsStatement = connection
@@ -17231,7 +17231,7 @@ public class ApiMgtDAO {
                     }
                 }
 
-                setOperationPoliciesToURITemplatesMap(apiRevision.getRevisionUUID(), uriTemplateMap);
+                setOperationPoliciesToURITemplatesMap(connection, apiRevision.getRevisionUUID(), uriTemplateMap);
 
                 PreparedStatement insertURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS_CURRENT_API);
@@ -17559,7 +17559,7 @@ public class ApiMgtDAO {
                     }
                 }
 
-                setAPIProductOperationPoliciesToURITemplatesMap(new Integer(apiId).toString(), uriTemplateMap);
+                setAPIProductOperationPoliciesToURITemplatesMap(connection, new Integer(apiId).toString(), uriTemplateMap);
 
                 PreparedStatement insertURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
@@ -17805,7 +17805,7 @@ public class ApiMgtDAO {
                     }
                 }
 
-                setAPIProductOperationPoliciesToURITemplatesMap(apiRevision.getRevisionUUID(), urlMappingList);
+                setAPIProductOperationPoliciesToURITemplatesMap(connection, apiRevision.getRevisionUUID(), urlMappingList);
 
                 PreparedStatement insertURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
@@ -18809,8 +18809,8 @@ public class ApiMgtDAO {
      * @throws SQLException
      * @throws APIManagementException
      */
-    private void setOperationPoliciesToURITemplatesMap(String uuid, Map<String, URITemplate> uriTemplates)
-            throws SQLException, APIManagementException {
+    private void setOperationPoliciesToURITemplatesMap(Connection connection, String uuid, Map<String,
+            URITemplate> uriTemplates) throws SQLException, APIManagementException {
 
         String currentApiUuid;
         String query;
@@ -18825,8 +18825,7 @@ public class ApiMgtDAO {
             currentApiUuid = uuid;
         }
 
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
             int apiId = getAPIID(currentApiUuid);
             ps.setInt(1, apiId);
             if (isRevision) {
@@ -18854,7 +18853,7 @@ public class ApiMgtDAO {
      * @throws SQLException
      * @throws APIManagementException
      */
-    private void setOperationPolicies(String uuid, Map<Integer, URITemplate> uriTemplates)
+    private void setOperationPolicies(Connection connection, String uuid, Map<Integer, URITemplate> uriTemplates)
             throws SQLException, APIManagementException {
 
         String currentApiUuid;
@@ -18869,8 +18868,7 @@ public class ApiMgtDAO {
             query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_OF_API_SQL;
             currentApiUuid = uuid;
         }
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
             int apiId = getAPIID(currentApiUuid);
             ps.setInt(1, apiId);
             if (isRevision) {
@@ -18898,12 +18896,11 @@ public class ApiMgtDAO {
      * @throws SQLException
      * @throws APIManagementException
      */
-    private void setAPIProductOperationPoliciesToURITemplatesMap(String productRevisionId,
+    private void setAPIProductOperationPoliciesToURITemplatesMap(Connection connection, String productRevisionId,
                                                                  Map<String, URITemplate> uriTemplates)
             throws SQLException, APIManagementException {
 
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
+        try (PreparedStatement ps = connection.prepareStatement(
                      SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_API_PRODUCT_SQL)) {
             ps.setString(1, productRevisionId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -18930,9 +18927,8 @@ public class ApiMgtDAO {
      * @return cloned policyID
      * @throws APIManagementException
      **/
-    private String cloneCommonPolicyToAPI(Connection connection, String commonPolicyId,
-                                          String clonedPolicyId, String apiUUID)
-            throws APIManagementException, SQLException {
+    private String cloneCommonPolicyToAPI(Connection connection, String commonPolicyId, String clonedPolicyId,
+                                          String apiUUID) throws APIManagementException, SQLException {
         OperationPolicyData policyData = getOperationPolicyByPolicyID(connection, commonPolicyId, true);
         if (policyData != null) {
             // If we are taking a clone from common policy, common policy's Id is used as the CLONED_POLICY_ID.
@@ -19301,7 +19297,7 @@ public class ApiMgtDAO {
     }
 
 
-    private void addOperationPolicyDefinition (Connection connection, String policyId,
+    private void addOperationPolicyDefinition(Connection connection, String policyId,
                                                OperationPolicyDefinition policyDefinition) throws SQLException {
 
         String dbQuery = SQLConstants.OperationPolicyConstants.ADD_OPERATION_POLICY_DEFINITION;
