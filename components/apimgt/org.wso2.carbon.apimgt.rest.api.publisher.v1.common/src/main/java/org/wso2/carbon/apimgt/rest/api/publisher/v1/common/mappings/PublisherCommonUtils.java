@@ -1632,6 +1632,7 @@ public class PublisherCommonUtils {
         product.setID(productIdentifier);
         product.setUuid(originalAPIProduct.getUuid());
         product.setOrganization(orgId);
+        product.setThumbnailUrl(originalAPIProduct.getThumbnailUrl());
 
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.updateAPIProduct(product);
         apiProvider.updateAPIProductSwagger(originalAPIProduct.getUuid(), apiToProductResourceMapping, product, orgId);
