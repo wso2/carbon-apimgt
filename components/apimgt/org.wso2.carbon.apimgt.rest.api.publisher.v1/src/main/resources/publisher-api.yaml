@@ -8550,7 +8550,7 @@ components:
           pattern: '^[^~!@#;:%^*()+={}|\\<>"'',&/$\[\]\s+\/]+$'
           example: 1.0.0
         provider:
-          maxLength: 50
+          maxLength: 200
           type: string
           description: |
             If the provider value is not given user invoking the api will be used as the provider.
