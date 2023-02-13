@@ -656,21 +656,28 @@ public class OAS2Parser extends APIDefinition {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(apiDefinition);
-        boolean swaggerErrorFound = false;
-        for (String message : parseAttemptForV2.getMessages()) {
-            OASParserUtil.addErrorToValidationResponse(validationResponse, message);
-            if (message.contains(APIConstants.SWAGGER_IS_MISSING_MSG)) {
-                ErrorItem errorItem = new ErrorItem();
-                errorItem.setErrorCode(ExceptionCodes.INVALID_OAS2_FOUND.getErrorCode());
-                errorItem.setMessage(ExceptionCodes.INVALID_OAS2_FOUND.getErrorMessage());
-                errorItem.setDescription(ExceptionCodes.INVALID_OAS2_FOUND.getErrorMessage());
-                validationResponse.getErrorItems().add(errorItem);
+        if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {
+            for (String message : parseAttemptForV2.getMessages()) {
+                OASParserUtil.addErrorToValidationResponse(validationResponse, message);
+                validationResponse.setValid(false);
+                if (message.contains(APIConstants.SWAGGER_IS_MISSING_MSG)) {
+                    ErrorItem errorItem = new ErrorItem();
+                    errorItem.setErrorCode(ExceptionCodes.INVALID_OAS2_FOUND.getErrorCode());
+                    errorItem.setMessage(ExceptionCodes.INVALID_OAS2_FOUND.getErrorMessage());
+                    errorItem.setDescription(ExceptionCodes.INVALID_OAS2_FOUND.getErrorMessage());
+                    validationResponse.getErrorItems().add(errorItem);
+                }
+                if (System.getProperty(APIConstants.SWAGGER_RELAXED_VALIDATION) != null
+                        && parseAttemptForV2.getSwagger() != null) {
+                    validationResponse.setValid(true);
+                } else {
+                    validationResponse.setValid(false);
+                }
             }
-            swaggerErrorFound = true;
-        }
-        if (parseAttemptForV2.getSwagger() == null || swaggerErrorFound) {
-            validationResponse.setValid(false);
         } else {
+            validationResponse.setValid(true);
+        }
+        if (validationResponse.isValid() && parseAttemptForV2.getSwagger() != null){
             Swagger swagger = parseAttemptForV2.getSwagger();
             Info info = swagger.getInfo();
             OASParserUtil.updateValidationResponseAsSuccess(

@@ -2966,4 +2966,5 @@ public final class APIConstants {
 
     public static final String CASE_SENSITIVE_CHECK_PATH =    "caseSensitiveRoleValidation";
     public static final String MIGRATE = "migrate";
+    public static final String SWAGGER_RELAXED_VALIDATION = "swaggerRelaxedValidation";
 }
