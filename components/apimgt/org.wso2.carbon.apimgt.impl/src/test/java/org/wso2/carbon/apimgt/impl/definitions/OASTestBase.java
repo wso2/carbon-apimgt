@@ -114,8 +114,8 @@ public class OASTestBase {
         bookGet.setAuthTypes("Application & Application User");
         bookGet.setHTTPVerb("GET");
         bookGet.setHttpVerbs("GET");
-        bookGet.setThrottlingTier("12310PerMinute");
-        bookGet.setThrottlingTiers("12310PerMinute");
+        bookGet.setThrottlingTier("12310PerMin");
+        bookGet.setThrottlingTiers("12310PerMin");
         throttlingLimit.setRequestCount(12310);
         throttlingLimit.setUnit("MINUTE");
         bookGet.setThrottlingLimit(throttlingLimit);

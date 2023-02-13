@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.impl.dao;
 
+import com.google.gson.Gson;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -24,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -423,6 +425,7 @@ public class SubscriptionValidationDAO {
                         if (isExpand) {
                             String revision = resultSet.getString("REVISION_UUID");
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
+                            api.setThrottleLimit(getAPILevelThrottleLimit(connection, apiUuid, revision));
                             if (APIConstants.API_PRODUCT.equals(apiType)) {
                                 attachURlMappingDetailsOfApiProduct(connection, api);
                             } else {
@@ -1100,6 +1103,7 @@ public class SubscriptionValidationDAO {
                         if (isExpand) {
                             String revision = resultSet.getString("REVISION_UUID");
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
+                            api.setThrottleLimit(getAPILevelThrottleLimit(connection, apiUuid, revision));
                             if (APIConstants.API_PRODUCT.equals(apiType)) {
                                 attachURlMappingDetailsOfApiProduct(connection, api);
                             } else {
@@ -1178,6 +1182,7 @@ public class SubscriptionValidationDAO {
                         api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
                         if (isExpand) {
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
+                            api.setThrottleLimit(getAPILevelThrottleLimit(connection, apiUuid, revision));
                             if (APIConstants.API_PRODUCT.equals(apiType)) {
                                 attachURlMappingDetailsOfApiProduct(connection, api);
                             } else {
@@ -1277,6 +1282,7 @@ public class SubscriptionValidationDAO {
                         api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
                         if (isExpand) {
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
+                            api.setThrottleLimit(getAPILevelThrottleLimit(connection, apiUuid, revision));
                             if (APIConstants.API_PRODUCT.equals(apiType)) {
                                 attachURlMappingDetailsOfApiProduct(connection, api);
                             } else {
@@ -1303,7 +1309,26 @@ public class SubscriptionValidationDAO {
             preparedStatement.setString(2, revisionUUID);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return resultSet.getString("API_TIER");
+                    return resultSet.getString(SQLConstants.ColumnName.API_THROTTLE_LIMIT);
+                }
+            }
+        }
+        return null;
+    }
+
+    private ThrottlingLimit getAPILevelThrottleLimit(Connection connection, String apiUUID, String revisionUUID)
+            throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.GET_REVISIONED_API_THROTTLE_LIMIT_SQL)) {
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, revisionUUID);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    String apiLevelTierJson = resultSet.getString(SQLConstants.ColumnName.API_THROTTLE_LIMIT);
+                    if (apiLevelTierJson != null) {
+                        return new Gson().fromJson(apiLevelTierJson, ThrottlingLimit.class);
+                    }
                 }
             }
         }

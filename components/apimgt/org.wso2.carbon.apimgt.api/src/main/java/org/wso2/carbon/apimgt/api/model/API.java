@@ -19,7 +19,9 @@ package org.wso2.carbon.apimgt.api.model;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.util.ModelUtil;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -66,6 +68,8 @@ public class API implements Serializable {
     private Set<Tier> availableTiers = new LinkedHashSet<Tier>();
     private Set<Policy> availableSubscriptionLevelPolicies = new LinkedHashSet<Policy>();
     private String apiLevelPolicy;
+
+    private ThrottlingLimit throttlingLimit;
     private AuthorizationPolicy authorizationPolicy;
     private Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
     private String organization;
@@ -1022,6 +1026,9 @@ public class API implements Serializable {
     }
 
     public String getApiLevelPolicy() {
+        if (throttlingLimit != null) {
+            return ModelUtil.generateThrottlePolicyFromThrottleLimit(throttlingLimit);
+        }
         return apiLevelPolicy;
     }
 
@@ -1342,5 +1349,13 @@ public class API implements Serializable {
 
     public void setAsyncTransportProtocols(String asyncTransportProtocols) {
         this.asyncTransportProtocols = asyncTransportProtocols;
+    }
+
+    public ThrottlingLimit getThrottleLimit() {
+        return throttlingLimit;
+    }
+
+    public void setThrottleLimit(ThrottlingLimit throttleLimit) {
+        this.throttlingLimit = throttleLimit;
     }
 }

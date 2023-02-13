@@ -79,7 +79,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsThrottlingLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
@@ -112,6 +111,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoDTO;
@@ -283,6 +283,13 @@ public class APIMappingUtil {
         }
         model.addAvailableTiers(apiTiers);
         model.setApiLevelPolicy(dto.getApiThrottlingPolicy());
+
+        if (dto.getThrottlingLimit() != null) {
+            ThrottlingLimit throttleLimit = new ThrottlingLimit();
+            throttleLimit.setRequestCount(dto.getThrottlingLimit().getRequestCount());
+            throttleLimit.setUnit(dto.getThrottlingLimit().getUnit().value());
+            model.setThrottleLimit(throttleLimit);
+        }
 
         String transports = StringUtils.join(dto.getTransport(), ',');
         model.setTransports(transports);
@@ -1126,6 +1133,32 @@ public class APIMappingUtil {
         dto.setPolicies(tiersToReturn);
         dto.setApiThrottlingPolicy(model.getApiLevelPolicy());
 
+        if (model.getThrottleLimit() != null) {
+            dto.setThrottlingLimit(ThrottlingLimitMappingUtil.fromThrottlingLimitToDTO(model.getThrottleLimit()));
+            // If the current API does not have throttlingLimit assigned but apiPolicy is available
+            // the API Policy should be able to populate the data relevant to the throttlingLimit in the console.
+        } else if (model.getApiLevelPolicy() != null) {
+            ThrottlingLimitDTO throttleLimitDTO = new ThrottlingLimitDTO();
+            throttleLimitDTO.setUnit(ThrottlingLimitDTO.UnitEnum.MINUTE);
+            switch (model.getApiLevelPolicy()) {
+                case "10KPerMin":
+                    throttleLimitDTO.setRequestCount(10000);
+                    break;
+                case "20KPerMin":
+                    throttleLimitDTO.setRequestCount(20000);
+                    break;
+                case "50KPerMin":
+                    throttleLimitDTO.setRequestCount(50000);
+                    break;
+                case "Unlimited":
+                    throttleLimitDTO.setRequestCount(-1);
+                    break;
+            }
+            if (throttleLimitDTO.getRequestCount() != null) {
+                dto.setThrottlingLimit(throttleLimitDTO);
+            }
+        }
+
         //APIs created with type set to "NULL" will be considered as "HTTP"
         if (model.getType() == null || model.getType().toLowerCase().equals("null")) {
             dto.setType(APIDTO.TypeEnum.HTTP);
@@ -1583,14 +1616,15 @@ public class APIMappingUtil {
                     authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                 }
                 template.setThrottlingTier(operation.getThrottlingPolicy());
-                if (operation.getThrottlingPolicy() != null && !operation.getThrottlingPolicy().isEmpty()) {
-                    // converts existing throttling policy to the new throttling limit format
-                    template.setThrottlingLimit(operation.getThrottlingPolicy());
-                } else if (operation.getThrottlingLimit() != null) {
-                    APIOperationsThrottlingLimitDTO apiOperationsThrottlingLimitDTO = operation.getThrottlingLimit();
+                // ThrottlingLimit is prioritized over throttlingPolicy
+                if (operation.getThrottlingLimit() != null) {
+                    ThrottlingLimitDTO apiOperationsThrottlingLimitDTO = operation.getThrottlingLimit();
                     ThrottlingLimit throttlingLimit = ThrottlingLimitMappingUtil.fromDTOToThrottlingLimit(
                             apiOperationsThrottlingLimitDTO);
                     template.setThrottlingLimit(throttlingLimit);
+                } else if (operation.getThrottlingPolicy() != null && !operation.getThrottlingPolicy().isEmpty()) {
+                    // converts existing throttling policy to the new throttling limit format
+                    template.setThrottlingLimit(operation.getThrottlingPolicy());
                 }
                 template.setThrottlingTiers(operation.getThrottlingPolicy());
                 template.setUriTemplate(uriTempVal);

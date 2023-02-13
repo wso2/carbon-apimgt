@@ -17,11 +17,13 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONValue;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.util.ModelUtil;
 
 import java.io.Serializable;
 import java.util.*;
@@ -127,6 +129,10 @@ public class URITemplate implements Serializable{
     }
 
     public String getThrottlingTier() {
+        // ThrottlingLimit is prioritized
+        if (throttlingLimit != null) {
+            return ModelUtil.generateThrottlePolicyFromThrottleLimit(throttlingLimit);
+        }
         return throttlingTier;
     }
 
@@ -458,30 +464,14 @@ public class URITemplate implements Serializable{
     }
 
     public ThrottlingLimit getThrottlingLimit() {
+        if (throttlingLimit == null & StringUtils.isNotEmpty(throttlingTier)) {
+            return ModelUtil.generateThrottlingLimitFromThrottlingTier(throttlingTier);
+        }
         return throttlingLimit;
     }
 
     public void setThrottlingLimit(String throttlingTier) {
-        ThrottlingLimit convertedThrottlingLimit = new ThrottlingLimit();
-        convertedThrottlingLimit.setUnit("MINUTE");
-        switch (throttlingTier) {
-            case "10KPerMin":
-                convertedThrottlingLimit.setRequestCount(10000);
-                break;
-            case "20KPerMin":
-                convertedThrottlingLimit.setRequestCount(20000);
-                break;
-            case "50KPerMin":
-                convertedThrottlingLimit.setRequestCount(50000);
-                break;
-            case "Unlimited":
-                convertedThrottlingLimit.setRequestCount(-1);
-                break;
-            default:
-                log.warn("Invalid throttling tier value received");
-                return;
-        }
-        this.throttlingLimit = convertedThrottlingLimit;
+        this.throttlingLimit = ModelUtil.generateThrottlingLimitFromThrottlingTier(throttlingTier);
     }
 
     public void setThrottlingLimit(ThrottlingLimit throttlingLimit) {

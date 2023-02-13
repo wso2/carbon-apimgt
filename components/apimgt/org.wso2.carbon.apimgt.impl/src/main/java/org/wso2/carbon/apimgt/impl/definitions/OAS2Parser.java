@@ -399,13 +399,6 @@ public class OAS2Parser extends APIDefinition {
                         ThrottlingLimit throttlingLimit = OASParserUtil.getThrottlingLimitFromJSON(
                                 extensions.get(APIConstants.SWAGGER_X_THROTTLING_LIMIT));
                         template.setThrottlingLimit(throttlingLimit);
-                        if (template.getThrottlingTier() == null) {
-                            // maps throttlingLimit to throttlingTier
-                            template.setThrottlingTier(
-                                    APIUtil.getThrottlingTierFromThrottlingLimit(throttlingLimit));
-                            template.setThrottlingTiers(
-                                    APIUtil.getThrottlingTierFromThrottlingLimit(throttlingLimit));
-                        }
                     }
                     if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
                         String mediationScript = (String) extensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
@@ -844,6 +837,9 @@ public class OAS2Parser extends APIDefinition {
         if (api.getApiLevelPolicy() != null) {
             swagger.setVendorExtension(APIConstants.X_THROTTLING_TIER, api.getApiLevelPolicy());
         }
+        if (api.getThrottleLimit() != null) {
+            swagger.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, api.getThrottleLimit());
+        }
         swagger.setVendorExtension(APIConstants.X_WSO2_CORS, api.getCorsConfiguration());
         Object prodEndpointObj = OASParserUtil.generateOASConfigForEndpoints(api, true);
         if (prodEndpointObj != null) {
@@ -940,9 +936,6 @@ public class OAS2Parser extends APIDefinition {
         // handle x-throttling-tier extension
         if (resource.getPolicy() != null && !StringUtils.isEmpty(resource.getPolicy())) {
             operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
-        } else if (resource.getThrottlingLimit() != null) {
-            operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER,
-                    APIUtil.getThrottlingTierFromThrottlingLimit(resource.getThrottlingLimit()));
         } else {
             operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER,
                     APIConstants.DEFAULT_API_POLICY_UNLIMITED);
@@ -951,9 +944,6 @@ public class OAS2Parser extends APIDefinition {
         if (resource.getThrottlingLimit() != null) {
             operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil
                     .getThrottlingLimitJSON(resource.getThrottlingLimit()));
-        } else if (resource.getPolicy() != null) {
-            operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil
-                    .getThrottlingLimitJSON(APIUtil.getThrottlingLimitFromThrottlingTier(resource.getPolicy())));
         } else {
             operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil.getThrottlingLimitJSON(
                     APIUtil.getDefaultThrottleLimit()));

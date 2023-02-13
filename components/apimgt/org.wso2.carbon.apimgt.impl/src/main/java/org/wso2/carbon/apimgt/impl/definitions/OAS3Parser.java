@@ -451,18 +451,11 @@ public class OAS3Parser extends APIDefinition {
                                 template.setThrottlingLimit(throttlingTier);
                             }
                         }
-                        // assigns x-throttling-limit value if x-throttling-tier is not available
+                        // assigns x-throttling-limit value
                         if (extensions.containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
                             ThrottlingLimit throttlingLimit = OASParserUtil.getThrottlingLimitFromJSON(
                                     extensions.get(APIConstants.SWAGGER_X_THROTTLING_LIMIT));
                             template.setThrottlingLimit(throttlingLimit);
-                            if (template.getThrottlingTier() == null) {
-                                // maps throttlingLimit to throttlingTier
-                                template.setThrottlingTier(
-                                        APIUtil.getThrottlingTierFromThrottlingLimit(throttlingLimit));
-                                template.setThrottlingTiers(
-                                        APIUtil.getThrottlingTierFromThrottlingLimit(throttlingLimit));
-                            }
                         }
                         if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
                             String mediationScript = (String) extensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
@@ -927,9 +920,15 @@ public class OAS3Parser extends APIDefinition {
         if (api.getAuthorizationHeader() != null) {
             openAPI.addExtension(APIConstants.X_WSO2_AUTH_HEADER, api.getAuthorizationHeader());
         }
+
         if (api.getApiLevelPolicy() != null) {
             openAPI.addExtension(APIConstants.X_THROTTLING_TIER, api.getApiLevelPolicy());
         }
+
+        if (api.getThrottleLimit() != null) {
+            openAPI.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, api.getThrottleLimit());
+        }
+
         openAPI.addExtension(APIConstants.X_WSO2_CORS, api.getCorsConfiguration());
         Object prodEndpointObj = OASParserUtil.generateOASConfigForEndpoints(api, true);
         if (prodEndpointObj != null) {
@@ -1198,9 +1197,6 @@ public class OAS3Parser extends APIDefinition {
         // handle x-throttling-tier extension
         if (resource.getPolicy() != null && !StringUtils.isEmpty(resource.getPolicy())) {
             operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
-        } else if (resource.getThrottlingLimit() != null) {
-            operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_TIER,
-                    APIUtil.getThrottlingTierFromThrottlingLimit(resource.getThrottlingLimit()));
         } else {
             operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, APIConstants.DEFAULT_API_POLICY_UNLIMITED);
         }
@@ -1208,9 +1204,6 @@ public class OAS3Parser extends APIDefinition {
         if (resource.getThrottlingLimit() != null) {
             operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil.getThrottlingLimitJSON(
                     resource.getThrottlingLimit()));
-        } else if (resource.getPolicy() != null) {
-            operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil.getThrottlingLimitJSON(
-                    APIUtil.getThrottlingLimitFromThrottlingTier(resource.getPolicy())));
         } else {
             operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
                     OASParserUtil.getThrottlingLimitJSON(APIUtil.getDefaultThrottleLimit()));

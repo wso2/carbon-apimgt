@@ -35,4 +35,6 @@ public class APIConstants {
     public static final String EMAIL_DOMAIN_SEPARATOR = "@";
     public static final String EMAIL_DOMAIN_SEPARATOR_REPLACEMENT = "-AT-";
     public static final String DEFAULT_KEY_MANAGER_HOST = "https://localhost:9443";
+
+    public static final String UNLIMITED_TIER = "Unlimited";
 }
