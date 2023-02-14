@@ -845,6 +845,18 @@ public class ApisApiServiceImplUtils {
             throw new APIManagementException("Required field 'vhost' not found in deployment",
                     ExceptionCodes.GATEWAY_ENVIRONMENT_VHOST_NOT_PROVIDED);
         }
+
+        List<VHost> vhosts = environments.get(environment).getVhosts();
+        boolean isVhostValidated = false;
+        for (VHost vhostItem : vhosts) {
+            //Checking the vhost is included in the available vhost list
+            if (vhostItem.getHost().equals(vhost)) {
+                isVhostValidated = true;
+            }
+        }
+        if (!isVhostValidated) {
+            throw new APIManagementException("Invalid Vhost: " + vhost);
+        }
         return mapApiRevisionDeployment(revisionId, vhost, displayOnDevportal, environment);
     }
 
