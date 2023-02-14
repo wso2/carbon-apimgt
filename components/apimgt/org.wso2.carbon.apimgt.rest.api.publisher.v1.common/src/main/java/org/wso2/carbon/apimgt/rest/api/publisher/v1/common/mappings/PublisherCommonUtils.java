@@ -1260,7 +1260,7 @@ public class PublisherCommonUtils {
             }
             // set the display name of the scope properly with existing API as OpenAPI doesn't have a display name
             if (existingAPI.getScopes() != null) {
-                for (org.wso2.carbon.apimgt.api.model.Scope existingScp : existingAPI.getScopes()){
+                for (org.wso2.carbon.apimgt.api.model.Scope existingScp : existingAPI.getScopes()) {
                     if (existingScp.getKey() != null && existingScp.getKey().equals(scope.getKey())) {
                         scope.setName(existingScp.getName());
                         break;
