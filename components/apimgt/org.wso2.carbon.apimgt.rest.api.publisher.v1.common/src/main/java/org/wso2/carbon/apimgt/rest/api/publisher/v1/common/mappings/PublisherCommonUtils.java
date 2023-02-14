@@ -335,7 +335,6 @@ public class PublisherCommonUtils {
                     if (operationPoliciesPerURITemplate.containsKey(key)) {
                         uriTemplate.setOperationPolicies(operationPoliciesPerURITemplate.get(key));
                     }
-
                 }
 
                 apiToUpdate.setUriTemplates(uriTemplates);
