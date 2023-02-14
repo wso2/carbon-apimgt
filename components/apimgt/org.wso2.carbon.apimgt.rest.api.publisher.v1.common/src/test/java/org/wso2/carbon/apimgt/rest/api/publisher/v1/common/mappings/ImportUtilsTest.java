@@ -51,7 +51,8 @@ public class ImportUtilsTest {
     private final String jsonFile = pathToArchive + "/customCommonLogPolicy.json";
     private APIProvider apiProvider;
 
-    @Before public void init() throws Exception {
+    @Before
+    public void init() throws Exception {
         PowerMockito.mockStatic(CommonUtil.class);
         PowerMockito.mockStatic(FileUtils.class);
         PowerMockito.stub(
@@ -62,7 +63,8 @@ public class ImportUtilsTest {
         policyData = Mockito.mock(OperationPolicyData.class);
     }
 
-    @Test public void testImportAPIPolicy() throws Exception {
+    @Test
+    public void testImportAPIPolicy() throws Exception {
 
         String policyDefContent = "{\"type\":\"operation_policy_specification\",\"version\":\"v4.1.0\",\"data\":"
                 + "{\"category\":\"Mediation\",\"name\":\"customCommonLogPolicy\",\"version\":\"v1\",\"displayName\""
