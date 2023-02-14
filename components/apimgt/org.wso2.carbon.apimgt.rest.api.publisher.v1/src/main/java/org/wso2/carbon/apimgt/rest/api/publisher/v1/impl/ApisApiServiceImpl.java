@@ -3178,10 +3178,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 throw new APIMgtResourceNotFoundException("API not found for id " + apiId,
                         ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
             }
-            if (newVersion.equals(existingAPI.getId().getVersion())) {
-                throw new APIMgtResourceAlreadyExistsException("Version " + newVersion + " exists for api "
-                        + existingAPI.getId().getApiName(), ExceptionCodes.from(API_VERSION_ALREADY_EXISTS, newVersion,
-                            existingAPI.getId().getApiName()));
+            //Get all existing versions of API
+            List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(
+                    apiIdentifierFromTable.getApiName(), apiIdentifierFromTable.getProviderName(), organization);
+            if (apiVersions.contains(newVersion)) {
+                throw new APIMgtResourceAlreadyExistsException(
+                        "Version " + newVersion + " exists for api " + existingAPI.getId().getApiName(),
+                        ExceptionCodes.from(API_VERSION_ALREADY_EXISTS, newVersion, existingAPI.getId().getApiName()));
             }
             if (StringUtils.isNotEmpty(serviceVersion)) {
                 String serviceName = existingAPI.getServiceInfo("name");
