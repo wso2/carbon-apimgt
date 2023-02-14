@@ -19660,10 +19660,10 @@ public class ApiMgtDAO {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     String deleteQuery = SQLConstants.OperationPolicyConstants.DELETE_OPERATION_POLICY_BY_ID;
-                    PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery);
-                    deleteStatement.setString(1, rs.getString("POLICY_UUID"));
-                    deleteStatement.execute();
-                    deleteStatement.close();
+                    try (PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery)) {
+                        deleteStatement.setString(1, rs.getString("POLICY_UUID"));
+                        deleteStatement.execute();
+                    }
                 }
             }
         }
