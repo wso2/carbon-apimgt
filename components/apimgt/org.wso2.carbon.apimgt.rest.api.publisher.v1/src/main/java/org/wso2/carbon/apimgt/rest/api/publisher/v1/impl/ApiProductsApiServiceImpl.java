@@ -597,8 +597,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             }
             if (StringUtils.isBlank(fileMediaType)) {
                 RestApiUtil.handleBadRequest(
-                        "Media Type of provided thumbnail is not supported. Supported Media Types are image/jpeg, "
-                                + "image/png, image/gif and image/svg+xml", log);
+                        "Media Type of provided thumbnail is not supported. Supported Media Types are "
+                                + RestApiConstants.ALLOWED_THUMBNAIL_MEDIA_TYPES, log);
             }
 
             //this will fail if user does not have access to the API or the API does not exist

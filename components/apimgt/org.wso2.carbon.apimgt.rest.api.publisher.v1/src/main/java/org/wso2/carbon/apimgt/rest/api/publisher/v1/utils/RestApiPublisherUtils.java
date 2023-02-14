@@ -352,8 +352,8 @@ public class RestApiPublisherUtils {
             if (StringUtils.isBlank(fileMediaType) ||
                     !RestApiConstants.ALLOWED_THUMBNAIL_MEDIA_TYPES.contains(fileMediaType.toLowerCase())) {
                 RestApiUtil.handleBadRequest(
-                        "Media Type of provided thumbnail is not supported. Supported Media Types are image/jpeg, "
-                                + "image/png, image/gif and image/svg+xml", log);
+                        "Media Type of provided thumbnail is not supported. Supported Media Types are "
+                                + RestApiConstants.ALLOWED_THUMBNAIL_MEDIA_TYPES, log);
             }
 
             // Convert svg images to png. This is done to prevent scripts within svg images from executing.

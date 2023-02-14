@@ -2588,8 +2588,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             if (StringUtils.isBlank(fileMediaType)) {
                 RestApiUtil.handleBadRequest(
-                        "Media Type of provided thumbnail is not supported. Supported Media Types are image/jpeg, "
-                                + "image/png, image/gif and image/svg+xml", log);
+                        "Media Type of provided thumbnail is not supported. Supported Media Types are "
+                                + RestApiConstants.ALLOWED_THUMBNAIL_MEDIA_TYPES, log);
             }
             PublisherCommonUtils.updateThumbnail(inputStream, fileMediaType, apiProvider, apiId, organization);
             String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL.replace(RestApiConstants.APIID_PARAM, apiId);
