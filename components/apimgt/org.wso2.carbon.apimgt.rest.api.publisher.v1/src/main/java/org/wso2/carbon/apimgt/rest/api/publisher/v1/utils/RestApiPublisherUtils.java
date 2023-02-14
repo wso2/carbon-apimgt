@@ -349,7 +349,7 @@ public class RestApiPublisherUtils {
             if (StringUtils.isBlank(fileContentType) ||
                     !RestApiConstants.ALLOWED_THUMBNAIL_MEDIA_TYPES.contains(fileContentType.toLowerCase())) {
                 RestApiUtil.handleBadRequest(
-                        "Thumbnail does not contain a supported Media Type. Supported Media Types are image/jpeg, "
+                        "Media Type of provided thumbnail is not supported. Supported Media Types are image/jpeg, "
                                 + "image/png, image/gif and image/svg+xml", log);
             }
 
@@ -363,7 +363,7 @@ public class RestApiPublisherUtils {
                 inputStream = new ByteArrayInputStream(outputStream.toByteArray());
             }
         } catch (TranscoderException | IOException e) {
-            throw new APIManagementException("Error while validating API thumbnail content", e);
+            throw new APIManagementException("Error while validating thumbnail content", e);
         } finally {
             IOUtils.closeQuietly(outputStream);
         }
