@@ -928,7 +928,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Get the existing URI templates for the API
         Set<URITemplate> oldURITemplates = apiMgtDAO.getURITemplatesOfAPI(api.getUuid());
         // Get the new local scope keys from URI templates
-        Set<Scope> newLocalScopes = getScopesToRegisterFromURITemplates(api.getId().getApiName(), api.getOrganization(), uriTemplates);
+        Set<Scope> newLocalScopes = api.getScopes();
         Set<String> newLocalScopeKeys = newLocalScopes.stream().map(Scope::getKey).collect(Collectors.toSet());
         // Get the existing versioned local scope keys attached for the API
         Set<String> oldVersionedLocalScopeKeys = apiMgtDAO.getVersionedLocalScopeKeysForAPI(api.getUuid(), tenantId);

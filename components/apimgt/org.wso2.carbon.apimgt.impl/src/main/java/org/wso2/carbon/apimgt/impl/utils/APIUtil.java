@@ -1626,38 +1626,26 @@ public final class APIUtil {
     }
 
     public static void handleException(String msg) throws APIManagementException {
-
-        log.error(msg);
         throw new APIManagementException(msg);
     }
 
     public static void handleException(String msg, Throwable t) throws APIManagementException {
-
-        log.error(msg, t);
         throw new APIManagementException(msg, t);
     }
 
     public static void handleInternalException(String msg, Throwable t) throws APIMgtInternalException {
-
-        log.error(msg, t);
         throw new APIMgtInternalException(msg, t);
     }
 
     public static void handleResourceAlreadyExistsException(String msg) throws APIMgtResourceAlreadyExistsException {
-
-        log.error(msg);
         throw new APIMgtResourceAlreadyExistsException(msg);
     }
 
     public static void handleResourceNotFoundException(String msg) throws APIMgtResourceNotFoundException {
-
-        log.error(msg);
         throw new APIMgtResourceNotFoundException(msg);
     }
 
     public static void handleAuthFailureException(String msg) throws APIMgtAuthorizationFailedException {
-
-        log.error(msg);
         throw new APIMgtAuthorizationFailedException(msg);
     }
 

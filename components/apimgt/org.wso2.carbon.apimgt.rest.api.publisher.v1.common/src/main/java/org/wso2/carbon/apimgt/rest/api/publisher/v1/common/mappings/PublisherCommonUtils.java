@@ -335,6 +335,7 @@ public class PublisherCommonUtils {
                     if (operationPoliciesPerURITemplate.containsKey(key)) {
                         uriTemplate.setOperationPolicies(operationPoliciesPerURITemplate.get(key));
                     }
+
                 }
 
                 apiToUpdate.setUriTemplates(uriTemplates);
@@ -723,21 +724,21 @@ public class PublisherCommonUtils {
 
         String scopePrefix = api.getScopePrefix();
         for (org.wso2.carbon.apimgt.api.model.Scope scope : api.getScopes()) {
-            String scopeName = scope.getKey();
+            String scopeKey = scope.getKey();
             if (scopePrefix != null) {
-                scopeName = APIUtil.prependScopePrefix(scopePrefix, scopeName);
+                scopeKey = APIUtil.prependScopePrefix(scopePrefix, scopeKey);
             }
-            if (!(APIUtil.isAllowedScope(scopeName))) {
+            if (!(APIUtil.isAllowedScope(scopeKey))) {
                 // Check if each scope key is already assigned as a local scope to a different API which is also not a
                 // different version of the same API. If true, return error.
                 // If false, check if the scope key is already defined as a shared scope. If so, do not honor the
                 // other scope attributes (description, role bindings) in the request payload, replace them with
                 // already defined values for the existing shared scope.
-                if (apiProvider.isScopeKeyAssignedLocally(api.getId().getApiName(), scopeName, api.getOrganization())) {
+                if (apiProvider.isScopeKeyAssignedLocally(api.getId().getApiName(), scopeKey, api.getOrganization())) {
                     throw new APIManagementException(
-                            "Scope " + scopeName + " is already assigned locally by another API",
+                            "Scope " + scopeKey + " is already assigned locally by another API",
                             ExceptionCodes.SCOPE_ALREADY_ASSIGNED);
-                } else if (apiProvider.isSharedScopeNameExists(scopeName, tenantId)) {
+                } else if (apiProvider.isSharedScopeNameExists(scopeKey, tenantId)) {
                     sharedAPIScopes.add(scope);
                     continue;
                 }
@@ -745,7 +746,7 @@ public class PublisherCommonUtils {
 
             //set display name as empty if it is not provided
             if (StringUtils.isBlank(scope.getName())) {
-                scope.setName(scopeName);
+                scope.setName(scopeKey);
             }
 
             //set description as empty if it is not provided
@@ -1255,6 +1256,15 @@ public class PublisherCommonUtils {
                     boolean isValidRole = APIUtil.isRoleNameExist(RestApiCommonUtil.getLoggedInUsername(), aRole);
                     if (!isValidRole) {
                         throw new APIManagementException("Role '" + aRole + "' Does not exist.");
+                    }
+                }
+            }
+            // set the display name of the scope properly with existing API as OpenAPI doesn't have a display name
+            if (existingAPI.getScopes() != null) {
+                for (org.wso2.carbon.apimgt.api.model.Scope existingScp : existingAPI.getScopes()){
+                    if (existingScp.getKey() != null && existingScp.getKey().equals(scope.getKey())) {
+                        scope.setName(existingScp.getName());
+                        break;
                     }
                 }
             }
