@@ -587,8 +587,14 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                         "Unsupported Thumbnail File Extension. Supported extensions are .jpg, .png, .jpeg, .svg "
                                 + "and .gif", log);
             }
+            if (log.isDebugEnabled()) {
+                log.debug("Validating thumbnail content of API Product : " + apiProductId);
+            }
             inputStream = (ByteArrayInputStream) RestApiPublisherUtils.validateThumbnailContent(fileInputStream);
             String fileMediaType = RestApiPublisherUtils.detectMediaType(inputStream);
+            if (log.isDebugEnabled()) {
+                log.debug("Media Type of thumbnail to be uploaded : " + fileMediaType);
+            }
             if (StringUtils.isBlank(fileMediaType)) {
                 RestApiUtil.handleBadRequest(
                         "Media Type of provided thumbnail is not supported. Supported Media Types are image/jpeg, "
