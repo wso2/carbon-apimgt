@@ -848,6 +848,18 @@ public class ApisApiServiceImplUtils {
                     ExceptionCodes.INVALID_GATEWAY_ENVIRONMENT, String.format("name '%s'", environment)));
 
         }
+
+        List<VHost> vhosts = environments.get(environment).getVhosts();
+        boolean isVhostValidated = false;
+        for (VHost vhostItem : vhosts) {
+            //Checking the vhost is included in the available vhost list
+            if (vhostItem.getHost().equals(vhost)) {
+                isVhostValidated = true;
+            }
+        }
+        if (!isVhostValidated) {
+            throw new APIManagementException("Invalid Vhost: " + vhost);
+        }
         if (mandatoryVHOST && StringUtils.isEmpty(vhost)) {
             // vhost is only required when deploying a revision, not required when un-deploying a revision
             // since the same scheme 'APIRevisionDeployment' is used for deploy and undeploy, handle it here.
