@@ -71,6 +71,8 @@ public class OAuthTokenGenerator {
 
                 if (timeDifference <= 1) {
                     if (tokenResponse.getRefreshToken() != null) {
+                        // Remove expired token from cache
+                        TokenCache.getInstance().getTokenMap().remove(oAuthEndpoint.getId(), tokenResponse);
                         tokenResponse = addTokenToCache(oAuthEndpoint, tokenResponse.getRefreshToken());
                     } else {
                         tokenResponse = addTokenToCache(oAuthEndpoint, null);
