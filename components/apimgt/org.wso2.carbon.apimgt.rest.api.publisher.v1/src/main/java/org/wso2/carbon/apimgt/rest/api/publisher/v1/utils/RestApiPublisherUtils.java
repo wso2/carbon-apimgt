@@ -345,16 +345,16 @@ public class RestApiPublisherUtils {
 
             // Detect Media Type and validate.
             inputStream = new ByteArrayInputStream(inputStreamBytes);
-            String fileContentType = RestApiPublisherUtils.detectMediaType(inputStream);
-            if (StringUtils.isBlank(fileContentType) ||
-                    !RestApiConstants.ALLOWED_THUMBNAIL_MEDIA_TYPES.contains(fileContentType.toLowerCase())) {
+            String fileMediaType = RestApiPublisherUtils.detectMediaType(inputStream);
+            if (StringUtils.isBlank(fileMediaType) ||
+                    !RestApiConstants.ALLOWED_THUMBNAIL_MEDIA_TYPES.contains(fileMediaType.toLowerCase())) {
                 RestApiUtil.handleBadRequest(
                         "Media Type of provided thumbnail is not supported. Supported Media Types are image/jpeg, "
                                 + "image/png, image/gif and image/svg+xml", log);
             }
 
             // Convert svg images to png. This is done to prevent scripts within svg images from executing.
-            if (RestApiConstants.SVG_MEDIA_TYPE.equals(fileContentType)) {
+            if (RestApiConstants.SVG_MEDIA_TYPE.equals(fileMediaType)) {
                 outputStream = new ByteArrayOutputStream();
                 TranscoderInput input_svg_image = new TranscoderInput(inputStream);
                 TranscoderOutput output_png_image = new TranscoderOutput(outputStream);

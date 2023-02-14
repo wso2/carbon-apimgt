@@ -589,6 +589,11 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             }
             inputStream = (ByteArrayInputStream) RestApiPublisherUtils.validateThumbnailContent(fileInputStream);
             String fileMediaType = RestApiPublisherUtils.detectMediaType(inputStream);
+            if (StringUtils.isBlank(fileMediaType)) {
+                RestApiUtil.handleBadRequest(
+                        "Media Type of provided thumbnail is not supported. Supported Media Types are image/jpeg, "
+                                + "image/png, image/gif and image/svg+xml", log);
+            }
 
             //this will fail if user does not have access to the API or the API does not exist
             APIProduct apiProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
