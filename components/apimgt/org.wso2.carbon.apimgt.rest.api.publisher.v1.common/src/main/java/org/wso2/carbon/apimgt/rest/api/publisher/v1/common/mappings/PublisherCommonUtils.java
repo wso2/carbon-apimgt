@@ -61,7 +61,6 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
-import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -351,10 +350,8 @@ public class PublisherCommonUtils {
         apiToUpdate.setGatewayType(apiDtoToUpdate.getGatewayType());
 
         if (apiDtoToUpdate.getThrottlingLimit() != null) {
-            ThrottlingLimit throttleLimit = new ThrottlingLimit();
-            throttleLimit.setRequestCount(apiDtoToUpdate.getThrottlingLimit().getRequestCount());
-            throttleLimit.setUnit(apiDtoToUpdate.getThrottlingLimit().getUnit().value());
-            apiToUpdate.setThrottleLimit(throttleLimit);
+            apiToUpdate.setThrottleLimit(ThrottlingLimitMappingUtil
+                    .fromDTOToThrottlingLimit(apiDtoToUpdate.getThrottlingLimit()));
         }
 
         //validate API categories
