@@ -2069,6 +2069,43 @@ public class ApiMgtDAO {
         return subscribers;
     }
 
+    /**
+     * Function returns the set of Subscribers by eliminating replicated subscribers
+     *
+     * @param identifier    API Identifier
+     * @param subscriberMap Map of subscriber id and an integer value
+     * @return Set of subscribers
+     * @throws APIManagementException if failed to get subscribers for given provider
+     */
+    public Set<Subscriber> getSubscribersOfAPIWithoutDuplicates(APIIdentifier identifier,
+            Map<Integer, Integer> subscriberMap) throws APIManagementException {
+
+        Set<Subscriber> subscribers = new HashSet<Subscriber>();
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_SUBSCRIBERS_OF_API_SQL);) {
+
+            ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            ps.setString(2, identifier.getApiName());
+            ps.setString(3, identifier.getVersion());
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                while (resultSet.next()) {
+                    Subscriber subscriber = new Subscriber(resultSet.getString(APIConstants.SUBSCRIBER_FIELD_USER_ID));
+                    subscriber.setSubscribedDate(resultSet.getTimestamp(APIConstants.SUBSCRIBER_FIELD_DATE_SUBSCRIBED));
+
+                    if (!subscriberMap.containsKey(subscriber.getId())) {
+                        subscribers.add(subscriber);
+                        subscriberMap.put(subscriber.getId(), 1);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get subscribers for :" + identifier.getApiName(), e);
+        }
+        return subscribers;
+    }
+
     public long getAPISubscriptionCountByAPI(Identifier identifier) throws APIManagementException {
 
         String sqlQuery = SQLConstants.GET_API_SUBSCRIPTION_COUNT_BY_API_SQL;
