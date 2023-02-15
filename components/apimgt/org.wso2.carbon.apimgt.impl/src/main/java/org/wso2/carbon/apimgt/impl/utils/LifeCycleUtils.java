@@ -261,14 +261,17 @@ public class LifeCycleUtils {
             if (tenantConfig.containsKey(NotifierConstants.NOTIFICATIONS_ENABLED)) {
                 isNotificationEnabled = (String) tenantConfig.get(NotifierConstants.NOTIFICATIONS_ENABLED);
             }
+
             if (JavaUtils.isTrueExplicitly(isNotificationEnabled)) {
+                Map<Integer, Integer> subscriberMap = new HashMap<>();
                 List<APIIdentifier> apiIdentifiers = getOldPublishedAPIList(api);
                 for (APIIdentifier oldAPI : apiIdentifiers) {
                     Properties prop = new Properties();
                     prop.put(NotifierConstants.API_KEY, oldAPI);
                     prop.put(NotifierConstants.NEW_API_KEY, api.getId());
 
-                    Set<Subscriber> subscribersOfAPI = apiMgtDAO.getSubscribersOfAPI(oldAPI);
+                    Set<Subscriber> subscribersOfAPI = apiMgtDAO.getSubscribersOfAPIWithoutDuplicates(oldAPI,
+                            subscriberMap);
                     prop.put(NotifierConstants.SUBSCRIBERS_PER_API, subscribersOfAPI);
 
                     NotificationDTO notificationDTO = new NotificationDTO(prop,
