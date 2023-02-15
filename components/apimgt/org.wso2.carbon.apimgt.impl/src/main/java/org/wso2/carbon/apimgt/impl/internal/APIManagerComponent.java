@@ -87,6 +87,7 @@ import org.wso2.carbon.apimgt.impl.observers.KeyMgtConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.TenantLoadMessageSender;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
+import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
@@ -317,6 +318,8 @@ public class APIManagerComponent {
                 }
             }
             bundleContext.registerService(ScopeValidator.class, new SystemScopesIssuer(), null);
+            // Register default KM
+            KeyMgtRegistrationService.registerDefaultKeyManager(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {
