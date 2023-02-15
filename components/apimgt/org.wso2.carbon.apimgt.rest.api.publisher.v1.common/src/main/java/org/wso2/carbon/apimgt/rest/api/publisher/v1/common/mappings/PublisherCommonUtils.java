@@ -732,6 +732,10 @@ public class PublisherCommonUtils {
         String scopePrefix = api.getScopePrefix();
         for (org.wso2.carbon.apimgt.api.model.Scope scope : api.getScopes()) {
             String scopeKey = scope.getKey();
+            //set display name as name (without prefix) if it is not provided
+            if (StringUtils.isBlank(scope.getName())) {
+                scope.setName(APIUtil.removeScopePrefix(scopePrefix, scopeKey));
+            }
             if (scopePrefix != null) {
                 scopeKey = APIUtil.prependScopePrefix(scopePrefix, scopeKey);
             }
@@ -749,11 +753,6 @@ public class PublisherCommonUtils {
                     sharedAPIScopes.add(scope);
                     continue;
                 }
-            }
-
-            //set display name as empty if it is not provided
-            if (StringUtils.isBlank(scope.getName())) {
-                scope.setName(scopeKey);
             }
 
             //set description as empty if it is not provided
