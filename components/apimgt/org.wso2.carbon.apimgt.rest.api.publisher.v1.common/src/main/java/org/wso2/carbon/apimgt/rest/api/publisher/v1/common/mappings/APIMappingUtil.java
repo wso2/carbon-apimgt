@@ -285,10 +285,7 @@ public class APIMappingUtil {
         model.setApiLevelPolicy(dto.getApiThrottlingPolicy());
 
         if (dto.getThrottlingLimit() != null) {
-            ThrottlingLimit throttleLimit = new ThrottlingLimit();
-            throttleLimit.setRequestCount(dto.getThrottlingLimit().getRequestCount());
-            throttleLimit.setUnit(dto.getThrottlingLimit().getUnit().value());
-            model.setThrottleLimit(throttleLimit);
+            model.setThrottleLimit(ThrottlingLimitMappingUtil.fromDTOToThrottlingLimit(dto.getThrottlingLimit()));
         }
 
         String transports = StringUtils.join(dto.getTransport(), ',');
