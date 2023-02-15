@@ -46,8 +46,14 @@ public class DefaultJWTTransformer implements JWTTransformer {
                     return jwtClaimsSet.getStringClaim(JWTConstants.AUTHORIZED_PARTY);
                 }
             } else {
-                if (jwtClaimsSet.getClaim(tokenIssuer.getConsumerKeyClaim()) != null) {
-                    return jwtClaimsSet.getStringClaim(tokenIssuer.getConsumerKeyClaim());
+                String consumerKeyClaim = tokenIssuer.getConsumerKeyClaim();
+                if (jwtClaimsSet.getClaim(consumerKeyClaim) != null) {
+                    if (jwtClaimsSet.getClaim(consumerKeyClaim) instanceof String) {
+                        return jwtClaimsSet.getStringClaim(tokenIssuer.getConsumerKeyClaim());
+                        // For some IDPs, the consumer key is returned as a list. (ex: ForgeRock)
+                    } else if (jwtClaimsSet.getClaim(consumerKeyClaim) instanceof List) {
+                        return jwtClaimsSet.getStringListClaim(tokenIssuer.getConsumerKeyClaim()).get(0);
+                    }
                 }
             }
         } catch (ParseException e) {
