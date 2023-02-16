@@ -36,7 +36,7 @@ public class ThrottlingLimitMappingUtil {
     public static ThrottlingLimit fromDTOToThrottlingLimit(ThrottlingLimitDTO dto) {
         ThrottlingLimit throttlingLimit = new ThrottlingLimit();
         throttlingLimit.setRequestCount(dto.getRequestCount());
-        throttlingLimit.setUnit(dto.getUnit().toString());
+        throttlingLimit.setUnit(dto.getUnit().name());
         return throttlingLimit;
     }
 
