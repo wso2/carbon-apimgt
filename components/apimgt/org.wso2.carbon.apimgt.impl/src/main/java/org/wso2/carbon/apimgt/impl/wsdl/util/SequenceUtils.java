@@ -17,6 +17,9 @@
  */
 package org.wso2.carbon.apimgt.impl.wsdl.util;
 
+import io.swagger.inflector.examples.models.ArrayExample;
+import io.swagger.inflector.examples.models.Example;
+import io.swagger.inflector.examples.models.ObjectExample;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
@@ -504,6 +507,40 @@ public class SequenceUtils {
             parameterJsonPathMapping.put(types[0], types[1]);
         } else {
             parameterJsonPathMapping.put(types[0], "simple");
+        }
+    }
+
+    public static void listExamples(Example example, Map<String, String> parameterJsonPathMapping)
+            throws JSONException {
+        listExamples(SOAPToRESTConstants.EMPTY_STRING, example, parameterJsonPathMapping);
+    }
+
+    public static void listExamples(String parent, Example example, Map<String, String> parameterJsonPathMapping)
+            throws JSONException {
+
+        if (example.getTypeName().equals(SOAPToRESTConstants.Swagger.OBJECT_TYPE)) {
+            Map<String, Example> values = ((ObjectExample) example).getValues();
+            if (values != null) {
+                for (Map.Entry<String, Example> entry : values.entrySet()) {
+                    String childKey = parent.isEmpty() ? entry.getKey() : parent + "." + entry.getKey();
+                    listExamples(childKey, entry.getValue(), parameterJsonPathMapping);
+                }
+            } else {
+                parameterJsonPathMapping.put(parent, "simple");
+            }
+        } else if (example.getTypeName().equals(SOAPToRESTConstants.Swagger.ARRAY_TYPE)) {
+            List<Example> exampleArray = ((ArrayExample) example).getItems();
+            if (exampleArray.size() > 0) {
+                for (Example exampleItem : exampleArray) {
+                    if (exampleItem.getTypeName().equals(SOAPToRESTConstants.Swagger.OBJECT_TYPE)) {
+                        listExamples(parent, exampleItem, parameterJsonPathMapping);
+                    } else {
+                        parameterJsonPathMapping.put(parent, "array");
+                    }
+                }
+            }
+        } else {
+            parameterJsonPathMapping.put(parent, "simple");
         }
     }
 }
