@@ -3182,8 +3182,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
             }
             //Get all existing versions of API
-            List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(
-                    apiIdentifierFromTable.getApiName(), apiIdentifierFromTable.getProviderName(), organization);
+            Set<String> apiVersions = apiProvider.getAPIVersions(apiIdentifierFromTable.getProviderName(),
+                    apiIdentifierFromTable.getApiName(), organization);
             if (apiVersions.contains(newVersion)) {
                 throw new APIMgtResourceAlreadyExistsException(
                         "Version " + newVersion + " exists for api " + existingAPI.getId().getApiName(),

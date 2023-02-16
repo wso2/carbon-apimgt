@@ -9967,4 +9967,118 @@ public final class APIUtil {
         byte[] digest = messageDigest.digest();
         return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
     }
+    
+    /**
+     * This method is used to get the default API level policy in a given tenant space
+     *
+     * @param tenantId tenantId
+     * @return default API level policy for a given tenant
+     */
+    public static String getDefaultAPILevelPolicy(int tenantId) throws APIManagementException {
+
+        Map<String, Tier> apiPolicies = getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_API, tenantId);
+        if (apiPolicies.size() > 0) {
+            String defaultTier =
+                    getTenantConfigPropertyValue(APIConstants.API_TENANT_CONF_DEFAULT_API_TIER, tenantId);
+            if (StringUtils.isNotEmpty(defaultTier) && apiPolicies.containsKey(defaultTier)) {
+                return defaultTier;
+            }
+            if (isEnabledUnlimitedTier()) {
+                return APIConstants.UNLIMITED_TIER;
+            }
+            return apiPolicies.keySet().toArray()[0].toString();
+        }
+        return null;
+    }
+
+    /**
+     * This method is used to get the default Application level policy in a given tenant space
+     *
+     * @param tenantId tenantId
+     * @return default Application level policy for a given tenant
+     */
+    public static String getDefaultApplicationLevelPolicy(int tenantId) throws APIManagementException {
+
+        Map<String, Tier> applicationLevelPolicies = getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_APP,
+                tenantId);
+        if (applicationLevelPolicies.size() > 0) {
+            String defaultTier =
+                    getTenantConfigPropertyValue(APIConstants.API_TENANT_CONF_DEFAULT_APPLICATION_TIER, tenantId);
+            if (StringUtils.isNotEmpty(defaultTier) && applicationLevelPolicies.containsKey(defaultTier)) {
+                return defaultTier;
+            }
+            if (isEnabledUnlimitedTier()) {
+                return APIConstants.UNLIMITED_TIER;
+            }
+            return applicationLevelPolicies.keySet().toArray()[0].toString();
+        }
+        return null;
+    }
+
+    /**
+     * This method is used to get the default Subscription level policy in a given tenant space
+     *
+     * @param tenantId tenantId
+     * @return default Subscription level policy for a given tenant
+     */
+    public static String getDefaultSubscriptionPolicy(int tenantId) throws APIManagementException {
+
+        Map<String, Tier> subscriptionPolicies = getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
+        if (subscriptionPolicies.size() > 0) {
+            String defaultTier =
+                    getTenantConfigPropertyValue(APIConstants.API_TENANT_CONF_DEFAULT_SUBSCRIPTION_TIER, tenantId);
+            if (StringUtils.isNotEmpty(defaultTier) && subscriptionPolicies.containsKey(defaultTier)) {
+                return defaultTier;
+            }
+            if (isEnabledUnlimitedTier()) {
+                return APIConstants.UNLIMITED_TIER;
+            }
+            return subscriptionPolicies.keySet().toArray()[0].toString();
+        }
+        return null;
+    }
+
+    /**
+     * This method is used to check whether a given policy is configured as default or not in a given tenant domain
+     *
+     * @param policyName policy name
+     * @param policyLevel policy level
+     * @param tenantDomain tenant domain name
+     * @return default Subscription level policy for a given tenant
+     */
+    public static boolean checkPolicyConfiguredAsDefault(String policyName, String policyLevel, String tenantDomain)
+            throws APIManagementException {
+
+        String configKey = null;
+        if (PolicyConstants.POLICY_LEVEL_API.equalsIgnoreCase(policyLevel)) {
+            configKey = APIConstants.API_TENANT_CONF_DEFAULT_API_TIER;
+        } else if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
+            configKey = APIConstants.API_TENANT_CONF_DEFAULT_SUBSCRIPTION_TIER;
+        } else if (PolicyConstants.POLICY_LEVEL_APP.equalsIgnoreCase(policyLevel)) {
+            configKey = APIConstants.API_TENANT_CONF_DEFAULT_APPLICATION_TIER;
+        }
+        if (StringUtils.isNotEmpty(configKey)) {
+            String defaultPolicyValue = getTenantConfigPropertyValue(configKey,
+                    getTenantIdFromTenantDomain(tenantDomain));
+            return StringUtils.equalsIgnoreCase(defaultPolicyValue, policyName);
+        }
+        return false;
+    }
+
+    /**
+     * Get configured value of a property in a given tenant domain
+     *
+     * @param propertyName property name
+     * @param tenantId tenant ID
+     * @return default Subscription level policy for a given tenant
+     */
+    private static String getTenantConfigPropertyValue(String propertyName, int tenantId)
+            throws APIManagementException {
+        String organization = getTenantDomainFromTenantId(tenantId);
+        JSONObject tenantConfig = getTenantConfig(organization);
+        if (tenantConfig.containsKey(propertyName)) {
+            return tenantConfig.get(propertyName).toString();
+        }
+        return null;
+    }
 }
