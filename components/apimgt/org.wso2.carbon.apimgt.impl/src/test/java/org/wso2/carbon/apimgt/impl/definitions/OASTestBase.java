@@ -23,6 +23,7 @@ import org.json.JSONObject;
 import org.junit.Assert;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -201,6 +202,23 @@ public class OASTestBase {
         Assert.assertEquals(2, scopes.size());
         Assert.assertTrue(scopes.contains(sampleScope));
         Assert.assertTrue(scopes.contains(extensionScope));
+    }
+
+    public void testThrottlingLimitParsing(APIDefinition parser, String swaggerContent) {
+        Object extension = parser.getRootLevelSwaggerExtension(swaggerContent, "x-throttling-limit");
+        Assert.assertNotNull("x-throttling-limit extension is not identified", extension);
+        ThrottlingLimit throttlingLimit = null;
+        try {
+            throttlingLimit = parser.getAPILevelThrottlingLimit(swaggerContent);
+        } catch (APIManagementException e) {
+            Assert.fail("Error while parsing x-throttling-limit extension " + e.getMessage());
+        }
+        Assert.assertNotNull("x-throttling-limit extension is not identified as a throttle limit",
+                throttlingLimit);
+        Assert.assertEquals("x-throttling-limit's request count is not identified",
+                throttlingLimit.getRequestCount(), 1000);
+        Assert.assertEquals("x-throttling-limit's unit time is not identified",
+                throttlingLimit.getUnit(), "HOUR");
     }
 
     public void testGenerateAPIDefinition2(APIDefinition parser, String content, OASParserEvaluator evaluator) throws Exception {

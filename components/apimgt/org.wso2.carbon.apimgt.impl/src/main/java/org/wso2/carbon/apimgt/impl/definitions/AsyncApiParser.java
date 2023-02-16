@@ -2180,4 +2180,9 @@ public class AsyncApiParser extends APIDefinition {
     public String getType() {
         return APIConstants.WSO2_GATEWAY_ENVIRONMENT;
     }
+
+    @Override
+    public Object getRootLevelSwaggerExtension(String swaggerContent, String extensionKey) {
+        return null;
+    }
 }

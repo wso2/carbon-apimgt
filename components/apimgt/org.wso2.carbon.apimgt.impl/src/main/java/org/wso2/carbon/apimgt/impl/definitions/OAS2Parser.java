@@ -689,6 +689,38 @@ public class OAS2Parser extends APIDefinition {
         } else {
             Swagger swagger = parseAttemptForV2.getSwagger();
             Info info = swagger.getInfo();
+            // Validate the x-throttling-limit extension for API
+            String xThrottlingLimitExtension = APIConstants.SWAGGER_X_THROTTLING_LIMIT;
+            if (swagger.getVendorExtensions() != null && swagger.getVendorExtensions()
+                    .containsKey(xThrottlingLimitExtension)) {
+                ErrorItem errorItem = OASParserUtil.validateAPIThrottleLimitExtension(swagger.getVendorExtensions()
+                                .get(xThrottlingLimitExtension));
+                if (errorItem != null) {
+                    validationResponse.getErrorItems().add(errorItem);
+                    errorItem.setDescription("Error while validating the x-throttling-limit extension " +
+                            "at the API Level");
+                    return validationResponse;
+                }
+            }
+            // Validate the x-throttling-limit extension for operations
+            for (String path : swagger.getPaths().keySet()) {
+                Path pathItem = swagger.getPaths().get(path);
+                for (Map.Entry<HttpMethod, Operation> operationEntry: pathItem.getOperationMap().entrySet()) {
+                    Operation operation = operationEntry.getValue();
+                    if (operation.getVendorExtensions() != null &&
+                            operation.getVendorExtensions().containsKey(xThrottlingLimitExtension)) {
+                        ErrorItem errorItem = OASParserUtil.validateAPIThrottleLimitExtension(
+                                operation.getVendorExtensions().get(xThrottlingLimitExtension));
+                        if (errorItem != null) {
+                            validationResponse.getErrorItems().add(errorItem);
+                            errorItem.setDescription(String.format("Error while validating the x-throttling-limit " +
+                                    "extension at the operation %s:%s", path, operationEntry.getKey()));
+                            return validationResponse;
+                        }
+                    }
+                }
+            }
+
             OASParserUtil.updateValidationResponseAsSuccess(
                     validationResponse, apiDefinition, swagger.getSwagger(),
                     info.getTitle(), info.getVersion(), swagger.getBasePath(), info.getDescription(),
@@ -1819,5 +1851,14 @@ public class OAS2Parser extends APIDefinition {
     @Override
     public String getType() {
         return null;
+    }
+
+    @Override
+    public Object getRootLevelSwaggerExtension(String swaggerContent, String extensionKey) {
+        Swagger swagger = getSwagger(swaggerContent);
+        if (swagger.getVendorExtensions() == null) {
+            return null;
+        }
+        return swagger.getVendorExtensions().get(extensionKey);
     }
 }

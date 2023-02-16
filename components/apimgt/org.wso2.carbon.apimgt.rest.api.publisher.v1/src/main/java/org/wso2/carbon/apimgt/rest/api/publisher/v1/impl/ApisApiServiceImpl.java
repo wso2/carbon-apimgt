@@ -4737,6 +4737,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             swaggerData = new SwaggerData(apiToAdd);
             definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
         }
+        // Currently, throttlingLimit cannot be populated from openapi/swagger definition when using
+        // the importOpenAPI resource, because there is no way to identify either the throttlingLimit is set
+        // to null or remains undefined.
         definitionToAdd = OASParserUtil.preProcess(definitionToAdd);
         Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
         Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
