@@ -8,6 +8,9 @@ on:
     branches:
       - master
   workflow_dispatch:
+concurrency:
+  group: ${{ github.event.number }}
+  cancel-in-progress: true
 jobs:
   build-product:
     runs-on: ubuntu-latest

@@ -3045,7 +3045,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //adding the api
             API createdApi = apiProvider.addAPI(apiToAdd);
-            String filename = fileDetail.getContentDisposition().getFilename();
+            String filename = null;
+            if (fileDetail != null) {
+                filename = fileDetail.getContentDisposition().getFilename();
+            }
 
             String swaggerStr = ApisApiServiceImplUtils.getSwaggerString(fileInputStream, url, wsdlArchiveExtractedPath, filename);
             String updatedSwagger = updateSwagger(createdApi.getUUID(), swaggerStr, organization);
