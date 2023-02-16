@@ -452,6 +452,7 @@ public class InboundWebsocketProcessorUtil {
         try {
             //validate token and subscriptions
             if (inboundMessageContext.isJWTToken()) {
+                log.debug("Authentication started for JWT tokens");
                 JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(),
                         inboundMessageContext.getTenantDomain());
                 AuthenticationContext authenticationContext;
@@ -466,7 +467,7 @@ public class InboundWebsocketProcessorUtil {
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, true);
                 }
             } else {
-                log.debug("Authentication not supported for Opaque tokens");
+                log.debug("Authentication started for Opaque tokens");
                 String apiKey;
                 if (inboundMessageContext.getToken() == null) {
                     String authHeader = inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader);
@@ -708,27 +709,29 @@ public class InboundWebsocketProcessorUtil {
                                                              String subscriptionOperation, String operationId) {
 
         InboundProcessorResponseDTO responseDTO = new GraphQLProcessorResponseDTO();
-        // validate scopes based on subscription payload
-        try {
-            if (!InboundWebsocketProcessorUtil.authorizeGraphQLSubscriptionEvents(subscriptionOperation,
-                    inboundMessageContext)) {
-                String errorMessage = WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR_MESSAGE
-                        + StringUtils.SPACE + subscriptionOperation;
-                log.error(errorMessage);
+        if (inboundMessageContext.isJWTToken()) { // scope validation not supported for Opaque tokens with gql subs
+            // validate scopes based on subscription payload
+            try {
+                if (!InboundWebsocketProcessorUtil.authorizeGraphQLSubscriptionEvents(subscriptionOperation,
+                        inboundMessageContext)) {
+                    String errorMessage = WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR_MESSAGE
+                            + StringUtils.SPACE + subscriptionOperation;
+                    log.error(errorMessage);
+                    responseDTO = InboundWebsocketProcessorUtil.getGraphQLFrameErrorDTO(
+                            WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR, errorMessage, false,
+                            operationId);
+                }
+            } catch (APIManagementException e) {
+                log.error(WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_MESSAGE, e);
+                responseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
+                        WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_ERROR,
+                        WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_MESSAGE, true);
+            } catch (APISecurityException e) {
+                log.error(WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR_MESSAGE, e);
                 responseDTO = InboundWebsocketProcessorUtil.getGraphQLFrameErrorDTO(
-                        WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR, errorMessage, false,
+                        WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR, e.getMessage(), false,
                         operationId);
             }
-        } catch (APIManagementException e) {
-            log.error(WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_MESSAGE, e);
-            responseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
-                    WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_ERROR,
-                    WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_MESSAGE, true);
-        } catch (APISecurityException e) {
-            log.error(WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR_MESSAGE, e);
-            responseDTO = InboundWebsocketProcessorUtil.getGraphQLFrameErrorDTO(
-                    WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR, e.getMessage(), false,
-                    operationId);
         }
         return responseDTO;
     }
