@@ -137,7 +137,7 @@ public class ImportUtils {
      * @param dependentAPIParamsConfigObject Params configuration of an API (this will not be null if a dependent API
      *                                       of an
      *                                       API product wants to override the parameters)
-     * @param organization                   Identifier of an Organization
+     * @param organization  Identifier of an Organization
      * @throws APIImportExportException If there is an error in importing an API
      * @@return Imported API
      */

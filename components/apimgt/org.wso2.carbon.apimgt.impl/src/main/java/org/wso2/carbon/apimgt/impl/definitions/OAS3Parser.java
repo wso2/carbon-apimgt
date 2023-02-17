@@ -752,7 +752,16 @@ public class OAS3Parser extends APIDefinition {
                     validationResponse.getErrorItems().add(errorItem);
                 }
             }
+            if (System.getProperty(APIConstants.SWAGGER_RELAXED_VALIDATION) != null &&
+                    parseAttemptForV3.getOpenAPI() != null) {
+                validationResponse.setValid(true);
+            } else {
+                validationResponse.setValid(false);
+            }
         } else {
+            validationResponse.setValid(true);
+        }
+        if (validationResponse.isValid()){
             OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
             io.swagger.v3.oas.models.info.Info info = openAPI.getInfo();
             List<String> endpoints;
@@ -1682,7 +1691,7 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException
      */
     private OpenAPI injectOtherScopesToDefaultScheme(OpenAPI openAPI) throws APIManagementException {
-        Map<String, SecurityScheme> securitySchemes ;
+        Map<String, SecurityScheme> securitySchemes;
         Components component = openAPI.getComponents();
         List<String> otherSetOfSchemes = new ArrayList<>();
 

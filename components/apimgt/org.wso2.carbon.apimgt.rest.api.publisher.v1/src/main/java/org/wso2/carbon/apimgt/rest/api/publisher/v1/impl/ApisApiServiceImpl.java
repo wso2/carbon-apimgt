@@ -1715,7 +1715,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param organization organization
      * @return API Lifecycle state information
      */
-    private LifecycleStateDTO getLifecycleState(String apiId, String organization) {
+    private LifecycleStateDTO getLifecycleState(String apiId, String organization) throws APIManagementException {
 
         try {
             APIIdentifier apiIdentifier;
@@ -1736,8 +1736,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId, e, log);
             } else {
-                String errorMessage = "Error while deleting API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                throw e;
             }
         }
         return null;
@@ -3046,7 +3045,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //adding the api
             API createdApi = apiProvider.addAPI(apiToAdd);
-            String filename = fileDetail.getContentDisposition().getFilename();
+            String filename = null;
+            if (fileDetail != null) {
+                filename = fileDetail.getContentDisposition().getFilename();
+            }
 
             String swaggerStr = ApisApiServiceImplUtils.getSwaggerString(fileInputStream, url, wsdlArchiveExtractedPath, filename);
             String updatedSwagger = updateSwagger(createdApi.getUUID(), swaggerStr, organization);
@@ -3179,10 +3181,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 throw new APIMgtResourceNotFoundException("API not found for id " + apiId,
                         ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
             }
-            if (newVersion.equals(existingAPI.getId().getVersion())) {
-                throw new APIMgtResourceAlreadyExistsException("Version " + newVersion + " exists for api "
-                        + existingAPI.getId().getApiName(), ExceptionCodes.from(API_VERSION_ALREADY_EXISTS, newVersion,
-                            existingAPI.getId().getApiName()));
+            //Get all existing versions of API
+            Set<String> apiVersions = apiProvider.getAPIVersions(apiIdentifierFromTable.getProviderName(),
+                    apiIdentifierFromTable.getApiName(), organization);
+            if (apiVersions.contains(newVersion)) {
+                throw new APIMgtResourceAlreadyExistsException(
+                        "Version " + newVersion + " exists for api " + existingAPI.getId().getApiName(),
+                        ExceptionCodes.from(API_VERSION_ALREADY_EXISTS, newVersion, existingAPI.getId().getApiName()));
             }
             if (StringUtils.isNotEmpty(serviceVersion)) {
                 String serviceName = existingAPI.getServiceInfo("name");

@@ -128,7 +128,7 @@ public class ThrottlingPolicyMappingUtil {
             dto.setQuotaPolicyType(mapQuotaPolicyTypeFromModeltoDTO(throttlingPolicy.getQuotaPolicyType()));
         }
         if (throttlingPolicy.getTierPlan() != null) {
-            dto.setTierPlan(ThrottlingPolicyDTO.TierPlanEnum.valueOf(throttlingPolicy.getTierPlan()));
+            dto.setTierPlan(ThrottlingPolicyDTO.TierPlanEnum.valueOf(throttlingPolicy.getTierPlan().toUpperCase()));
         }
         if (throttlingPolicy.getTierAttributes() != null) {
             Map<String, String> additionalProperties = new HashMap<>();

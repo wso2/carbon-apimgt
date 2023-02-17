@@ -11,7 +11,9 @@ on:
 
 permissions:
   contents: read # to fetch code (actions/checkout)
-
+concurrency:
+  group: ${{ github.event.number }}
+  cancel-in-progress: true
 jobs:
   build-carbon:
     runs-on: ubuntu-latest

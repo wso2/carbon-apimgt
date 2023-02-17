@@ -127,6 +127,10 @@ public final class APIConstants {
 
     public static final String API_TENANT_CONF_IS_UNLIMITED_TIER_PAID = "IsUnlimitedTierPaid";
 
+    public static final String API_TENANT_CONF_DEFAULT_API_TIER = "DefaultAPILevelTier";
+    public static final String API_TENANT_CONF_DEFAULT_APPLICATION_TIER = "DefaultApplicationLevelTier";
+    public static final String API_TENANT_CONF_DEFAULT_SUBSCRIPTION_TIER = "DefaultSubscriptionLevelTier";
+
     public static final String API_TENANT_CONF_EXPOSE_ENDPOINT_PASSWORD = "ExposeEndpointPassword";
 
     public static final String API_CATEGORY_FREE = "Free";
@@ -2966,4 +2970,5 @@ public final class APIConstants {
 
     public static final String CASE_SENSITIVE_CHECK_PATH =    "caseSensitiveRoleValidation";
     public static final String MIGRATE = "migrate";
+    public static final String SWAGGER_RELAXED_VALIDATION = "swaggerRelaxedValidation";
 }
