@@ -31,6 +31,7 @@ public class APIDTO   {
     private String organization = null;
     private Boolean isDefaultVersion = null;
     private List<URLMappingDTO> urlMappings = new ArrayList<>();
+    private Object corsConfiguration = null;
 
   /**
    * UUID of API
@@ -246,6 +247,23 @@ public class APIDTO   {
     this.urlMappings = urlMappings;
   }
 
+  /**
+   **/
+  public APIDTO corsConfiguration(Object corsConfiguration) {
+    this.corsConfiguration = corsConfiguration;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("corsConfiguration")
+  public Object getCorsConfiguration() {
+    return corsConfiguration;
+  }
+  public void setCorsConfiguration(Object corsConfiguration) {
+    this.corsConfiguration = corsConfiguration;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -267,12 +285,13 @@ public class APIDTO   {
         Objects.equals(status, API.status) &&
         Objects.equals(organization, API.organization) &&
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
-        Objects.equals(urlMappings, API.urlMappings);
+        Objects.equals(urlMappings, API.urlMappings) &&
+        Objects.equals(corsConfiguration, API.corsConfiguration);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, urlMappings);
+    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, urlMappings, corsConfiguration);
   }
 
   @Override
@@ -292,6 +311,7 @@ public class APIDTO   {
     sb.append("    organization: ").append(toIndentedString(organization)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    urlMappings: ").append(toIndentedString(urlMappings)).append("\n");
+    sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
     sb.append("}");
     return sb.toString();
   }

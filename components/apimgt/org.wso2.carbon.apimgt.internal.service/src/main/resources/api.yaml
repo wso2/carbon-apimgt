@@ -867,6 +867,8 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/URLMapping'
+      corsConfiguration:
+        type: object
 
   #-----------------------------------------------------
   # synapse Artifact resource

@@ -56,34 +56,33 @@ public class ApisApiServiceImpl implements ApisApiService {
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         String organization = RestApiUtil.getOrganization(messageContext);
         organization = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
+        List<API> apiList = new ArrayList<>();
         APIListDTO apiListDTO;
         if (StringUtils.isNotEmpty(gatewayLabel)) {
             if (StringUtils.isNotEmpty(apiId)) {
                 API api = subscriptionValidationDAO.getApiByUUID(apiId, gatewayLabel, organization, expand);
-                apiListDTO = SubscriptionValidationDataUtil.fromAPIToAPIListDTO(api);
+                apiList.add(api);
             } else if (StringUtils.isNotEmpty(context) && StringUtils.isNotEmpty(version)) {
                 if (!context.startsWith("/t/" + organization.toLowerCase())) {
                     apiListDTO = new APIListDTO();
                 }
                 API api = subscriptionValidationDAO
                         .getAPIByContextAndVersion(context, version, gatewayLabel, expand);
-                apiListDTO = SubscriptionValidationDataUtil.fromAPIToAPIListDTO(api);
+                apiList.add(api);
             } else {
                 if (APIConstants.ORG_ALL_QUERY_PARAM.equals(organization)) {
                     // Retrieve API Detail according to Gateway label.
-                    apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(
-                            subscriptionValidationDAO.getAllApisByLabel(gatewayLabel, expand));
+                    apiList = subscriptionValidationDAO.getAllApis(gatewayLabel, expand);
                 } else {
                     // Retrieve API Detail according to Gateway label.
-                    apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(
-                            subscriptionValidationDAO.getAllApis(organization, gatewayLabel, expand));
+                    apiList = subscriptionValidationDAO.getAllApis(organization, gatewayLabel, expand);
                 }
             }
         } else {
-            apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(
-                    subscriptionValidationDAO.getAllApis(organization, expand));
+            apiList = subscriptionValidationDAO.getAllApis(organization, expand);
         }
-        if (APIConstants.APPLICATION_GZIP.equals(accept)) {
+        apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(apiList);
+        if (APIConstants.APPLICATION_GZIP.equals(accept) && apiList.size() > 1) {
             try {
                 File zippedResponse = GZIPUtils.constructZippedResponse(apiListDTO);
                 return Response.ok().entity(zippedResponse)

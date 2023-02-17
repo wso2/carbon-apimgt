@@ -11431,6 +11431,12 @@ components:
         defaultSubscriptionPolicy:
           type: string
           description: Default Subscription Policy.
+        validationForWSEnabled:
+          type: boolean
+          description: |
+            Is Validation for WS Enabled
+          example: false
+          default: false
         authorizationHeader:
           type: string
           description: Authorization Header

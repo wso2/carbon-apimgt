@@ -18,10 +18,16 @@
 package org.wso2.carbon.apimgt.gateway.inbound.websocket;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.util.ReferenceCountUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +42,7 @@ import org.apache.synapse.api.Resource;
 import org.apache.synapse.api.dispatch.RESTDispatcher;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
@@ -47,6 +54,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiC
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiException;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
+import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContextDataHolder;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.handshake.HandshakeProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.GraphQLRequestProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.RequestProcessor;
@@ -56,16 +64,21 @@ import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketPr
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class intercepts the inbound websocket handler execution during handshake, request messaging, response
@@ -99,7 +112,9 @@ public class InboundWebSocketProcessor {
         try {
             HandshakeProcessor handshakeProcessor = new HandshakeProcessor();
             setUris(req, inboundMessageContext);
+            inboundMessageContext.setVersion(getVersionFromUrl(inboundMessageContext.getRequestPath()));
             InboundWebsocketProcessorUtil.setTenantDomainToContext(inboundMessageContext);
+            validateCorsHeaders(ctx, req, inboundMessageContext);
             setMatchingResource(ctx, req, inboundMessageContext);
             String userAgent = req.headers().get(HttpHeaders.USER_AGENT);
 
@@ -147,6 +162,129 @@ public class InboundWebSocketProcessor {
             publishResourceNotFoundEvent(ctx);
         }
         return inboundProcessorResponseDTO;
+    }
+
+    private void validateCorsHeaders(ChannelHandlerContext ctx, FullHttpRequest req,
+                                     InboundMessageContext inboundMessageContext)
+            throws APISecurityException, WebSocketApiException {
+        // Current implementation supports validating only the 'origin' header
+        try {
+            String requestOrigin = req.headers().get(HttpHeaderNames.ORIGIN);
+            // Don't validate the 'origin' header if it's not present in the request
+            if (requestOrigin == null) {
+                return;
+            }
+            CORSConfiguration corsConfiguration = getCORSConfiguration(ctx, req, inboundMessageContext);
+            if (corsConfiguration == null || !corsConfiguration.isCorsConfigurationEnabled()) {
+                return;
+            }
+            String allowedOrigin = assessAndGetAllowedOrigin(requestOrigin,
+                                                             corsConfiguration.getAccessControlAllowOrigins());
+            if (allowedOrigin == null) {
+                handleCORSValidationFailure(ctx, req);
+            }
+
+        }  catch (URISyntaxException | AxisFault e) {
+            throw new WebSocketApiException("Error while getting matching resource for Websocket API");
+        }
+    }
+
+    private CORSConfiguration getCORSConfiguration(ChannelHandlerContext ctx, FullHttpRequest req,
+                                                   InboundMessageContext inboundMessageContext)
+            throws APISecurityException, AxisFault, URISyntaxException {
+        if (!APIUtil.isCORSValidationEnabledForWS()) {
+            return new CORSConfiguration(false, null, false, null, null);
+        }
+        String errorMessage;
+        SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(
+                inboundMessageContext.getTenantDomain());
+        if (datastore != null) {
+            MessageContext synCtx = getMessageContext(inboundMessageContext);
+            API wsApi = InboundWebsocketProcessorUtil.getApi(synCtx, inboundMessageContext);
+            org.wso2.carbon.apimgt.keymgt.model.entity.API api = datastore.getApiByContextAndVersion(
+                    wsApi.getContext(), wsApi.getVersion());
+            if (api == null && APIConstants.DEFAULT_WEBSOCKET_VERSION.equals(inboundMessageContext.getVersion())) {
+                // for websocket default version.
+                api = datastore.getDefaultApiByContext(inboundMessageContext.getRequestPath());
+            }
+            if (api != null) {
+                CORSConfiguration corsConfiguration = api.getCORSConfiguration();
+                if (corsConfiguration != null) {
+                    corsConfiguration.setAccessControlAllowOrigins(corsConfiguration.getAccessControlAllowOrigins());
+                    return corsConfiguration;
+                } else {
+                    List<String> allowedOrigins = new ArrayList<>(WebsocketUtil.getAllowedOriginsConfigured());
+                    return new CORSConfiguration(true, allowedOrigins, false, null, null);
+                }
+            } else {
+                errorMessage = "API with context: " + inboundMessageContext.getRequestPath() + " and version: "
+                        + inboundMessageContext.getVersion() + " not found in Subscription datastore.";
+            }
+        } else {
+            errorMessage = "Subscription datastore is not initialized for tenant domain "
+                    + inboundMessageContext.getTenantDomain();
+        }
+        log.error(errorMessage);
+        handleHandshakeError(ctx.channel().id().asLongText(), new InboundProcessorResponseDTO(), ctx,
+                             inboundMessageContext, req, errorMessage,
+                             APISecurityConstants.CORS_ORIGIN_HEADER_VALIDATION_FAILED,
+                             HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+        return null;
+    }
+
+    /**
+     * Handle error flow in handshake phase.
+     *
+     * @param channelId              Channel Id of the web socket connection
+     * @param responseDTO            InboundProcessorResponseDTO
+     * @param ctx                    ChannelHandlerContext
+     * @param inboundMessageContext  InboundMessageContext
+     * @param msg                    WebsocketFrame that was received
+     * @param errorMessage           Error message
+     * @param errorCode              Error code
+     * @param httpResponseStatusCode Http response status code
+     */
+    private void handleHandshakeError(String channelId, InboundProcessorResponseDTO responseDTO,
+                                      ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext,
+                                      Object msg, String errorMessage, int errorCode, int httpResponseStatusCode)
+            throws APISecurityException {
+        ReferenceCountUtil.release(msg);
+        InboundMessageContextDataHolder.getInstance().removeInboundMessageContextForConnection(channelId);
+        if (StringUtils.isEmpty(responseDTO.getErrorMessage())) {
+            responseDTO.setErrorMessage(errorMessage);
+        }
+        responseDTO.setErrorCode(httpResponseStatusCode);
+        WebsocketUtil.sendHandshakeErrorMessage(ctx, inboundMessageContext, responseDTO, errorMessage, errorCode);
+    }
+
+    private void handleCORSValidationFailure(ChannelHandlerContext ctx, FullHttpRequest req)
+            throws APISecurityException {
+        FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN);
+        ctx.writeAndFlush(httpResponse);
+        ctx.close();
+        log.warn("Validation of CORS origin header failed for WS request on: " + req.uri());
+        throw new APISecurityException(APISecurityConstants.CORS_ORIGIN_HEADER_VALIDATION_FAILED,
+                                       APISecurityConstants.CORS_ORIGIN_HEADER_VALIDATION_FAILED_MESSAGE);
+    }
+
+    private String assessAndGetAllowedOrigin(String origin, Collection<String> allowedOrigins) {
+
+        if (allowedOrigins.contains("*")) {
+            return "*";
+        } else if (allowedOrigins.contains(origin)) {
+            return origin;
+        } else if (origin != null) {
+            for (String allowedOrigin : allowedOrigins) {
+                if (allowedOrigin.contains("*")) {
+                    Pattern pattern = Pattern.compile(allowedOrigin.replace("*", ".*"));
+                    Matcher matcher = pattern.matcher(origin);
+                    if (matcher.find()) {
+                        return origin;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -429,6 +567,16 @@ public class InboundWebSocketProcessor {
             request.headers().remove(header);
         }
         inboundMessageContext.setHeadersToRemove(new ArrayList<>());
+    }
+
+    /**
+     * extract the version from the request uri
+     *
+     * @param url
+     * @return version String
+     */
+    private String getVersionFromUrl(final String url) {
+        return url.replaceFirst(".*/([^/?]+).*", "$1");
     }
 
 }
