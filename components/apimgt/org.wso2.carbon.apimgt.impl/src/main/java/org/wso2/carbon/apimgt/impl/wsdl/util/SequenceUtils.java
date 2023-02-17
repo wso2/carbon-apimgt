@@ -515,8 +515,21 @@ public class SequenceUtils {
         listExamples(SOAPToRESTConstants.EMPTY_STRING, example, parameterJsonPathMapping);
     }
 
-    public static void listExamples(String parent, Example example, Map<String, String> parameterJsonPathMapping)
-            throws JSONException {
+    /**
+     * Recursively go through the example schema. A schema can be either a primitive type such as string, int or a
+     * structured such as object or array. If it's a primitive type, If it's a primitive type, schema does not proceed
+     * further and this ends the branch. If it is an object type or an array type, we need to proceed further as objects
+     * can have further schemas included in and array can have either objects in its array elements or primitive
+     * elements. Objects are stored as LinkedHashMaps in the Example data structure and Arrays are stored as ArrayList.
+     * Each schema path will have a value either simple or array mapped which will be used in later operations. In this
+     * method, a simple type will be assigned if the schema ends with a primitive type in an object schema. If it ends
+     * as primitive elements in an array, array type is assigned.
+     *
+     * @param parent                   Parent nodes schema path
+     * @param example                  Example data node
+     * @param parameterJsonPathMapping Map to be populated with the respective schema paths
+     */
+    public static void listExamples(String parent, Example example, Map<String, String> parameterJsonPathMapping) {
 
         if (SOAPToRESTConstants.Swagger.OBJECT_TYPE.equals(example.getTypeName())) {
             Map<String, Example> values = ((ObjectExample) example).getValues();
