@@ -518,7 +518,7 @@ public class SequenceUtils {
     public static void listExamples(String parent, Example example, Map<String, String> parameterJsonPathMapping)
             throws JSONException {
 
-        if (example.getTypeName().equals(SOAPToRESTConstants.Swagger.OBJECT_TYPE)) {
+        if (SOAPToRESTConstants.Swagger.OBJECT_TYPE.equals(example.getTypeName())) {
             Map<String, Example> values = ((ObjectExample) example).getValues();
             if (values != null) {
                 for (Map.Entry<String, Example> entry : values.entrySet()) {
@@ -528,11 +528,11 @@ public class SequenceUtils {
             } else {
                 parameterJsonPathMapping.put(parent, "simple");
             }
-        } else if (example.getTypeName().equals(SOAPToRESTConstants.Swagger.ARRAY_TYPE)) {
+        } else if (SOAPToRESTConstants.Swagger.ARRAY_TYPE.equals(example.getTypeName())) {
             List<Example> exampleArray = ((ArrayExample) example).getItems();
             if (exampleArray.size() > 0) {
                 for (Example exampleItem : exampleArray) {
-                    if (exampleItem.getTypeName().equals(SOAPToRESTConstants.Swagger.OBJECT_TYPE)) {
+                    if (SOAPToRESTConstants.Swagger.OBJECT_TYPE.equals(exampleItem.getTypeName())) {
                         listExamples(parent, exampleItem, parameterJsonPathMapping);
                     } else {
                         parameterJsonPathMapping.put(parent, "array");
