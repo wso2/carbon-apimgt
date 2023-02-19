@@ -345,26 +345,27 @@ public class RestApiPublisherUtils {
 
             // Detect Media Type and validate.
             inputStream = new ByteArrayInputStream(inputStreamBytes);
-            String fileMediaType = RestApiPublisherUtils.detectMediaType(inputStream);
-            if (log.isDebugEnabled()) {
-                log.debug("Detected Media Type during thumbnail content validation : " + fileMediaType);
-            }
-            if (StringUtils.isBlank(fileMediaType) ||
-                    !RestApiConstants.ALLOWED_THUMBNAIL_MEDIA_TYPES.contains(fileMediaType.toLowerCase())) {
-                RestApiUtil.handleBadRequest(
-                        "Media Type of provided thumbnail is not supported. Supported Media Types are "
-                                + RestApiConstants.ALLOWED_THUMBNAIL_MEDIA_TYPES, log);
-            }
+            if (inputStream.available() > 0) {
+                log.debug("Validating thumbnail content");
+                String fileMediaType = RestApiPublisherUtils.detectMediaType(inputStream);
+                if (log.isDebugEnabled()) {
+                    log.debug("Detected Media Type during thumbnail content validation : " + fileMediaType);
+                }
+                if (StringUtils.isBlank(fileMediaType) || !RestApiConstants.ALLOWED_THUMBNAIL_MEDIA_TYPES.contains(fileMediaType.toLowerCase())) {
+                    RestApiUtil.handleBadRequest(
+                            "Media Type of provided thumbnail is not supported. Supported Media Types are " + RestApiConstants.ALLOWED_THUMBNAIL_MEDIA_TYPES, log);
+                }
 
-            // Convert svg images to png. This is done to prevent scripts within svg images from executing.
-            if (RestApiConstants.SVG_MEDIA_TYPE.equals(fileMediaType)) {
-                log.debug("Converting svg image to png format");
-                outputStream = new ByteArrayOutputStream();
-                TranscoderInput input_svg_image = new TranscoderInput(inputStream);
-                TranscoderOutput output_png_image = new TranscoderOutput(outputStream);
-                PNGTranscoder my_converter = new PNGTranscoder();
-                my_converter.transcode(input_svg_image, output_png_image);
-                inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+                // Convert svg images to png. This is done to prevent scripts within svg images from executing.
+                if (RestApiConstants.SVG_MEDIA_TYPE.equals(fileMediaType)) {
+                    log.debug("Converting svg image to png format");
+                    outputStream = new ByteArrayOutputStream();
+                    TranscoderInput input_svg_image = new TranscoderInput(inputStream);
+                    TranscoderOutput output_png_image = new TranscoderOutput(outputStream);
+                    PNGTranscoder my_converter = new PNGTranscoder();
+                    my_converter.transcode(input_svg_image, output_png_image);
+                    inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+                }
             }
         } catch (TranscoderException | IOException e) {
             throw new APIManagementException("Error while validating thumbnail content", e);
@@ -372,5 +373,34 @@ public class RestApiPublisherUtils {
             IOUtils.closeQuietly(outputStream);
         }
         return inputStream;
+    }
+
+    /**
+     * This method will retrieve the Media Type of the processed input stream
+     *
+     * @param inputStream stream data which has been processed
+     * @param fileDetail object containing meta data of the file
+     * @return Media Type of the processed input stream
+     */
+    public static String getMediaType(InputStream inputStream, Attachment fileDetail) throws IOException {
+        String fileMediaType;
+        if (inputStream.available() > 0) {
+            // Since the inputStream contains data, this will be a thumbnail uploading scenario.
+            fileMediaType = RestApiPublisherUtils.detectMediaType(inputStream);
+        } else {
+            // Since the inputStream does not have data, this will be a thumbnail removing scenario.
+            // Apache Tika would detect the media type of the empty stream as application/octet-stream. Hence,
+            // retrieving the media type from the fileDetail object.
+            fileMediaType = fileDetail.getContentType().toString();
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Media Type of thumbnail to be uploaded : " + fileMediaType);
+        }
+        if (StringUtils.isBlank(fileMediaType)) {
+            RestApiUtil.handleBadRequest(
+                    "Media Type of provided thumbnail is not supported. Supported Media Types are image/jpeg, "
+                            + "image/png, image/gif and image/svg+xml", log);
+        }
+        return fileMediaType;
     }
 }

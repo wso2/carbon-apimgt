@@ -2578,19 +2578,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                         "Unsupported Thumbnail File Extension. Supported extensions are .jpg, .png, .jpeg, .svg "
                                 + "and .gif", log);
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Validating thumbnail content of API : " + apiId);
-            }
             inputStream = (ByteArrayInputStream) RestApiPublisherUtils.validateThumbnailContent(fileInputStream);
-            String fileMediaType = RestApiPublisherUtils.detectMediaType(inputStream);
-            if (log.isDebugEnabled()) {
-                log.debug("Media Type of thumbnail to be uploaded : " + fileMediaType);
-            }
-            if (StringUtils.isBlank(fileMediaType)) {
-                RestApiUtil.handleBadRequest(
-                        "Media Type of provided thumbnail is not supported. Supported Media Types are "
-                                + RestApiConstants.ALLOWED_THUMBNAIL_MEDIA_TYPES, log);
-            }
+            String fileMediaType = RestApiPublisherUtils.getMediaType(inputStream, fileDetail);
             PublisherCommonUtils.updateThumbnail(inputStream, fileMediaType, apiProvider, apiId, organization);
             String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL.replace(RestApiConstants.APIID_PARAM, apiId);
             URI uri = new URI(uriString);
@@ -2611,7 +2600,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while updating thumbnail of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | IOException e) {
             String errorMessage = "Error while updating thumbnail of API: " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } finally {
