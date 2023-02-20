@@ -69,7 +69,7 @@ public class FaultCodeClassifier {
         case APISecurityConstants.SUBSCRIPTION_INACTIVE:
             return FaultSubCategories.Authentication.SUBSCRIPTION_VALIDATION_FAILURE;
         default:
-            return FaultSubCategories.TargetConnectivity.OTHER;
+            return FaultSubCategories.Authentication.OTHER;
         }
     }
 
