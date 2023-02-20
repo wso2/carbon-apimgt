@@ -156,7 +156,8 @@ public class PublisherCommonUtils {
         if (oldEndpointConfig != null) {
             if ((oldEndpointConfig.containsKey(APIConstants.ENDPOINT_SECURITY))) {
                 JSONObject oldEndpointSecurity = (JSONObject) oldEndpointConfig.get(APIConstants.ENDPOINT_SECURITY);
-                if (oldEndpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION)) {
+                if (oldEndpointSecurity != null &&
+                        oldEndpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION)) {
                     JSONObject oldEndpointSecurityProduction = (JSONObject) oldEndpointSecurity
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
 
@@ -167,7 +168,8 @@ public class PublisherCommonUtils {
                                 .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
                     }
                 }
-                if (oldEndpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX)) {
+                if (oldEndpointSecurity != null &&
+                        oldEndpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX)) {
                     JSONObject oldEndpointSecuritySandbox = (JSONObject) oldEndpointSecurity
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
 
@@ -239,8 +241,8 @@ public class PublisherCommonUtils {
         //validation for tiers
         List<String> tiersFromDTO = apiDtoToUpdate.getPolicies();
         String originalStatus = originalAPI.getStatus();
-        if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
-                .contains(APIConstants.API_SECURITY_API_KEY)) {
+        if (apiSecurity != null && (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
+                .contains(APIConstants.API_SECURITY_API_KEY))) {
             if ((tiersFromDTO == null || tiersFromDTO.isEmpty() && !(APIConstants.CREATED.equals(originalStatus)
                     || APIConstants.PROTOTYPED.equals(originalStatus)))
                     && !apiDtoToUpdate.getAdvertiseInfo().isAdvertised()) {
