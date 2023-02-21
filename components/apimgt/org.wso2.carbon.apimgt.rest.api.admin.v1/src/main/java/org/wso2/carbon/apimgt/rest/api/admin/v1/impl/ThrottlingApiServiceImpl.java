@@ -838,7 +838,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Delete a Subscription level policy specified by uuid
      *
-     * @param policyId          uuid of the policyu
+     * @param policyId          uuid of the policy
      * @return 200 OK response if successfully deleted the policy
      */
     @Override
@@ -1091,11 +1091,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @param policyId   UUID of the throttling policy to be exported(for future use)
      * @param policyName Name of the policy to be exported
      * @param type       type of the policy to be exported
-     * @param format     format of the policy details
      * @return Throttling Policy details in ExportThrottlePolicyDTO format
      */
     @Override
-    public Response exportThrottlingPolicy(String policyId, String policyName, String type, String format,
+    public Response exportThrottlingPolicy(String policyId, String policyName, String type,
             MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -1195,6 +1194,9 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                     String errorMessage = "Error while retrieving Custom policy: " + policyName;
                     RestApiUtil.handleInternalServerError(errorMessage, e, log);
                 }
+            }
+            if (policyName == null) {
+                RestApiUtil.handleBadRequest("Policy name is required", log);
             }
             RestApiUtil.handleResourceNotFoundError("No throttle policy found by the name " + policyName, log);
         } catch (APIManagementException | ParseException e) {
