@@ -409,12 +409,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         try {
             PublisherAPI addingAPI = APIMapper.INSTANCE.toPublisherApi(api);
-            if (!addingAPI.getVisibleRoles().isEmpty()) {
-                HashSet<String> roleSet = new HashSet<>(Arrays.asList(addingAPI.getVisibleRoles().split(",")));
-                addingAPI.setLimitedRoles(roleSet);
-            }
 
-            PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(api.getOrganization()), addingAPI);
+            PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(api.getOrganization()),
+                    processAPIVisibility(addingAPI));
             api.setUuid(addedAPI.getId());
             api.setCreatedTime(addedAPI.getCreatedTime());
         } catch (APIPersistenceException e) {
@@ -820,7 +817,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
         try {
             api.setCreatedTime(existingAPI.getCreatedTime());
-            apiPersistenceInstance.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
+
+            PublisherAPI publisherAPI = APIMapper.INSTANCE.toPublisherApi(api);
+            apiPersistenceInstance.updateAPI(new Organization(organization), processAPIVisibility(publisherAPI));
+
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while updating API details", e);
         }
@@ -870,6 +870,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         return api;
+    }
+
+    private PublisherAPI processAPIVisibility(PublisherAPI publisherAPI) {
+        if (!publisherAPI.getVisibility().equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
+            publisherAPI.setLimitedRoles(new HashSet<>());
+        } else if (!publisherAPI.getVisibleRoles().isEmpty()){
+            HashSet<String> roleSet = new HashSet<>(Arrays.asList(publisherAPI.getVisibleRoles().split(",")));
+            publisherAPI.setLimitedRoles(roleSet);
+        }
+        return publisherAPI;
     }
 
     private void validateKeyManagers(API api) throws APIManagementException {
