@@ -1331,14 +1331,17 @@ public class PublisherCommonUtils {
         existingAPI.setUriTemplates(uriTemplates);
         existingAPI.setScopes(scopes);
         PublisherCommonUtils.validateScopes(existingAPI);
+
         //Update API is called to update URITemplates and scopes of the API
-        SwaggerData swaggerData = new SwaggerData(existingAPI);
-        String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
-        apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, organization);
-        existingAPI.setSwaggerDefinition(updatedApiDefinition);
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organization);
         existingAPI.setStatus(unModifiedAPI.getStatus());
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
+        SwaggerData swaggerData = new SwaggerData(existingAPI);
+
+        String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
+        apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, organization);
+        existingAPI.setSwaggerDefinition(updatedApiDefinition);
+
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organization); // TODO see why we need to get it
         // instead of passing same
@@ -1357,9 +1360,11 @@ public class PublisherCommonUtils {
             throws APIManagementException, FaultGatewaysException {
         API oldApi = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
 
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         List<APIOperationsDTO> operationListWithOldData = APIMappingUtil
                 .getOperationListWithOldData(originalAPI.getUriTemplates(),
-                        extractGraphQLOperationList(schemaDefinition));
+                        extractGraphQLOperationList(schemaDefinition), tenantId);
 
         Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI, operationListWithOldData);
         originalAPI.setUriTemplates(uriTemplates);

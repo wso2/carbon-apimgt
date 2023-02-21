@@ -34,6 +34,8 @@ public class SettingsDTO   {
     private Boolean externalStoresEnabled = null;
     private Boolean docVisibilityEnabled = null;
     private Boolean crossTenantSubscriptionEnabled = false;
+    private String defaultAdvancePolicy = null;
+    private String defaultSubscriptionPolicy = null;
     private String authorizationHeader = null;
 
   /**
@@ -198,6 +200,42 @@ public class SettingsDTO   {
   }
 
   /**
+   * Default Advance Policy.
+   **/
+  public SettingsDTO defaultAdvancePolicy(String defaultAdvancePolicy) {
+    this.defaultAdvancePolicy = defaultAdvancePolicy;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Default Advance Policy.")
+  @JsonProperty("defaultAdvancePolicy")
+  public String getDefaultAdvancePolicy() {
+    return defaultAdvancePolicy;
+  }
+  public void setDefaultAdvancePolicy(String defaultAdvancePolicy) {
+    this.defaultAdvancePolicy = defaultAdvancePolicy;
+  }
+
+  /**
+   * Default Subscription Policy.
+   **/
+  public SettingsDTO defaultSubscriptionPolicy(String defaultSubscriptionPolicy) {
+    this.defaultSubscriptionPolicy = defaultSubscriptionPolicy;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Default Subscription Policy.")
+  @JsonProperty("defaultSubscriptionPolicy")
+  public String getDefaultSubscriptionPolicy() {
+    return defaultSubscriptionPolicy;
+  }
+  public void setDefaultSubscriptionPolicy(String defaultSubscriptionPolicy) {
+    this.defaultSubscriptionPolicy = defaultSubscriptionPolicy;
+  }
+
+  /**
    * Authorization Header
    **/
   public SettingsDTO authorizationHeader(String authorizationHeader) {
@@ -234,12 +272,14 @@ public class SettingsDTO   {
         Objects.equals(externalStoresEnabled, settings.externalStoresEnabled) &&
         Objects.equals(docVisibilityEnabled, settings.docVisibilityEnabled) &&
         Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled) &&
+        Objects.equals(defaultAdvancePolicy, settings.defaultAdvancePolicy) &&
+        Objects.equals(defaultSubscriptionPolicy, settings.defaultSubscriptionPolicy) &&
         Objects.equals(authorizationHeader, settings.authorizationHeader);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, authorizationHeader);
+    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader);
   }
 
   @Override
@@ -256,6 +296,8 @@ public class SettingsDTO   {
     sb.append("    externalStoresEnabled: ").append(toIndentedString(externalStoresEnabled)).append("\n");
     sb.append("    docVisibilityEnabled: ").append(toIndentedString(docVisibilityEnabled)).append("\n");
     sb.append("    crossTenantSubscriptionEnabled: ").append(toIndentedString(crossTenantSubscriptionEnabled)).append("\n");
+    sb.append("    defaultAdvancePolicy: ").append(toIndentedString(defaultAdvancePolicy)).append("\n");
+    sb.append("    defaultSubscriptionPolicy: ").append(toIndentedString(defaultSubscriptionPolicy)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
     sb.append("}");
     return sb.toString();

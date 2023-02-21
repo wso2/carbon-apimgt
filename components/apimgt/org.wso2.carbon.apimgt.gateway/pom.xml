@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.28.87-SNAPSHOT</version>
+        <version>9.28.92-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -473,6 +473,7 @@
                             org.apache.commons.codec.*,
                             org.wso2.carbon.apimgt.common.gateway.*,
                             org.wso2.carbon.apimgt.common.jms.*,
+                            org.wso2.carbon.apimgt.common.analytics.*,
                             org.wso2.carbon.apimgt.usage.publisher.*; version="${carbon.apimgt.imp.pkg.version}",
                             javax.annotation;version=0.0.0;resolution:=optional,
                             *;resolution:=optional

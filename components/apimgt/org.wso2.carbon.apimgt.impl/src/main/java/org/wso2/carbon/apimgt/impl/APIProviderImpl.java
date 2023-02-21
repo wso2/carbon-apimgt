@@ -591,6 +591,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void addURITemplates(int apiId, API api, int tenantId) throws APIManagementException {
 
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        validateAndUpdateURITemplates(api, tenantId);
         apiMgtDAO.addURITemplates(apiId, api, tenantId);
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
@@ -953,6 +954,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 oldLocalScopesItr.remove();
             }
         }
+        validateAndUpdateURITemplates(api, tenantId);
         apiMgtDAO.updateURITemplates(api, tenantId);
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the URI templates of API: " + apiIdentifier + " in the database");
@@ -1870,6 +1872,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
         Map<String, String> clonedPolicies = new HashMap<>();
         Set<URITemplate> uriTemplates = newAPI.getUriTemplates();
+        List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails = new ArrayList<>();
         for (URITemplate uriTemplate : uriTemplates) {
             String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
             if (extractedPoliciesMap.containsKey(key)) {
@@ -1877,10 +1880,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 for (OperationPolicy operationPolicy : operationPolicies) {
                     String clonedPolicyId;
                     if (!clonedPolicies.containsKey(operationPolicy.getPolicyId())) {
-                        OperationPolicyData apiSpecificOperationPolicy =
-                                apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(operationPolicy.getPolicyId(),
-                                        oldAPIUuid, newAPI.getOrganization(), true);
-                        clonedPolicyId = apiMgtDAO.cloneOperationPolicy(newAPI.getUuid(), apiSpecificOperationPolicy);
+                        clonedPolicyId = UUID.randomUUID().toString();
+
+                        ClonePolicyMetadataDTO toBeClonedSinglePolicyData = new ClonePolicyMetadataDTO();
+                        toBeClonedSinglePolicyData.setClonedPolicyUUID(clonedPolicyId);
+                        toBeClonedSinglePolicyData.setCurrentPolicyUUID(operationPolicy.getPolicyId());
+                        toBeClonedPolicyDetails.add(toBeClonedSinglePolicyData);
+
                         clonedPolicies.put(operationPolicy.getPolicyId(), clonedPolicyId);
                     } else {
                         clonedPolicyId = clonedPolicies.get(operationPolicy.getPolicyId());
@@ -1892,6 +1898,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         if (uriTemplates != null) {
+            apiMgtDAO.cloneAPISpecificPoliciesForVersioning(oldAPIUuid, newAPI.getUuid(), newAPI.getOrganization(),
+                    toBeClonedPolicyDetails);
             apiMgtDAO.addOperationPolicyMapping(uriTemplates);
         }
     }
@@ -2654,7 +2662,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             " found in api definition for resource " + template.getHTTPVerb() + " " +
                             template.getUriTemplate();
                     log.error(message);
-                    throw new APIManagementException(message);
+                    throw new APIManagementException(message, ExceptionCodes.TIER_NAME_INVALID);
                 }
             }
         }
@@ -6273,5 +6281,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             return false;
         }
         return true;
+    }
+
+    private void validateAndUpdateURITemplates(API api, int tenantId) throws APIManagementException {
+        if (api.getUriTemplates() != null) {
+            for (URITemplate uriTemplate : api.getUriTemplates()) {
+                if (StringUtils.isEmpty(api.getApiLevelPolicy())) {
+                    // API level policy not attached.
+                    if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
+                        uriTemplate.setThrottlingTier(APIUtil.getDefaultAPILevelPolicy(tenantId));
+                    }
+                } else {
+                    uriTemplate.setThrottlingTier(api.getApiLevelPolicy());
+                }
+            }
+        }
     }
 }

@@ -17,6 +17,36 @@
     "DefaultRoles"
   ],
   "properties": {
+    "DefaultApplicationLevelTier": {
+      "$id": "#/properties/DefaultApplicationLevelTier",
+      "type": "string",
+      "title": "The DefaultApplicationLevelTier schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": "Unlimited",
+      "examples": [
+        "10PerMin", "20PerMin", "50PerMin", "Unlimited"
+      ]
+    },
+    "DefaultAPILevelTier": {
+      "$id": "#/properties/DefaultAPILevelTier",
+      "type": "string",
+      "title": "The DefaultAPILevelTier schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": "Unlimited",
+      "examples": [
+        "10KPerMin", "20KPerMin", "50KPerMin", "Unlimited"
+      ]
+    },
+    "DefaultSubscriptionLevelTier": {
+      "$id": "#/properties/DefaultSubscriptionLevelTier",
+      "type": "string",
+      "title": "The DefaultSubscriptionLevelTier schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": "Unlimited",
+      "examples": [
+        "Bronze", "Gold", "Silver", "Unlimited"
+      ]
+    },
     "EnableMonetization": {
       "$id": "#/properties/EnableMonetization",
       "type": "boolean",
