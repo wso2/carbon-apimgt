@@ -26,6 +26,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import io.swagger.models.Path;
 import io.swagger.models.RefModel;
 import io.swagger.models.RefPath;
@@ -889,8 +891,7 @@ public class OASParserUtil {
         }
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         try {
-            JSONParser parser = new JSONParser();
-            parser.parse(apiDefinitionProcessed); // Parsing the json content to validate parsing errors
+            new Gson().fromJson(apiDefinitionProcessed, JsonObject.class); // Parsing the json content to validate parsing errors
             apiDefinitionProcessed = removeUnsupportedBlocksFromResources(apiDefinitionProcessed);
             if (apiDefinitionProcessed != null) {
                 apiDefinition = apiDefinitionProcessed;
