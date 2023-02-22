@@ -400,6 +400,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                         .generateAuthenticationContext(tokenIdentifier, payload, api, getApiLevelPolicy(),
                                 endUserToken, synCtx);
                 APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, contextHeader);
+                synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, authenticationContext.getUsername());
                 if (log.isDebugEnabled()) {
                     log.debug("User is authorized to access the resource using Api Key.");
                 }
