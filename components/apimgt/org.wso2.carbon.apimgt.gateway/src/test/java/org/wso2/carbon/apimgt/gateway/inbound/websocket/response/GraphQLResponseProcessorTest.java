@@ -88,6 +88,16 @@ public class GraphQLResponseProcessorTest {
         PowerMockito.when(InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO,
                 inboundMessageContext, "1")).thenReturn(responseDTO);
         GraphQLResponseProcessor responseProcessor = new GraphQLResponseProcessor();
+        setChannelAttributeMap(inboundMessageContext);
+        PowerMockito.when(WebsocketUtil.validateDenyPolicies(Mockito.anyObject())).thenReturn(responseDTO);
+        InboundProcessorResponseDTO processorResponseDTO =
+                responseProcessor.handleResponse(msgSize, msgText, inboundMessageContext);
+        Assert.assertFalse(processorResponseDTO.isError());
+        Assert.assertNull(processorResponseDTO.getErrorMessage());
+    }
+
+    private void setChannelAttributeMap(InboundMessageContext inboundMessageContext) {
+
         ChannelHandlerContext ctx = Mockito.mock(ChannelHandlerContext.class);
         inboundMessageContext.setCtx(ctx);
         Channel channel = Mockito.mock(Channel.class);
@@ -95,11 +105,6 @@ public class GraphQLResponseProcessorTest {
         PowerMockito.mockStatic(WebSocketUtils.class);
         Mockito.when(channel.attr(WebSocketUtils.WSO2_PROPERTIES)).thenReturn(getChannelAttributeMap());
         PowerMockito.when(WebSocketUtils.getApiProperties(ctx)).thenReturn(new HashMap<>());
-        PowerMockito.when(WebsocketUtil.validateDenyPolicies(Mockito.anyObject())).thenReturn(responseDTO);
-        InboundProcessorResponseDTO processorResponseDTO =
-                responseProcessor.handleResponse(msgSize, msgText, inboundMessageContext);
-        Assert.assertFalse(processorResponseDTO.isError());
-        Assert.assertNull(processorResponseDTO.getErrorMessage());
     }
 
     @Test
@@ -114,6 +119,7 @@ public class GraphQLResponseProcessorTest {
                 .thenReturn(responseDTO);
         PowerMockito.when(WebsocketUtil.validateDenyPolicies(Mockito.anyObject())).thenReturn(responseDTO);
         PowerMockito.when(WebsocketUtil.validateDenyPolicies(Mockito.anyObject())).thenReturn(responseDTO);
+        setChannelAttributeMap(inboundMessageContext);
         GraphQLResponseProcessor responseProcessor = new GraphQLResponseProcessor();
         InboundProcessorResponseDTO processorResponseDTO =
                 responseProcessor.handleResponse(msgSize, msgText, inboundMessageContext);
@@ -142,6 +148,7 @@ public class GraphQLResponseProcessorTest {
                         .getBadRequestFrameErrorDTO("Missing mandatory id field in the message"))
                 .thenReturn(inboundProcessorResponseDTO);
         PowerMockito.when(WebsocketUtil.validateDenyPolicies(Mockito.anyObject())).thenReturn(responseDTO);
+        setChannelAttributeMap(inboundMessageContext);
         InboundProcessorResponseDTO processorResponseDTO =
                 responseProcessor.handleResponse(msgSize, msgText, inboundMessageContext);
         Assert.assertTrue(processorResponseDTO.isError());
@@ -180,13 +187,7 @@ public class GraphQLResponseProcessorTest {
         PowerMockito.when(InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO,
                 inboundMessageContext, "1")).thenReturn(throttleResponseDTO);
         GraphQLResponseProcessor responseProcessor = new GraphQLResponseProcessor();
-        ChannelHandlerContext ctx = Mockito.mock(ChannelHandlerContext.class);
-        inboundMessageContext.setCtx(ctx);
-        Channel channel = Mockito.mock(Channel.class);
-        Mockito.when(ctx.channel()).thenReturn(channel);
-        PowerMockito.mockStatic(WebSocketUtils.class);
-        Mockito.when(channel.attr(WebSocketUtils.WSO2_PROPERTIES)).thenReturn(getChannelAttributeMap());
-        PowerMockito.when(WebSocketUtils.getApiProperties(ctx)).thenReturn(new HashMap<>());
+        setChannelAttributeMap(inboundMessageContext);
         PowerMockito.when(WebsocketUtil.validateDenyPolicies(Mockito.anyObject())).thenReturn(responseDTO);
         InboundProcessorResponseDTO processorResponseDTO =
                 responseProcessor.handleResponse(msgSize, msgText, inboundMessageContext);
@@ -228,13 +229,7 @@ public class GraphQLResponseProcessorTest {
         PowerMockito.when(InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO,
                 inboundMessageContext, "1")).thenReturn(responseDTO);
         GraphQLResponseProcessor responseProcessor = new GraphQLResponseProcessor();
-        ChannelHandlerContext ctx = Mockito.mock(ChannelHandlerContext.class);
-        inboundMessageContext.setCtx(ctx);
-        Channel channel = Mockito.mock(Channel.class);
-        Mockito.when(ctx.channel()).thenReturn(channel);
-        PowerMockito.mockStatic(WebSocketUtils.class);
-        Mockito.when(channel.attr(WebSocketUtils.WSO2_PROPERTIES)).thenReturn(getChannelAttributeMap());
-        PowerMockito.when(WebSocketUtils.getApiProperties(ctx)).thenReturn(new HashMap<>());
+        setChannelAttributeMap(inboundMessageContext);
         PowerMockito.when(WebsocketUtil.validateDenyPolicies(Mockito.anyObject())).thenReturn(responseDTO);
         InboundProcessorResponseDTO processorResponseDTO =
                 responseProcessor.handleResponse(msgSize, msgText, inboundMessageContext);
@@ -283,13 +278,7 @@ public class GraphQLResponseProcessorTest {
                 .thenReturn(responseDTO);
 
         GraphQLResponseProcessor responseProcessor = new GraphQLResponseProcessor();
-        ChannelHandlerContext ctx = Mockito.mock(ChannelHandlerContext.class);
-        inboundMessageContext.setCtx(ctx);
-        Channel channel = Mockito.mock(Channel.class);
-        Mockito.when(ctx.channel()).thenReturn(channel);
-        PowerMockito.mockStatic(WebSocketUtils.class);
-        Mockito.when(channel.attr(WebSocketUtils.WSO2_PROPERTIES)).thenReturn(getChannelAttributeMap());
-        PowerMockito.when(WebSocketUtils.getApiProperties(ctx)).thenReturn(new HashMap<>());
+        setChannelAttributeMap(inboundMessageContext);
         PowerMockito.when(WebsocketUtil.validateDenyPolicies(Mockito.anyObject())).thenReturn(responseDTO);
         InboundProcessorResponseDTO processorResponseDTO = responseProcessor
                 .handleResponse(msgSize, msgText, inboundMessageContext);

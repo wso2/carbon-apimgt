@@ -74,6 +74,10 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                                                      InboundMessageContext inboundMessageContext) {
         InboundProcessorResponseDTO responseDTO;
         JSONObject graphQLMsg = new JSONObject(msgText);
+        // removing the existing resource already set in the channel so that new resource can be extracted and set,
+        // so that analytics events will be published against correct resource
+        WebSocketUtils.removeApiPropertyFromChannel(inboundMessageContext.getCtx(),
+                APIConstants.API_ELECTED_RESOURCE);
         responseDTO = InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext);
         Parser parser = new Parser();
 
@@ -81,63 +85,73 @@ public class GraphQLRequestProcessor extends RequestProcessor {
             responseDTO = WebsocketUtil.validateDenyPolicies(inboundMessageContext);
         }
         //for gql subscription operation payloads
-        if (!responseDTO.isError() && checkIfSubscribeMessage(graphQLMsg)) {
-            String operationId = graphQLMsg.getString(
-                    GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID);
-            if (validatePayloadFields(graphQLMsg)) {
-                String graphQLSubscriptionPayload =
-                        ((JSONObject) graphQLMsg.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD))
-                                .getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_QUERY);
-                Document document = parser.parseDocument(graphQLSubscriptionPayload);
-                // Extract the operation type and operations from the payload
-                OperationDefinition operation = getOperationFromPayload(document);
-                if (operation != null) {
-                    if (checkIfValidSubscribeOperation(operation)) {
-                        responseDTO = validateQueryPayload(inboundMessageContext, document, operationId);
-                        if (!responseDTO.isError()) {
-                            // subscription operation name
-                            String subscriptionOperation = GraphQLProcessorUtil.getOperationListAsString(operation,
-                                    inboundMessageContext.getGraphQLSchemaDTO().getTypeDefinitionRegistry());
-                            WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
-                                    APIConstants.API_ELECTED_RESOURCE, subscriptionOperation);
-                            // extract verb info dto with throttle policy for matching verb
-                            VerbInfoDTO verbInfoDTO = InboundWebsocketProcessorUtil
-                                    .findMatchingVerb(subscriptionOperation, inboundMessageContext);
-                            String authType = verbInfoDTO.getAuthType();
-                            // validate scopes based on subscription payload when security is enabled
-                            if (!StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase()).equals(authType)) {
-                                responseDTO = InboundWebsocketProcessorUtil
-                                        .validateScopes(inboundMessageContext, subscriptionOperation, operationId);
-                            }
+        if (!responseDTO.isError()) {
+            if (checkIfSubscribeMessage(graphQLMsg)) {
+                String operationId = graphQLMsg.getString(
+                        GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID);
+                if (validatePayloadFields(graphQLMsg)) {
+                    String graphQLSubscriptionPayload =
+                            ((JSONObject) graphQLMsg.get(GraphQLConstants.SubscriptionConstants
+                                    .PAYLOAD_FIELD_NAME_PAYLOAD))
+                                    .getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_QUERY);
+                    Document document = parser.parseDocument(graphQLSubscriptionPayload);
+                    // Extract the operation type and operations from the payload
+                    OperationDefinition operation = getOperationFromPayload(document);
+                    if (operation != null) {
+                        if (checkIfValidSubscribeOperation(operation)) {
+                            responseDTO = validateQueryPayload(inboundMessageContext, document, operationId);
                             if (!responseDTO.isError()) {
-                                QueryAnalyzer queryAnalyzer = new QueryAnalyzer(
-                                        inboundMessageContext.getGraphQLSchemaDTO().getGraphQLSchema());
-                                // analyze query depth and complexity
-                                responseDTO = validateQueryDepthAndComplexity(queryAnalyzer,
-                                        inboundMessageContext, graphQLSubscriptionPayload, operationId);
-                                if (!responseDTO.isError()) {
-                                    //throttle for matching resource
+                                // subscription operation name
+                                String subscriptionOperation = GraphQLProcessorUtil.getOperationListAsString(operation,
+                                        inboundMessageContext.getGraphQLSchemaDTO().getTypeDefinitionRegistry());
+                                // set resource name of subscription operation for analytics event publishing
+                                WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
+                                        APIConstants.API_ELECTED_RESOURCE, subscriptionOperation);
+                                // extract verb info dto with throttle policy for matching verb
+                                VerbInfoDTO verbInfoDTO = InboundWebsocketProcessorUtil
+                                        .findMatchingVerb(subscriptionOperation, inboundMessageContext);
+                                String authType = verbInfoDTO.getAuthType();
+                                // validate scopes based on subscription payload when security is enabled
+                                if (!StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase())
+                                        .equals(authType)) {
                                     responseDTO = InboundWebsocketProcessorUtil
-                                            .doThrottleForGraphQL(msgSize, verbInfoDTO, inboundMessageContext,
-                                                    operationId);
-                                    // add verb info dto for the successful invoking subscription operation request
-                                    inboundMessageContext.addVerbInfoForGraphQLMsgId(graphQLMsg
-                                                    .getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID),
-                                            new GraphQLOperationDTO(verbInfoDTO, subscriptionOperation));
+                                            .validateScopes(inboundMessageContext, subscriptionOperation, operationId);
+                                }
+                                if (!responseDTO.isError()) {
+                                    QueryAnalyzer queryAnalyzer = new QueryAnalyzer(
+                                            inboundMessageContext.getGraphQLSchemaDTO().getGraphQLSchema());
+                                    // analyze query depth and complexity
+                                    responseDTO = validateQueryDepthAndComplexity(queryAnalyzer,
+                                            inboundMessageContext, graphQLSubscriptionPayload, operationId);
+                                    if (!responseDTO.isError()) {
+                                        //throttle for matching resource
+                                        responseDTO = InboundWebsocketProcessorUtil
+                                                .doThrottleForGraphQL(msgSize, verbInfoDTO, inboundMessageContext,
+                                                        operationId);
+                                        // add verb info dto for the successful invoking subscription operation request
+                                        inboundMessageContext.addVerbInfoForGraphQLMsgId(graphQLMsg
+                                                        .getString(GraphQLConstants.SubscriptionConstants
+                                                                .PAYLOAD_FIELD_NAME_ID),
+                                                new GraphQLOperationDTO(verbInfoDTO, subscriptionOperation));
+                                    }
                                 }
                             }
+                        } else {
+                            responseDTO = InboundWebsocketProcessorUtil.getBadRequestGraphQLFrameErrorDTO(
+                                    "Invalid operation. Only allowed Subscription type operations", operationId);
                         }
                     } else {
                         responseDTO = InboundWebsocketProcessorUtil.getBadRequestGraphQLFrameErrorDTO(
-                                "Invalid operation. Only allowed Subscription type operations", operationId);
+                                "Operation definition cannot be empty", operationId);
                     }
                 } else {
                     responseDTO = InboundWebsocketProcessorUtil.getBadRequestGraphQLFrameErrorDTO(
-                            "Operation definition cannot be empty", operationId);
+                            "Invalid operation payload", operationId);
                 }
             } else {
-                responseDTO = InboundWebsocketProcessorUtil.getBadRequestGraphQLFrameErrorDTO(
-                        "Invalid operation payload", operationId);
+                // if not subscribe message, set resource name as wild card for analytics event publishing
+                WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
+                        APIConstants.API_ELECTED_RESOURCE, APIConstants.GRAPHQL_RESOURCE_PATH);
             }
         }
         return responseDTO;
