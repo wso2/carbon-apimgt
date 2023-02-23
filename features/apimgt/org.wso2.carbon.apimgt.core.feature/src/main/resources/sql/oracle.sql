@@ -3705,7 +3705,7 @@ CREATE TABLE AM_CORRELATION_PROPERTIES
 
 -- End of API-MGT Tables --
 
---permance indexes start--
+--performance indexes start--
 /
 create index IDX_ITS_LMT on IDN_THRIFT_SESSION (LAST_MODIFIED_TIME)
 /
@@ -3734,5 +3734,7 @@ create index IDX_AS_AITIAI on AM_SUBSCRIPTION (API_ID,TIER_ID,APPLICATION_ID)
 create index IDX_APA_QT on AM_POLICY_APPLICATION (QUOTA_TYPE)
 /
 create index IDX_AA_AT_CB on AM_APPLICATION (APPLICATION_TIER,CREATED_BY)
+/
+create index IDX_IOAT_TSH_TS on IDN_OAUTH2_ACCESS_TOKEN (TOKEN_SCOPE_HASH,TOKEN_STATE)
 /
 -- Performance indexes end--
