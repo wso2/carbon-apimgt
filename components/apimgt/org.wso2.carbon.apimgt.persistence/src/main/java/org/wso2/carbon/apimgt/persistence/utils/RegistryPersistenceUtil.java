@@ -1402,6 +1402,7 @@ public class RegistryPersistenceUtil {
             api.setApiName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
             api.setProviderName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
             api.setVersion(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+            api.setBusinessOwner(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
 
         } catch (GovernanceException e) {
             throw new APIPersistenceException("Error while extracting api attributes ", e);
