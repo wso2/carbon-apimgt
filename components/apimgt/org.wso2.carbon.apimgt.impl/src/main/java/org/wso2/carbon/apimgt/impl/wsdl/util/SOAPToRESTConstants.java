@@ -86,6 +86,8 @@ public class SOAPToRESTConstants {
         public static final String SOAP_VERSION= "x-soap-version";
         public static final String SOAP_MESSAGE_TYPE = "x-soap-message-type";
         public static final String SOAP_STYLE = "x-soap-style";
+        public static final String OBJECT_TYPE ="object";
+        public static final String ARRAY_TYPE ="array";
 
     }
 

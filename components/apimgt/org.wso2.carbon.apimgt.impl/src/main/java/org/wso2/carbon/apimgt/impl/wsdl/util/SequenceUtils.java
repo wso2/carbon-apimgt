@@ -17,6 +17,9 @@
  */
 package org.wso2.carbon.apimgt.impl.wsdl.util;
 
+import io.swagger.inflector.examples.models.ArrayExample;
+import io.swagger.inflector.examples.models.Example;
+import io.swagger.inflector.examples.models.ObjectExample;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
@@ -504,6 +507,53 @@ public class SequenceUtils {
             parameterJsonPathMapping.put(types[0], types[1]);
         } else {
             parameterJsonPathMapping.put(types[0], "simple");
+        }
+    }
+
+    public static void listExamples(Example example, Map<String, String> parameterJsonPathMapping)
+            throws JSONException {
+        listExamples(SOAPToRESTConstants.EMPTY_STRING, example, parameterJsonPathMapping);
+    }
+
+    /**
+     * Recursively go through the example schema. A schema can be either a primitive type such as string, int or a
+     * structured such as object or array. If it's a primitive type, If it's a primitive type, schema does not proceed
+     * further and this ends the branch. If it is an object type or an array type, we need to proceed further as objects
+     * can have further schemas included in and array can have either objects in its array elements or primitive
+     * elements. Objects are stored as LinkedHashMaps in the Example data structure and Arrays are stored as ArrayList.
+     * Each schema path will have a value either simple or array mapped which will be used in later operations. In this
+     * method, a simple type will be assigned if the schema ends with a primitive type in an object schema. If it ends
+     * as primitive elements in an array, array type is assigned.
+     *
+     * @param parent                   Parent nodes schema path
+     * @param example                  Example data node
+     * @param parameterJsonPathMapping Map to be populated with the respective schema paths
+     */
+    public static void listExamples(String parent, Example example, Map<String, String> parameterJsonPathMapping) {
+
+        if (SOAPToRESTConstants.Swagger.OBJECT_TYPE.equals(example.getTypeName())) {
+            Map<String, Example> values = ((ObjectExample) example).getValues();
+            if (values != null) {
+                for (Map.Entry<String, Example> entry : values.entrySet()) {
+                    String childKey = parent.isEmpty() ? entry.getKey() : parent + "." + entry.getKey();
+                    listExamples(childKey, entry.getValue(), parameterJsonPathMapping);
+                }
+            } else {
+                parameterJsonPathMapping.put(parent, "simple");
+            }
+        } else if (SOAPToRESTConstants.Swagger.ARRAY_TYPE.equals(example.getTypeName())) {
+            List<Example> exampleArray = ((ArrayExample) example).getItems();
+            if (exampleArray.size() > 0) {
+                for (Example exampleItem : exampleArray) {
+                    if (SOAPToRESTConstants.Swagger.OBJECT_TYPE.equals(exampleItem.getTypeName())) {
+                        listExamples(parent, exampleItem, parameterJsonPathMapping);
+                    } else {
+                        parameterJsonPathMapping.put(parent, "array");
+                    }
+                }
+            }
+        } else {
+            parameterJsonPathMapping.put(parent, "simple");
         }
     }
 }
