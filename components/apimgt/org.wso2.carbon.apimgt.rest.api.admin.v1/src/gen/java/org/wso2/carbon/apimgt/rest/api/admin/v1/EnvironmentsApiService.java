@@ -27,5 +27,5 @@ public interface EnvironmentsApiService {
       public Response environmentsEnvironmentIdPut(String environmentId, EnvironmentDTO environmentDTO, MessageContext messageContext) throws APIManagementException;
       public Response environmentsGet(MessageContext messageContext) throws APIManagementException;
       public Response environmentsPost(EnvironmentDTO environmentDTO, MessageContext messageContext) throws APIManagementException;
-      public Response validateVhost(String vHost, MessageContext messageContext) throws APIManagementException;
+      public Response validateVhost(String vhost, MessageContext messageContext) throws APIManagementException;
 }

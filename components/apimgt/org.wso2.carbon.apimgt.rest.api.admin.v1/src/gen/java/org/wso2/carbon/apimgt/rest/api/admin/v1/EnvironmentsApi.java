@@ -121,7 +121,7 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. VHost validation information is returned ", response = VHostValidationResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
-    public Response validateVhost( @NotNull @ApiParam(value = "Name of the vHost",required=true)  @QueryParam("vHost") String vHost) throws APIManagementException{
-        return delegate.validateVhost(vHost, securityContext);
+    public Response validateVhost( @NotNull @ApiParam(value = "Name of the vHost",required=true)  @QueryParam("vhost") String vhost) throws APIManagementException{
+        return delegate.validateVhost(vhost, securityContext);
     }
 }
