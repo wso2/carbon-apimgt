@@ -1363,6 +1363,11 @@ public class APIAdminImpl implements APIAdmin {
         return policies;
     }
 
+    @Override
+    public boolean isVHostNameExist(String vHost) throws APIManagementException {
+        return ChoreoApiMgtDAO.getInstance().isVHostExists(vHost);
+    }
+
     private IdentityProvider createIdp(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
 
         IdentityProvider identityProvider = new IdentityProvider();

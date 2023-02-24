@@ -1810,6 +1810,51 @@ paths:
           "https://127.0.0.1:9443/api/am/admin/v3/environments/d7cf8523-9180-4255-84fa-6cb171c1f779"'
 
   ######################################################
+  # The "Environment vHost" resource API
+  ######################################################
+  /environments/validate-vhost:
+    post:
+      tags:
+        - Environments
+        - Validation
+      summary: Validate provided vHost name
+      description: |
+        Using this operation, it is possible check whether the given vHost name is valid
+      operationId: validateVhost
+      parameters:
+        - name: vHost
+          in: query
+          description: Name of the vHost
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            VHost validation information is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VHostValidationResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:environment_read
+            - apim:environment_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v3/environments/validate-vhost?vHost=abf64c3b-258d-4746-8279-d6c5f63ea558-testenv123-dxjit.dev-us-east-azure.choreo.choreoapis.dev"'
+  ######################################################
   # The Bot Detection Data API resources
   ######################################################
   /bot-detection-data:
@@ -4097,6 +4142,15 @@ components:
         wssPort:
           type: integer
           example: 8099
+    VHostValidationResponse:
+      title: VHost validation response
+      required:
+        - validity
+      type: object
+      properties:
+        validity:
+          type: boolean
+          example: true
     AdditionalProperty:
       title: Additional Gateway Properties
       type: object
