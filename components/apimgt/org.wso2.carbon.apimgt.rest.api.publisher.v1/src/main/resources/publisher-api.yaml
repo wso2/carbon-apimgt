@@ -11644,10 +11644,10 @@ components:
         unit:
           type: string
           enum:
-            - Second
-            - Minute
-            - Hour
-            - Day
+            - SECOND
+            - MINUTE
+            - HOUR
+            - DAY
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
