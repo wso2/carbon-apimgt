@@ -68,6 +68,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String apiSecurity; // ?check whether same to private List<String> securityScheme = new ArrayList<>();
     private boolean enableSchemaValidation;
     private boolean enableStore;
+    private Boolean enableBackendJWT;
     private String testKey;
     private String contextTemplate;
     private Set<String> availableTierNames;
@@ -598,6 +599,14 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.vendor = vendor;
     }
 
+    public Boolean getEnableBackendJWT() {
+        return enableBackendJWT;
+    }
+
+    public void setEnableBackendJWT(Boolean enableBackendJWT) {
+        this.enableBackendJWT = enableBackendJWT;
+    }
+
     @Override
     public String toString() {
         return "PublisherAPI [isDefaultVersion=" + isDefaultVersion + ", description=" + description + ", wsdlUrl="
@@ -626,7 +635,7 @@ public class PublisherAPI extends PublisherAPIInfo {
                 + ", versionTimestamp=" + versionTimestamp + ",apiExternalProductionEndpoint="
                 + apiExternalProductionEndpoint + ",apiExternalSandboxEndpoint=" + apiExternalSandboxEndpoint
                 + ", originalDevportalURL" + redirectURL + ", apiOwner" + apiOwner + ", vendor" + vendor
-                + ", toString()=" + super.toString() + "]";
+                + ", apiOwner" + enableBackendJWT + ", toString()=" + super.toString() + "]";
     }
 }
 
