@@ -99,7 +99,7 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
         })
-    }, tags={ "Environments" })
+    }, tags={ "Environments",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created environment as entity in the body. ", response = EnvironmentDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
