@@ -527,7 +527,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param jsonString this string will contain oAuth app details
      * @param userName user name of logged in user.
      * @param clientId this is the consumer key of oAuthApplication
-     * @param applicationName this is the APIM appication name.
+     * @param application the Application Object that represents the Application.
      * @param keyType
      * @param tokenType this is theApplication Token Type. This can be either default or jwt.
      * @param keyManagerName key Manager name
@@ -536,12 +536,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     @Override
     public Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
-                                                      String applicationName, String keyType, String tokenType,
+                                                      Application application, String keyType, String tokenType,
                                                       String keyManagerName, String tenantDomain) throws APIManagementException {
 
         String callBackURL = null;
+        String applicationName = application.getName();
         if (StringUtils.isEmpty(tenantDomain)) {
             tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        } else {
+            int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+            if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+                tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            }
         }
         String keyManagerId = null;
         KeyManagerConfigurationDTO keyManagerConfiguration = null;
@@ -638,6 +644,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         keyDetails.put(APIConstants.FrontEndParameterNames.CLIENT_DETAILS, oAuthApplication.getJsonString());
         keyDetails.put(APIConstants.FrontEndParameterNames.KEY_MAPPING_ID, keyMappingId);
         keyDetails.put(APIConstants.FrontEndParameterNames.MODE, APIConstants.OAuthAppMode.MAPPED.name());
+
+        ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
+                UUID.randomUUID().toString(), System.currentTimeMillis(),
+                APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
+                application.getId(), application.getUUID(), oAuthApplication.getClientId(), keyType,
+                keyManagerName);
+        APIUtil.sendNotification(applicationRegistrationEvent,
+                APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+
         return keyDetails;
     }
 
@@ -2189,7 +2204,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     log.debug("Importing application when KM OAuth App creation is disabled. Trying to map keys");
                     // passing null `clientId` is ok here since the id/secret pair is included
                     // in the `jsonString` and ApplicationUtils#createOauthAppRequest logic handles it.
-                    return mapExistingOAuthClient(jsonString, userId, null, application.getName(), tokenType,
+                    return mapExistingOAuthClient(jsonString, userId, null, application, tokenType,
                             APIConstants.DEFAULT_TOKEN_TYPE, keyManagerName, tenantDomain);
                 } else {
                     throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
