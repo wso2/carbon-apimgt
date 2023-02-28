@@ -1136,7 +1136,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
                 Map<String, Object> keyDetails = apiConsumer
                         .mapExistingOAuthClient(jsonParamObj.toJSONString(), username, clientId,
-                                application.getName(), keyType, tokenType, keyManagerName, organization);
+                                application, keyType, tokenType, keyManagerName, organization);
                 ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil
                         .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                 applicationKeyDTO.setKeyManager(keyManagerName);
