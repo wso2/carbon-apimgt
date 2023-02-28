@@ -243,6 +243,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
 
                     AuthenticationContext authenticationContext = GatewayUtils
                             .generateAuthenticationContext(tokenIdentifier, payload, api, retrievedApi.getApiTier());
+                    synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, authenticationContext.getUsername());
                     APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext);
                     if (log.isDebugEnabled()) {
                         log.debug("User is authorized to access the resource using Internal Key.");

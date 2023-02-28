@@ -56,12 +56,11 @@ public class BasicAuthAuthenticatorTest {
         PowerMockito.when(OpenAPIUtils.getResourceAuthenticationScheme(Mockito.any(), Mockito.any()))
                 .thenReturn(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
 
-        messageContext = Mockito.mock(Axis2MessageContext.class);
         axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext.class);
-        Mockito.when(axis2MsgCntxt.getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME)).thenReturn("1506576365");
-        Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
-        Mockito.when((messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT)))
-                .thenReturn(Mockito.mock(OpenAPI.class));
+        messageContext = new Axis2MessageContext(axis2MsgCntxt, null,null);
+        messageContext.setProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME,"1506576365");
+        messageContext.setProperty(APIMgtGatewayConstants.OPEN_API_OBJECT, Mockito.mock(OpenAPI.class));
+        messageContext.setProperty(BasicAuthAuthenticator.PUBLISHER_TENANT_DOMAIN, "carbon.super");
 
         basicAuthAuthenticator = new BasicAuthAuthenticator(CUSTOM_AUTH_HEADER, true, UNLIMITED_THROTTLE_POLICY);
         BasicAuthCredentialValidator basicAuthCredentialValidator = Mockito.mock(BasicAuthCredentialValidator.class);
@@ -100,8 +99,6 @@ public class BasicAuthAuthenticatorTest {
             return false;
         });
         PowerMockito.whenNew(BasicAuthCredentialValidator.class).withNoArguments().thenReturn(basicAuthCredentialValidator);
-        Mockito.when(messageContext.getProperty(BasicAuthAuthenticator.PUBLISHER_TENANT_DOMAIN)).
-                thenReturn("carbon.super");
 
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -177,6 +174,7 @@ public class BasicAuthAuthenticatorTest {
         Assert.assertTrue(basicAuthAuthenticator.authenticate(messageContext).isAuthenticated());
         transportHeaders = (TreeMap) axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         Assert.assertNull(transportHeaders.get(CUSTOM_AUTH_HEADER));
+        Assert.assertEquals(messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME),"test_username@carbon.super");
     }
 
     @Test

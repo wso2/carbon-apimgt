@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategor
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategories;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 
 /**
@@ -60,16 +61,20 @@ public class FaultCodeClassifier {
         case APISecurityConstants.API_AUTH_MISSING_CREDENTIALS:
         case APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED:
         case APISecurityConstants.API_AUTH_ACCESS_TOKEN_INACTIVE:
+        case WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_ERROR:
+        case WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_ERROR:
+        case WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS:
             return FaultSubCategories.Authentication.AUTHENTICATION_FAILURE;
         case APISecurityConstants.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE:
         case APISecurityConstants.INVALID_SCOPE:
+        case WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR:
             return FaultSubCategories.Authentication.AUTHORIZATION_FAILURE;
         case APISecurityConstants.API_BLOCKED:
         case APISecurityConstants.API_AUTH_FORBIDDEN:
         case APISecurityConstants.SUBSCRIPTION_INACTIVE:
             return FaultSubCategories.Authentication.SUBSCRIPTION_VALIDATION_FAILURE;
         default:
-            return FaultSubCategories.TargetConnectivity.OTHER;
+            return FaultSubCategories.Authentication.OTHER;
         }
     }
 
@@ -88,6 +93,7 @@ public class FaultCodeClassifier {
     protected FaultSubCategory getThrottledFaultSubCategory(int errorCode) {
         switch (errorCode) {
         case APIThrottleConstants.API_THROTTLE_OUT_ERROR_CODE:
+        case WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR:
             return FaultSubCategories.Throttling.API_LEVEL_LIMIT_EXCEEDED;
         case APIThrottleConstants.HARD_LIMIT_EXCEEDED_ERROR_CODE:
             return FaultSubCategories.Throttling.HARD_LIMIT_EXCEEDED;
@@ -104,8 +110,10 @@ public class FaultCodeClassifier {
         case APIThrottleConstants.SUBSCRIPTION_BURST_THROTTLE_OUT_ERROR_CODE:
             return FaultSubCategories.Throttling.BURST_CONTROL_LIMIT_EXCEEDED;
         case APIThrottleConstants.GRAPHQL_QUERY_TOO_DEEP:
+        case WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP:
             return FaultSubCategories.Throttling.QUERY_TOO_DEEP;
         case APIThrottleConstants.GRAPHQL_QUERY_TOO_COMPLEX:
+        case WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_COMPLEX:
             return FaultSubCategories.Throttling.QUERY_TOO_COMPLEX;
         default:
             return FaultSubCategories.Throttling.OTHER;

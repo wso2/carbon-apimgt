@@ -24,6 +24,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -190,6 +191,7 @@ public class MutualSSLAuthenticator implements Authenticator {
             log.debug("Auth context for the API " + getAPIIdentifier(messageContext) + ": Username[" + authContext
                     .getUsername() + "APIKey[(" + authContext.getApiKey() + "] Tier[" + authContext.getTier() + "]");
         }
+        messageContext.setProperty(APIMgtGatewayConstants.END_USER_NAME, authContext.getUsername());
         APISecurityUtils.setAuthenticationContext(messageContext, authContext, null);
     }
 
