@@ -912,6 +912,7 @@ public class APIConsumerImplTest {
                 (accessTokenRequest);
         Mockito.when(keyManager.getNewApplicationAccessToken(accessTokenRequest)).thenReturn(accessTokenInfo);
         Application application = new Application(1);
+        application.setName("app1");
         try {
             apiConsumer.mapExistingOAuthClient("", "admin", "1", application,
                     "refresh", "DEFAULT", "Resident Key Manager", "carbon.super");
