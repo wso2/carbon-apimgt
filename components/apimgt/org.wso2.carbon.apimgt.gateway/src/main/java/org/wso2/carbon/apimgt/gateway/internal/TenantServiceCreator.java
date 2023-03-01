@@ -36,6 +36,7 @@ import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.rmi.RemoteException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -290,6 +291,8 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                 copyArtifact(securedWebSocketInboundEp, MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR);
                 copyArtifact(webHookServerHTTP, MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR);
                 copyArtifact(webHookServerHTTPS, MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR);
+            } catch (FileAlreadyExistsException e) {
+                // This exception is thrown when the file already exists. As this is a harmless, this case is ignored
             } catch (IOException e) {
                 log.error("Error while copying API manager specific synapse sequences" + e);
             }
