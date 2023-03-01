@@ -960,6 +960,11 @@ public class OAS3Parser extends APIDefinition {
             for (Map.Entry<PathItem.HttpMethod, Operation> entry : pathItem.readOperationsMap().entrySet()) {
                 Operation operation = entry.getValue();
                 operation.addExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
+                // set default throttling limit if not defined for operation in openapi definition. This is expected
+                // from the choreo console.
+                if (!operation.getExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
+                    operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, APIUtil.getDefaultThrottleLimit());
+                }
             }
         }
         openAPI.addExtension(APIConstants.X_WSO2_RESPONSE_CACHE,

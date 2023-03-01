@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -10,8 +12,10 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
@@ -138,6 +142,34 @@ public class OAS3ParserTest extends OASTestBase {
         APIDefinitionValidationResponse response = oas3Parser.validateAPIDefinition(openApi, false);
         Assert.assertTrue(response.isValid());
         Assert.assertTrue(response.getParser().getClass().equals(oas3Parser.getClass()));
+    }
+
+    @Test
+    public void getOASDefinitionForPublisher() throws Exception {
+        String relativePath = "definitions" + File.separator + "petstore_v3.yaml";
+        String swagger = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath),
+                "UTF-8");
+        API api = Mockito.mock(API.class);
+        Mockito.when(api.getContext()).thenReturn("/test");
+        String swaggerContent = null;
+        try {
+            swaggerContent = oas3Parser.getOASDefinitionForPublisher(api, swagger);
+        } catch (APIManagementException e) {
+            Assert.fail();
+        }
+        OpenAPI parsedSwagger = new OpenAPIV3Parser().readContents(swaggerContent, null, null).getOpenAPI();
+        Assert.assertNotNull(parsedSwagger);
+        // Tests if the default throttling limit is added if no throttling limit is mentioned in the
+        // swagger definition.
+        Assert.assertNotNull(parsedSwagger.getPaths().get("/pets/{petId}").getGet());
+        Assert.assertNotNull(parsedSwagger.getPaths().get("/pets/{petId}").getGet().getExtensions());
+        Assert.assertNotNull(parsedSwagger.getPaths().get("/pets/{petId}").getGet().getExtensions()
+                .get(APIConstants.SWAGGER_X_THROTTLING_LIMIT));
+        Object limitObject = parsedSwagger.getPaths().get("/pets/{petId}").getGet().getExtensions()
+                .get(APIConstants.SWAGGER_X_THROTTLING_LIMIT);
+        Gson gson = new Gson();
+        JsonObject jsonObject = gson.toJsonTree(limitObject).getAsJsonObject();
+        Assert.assertEquals("requestCount Mismatched", -1, jsonObject.get("requestCount").getAsInt());
     }
 
 }

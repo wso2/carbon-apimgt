@@ -872,6 +872,12 @@ public class OAS2Parser extends APIDefinition {
             for (Map.Entry<HttpMethod, Operation> entry : operationMap.entrySet()) {
                 Operation operation = entry.getValue();
                 operation.setVendorExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
+                if (!operation.getVendorExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
+                    // set default throttling limit if not defined for operation in openapi definition. This is expected
+                    // from the choreo console.
+                    operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
+                            APIUtil.getDefaultThrottleLimit());
+                }
             }
         }
         swagger.setVendorExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
