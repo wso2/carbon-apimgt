@@ -146,7 +146,7 @@ public class OAS3ParserTest extends OASTestBase {
 
     @Test
     public void getOASDefinitionForPublisher() throws Exception {
-        String relativePath = "definitions" + File.separator + "petstore_v3.yaml";
+        String relativePath = "definitions" + File.separator + "petstore_v3_throttle_limit.yaml";
         String swagger = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath),
                 "UTF-8");
         API api = Mockito.mock(API.class);
@@ -170,6 +170,15 @@ public class OAS3ParserTest extends OASTestBase {
         Gson gson = new Gson();
         JsonObject jsonObject = gson.toJsonTree(limitObject).getAsJsonObject();
         Assert.assertEquals("requestCount Mismatched", -1, jsonObject.get("requestCount").getAsInt());
-    }
 
+        Assert.assertNotNull(parsedSwagger.getPaths().get("/pets").getGet());
+        Assert.assertNotNull(parsedSwagger.getPaths().get("/pets").getGet().getExtensions());
+        Assert.assertNotNull(parsedSwagger.getPaths().get("/pets").getGet().getExtensions()
+                .get(APIConstants.SWAGGER_X_THROTTLING_LIMIT));
+        limitObject = parsedSwagger.getPaths().get("/pets").getGet().getExtensions()
+                .get(APIConstants.SWAGGER_X_THROTTLING_LIMIT);
+        jsonObject = gson.toJsonTree(limitObject).getAsJsonObject();
+        Assert.assertEquals("requestCount Mismatched", 10000, jsonObject.get("requestCount").getAsInt());
+        Assert.assertEquals("timeUnit Mismatched", "MINUTE", jsonObject.get("unit").getAsString());
+    }
 }

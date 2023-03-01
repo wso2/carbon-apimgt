@@ -73,6 +73,7 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.endpointurlextractor.EndpointUrl;
+import org.wso2.carbon.apimgt.api.util.ModelUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIEndpointUrlExtractorManager;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -952,18 +953,23 @@ public class OAS3Parser extends APIDefinition {
                 openAPI.addExtension(APIConstants.X_WSO2_MUTUAL_SSL, mutualSSLOptional);
             }
         }
-        // This app security is should given in resource level,
-        // otherwise the default oauth2 scheme defined at each resouce level will override application securities
+        // This app security should be given in resource level,
+        // otherwise the default oauth2 scheme defined at each resource level will override application securities
         JsonNode appSecurityExtension = OASParserUtil.getAppSecurity(apiSecurity);
         for (String pathKey : openAPI.getPaths().keySet()) {
             PathItem pathItem = openAPI.getPaths().get(pathKey);
             for (Map.Entry<PathItem.HttpMethod, Operation> entry : pathItem.readOperationsMap().entrySet()) {
                 Operation operation = entry.getValue();
                 operation.addExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
-                // set default throttling limit if not defined for operation in openapi definition. This is expected
-                // from the choreo console.
+                // If throttling limit remains unassigned in the swagger definition, the throttling-tier property
+                // will be used to generate the limit. If throttling-tier is also not defined, the default tier would
+                // be unlimited tier.
                 if (!operation.getExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
-                    operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, APIUtil.getDefaultThrottleLimit());
+                    String tier = operation.getExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER) ?
+                            (String) operation.getExtensions().get(APIConstants.SWAGGER_X_THROTTLING_TIER) :
+                            APIConstants.UNLIMITED_TIER;
+                    operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
+                            ModelUtil.generateThrottlingLimitFromThrottlingTier(tier));
                 }
             }
         }
