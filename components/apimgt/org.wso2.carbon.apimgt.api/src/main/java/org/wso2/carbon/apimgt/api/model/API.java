@@ -1362,7 +1362,6 @@ public class API implements Serializable {
     /**
      * Property to determine whether to send backend JWTs to this API
      */
-
     public Boolean getEnableBackendJWT() {
         return enableBackendJWT;
     }

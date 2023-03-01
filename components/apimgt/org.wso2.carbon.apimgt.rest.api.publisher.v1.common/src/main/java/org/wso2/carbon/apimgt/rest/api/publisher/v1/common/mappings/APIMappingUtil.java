@@ -196,8 +196,6 @@ public class APIMappingUtil {
 
         model.setImplementation(dto.getEndpointImplementationType().toString());
         model.setType(dto.getType().toString());
-
-        // If property is null, the it should default to true
         model.setEnableBackendJWT(dto.isEnableBackendJWT() != null ? dto.isEnableBackendJWT() : true);
 
         if (dto.getLifeCycleStatus() != null) {
@@ -904,7 +902,7 @@ public class APIMappingUtil {
         dto.setRevisionedApiId(model.getRevisionedApiId());
         dto.setRevisionId(model.getRevisionId());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
-        dto.setEnableBackendJWT(model.getEnableBackendJWT());
+        dto.setEnableBackendJWT(model.getEnableBackendJWT() != null ? model.getEnableBackendJWT() : true);
 
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
