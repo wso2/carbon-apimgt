@@ -44,7 +44,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String businessOwnerEmail;
     private String visibility;
     private String visibleRoles;
-    private Set<String> limitedRoles;
+    private Set<String> visibleRolesSet;
     private String visibleOrganizations; //visibleTenants
     private boolean endpointSecured;
     private String swaggerDefinition;
@@ -204,12 +204,12 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.visibleRoles = visibleRoles;
     }
 
-    public Set<String> getLimitedRoles() {
-        return limitedRoles;
+    public Set<String> getVisibleRolesSet() {
+        return visibleRolesSet;
     }
 
-    public void setLimitedRoles(Set<String> limitedRoles) {
-        this.limitedRoles = limitedRoles;
+    public void setVisibleRolesSet(Set<String> visibleRolesSet) {
+        this.visibleRolesSet = visibleRolesSet;
     }
 
     public String getVisibleOrganizations() {
