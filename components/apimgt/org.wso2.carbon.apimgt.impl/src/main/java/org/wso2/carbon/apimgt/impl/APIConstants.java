@@ -889,8 +889,6 @@ public final class APIConstants {
     public static final String CORS_CONFIGURATION = "CORSConfiguration.";
     public static final String CORS_CONFIGURATION_ENABLED = CORS_CONFIGURATION + "Enabled";
     public static final String CORS_CONFIGURATION_ENABLE_VALIDATION_FOR_WS = CORS_CONFIGURATION + "EnableValidationForWS";
-    public static final String WS_ORIGIN = "WSOrigin";
-    public static final String WS_CORS_ORIGIN_SUCCESS = "WSCORSOriginSuccess";
     public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN = CORS_CONFIGURATION
             + "Access-Control-Allow-Origin";
     public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS = CORS_CONFIGURATION
