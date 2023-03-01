@@ -342,7 +342,7 @@ public class BasicAuthAuthenticator implements Authenticator {
      * @return A string representation of the authentication challenge
      */
     public String getChallengeString() {
-        return "Basic Auth realm=\"WSO2 API Manager\"";
+        return "Basic realm=\"WSO2 API Manager\"";
     }
 
 
