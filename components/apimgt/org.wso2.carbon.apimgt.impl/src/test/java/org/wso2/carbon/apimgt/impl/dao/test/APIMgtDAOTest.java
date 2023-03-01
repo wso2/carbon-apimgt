@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- * 
+ *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -33,19 +33,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -78,6 +66,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
@@ -91,14 +80,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -1469,5 +1451,365 @@ public class APIMgtDAOTest {
         graphqlComplexityInfo.setList(list);
 
         return graphqlComplexityInfo;
+    }
+
+    @Test
+    public void testCommonOperationPolicyAddition() throws Exception {
+        String org = "org1";
+
+        OperationPolicyData operationPolicyData = getOperationPolicyDataObject(org, null, "addHeader");
+
+        String policyID = apiMgtDAO.addCommonOperationPolicy(operationPolicyData);
+        Assert.assertNotNull(policyID);
+
+        OperationPolicyData retrievedCommonPolicyData = apiMgtDAO.getCommonOperationPolicyByPolicyID(policyID, org, true);
+        Assert.assertNotNull(retrievedCommonPolicyData);
+        Assert.assertEquals(retrievedCommonPolicyData.getSpecification().getName(), operationPolicyData.getSpecification().getName());
+
+        apiMgtDAO.deleteOperationPolicyByPolicyId(policyID);
+        OperationPolicyData policyDataAfterDelete = apiMgtDAO.getCommonOperationPolicyByPolicyID(policyID, org,
+                true);
+        Assert.assertNull("Policy should delete", policyDataAfterDelete);
+    }
+
+    @Test
+    public void testAPISpecificOperationPolicyAddition() throws Exception {
+
+        String org = "org1";
+        String apiUUID = "12345";
+
+        OperationPolicyData operationPolicyData = getOperationPolicyDataObject(org, apiUUID, "addHeader");
+
+        String policyID = apiMgtDAO.addAPISpecificOperationPolicy(apiUUID, null, operationPolicyData);
+        Assert.assertNotNull(policyID);
+
+        OperationPolicyData retrievedPolicyData = apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(policyID,
+                apiUUID, org, true);
+        Assert.assertNotNull(retrievedPolicyData);
+        Assert.assertEquals(retrievedPolicyData.getSpecification().getName(), operationPolicyData.getSpecification().getName());
+        Assert.assertEquals(retrievedPolicyData.getApiUUID(), apiUUID);
+
+        apiMgtDAO.deleteOperationPolicyByPolicyId(policyID);
+
+        OperationPolicyData policyDataAfterDelete = apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(policyID,
+                apiUUID, org, true);
+        Assert.assertNull("Policy should delete", policyDataAfterDelete);
+    }
+
+
+    @Test
+    public void testCommonPolicyCloneToAPI() throws Exception {
+        String org = "org1";
+
+        OperationPolicyData commonPolicyData = getOperationPolicyDataObject(org, null, "addHeader");
+        String commonPolicyUUID = apiMgtDAO.addCommonOperationPolicy(commonPolicyData);
+
+        OperationPolicy policy = new OperationPolicy();
+        policy.setPolicyName(commonPolicyData.getSpecification().getName());
+        policy.setPolicyVersion(commonPolicyData.getSpecification().getVersion());
+        policy.setPolicyId(commonPolicyUUID);
+        policy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+        policy.setOrder(1);
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("headerName", "Test Header");
+        parameters.put("headerValue", "Test Value");
+        policy.setParameters(parameters);
+
+        List<OperationPolicy> policyList = new ArrayList<>();
+        policyList.add(policy);
+
+        APIIdentifier apiIdentifier = new APIIdentifier("testCommonPolicyCloneToAPI",
+                "testCommonPolicyCloneToAPI", "1.0.0");
+        API api = new API(apiIdentifier);
+        api.setOrganization(org);
+        api.setContext("/testCommonPolicyCloneToAPI");
+        api.setContextTemplate("/testCommonPolicyCloneToAPI/{version}");
+        api.setScopes(getScopes());
+        api.setStatus(APIConstants.PUBLISHED);
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
+        api.setAsDefaultVersion(true);
+        api.setUUID(UUID.randomUUID().toString());
+        int apiID = apiMgtDAO.addAPI(api, -1234, org);
+        apiMgtDAO.addURITemplates(apiID, api, -1234);
+        api.setUriTemplates(getUriTemplateSetWithPolicies(policyList));
+        apiMgtDAO.updateAPI(api);
+        apiMgtDAO.updateURITemplates(api, -1234);
+
+        String clonedPolicyUUID = null;
+
+        Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesWithOperationPolicies(api.getUuid());
+        for (URITemplate template : uriTemplates) {
+            List<OperationPolicy> storedPolicyList = template.getOperationPolicies();
+            for (OperationPolicy storedPolicy : storedPolicyList) {
+                Assert.assertNotEquals("Policy UUID should changed with cloned policy ID",
+                        commonPolicyUUID, storedPolicy.getPolicyId());
+                Assert.assertEquals("Policy name should be same",
+                        commonPolicyData.getSpecification().getName(), storedPolicy.getPolicyName());
+                Assert.assertEquals("Policy direction should be same",
+                        APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST, storedPolicy.getDirection());
+                Assert.assertEquals("Policy parameters should be same",
+                        parameters, storedPolicy.getParameters());
+
+                if (clonedPolicyUUID == null) {
+                    clonedPolicyUUID = storedPolicy.getPolicyId();
+                } else {
+                    Assert.assertEquals("Since we have used only policy, all the cloned policy UUIDs should be same",
+                            clonedPolicyUUID, storedPolicy.getPolicyId());
+                }
+            }
+        }
+
+        Assert.assertNotNull("Cloned policy UUID should not be null", clonedPolicyUUID);
+
+        OperationPolicyData clonedPolicyData = apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(clonedPolicyUUID,
+                api.getUuid(), org, false);
+
+        Assert.assertNotNull("Cloned policy should be available for API", clonedPolicyData);
+        Assert.assertNotNull("Cloned common policy UUID should not be null",
+                clonedPolicyData.getClonedCommonPolicyId());
+        Assert.assertEquals("Cloned common policy UUID should be the common policy UUID", commonPolicyUUID,
+                clonedPolicyData.getClonedCommonPolicyId());
+        Assert.assertNull("Revision UUID should not be populated", clonedPolicyData.getRevisionUUID());
+
+        apiMgtDAO.deleteAPI(api.getUuid());
+        apiMgtDAO.deleteOperationPolicyByPolicyId(commonPolicyUUID);
+
+        OperationPolicyData clonedPolicyDataAfterDelete = apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(clonedPolicyUUID,
+                api.getUuid(), org, false);
+        Assert.assertNull("Cloned policy should delete with the API delete", clonedPolicyDataAfterDelete);
+    }
+
+    @Test
+    public void testClonePolicyDeleteIfNotUsed() throws Exception {
+        String org = "org1";
+
+        OperationPolicyData headerCPolicyData = getOperationPolicyDataObject(org, null, "addHeader");
+        String headerCPolicyUUID = apiMgtDAO.addCommonOperationPolicy(headerCPolicyData);
+
+        OperationPolicyData logCPolicyData = getOperationPolicyDataObject(org, null, "logPolicy");
+        String logCPolicyUUID = apiMgtDAO.addCommonOperationPolicy(logCPolicyData);
+
+        List<OperationPolicy> policyList = new ArrayList<>();
+
+        OperationPolicy headerCPolicy = new OperationPolicy();
+        headerCPolicy.setPolicyName(headerCPolicyData.getSpecification().getName());
+        headerCPolicy.setPolicyVersion(headerCPolicyData.getSpecification().getVersion());
+        headerCPolicy.setPolicyId(headerCPolicyUUID);
+        headerCPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+        headerCPolicy.setOrder(1);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("headerName", "Test Header");
+        parameters.put("headerValue", "Test Value");
+        headerCPolicy.setParameters(parameters);
+
+        policyList.add(headerCPolicy);
+
+        OperationPolicy logCPolicy = new OperationPolicy();
+        logCPolicy.setPolicyName(logCPolicyData.getSpecification().getName());
+        logCPolicy.setPolicyVersion(logCPolicyData.getSpecification().getVersion());
+        logCPolicy.setPolicyId(logCPolicyUUID);
+        logCPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+        logCPolicy.setOrder(2);
+
+        APIIdentifier apiIdentifier = new APIIdentifier("testClonePolicyDeleteIfNotUsed",
+                "testClonePolicyDeleteIfNotUsed", "1.0.0");
+        API api = new API(apiIdentifier);
+        api.setOrganization(org);
+        api.setContext("/testClonePolicyDeleteIfNotUsed");
+        api.setContextTemplate("/testClonePolicyDeleteIfNotUsed/{version}");
+        api.setScopes(getScopes());
+        api.setStatus(APIConstants.PUBLISHED);
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
+        api.setAsDefaultVersion(true);
+        api.setUUID(UUID.randomUUID().toString());
+        int apiID = apiMgtDAO.addAPI(api, -1234, org);
+        apiMgtDAO.addURITemplates(apiID, api, -1234);
+        api.setUriTemplates(getUriTemplateSetWithPolicies(policyList));
+        apiMgtDAO.updateAPI(api);
+        apiMgtDAO.updateURITemplates(api, -1234);
+
+        String clonedAddHeaderPolicyUUID = null;
+
+        Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesWithOperationPolicies(api.getUuid());
+        for (URITemplate template : uriTemplates) {
+            List<OperationPolicy> storedPolicyList = template.getOperationPolicies();
+            for (OperationPolicy storedPolicy : storedPolicyList) {
+                clonedAddHeaderPolicyUUID = storedPolicy.getPolicyId();
+                break;
+            }
+        }
+
+        List<OperationPolicy> newPolicyList = new ArrayList<>();
+        newPolicyList.add(logCPolicy);
+        api.setUriTemplates(getUriTemplateSetWithPolicies(newPolicyList));
+        apiMgtDAO.updateAPI(api);
+        apiMgtDAO.updateURITemplates(api, -1234);
+
+        Set<URITemplate> updatedUriTemplates = apiMgtDAO.getURITemplatesWithOperationPolicies(api.getUuid());
+        String clonedLogPolicyUUID = null;
+        for (URITemplate template : updatedUriTemplates) {
+            List<OperationPolicy> storedPolicyList = template.getOperationPolicies();
+            for (OperationPolicy storedPolicy : storedPolicyList) {
+                clonedLogPolicyUUID = storedPolicy.getPolicyId();
+                break;
+            }
+        }
+
+        OperationPolicyData clonedAddHeaderPolicyData =
+                apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(clonedAddHeaderPolicyUUID, api.getUuid(), org, false);
+
+        Assert.assertNull("Cloned Add header needs to be cleared as it is no longer used", clonedAddHeaderPolicyData);
+        Assert.assertNotEquals("Policy UUID should change", clonedLogPolicyUUID, clonedAddHeaderPolicyUUID);
+
+        apiMgtDAO.deleteAPI(api.getUuid());
+        apiMgtDAO.deleteOperationPolicyByPolicyId(headerCPolicyUUID);
+        apiMgtDAO.deleteOperationPolicyByPolicyId(logCPolicyUUID);
+    }
+
+
+    @Test
+    public void testAddAPISpecificPolicyToAPI() throws Exception {
+        String org = "carbon.super";
+
+        APIIdentifier apiIdentifier = new APIIdentifier("testAddAPISpecificPolicyToAPI",
+                "testAddAPISpecificPolicyToAPI", "1.0.0");
+        API api = new API(apiIdentifier);
+        api.setOrganization(org);
+        api.setContext("/testAddAPISpecificPolicyToAPI");
+        api.setContextTemplate("/testAddAPISpecificPolicyToAPI/{version}");
+        api.setUriTemplates(getUriTemplateSetWithPolicies(null));
+        api.setScopes(getScopes());
+        api.setStatus(APIConstants.PUBLISHED);
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
+        api.setAsDefaultVersion(true);
+        api.setUUID(UUID.randomUUID().toString());
+        int apiID = apiMgtDAO.addAPI(api, -1234, org);
+        apiMgtDAO.addURITemplates(apiID, api, -1234);
+        apiMgtDAO.updateAPI(api);
+        apiMgtDAO.updateURITemplates(api, -1234);
+
+        OperationPolicyData apiSpecificPolicyData = getOperationPolicyDataObject(org, null, "addHeader");
+        String policyUUID = apiMgtDAO.addAPISpecificOperationPolicy(api.getUuid(), null, apiSpecificPolicyData);
+
+        OperationPolicy policy = new OperationPolicy();
+        policy.setPolicyName(apiSpecificPolicyData.getSpecification().getName());
+        policy.setPolicyVersion(apiSpecificPolicyData.getSpecification().getVersion());
+        policy.setPolicyId(policyUUID);
+        policy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+        policy.setOrder(1);
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("headerName", "Test Header");
+        parameters.put("headerValue", "Test Value");
+        policy.setParameters(parameters);
+
+        List<OperationPolicy> policyList = new ArrayList<>();
+        policyList.add(policy);
+
+        api.setUriTemplates(getUriTemplateSetWithPolicies(policyList));
+        apiMgtDAO.updateAPI(api);
+        apiMgtDAO.updateURITemplates(api, -1234);
+
+        Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesWithOperationPolicies(api.getUuid());
+        for (URITemplate template : uriTemplates) {
+            List<OperationPolicy> storedPolicyList = template.getOperationPolicies();
+            for (OperationPolicy storedPolicy : storedPolicyList) {
+                Assert.assertEquals("Policy UUID should not change", policyUUID, storedPolicy.getPolicyId());
+                Assert.assertEquals("Policy name should be same",
+                        apiSpecificPolicyData.getSpecification().getName(), storedPolicy.getPolicyName());
+                Assert.assertEquals("Policy direction should be same",
+                        APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST, storedPolicy.getDirection());
+                Assert.assertEquals("Policy parameters should be same",
+                        parameters, storedPolicy.getParameters());
+            }
+        }
+
+        OperationPolicyData clonedPolicyData = apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(policyUUID,
+                api.getUuid(), org, false);
+
+        Assert.assertNotNull("Policy should be available for API", clonedPolicyData);
+        Assert.assertNull("Cloned common policy UUID should be null", clonedPolicyData.getClonedCommonPolicyId());
+        Assert.assertNull("Revision UUID should not be populated", clonedPolicyData.getRevisionUUID());
+
+        apiMgtDAO.deleteAPI(api.getUuid());
+
+        OperationPolicyData policyDataAfterDelete = apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(policyUUID,
+                api.getUuid(), org, false);
+        Assert.assertNull("API specific policy should delete with the API delete", policyDataAfterDelete);
+    }
+
+    private OperationPolicyData getOperationPolicyDataObject(String org, String apiUUID, String policyName) throws APIManagementException {
+        String jsonSpec = getPolicyJson(policyName);
+        String jsonDef = getPolicyDef(policyName);
+
+        OperationPolicySpecification policySpec = APIUtil.getValidatedOperationPolicySpecification(jsonSpec);
+
+        OperationPolicyDefinition synapseDefinition = new OperationPolicyDefinition();
+        synapseDefinition.setContent(jsonDef);
+        synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
+        synapseDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(synapseDefinition));
+
+        OperationPolicyData operationPolicyData = new OperationPolicyData();
+        operationPolicyData.setSpecification(policySpec);
+        operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
+
+        operationPolicyData.setOrganization(org);
+        operationPolicyData.setApiUUID(apiUUID);
+        operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
+
+        return operationPolicyData;
+    }
+
+    private Set<URITemplate> getUriTemplateSetWithPolicies(List<OperationPolicy> policy) {
+        Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
+        uriTemplates.add(getUriTemplateWithPolicies("/abc", "GET", "Any",
+                "Unlimited", policy));
+        uriTemplates.add(getUriTemplateWithPolicies("/abc", "POST", "Any",
+                "Unlimited", policy));
+        return uriTemplates;
+    }
+
+    private URITemplate getUriTemplateWithPolicies(String resourceString, String httpVerb,
+                                                   String authType, String throtlingTier, List<OperationPolicy> policyList) {
+        URITemplate uriTemplate = new URITemplate();
+        uriTemplate.setUriTemplate(resourceString);
+        uriTemplate.setHTTPVerb(httpVerb);
+        uriTemplate.setThrottlingTier(throtlingTier);
+        uriTemplate.setAuthType(authType);
+        if (policyList != null) {
+            uriTemplate.setOperationPolicies(policyList);
+        }
+        return uriTemplate;
+    }
+
+    private String getPolicyJson(String policyName) {
+        if ("addHeader".equals(policyName)) {
+            return "{ \"category\": \"Mediation\", \"name\": \"addHeader\", \"version\": \"v1\", \"displayName\": " +
+                    "\"Add Header\", \"description\": \"This policy allows you to add a new header to the request\", " +
+                    "\"policyAttributes\": [ { \"name\": \"headerName\", \"displayName\": \"Header Name\", \"description\": " +
+                    "\"Name of the header to be added\", \"validationRegex\": \"^([a-zA-Z_][a-zA-Z\\\\d_\\\\-\\\\ ]*)$\"," +
+                    " \"type\": \"String\", \"required\": true }, { \"name\": \"headerValue\", \"displayName\": " +
+                    "\"Header Value\", \"description\": \"Value of the header\", \"validationRegex\": " +
+                    "\"^([a-zA-Z\\\\d_][a-zA-Z\\\\d_\\\\-\\\\ ]*)$\", \"type\": \"String\", \"required\": true } ]," +
+                    " \"applicableFlows\": [ \"request\", \"response\", \"fault\" ], \"supportedGateways\": [ \"Synapse\" ]," +
+                    " \"supportedApiTypes\": [ \"HTTP\" ] }";
+        } else if ("logPolicy".equals(policyName)) {
+            return "{ \"category\": \"Mediation\", \"name\": \"addLogMessage\", \"version\": \"v1\"," +
+                    " \"displayName\": \"Log Policy\", \"description\": " +
+                    "\"This policy allows you to log the important details of the request\", \"applicableFlows\": " +
+                    "[ \"request\", \"response\", \"fault\" ], \"supportedGateways\": [ \"Synapse\" ], " +
+                    "\"supportedApiTypes\": [ \"HTTP\" ] }";
+        }
+        return "";
+    }
+
+    private String getPolicyDef(String policyName) {
+        if ("addHeader".equals(policyName)) {
+            return "<property action=\"set\" name=\"{{headerName}}\" value=\"{{headerValue}}\" scope=\"transport\" />";
+        } else if ("logPolicy".equals(policyName)) {
+            return "<log level=\"full\"> <property name=\"MESSAGE\" value=\"MESSAGE\"/> </log>";
+        }
+        return "";
     }
 }

@@ -122,7 +122,7 @@ public class SequenceGenerator {
             Map<HttpMethod, Operation> operationMap = path.getOperationMap();
             for (HttpMethod httpMethod : operationMap.keySet()) {
                 boolean isResourceFromWSDL = false;
-                Map<String, String> parameterJsonPathMapping = new HashMap<>();
+                Map<String, String> parameterJsonPathMapping = new LinkedHashMap<>();
                 Map<String, String> queryParameters = new HashMap<>();
                 Operation operation = operationMap.get(httpMethod);
                 String operationId = operation.getOperationId();
@@ -163,10 +163,8 @@ public class SequenceGenerator {
                                 Example example = ExampleBuilder
                                         .fromModel(defName, model, definitions, new HashSet<String>());
                                 replaceNullWithStringExample(example);
-                                String jsonExample = Json.pretty(example);
                                 try {
-                                    org.json.JSONObject json = new org.json.JSONObject(jsonExample);
-                                    SequenceUtils.listJson(json, parameterJsonPathMapping);
+                                    SequenceUtils.listExamples(example, parameterJsonPathMapping);
                                 } catch (JSONException e) {
                                     log.error("Error occurred while generating json mapping for the definition", e);
                                 }
@@ -270,11 +268,8 @@ public class SequenceGenerator {
                         String defName = $ref.substring("#/definitions/".length());
                         Model model = definitions.get(defName);
                         Example example = ExampleBuilder.fromModel(defName, model, definitions, new HashSet<String>());
-
-                        String jsonExample = Json.pretty(example);
                         try {
-                            org.json.JSONObject json = new org.json.JSONObject(jsonExample);
-                            SequenceUtils.listJson(json, parameterJsonPathMapping);
+                            SequenceUtils.listExamples(example, parameterJsonPathMapping);
                         } catch (JSONException e) {
                             log.error("Error occurred while generating json mapping for the definition: " + defName, e);
                         }

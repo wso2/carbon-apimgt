@@ -49,34 +49,45 @@ public class GraphQLResponseProcessor extends ResponseProcessor {
         InboundProcessorResponseDTO responseDTO =
                 InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext);
         JSONObject graphQLMsg = new JSONObject(msgText);
+        // removing the existing resource already set in the channel so that new resource can be extracted and set,
+        // so that analytics events will be published against correct resource
+        WebSocketUtils.removeApiPropertyFromChannel(inboundMessageContext.getCtx(),
+                APIConstants.API_ELECTED_RESOURCE);
 
         if (!responseDTO.isError()) {
             responseDTO = WebsocketUtil.validateDenyPolicies(inboundMessageContext);
         }
-        if (!responseDTO.isError() && checkIfSubscribeMessageResponse(graphQLMsg)) {
-            if (graphQLMsg.has(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID)
-                    && graphQLMsg.getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID) != null) {
-                String operationId = graphQLMsg.getString(
-                        GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID);
-                GraphQLOperationDTO graphQLOperationDTO =
-                        inboundMessageContext.getVerbInfoForGraphQLMsgId(
-                                graphQLMsg.getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID));
-                WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
-                        APIConstants.API_ELECTED_RESOURCE, graphQLOperationDTO.getOperation());
-                // validate scopes based on subscription payload when security is enabled
-                String authType = graphQLOperationDTO.getVerbInfoDTO().getAuthType();
-                if (!StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase()).equals(authType)) {
+        if (!responseDTO.isError()) {
+            if (checkIfSubscribeMessageResponse(graphQLMsg)) {
+                if (graphQLMsg.has(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID)
+                        && graphQLMsg.getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID) != null) {
+                    String operationId = graphQLMsg.getString(
+                            GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID);
+                    GraphQLOperationDTO graphQLOperationDTO =
+                            inboundMessageContext.getVerbInfoForGraphQLMsgId(
+                                    graphQLMsg.getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID));
+                    // set resource name of subscription operation for analytics event publishing
+                    WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
+                            APIConstants.API_ELECTED_RESOURCE, graphQLOperationDTO.getOperation());
+                    // validate scopes based on subscription payload when security is enabled
+                    String authType = graphQLOperationDTO.getVerbInfoDTO().getAuthType();
+                    if (!StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase()).equals(authType)) {
+                        responseDTO = InboundWebsocketProcessorUtil
+                                .validateScopes(inboundMessageContext, graphQLOperationDTO.getOperation(), operationId);
+                    }
+                    if (!responseDTO.isError()) {
+                        //throttle for matching resource
+                        return InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize,
+                                graphQLOperationDTO.getVerbInfoDTO(), inboundMessageContext, operationId);
+                    }
+                } else {
                     responseDTO = InboundWebsocketProcessorUtil
-                            .validateScopes(inboundMessageContext, graphQLOperationDTO.getOperation(), operationId);
-                }
-                if (!responseDTO.isError()) {
-                    //throttle for matching resource
-                    return InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize,
-                            graphQLOperationDTO.getVerbInfoDTO(), inboundMessageContext, operationId);
+                            .getBadRequestFrameErrorDTO("Missing mandatory id field in the message");
                 }
             } else {
-                responseDTO = InboundWebsocketProcessorUtil
-                        .getBadRequestFrameErrorDTO("Missing mandatory id field in the message");
+                // if not subscribe message, set resource name as wild card for analytics event publishing
+                WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
+                        APIConstants.API_ELECTED_RESOURCE, APIConstants.GRAPHQL_RESOURCE_PATH);
             }
         }
         return responseDTO;

@@ -676,6 +676,24 @@ public class OAS2Parser extends APIDefinition {
             }
         } else {
             validationResponse.setValid(true);
+            // Check whether the given OpenAPI definition contains empty resource paths
+            // We are checking this manually since the Swagger parser does not throw an error for this
+            // Which is a known issue of Swagger 2.0 parser
+            Set<URITemplate> uriTemplates = null;
+            uriTemplates = getURITemplates(apiDefinition);
+            if (uriTemplates == null) {
+                validationResponse.setValid(false);
+                return validationResponse;
+            } else {
+                for (URITemplate uriTemplate : uriTemplates) {
+                    if (uriTemplate.getUriTemplate().isEmpty()) {
+                        OASParserUtil.addErrorToValidationResponse(validationResponse,
+                                "A resource path is empty in the swagger definition");
+                        validationResponse.setValid(false);
+                        return validationResponse;
+                    }
+                }
+            }
         }
         if (validationResponse.isValid() && parseAttemptForV2.getSwagger() != null){
             Swagger swagger = parseAttemptForV2.getSwagger();
