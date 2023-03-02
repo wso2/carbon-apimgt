@@ -120,7 +120,7 @@ public interface APIConsumer extends APIManager {
      * @param jsonString this string will contain oAuth app details
      * @param userName user name of logged in user.
      * @param clientId this is the consumer key of oAuthApplication
-     * @param applicationName this is the APIM appication name.
+     * @param application the Application Object that represents the Application.
      * @param keyType
      * @param tokenType this is theApplication Token Type. This can be either default or jwt.
      * @param keyManagerName
@@ -128,7 +128,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
-                                               String applicationName, String keyType, String tokenType,
+                                               Application application, String keyType, String tokenType,
                                                String keyManagerName,String tenantDomain) throws APIManagementException;
 
     /**
