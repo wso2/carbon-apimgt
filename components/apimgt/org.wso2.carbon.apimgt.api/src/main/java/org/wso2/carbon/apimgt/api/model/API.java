@@ -68,7 +68,6 @@ public class API implements Serializable {
     private Set<Tier> availableTiers = new LinkedHashSet<Tier>();
     private Set<Policy> availableSubscriptionLevelPolicies = new LinkedHashSet<Policy>();
     private String apiLevelPolicy;
-
     private ThrottlingLimit throttlingLimit;
     private AuthorizationPolicy authorizationPolicy;
     private Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
@@ -81,6 +80,7 @@ public class API implements Serializable {
 
     private String status;
 
+    private Boolean enableBackendJWT;
     private String technicalOwner;
     private String technicalOwnerEmail;
     private String businessOwner;
@@ -1357,5 +1357,16 @@ public class API implements Serializable {
 
     public void setThrottleLimit(ThrottlingLimit throttleLimit) {
         this.throttlingLimit = throttleLimit;
+    }
+
+    /**
+     * Property to determine whether to send backend JWTs to this API
+     */
+    public Boolean getEnableBackendJWT() {
+        return enableBackendJWT;
+    }
+
+    public void setEnableBackendJWT(Boolean enableBackendJWT) {
+        this.enableBackendJWT = enableBackendJWT;
     }
 }

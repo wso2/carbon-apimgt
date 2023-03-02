@@ -215,4 +215,27 @@ public class ChoreoApiMgtDAO {
         }
         return envToDataPlaneIdMap;
     }
+
+    /**
+     * Checks whether the given vHost exists.
+     *
+     * @param vHost        vHost name
+     * @throws APIManagementException if failed to check the vHost name
+     */
+    public boolean isVHostExists(String vHost) throws APIManagementException {
+        boolean isValidVHost = false;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_VHOSTS_BY_NAME_SQL))
+        {
+            prepStmt.setString(1, vHost);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    isValidVHost = true;
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Failed to check the availability of the provided vHost" + vHost, e);
+        }
+        return isValidVHost;
+    }
 }

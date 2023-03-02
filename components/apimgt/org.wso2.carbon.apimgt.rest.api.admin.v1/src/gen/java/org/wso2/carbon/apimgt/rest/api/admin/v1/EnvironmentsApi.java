@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.impl.EnvironmentsApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -98,11 +99,29 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
         })
-    }, tags={ "Environments" })
+    }, tags={ "Environments",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created environment as entity in the body. ", response = EnvironmentDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
     public Response environmentsPost(@ApiParam(value = "Environment object that should to be added " ,required=true) EnvironmentDTO environmentDTO) throws APIManagementException{
         return delegate.environmentsPost(environmentDTO, securityContext);
+    }
+
+    @POST
+    @Path("/validate-vhost")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Validate provided vHost name", notes = "Using this operation, it is possible check whether the given vHost name is valid ", response = VHostValidationResponseDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:environment_read", description = "Retrieve gateway environments"),
+            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
+        })
+    }, tags={ "Environments", "Validation" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. VHost validation information is returned ", response = VHostValidationResponseDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
+    public Response validateVhost( @NotNull @ApiParam(value = "Name of the vHost",required=true)  @QueryParam("vhost") String vhost) throws APIManagementException{
+        return delegate.validateVhost(vhost, securityContext);
     }
 }

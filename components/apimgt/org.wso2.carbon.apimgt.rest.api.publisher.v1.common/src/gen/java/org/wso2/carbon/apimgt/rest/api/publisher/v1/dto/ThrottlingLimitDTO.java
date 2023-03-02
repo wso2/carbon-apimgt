@@ -25,10 +25,10 @@ public class ThrottlingLimitDTO   {
     @XmlType(name="UnitEnum")
     @XmlEnum(String.class)
     public enum UnitEnum {
-        SECOND("Second"),
-        MINUTE("Minute"),
-        HOUR("Hour"),
-        DAY("Day");
+        SECOND("SECOND"),
+        MINUTE("MINUTE"),
+        HOUR("HOUR"),
+        DAY("DAY");
         private String value;
 
         UnitEnum (String v) {

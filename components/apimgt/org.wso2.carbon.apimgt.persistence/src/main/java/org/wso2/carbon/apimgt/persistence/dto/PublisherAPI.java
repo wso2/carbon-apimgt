@@ -44,6 +44,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String businessOwnerEmail;
     private String visibility;
     private String visibleRoles;
+    private Set<String> visibleRolesSet;
     private String visibleOrganizations; //visibleTenants
     private boolean endpointSecured;
     private String swaggerDefinition;
@@ -68,6 +69,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String apiSecurity; // ?check whether same to private List<String> securityScheme = new ArrayList<>();
     private boolean enableSchemaValidation;
     private boolean enableStore;
+    private Boolean enableBackendJWT;
     private String testKey;
     private String contextTemplate;
     private Set<String> availableTierNames;
@@ -201,6 +203,14 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     public void setVisibleRoles(String visibleRoles) {
         this.visibleRoles = visibleRoles;
+    }
+
+    public Set<String> getVisibleRolesSet() {
+        return visibleRolesSet;
+    }
+
+    public void setVisibleRolesSet(Set<String> visibleRolesSet) {
+        this.visibleRolesSet = visibleRolesSet;
     }
 
     public String getVisibleOrganizations() {
@@ -598,6 +608,14 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.vendor = vendor;
     }
 
+    public Boolean getEnableBackendJWT() {
+        return enableBackendJWT;
+    }
+
+    public void setEnableBackendJWT(Boolean enableBackendJWT) {
+        this.enableBackendJWT = enableBackendJWT;
+    }
+
     @Override
     public String toString() {
         return "PublisherAPI [isDefaultVersion=" + isDefaultVersion + ", description=" + description + ", wsdlUrl="
@@ -626,7 +644,7 @@ public class PublisherAPI extends PublisherAPIInfo {
                 + ", versionTimestamp=" + versionTimestamp + ",apiExternalProductionEndpoint="
                 + apiExternalProductionEndpoint + ",apiExternalSandboxEndpoint=" + apiExternalSandboxEndpoint
                 + ", originalDevportalURL" + redirectURL + ", apiOwner" + apiOwner + ", vendor" + vendor
-                + ", toString()=" + super.toString() + "]";
+                + ", apiOwner" + enableBackendJWT + ", toString()=" + super.toString() + "]";
     }
 }
 
