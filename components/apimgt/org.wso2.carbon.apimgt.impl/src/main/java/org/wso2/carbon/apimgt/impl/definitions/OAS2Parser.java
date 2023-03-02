@@ -697,7 +697,7 @@ public class OAS2Parser extends APIDefinition {
                                 .get(xThrottlingLimitExtension));
                 if (errorItem != null) {
                     validationResponse.getErrorItems().add(errorItem);
-                    errorItem.setDescription("Error while validating the x-throttling-limit extension " +
+                    errorItem.setDescription("Invalid x-throttling-limit extension " +
                             "at the API Level");
                     return validationResponse;
                 }
@@ -713,7 +713,7 @@ public class OAS2Parser extends APIDefinition {
                                 operation.getVendorExtensions().get(xThrottlingLimitExtension));
                         if (errorItem != null) {
                             validationResponse.getErrorItems().add(errorItem);
-                            errorItem.setDescription(String.format("Error while validating the x-throttling-limit " +
+                            errorItem.setDescription(String.format("Invalid x-throttling-limit " +
                                     "extension at the operation %s:%s", path, operationEntry.getKey()));
                             return validationResponse;
                         }
@@ -1854,8 +1854,8 @@ public class OAS2Parser extends APIDefinition {
     }
 
     @Override
-    public Object getRootLevelSwaggerExtension(String swaggerContent, String extensionKey) {
-        Swagger swagger = getSwagger(swaggerContent);
+    public Object getRootLevelExtension(String apiDefinitionContent, String extensionKey) {
+        Swagger swagger = getSwagger(apiDefinitionContent);
         if (swagger.getVendorExtensions() == null) {
             return null;
         }

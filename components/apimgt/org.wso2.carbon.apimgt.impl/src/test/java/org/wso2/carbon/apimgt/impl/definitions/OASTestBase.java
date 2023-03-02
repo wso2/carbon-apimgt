@@ -205,7 +205,7 @@ public class OASTestBase {
     }
 
     public void testThrottlingLimitParsing(APIDefinition parser, String swaggerContent) {
-        Object extension = parser.getRootLevelSwaggerExtension(swaggerContent, "x-throttling-limit");
+        Object extension = parser.getRootLevelExtension(swaggerContent, "x-throttling-limit");
         Assert.assertNotNull("x-throttling-limit extension is not identified", extension);
         ThrottlingLimit throttlingLimit = null;
         try {

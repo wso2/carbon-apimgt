@@ -2182,7 +2182,7 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     @Override
-    public Object getRootLevelSwaggerExtension(String swaggerContent, String extensionKey) {
+    public Object getRootLevelExtension(String apiDefinitionContent, String extensionKey) {
         return null;
     }
 }

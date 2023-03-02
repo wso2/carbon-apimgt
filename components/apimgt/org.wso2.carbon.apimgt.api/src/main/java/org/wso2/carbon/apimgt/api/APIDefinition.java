@@ -272,24 +272,24 @@ public abstract class APIDefinition {
     /**
      * This method will extract the root level swagger extension
      *
-     * @param swaggerContent String
+     * @param apiDefinitionContent String (this could be openapi, swagger, asyncapi content)
      * @param extensionKey   String
      * @return Object
      * @throws APIManagementException
      */
-    public abstract Object getRootLevelSwaggerExtension(String swaggerContent, String extensionKey);
+    public abstract Object getRootLevelExtension(String apiDefinitionContent, String extensionKey);
 
     /**
      * This method will extract the resource level swagger extension
      *
-     * @param swaggerContent String
+     * @param apiDefinitionContent String
      * @return {@link ThrottlingLimit}
      * @throws APIManagementException if the value under extension cannot be mapped to a {@link ThrottlingLimit}
      *                                object
      */
-    public ThrottlingLimit getAPILevelThrottlingLimit(String swaggerContent)
+    public ThrottlingLimit getAPILevelThrottlingLimit(String apiDefinitionContent)
             throws APIManagementException {
-        Object extension = getRootLevelSwaggerExtension(swaggerContent,
+        Object extension = getRootLevelExtension(apiDefinitionContent,
                 APIConstants.X_THROTTLING_LIMIT_OPENAPI_EXTENSION);
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -299,7 +299,7 @@ public abstract class APIDefinition {
             // Unreachable condition as the extension is already validated before calling this method.
         } catch (IllegalArgumentException e) {
             throw new APIManagementException(
-                    String.format("Invalid content under the %s extension in swagger definition",
+                    String.format("Invalid content under the %s extension in the api definition",
                             APIConstants.X_THROTTLING_LIMIT_OPENAPI_EXTENSION), e);
         }
         return null;
