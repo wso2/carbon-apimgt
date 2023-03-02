@@ -64,8 +64,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Export Successful. ", response = ExportThrottlePolicyDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response exportThrottlingPolicy( @ApiParam(value = "UUID of the ThrottlingPolicy")  @QueryParam("policyId") String policyId,  @ApiParam(value = "Throttling Policy Name ")  @QueryParam("name") String name,  @ApiParam(value = "Type of the Throttling Policy ", allowableValues="sub, app, api, global")  @QueryParam("type") String type,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format) throws APIManagementException{
-        return delegate.exportThrottlingPolicy(policyId, name, type, format, securityContext);
+    public Response exportThrottlingPolicy( @ApiParam(value = "UUID of the ThrottlingPolicy")  @QueryParam("policyId") String policyId,  @ApiParam(value = "Throttling Policy Name ")  @QueryParam("name") String name,  @ApiParam(value = "Type of the Throttling Policy ", allowableValues="sub, app, api, global")  @QueryParam("type") String type) throws APIManagementException{
+        return delegate.exportThrottlingPolicy(policyId, name, type, securityContext);
     }
 
     @POST
