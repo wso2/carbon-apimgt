@@ -1963,7 +1963,7 @@
         <carbon.commons.version>4.9.2</carbon.commons.version>
 
         <carbon.registry.version>4.8.13</carbon.registry.version>
-        <carbon.mediation.version>4.7.174</carbon.mediation.version>
+        <carbon.mediation.version>4.7.175</carbon.mediation.version>
 
         <mongodb.driver.version>4.1.0</mongodb.driver.version>
 
@@ -2042,7 +2042,7 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-        <synapse.version>4.0.0-wso2v19</synapse.version>
+        <synapse.version>4.0.0-wso2v20</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
