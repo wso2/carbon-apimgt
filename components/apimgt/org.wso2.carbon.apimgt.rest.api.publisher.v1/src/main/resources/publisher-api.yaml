@@ -8390,6 +8390,9 @@ components:
         isRevision:
           type: boolean
           example: false
+        enableBackendJWT:
+          type: boolean
+          example: true
         revisionedApiId:
           type: string
           description: |
