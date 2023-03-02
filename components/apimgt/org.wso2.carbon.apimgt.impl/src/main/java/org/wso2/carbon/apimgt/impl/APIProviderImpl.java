@@ -4745,6 +4745,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 populateAPIStatus(api);
                 populateDefaultVersion(api);
+                if (publisherAPI.getVisibleRolesSet() != null) {
+                    String visibleRoles = StringUtils.join(publisherAPI.getVisibleRolesSet(), ',');
+                    api.setVisibleRoles(visibleRoles);
+                }
+
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
