@@ -62,6 +62,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String apiSecurity;
     private String visibility;
     private String visibleRoles;
+    private Set<String> visibleRolesSet;
     private String gatewayVendor;
     private String asyncTransportProtocols;
 
@@ -337,6 +338,13 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.asyncTransportProtocols = asyncTransportProtocols;
     }
 
+    public Set<String> getVisibleRolesSet() {
+        return visibleRolesSet;
+    }
+
+    public void setVisibleRolesSet(Set<String> visibleRolesSet) {
+        this.visibleRolesSet = visibleRolesSet;
+    }
 
     @Override
     public String toString() {
