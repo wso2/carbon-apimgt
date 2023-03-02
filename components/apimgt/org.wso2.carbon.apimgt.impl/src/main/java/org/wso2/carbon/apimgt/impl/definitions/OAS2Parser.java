@@ -75,6 +75,7 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.endpointurlextractor.EndpointUrl;
+import org.wso2.carbon.apimgt.api.util.ModelUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIEndpointUrlExtractorManager;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -863,8 +864,8 @@ public class OAS2Parser extends APIDefinition {
                 swagger.setVendorExtension(APIConstants.X_WSO2_MUTUAL_SSL, mutualSSLOptional);
             }
         }
-        // This app security is should given in resource level,
-        // otherwise the default oauth2 scheme defined at each resouce level will override application securities
+        // This app security should be given in resource level,
+        // otherwise the default oauth2 scheme defined at each resource level will override application securities
         JsonNode appSecurityExtension = OASParserUtil.getAppSecurity(apiSecurity);
         for (String pathKey : swagger.getPaths().keySet()) {
             Path path = swagger.getPath(pathKey);
@@ -872,6 +873,16 @@ public class OAS2Parser extends APIDefinition {
             for (Map.Entry<HttpMethod, Operation> entry : operationMap.entrySet()) {
                 Operation operation = entry.getValue();
                 operation.setVendorExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
+                // If throttling limit remains unassigned in the swagger definition, the throttling-tier property
+                // will be used to generate the limit. If throttling-tier is also not defined, the default tier would
+                // be unlimited tier.
+                if (!operation.getVendorExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
+                    String tier = operation.getVendorExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER) ?
+                            (String) operation.getVendorExtensions().get(APIConstants.SWAGGER_X_THROTTLING_TIER) :
+                            APIConstants.UNLIMITED_TIER;
+                    operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
+                            ModelUtil.generateThrottlingLimitFromThrottlingTier(tier));
+                }
             }
         }
         swagger.setVendorExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
