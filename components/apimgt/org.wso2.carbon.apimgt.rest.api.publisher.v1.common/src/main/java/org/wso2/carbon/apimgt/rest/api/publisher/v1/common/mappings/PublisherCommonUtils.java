@@ -665,16 +665,7 @@ public class PublisherCommonUtils {
      * @throws APIManagementException API Management Exception.
      */
     public static String validateRoles(List<String> inputRoles) throws APIManagementException {
-
-        String userName = RestApiCommonUtil.getLoggedInUsername();
-        boolean isMatched = false;
-        if (inputRoles != null && !inputRoles.isEmpty()) {
-            String roleString = String.join(",", inputRoles);
-            isMatched = APIUtil.isRoleNameExist(userName, roleString);
-            if (!isMatched) {
-                return "Invalid user roles found in visibleRoles list";
-            }
-        }
+        // internal user store is not used in Choreo.
         return "";
     }
 
