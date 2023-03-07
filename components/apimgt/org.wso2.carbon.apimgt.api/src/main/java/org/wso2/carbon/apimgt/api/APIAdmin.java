@@ -473,6 +473,14 @@ public interface APIAdmin  {
      */
     Policy[] getPolicies(int tenantId, String level) throws APIManagementException;
 
+    /**
+     * Checks whether the given vHost name is already registered in the system
+     *
+     * @param vHost A String representing the vHost name
+     * @return true if the vHost name already exists and false otherwise
+     * @throws APIManagementException if failed to check the vHost name availability
+     */
+    boolean isVHostNameExist(String vHost) throws APIManagementException;
 
     /**
      * Health Check endpoint implementation

@@ -75,6 +75,7 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.endpointurlextractor.EndpointUrl;
+import org.wso2.carbon.apimgt.api.util.ModelUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIEndpointUrlExtractorManager;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -399,13 +400,6 @@ public class OAS2Parser extends APIDefinition {
                         ThrottlingLimit throttlingLimit = OASParserUtil.getThrottlingLimitFromJSON(
                                 extensions.get(APIConstants.SWAGGER_X_THROTTLING_LIMIT));
                         template.setThrottlingLimit(throttlingLimit);
-                        if (template.getThrottlingTier() == null) {
-                            // maps throttlingLimit to throttlingTier
-                            template.setThrottlingTier(
-                                    APIUtil.getThrottlingTierFromThrottlingLimit(throttlingLimit));
-                            template.setThrottlingTiers(
-                                    APIUtil.getThrottlingTierFromThrottlingLimit(throttlingLimit));
-                        }
                     }
                     if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
                         String mediationScript = (String) extensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
@@ -844,6 +838,9 @@ public class OAS2Parser extends APIDefinition {
         if (api.getApiLevelPolicy() != null) {
             swagger.setVendorExtension(APIConstants.X_THROTTLING_TIER, api.getApiLevelPolicy());
         }
+        if (api.getThrottleLimit() != null) {
+            swagger.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, api.getThrottleLimit());
+        }
         swagger.setVendorExtension(APIConstants.X_WSO2_CORS, api.getCorsConfiguration());
         Object prodEndpointObj = OASParserUtil.generateOASConfigForEndpoints(api, true);
         if (prodEndpointObj != null) {
@@ -867,8 +864,8 @@ public class OAS2Parser extends APIDefinition {
                 swagger.setVendorExtension(APIConstants.X_WSO2_MUTUAL_SSL, mutualSSLOptional);
             }
         }
-        // This app security is should given in resource level,
-        // otherwise the default oauth2 scheme defined at each resouce level will override application securities
+        // This app security should be given in resource level,
+        // otherwise the default oauth2 scheme defined at each resource level will override application securities
         JsonNode appSecurityExtension = OASParserUtil.getAppSecurity(apiSecurity);
         for (String pathKey : swagger.getPaths().keySet()) {
             Path path = swagger.getPath(pathKey);
@@ -876,6 +873,16 @@ public class OAS2Parser extends APIDefinition {
             for (Map.Entry<HttpMethod, Operation> entry : operationMap.entrySet()) {
                 Operation operation = entry.getValue();
                 operation.setVendorExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
+                // If throttling limit remains unassigned in the swagger definition, the throttling-tier property
+                // will be used to generate the limit. If throttling-tier is also not defined, the default tier would
+                // be unlimited tier.
+                if (!operation.getVendorExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
+                    String tier = operation.getVendorExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER) ?
+                            (String) operation.getVendorExtensions().get(APIConstants.SWAGGER_X_THROTTLING_TIER) :
+                            APIConstants.UNLIMITED_TIER;
+                    operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
+                            ModelUtil.generateThrottlingLimitFromThrottlingTier(tier));
+                }
             }
         }
         swagger.setVendorExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
@@ -940,9 +947,6 @@ public class OAS2Parser extends APIDefinition {
         // handle x-throttling-tier extension
         if (resource.getPolicy() != null && !StringUtils.isEmpty(resource.getPolicy())) {
             operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
-        } else if (resource.getThrottlingLimit() != null) {
-            operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER,
-                    APIUtil.getThrottlingTierFromThrottlingLimit(resource.getThrottlingLimit()));
         } else {
             operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER,
                     APIConstants.DEFAULT_API_POLICY_UNLIMITED);
@@ -951,9 +955,6 @@ public class OAS2Parser extends APIDefinition {
         if (resource.getThrottlingLimit() != null) {
             operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil
                     .getThrottlingLimitJSON(resource.getThrottlingLimit()));
-        } else if (resource.getPolicy() != null) {
-            operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil
-                    .getThrottlingLimitJSON(APIUtil.getThrottlingLimitFromThrottlingTier(resource.getPolicy())));
         } else {
             operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT, OASParserUtil.getThrottlingLimitJSON(
                     APIUtil.getDefaultThrottleLimit()));

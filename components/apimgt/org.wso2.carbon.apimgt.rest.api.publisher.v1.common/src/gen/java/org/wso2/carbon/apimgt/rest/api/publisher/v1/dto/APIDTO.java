@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import javax.validation.constraints.*;
@@ -57,6 +58,7 @@ public class APIDTO   {
     private Boolean hasThumbnail = null;
     private Boolean isDefaultVersion = null;
     private Boolean isRevision = null;
+    private Boolean enableBackendJWT = null;
     private String revisionedApiId = null;
     private Integer revisionId = null;
     private Boolean enableSchemaValidation = null;
@@ -141,6 +143,7 @@ return null;
     @Scope(name = "apim:api_publish", description="", value ="")
     @Scope(name = "apim:api_manage", description="", value ="")
     private String apiThrottlingPolicy = null;
+    private ThrottlingLimitDTO throttlingLimit = null;
     private String authorizationHeader = null;
     private List<String> securityScheme = new ArrayList<String>();
     private APIMaxTpsDTO maxTps = null;
@@ -562,6 +565,23 @@ return null;
   }
 
   /**
+   **/
+  public APIDTO enableBackendJWT(Boolean enableBackendJWT) {
+    this.enableBackendJWT = enableBackendJWT;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("enableBackendJWT")
+  public Boolean isEnableBackendJWT() {
+    return enableBackendJWT;
+  }
+  public void setEnableBackendJWT(Boolean enableBackendJWT) {
+    this.enableBackendJWT = enableBackendJWT;
+  }
+
+  /**
    * UUID of the api registry artifact 
    **/
   public APIDTO revisionedApiId(String revisionedApiId) {
@@ -717,6 +737,24 @@ return null;
   }
   public void setApiThrottlingPolicy(String apiThrottlingPolicy) {
     this.apiThrottlingPolicy = apiThrottlingPolicy;
+  }
+
+  /**
+   **/
+  public APIDTO throttlingLimit(ThrottlingLimitDTO throttlingLimit) {
+    this.throttlingLimit = throttlingLimit;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("throttlingLimit")
+  public ThrottlingLimitDTO getThrottlingLimit() {
+    return throttlingLimit;
+  }
+  public void setThrottlingLimit(ThrottlingLimitDTO throttlingLimit) {
+    this.throttlingLimit = throttlingLimit;
   }
 
   /**
@@ -1333,6 +1371,7 @@ return null;
         Objects.equals(hasThumbnail, API.hasThumbnail) &&
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(isRevision, API.isRevision) &&
+        Objects.equals(enableBackendJWT, API.enableBackendJWT) &&
         Objects.equals(revisionedApiId, API.revisionedApiId) &&
         Objects.equals(revisionId, API.revisionId) &&
         Objects.equals(enableSchemaValidation, API.enableSchemaValidation) &&
@@ -1342,6 +1381,7 @@ return null;
         Objects.equals(tags, API.tags) &&
         Objects.equals(policies, API.policies) &&
         Objects.equals(apiThrottlingPolicy, API.apiThrottlingPolicy) &&
+        Objects.equals(throttlingLimit, API.throttlingLimit) &&
         Objects.equals(authorizationHeader, API.authorizationHeader) &&
         Objects.equals(securityScheme, API.securityScheme) &&
         Objects.equals(maxTps, API.maxTps) &&
@@ -1379,7 +1419,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, scopePrefix, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, enableBackendJWT, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, throttlingLimit, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, scopePrefix, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols);
   }
 
   @Override
@@ -1401,6 +1441,7 @@ return null;
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    isRevision: ").append(toIndentedString(isRevision)).append("\n");
+    sb.append("    enableBackendJWT: ").append(toIndentedString(enableBackendJWT)).append("\n");
     sb.append("    revisionedApiId: ").append(toIndentedString(revisionedApiId)).append("\n");
     sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
@@ -1410,6 +1451,7 @@ return null;
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
     sb.append("    apiThrottlingPolicy: ").append(toIndentedString(apiThrottlingPolicy)).append("\n");
+    sb.append("    throttlingLimit: ").append(toIndentedString(throttlingLimit)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    maxTps: ").append(toIndentedString(maxTps)).append("\n");

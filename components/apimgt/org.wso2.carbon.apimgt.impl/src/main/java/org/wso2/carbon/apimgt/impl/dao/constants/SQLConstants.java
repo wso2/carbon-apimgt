@@ -22,6 +22,12 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class SQLConstants {
+    public static class ColumnName {
+        public static final String API_THROTTLE_LIMIT= "API_THROTTLE_LIMIT";
+        public static final String API_UUID = "API_UUID";
+        public static final String API_TIER = "API_TIER";
+    }
+
     public static final String GET_API_FOR_CONTEXT_TEMPLATE_SQL =
             " SELECT " +
             "   API.API_NAME," +
@@ -1455,6 +1461,9 @@ public class SQLConstants {
                     "SCOPE_PREFIX)" +
                     " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
+    public static final String ADD_CHOREO_AM_API_SQL =
+            " INSERT INTO CHOREO_AM_API (API_UUID,API_THROTTLE_LIMIT) VALUES (?,?)";
+
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
 
@@ -1679,6 +1688,13 @@ public class SQLConstants {
                     "   API_TYPE = ?, " +
                     "   GATEWAY_VENDOR = ?, " +
                     "   SCOPE_PREFIX = ? " +
+                    " WHERE " +
+                    "   API_UUID = ? ";
+
+    public static final String UPDATE_CHOREO_AM_API_SQL =
+            "UPDATE CHOREO_AM_API " +
+                    "SET " +
+                    "   API_THROTTLE_LIMIT = ? " +
                     " WHERE " +
                     "   API_UUID = ? ";
 
@@ -2644,6 +2660,7 @@ public class SQLConstants {
 
     public static final String GET_API_DETAILS_SQL = "SELECT * FROM AM_API ";
 
+    public static final String GET_API_THROTTLE_LIMIT_SQL = "SELECT * FROM CHOREO_AM_API ";
 
     public static final String REMOVE_GROUP_ID_MAPPING_SQL =
             "DELETE FROM AM_APPLICATION_GROUP_MAPPING WHERE APPLICATION_ID = ? ";
@@ -2698,6 +2715,9 @@ public class SQLConstants {
     public static final String GET_ENVIRONMENT_VHOSTS_BY_ID_SQL =
             "SELECT GATEWAY_ENV_ID, HOST, HTTP_CONTEXT, HTTP_PORT, HTTPS_PORT, WS_PORT, WSS_PORT " +
             "FROM AM_GW_VHOST WHERE GATEWAY_ENV_ID = ?";
+
+    public static final String GET_ENVIRONMENT_VHOSTS_BY_NAME_SQL =
+            "SELECT GATEWAY_ENV_ID, HOST FROM AM_GW_VHOST WHERE HOST = ?";
 
     public static final String INSERT_ENV_TO_DATA_PLANE_MAPPING_SQL =
             "INSERT INTO CHOREO_GW_ENV_DATA_PLANE_MAPPING (GATEWAY_ENV_UUID, DATA_PLANE_ID) VALUES (?,?)";
@@ -3073,6 +3093,10 @@ public class SQLConstants {
             "? AND REVISION_UUID = ?";
     public static final String GET_REVISIONED_API_TIER_SQL = "SELECT API_TIER FROM AM_API_REVISION_METADATA WHERE " +
             "API_UUID = ? AND REVISION_UUID = ?";
+    public static final String GET_REVISIONED_API_THROTTLE_LIMIT_SQL = "SELECT API_THROTTLE_LIMIT FROM " +
+            "CHOREO_AM_API_REVISION_METADATA WHERE API_UUID = ? AND REVISION_UUID = ?";
+    public static final String ADD_CHOREO_API_REVISION_METADATA = "INSERT INTO CHOREO_AM_API_REVISION_METADATA (API_UUID," +
+            "REVISION_UUID,API_THROTTLE_LIMIT) VALUES(?,?,(SELECT API_THROTTLE_LIMIT FROM CHOREO_AM_API WHERE API_UUID = ? ))";
     public static final String RESTORE_API_REVISION_METADATA = "UPDATE AM_API SET API_TIER = (SELECT API_TIER FROM " +
             "AM_API_REVISION_METADATA WHERE API_UUID = ? AND REVISION_UUID = ?) WHERE API_UUID = ?";
     public static final String ADD_PER_API_LOGGING_SQL =
@@ -3588,7 +3612,6 @@ public class SQLConstants {
                         "AND WH.APPLICATION_ID = SUB.APPLICATION_ID " +
                         "AND API.API_UUID = WH.API_UUID " +
                         "AND APP.SUBSCRIBER_ID = SUBSCRIBER.SUBSCRIBER_ID ";
-
         public static final String GET_ALL_VALID_SUBSCRIPTIONS_POSTGRE_SQL =
                 "SELECT WH.API_UUID AS API_UUID, " +
                         "WH.APPLICATION_ID AS APPLICATION_ID, " +

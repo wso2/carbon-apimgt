@@ -108,4 +108,12 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         }
         return null;
     }
+    @Override
+    public Response validateVhost(String vHost, MessageContext messageContext) throws APIManagementException {
+        APIAdmin apiAdmin = new APIAdminImpl();
+        boolean isVHostNameExist = apiAdmin.isVHostNameExist(vHost);
+        VHostValidationResponseDTO vHostValidationResponseDTO = new VHostValidationResponseDTO();
+        vHostValidationResponseDTO.setValidity(!isVHostNameExist);
+        return Response.ok().entity(vHostValidationResponseDTO).build();
+    }
 }

@@ -1364,6 +1364,11 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
+    public boolean isVHostNameExist(String vHost) throws APIManagementException {
+        return ChoreoApiMgtDAO.getInstance().isVHostExists(vHost);
+    }
+
+    @Override
     public boolean checkHealth() {
         return ServiceReferenceHolder.getInstance().isStarted();
     }

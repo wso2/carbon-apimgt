@@ -816,6 +816,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             api.setCreatedTime(existingAPI.getCreatedTime());
             apiPersistenceInstance.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
+
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while updating API details", e);
         }
@@ -2619,6 +2620,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void validateAPIThrottlingTier(API api, String tenantDomain) throws APIManagementException {
+        if (api.getThrottleLimit() != null) {
+            log.debug("Validating apiLevelPolicy is skipped as the value is constructed from ThrottleLimit");
+            return;
+        }
         if (log.isDebugEnabled()) {
             log.debug("Validating apiLevelPolicy defined in the API");
         }
@@ -4733,12 +4738,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 /////////////////// Do processing on the data object//////////
                 populateRevisionInformation(api, uuid);
                 populateAPIInformation(uuid, organization, api);
+                populateChoreoAPIInformation(api);
                 if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                         || APIUtil.isSequenceDefined(api.getFaultSequence())) {
                     loadMediationPoliciesAsOperationPoliciesToAPI(api, organization);
                 }
                 populateAPIStatus(api);
                 populateDefaultVersion(api);
+                if (publisherAPI.getVisibleRolesSet() != null) {
+                    String visibleRoles = StringUtils.join(publisherAPI.getVisibleRolesSet(), ',');
+                    api.setVisibleRoles(visibleRoles);
+                }
+
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";

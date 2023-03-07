@@ -18,17 +18,17 @@ import javax.validation.Valid;
 
 
 
-public class APIOperationsThrottlingLimitDTO   {
+public class ThrottlingLimitDTO   {
   
     private Integer requestCount = null;
 
     @XmlType(name="UnitEnum")
     @XmlEnum(String.class)
     public enum UnitEnum {
-        SECOND("Second"),
-        MINUTE("Minute"),
-        HOUR("Hour"),
-        DAY("Day");
+        SECOND("SECOND"),
+        MINUTE("MINUTE"),
+        HOUR("HOUR"),
+        DAY("DAY");
         private String value;
 
         UnitEnum (String v) {
@@ -58,7 +58,7 @@ return null;
 
   /**
    **/
-  public APIOperationsThrottlingLimitDTO requestCount(Integer requestCount) {
+  public ThrottlingLimitDTO requestCount(Integer requestCount) {
     this.requestCount = requestCount;
     return this;
   }
@@ -75,7 +75,7 @@ return null;
 
   /**
    **/
-  public APIOperationsThrottlingLimitDTO unit(UnitEnum unit) {
+  public ThrottlingLimitDTO unit(UnitEnum unit) {
     this.unit = unit;
     return this;
   }
@@ -100,9 +100,9 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIOperationsThrottlingLimitDTO apIOperationsThrottlingLimit = (APIOperationsThrottlingLimitDTO) o;
-    return Objects.equals(requestCount, apIOperationsThrottlingLimit.requestCount) &&
-        Objects.equals(unit, apIOperationsThrottlingLimit.unit);
+    ThrottlingLimitDTO throttlingLimit = (ThrottlingLimitDTO) o;
+    return Objects.equals(requestCount, throttlingLimit.requestCount) &&
+        Objects.equals(unit, throttlingLimit.unit);
   }
 
   @Override
@@ -113,7 +113,7 @@ return null;
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIOperationsThrottlingLimitDTO {\n");
+    sb.append("class ThrottlingLimitDTO {\n");
     
     sb.append("    requestCount: ").append(toIndentedString(requestCount)).append("\n");
     sb.append("    unit: ").append(toIndentedString(unit)).append("\n");

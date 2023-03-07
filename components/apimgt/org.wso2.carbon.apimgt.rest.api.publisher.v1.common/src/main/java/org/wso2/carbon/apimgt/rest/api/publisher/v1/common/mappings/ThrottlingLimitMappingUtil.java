@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsThrottlingLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingLimitDTO;
 
 /**
  * This class is responsible for mapping APIOperationsThrottlingLimitDTOs into REST API throttling related manipulations
@@ -33,10 +33,10 @@ public class ThrottlingLimitMappingUtil {
      * @param dto Holds throttling limits relevant to the operations
      * @return throttlingLimit object
      */
-    public static ThrottlingLimit fromDTOToThrottlingLimit(APIOperationsThrottlingLimitDTO dto) {
+    public static ThrottlingLimit fromDTOToThrottlingLimit(ThrottlingLimitDTO dto) {
         ThrottlingLimit throttlingLimit = new ThrottlingLimit();
         throttlingLimit.setRequestCount(dto.getRequestCount());
-        throttlingLimit.setUnit(dto.getUnit().toString());
+        throttlingLimit.setUnit(dto.getUnit().name());
         return throttlingLimit;
     }
 
@@ -46,14 +46,14 @@ public class ThrottlingLimitMappingUtil {
      * @param throttlingLimit Provides throttling limit details
      * @return APIOperationsThrottlingLimitDTO object with throttling details
      */
-    public static APIOperationsThrottlingLimitDTO fromThrottlingLimitToDTO(ThrottlingLimit throttlingLimit) {
-        APIOperationsThrottlingLimitDTO dto = new APIOperationsThrottlingLimitDTO();
+    public static ThrottlingLimitDTO fromThrottlingLimitToDTO(ThrottlingLimit throttlingLimit) {
+        ThrottlingLimitDTO dto = new ThrottlingLimitDTO();
         if (throttlingLimit == null) {
             dto.setRequestCount(-1);
-            dto.setUnit(APIOperationsThrottlingLimitDTO.UnitEnum.MINUTE);
+            dto.setUnit(ThrottlingLimitDTO.UnitEnum.MINUTE);
         } else {
             dto.setRequestCount(throttlingLimit.getRequestCount());
-            dto.setUnit(APIOperationsThrottlingLimitDTO.UnitEnum.valueOf(throttlingLimit.getUnit()));
+            dto.setUnit(ThrottlingLimitDTO.UnitEnum.valueOf(throttlingLimit.getUnit()));
         }
         return dto;
     }

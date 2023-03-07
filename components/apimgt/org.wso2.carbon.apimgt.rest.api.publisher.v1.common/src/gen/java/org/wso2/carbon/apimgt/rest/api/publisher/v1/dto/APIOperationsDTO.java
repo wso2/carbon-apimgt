@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsThrottlingLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingLimitDTO;
 import javax.validation.constraints.*;
 
 
@@ -29,7 +29,7 @@ public class APIOperationsDTO   {
     private String verb = null;
     private String authType = "Any";
     private String throttlingPolicy = null;
-    private APIOperationsThrottlingLimitDTO throttlingLimit = null;
+    private ThrottlingLimitDTO throttlingLimit = null;
     private List<String> scopes = new ArrayList<String>();
     private List<String> usedProductIds = new ArrayList<String>();
     private String amznResourceName = null;
@@ -125,7 +125,7 @@ public class APIOperationsDTO   {
 
   /**
    **/
-  public APIOperationsDTO throttlingLimit(APIOperationsThrottlingLimitDTO throttlingLimit) {
+  public APIOperationsDTO throttlingLimit(ThrottlingLimitDTO throttlingLimit) {
     this.throttlingLimit = throttlingLimit;
     return this;
   }
@@ -134,10 +134,10 @@ public class APIOperationsDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("throttlingLimit")
-  public APIOperationsThrottlingLimitDTO getThrottlingLimit() {
+  public ThrottlingLimitDTO getThrottlingLimit() {
     return throttlingLimit;
   }
-  public void setThrottlingLimit(APIOperationsThrottlingLimitDTO throttlingLimit) {
+  public void setThrottlingLimit(ThrottlingLimitDTO throttlingLimit) {
     this.throttlingLimit = throttlingLimit;
   }
 

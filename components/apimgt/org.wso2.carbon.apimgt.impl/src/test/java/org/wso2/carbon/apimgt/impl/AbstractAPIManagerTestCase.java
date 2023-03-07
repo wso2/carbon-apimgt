@@ -820,4 +820,41 @@ public class AbstractAPIManagerTestCase {
 
         Assert.assertEquals(abstractAPIManager.getAsyncAPIDefinition(SAMPLE_RESOURCE_ID, SAMPLE_TENANT_DOMAIN), asyncDefinition);
     }
+
+    public void testPopulateAPIThrottleLimit() throws Exception {
+        APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
+        API api = new API(apiIdentifier);
+        api.setUuid("randomUUID");
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiPersistenceInstance);
+        abstractAPIManager.populateChoreoAPIInformation(api);
+
+        // When there is no revision
+        ThrottlingLimit throttleLimit = Mockito.mock(ThrottlingLimit.class);
+        Mockito.when(throttleLimit.getRequestCount()).thenReturn(100);
+        Mockito.when(throttleLimit.getUnit()).thenReturn("MIN");
+        Mockito.when(apiMgtDAO.getAPIThrottlingLimit(anyString())).thenReturn(throttleLimit);
+        abstractAPIManager.populateChoreoAPIInformation(api);
+
+        Assert.assertNotNull("API Throttle Limit is null", api.getThrottleLimit());
+        Assert.assertEquals("API Throttle Limit request count is not properly set.", 100,
+                api.getThrottleLimit().getRequestCount());
+        Assert.assertEquals("API Throttle Limit timeunit is not properly set.", "MINUTE",
+                api.getThrottleLimit().getUnit());
+
+        // When there is a revision
+        api.setRevision(true);
+        api.setRevisionedApiId("randomRevisionUUID");
+
+        ThrottlingLimit throttleLimit2 = Mockito.mock(ThrottlingLimit.class);
+        Mockito.when(throttleLimit2.getRequestCount()).thenReturn(200);
+        Mockito.when(throttleLimit2.getUnit()).thenReturn("MIN");
+        Mockito.when(apiMgtDAO.getAPIThrottlingLimit(anyString(), anyString())).thenReturn(throttleLimit2);
+        abstractAPIManager.populateChoreoAPIInformation(api);
+
+        Assert.assertNotNull("API Throttle Limit is null", api.getThrottleLimit());
+        Assert.assertEquals("API Throttle Limit request count is not properly set.", 200,
+                api.getThrottleLimit().getRequestCount());
+        Assert.assertEquals("API Throttle Limit timeunit is not properly set.", "MIN",
+                api.getThrottleLimit().getUnit());
+    }
 }
