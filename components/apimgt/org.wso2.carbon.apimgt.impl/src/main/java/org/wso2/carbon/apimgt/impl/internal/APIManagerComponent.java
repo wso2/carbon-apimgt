@@ -317,6 +317,9 @@ public class APIManagerComponent {
                 }
             }
             bundleContext.registerService(ScopeValidator.class, new SystemScopesIssuer(), null);
+
+            //perform at the end
+            ServiceReferenceHolder.getInstance().setStarted(true);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {

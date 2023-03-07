@@ -472,4 +472,12 @@ public interface APIAdmin  {
      * @throws APIManagementException
      */
     Policy[] getPolicies(int tenantId, String level) throws APIManagementException;
+
+
+    /**
+     * Health Check endpoint implementation
+     *
+     * @return true if the server is available
+     */
+    boolean checkHealth();
 }

@@ -33,12 +33,14 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.uri.template.URITemplate;
+import org.wso2.uri.template.URITemplateException;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 
 public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
@@ -62,8 +64,18 @@ public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
         //If Authorization headers are present anonymous URI check will be skipped
         ArrayList authHeaders = (ArrayList) ((TreeMap) (message.get(Message.PROTOCOL_HEADERS)))
                 .get(RestApiConstants.AUTH_HEADER_NAME);
-        if (authHeaders != null)
+        if (authHeaders != null) {
             return;
+        }
+
+        // we don't need to check authentication for the health-check endpoints
+        Set<URITemplate> healthCheckEps = RestApiUtil.getHealthCheckEndpoints();
+        for (URITemplate healthCheckEp : healthCheckEps) {
+            if (healthCheckEp.matches(path, new HashMap<>())) {
+                message.put(RestApiConstants.AUTHENTICATION_REQUIRED, false);
+                return;
+            }
+        }
 
         //Check if the accessing URI is allowed and then authorization is skipped
         try {
@@ -84,6 +96,7 @@ public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 if (uriTemplate.matches(path, new HashMap<String, String>())) {
                     List<String> allowedVerbs = allowedResourcePathsMap.get(uriTemplate);
                     if (allowedVerbs.contains(httpMethod)) {
+                        // check if devPortal anonymous mode is disabled, then should not allow anonymous access
                         if (StringUtils.startsWith((String) message.get(Message.BASE_PATH),
                                 "/" + RestApiConstants.REST_API_DEVELOPER_PORTAL_CONTEXT)) {
                             // Authentication will be skipped for /swagger.yaml, /settings, /tenants resources of
