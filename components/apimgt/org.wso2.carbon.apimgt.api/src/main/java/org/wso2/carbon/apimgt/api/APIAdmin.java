@@ -271,11 +271,19 @@ public interface APIAdmin  {
     List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization) throws APIManagementException;
 
     /**
-     * This method returns all the key managers registered in all the tenants
-     * @return
+     * This method returns all the key managers registered in all the organizations
+     * @return map of org -> list of key managers
      * @throws APIManagementException
      */
-    Map<String, List<KeyManagerConfigurationDTO>> getAllKeyManagerConfigurations() throws APIManagementException;
+    Map<String, List<KeyManagerConfigurationDTO>> getDirectActiveKeyManagerConfigurations() throws APIManagementException;
+
+    /**
+     * This method returns the key managers registered in the given organization
+     * @param organization organization of the key manager
+     * @return KeyManagerConfigurationDTO list
+     * @throws APIManagementException if error occurred
+     */
+    List<KeyManagerConfigurationDTO> getDirectActiveKeyManagerConfigurations(String organization) throws APIManagementException;
 
     /**
      * This method is used to retrieve the key manager details from the external reference id

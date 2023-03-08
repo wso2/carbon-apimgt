@@ -29,7 +29,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -442,10 +441,10 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public Map<String, List<KeyManagerConfigurationDTO>> getAllKeyManagerConfigurations()
+    public Map<String, List<KeyManagerConfigurationDTO>> getDirectActiveKeyManagerConfigurations()
             throws APIManagementException {
 
-        List<KeyManagerConfigurationDTO> keyManagerConfigurations = apiMgtDAO.getKeyManagerConfigurations();
+        List<KeyManagerConfigurationDTO> keyManagerConfigurations = apiMgtDAO.getActiveKeyManagerConfigurations();
         Map<String, List<KeyManagerConfigurationDTO>> keyManagerConfigurationsByOrg = new HashMap<>();
         for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
             List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS;
@@ -463,6 +462,26 @@ public class APIAdminImpl implements APIAdmin {
                     .put(keyManagerConfiguration.getOrganization(), keyManagerConfigurationDTOS);
         }
         return keyManagerConfigurationsByOrg;
+    }
+
+    @Override
+    public List<KeyManagerConfigurationDTO> getDirectActiveKeyManagerConfigurations(String organization)
+            throws APIManagementException {
+        List<KeyManagerConfigurationDTO> superTenantKeyManagerConfigurations =
+                apiMgtDAO.getKeyManagerConfigurationsByOrganization(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        List<KeyManagerConfigurationDTO> configurationDTOs = new ArrayList<>(superTenantKeyManagerConfigurations);
+        for (KeyManagerConfigurationDTO configurationDTO : configurationDTOs) {
+            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(configurationDTO.getName())) {
+                APIUtil.getAndSetDefaultKeyManagerConfiguration(configurationDTO);
+                break;
+            }
+        }
+
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+            List<KeyManagerConfigurationDTO> orgKeyManagerConfigs = apiMgtDAO.getActiveKeyManagerConfigurations(organization);
+            configurationDTOs.addAll(orgKeyManagerConfigs);
+        }
+        return configurationDTOs;
     }
 
     @Override
