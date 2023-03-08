@@ -3670,6 +3670,12 @@ public class SQLConstants {
                         "TOKEN_TYPE, EXTERNAL_REFERENCE_ID, CONFIGURATION " +
                         "FROM AM_KEY_MANAGER " +
                         "WHERE TOKEN_TYPE != 'EXCHANGED' AND ENABLED = ?";
+
+        public static final String GET_ALL_NON_EXT_KEY_MANAGERS_BY_ORG =
+                "SELECT UUID, NAME, DISPLAY_NAME, DESCRIPTION, TYPE, ENABLED, ORGANIZATION, " +
+                        "TOKEN_TYPE, EXTERNAL_REFERENCE_ID, CONFIGURATION " +
+                        "FROM AM_KEY_MANAGER " +
+                        "WHERE TOKEN_TYPE != 'EXCHANGED' AND ENABLED = ? AND ORGANIZATION = ?";
     }
 
     /**

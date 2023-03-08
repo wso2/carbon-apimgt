@@ -9260,6 +9260,30 @@ public class ApiMgtDAO {
         return keyManagerConfigurationDTOS;
     }
 
+    public List<KeyManagerConfigurationDTO> getActiveKeyManagerConfigurations(String organization)
+            throws APIManagementException {
+        List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS = new ArrayList<>();
+        final String query = SQLConstants.KeyManagerSqlConstants.GET_ALL_NON_EXT_KEY_MANAGERS_BY_ORG;
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+            //returns only enabled key managers
+            preparedStatement.setBoolean(1, true);
+            preparedStatement.setString(2, organization);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+                    setKeyManagerConfigurationFromResultSet(resultSet, keyManagerConfigurationDTO);
+                    keyManagerConfigurationDTOS.add(keyManagerConfigurationDTO);
+                }
+            }
+        } catch (SQLException | IOException e) {
+            throw new APIManagementException("Error while retrieving key manager " +
+                    "configurations of org: " + organization, e);
+        }
+
+        return keyManagerConfigurationDTOS;
+    }
+
     public boolean isKeyManagerConfigurationExistByName(String name, String organization)
             throws APIManagementException {
 

@@ -49,10 +49,12 @@ public class KeymanagersApiServiceImpl implements KeymanagersApiService {
             if (StringUtils.isNotEmpty(organizationFromQueryParam) &&
                     organizationFromQueryParam.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
                 Map<String, List<KeyManagerConfigurationDTO>> keyManagerConfigurationsPerOrg =
-                        apiAdmin.getAllActiveKeyManagerConfigurations();
+                        apiAdmin.getDirectActiveKeyManagerConfigurations();
                 for (List<KeyManagerConfigurationDTO> configList: keyManagerConfigurationsPerOrg.values()) {
                     keyManagerConfigurations.addAll(configList);
                 }
+            } else if (StringUtils.isNotEmpty(organizationFromQueryParam)) {
+                keyManagerConfigurations = apiAdmin.getDirectActiveKeyManagerConfigurations(organizationFromQueryParam);
             } else {
                 String organization = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
                 keyManagerConfigurations = apiAdmin.getKeyManagerConfigurationsByOrganization(organization);

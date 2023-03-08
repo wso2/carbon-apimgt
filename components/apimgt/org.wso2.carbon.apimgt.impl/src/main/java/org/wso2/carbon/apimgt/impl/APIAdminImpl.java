@@ -76,6 +76,7 @@ import org.wso2.carbon.identity.application.common.util.IdentityApplicationConst
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.idp.mgt.IdentityProviderManager;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -440,7 +441,7 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public Map<String, List<KeyManagerConfigurationDTO>> getAllActiveKeyManagerConfigurations()
+    public Map<String, List<KeyManagerConfigurationDTO>> getDirectActiveKeyManagerConfigurations()
             throws APIManagementException {
 
         List<KeyManagerConfigurationDTO> keyManagerConfigurations = apiMgtDAO.getActiveKeyManagerConfigurations();
@@ -461,6 +462,26 @@ public class APIAdminImpl implements APIAdmin {
                     .put(keyManagerConfiguration.getOrganization(), keyManagerConfigurationDTOS);
         }
         return keyManagerConfigurationsByOrg;
+    }
+
+    @Override
+    public List<KeyManagerConfigurationDTO> getDirectActiveKeyManagerConfigurations(String organization)
+            throws APIManagementException {
+        List<KeyManagerConfigurationDTO> superTenantKeyManagerConfigurations =
+                apiMgtDAO.getKeyManagerConfigurationsByOrganization(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        List<KeyManagerConfigurationDTO> configurationDTOs = new ArrayList<>(superTenantKeyManagerConfigurations);
+        for (KeyManagerConfigurationDTO configurationDTO : configurationDTOs) {
+            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(configurationDTO.getName())) {
+                APIUtil.getAndSetDefaultKeyManagerConfiguration(configurationDTO);
+                break;
+            }
+        }
+
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+            List<KeyManagerConfigurationDTO> orgKeyManagerConfigs = apiMgtDAO.getActiveKeyManagerConfigurations(organization);
+            configurationDTOs.addAll(orgKeyManagerConfigs);
+        }
+        return configurationDTOs;
     }
 
     @Override
