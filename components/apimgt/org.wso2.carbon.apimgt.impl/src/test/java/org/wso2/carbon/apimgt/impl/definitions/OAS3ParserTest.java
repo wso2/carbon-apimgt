@@ -180,5 +180,15 @@ public class OAS3ParserTest extends OASTestBase {
         jsonObject = gson.toJsonTree(limitObject).getAsJsonObject();
         Assert.assertEquals("requestCount Mismatched", 10000, jsonObject.get("requestCount").getAsInt());
         Assert.assertEquals("timeUnit Mismatched", "MINUTE", jsonObject.get("unit").getAsString());
+
+        Assert.assertNotNull(parsedSwagger.getPaths().get("/pets").getPost());
+        Assert.assertNotNull(parsedSwagger.getPaths().get("/pets").getPost().getExtensions());
+        Assert.assertNotNull(parsedSwagger.getPaths().get("/pets").getPost().getExtensions()
+                .get(APIConstants.SWAGGER_X_THROTTLING_LIMIT));
+        limitObject = parsedSwagger.getPaths().get("/pets").getPost().getExtensions()
+                .get(APIConstants.SWAGGER_X_THROTTLING_LIMIT);
+        jsonObject = gson.toJsonTree(limitObject).getAsJsonObject();
+        Assert.assertEquals("requestCount Mismatched", -1, jsonObject.get("requestCount").getAsInt());
+        Assert.assertEquals("timeUnit Mismatched", "MINUTE", jsonObject.get("unit").getAsString());
     }
 }

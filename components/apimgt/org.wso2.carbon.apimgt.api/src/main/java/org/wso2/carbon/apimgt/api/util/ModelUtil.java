@@ -34,6 +34,10 @@ public class ModelUtil {
     public static String generateThrottlePolicyFromThrottleLimit(ThrottlingLimit throttlingLimit) {
         String requestCount;
         String shortenerSuffix = "";
+        // Since it is a utility method, it is better to check for null values
+        if (throttlingLimit == null) {
+            return APIConstants.UNLIMITED_TIER;
+        }
         if (throttlingLimit.getRequestCount() == -1)
             return APIConstants.UNLIMITED_TIER;
         if (throttlingLimit.getRequestCount() % 100000 == 0) {
@@ -65,6 +69,13 @@ public class ModelUtil {
     public static ThrottlingLimit generateThrottlingLimitFromThrottlingTier(String throttlingTierStr) {
         ThrottlingLimit throttlingLimit = new ThrottlingLimit();
         throttlingLimit.setUnit("MINUTE");
+        // If the tier is null or empty, then the default value is unlimited
+        // Since this is a utility method, and it is required to avoid null pointer exception if a null
+        // object is provided as a parameter.
+        if (throttlingTierStr == null) {
+            throttlingLimit.setRequestCount(-1);
+            return throttlingLimit;
+        }
         switch (throttlingTierStr) {
             case "10KPerMin":
                 throttlingLimit.setRequestCount(10000);

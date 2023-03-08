@@ -188,5 +188,17 @@ public class OAS2ParserTest extends OASTestBase {
         jsonObject = gson.toJsonTree(limitObject).getAsJsonObject();
         Assert.assertEquals("requestCount Mismatched", 10000, jsonObject.get("requestCount").getAsInt());
         Assert.assertEquals("timeUnit Mismatched", "MINUTE", jsonObject.get("unit").getAsString());
+
+        // Swagger Parser for v2 does not keep the null valued extensions. Still added the test
+        // to make sure that the behavior does not change
+        Assert.assertNotNull(parsedSwagger.getPaths().get("/pets").getPost());
+        Assert.assertNotNull(parsedSwagger.getPaths().get("/pets").getPost().getVendorExtensions());
+        Assert.assertNotNull(parsedSwagger.getPaths().get("/pets").getPost().getVendorExtensions()
+                .get(APIConstants.SWAGGER_X_THROTTLING_LIMIT));
+        limitObject = parsedSwagger.getPaths().get("/pets").getPost().getVendorExtensions()
+                .get(APIConstants.SWAGGER_X_THROTTLING_LIMIT);
+        jsonObject = gson.toJsonTree(limitObject).getAsJsonObject();
+        Assert.assertEquals("requestCount Mismatched", -1, jsonObject.get("requestCount").getAsInt());
+        Assert.assertEquals("timeUnit Mismatched", "MINUTE", jsonObject.get("unit").getAsString());
     }
 }

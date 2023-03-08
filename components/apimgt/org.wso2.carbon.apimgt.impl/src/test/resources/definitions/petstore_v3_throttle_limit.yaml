@@ -49,6 +49,7 @@ paths:
     post:
       summary: Create a pet
       operationId: createPets
+      x-throttling-tier: null
       tags:
         - pets
       responses:
