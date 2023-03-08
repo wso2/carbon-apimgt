@@ -9238,12 +9238,14 @@ public class ApiMgtDAO {
 
     }
 
-    public List<KeyManagerConfigurationDTO> getKeyManagerConfigurations() throws APIManagementException {
+    public List<KeyManagerConfigurationDTO> getActiveKeyManagerConfigurations() throws APIManagementException {
 
         List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS = new ArrayList<>();
-        final String query = "SELECT * FROM AM_KEY_MANAGER";
+        final String query = SQLConstants.KeyManagerSqlConstants.GET_ALL_NON_EXT_KEY_MANAGERS;
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+            //returns only enabled key managers
+            preparedStatement.setBoolean(1, true);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();

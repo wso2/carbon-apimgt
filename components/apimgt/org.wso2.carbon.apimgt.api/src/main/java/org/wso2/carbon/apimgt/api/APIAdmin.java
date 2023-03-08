@@ -275,7 +275,7 @@ public interface APIAdmin  {
      * @return
      * @throws APIManagementException
      */
-    Map<String, List<KeyManagerConfigurationDTO>> getAllKeyManagerConfigurations() throws APIManagementException;
+    Map<String, List<KeyManagerConfigurationDTO>> getAllActiveKeyManagerConfigurations() throws APIManagementException;
 
     /**
      * This method is used to retrieve the key manager details from the external reference id

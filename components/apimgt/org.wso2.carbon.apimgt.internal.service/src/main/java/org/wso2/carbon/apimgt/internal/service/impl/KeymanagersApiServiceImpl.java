@@ -49,7 +49,7 @@ public class KeymanagersApiServiceImpl implements KeymanagersApiService {
             if (StringUtils.isNotEmpty(organizationFromQueryParam) &&
                     organizationFromQueryParam.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
                 Map<String, List<KeyManagerConfigurationDTO>> keyManagerConfigurationsPerOrg =
-                        apiAdmin.getAllKeyManagerConfigurations();
+                        apiAdmin.getAllActiveKeyManagerConfigurations();
                 for (List<KeyManagerConfigurationDTO> configList: keyManagerConfigurationsPerOrg.values()) {
                     keyManagerConfigurations.addAll(configList);
                 }

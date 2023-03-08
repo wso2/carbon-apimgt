@@ -29,7 +29,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -77,7 +76,6 @@ import org.wso2.carbon.identity.application.common.util.IdentityApplicationConst
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.idp.mgt.IdentityProviderManager;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -442,10 +440,10 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public Map<String, List<KeyManagerConfigurationDTO>> getAllKeyManagerConfigurations()
+    public Map<String, List<KeyManagerConfigurationDTO>> getAllActiveKeyManagerConfigurations()
             throws APIManagementException {
 
-        List<KeyManagerConfigurationDTO> keyManagerConfigurations = apiMgtDAO.getKeyManagerConfigurations();
+        List<KeyManagerConfigurationDTO> keyManagerConfigurations = apiMgtDAO.getActiveKeyManagerConfigurations();
         Map<String, List<KeyManagerConfigurationDTO>> keyManagerConfigurationsByOrg = new HashMap<>();
         for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
             List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS;

@@ -3665,6 +3665,11 @@ public class SQLConstants {
         public static final String GET_KEY_MANAGER_BY_EXT_REF_ID =
                 "SELECT * FROM AM_KEY_MANAGER WHERE EXTERNAL_REFERENCE_ID = ?";
 
+        public static final String GET_ALL_NON_EXT_KEY_MANAGERS =
+                "SELECT UUID, NAME, DISPLAY_NAME, DESCRIPTION, TYPE, ENABLED, ORGANIZATION, " +
+                        "TOKEN_TYPE, EXTERNAL_REFERENCE_ID, CONFIGURATION " +
+                        "FROM AM_KEY_MANAGER " +
+                        "WHERE TOKEN_TYPE != 'EXCHANGED' AND ENABLED = ?";
     }
 
     /**
