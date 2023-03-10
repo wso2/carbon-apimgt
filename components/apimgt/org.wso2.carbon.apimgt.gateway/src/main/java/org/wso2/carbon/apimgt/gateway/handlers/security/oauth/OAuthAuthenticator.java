@@ -187,7 +187,7 @@ public class OAuthAuthenticator implements Authenticator {
                 if (log.isDebugEnabled()) {
                     log.debug("Removing OAuth key from Authorization header");
                 }
-                headers.put(getSecurityHeader(), remainingAuthHeader);
+                headers.put(getSecurityHeader(), remainingAuthHeader.get());
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("Removing Authorization header from headers");
