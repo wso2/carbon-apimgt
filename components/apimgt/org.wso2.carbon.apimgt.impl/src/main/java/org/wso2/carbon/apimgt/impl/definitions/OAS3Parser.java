@@ -196,6 +196,33 @@ public class OAS3Parser extends APIDefinition {
                                 hasXmlPayload = true;
                             }
                         }
+                    } else {
+                        Content content = op.getResponses().get(responseEntry).getContent();
+                        if (content != null) {
+                            MediaType applicationJson = content.get(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                            MediaType applicationXml = content.get(APIConstants.APPLICATION_XML_MEDIA_TYPE);
+                            if (applicationJson != null) {
+                                Schema jsonSchema = applicationJson.getSchema();
+                                if (jsonSchema != null) {
+                                    String jsonExample = getJsonExample(jsonSchema, definitions);
+                                    genCode.append(getGeneratedResponsePayloads(responseEntry, jsonExample, "json", false));
+                                    respCodeInitialized = true;
+                                    hasJsonPayload = true;
+                                }
+                            }
+                            if (applicationXml != null) {
+                                Schema xmlSchema = applicationXml.getSchema();
+                                if (xmlSchema != null) {
+                                    String xmlExample = getXmlExample(xmlSchema, definitions);
+                                    genCode.append(getGeneratedResponsePayloads(responseEntry, xmlExample, "xml", respCodeInitialized));
+                                    hasXmlPayload = true;
+                                }
+                            }
+                        } else {
+                            setDefaultGeneratedResponse(genCode, responseEntry);
+                            hasJsonPayload = true;
+                            hasXmlPayload = true;
+                        }
                     }
                 }
                 //inserts minimum response code and mock payload variables to static script
