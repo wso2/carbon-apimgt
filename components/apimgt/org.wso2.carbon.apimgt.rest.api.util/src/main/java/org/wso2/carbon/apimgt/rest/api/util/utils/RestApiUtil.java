@@ -99,6 +99,7 @@ public class RestApiUtil {
     private static Set<URITemplate> serviceCatalogAPIResourceMappings;
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> uriToHttpMethodsMap;
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> ETagSkipListURIToHttpMethodsMap;
+    private static Set<org.wso2.uri.template.URITemplate> healthCheckEndpoints;
 
     public static <T> ErrorDTO getConstraintViolationErrorDTO(Set<ConstraintViolation<T>> violations) {
         ErrorDTO errorDTO = new ErrorDTO();
@@ -1166,6 +1167,21 @@ public class RestApiUtil {
             }
         }
         return uriToMethodsMap;
+    }
+
+    public static Set<org.wso2.uri.template.URITemplate> getHealthCheckEndpoints() {
+        if (healthCheckEndpoints == null) {
+            healthCheckEndpoints = new HashSet<>();
+            try {
+                org.wso2.uri.template.URITemplate template =
+                        new org.wso2.uri.template.URITemplate(RestApiConstants.REST_API_INTERNAL_HEALTH_CHECK_ENDPOINT);
+                healthCheckEndpoints.add(template);
+            } catch (URITemplateException e) {
+                // we don't need to break the flow
+                log.error("Error while initializing health-check API url template", e);
+            }
+        }
+        return healthCheckEndpoints;
     }
 
     /**

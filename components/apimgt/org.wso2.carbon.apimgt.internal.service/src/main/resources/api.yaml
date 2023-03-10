@@ -753,6 +753,22 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /healthz:
+    get:
+      summary: Retrieve health status of the server
+      description: |
+        This retrieves the health status of the server
+      tags:
+        - 'Health'
+      responses:
+        200:
+          description: 'Health status success'
+          schema:
+            $ref: '#/definitions/HealthStatus'
+        default:
+          description: The server is unhealthy
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -1649,3 +1665,12 @@ definitions:
       logLevel:
         type: string
         example: all
+  HealthStatus:
+      title: Health status object
+      properties:
+        status:
+          type: string
+          example:
+          enum:
+            - AVAILABLE
+            - UNAVAILABLE

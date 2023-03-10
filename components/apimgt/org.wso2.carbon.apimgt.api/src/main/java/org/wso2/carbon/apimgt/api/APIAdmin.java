@@ -489,4 +489,11 @@ public interface APIAdmin  {
      * @throws APIManagementException if failed to check the vHost name availability
      */
     boolean isVHostNameExist(String vHost) throws APIManagementException;
+
+    /**
+     * Health Check endpoint implementation
+     *
+     * @return true if the server is available
+     */
+    boolean checkHealth();
 }

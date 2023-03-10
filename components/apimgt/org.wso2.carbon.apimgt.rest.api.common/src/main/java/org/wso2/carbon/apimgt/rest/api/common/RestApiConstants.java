@@ -191,6 +191,11 @@ public final class RestApiConstants {
     public static final String COOKIE_HEADER_NAME = "cookie";
     public static final String AUTH_COOKIE_NAME = "AM_ACC_TOKEN_DEFAULT_P2"; // This cookie name should be used when setting the cookie for SPA app in SPA app user authentication response to REST API context as path directive
 
+    static final String REST_API_INTERNAL_CONTEXT = "/internal/data";
+    public static final String REST_API_INTERNAL_HEALTH_CHECK_ENDPOINT =
+            REST_API_INTERNAL_CONTEXT + "/" + API_VERSION_PARAM + "/healthz";
+
+
     public static final String API_VERSION = "API_VERSION";
     public static final String REQUEST_URL = "org.apache.cxf.request.uri";
     public static final String REQUEST_METHOD = "org.apache.cxf.request.method";

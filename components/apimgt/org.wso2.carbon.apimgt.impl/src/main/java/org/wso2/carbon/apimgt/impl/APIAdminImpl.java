@@ -1387,6 +1387,11 @@ public class APIAdminImpl implements APIAdmin {
         return ChoreoApiMgtDAO.getInstance().isVHostExists(vHost);
     }
 
+    @Override
+    public boolean checkHealth() {
+        return ServiceReferenceHolder.getInstance().isStarted();
+    }
+
     private IdentityProvider createIdp(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
 
         IdentityProvider identityProvider = new IdentityProvider();

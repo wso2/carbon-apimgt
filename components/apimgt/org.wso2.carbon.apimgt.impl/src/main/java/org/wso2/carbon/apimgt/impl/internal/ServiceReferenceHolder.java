@@ -79,6 +79,7 @@ public class ServiceReferenceHolder {
     private Map<String, APIDefinition> apiDefinitionMap = new HashMap<>();
     private OperationPolicyProvider operationPolicyProvider;
     private APIEndpointUrlExtractor apiEndpointUrlExtractor;
+    private boolean started = false;
 
     private ServiceReferenceHolder() {
 
@@ -350,6 +351,14 @@ public class ServiceReferenceHolder {
     public void removeExternalEnvironments(String type) {
 
         externalEnvironmentsMap.remove(type);
+    }
+
+    public boolean isStarted() {
+        return started;
+    }
+
+    public void setStarted(boolean started) {
+        this.started = started;
     }
 
     public void addAPIDefinitionParser(String type, APIDefinition apiDefinition) {
