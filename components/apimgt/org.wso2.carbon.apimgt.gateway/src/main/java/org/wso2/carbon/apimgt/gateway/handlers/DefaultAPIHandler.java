@@ -58,15 +58,17 @@ public class DefaultAPIHandler extends AbstractSynapseHandler {
             String selectedPath = selectedAPIS.firstKey();
             API selectedAPI = selectedAPIS.get(selectedPath);
             if (selectedAPI != null) {
-                if (GatewayUtils.isOnDemandLoading()){
+                if (GatewayUtils.isOnDemandLoading()) {
                     if (!selectedAPI.isDeployed()) {
-                        synchronized ("LoadAPI_".concat(selectedAPI.getContext().intern())) {
-                            InMemoryAPIDeployer inMemoryAPIDeployer = new InMemoryAPIDeployer();
-                            try {
-                                inMemoryAPIDeployer.deployAPI(selectedAPI.getUuid());
-                            } catch (ArtifactSynchronizerException e) {
-                                log.error("Error while retrieve and deploy artifact for API : " + selectedAPI.getApiId(), e);
-                                return false;
+                        synchronized ("LoadAPI_".concat(selectedAPI.getContext()).intern()) {
+                            if(!selectedAPI.isDeployed()) {
+                                InMemoryAPIDeployer inMemoryAPIDeployer = new InMemoryAPIDeployer();
+                                try {
+                                    inMemoryAPIDeployer.deployAPI(selectedAPI.getUuid());
+                                } catch (ArtifactSynchronizerException e) {
+                                    log.error("Error while retrieve and deploy artifact for API : " + selectedAPI.getApiId(), e);
+                                    return false;
+                                }
                             }
                         }
                     }
