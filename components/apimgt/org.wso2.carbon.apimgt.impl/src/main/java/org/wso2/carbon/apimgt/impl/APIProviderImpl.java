@@ -4901,6 +4901,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (scopes != null) {
             scopesDAO.addScopes(scopes, tenantId);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SCOPE, APIUtil
+                            .getScopesAsString(scopes), APIConstants.AuditLogConstants.CREATED,
+                    this.username);
             for (Scope scope : scopes) {
                 ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SCOPE_CREATE.name(), tenantId,
@@ -4918,6 +4921,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (scope != null) {
             scopesDAO.updateScope(scope, tenantId);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SCOPE, scope.getKey(),
+                    APIConstants.AuditLogConstants.UPDATED, this.username);
             ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.SCOPE_UPDATE.name(), tenantId,
                     tenantDomain, scope.getKey(), scope.getName(), scope.getDescription());
@@ -4932,6 +4937,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (StringUtils.isNotEmpty(scopeKey)) {
             scopesDAO.deleteScope(scopeKey, tenantId);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SCOPE, scopeKey,
+                    APIConstants.AuditLogConstants.DELETED, this.username);
             ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.SCOPE_DELETE.name(), tenantId,
                     tenantDomain, scopeKey, null, null);

@@ -10234,4 +10234,18 @@ public final class APIUtil {
         }
         return null;
     }
+
+    /**
+     * Get aggregated string from set of scopes
+     *
+     * @param scopes set of scopes
+     * @return scopes string
+     */
+    public static String getScopesAsString(Set<Scope> scopes) {
+        StringBuilder scopesStringBuilder = new StringBuilder();
+        for (Scope scope : scopes) {
+            scopesStringBuilder.append(scope.getKey()).append(" ");
+        }
+        return scopesStringBuilder.toString().trim();
+    }
 }
