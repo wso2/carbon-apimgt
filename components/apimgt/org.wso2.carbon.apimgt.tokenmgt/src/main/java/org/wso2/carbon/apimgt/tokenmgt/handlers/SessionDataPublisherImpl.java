@@ -245,6 +245,13 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
         Set<String> systemAppClientIds = new HashSet<>();
 
         try {
+            clientIds = OAuthTokenPersistenceFactory.getInstance().getTokenManagementDAO()
+                    .getAllTimeAuthorizedClientIds(authenticatedUser);
+        } catch (IdentityOAuth2Exception e) {
+            throw handleError("Error occurred while retrieving apps authorized by User ID : " + username, e);
+        }
+
+        try {
             systemApplicationDTOS = systemApplicationDAO.getApplications(tenantDomain);
             if (systemApplicationDTOS.length < 0) {
                 if (log.isDebugEnabled()) {
@@ -252,20 +259,15 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
                 }
             } else {
                 for (SystemApplicationDTO applicationDTO : systemApplicationDTOS) {
-                    try {
-                        if (ApplicationMgtUtil.isUserAuthorized(applicationDTO.getName(),tenantAwareusername)) {
-                            systemAppClientIds.add(applicationDTO.getConsumerKey());
-                        }
-                    } catch (IdentityApplicationManagementException e) {
-                        log.error("Error occurred while checking the authorization of the application "
-                                + applicationDTO.getName(), e);
-                    }
+                    systemAppClientIds.add(applicationDTO.getConsumerKey());
                 }
             }
         } catch (APIMgtDAOException e) {
             log.error("Error thrown while retrieving system applications for the tenant domain " + tenantDomain, e);
         }
-        clientIds = systemAppClientIds;
+        if (clientIds.containsAll(systemAppClientIds)) {
+            clientIds = systemAppClientIds;
+        }
 
         Set<OAuthConsumerAppDTO> appDTOs = new HashSet<>();
         for (String clientId : clientIds) {
