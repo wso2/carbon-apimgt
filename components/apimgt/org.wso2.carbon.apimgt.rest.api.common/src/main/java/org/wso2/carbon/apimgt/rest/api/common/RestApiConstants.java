@@ -168,7 +168,7 @@ public final class RestApiConstants {
     public static final String REST_API_DEVELOPER_PORTAL_CONTEXT_FULL = REST_API_DEVELOPER_PORTAL_CONTEXT +
             REST_API_DEVELOPER_PORTAL_VERSION;
     public static final String REST_API_PUBLISHER_VERSION_0 ="v0.16";
-    public static final String REST_API_PUBLISHER_VERSION = "v3";
+    public static final String REST_API_PUBLISHER_VERSION = "v2";
     public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
     public static final String REST_API_PUBLISHER_CONTEXT_FULL_0 =
             REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_0;
@@ -176,7 +176,7 @@ public final class RestApiConstants {
             REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION;
     public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
     public static final String REST_API_ADMIN_VERSION_0 = "v0.16";
-    public static final String REST_API_ADMIN_VERSION = "v3";
+    public static final String REST_API_ADMIN_VERSION = "v2";
     public static final String REST_API_DCR_CONTEXT_FULL = "/client-registration/v0.17";
     public static final String REST_API_DCR_CONTEXT = "/client-registration";
     public static final String REST_API_DCR_VERSION = "v0.17";
