@@ -234,10 +234,18 @@ components:
 
     LoggingApiInput:
       title: API Info object with log details
+      required:
+        - logLevel
       properties:
         logLevel:
           type: string
           example: FULL
+        resourceMethod:
+          type: string
+          example: GET
+        resourcePath:
+          type: string
+          example: /v1.0.0/pizza
     LoggingApiOutput:
       title: API Info object with log details
       properties:
