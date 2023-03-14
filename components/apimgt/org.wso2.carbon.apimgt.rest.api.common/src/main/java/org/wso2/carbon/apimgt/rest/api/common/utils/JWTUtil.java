@@ -75,9 +75,6 @@ public class JWTUtil {
                 return false;
             }
             String[] scopes = scopeClaim.split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER);
-            scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
-                    .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
-                    .toArray(size -> new String[size]);
             oauthTokenInfo.setScopes(scopes);
             // check whether organization claim value and orgId matches
             String orgUuid = getOrgIdFromJwt(signedJWTInfo);
