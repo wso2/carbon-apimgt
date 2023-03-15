@@ -3751,6 +3751,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             throw new APIMgtResourceNotFoundException("API not found "); // for backword compatibility we send 404
         }
+
     }
 
     private API addTiersToAPI(API api, String organization) throws APIManagementException {
