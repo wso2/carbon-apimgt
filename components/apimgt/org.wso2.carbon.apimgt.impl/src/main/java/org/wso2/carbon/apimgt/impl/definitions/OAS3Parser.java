@@ -18,6 +18,7 @@
  */
 
 package org.wso2.carbon.apimgt.impl.definitions;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.swagger.oas.inflector.examples.ExampleBuilder;
@@ -974,9 +975,13 @@ public class OAS3Parser extends APIDefinition {
                 openAPI.addExtension(APIConstants.X_WSO2_MUTUAL_SSL, mutualSSLOptional);
             }
         }
-        // This app security is should given in resource level,
-        // otherwise the default oauth2 scheme defined at each resouce level will override application securities
+        // This app security should be given in both root level and resource level,
+        // otherwise the default oauth2 scheme defined at each resource level will override application securities
         JsonNode appSecurityExtension = OASParserUtil.getAppSecurity(apiSecurity);
+        if (openAPI.getExtensions() != null && !(openAPI.getExtensions()
+                .containsKey(APIConstants.X_WSO2_APP_SECURITY))) {
+            openAPI.addExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
+        }
         for (String pathKey : openAPI.getPaths().keySet()) {
             PathItem pathItem = openAPI.getPaths().get(pathKey);
             for (Map.Entry<PathItem.HttpMethod, Operation> entry : pathItem.readOperationsMap().entrySet()) {
