@@ -3751,7 +3751,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             throw new APIMgtResourceNotFoundException("API not found "); // for backword compatibility we send 404
         }
-
     }
 
     private API addTiersToAPI(API api, String organization) throws APIManagementException {
@@ -3810,8 +3809,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Organization org = new Organization(organization);
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
-                checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
-                        devPortalApi.getVisibleRoles());
+
+                // apiVisibility check is already done at the persistence level
+                // checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(), devPortalApi.getVisibleRoles());
                 API api = APIMapper.INSTANCE.toApi(devPortalApi);
 
                 /// populate relavant external info
