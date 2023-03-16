@@ -18,23 +18,23 @@
 
 package org.wso2.carbon.apimgt.keymgt.token;
 
-import junit.framework.TestCase;
 import org.junit.Assert;
-import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
-import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
-public class URLSafeJWTGeneratorTest extends TestCase {
+public class URLSafeJWTGeneratorTest {
 
+    @Test
     public void testEncode() {
-        // Test whether the encode method is base64url encoding.
-        APIMgtGatewayJWTGeneratorImpl apiMgtGatewayJWTGenerator = new APIMgtGatewayJWTGeneratorImpl();
+        URLSafeJWTGenerator urlSafeJWTGenerator = Mockito.mock(URLSafeJWTGenerator.class, Mockito.CALLS_REAL_METHODS);
         String stringToBeEncoded = "<<???>>";
-        String expectedEncodedString = "PDw_Pz8-PiA=";
+        String expectedEncodedString = "PDw_Pz8-Pg";
         try {
-            String actualEncodedString = apiMgtGatewayJWTGenerator.encode(stringToBeEncoded.getBytes());
+            String actualEncodedString = urlSafeJWTGenerator.encode(stringToBeEncoded.getBytes());
             Assert.assertEquals(expectedEncodedString, actualEncodedString);
-        } catch (JWTGeneratorException e) {
-            Assert.fail("JWTGeneratorException thrown");
+        } catch (APIManagementException e) {
+            Assert.fail("APIManagementException thrown");
         }
     }
 }
