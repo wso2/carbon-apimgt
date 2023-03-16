@@ -48,6 +48,14 @@ public class OAS3ParserTest extends OASTestBase {
     }
 
     @Test
+    public void testThrottlingLimitExtension() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas3" + File.separator + "oas3_throttling.json";
+        String swaggerContent = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath),
+                "UTF-8");
+        testThrottlingLimitParsing(oas3Parser, swaggerContent);
+    }
+
+    @Test
     public void testGenerateAPIDefinition() throws Exception {
         testGenerateAPIDefinition(oas3Parser);
     }

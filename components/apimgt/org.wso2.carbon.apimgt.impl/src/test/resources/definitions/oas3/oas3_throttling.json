@@ -1,0 +1,22 @@
+{
+  "paths": {
+    "/*": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    }
+  },
+  "openapi":"3.0.0",
+  "x-throttling-limit": {
+    "requestCount": 1000,
+    "unit": "HOUR"
+  },
+  "info": {
+    "title": "PhoneVerificationO",
+    "version": "1.0.0"
+  }
+}

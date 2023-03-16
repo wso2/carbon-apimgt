@@ -17,10 +17,12 @@
  */
 package org.wso2.carbon.apimgt.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.util.ArrayList;
@@ -266,4 +268,40 @@ public abstract class APIDefinition {
      * @return String parserType
      */
     public abstract String getType();
+
+    /**
+     * This method will extract the root level swagger extension
+     *
+     * @param apiDefinitionContent String (this could be openapi, swagger, asyncapi content)
+     * @param extensionKey   String
+     * @return Object
+     * @throws APIManagementException
+     */
+    public abstract Object getRootLevelExtension(String apiDefinitionContent, String extensionKey);
+
+    /**
+     * This method will extract the resource level swagger extension
+     *
+     * @param apiDefinitionContent String
+     * @return {@link ThrottlingLimit}
+     * @throws APIManagementException if the value under extension cannot be mapped to a {@link ThrottlingLimit}
+     *                                object
+     */
+    public ThrottlingLimit getAPILevelThrottlingLimit(String apiDefinitionContent)
+            throws APIManagementException {
+        Object extension = getRootLevelExtension(apiDefinitionContent,
+                APIConstants.X_THROTTLING_LIMIT_OPENAPI_EXTENSION);
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            if (extension != null) {
+                return mapper.convertValue(extension, ThrottlingLimit.class);
+            }
+            // Unreachable condition as the extension is already validated before calling this method.
+        } catch (IllegalArgumentException e) {
+            throw new APIManagementException(
+                    String.format("Invalid content under the %s extension in the api definition",
+                            APIConstants.X_THROTTLING_LIMIT_OPENAPI_EXTENSION), e);
+        }
+        return null;
+    }
 }

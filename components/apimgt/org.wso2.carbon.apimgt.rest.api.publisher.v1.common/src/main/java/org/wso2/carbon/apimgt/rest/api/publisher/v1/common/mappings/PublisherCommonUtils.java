@@ -1279,6 +1279,11 @@ public class PublisherCommonUtils {
 
         existingAPI.setUriTemplates(uriTemplates);
         existingAPI.setScopes(scopes);
+        existingAPI.setThrottleLimit(oasParser.getAPILevelThrottlingLimit(response.getJsonContent()));
+        // If the API level throttlingLimit is not provided, remove the API level policy
+        if (existingAPI.getThrottleLimit() == null) {
+            existingAPI.setApiLevelPolicy(null);
+        }
         // update the API's scopes with scope prefix (if it is available)
         APIUtil.updateAPIScopesWithPrefix(existingAPI);
         PublisherCommonUtils.validateScopes(existingAPI);

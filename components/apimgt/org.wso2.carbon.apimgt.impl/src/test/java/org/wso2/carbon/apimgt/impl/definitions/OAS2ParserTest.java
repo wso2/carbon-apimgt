@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.ThrottlingLimit;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -62,6 +63,14 @@ public class OAS2ParserTest extends OASTestBase {
         String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2_scopes.json";
         String oas2Scope = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
         testGetScopes(oas2Parser, oas2Scope);
+    }
+
+    @Test
+    public void testThrottlingLimitExtension() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2_throttling.json";
+        String swaggerContent = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath),
+                "UTF-8");
+        testThrottlingLimitParsing(oas2Parser, swaggerContent);
     }
 
     @Test
