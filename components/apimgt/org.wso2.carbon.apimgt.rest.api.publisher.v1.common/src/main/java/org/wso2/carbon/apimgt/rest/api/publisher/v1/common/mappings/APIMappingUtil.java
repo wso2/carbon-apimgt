@@ -196,8 +196,7 @@ public class APIMappingUtil {
 
         model.setImplementation(dto.getEndpointImplementationType().toString());
         model.setType(dto.getType().toString());
-        model.setEnableBackendJWT(dto.isEnableBackendJWT() != null ? dto.isEnableBackendJWT() : true);
-
+        model.setEnableBackendJWT(dto.isEnableBackendJWT() != null ? dto.isEnableBackendJWT() : false);
         if (dto.getLifeCycleStatus() != null) {
             model.setStatus((dto.getLifeCycleStatus() != null) ? dto.getLifeCycleStatus().toUpperCase() : null);
         }
