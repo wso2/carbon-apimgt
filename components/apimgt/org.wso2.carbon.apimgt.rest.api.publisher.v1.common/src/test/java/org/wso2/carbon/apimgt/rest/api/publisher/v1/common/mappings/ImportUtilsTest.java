@@ -19,6 +19,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import com.google.gson.JsonObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Assert;
@@ -34,13 +35,16 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 
 import java.io.File;
 
-@RunWith(PowerMockRunner.class) @PrepareForTest({ APIProvider.class, CommonUtil.class, FileUtils.class, APIUtil.class })
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ ImportUtils.class, APIConstants.class, APIProvider.class, CommonUtil.class,
+        FileUtils.class, APIUtil.class })
 public class ImportUtilsTest {
     private static final String ORGANIZATION = "carbon.super";
     private static final String POLICYNAME = "customCommonLogPolicy";
@@ -50,6 +54,8 @@ public class ImportUtilsTest {
     private final String yamlFile = pathToArchive + "/customCommonLogPolicy.yaml";
     private final String jsonFile = pathToArchive + "/customCommonLogPolicy.json";
     private APIProvider apiProvider;
+    private final JsonObject endpointConfigObject = new JsonObject();
+    private final JsonObject config = new JsonObject();
 
     @Before
     public void init() throws Exception {
@@ -61,6 +67,9 @@ public class ImportUtilsTest {
                                 String.class));
         apiProvider = Mockito.mock(APIProvider.class);
         policyData = Mockito.mock(OperationPolicyData.class);
+        PowerMockito.mockStatic(APIConstants.class);
+        endpointConfigObject.add(APIConstants.ENDPOINT_SPECIFIC_CONFIG, config);
+
     }
 
     @Test
@@ -118,5 +127,24 @@ public class ImportUtilsTest {
         } catch (APIManagementException ex) {
             Assert.assertEquals(errorMsg, ex.getMessage());
         }
+    }
+
+    @Test
+    public void testGetUpdatedEndpointConfig() throws Exception {
+        String activeDuration = "200";
+        config.addProperty(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION, activeDuration);
+        JsonObject actualConfig = ImportUtils.getUpdatedEndpointConfig(endpointConfigObject)
+                .get(APIConstants.ENDPOINT_SPECIFIC_CONFIG).getAsJsonObject();
+        String actualDuration = actualConfig.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).getAsString();
+        Assert.assertEquals(actualDuration, activeDuration);
+    }
+
+    @Test
+    public void testGetUpdatedEndpointConfigWithEmptyActionDuration() throws Exception {
+        String emptyActiveDuration = "";
+        config.addProperty(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION, emptyActiveDuration);
+        JsonObject actualConfig = ImportUtils.getUpdatedEndpointConfig(endpointConfigObject)
+                .get(APIConstants.ENDPOINT_SPECIFIC_CONFIG).getAsJsonObject();
+        Assert.assertNull(actualConfig.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION));
     }
 }
