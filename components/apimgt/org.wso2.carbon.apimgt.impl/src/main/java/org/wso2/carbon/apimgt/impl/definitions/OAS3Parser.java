@@ -778,38 +778,6 @@ public class OAS3Parser extends APIDefinition {
                 title = info.getTitle();
                 context = info.getTitle().replaceAll("\\s", "").toLowerCase();
             }
-
-            String xThrottlingLimitExtension = APIConstants.SWAGGER_X_THROTTLING_LIMIT;
-            if (openAPI.getExtensions() != null && openAPI.getExtensions().containsKey(xThrottlingLimitExtension)) {
-                ErrorItem errorItem = OASParserUtil.validateAPIThrottleLimitExtension(
-                        openAPI.getExtensions().get(xThrottlingLimitExtension));
-                if (errorItem != null) {
-                    validationResponse.getErrorItems().add(errorItem);
-                    errorItem.setDescription("Invalid x-throttling-limit extension " +
-                            "at the API Level");
-                    return validationResponse;
-                }
-            }
-            // Validate the x-throttling-limit extension for each resource
-            for (String path : openAPI.getPaths().keySet()) {
-                PathItem pathItem = openAPI.getPaths().get(path);
-                for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry :
-                        pathItem.readOperationsMap().entrySet()) {
-                    Operation operation = operationEntry.getValue();
-                    if (operation.getExtensions() != null
-                            && operation.getExtensions().containsKey(xThrottlingLimitExtension)) {
-                        ErrorItem errorItem = OASParserUtil.validateAPIThrottleLimitExtension(
-                                operation.getExtensions().get(xThrottlingLimitExtension));
-                        if (errorItem != null) {
-                            validationResponse.getErrorItems().add(errorItem);
-                            errorItem.setDescription(String.format("Invalid x-throttling-limit " +
-                                    "extension at the operation %s:%s", path, operationEntry.getKey()));
-                            return validationResponse;
-                        }
-                    }
-                }
-            }
-
             OASParserUtil.updateValidationResponseAsSuccess(
                     validationResponse, apiDefinition, openAPI.getOpenapi(),
                     title, info.getVersion(), context,
@@ -2091,14 +2059,5 @@ public class OAS3Parser extends APIDefinition {
     @Override
     public String getType() {
         return null;
-    }
-
-    @Override
-    public Object getRootLevelExtension(String apiDefinitionContent, String extensionKey) {
-        OpenAPI openAPI = getOpenAPI(apiDefinitionContent);
-        if (openAPI.getExtensions() == null) {
-            return null;
-        }
-        return openAPI.getExtensions().get(extensionKey);
     }
 }

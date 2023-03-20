@@ -47,10 +47,6 @@
             <groupId>org.wso2.orbit.graphQL</groupId>
             <artifactId>graphQL</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
