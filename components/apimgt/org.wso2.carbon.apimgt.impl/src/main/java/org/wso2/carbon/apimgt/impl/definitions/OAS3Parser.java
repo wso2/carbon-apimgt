@@ -1534,9 +1534,21 @@ public class OAS3Parser extends APIDefinition {
         if (isDefaultGiven(swaggerContent) && !legacyScopes.isEmpty()) {
             SecurityScheme defaultScheme = openAPI.getComponents().getSecuritySchemes()
                     .get(OPENAPI_SECURITY_SCHEMA_KEY);
-            OAuthFlows oAuthFlows = defaultScheme.getFlows();
-            if (oAuthFlows != null) {
-                OAuthFlow oAuthFlow = oAuthFlows.getImplicit();
+            if (defaultScheme != null && defaultScheme.getFlows() != null) {
+                OAuthFlows flows = defaultScheme.getFlows();
+                OAuthFlow oAuthFlow = null;
+                if (flows.getImplicit() != null || flows.getAuthorizationCode() != null) {
+                    oAuthFlow =
+                            flows.getImplicit() != null ? flows.getImplicit() : flows.getAuthorizationCode();
+                    String authUrl = oAuthFlow.getAuthorizationUrl();
+                    if (StringUtils.isBlank(authUrl)) {
+                        oAuthFlow.setAuthorizationUrl(OPENAPI_DEFAULT_AUTHORIZATION_URL);
+                    }
+                } else if (flows.getClientCredentials() != null) {
+                    oAuthFlow = flows.getClientCredentials();
+                } else if (flows.getPassword() != null) {
+                    oAuthFlow = flows.getPassword();
+                }
                 if (oAuthFlow != null) {
                     Scopes defaultScopes = oAuthFlow.getScopes();
                     if (defaultScopes != null) {
