@@ -26,9 +26,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.api.APIDefinition;
-import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
@@ -582,48 +580,5 @@ public class OASParserUtilTest {
         Assert.assertFalse(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " exists on resource level",
                 pathsObj.has(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
 
-    }
-
-    @Test
-    public void testValidateThrottleLimitExtension() {
-        Assert.assertNull("Having null extension should not result in an error",
-                OASParserUtil.validateAPIThrottleLimitExtension(null));
-
-        Map<String, Object> validExtension = new HashMap<>();
-        validExtension.put("requestCount", 2000);
-        validExtension.put("unit", "MINUTE");
-        Assert.assertNull("Having proper extension should not result in an error",
-                OASParserUtil.validateAPIThrottleLimitExtension(null));
-
-
-        Map<String, Object> missingRequestCount = new HashMap<>();
-        missingRequestCount.put("unit", "Min");
-        ErrorItem errorItem = OASParserUtil.validateAPIThrottleLimitExtension(missingRequestCount);
-        Assert.assertNotNull("If the requestCount is missing, it should result in an error", errorItem);
-        Assert.assertEquals("Invalid errorCode for invalid throttle limit.", 900765,
-                errorItem.getErrorCode());
-
-        Map<String, Object> missingUnit = new HashMap<>();
-        missingUnit.put("requestCount", 2000);
-        errorItem = OASParserUtil.validateAPIThrottleLimitExtension(missingUnit);
-        Assert.assertNotNull("If the unit is missing, it should result in an error", errorItem);
-        Assert.assertEquals("Invalid errorCode for invalid throttle limit.", 900765,
-                errorItem.getErrorCode());
-
-        Map<String, Object> invalidUnit = new HashMap<>();
-        invalidUnit.put("requestCount", 2000);
-        invalidUnit.put("unit", "Min");
-        errorItem = OASParserUtil.validateAPIThrottleLimitExtension(invalidUnit);
-        Assert.assertNotNull("Having invalid unit would result in an error", errorItem);
-        Assert.assertEquals("Invalid errorCode for invalid throttle limit.", 900765,
-                errorItem.getErrorCode());
-
-        Map<String, Object> invalidRequestCount = new HashMap<>();
-        invalidRequestCount.put("requestCount", -2);
-        invalidRequestCount.put("unit", "Min");
-        errorItem = OASParserUtil.validateAPIThrottleLimitExtension(invalidRequestCount);
-        Assert.assertNotNull("Having invalid requestCount would result in an error", errorItem);
-        Assert.assertEquals("Invalid errorCode for invalid throttle limit.", 900765,
-                errorItem.getErrorCode());
     }
 }

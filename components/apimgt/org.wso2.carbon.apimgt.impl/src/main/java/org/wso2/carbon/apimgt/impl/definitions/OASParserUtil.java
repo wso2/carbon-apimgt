@@ -961,41 +961,6 @@ public class OASParserUtil {
     }
 
     /**
-     * Validates if the APIThrottleLimit is in the desired format. If any validation step fails,
-     * an error item is returned
-     *
-     * @param extensionValue - APIThrottleLimit extension value
-     * @return {@link ErrorItem} - ErrorItem object if any validation fails, null otherwise
-     */
-    public static ErrorItem validateAPIThrottleLimitExtension(Object extensionValue) {
-        if (extensionValue == null) {
-            return null;
-        }
-        String[] allowedTimeUnits = { "SECOND", "MINUTE", "HOUR", "DAY"};
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            ThrottlingLimit throttlingLimit = mapper.convertValue(extensionValue, ThrottlingLimit.class);
-            if ((StringUtils.isNotEmpty(throttlingLimit.getUnit()) && !Arrays.asList(allowedTimeUnits)
-                    .contains(throttlingLimit.getUnit()))
-                    || (StringUtils.isEmpty(throttlingLimit.getUnit()) && throttlingLimit.getRequestCount() != -1)
-                    || throttlingLimit.getRequestCount() < -1) {
-                ErrorItem errorItem = new ErrorItem();
-                errorItem.setErrorCode(ExceptionCodes.INVALID_THROTTLING_LIMIT_FOUND.getErrorCode());
-                errorItem.setMessage(ExceptionCodes.INVALID_THROTTLING_LIMIT_FOUND.getErrorMessage());
-                errorItem.setDescription(ExceptionCodes.INVALID_THROTTLING_LIMIT_FOUND.getErrorDescription());
-                return errorItem;
-            }
-        } catch (IllegalArgumentException e) {
-            ErrorItem errorItem = new ErrorItem();
-            errorItem.setErrorCode(ExceptionCodes.INVALID_THROTTLING_LIMIT_FOUND.getErrorCode());
-            errorItem.setMessage(ExceptionCodes.INVALID_THROTTLING_LIMIT_FOUND.getErrorMessage());
-            errorItem.setDescription(ExceptionCodes.INVALID_THROTTLING_LIMIT_FOUND.getErrorDescription());
-            return errorItem;
-        }
-        return null;
-    }
-
-    /**
      * Add error item with the provided message to the provided validation response object
      *
      * @param validationResponse APIDefinitionValidationResponse object
