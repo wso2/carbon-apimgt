@@ -3733,24 +3733,26 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             return;
         }
 
-        if (visibilityRoles != null && !visibilityRoles.trim().isEmpty()) {
-            String[] visibilityRolesList = visibilityRoles.replaceAll("\\s+", "").split(",");
-            if (log.isDebugEnabled()) {
-                log.debug("API has restricted visibility with the roles : "
-                        + Arrays.toString(visibilityRolesList));
-            }
-            String[] userRoleList = APIUtil.getListOfRoles(userNameWithTenantDomain);
-            if (log.isDebugEnabled()) {
-                log.debug("User " + username + " has roles " + Arrays.toString(userRoleList));
-            }
-            for (String role : visibilityRolesList) {
-                if (!role.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST)
-                        && APIUtil.compareRoleList(userRoleList, role)) {
-                    return;
-                }
-            }
-            throw new APIMgtResourceNotFoundException("API not found "); // for backword compatibility we send 404
-        }
+        // This role comparison is done on the MongoDB side.
+        // TODO:rashm1n - Need to move the role fetching/comparison to the carbon-apimgt side.
+//        if (visibilityRoles != null && !visibilityRoles.trim().isEmpty()) {
+//            String[] visibilityRolesList = visibilityRoles.replaceAll("\\s+", "").split(",");
+//            if (log.isDebugEnabled()) {
+//                log.debug("API has restricted visibility with the roles : "
+//                        + Arrays.toString(visibilityRolesList));
+//            }
+//            String[] userRoleList = APIUtil.getListOfRoles(userNameWithTenantDomain);
+//            if (log.isDebugEnabled()) {
+//                log.debug("User " + username + " has roles " + Arrays.toString(userRoleList));
+//            }
+//            for (String role : visibilityRolesList) {
+//                if (!role.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST)
+//                        && APIUtil.compareRoleList(userRoleList, role)) {
+//                    return;
+//                }
+//            }
+//            throw new APIMgtResourceNotFoundException("API not found "); // for backword compatibility we send 404
+//        }
 
     }
 
