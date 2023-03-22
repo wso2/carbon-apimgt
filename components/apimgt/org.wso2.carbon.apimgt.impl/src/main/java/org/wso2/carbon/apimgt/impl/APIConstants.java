@@ -2960,4 +2960,9 @@ public final class APIConstants {
 
     // Constants related to basic health check APIs
     public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
+
+    public static final String CHOREO_TOKEN_HANDLER = "ChoreoTokenHandler";
+    public static final String APP_SERVICE_URL = "AppServiceUrl";
+    public static final String AUTHZ_SERVICE_URL = "AuthzServiceUrl";
+    public static final String AUTHZ_SERVICE_ENABLED = "AuthzServiceEnabled";
 }

@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
+import org.wso2.carbon.apimgt.impl.grpc.GrpcConfig;
 import org.wso2.carbon.apimgt.impl.monetization.MonetizationConfigurationDto;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -134,6 +135,8 @@ public class APIManagerConfiguration {
     }
 
     private Map<String, ExtensionListener> extensionListenerMap = new HashMap<>();
+
+    private GrpcConfig grpcConfig;
 
     public static Properties getRealtimeTokenRevocationNotifierProperties() {
 
@@ -572,6 +575,8 @@ public class APIManagerConfiguration {
                 setExtensionListenerConfigurations(element);
             } else if (APIConstants.JWT_AUDIENCES.equals(localName)){
                 setRestApiJWTAuthAudiences(element);
+            } else if (APIConstants.CHOREO_TOKEN_HANDLER.equals(localName)) {
+               setGRPCConfiguration(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -2132,5 +2137,24 @@ public class APIManagerConfiguration {
 
     public Map<String, Environment> getGatewayEnvironments() {
         return apiGatewayEnvironments;
+    }
+
+    private void setGRPCConfiguration(OMElement element) {
+        OMElement appServiceUrl = element.getFirstChildWithName(
+                new QName(APIConstants.APP_SERVICE_URL));
+        OMElement authzServiceUrl = element.getFirstChildWithName(
+                new QName(APIConstants.AUTHZ_SERVICE_URL));
+        OMElement authzServiceEnabled = element.getFirstChildWithName(
+                new QName(APIConstants.AUTHZ_SERVICE_ENABLED));
+        grpcConfig = GrpcConfig.getInstance();
+        if (appServiceUrl != null) {
+            grpcConfig.setAppServiceUrl(appServiceUrl.getText());
+        }
+        if (authzServiceUrl != null) {
+            grpcConfig.setAuthzServiceUrl(authzServiceUrl.getText());
+        }
+        if (authzServiceEnabled != null) {
+            grpcConfig.setAuthzServiceEnabled(Boolean.parseBoolean(authzServiceEnabled.getText()));
+        }
     }
 }

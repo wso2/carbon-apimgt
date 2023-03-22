@@ -1,0 +1,470 @@
+syntax = "proto3";
+
+package choreo.apis;
+
+import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
+
+option go_package = "github.com/wso2-enterprise/choreo-runtime/pkg/apis";
+
+message User {
+  int64 id = 1;
+  string idp_id = 2 [(validate.rules).string.uuid = true];
+  string picture_url = 3;
+  string email = 4;
+  string display_name = 5;
+  repeated Group groups = 6;
+  repeated Role roles = 7;
+  bool is_anonymous = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp expired_at = 10;
+}
+
+message Organization {
+  int64 id = 1;
+  string uuid = 2 [(validate.rules).string.uuid = true];
+  string handle = 3 [(validate.rules).string.min_len = 1];
+  string name = 4 [(validate.rules).string.min_len = 1];
+}
+
+message MemberInvitation {
+  int64 id = 1;
+  string uuid = 2;
+  string email = 3 [(validate.rules).string.email = true];
+  string handle = 4 [(validate.rules).string.min_len = 1];
+  repeated string groups = 5;
+  string application = 6;
+}
+
+message Group {
+  int64 id = 1;
+  string org_name = 2;
+  string org_uuid = 3;
+  string description = 4;
+  bool default_group = 5;
+  string display_name = 6 [(validate.rules).string.min_len = 1];
+  string handle = 7 [(validate.rules).string.max_len = 30, (validate.rules).string.pattern = "^[a-z][a-z0-9-]+$"];
+  repeated Role roles = 8;
+  repeated User users = 9;
+  repeated GroupTag tags = 10;
+  string created_by = 11;
+  string updated_by = 12;
+  google.protobuf.Timestamp created_at = 13;
+  google.protobuf.Timestamp updated_at = 14;
+}
+
+message Permission {
+  int64 id = 1;
+  string handle = 2 [(validate.rules).string.max_len = 30];
+  string display_name = 3;
+  string domain_area = 4;
+  string description = 5;
+  int64 parent_id = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+message Role {
+  int64 id = 1;
+  string description = 2;
+  string display_name = 3 [(validate.rules).string.min_len = 1];
+  string handle = 4 [(validate.rules).string.max_len = 30, (validate.rules).string.pattern = "^[a-z][a-z0-9-]+$"];
+  bool default_role = 5;
+  repeated Permission permissions = 6;
+  repeated RoleTag tags = 7;
+  repeated User users = 8;
+  string created_by = 9;
+  string updated_by = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+}
+
+message GroupTag {
+  int64 id = 1;
+  string org_name = 2;
+  string org_uuid = 3;
+  string group_name = 4;
+  string handle = 5 [(validate.rules).string.max_len = 30, (validate.rules).string.pattern = "^[A-Za-z0-9-_ ]+$"];
+  string created_by = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+message RoleTag {
+  int64 id = 1;
+  string role_handle = 2;
+  string handle = 3 [(validate.rules).string.max_len = 30, (validate.rules).string.pattern = "^[A-Za-z0-9-_ ]+$"];
+  string created_by = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message Application {
+  int64 id = 1;
+  string name = 2 [(validate.rules).string.max_len = 30, (validate.rules).string.pattern = "^[a-z][a-z0-9-]+$"];
+  int64 organization_id = 3;
+  string organization = 4 [json_name = "org", (validate.rules).string.min_len = 1];
+  string display_name = 5 [(validate.rules).string.min_len = 1];
+  string display_type = 6;
+  string git_remote = 7;
+  string working_file = 8;
+  enum DeployType {
+    Unknown = 0;
+    Job = 1;
+    Service = 2;
+    Custom = 3;
+  }
+  DeployType deploy_type = 9;
+  string cron_schedule = 10;
+  string template = 11;
+  google.protobuf.Timestamp created_at = 12;
+  message Observability {
+    string id = 1 [json_name = "observabilityId"];
+    string latest_version = 2;
+  }
+  Observability observability = 13;
+  enum Status {
+    unknown = 0;
+    stopped = 1;
+    running = 2;
+  }
+  Status status = 14;
+  string template_code = 15;
+  bool pre_built = 16;
+  string sample_reference = 17;
+  string docker_image = 18;
+  string project_id = 19;
+  string application_id = 20;
+}
+
+message EnvironmentInfo {
+  string access_url = 1;
+  string observability_url = 2;
+  string status = 3;
+}
+
+message AuthRequest {
+  string code = 1;
+  string providers = 2 [json_name = "authenticatedIdPs"];
+  string redirect_url = 3;
+  string beta_invite_correlation_key = 4 [json_name = "ck"];
+}
+
+message AuthResponse {
+  string token = 1;
+  string display_name = 2;
+  string user_email = 3;
+  string user_profile_picture_url = 4;
+  string idp_id = 5;
+  repeated Organization organizations = 6;
+  int64 user_id = 7;
+  google.protobuf.Timestamp user_created_at = 8;
+  google.protobuf.Timestamp user_expired_at = 9;
+  bool is_anonymous = 10;
+}
+
+message TriggerParams {
+  enum DType {
+    Job = 0;
+    Service = 1;
+    Cron = 2;
+  }
+  string org = 1;
+  string app = 2;
+  string appId = 3;
+  string ns = 4;
+  string hostname = 5;
+  string cron = 6;
+  DType deploymentType = 7;
+}
+
+message DeploymentRun {
+  int64 id = 1;
+  int64 createdAt = 2;
+}
+
+message DeploymentRunStatus {
+  string state = 1;
+  string conclusion = 2;
+  map<string, Phase> phases = 3;
+  string errorMsg = 4;
+}
+
+message Phase {
+  string state = 1;
+  string conclusion = 2;
+}
+
+message Environment {
+  int64 id = 1;
+  int64 orgId = 2;
+  string org = 3;
+  string display_name = 4 [(validate.rules).string.min_len = 1];
+  string name = 5 [(validate.rules).string.max_len = 30, (validate.rules).string.pattern = "^[a-z][a-z0-9-]+$"];
+  int64 k8s_cluster_id = 6;
+  string k8s_namespace = 7;
+  int64 createdAt = 8;
+  int64 updatedAt = 9;
+}
+
+message ApplicationToEnvMapper {
+  int64 appId = 1;
+  int64 envId = 2;
+  string deploymentBuildId = 3;
+  deploymentStatusEnum status = 4;
+  int64 createdAt = 6;
+  int64 updatedAt = 7;
+}
+
+enum testStatusEnum {
+  running = 0;
+  stopped = 1;
+}
+
+enum deploymentStatusEnum {
+  deploying = 0;
+  deployed = 1;
+  undeploying = 2;
+  undeployed = 4;
+  pending = 5;
+}
+
+message WebsocketRawMessage {
+  int32 type = 1;
+  bytes message = 2;
+}
+
+message WebsocketMessage {
+  enum Type {
+    unknown = 0;
+    control = 1;
+    data = 2;
+    error = 3;
+  }
+  Type type = 1;
+  google.protobuf.Any message = 2;
+}
+
+message WorkspaceFileInfo {
+  enum Type {
+    unknown = 0;
+    dir = 1;
+    file = 2;
+
+  }
+  Type type = 1;
+  string path = 2 [(validate.rules).string.min_len = 1];
+  uint64 size = 3;
+  string content = 4;
+  repeated string files = 5;
+
+}
+
+message WorkspaceApplicationLogLine {
+  enum Type {
+    UNKNOWN = 0;
+    STDOUT = 1;
+    STDERR = 2;
+    ERROR = 3;
+  }
+  Type type = 1;
+  string data = 2;
+}
+
+message Error {
+  // Make sure to change github.com/wso2-enterprise/choreo-runtime/pkg/errors package if the error codes were changed or added
+  enum Code {
+    // 1001 to 1999 - client errors
+    // 2001 to 2999 - server errors
+    reserved 1 to 999, 1000, 2000;
+    UNKNOWN = 0;
+    UNKNOWN_CLIENT = 1001;
+    INVALID_REQUEST = 1002;
+    NOT_FOUND = 1003;
+    NOT_AUTHORIZED = 1004;
+    FORBIDDEN = 1005;
+    INVITATION_NOT_FOUND = 1010;
+    INVITATION_ALREADY_USED = 1011;
+    DUPLICATE_RESOURCE = 1012;
+    TOO_MANY_REQUESTS = 1013;
+
+    UNKNOWN_SERVER = 2001;
+    INTERNAL = 2002;
+    UNAVAILABLE = 2003;
+    UNIMPLEMENTED = 2004;
+  }
+  Code code = 1;
+  string type = 2;
+  string message = 3;
+  string cause = 4;
+}
+
+message Configuration {
+  int64 id = 1;
+  int64 organization_id = 2;
+  string key = 3 [(validate.rules).string.min_len = 1];
+  string value = 4 [(validate.rules).string.min_len = 1];
+  string scope = 5;
+  int64 group_id = 6;
+}
+
+message Secret {
+  int64 id = 1;
+  int64 organization_id = 2;
+  string key = 3 [(validate.rules).string.min_len = 1];
+  string encrypted_value = 4 [(validate.rules).string.min_len = 1];
+  string value = 5;
+  string scope = 6;
+  int64 group_id = 7;
+  string encrypt_key_version = 8;
+}
+
+message ConfigurationGroup {
+  int64 id = 1;
+  int64 organization_id = 2;
+  string scope = 3;
+  string name = 4;
+  string display_name = 5;
+  repeated Configuration configurations = 6;
+  repeated Secret secrets = 7;
+}
+
+message ConnectionConfig {
+  string connector_name = 1 [(validate.rules).string.min_len = 1];
+  oauth2 oauth2_config = 2;
+  message oauth2 {
+    string api_base_url = 1 [(validate.rules).string.min_len = 1];
+    string client_id = 2 [(validate.rules).string.min_len = 1];
+    string auth_url = 3 [(validate.rules).string.min_len = 1];
+    string redirect_url = 4 [(validate.rules).string.min_len = 1];
+    repeated string scopes = 5;
+    repeated parameter params = 6;
+  }
+  message parameter {
+    string key = 1;
+    string value = 2;
+  }
+}
+
+message Connection {
+  int64 id = 1;
+  string handle = 2[(validate.rules).string.min_len = 1];
+  string display_name = 3[(validate.rules).string.min_len = 1];
+  string connector_name = 4[(validate.rules).string.min_len = 1];
+  string user_account_identifier = 5;
+  Token token = 6;
+  message code_var_mapping {
+    string name = 1;
+    string code_variable_key = 2;
+  }
+  string organization_name = 7;
+  repeated code_var_mapping code_variable_keys = 8;
+  bool is_shared = 9;
+  bool is_used = 10;
+  string type = 11[(validate.rules).string.min_len = 1];
+}
+
+message OnPremKey {
+  int64 id = 1;
+  int64 org_id = 2;
+  string org_name = 3;
+  string org_uuid = 4;
+  string key = 5;
+  string status = 6;
+  string display_name = 7 [(validate.rules).string.min_len = 1];
+  string handle = 8 [(validate.rules).string.max_len = 36];
+  string created_by = 9;
+  string updated_by = 10;
+  google.protobuf.Timestamp expires_at = 11;
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Timestamp updated_at = 13;
+}
+
+message OnPremKeySubscription {
+  int64 id = 1;
+  string org_name = 2;
+  string plan = 3;
+  bool isExpired = 4;
+  google.protobuf.Timestamp start_date = 5;
+  google.protobuf.Timestamp end_date = 6;
+}
+
+message TokenInfo {
+  string access_token = 1;
+  string refresh_token = 2;
+  string client_id = 3;
+  string client_secret = 4;
+  string token_url = 5;
+}
+
+message Token {
+  string access_token = 1;
+  string token = 2;
+  string refresh_token = 3;
+  string refresh_url = 4;
+  string client_id = 5;
+  string client_secret = 6;
+}
+
+message ConfigMappingInfo {
+  int64 id = 1;
+  string display_name = 2;
+  repeated ConfigMapping config_mapping = 3;
+}
+
+message ConfigMapping {
+  int64 id = 1;
+  int64 connection_id = 2;
+  KeyType key_type = 3 ;
+  string key_name = 4;
+  string config_key_name = 5 [(validate.rules).string.min_len = 1];
+  string value = 6;
+  bool secret = 7;
+}
+
+enum KeyType {
+  unknownKey = 0;
+  tokenEpKey = 1;
+  accessTokenKey = 2;
+  refreshTokenKey = 3;
+  invocationUrlKey = 4;
+  clientIdKey = 5;
+  clientSecretKey = 6;
+  customKey = 7;
+}
+
+message MappedConfigData {
+  string key_type = 1 [(validate.rules).string.min_len = 1];
+  string config_key_name = 2 [(validate.rules).string.min_len = 1];
+  string value = 3;
+  bool secret = 4;
+}
+
+message ApplicationCount {
+  int64 count = 1;
+}
+
+message EnvironmentId {
+  int64 id = 1;
+  string environment_id = 2[(validate.rules).string.min_len = 1];
+}
+
+message Pagination {
+  int64 offset = 1;
+  int64 limit = 2;
+  int64 total = 3;
+  string previous = 4;
+  string next = 5;
+}
+
+message PaginatedRole {
+  int64 count = 1;
+  repeated Role list = 2;
+  Pagination pagination = 3;
+}
+
+message PermissionTree {
+  string domain = 1;
+  repeated Permission list = 2;
+}
