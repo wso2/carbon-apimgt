@@ -50,7 +50,8 @@ public class TenantLogsApiServiceImpl implements TenantLogsApiService {
         if (apiId != null) {
             if (DevopsAPIUtils.validateLogLevel(loggingApiInputDTO.getLogLevel())) {
                 APILoggingImpl apiLoggingImpl = new APILoggingImpl();
-                apiLoggingImpl.addUpdateAPILogger(tenantId, apiId, loggingApiInputDTO.getLogLevel().toUpperCase());
+                apiLoggingImpl.addUpdateAPILogger(tenantId, apiId, loggingApiInputDTO.getLogLevel().toUpperCase(),
+                        loggingApiInputDTO.getResourceMethod(),loggingApiInputDTO.getResourcePath());
                 return Response.ok().entity(loggingApiInputDTO).build();
             } else {
                 throw new APIManagementException("The input log level is incorrect: Input log level : " +
