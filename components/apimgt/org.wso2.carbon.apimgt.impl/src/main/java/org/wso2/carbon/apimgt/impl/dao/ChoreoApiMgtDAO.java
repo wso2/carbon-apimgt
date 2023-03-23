@@ -237,7 +237,7 @@ public class ChoreoApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Failed to check the availability of the provided environment " + name, e);
+            throw new APIManagementException("Failed to check the availability of the provided environment name " + name + " of Organization: " + organization, e);
         }
 
         return isValidEnvName;
