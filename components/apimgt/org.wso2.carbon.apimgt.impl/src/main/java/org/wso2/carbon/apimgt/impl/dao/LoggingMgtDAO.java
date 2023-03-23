@@ -76,6 +76,29 @@ public class LoggingMgtDAO {
         }
     }
 
+    public void addAPILoggerPerResource(String organization, String apiId, String logLevel, String resourceMethod,
+                                        String resourcePath) throws APIManagementException {
+        try (Connection addLoggingCon = APIMgtDBUtil.getConnection()) {
+            addLoggingCon.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = addLoggingCon.prepareStatement(
+                    SQLConstants.ADD_PER_API_RESOURCE_LOGGING_SQL)) {
+                preparedStatement.setString(1, logLevel);
+                preparedStatement.setString(2, apiId);
+                preparedStatement.setString(3, organization);
+                preparedStatement.setString(4, resourceMethod);
+                preparedStatement.setString(5, resourcePath);
+
+                preparedStatement.executeUpdate();
+                addLoggingCon.commit();
+            } catch (SQLException e) {
+                addLoggingCon.rollback();
+                throw new ApiLoggingMgtException("Error while adding new per API logger", e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to add API logging for " + apiId + " with the log level " + logLevel, e);
+        }
+    }
+
     public List<APILogInfoDTO> retrieveAPILoggerList(String organization, String logLevel) throws
             APIManagementException {
         List<APILogInfoDTO> apiLogInfoDTOList = new ArrayList<>();
