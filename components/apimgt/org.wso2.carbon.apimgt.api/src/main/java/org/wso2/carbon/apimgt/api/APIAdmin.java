@@ -482,6 +482,16 @@ public interface APIAdmin  {
     Policy[] getPolicies(int tenantId, String level) throws APIManagementException;
 
     /**
+     * checks whether the given Environment name for the given organization is already there in the system.
+     *
+     * @param name         A String represents the environment name
+     * @param organization A String represents the organizationId
+     * @return true if an environment is already exists for the given name within the organization and false otherwise
+     * @throws APIManagementException if failed to check the vHost name availability
+     */
+    boolean isEnvNameExist(String name, String organization) throws APIManagementException;
+
+    /**
      * Checks whether the given vHost name is already registered in the system
      *
      * @param vHost A String representing the vHost name

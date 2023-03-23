@@ -1383,6 +1383,11 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
+    public boolean isEnvNameExist(String name, String organization) throws APIManagementException {
+        return ChoreoApiMgtDAO.getInstance().isEnvNameExists(name, organization);
+    }
+
+    @Override
     public boolean isVHostNameExist(String vHost) throws APIManagementException {
         return ChoreoApiMgtDAO.getInstance().isVHostExists(vHost);
     }

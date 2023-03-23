@@ -217,6 +217,33 @@ public class ChoreoApiMgtDAO {
     }
 
     /**
+     * Checks whether a given environment name in given organization is already exists
+     *
+     * @param name         String represents the name of the environment
+     * @param organization string represents organizationId
+     * @return true if the environment is exists and false otherwise
+     * @throws APIManagementException if failed to check the environment name
+     */
+    public boolean isEnvNameExists(String name, String organization) throws APIManagementException {
+        boolean isValidEnvName = false;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_BY_NAME_SQL))
+        {
+            prepStmt.setString(1, organization);
+            prepStmt.setString(2, name);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    isValidEnvName = true;
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Failed to check the availability of the provided environment " + name, e);
+        }
+
+        return isValidEnvName;
+    }
+
+    /**
      * Checks whether the given vHost exists.
      *
      * @param vHost        vHost name
