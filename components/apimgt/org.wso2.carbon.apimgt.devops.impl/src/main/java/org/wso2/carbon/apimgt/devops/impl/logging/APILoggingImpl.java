@@ -38,9 +38,11 @@ import java.util.List;
 public class APILoggingImpl {
     private static final String PER_API_LOGGING_PERMISSION_PATH = "/permission/protected/configure/logging";
     private static final String INVALID_LOGGING_PERMISSION = "Invalid logging permission";
+    private static final String INCORRECT_LOGGING_PER_API_RESOURCE_REQUEST = "Resource Method and Resource Path both should included";
     private final ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
-    public void addUpdateAPILogger(String tenantId, String apiId, String logLevel) throws APIManagementException {
+    public void addUpdateAPILogger(String tenantId, String apiId, String logLevel, String resourceMethod,
+                                   String resourcePath) throws APIManagementException {
         if (apiMgtDAO.getAPIInfoByUUID(apiId) == null) {
             throw new APIManagementException("API not found.",
                     ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
@@ -49,7 +51,17 @@ public class APILoggingImpl {
             throw new APIManagementException(INVALID_LOGGING_PERMISSION,
                     ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION));
         }
-        LoggingMgtDAO.getInstance().addAPILogger(tenantId, apiId, logLevel);
+
+        if (resourceMethod != null && resourcePath != null) {
+            LoggingMgtDAO.getInstance().addAPILoggerPerResource(tenantId, apiId, logLevel, resourceMethod.toUpperCase(),
+                    resourcePath);
+        } else if (resourceMethod == null && resourcePath == null) {
+            LoggingMgtDAO.getInstance().addAPILogger(tenantId, apiId, logLevel);
+        } else {
+            throw new APIManagementException(INCORRECT_LOGGING_PER_API_RESOURCE_REQUEST,
+                    ExceptionCodes.from(ExceptionCodes.LOGGING_API_MISSING_DATA));
+        }
+
         publishLogAPIData(tenantId, apiId, logLevel);
     }
 
