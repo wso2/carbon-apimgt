@@ -58,6 +58,8 @@ public class DevopsAPIUtils {
             loggingApiOutputDTO.setContext(apiLogInfoDTO.getContext());
             loggingApiOutputDTO.setLogLevel(apiLogInfoDTO.getLogLevel());
             loggingApiOutputDTO.setApiId(apiLogInfoDTO.getApiId());
+            loggingApiOutputDTO.setResourceMethod(apiLogInfoDTO.getResourceMethod());
+            loggingApiOutputDTO.setResourcePath(apiLogInfoDTO.getResourcePath());
             loggingApiOutputDTOList.add(loggingApiOutputDTO);
         }
         loggingApiOutputListDTO.apis(loggingApiOutputDTOList);
