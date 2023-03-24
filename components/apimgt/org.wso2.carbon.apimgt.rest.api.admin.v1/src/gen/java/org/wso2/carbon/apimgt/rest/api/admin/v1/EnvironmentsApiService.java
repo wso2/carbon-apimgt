@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentNameValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostValidationResponseDTO;
 
@@ -27,5 +28,6 @@ public interface EnvironmentsApiService {
       public Response environmentsEnvironmentIdPut(String environmentId, EnvironmentDTO environmentDTO, MessageContext messageContext) throws APIManagementException;
       public Response environmentsGet(MessageContext messageContext) throws APIManagementException;
       public Response environmentsPost(EnvironmentDTO environmentDTO, MessageContext messageContext) throws APIManagementException;
+      public Response validateEnvName(String name, MessageContext messageContext) throws APIManagementException;
       public Response validateVhost(String vhost, MessageContext messageContext) throws APIManagementException;
 }
