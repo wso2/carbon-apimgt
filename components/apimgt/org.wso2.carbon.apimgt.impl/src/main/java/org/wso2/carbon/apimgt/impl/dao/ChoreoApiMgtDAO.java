@@ -24,7 +24,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -218,7 +217,7 @@ public class ChoreoApiMgtDAO {
     }
 
     /**
-     * Checks whether a given environment name in given organization is already exists
+     * Checks whether a given environment name in given organization is already exists in the DB
      *
      * @param name         String represents the name of the environment
      * @param organization string represents organizationId
@@ -226,14 +225,6 @@ public class ChoreoApiMgtDAO {
      * @throws APIManagementException if failed to check the environment name
      */
     public boolean isEnvNameExists(String name, String organization) throws APIManagementException {
-        // check if the environment exists in the readonly environments (from config)
-        Map<String, Environment> environments = APIUtil.getReadOnlyGatewayEnvironments();
-        for (Map.Entry<String, Environment> environment : environments.entrySet()) {
-            if (environment.getValue().getName().equals(name)) {
-                return true;
-            }
-        }
-        // check if the env exists in the dynamic environments (from database)
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_BY_NAME_SQL)) {
             prepStmt.setString(1, organization);
@@ -247,7 +238,6 @@ public class ChoreoApiMgtDAO {
             throw new APIManagementException("Failed to check the availability of the provided environment name " +
                     name + " of Organization: " + organization, e);
         }
-
         return false;
     }
 

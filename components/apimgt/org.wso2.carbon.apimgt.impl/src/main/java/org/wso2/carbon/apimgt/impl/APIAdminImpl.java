@@ -1384,6 +1384,14 @@ public class APIAdminImpl implements APIAdmin {
 
     @Override
     public boolean isEnvNameExist(String name, String organization) throws APIManagementException {
+        // check if the environment exists in the readonly environments (from config)
+        Map<String, Environment> environments = APIUtil.getReadOnlyGatewayEnvironments();
+        for (Map.Entry<String, Environment> environment : environments.entrySet()) {
+            if (environment.getValue().getName().equals(name)) {
+                return true;
+            }
+        }
+        // check if the env exists in the dynamic environments (from database)
         return ChoreoApiMgtDAO.getInstance().isEnvNameExists(name, organization);
     }
 
