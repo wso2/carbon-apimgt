@@ -22,11 +22,21 @@ public class APILogInfoDTO {
     private String apiId;
     private String context;
     private String logLevel;
+    private String resourceMethod;
+    private String resourcePath;
 
     public APILogInfoDTO(String apiId, String context, String logLevel) {
         this.apiId = apiId;
         this.context = context;
         this.logLevel = logLevel;
+    }
+
+    public APILogInfoDTO(String apiId, String context, String logLevel, String resourceMethod, String resourcePath) {
+        this.apiId = apiId;
+        this.context = context;
+        this.logLevel = logLevel;
+        this.resourceMethod = resourceMethod;
+        this.resourcePath = resourcePath;
     }
 
     public String getApiId() {
@@ -52,4 +62,12 @@ public class APILogInfoDTO {
     public void setLogLevel(String logLevel) {
         this.logLevel = logLevel;
     }
+
+    public String getResourcePath() { return resourcePath;}
+
+    public void setResourcePath(String resourcePath) { this.resourcePath = resourcePath;}
+
+    public String getResourceMethod() { return resourceMethod;}
+
+    public void setResourceMethod(String resourceMethod) { this.resourceMethod = resourceMethod;}
 }
