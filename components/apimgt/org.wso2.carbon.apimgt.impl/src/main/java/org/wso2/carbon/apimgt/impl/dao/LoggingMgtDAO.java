@@ -230,7 +230,10 @@ public class LoggingMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to retrieve organization", e);
         }
-        String apiLogLevel = apiLogInfoApiDTOList.get(0).getLogLevel();
+        String apiLogLevel = null;
+        if (!apiLogInfoApiDTOList.isEmpty()) {
+            apiLogLevel = apiLogInfoApiDTOList.get(0).getLogLevel();
+        }
         boolean isResourceLevelHasHighPriority = false;
         for (APILogInfoDTO apiLogInfoDTO : apiLogInfoApiResourceDTOList) {
             switch (apiLogInfoDTO.getLogLevel()) {
