@@ -53,6 +53,7 @@ public class Environment implements Serializable {
     private List<VHost> vhosts = new ArrayList<>();
     private String provider;
     private String dataPlaneId;
+    private String gatewayEnvironmentType;
     private Map<String, String> additionalProperties = new HashMap<>();
 
     public boolean isDefault() {
@@ -240,6 +241,14 @@ public class Environment implements Serializable {
 
     public void setDataPlaneId(String dataPlaneId) {
         this.dataPlaneId = dataPlaneId;
+    }
+
+    public String getGatewayEnvironmentType() {
+        return gatewayEnvironmentType;
+    }
+
+    public void setGatewayEnvironmentType(String gatewayEnvironmentType) {
+        this.gatewayEnvironmentType = gatewayEnvironmentType;
     }
 
     @Override

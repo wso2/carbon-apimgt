@@ -639,6 +639,13 @@ public class APIManagerConfiguration {
         } else {
             environment.setDescription("");
         }
+        OMElement gatewayEnvType =
+                environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_ENVIRONMENT_TYPE));
+        if (gatewayEnvType != null && gatewayEnvType.getText() != null && !"".equals(gatewayEnvType.getText())) {
+            environment.setGatewayEnvironmentType(gatewayEnvType.getText());
+        } else {
+            environment.setGatewayEnvironmentType(APIConstants.API_GATEWAY_ENVIRONMENT_TYPE_EXTERNAL);
+        }
         environment.setReadOnly(true);
         OMElement dataPlaneId =
                 environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_DATA_PLANE_ID));

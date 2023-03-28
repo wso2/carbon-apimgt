@@ -170,6 +170,11 @@
                 {% else %}
                 <DataPlaneId></DataPlaneId>
                 {% endif %}
+                {% if environment_name.gateway_environment_type is defined %}
+                <GatewayEnvironmentType>{{environment_name.gateway_environment_type}}</GatewayEnvironmentType>
+                {% else %}
+                <GatewayEnvironmentType></GatewayEnvironmentType>
+                {% endif %}
                 <VirtualHosts>
                     {% for vhost in environment_name.virtual_host %}
                     <VirtualHost>

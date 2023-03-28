@@ -13867,6 +13867,7 @@ public class ApiMgtDAO {
                     String displayName = rs.getString("DISPLAY_NAME");
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
+                    String gwEnvType = rs.getString("ENVIRONMENT_TYPE");
 
                     Environment env = new Environment();
                     env.setId(id);
@@ -13875,6 +13876,7 @@ public class ApiMgtDAO {
                     env.setDisplayName(displayName);
                     env.setDescription(description);
                     env.setProvider(provider);
+                    env.setGatewayEnvironmentType(gwEnvType);
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                     envList.add(env);
                 }
@@ -13907,6 +13909,7 @@ public class ApiMgtDAO {
                     String displayName = rs.getString("DISPLAY_NAME");
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
+                    String gwEnvType = rs.getString("ENVIRONMENT_TYPE");
 
                     env = new Environment();
                     env.setId(id);
@@ -13915,6 +13918,7 @@ public class ApiMgtDAO {
                     env.setDisplayName(displayName);
                     env.setDescription(description);
                     env.setProvider(provider);
+                    env.setGatewayEnvironmentType(gwEnvType);
                     env.setDataPlaneId(ChoreoApiMgtDAO.getInstance().getDataPlaneIdForEnvironment(connection, uuid));
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                 }
@@ -13948,7 +13952,8 @@ public class ApiMgtDAO {
                 prepStmt.setString(3, environment.getDisplayName());
                 prepStmt.setString(4, environment.getDescription());
                 prepStmt.setString(5, environment.getProvider());
-                prepStmt.setString(6, tenantDomain);
+                prepStmt.setString(6, environment.getGatewayEnvironmentType());
+                prepStmt.setString(7, tenantDomain);
                 prepStmt.executeUpdate();
 
                 ResultSet rs = prepStmt.getGeneratedKeys();
@@ -14090,7 +14095,8 @@ public class ApiMgtDAO {
             try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_ENVIRONMENT_SQL)) {
                 prepStmt.setString(1, environment.getDisplayName());
                 prepStmt.setString(2, environment.getDescription());
-                prepStmt.setString(3, environment.getUuid());
+                prepStmt.setString(3, environment.getGatewayEnvironmentType());
+                prepStmt.setString(4, environment.getUuid());
                 prepStmt.executeUpdate();
                 deleteGatewayVhosts(connection, environment.getId());
                 addGatewayVhosts(connection, environment.getId(), environment.getVhosts());
