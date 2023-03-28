@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.common.analytics.publishers.dto;
 
 /**
- * Extended API Object with organization ID
+ * Extended API Object with organization ID.
  */
 public class ExtendedAPI extends API {
 
