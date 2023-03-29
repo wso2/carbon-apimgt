@@ -165,7 +165,7 @@ public class EnvironmentDTO   {
   }
 
   
-  @ApiModelProperty(example = "External", value = "")
+  @ApiModelProperty(example = "external", value = "")
   @JsonProperty("gatewayAccessibilityType")
   public String getGatewayAccessibilityType() {
     return gatewayAccessibilityType;
