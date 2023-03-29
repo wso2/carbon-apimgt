@@ -51,6 +51,7 @@ import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import java.util.ArrayList;
+import java.util.List;
 import javax.xml.stream.XMLStreamException;
 
 /**
@@ -174,7 +175,7 @@ public class UserSignUpWSWorkflowExecutorTest {
 
     @Test
     public void testCompletingUserSignUpWorkflowApprovedByAdmin() throws Exception {
-        ArrayList<String> roleMap = new ArrayList<String>();
+        List<String> roleMap = new ArrayList<String>();
         roleMap.add(signUpRole);
         UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
         userRegistrationConfigDTO.setRoles(roleMap);
@@ -195,7 +196,7 @@ public class UserSignUpWSWorkflowExecutorTest {
 
     @Test
     public void testFailureToCompleteUserSignUpWorkflowApprovedByAdmin() throws Exception {
-        ArrayList<String> roleMap = new ArrayList<String>();
+        List<String> roleMap = new ArrayList<String>();
         roleMap.add(signUpRole);
         UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
         userRegistrationConfigDTO.setRoles(roleMap);
@@ -240,7 +241,7 @@ public class UserSignUpWSWorkflowExecutorTest {
 
     @Test
     public void testCompletingUserSignUpWorkflowRejectedByAdmin() throws Exception {
-        ArrayList<String> roleMap = new ArrayList<String>();
+        List<String> roleMap = new ArrayList<String>();
         roleMap.add(signUpRole);
         UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
         userRegistrationConfigDTO.setRoles(roleMap);
@@ -258,7 +259,7 @@ public class UserSignUpWSWorkflowExecutorTest {
 
     @Test
     public void testFailureToCompleteUserSignUpWorkflowRejectedByAdmin() throws Exception {
-        ArrayList<String> roleMap = new ArrayList<String>();
+        List<String> roleMap = new ArrayList<String>();
         roleMap.add(signUpRole);
         UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
         userRegistrationConfigDTO.setRoles(roleMap);

@@ -41,8 +41,9 @@ import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.CarbonUtils;
+
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
 
 /**
  * UserSignUpSimpleWorkflowExecutor test cases
@@ -100,7 +101,7 @@ public class UserSignUpSimpleWorkflowExecutorTest {
 
     @Test
     public void testExecutingUserSignUpSimpleWorkflow() throws APIManagementException, UserStoreException {
-        ArrayList<String> roleMap = new ArrayList<String>();
+        List<String> roleMap = new ArrayList<String>();
         roleMap.add(signUpRole);
 
         UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
@@ -109,7 +110,7 @@ public class UserSignUpSimpleWorkflowExecutorTest {
         PowerMockito.when(SelfSignUpUtil.getSignupConfiguration(tenantDomain)).thenReturn(userRegistrationConfigDTO);
         Mockito.when(userStoreManager.isExistingUser(username)).thenReturn(true);
         Mockito.when(userStoreManager.isExistingRole(signUpRole)).thenReturn(true);
-        Mockito.doNothing().when(userStoreManager).updateRoleListOfUser(username, null, new String[] { signUpRole });
+        Mockito.doNothing().when(userStoreManager).updateRoleListOfUser(username, null, new String[]{signUpRole});
 
         try {
             Assert.assertNotNull(userSignUpSimpleWorkflowExecutor.execute(workflowDTO));
@@ -120,7 +121,7 @@ public class UserSignUpSimpleWorkflowExecutorTest {
 
     @Test
     public void testFailuresToCompleteUserSignUpSimpleWorkflow() throws Exception {
-        ArrayList<String> roleMap = new ArrayList<String>();
+        List<String> roleMap = new ArrayList<String>();
         roleMap.add(signUpRole);
 
         UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
@@ -151,7 +152,7 @@ public class UserSignUpSimpleWorkflowExecutorTest {
 
 
     @Test
-    public void testGetWorkflowDetails(){
+    public void testGetWorkflowDetails() {
         try {
             userSignUpSimpleWorkflowExecutor.getWorkflowDetails("random_string");
         } catch (WorkflowException e) {
