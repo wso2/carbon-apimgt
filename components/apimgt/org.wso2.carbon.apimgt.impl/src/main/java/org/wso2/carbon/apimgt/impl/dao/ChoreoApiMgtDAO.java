@@ -166,7 +166,7 @@ public class ChoreoApiMgtDAO {
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
                     String dataPlaneId = rs.getString("DATA_PLANE_ID");
-                    String gwEnvType = rs.getString("ENVIRONMENT_TYPE");
+                    String gwAccessibilityType = rs.getString("ACCESSIBILITY_TYPE");
 
                     Environment env = new Environment();
                     env.setId(id);
@@ -176,7 +176,7 @@ public class ChoreoApiMgtDAO {
                     env.setDescription(description);
                     env.setProvider(provider);
                     env.setDataPlaneId(dataPlaneId);
-                    env.setGatewayEnvironmentType(gwEnvType);
+                    env.setAccessibilityType(gwAccessibilityType);
                     env.setVhosts(ApiMgtDAO.getInstance().getVhostGatewayEnvironments(connection, id));
                     envList.add(env);
                 }

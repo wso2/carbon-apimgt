@@ -67,7 +67,7 @@ public class EnvironmentMappingUtil {
         envDTO.setAdditionalProperties(fromAdditionalPropertiesToAdditionalPropertiesDTO
                 (env.getAdditionalProperties()));
         envDTO.setDataPlaneId(env.getDataPlaneId());
-        envDTO.setGatewayEnvironmentType(env.getGatewayEnvironmentType());
+        envDTO.setGatewayAccessibilityType(env.getAccessibilityType());
         return envDTO;
     }
 
@@ -134,7 +134,7 @@ public class EnvironmentMappingUtil {
         env.setProvider(envDTO.getProvider());
         env.setReadOnly(false);
         env.setDataPlaneId(envDTO.getDataPlaneId());
-        env.setGatewayEnvironmentType(envDTO.getGatewayEnvironmentType());
+        env.setAccessibilityType(envDTO.getGatewayAccessibilityType());
         env.setVhosts(envDTO.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostDtoToVHost)
                 .collect(Collectors.toList()));
         env.setAdditionalProperties(fromAdditionalPropertiesDTOToAdditionalProperties

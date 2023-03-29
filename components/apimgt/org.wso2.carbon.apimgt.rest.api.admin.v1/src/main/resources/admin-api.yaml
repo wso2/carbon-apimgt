@@ -4127,7 +4127,7 @@ components:
           type: string
           readOnly: true
           example: sce92bdc-e1e6-325c-a6f2-626218a021e3
-        gatewayEnvironmentType:
+        gatewayAccessibilityType:
           type: string
           readOnly: true
           example: External

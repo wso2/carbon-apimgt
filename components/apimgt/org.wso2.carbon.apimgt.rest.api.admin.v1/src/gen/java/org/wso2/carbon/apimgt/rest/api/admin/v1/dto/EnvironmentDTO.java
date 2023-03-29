@@ -32,7 +32,7 @@ public class EnvironmentDTO   {
     private String description = null;
     private Boolean isReadOnly = null;
     private String dataPlaneId = null;
-    private String gatewayEnvironmentType = null;
+    private String gatewayAccessibilityType = null;
     private List<VHostDTO> vhosts = new ArrayList<VHostDTO>();
     private List<GatewayEnvironmentProtocolURIDTO> endpointURIs = new ArrayList<GatewayEnvironmentProtocolURIDTO>();
     private List<AdditionalPropertyDTO> additionalProperties = new ArrayList<AdditionalPropertyDTO>();
@@ -159,19 +159,19 @@ public class EnvironmentDTO   {
 
   /**
    **/
-  public EnvironmentDTO gatewayEnvironmentType(String gatewayEnvironmentType) {
-    this.gatewayEnvironmentType = gatewayEnvironmentType;
+  public EnvironmentDTO gatewayAccessibilityType(String gatewayAccessibilityType) {
+    this.gatewayAccessibilityType = gatewayAccessibilityType;
     return this;
   }
 
   
   @ApiModelProperty(example = "External", value = "")
-  @JsonProperty("gatewayEnvironmentType")
-  public String getGatewayEnvironmentType() {
-    return gatewayEnvironmentType;
+  @JsonProperty("gatewayAccessibilityType")
+  public String getGatewayAccessibilityType() {
+    return gatewayAccessibilityType;
   }
-  public void setGatewayEnvironmentType(String gatewayEnvironmentType) {
-    this.gatewayEnvironmentType = gatewayEnvironmentType;
+  public void setGatewayAccessibilityType(String gatewayAccessibilityType) {
+    this.gatewayAccessibilityType = gatewayAccessibilityType;
   }
 
   /**
@@ -246,7 +246,7 @@ public class EnvironmentDTO   {
         Objects.equals(description, environment.description) &&
         Objects.equals(isReadOnly, environment.isReadOnly) &&
         Objects.equals(dataPlaneId, environment.dataPlaneId) &&
-        Objects.equals(gatewayEnvironmentType, environment.gatewayEnvironmentType) &&
+        Objects.equals(gatewayAccessibilityType, environment.gatewayAccessibilityType) &&
         Objects.equals(vhosts, environment.vhosts) &&
         Objects.equals(endpointURIs, environment.endpointURIs) &&
         Objects.equals(additionalProperties, environment.additionalProperties);
@@ -254,7 +254,7 @@ public class EnvironmentDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, provider, description, isReadOnly, dataPlaneId, gatewayEnvironmentType, vhosts, endpointURIs, additionalProperties);
+    return Objects.hash(id, name, displayName, provider, description, isReadOnly, dataPlaneId, gatewayAccessibilityType, vhosts, endpointURIs, additionalProperties);
   }
 
   @Override
@@ -269,7 +269,7 @@ public class EnvironmentDTO   {
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    isReadOnly: ").append(toIndentedString(isReadOnly)).append("\n");
     sb.append("    dataPlaneId: ").append(toIndentedString(dataPlaneId)).append("\n");
-    sb.append("    gatewayEnvironmentType: ").append(toIndentedString(gatewayEnvironmentType)).append("\n");
+    sb.append("    gatewayAccessibilityType: ").append(toIndentedString(gatewayAccessibilityType)).append("\n");
     sb.append("    vhosts: ").append(toIndentedString(vhosts)).append("\n");
     sb.append("    endpointURIs: ").append(toIndentedString(endpointURIs)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");

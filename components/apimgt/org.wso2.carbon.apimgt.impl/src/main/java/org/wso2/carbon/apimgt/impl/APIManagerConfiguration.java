@@ -639,12 +639,13 @@ public class APIManagerConfiguration {
         } else {
             environment.setDescription("");
         }
-        OMElement gatewayEnvType =
-                environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_ENVIRONMENT_TYPE));
-        if (gatewayEnvType != null && gatewayEnvType.getText() != null && !"".equals(gatewayEnvType.getText())) {
-            environment.setGatewayEnvironmentType(gatewayEnvType.getText());
+        OMElement gatewayAccessibilityType =
+                environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_ACCESSIBILITY_TYPE));
+        if (gatewayAccessibilityType != null && gatewayAccessibilityType.getText() != null &&
+                !"".equals(gatewayAccessibilityType.getText())) {
+            environment.setAccessibilityType(gatewayAccessibilityType.getText());
         } else {
-            environment.setGatewayEnvironmentType(APIConstants.API_GATEWAY_ENVIRONMENT_TYPE_EXTERNAL);
+            environment.setAccessibilityType(APIConstants.API_GATEWAY_ACCESSIBILITY_TYPE_EXTERNAL);
         }
         environment.setReadOnly(true);
         OMElement dataPlaneId =
