@@ -1626,6 +1626,9 @@ definitions:
           $ref: '#/definitions/APILoggingConfig'
   APILoggingConfig:
     title: API Info object with log details
+    required:
+      - context
+      - logLevel
     properties:
       context:
         type: string
@@ -1633,6 +1636,12 @@ definitions:
       logLevel:
         type: string
         example: all
+      resourceMethod:
+        type: string
+        example: GET
+      resourcePath:
+        type: string
+        example: /v1.0.0/pizza
 
   #-----------------------------------------------------
   # Correlation Configs Components List

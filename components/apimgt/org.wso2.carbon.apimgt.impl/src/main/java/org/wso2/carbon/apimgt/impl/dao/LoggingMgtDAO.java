@@ -168,9 +168,10 @@ public class LoggingMgtDAO {
 
     public List<APILogInfoDTO> retrieveAllAPILoggerList() throws APIManagementException {
         List<APILogInfoDTO> apiLogInfoDTOList = new ArrayList<>();
-        String query = SQLConstants.RETRIEVE_ALL_PER_API_LOGGING_SQL;
+        String queryPerApi = SQLConstants.RETRIEVE_ALL_PER_API_LOGGING_SQL;
+        String queryPerApiResource = SQLConstants.RETRIEVE_ALL_PER_API_RESOURCE_LOGGING_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(queryPerApi)) {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     String logLevel = APIConstants.LOG_LEVEL_OFF;
@@ -180,6 +181,22 @@ public class LoggingMgtDAO {
                     APILogInfoDTO apiLogInfoDTO = new APILogInfoDTO(resultSet.getString(API_UUID),
                             resultSet.getString(CONTEXT), logLevel);
                     apiLogInfoDTOList.add(apiLogInfoDTO);
+                }
+            }
+            PreparedStatement preparedStatementResource = connection.prepareStatement(queryPerApiResource);
+            {
+                try (ResultSet resultSet = preparedStatementResource.executeQuery()) {
+                    while (resultSet.next()) {
+                        String logLevel = APIConstants.LOG_LEVEL_OFF;
+                        if (resultSet.getString(APIConstants.LOG_LEVEL) != null) {
+                            logLevel = resultSet.getString(APIConstants.LOG_LEVEL);
+                        }
+                        APILogInfoDTO apiLogInfoDTO = new APILogInfoDTO(resultSet.getString(API_UUID),
+                                resultSet.getString(CONTEXT), logLevel,
+                                resultSet.getString(APIConstants.RESOURCE_METHOD),
+                                resultSet.getString(APIConstants.RESOURCE_PATH));
+                        apiLogInfoDTOList.add(apiLogInfoDTO);
+                    }
                 }
             }
         } catch (SQLException e) {
