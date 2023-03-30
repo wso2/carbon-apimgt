@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.gateway.handlers;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -119,14 +120,71 @@ class LogUtils {
         return transportInURL.substring(1);
     }
 
-    protected static String getMatchingLogLevel(MessageContext ctx, Map<String, String> logProperties) {
+    protected static String getHTTPMethod(org.apache.synapse.MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MsgContext = ((Axis2MessageContext) messageContext)
+                .getAxis2MessageContext();
+        String httpMethod = (String) axis2MsgContext.getProperty("HTTP_METHOD");
+        return httpMethod;
+    }
+
+    protected static String getMatchingLogLevel(MessageContext ctx,
+                                                Map<APILoggerManager.logResourceProperties, String> logProperties) {
+
         String apiCtx = LogUtils.getTransportInURL(ctx);
-        for (Map.Entry<String, String> entry : logProperties.entrySet()) {
-            String key = entry.getKey().substring(1);
-            if (apiCtx.startsWith(key + "/") || apiCtx.equals(key)) {
-                ctx.setProperty(LogsHandler.LOG_LEVEL, entry.getValue());
+        String apiHttpMethod = LogUtils.getHTTPMethod(ctx);
+        String apiLogLevel = null;
+        String resourceLogLevel = null;
+        String resourcePath = null;
+        String resourceMethod = null;
+        for (Map.Entry<APILoggerManager.logResourceProperties, String> entry : logProperties.entrySet()) {
+            APILoggerManager.logResourceProperties key = entry.getKey();
+            key.getResourceMethod();
+            String apiResourcePath = apiCtx.split("/", 3)[2];
+            if (("/" + apiResourcePath).equals(key.getResourcePath()) && apiHttpMethod.equals(key.getResourceMethod())) {
+                if (key.getContext().startsWith(key.getContext() + "/") || key.getContext().equals(key.getContext())) {
+                    resourceLogLevel = entry.getValue();
+                    resourcePath = key.getResourcePath();
+                    resourceMethod = key.getResourceMethod();
+                }
+            } else if (key.getResourcePath() == null && key.getResourceMethod() == null) {
+                if (key.getContext().startsWith(key.getContext() + "/") || key.getContext().equals(key.getContext())) {
+                    apiLogLevel = entry.getValue();
+                }
+            }
+        }
+        boolean isResourceLevelHasHighPriority = false;
+        if (apiLogLevel != null || resourceLogLevel != null) {
+            switch (resourceLogLevel) {
+                case APIConstants.LOG_LEVEL_FULL:
+                    isResourceLevelHasHighPriority = true;
+                    break;
+                case APIConstants.LOG_LEVEL_STANDARD:
+                    if (apiLogLevel.equals(APIConstants.LOG_LEVEL_BASIC)
+                            || apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF)) {
+                        isResourceLevelHasHighPriority = true;
+                        break;
+                    } else {
+                        break;
+                    }
+                case APIConstants.LOG_LEVEL_BASIC:
+                    if (apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF)) {
+                        isResourceLevelHasHighPriority = true;
+                    } else {
+                        break;
+                    }
+                case APIConstants.LOG_LEVEL_OFF:
+                    break;
+            }
+            if (isResourceLevelHasHighPriority) {
+                ctx.setProperty(LogsHandler.LOG_LEVEL, resourceLogLevel);
+                ctx.setProperty(LogsHandler.RESOURCE_PATH, resourcePath);
+                ctx.setProperty(LogsHandler.RESOURCE_METHOD, resourceMethod);
                 ctx.setProperty("API_TO", apiCtx);
-                return entry.getValue();
+                return resourceLogLevel;
+            } else {
+                ctx.setProperty(LogsHandler.LOG_LEVEL, resourceLogLevel);
+                ctx.setProperty("API_TO", apiCtx);
+                return apiLogLevel;
             }
         }
         return null;
