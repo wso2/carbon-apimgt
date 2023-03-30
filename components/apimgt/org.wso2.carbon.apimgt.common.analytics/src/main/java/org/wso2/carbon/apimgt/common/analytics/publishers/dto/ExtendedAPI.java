@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.common.analytics.publishers.dto;
 
 /**
- * Extended API Object with organization ID
+ * Extended API Object with organization ID.
  */
 public class ExtendedAPI extends API {
 
