@@ -43,4 +43,5 @@ public class APIConstants {
     public static final String ENDPOINT_SECURITY = "endpoint_security";
     public static final String ENDPOINT_SECURITY_PRODUCTION = "production";
     public static final String ENDPOINT_SECURITY_SANDBOX = "sandbox";
+    public static final String ENDPOINT_CONFIG_SESSION_TIMEOUT = "sessionTimeOut";
 }
