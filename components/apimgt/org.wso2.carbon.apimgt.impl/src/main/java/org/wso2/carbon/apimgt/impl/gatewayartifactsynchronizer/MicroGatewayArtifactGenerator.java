@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -32,6 +33,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.environmentspecif
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,6 +62,8 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
         try {
             DeploymentDescriptorDto descriptorDto = new DeploymentDescriptorDto();
             Map<String, ApiProjectDto> deploymentsMap = new HashMap<>();
+            Map<String, org.wso2.carbon.apimgt.api.model.Environment> gwEnvironments =
+                    APIUtil.getReadOnlyEnvironments();
 
             // "tempDirectory" is the root artifact directory
             File tempDirectory = CommonUtil.createTempDirectory(null);
@@ -85,6 +89,7 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                     environment.setName(apiRuntimeArtifactDto.getLabel());
                     environment.setVhost(apiRuntimeArtifactDto.getVhost());
                     environment.setDeployedTimeStamp(apiRuntimeArtifactDto.getDeployedTimeStamp());
+                    environment.setDeploymentType(getDeploymentType(gwEnvironments, apiRuntimeArtifactDto.getLabel()));
                     apiProjectDto.getEnvironments().add(environment); // ignored if the name of the environment is same
                 }
             }
@@ -112,6 +117,41 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
             return runtimeArtifactDto;
         } catch (APIImportExportException | IOException e) {
             throw new APIManagementException("Error while Generating API artifact", e);
+        }
+    }
+
+    private EnvironmentDto.DeploymentType getDeploymentType(
+            Map<String, org.wso2.carbon.apimgt.api.model.Environment> gwEnvironments, String envName) {
+        org.wso2.carbon.apimgt.api.model.Environment deployedEnv = gwEnvironments.get(envName);
+        if (deployedEnv != null) {
+            if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(deployedEnv.getType())
+                    || APIConstants.GATEWAY_ENV_TYPE_HYBRID.equals(deployedEnv.getType())) {
+                return EnvironmentDto.DeploymentType.PRODUCTION;
+            } else { // sandbox
+                return EnvironmentDto.DeploymentType.SANDBOX;
+            }
+        } else {
+            String sandboxPrefixes = System.getenv(
+                    APIConstants.GatewayArtifactConstants.ENV_DEPLOYMENT_TYPE_SANDBOX_PREFIXES);
+            String prodPrefixes = System.getenv(
+                    APIConstants.GatewayArtifactConstants.ENV_DEPLOYMENT_TYPE_PROD_PREFIXES);
+            if (StringUtils.isBlank(sandboxPrefixes)) {
+                sandboxPrefixes = APIConstants.GatewayArtifactConstants.DEPLOYMENT_TYPE_SANDBOX_PREFIXES_DEFAULT;
+            }
+            if (StringUtils.isBlank(prodPrefixes)) {
+                prodPrefixes = APIConstants.GatewayArtifactConstants.DEPLOYMENT_TYPE_PROD_PREFIXES_DEFAULT;
+            }
+            for (String deploymentTypeSandboxPrefix : sandboxPrefixes.split("\\s*,\\s*")) {
+                if (envName.toLowerCase().contains(deploymentTypeSandboxPrefix)) {
+                    return EnvironmentDto.DeploymentType.SANDBOX;
+                }
+            }
+            for (String deploymentTypeProdPrefix : prodPrefixes.split("\\s*,\\s*")) {
+                if (envName.toLowerCase().contains(deploymentTypeProdPrefix)) {
+                    return EnvironmentDto.DeploymentType.PRODUCTION;
+                }
+            }
+            return EnvironmentDto.DeploymentType.SANDBOX;
         }
     }
 
