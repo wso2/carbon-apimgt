@@ -249,6 +249,8 @@ public class APIMappingUtil {
             }
         }
 
+
+
         if (dto.getSubscriptionAvailability() != null) {
             model.setSubscriptionAvailability(
                     mapSubscriptionAvailabilityFromDTOtoAPI(dto.getSubscriptionAvailability()));
@@ -264,6 +266,16 @@ public class APIMappingUtil {
         //URI Templates
         // No default topics for AsyncAPIs. Therefore set URITemplates only for non-AsyncAPIs.
         Set<URITemplate> uriTemplates = getURITemplates(model, dto.getOperations());
+
+        if (dto.getApiPolicies() != null) {
+            List<OperationPolicy> policyList = OperationPolicyMappingUtil
+                    .fromDTOToAPIOperationPoliciesList(dto.getApiPolicies(), true);
+            if (policyList != null) {
+                for (URITemplate template: uriTemplates) {
+                    template.setOperationPolicies(policyList);
+                }
+            }
+        }
         model.setUriTemplates(uriTemplates);
 
         // wsUriMapping
@@ -1175,7 +1187,11 @@ public class APIMappingUtil {
 
             //since the operation details goes missing after fetching operations list from the swagger definition, we
             //have to set them back from the original API model.
-            setOperationPoliciesToOperationsDTO(model, apiOperationsDTO);
+            if (APIUtil.isAPILevelPolicy(model)) {
+                setOperationPolicyAsAPIPolicy(model, dto);
+            } else {
+                setOperationPoliciesToOperationsDTO(model, apiOperationsDTO);
+            }
 
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
@@ -1684,7 +1700,7 @@ public class APIMappingUtil {
                 template.setAuthTypes(authType);
                 if (operation.getOperationPolicies() != null) {
                     template.setOperationPolicies(OperationPolicyMappingUtil
-                            .fromDTOToAPIOperationPoliciesList(operation.getOperationPolicies()));
+                            .fromDTOToAPIOperationPoliciesList(operation.getOperationPolicies(), false));
                 }
                 uriTemplates.add(template);
             } else {
@@ -2129,6 +2145,30 @@ public class APIMappingUtil {
             }
         }
         return operationsDTOList;
+    }
+
+    private static boolean isAPILevelPolicy(API api) {
+        boolean isAPILevelPolicy = false;
+        for (URITemplate uriTemplate : api.getUriTemplates()) {
+            if (uriTemplate.getOperationPolicies() != null && uriTemplate.getOperationPolicies().size() > 0) {
+                if (uriTemplate.getOperationPolicies().get(0).isApiLevelPolicy()) {
+                    isAPILevelPolicy = true;
+                }
+                break;
+            }
+        }
+        return isAPILevelPolicy;
+    }
+
+    private static void setOperationPolicyAsAPIPolicy(API api, APIDTO dto) {
+
+        for (URITemplate uriTemplate : api.getUriTemplates()) {
+            if (uriTemplate.getOperationPolicies() != null) {
+                dto.setApiPolicies(OperationPolicyMappingUtil.
+                        fromOperationPolicyListToDTO(uriTemplate.getOperationPolicies()));
+                break;
+            }
+        }
     }
 
     /**
@@ -2625,7 +2665,7 @@ public class APIMappingUtil {
                 template.setResourceURI(resourceItem.getTarget());
                 template.setUriTemplate(resourceItem.getTarget());
                 template.setOperationPolicies(OperationPolicyMappingUtil
-                        .fromDTOToAPIOperationPoliciesList(resourceItem.getOperationPolicies()));
+                        .fromDTOToAPIOperationPoliciesList(resourceItem.getOperationPolicies(), false));
 
                 APIProductResource resource = new APIProductResource();
                 resource.setApiId(res.getApiId());

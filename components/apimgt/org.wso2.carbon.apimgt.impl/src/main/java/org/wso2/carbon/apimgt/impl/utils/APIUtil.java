@@ -10081,4 +10081,24 @@ public final class APIUtil {
         }
         return null;
     }
+
+    public static boolean isAPILevelPolicy(API api) {
+        boolean isAPILevelPolicy = false;
+        for (URITemplate uriTemplate : api.getUriTemplates()) {
+            isAPILevelPolicy =  isAPILevelPolicy(uriTemplate);
+            //Checking the first uri Template is enough
+            break;
+        }
+        return isAPILevelPolicy;
+    }
+
+    public static boolean isAPILevelPolicy(URITemplate uriTemplate) {
+        if (uriTemplate.getOperationPolicies() != null && !uriTemplate.getOperationPolicies().isEmpty()) {
+            if (uriTemplate.getOperationPolicies().get(0).isApiLevelPolicy()) {
+                // If API level policy, all the uri Templates should have policy attached.
+                return true;
+            }
+        }
+        return false;
+    }
 }

@@ -29,6 +29,7 @@ public class OperationPolicy implements Comparable<OperationPolicy> {
     private Map<String, Object> parameters = null;
     private String policyId = null;
     private int order = 1;
+    private boolean apiLevelPolicy = false;
 
     public String getPolicyName() {
 
@@ -88,6 +89,14 @@ public class OperationPolicy implements Comparable<OperationPolicy> {
     public void setOrder(int order) {
 
         this.order = order;
+    }
+
+    public boolean isApiLevelPolicy() {
+        return apiLevelPolicy;
+    }
+
+    public void setApiLevelPolicy(boolean apiLevelPolicy) {
+        this.apiLevelPolicy = apiLevelPolicy;
     }
 
     @Override

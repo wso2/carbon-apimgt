@@ -96,7 +96,7 @@ public class OperationPolicyMappingUtil {
     }
 
     public static List<OperationPolicy> fromDTOToAPIOperationPoliciesList(
-            APIOperationPoliciesDTO apiOperationPoliciesDTO) {
+            APIOperationPoliciesDTO apiOperationPoliciesDTO, boolean apiLevelPolicy) {
 
         List<OperationPolicy> operationPoliciesList = new ArrayList<>();
 
@@ -111,6 +111,7 @@ public class OperationPolicyMappingUtil {
                 OperationPolicy operationPolicy = fromDTOToOperationPolicy(op);
                 operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
                 operationPolicy.setOrder(requestCount);
+                operationPolicy.setApiLevelPolicy(apiLevelPolicy);
                 operationPoliciesList.add(operationPolicy);
                 requestCount += 1;
             }
@@ -119,6 +120,7 @@ public class OperationPolicyMappingUtil {
                 OperationPolicy operationPolicy = fromDTOToOperationPolicy(op);
                 operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
                 operationPolicy.setOrder(responseCount);
+                operationPolicy.setApiLevelPolicy(apiLevelPolicy);
                 operationPoliciesList.add(operationPolicy);
                 responseCount += 1;
             }
@@ -127,6 +129,7 @@ public class OperationPolicyMappingUtil {
                 OperationPolicy operationPolicy = fromDTOToOperationPolicy(op);
                 operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
                 operationPolicy.setOrder(faultCount);
+                operationPolicy.setApiLevelPolicy(apiLevelPolicy);
                 operationPoliciesList.add(operationPolicy);
                 faultCount += 1;
             }

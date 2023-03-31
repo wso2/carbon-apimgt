@@ -34,6 +34,7 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.osgi.service.dmt.Uri;
 import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.*;
@@ -6047,23 +6048,34 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
 
         Set<URITemplate> uriTemplatesWithPolicies = apiMgtDAO.getURITemplatesWithOperationPolicies(apiId);
+        boolean isAPILevelPolicy = false;
 
         if (!uriTemplatesWithPolicies.isEmpty()) {
             //This is a temporary map to keep operation policies list of URI Templates against the URI mapping ID
             Map<String, List<OperationPolicy>> operationPoliciesMap = new HashMap<>();
-
+            List<OperationPolicy> apiLevelPolicies = null;
             for (URITemplate uriTemplate : uriTemplatesWithPolicies) {
+                isAPILevelPolicy = APIUtil.isAPILevelPolicy(uriTemplate);
                 String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                 List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
                 if (!operationPolicies.isEmpty()) {
-                    operationPoliciesMap.put(key, operationPolicies);
+                    if (isAPILevelPolicy) {
+                        apiLevelPolicies = operationPolicies;
+                        break;
+                    } else {
+                        operationPoliciesMap.put(key, operationPolicies);
+                    }
                 }
             }
 
             for (URITemplate uriTemplate : uriTemplates) {
-                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
-                if (operationPoliciesMap.containsKey(key)) {
-                    uriTemplate.setOperationPolicies(operationPoliciesMap.get(key));
+                if (isAPILevelPolicy) {
+                    uriTemplate.setOperationPolicies(apiLevelPolicies);
+                } else {
+                    String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                    if (operationPoliciesMap.containsKey(key)) {
+                        uriTemplate.setOperationPolicies(operationPoliciesMap.get(key));
+                    }
                 }
             }
         }

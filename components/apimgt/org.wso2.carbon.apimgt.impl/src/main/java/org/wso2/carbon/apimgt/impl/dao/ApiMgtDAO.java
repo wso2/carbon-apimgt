@@ -5862,8 +5862,7 @@ public class ApiMgtDAO {
                                     updatedPoliciesMap.put(policy.getPolicyId(), clonedPolicyId);
                                 }
 
-                                Gson gson = new Gson();
-                                String paramJSON = gson.toJson(policy.getParameters());
+
                                 if (log.isDebugEnabled()) {
                                     log.debug("Adding operation policy " + policy.getPolicyName() + " for API "
                                             + api.getId().getApiName() + " to URL mapping Id " + uriMappingId);
@@ -5872,7 +5871,7 @@ public class ApiMgtDAO {
                                 operationPolicyMappingPrepStmt.setInt(1, uriMappingId);
                                 operationPolicyMappingPrepStmt.setString(2, updatedPoliciesMap.get(policy.getPolicyId()));
                                 operationPolicyMappingPrepStmt.setString(3, policy.getDirection());
-                                operationPolicyMappingPrepStmt.setString(4, paramJSON);
+                                operationPolicyMappingPrepStmt.setString(4, getPolicyParameters(policy));
                                 operationPolicyMappingPrepStmt.setInt(5, policy.getOrder());
                                 operationPolicyMappingPrepStmt.addBatch();
                             }
@@ -5891,6 +5890,14 @@ public class ApiMgtDAO {
                 cleanUnusedClonedOperationPolicies(connection, usedClonedPolicies, api.getUuid());
             }
         }
+    }
+
+    String getPolicyParameters(OperationPolicy policy) {
+        Map<String,Object> paramsMap = new HashMap<>();
+        paramsMap.put("apiLevelPolicy", policy.isApiLevelPolicy());
+        paramsMap.put("parameters", policy.getParameters());
+        Gson gson = new Gson();
+        return gson.toJson(paramsMap);
     }
 
 
@@ -14642,14 +14649,11 @@ public class ApiMgtDAO {
                                     clonedPoliciesMap.put(policy.getPolicyId(), clonedPolicyId);
                                 }
 
-                                Gson gson = new Gson();
-                                String paramJSON = gson.toJson(policy.getParameters());
-
                                 insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
                                 insertOperationPolicyMappingStatement
                                         .setString(2, clonedPoliciesMap.get(policy.getPolicyId()));
                                 insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
-                                insertOperationPolicyMappingStatement.setString(4, paramJSON);
+                                insertOperationPolicyMappingStatement.setString(4, getPolicyParameters(policy));
                                 insertOperationPolicyMappingStatement.setInt(5, policy.getOrder());
                                 insertOperationPolicyMappingStatement.addBatch();
                             }
@@ -16450,13 +16454,10 @@ public class ApiMgtDAO {
                                         clonedPolicyMap.put(policy.getPolicyId(), clonedPolicyId);
                                     }
 
-                                    Gson gson = new Gson();
-                                    String paramJSON = gson.toJson(policy.getParameters());
-
                                     insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
                                     insertOperationPolicyMappingStatement.setString(2, clonedPolicyMap.get(policy.getPolicyId()));
                                     insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
-                                    insertOperationPolicyMappingStatement.setString(4, paramJSON);
+                                    insertOperationPolicyMappingStatement.setString(4, getPolicyParameters(policy));
                                     insertOperationPolicyMappingStatement.setInt(5, policy.getOrder());
                                     insertOperationPolicyMappingStatement.addBatch();
                                 }
@@ -17339,12 +17340,10 @@ public class ApiMgtDAO {
                                         usedClonedPolicies.add(restoredPolicyId);
                                     }
 
-                                    Gson gson = new Gson();
-                                    String paramJSON = gson.toJson(policy.getParameters());
                                     insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
                                     insertOperationPolicyMappingStatement.setString(2, restoredPolicyMap.get(policy.getPolicyName()));
                                     insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
-                                    insertOperationPolicyMappingStatement.setString(4, paramJSON);
+                                    insertOperationPolicyMappingStatement.setString(4, getPolicyParameters(policy));
                                     insertOperationPolicyMappingStatement.setInt(5, policy.getOrder());
                                     insertOperationPolicyMappingStatement.addBatch();
                                 }
@@ -17661,13 +17660,10 @@ public class ApiMgtDAO {
                                     clonedPoliciesMap.put(policy.getPolicyId(), clonedPolicyId);
                                 }
 
-                                Gson gson = new Gson();
-                                String paramJSON = gson.toJson(policy.getParameters());
-
                                 insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
                                 insertOperationPolicyMappingStatement.setString(2, clonedPoliciesMap.get(policy.getPolicyId()));
                                 insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
-                                insertOperationPolicyMappingStatement.setString(4, paramJSON);
+                                insertOperationPolicyMappingStatement.setString(4, getPolicyParameters(policy));
                                 insertOperationPolicyMappingStatement.setInt(5, policy.getOrder());
                                 insertOperationPolicyMappingStatement.addBatch();
                             }
@@ -17888,13 +17884,10 @@ public class ApiMgtDAO {
                                         usedClonedPolicies.add(policyId);
                                     }
 
-                                    Gson gson = new Gson();
-                                    String paramJSON = gson.toJson(policy.getParameters());
-
                                     addOperationPolicyStatement.setInt(1, rs.getInt(1));
                                     addOperationPolicyStatement.setString(2, clonedPoliciesMap.get(policy.getPolicyName()));
                                     addOperationPolicyStatement.setString(3, policy.getDirection());
-                                    addOperationPolicyStatement.setString(4, paramJSON);
+                                    addOperationPolicyStatement.setString(4, getPolicyParameters(policy));
                                     addOperationPolicyStatement.setInt(5, policy.getOrder());
                                     addOperationPolicyStatement.executeUpdate();
                                 }
@@ -19737,7 +19730,14 @@ public class ApiMgtDAO {
         operationPolicy.setPolicyId(rs.getString("POLICY_UUID"));
         operationPolicy.setOrder(rs.getInt("POLICY_ORDER"));
         operationPolicy.setDirection(rs.getString("DIRECTION"));
-        operationPolicy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
+        Map<String, Object> paramsMap = APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS"));
+        if (paramsMap.get("apiLevelPolicy") != null) {
+            operationPolicy.setApiLevelPolicy((Boolean) paramsMap.get("apiLevelPolicy"));
+            operationPolicy.setParameters((Map<String, Object>) paramsMap.get("parameters"));
+        } else {
+            operationPolicy.setApiLevelPolicy(false);
+            operationPolicy.setParameters(paramsMap);
+        }
         return operationPolicy;
     }
 

@@ -61,14 +61,23 @@ public class SynapsePolicyAggregator {
             throws APIManagementException, IOException {
 
         List<Object> caseList = new ArrayList<>();
+        boolean isAPILevelPolicy = false;
         for (URITemplate template : uriTemplates) {
             populatePolicyCaseList(template, pathToAchieve, flow, caseList);
+            if (APIUtil.isAPILevelPolicy(template)) {
+                isAPILevelPolicy = true;
+                break;
+            }
         }
 
         if (caseList.size() != 0) {
             Map<String, Object> configMap = new HashMap<>();
             configMap.put("sequence_name", sequenceName);
-            configMap.put("case_list", caseList);
+            if (isAPILevelPolicy) {
+                configMap.put("api_policies", ((HashMap) caseList.get(0)).get("policy_sequence"));
+            } else {
+                configMap.put("case_list", caseList);
+            }
             if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(flow)) {
                 configMap.put("fault_sequence", true);
             }

@@ -219,7 +219,7 @@ public class ImportUtils {
             }
             String targetAPIUuid = (targetApi != null) ? targetApi.getUuid() : null;
             Map<String, List<OperationPolicy>> extractedPoliciesMap =
-                    extractValidateAndDropOperationPoliciesFromURITemplate(importedApiDTO.getOperations(),
+                    extractValidateAndDropOperationPoliciesFromURITemplate(importedApiDTO,
                             extractedFolderPath, targetAPIUuid, organization, importedApiDTO.getType().toString(),
                             apiProvider);
 
@@ -415,7 +415,7 @@ public class ImportUtils {
     /**
      * This method will extract out the API policies from the URL template.
      *
-     * @param operationsDTO       The policy enforcement information
+     * @param importedApiDTO      API DTO
      * @param extractedFolderPath Extracted folder path of the API project
      * @param apiUUID             If this is an already existing API, the uuid of that API. If not, this will be null
      * @param tenantDomain        Tenant domain
@@ -424,13 +424,25 @@ public class ImportUtils {
      * @throws APIManagementException If there is an error in extracting process
      */
     public static Map<String, List<OperationPolicy>> extractValidateAndDropOperationPoliciesFromURITemplate
-    (List<APIOperationsDTO> operationsDTO, String extractedFolderPath, String apiUUID, String tenantDomain,
+    (APIDTO importedApiDTO, String extractedFolderPath, String apiUUID, String tenantDomain,
      String apiType, APIProvider provider) throws APIManagementException {
+        boolean isAPILevelPolicy = importedApiDTO.getApiPolicies() != null;
+        List<APIOperationsDTO> operationsDTO = importedApiDTO.getOperations();
+        List<OperationPolicy> apiLevelPolicies = null;
+        if (isAPILevelPolicy) {
+            apiLevelPolicies = OperationPolicyMappingUtil
+                    .fromDTOToAPIOperationPoliciesList(importedApiDTO.getApiPolicies(), true);
+        }
         Map<String, List<OperationPolicy>> operationPoliciesMap = new HashMap<>();
         for (APIOperationsDTO dto : operationsDTO) {
             String key = dto.getVerb() + ":" + dto.getTarget();
-            List<OperationPolicy> operationPolicies =
-                    OperationPolicyMappingUtil.fromDTOToAPIOperationPoliciesList(dto.getOperationPolicies());
+            List<OperationPolicy> operationPolicies;
+            if (isAPILevelPolicy) {
+                operationPolicies = apiLevelPolicies;
+            } else {
+                operationPolicies =
+                        OperationPolicyMappingUtil.fromDTOToAPIOperationPoliciesList(dto.getOperationPolicies(), false);
+            }
             Map<String, OperationPolicySpecification> visitedPoliciesMap = new HashMap<>();
             for (OperationPolicy policy : operationPolicies) {
                 validateAppliedPolicy(policy, visitedPoliciesMap, extractedFolderPath, apiUUID, provider, tenantDomain,
@@ -441,6 +453,7 @@ public class ImportUtils {
             }
             dto.setOperationPolicies(null);
         }
+        importedApiDTO.setApiPolicies(null);
         return operationPoliciesMap;
     }
 
