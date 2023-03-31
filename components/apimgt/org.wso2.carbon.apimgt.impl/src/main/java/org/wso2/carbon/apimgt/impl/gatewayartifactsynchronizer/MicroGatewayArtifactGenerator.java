@@ -133,15 +133,25 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
         } else {
             String sandboxPrefixes = System.getenv(
                     APIConstants.GatewayArtifactConstants.ENV_DEPLOYMENT_TYPE_SANDBOX_PREFIXES);
+            String prodPrefixes = System.getenv(
+                    APIConstants.GatewayArtifactConstants.ENV_DEPLOYMENT_TYPE_PROD_PREFIXES);
             if (StringUtils.isBlank(sandboxPrefixes)) {
                 sandboxPrefixes = APIConstants.GatewayArtifactConstants.DEPLOYMENT_TYPE_SANDBOX_PREFIXES_DEFAULT;
+            }
+            if (StringUtils.isBlank(prodPrefixes)) {
+                prodPrefixes = APIConstants.GatewayArtifactConstants.DEPLOYMENT_TYPE_PROD_PREFIXES_DEFAULT;
             }
             for (String deploymentTypeSandboxPrefix : sandboxPrefixes.split("\\s*,\\s*")) {
                 if (envName.toLowerCase().contains(deploymentTypeSandboxPrefix)) {
                     return EnvironmentDto.DeploymentType.SANDBOX;
                 }
             }
-            return EnvironmentDto.DeploymentType.PRODUCTION;
+            for (String deploymentTypeProdPrefix : prodPrefixes.split("\\s*,\\s*")) {
+                if (envName.toLowerCase().contains(deploymentTypeProdPrefix)) {
+                    return EnvironmentDto.DeploymentType.PRODUCTION;
+                }
+            }
+            return EnvironmentDto.DeploymentType.SANDBOX;
         }
     }
 
