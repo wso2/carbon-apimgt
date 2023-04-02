@@ -161,8 +161,7 @@ public class SystemScopesMappingUtil {
     public static JSONObject createJsonObjectOfRoleMapping(RoleAliasListDTO body) {
         JSONObject roleJson = new JSONObject();
         for (RoleAliasDTO roleAlias : body.getList()) {
-            String aliases = roleAlias.getAliases().toString()
-                    .replaceAll("\\[", "").replaceAll("\\]", "");
+            String aliases = String.join(",", roleAlias.getAliases());
             roleJson.put(roleAlias.getRole(), aliases);
         }
         return roleJson;
