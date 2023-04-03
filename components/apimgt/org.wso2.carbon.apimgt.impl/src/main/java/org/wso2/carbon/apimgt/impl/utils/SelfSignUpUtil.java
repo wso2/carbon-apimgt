@@ -37,10 +37,10 @@ public final class SelfSignUpUtil {
 	 */
 	public static UserRegistrationConfigDTO getSignupConfiguration(String tenantDomain) throws APIManagementException {
 
-		Object selfSighupConfigObject = ServiceReferenceHolder.getInstance().getApimConfigService()
+		Object selfSignupConfigObject = ServiceReferenceHolder.getInstance().getApimConfigService()
 				.getSelfSighupConfig(tenantDomain);
-		if (selfSighupConfigObject instanceof UserRegistrationConfigDTO) {
-			UserRegistrationConfigDTO selfSighupConfig = (UserRegistrationConfigDTO) selfSighupConfigObject;
+		if (selfSignupConfigObject instanceof UserRegistrationConfigDTO) {
+			UserRegistrationConfigDTO selfSighupConfig = (UserRegistrationConfigDTO) selfSignupConfigObject;
 			return selfSighupConfig;
 		}
 		return new UserRegistrationConfigDTO();

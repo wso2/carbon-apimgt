@@ -23,7 +23,7 @@ import java.io.IOException;
 public class APIMConfigServiceImplTestCase {
 
     @Test
-    public void testGetSelfSighupConfigWhenSelfSignUpIsEnabled() throws APIManagementException, IOException {
+    public void testGetSelfSignUpConfigWhenSelfSignUpIsEnabled() throws APIManagementException, IOException {
         System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
         PowerMockito.mockStatic(SystemConfigurationsDAO.class);
         SystemConfigurationsDAO systemConfigurationsDAO = Mockito.mock(SystemConfigurationsDAO.class);
@@ -43,7 +43,7 @@ public class APIMConfigServiceImplTestCase {
     }
 
     @Test
-    public void testGetSelfSighupConfigWhenManySelfSignUpRolesIsPresent() throws APIManagementException, IOException {
+    public void testGetSelfSignUpConfigWhenManySelfSignUpRolesIsPresent() throws APIManagementException, IOException {
         System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
         PowerMockito.mockStatic(SystemConfigurationsDAO.class);
         SystemConfigurationsDAO systemConfigurationsDAO = Mockito.mock(SystemConfigurationsDAO.class);
@@ -67,7 +67,7 @@ public class APIMConfigServiceImplTestCase {
     }
 
     @Test
-    public void testGetSelfSighupConfigWhenSelfSignUpIsDisabled() throws APIManagementException, IOException {
+    public void testGetSelfSignUpConfigWhenSelfSignUpIsDisabled() throws APIManagementException, IOException {
         System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
         PowerMockito.mockStatic(SystemConfigurationsDAO.class);
         SystemConfigurationsDAO systemConfigurationsDAO = Mockito.mock(SystemConfigurationsDAO.class);
