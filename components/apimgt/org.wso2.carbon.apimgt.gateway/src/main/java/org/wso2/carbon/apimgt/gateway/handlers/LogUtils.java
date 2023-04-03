@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.gateway.handlers;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -128,26 +127,24 @@ class LogUtils {
     }
 
     protected static String getMatchingLogLevel(MessageContext ctx,
-                                                Map<APILoggerManager.logResourceProperties, String> logProperties) {
-
+                                                Map<Map<String, String>, String> logProperties) {
         String apiCtx = LogUtils.getTransportInURL(ctx);
         String apiHttpMethod = LogUtils.getHTTPMethod(ctx);
         String apiLogLevel = null;
         String resourceLogLevel = null;
         String resourcePath = null;
         String resourceMethod = null;
-        for (Map.Entry<APILoggerManager.logResourceProperties, String> entry : logProperties.entrySet()) {
-            APILoggerManager.logResourceProperties key = entry.getKey();
-            key.getResourceMethod();
+        for (Map.Entry<Map<String, String>, String> entry : logProperties.entrySet()) {
+            Map<String, String> key = entry.getKey();
             String apiResourcePath = apiCtx.split("/", 3)[2];
-            if (("/" + apiResourcePath).equals(key.getResourcePath()) && apiHttpMethod.equals(key.getResourceMethod())) {
-                if (key.getContext().startsWith(key.getContext() + "/") || key.getContext().equals(key.getContext())) {
+            if (("/" + apiResourcePath).equals(key.get("resourcePath")) && apiHttpMethod.equals(key.get("resourceMethod"))) {
+                if (key.get("context").startsWith(key.get("context") + "/") || key.get("context").equals(key.get("context"))) {
                     resourceLogLevel = entry.getValue();
-                    resourcePath = key.getResourcePath();
-                    resourceMethod = key.getResourceMethod();
+                    resourcePath = key.get("resourcePath");
+                    resourceMethod = key.get("resourceMethod");
                 }
-            } else if (key.getResourcePath() == null && key.getResourceMethod() == null) {
-                if (key.getContext().startsWith(key.getContext() + "/") || key.getContext().equals(key.getContext())) {
+            } else if (key.get("resourcePath") == null && key.get("resourceMethod") == null) {
+                if (key.get("context").startsWith(key.get("context") + "/") || key.get("context").equals(key.get("context"))) {
                     apiLogLevel = entry.getValue();
                 }
             }
@@ -182,7 +179,7 @@ class LogUtils {
                 ctx.setProperty("API_TO", apiCtx);
                 return resourceLogLevel;
             } else {
-                ctx.setProperty(LogsHandler.LOG_LEVEL, resourceLogLevel);
+                ctx.setProperty(LogsHandler.LOG_LEVEL, apiLogLevel);
                 ctx.setProperty("API_TO", apiCtx);
                 return apiLogLevel;
             }
