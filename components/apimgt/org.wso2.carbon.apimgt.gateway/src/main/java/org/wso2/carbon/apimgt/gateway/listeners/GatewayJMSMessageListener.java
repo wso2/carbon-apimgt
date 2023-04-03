@@ -347,8 +347,6 @@ public class GatewayJMSMessageListener implements MessageListener {
                     .removeKeyTemplate(oldKey);
             ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
                     .addKeyTemplate(newKey, newTemplateValue);
-            APILoggerManager.getInstance().updateLoggerMap(apiEvent.getApiContext(), apiEvent.getLogLevel(),
-                    apiEvent.getResourceMethod(), apiEvent.getResourcePath());
         }
     }
 
