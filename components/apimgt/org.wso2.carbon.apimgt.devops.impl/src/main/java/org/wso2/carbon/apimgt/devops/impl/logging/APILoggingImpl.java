@@ -62,12 +62,12 @@ public class APILoggingImpl {
                     ExceptionCodes.from(ExceptionCodes.LOGGING_API_MISSING_DATA));
         }
 
-        publishLogAPIData(tenantId, apiId, logLevel);
+        publishLogAPIData(tenantId, apiId, logLevel, resourceMethod, resourcePath);
     }
 
-    private void publishLogAPIData(String tenantId, String apiId, String logLevel) throws APIManagementException {
+    private void publishLogAPIData(String tenantId, String apiId, String logLevel, String resourceMethod, String resourcePath) throws APIManagementException {
         APIEvent apiEvent = new APIEvent(apiId, logLevel, APIConstants.EventType.UDATE_API_LOG_LEVEL.name(),
-                apiMgtDAO.getAPIContext(apiId));
+                apiMgtDAO.getAPIContext(apiId), resourceMethod, resourcePath, tenantId);
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
