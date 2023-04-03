@@ -354,7 +354,8 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
             }
         } else if (EventType.UDATE_API_LOG_LEVEL.toString().equals(eventType)) {
             APIEvent apiEvent = new Gson().fromJson(eventJson, APIEvent.class);
-            APILoggerManager.getInstance().updateLoggerMap(apiEvent.getApiContext(), apiEvent.getLogLevel());
+            APILoggerManager.getInstance().updateLoggerMap(apiEvent.getApiContext(), apiEvent.getLogLevel(),
+                    apiEvent.getResourceMethod(), apiEvent.getResourcePath());
         } else if (EventType.CUSTOM_POLICY_ADD.toString().equals(eventType)) {
             KeyTemplateEvent keyTemplateEvent = new Gson().fromJson(eventJson, KeyTemplateEvent.class);
             String key = keyTemplateEvent.getKeyTemplate();

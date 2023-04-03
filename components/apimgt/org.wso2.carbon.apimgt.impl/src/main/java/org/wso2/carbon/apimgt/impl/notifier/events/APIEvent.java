@@ -36,14 +36,19 @@ public class APIEvent extends Event {
     private String apiType;
     private String apiStatus;
     private String logLevel;
+    private String resourceMethod;
+    private String resourcePath;
     private APIConstants.EventAction action;
     private String securityScheme;
 
-    public APIEvent(String uuid, String logLevel, String type, String apiContext) {
+    public APIEvent(String uuid, String logLevel, String type, String apiContext,
+                    String resourceMethod, String resourcePath, String tenantId) {
         this.uuid = uuid;
         this.logLevel = logLevel;
         this.type = type;
         this.apiContext = apiContext;
+        this.resourceMethod = resourceMethod;
+        this.resourcePath = resourcePath;
     }
 
     public APIEvent(String uuid, String apiName, String apiVersion, String apiProvider, String apiType, String apiStatus,
@@ -218,6 +223,14 @@ public class APIEvent extends Event {
 
     public String getLogLevel() {
         return logLevel;
+    }
+
+    public String getResourceMethod() {
+        return resourceMethod;
+    }
+
+    public String getResourcePath() {
+        return resourcePath;
     }
 
     public APIConstants.EventAction getAction() {

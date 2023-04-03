@@ -78,11 +78,11 @@ public class APILoggerManager {
         }
     }
 
-    public void updateLoggerMap(String apiContext, String logLevel) {
+    public void updateLoggerMap(String apiContext, String logLevel, String resourceMethod, String resourcePath) {
         Map<String, String> properties = new HashMap<>();
         properties.put("context", apiContext);
-        properties.put("resourcePath", null);
-        properties.put("resourceMethod", null);
+        properties.put("resourcePath", resourceMethod);
+        properties.put("resourceMethod", resourcePath);
         logProperties.put(properties, logLevel);
     }
 
