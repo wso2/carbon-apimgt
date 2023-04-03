@@ -280,7 +280,7 @@ public class LogsHandler extends AbstractSynapseHandler {
      *
      * @param map Map containing API context and logLevel
      */
-    public static Map<APILoggerManager.logResourceProperties, String> syncAPILogData(Map<String, Object> map) {
+    public static Map<Map<String, String>, String> syncAPILogData(Map<String, Object> map) {
         String apictx = (String) map.get("context");
         String logLevel = (String) map.get("value");
         log.debug("Log level for " + apictx + " is changed to " + logLevel);
@@ -290,7 +290,7 @@ public class LogsHandler extends AbstractSynapseHandler {
         return APILoggerManager.getInstance().getPerAPILoggerList().get(context);
     }
 
-    public static Map<APILoggerManager.logResourceProperties, String> getLogData() {
+    public static Map<Map<String, String>, String> getLogData() {
         return APILoggerManager.getInstance().getPerAPILoggerList();
     }
 
@@ -301,7 +301,7 @@ public class LogsHandler extends AbstractSynapseHandler {
      * @return log level of the API or null if not
      */
     private String getAPILogLevel(MessageContext ctx) {
-        Map<APILoggerManager.logResourceProperties, String> logProperties = APILoggerManager.getInstance().getPerAPILoggerList();
+        Map<Map<String, String>, String> logProperties = APILoggerManager.getInstance().getPerAPILoggerList();
         // if the logging API data holder is empty or null return null
         if (!logProperties.isEmpty()) {
             return LogUtils.getMatchingLogLevel(ctx, logProperties);
