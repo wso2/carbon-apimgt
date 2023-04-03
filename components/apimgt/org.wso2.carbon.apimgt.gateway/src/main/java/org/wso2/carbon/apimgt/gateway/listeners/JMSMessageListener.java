@@ -91,13 +91,6 @@ public class JMSMessageListener implements MessageListener {
                              * state - State whether blocking condition is enabled or not
                              */
                             handleBlockingMessage(payloadData);
-                        } else if (payloadData.get(APIConstants.POLICY_TEMPLATE_KEY) != null) {
-                            /*
-                             * This message contains key template data
-                             * keyTemplateValue - Value of key template
-                             * keyTemplateState - whether key template active or not
-                             */
-                            // handleKeyTemplateMessage(payloadData);
                         }
                     }
                 }else{
