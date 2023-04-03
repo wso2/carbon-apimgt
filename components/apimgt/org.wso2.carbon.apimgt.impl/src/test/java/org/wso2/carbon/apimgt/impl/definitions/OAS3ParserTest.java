@@ -10,8 +10,11 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -24,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import static org.mockito.Mockito.when;
 
 public class OAS3ParserTest extends OASTestBase {
     private OAS3Parser oas3Parser = new OAS3Parser();
@@ -218,6 +223,23 @@ public class OAS3ParserTest extends OASTestBase {
                 response.getErrorItems().get(0).getErrorDescription());
     }
 
+    @Test
+    public void testRootLevelApplicationSecurity() throws Exception {
+        String apiSecurity = "oauth_basic_auth_api_key_mandatory,oauth2,api_key";
+        String oasDefinition = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3"
+                        + File.separator + "oas3_app_security.json"),
+                "UTF-8");
+        String oasDefinitionEdited = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3"
+                        + File.separator + "oas3_app_security_key.json"),
+                "UTF-8");
+        API api = Mockito.mock(API.class);
+        when(api.getApiSecurity()).thenReturn(apiSecurity);
+        APIDefinition parser = OASParserUtil.getOASParser(oasDefinition);
+        String response = parser.getOASDefinitionForPublisher(api, oasDefinition);
+        Assert.assertEquals(oasDefinitionEdited, response);
+
     // Test case for an API with clientCredentials security scheme
     @Test
     public void testProcessOtherSchemeScopesWithClientCredentialsScheme() throws Exception {
@@ -242,6 +264,7 @@ public class OAS3ParserTest extends OASTestBase {
         Assert.assertNotNull(defaultSecScheme.getFlows().getClientCredentials().getTokenUrl());
         //Check whether the authorization url is null
         Assert.assertNull(defaultSecScheme.getFlows().getClientCredentials().getAuthorizationUrl());
+
     }
 
 }
