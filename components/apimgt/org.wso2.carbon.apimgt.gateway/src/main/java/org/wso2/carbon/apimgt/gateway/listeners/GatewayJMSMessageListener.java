@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.KeyTemplateEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
@@ -212,7 +213,7 @@ public class GatewayJMSMessageListener implements MessageListener {
         if (EventType.APPLICATION_CREATE.toString().equals(eventType)
                 || EventType.APPLICATION_UPDATE.toString().equals(eventType)) {
             ApplicationEvent event = new Gson().fromJson(eventJson, ApplicationEvent.class);
-            ServiceReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateApplication(event);;
+            ServiceReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateApplication(event);
         } else if (EventType.SUBSCRIPTIONS_CREATE.toString().equals(eventType)
                 || EventType.SUBSCRIPTIONS_UPDATE.toString().equals(eventType)) {
             SubscriptionEvent event = new Gson().fromJson(eventJson, SubscriptionEvent.class);
@@ -225,7 +226,7 @@ public class GatewayJMSMessageListener implements MessageListener {
             APIEvent event = new Gson().fromJson(eventJson, APIEvent.class);
             if (APIStatus.RETIRED.toString().equals(event.getApiStatus())) {
                 ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeAPI(event);
-                DataHolder.getInstance().removeAPIFromAllTenantMap(event.getApiContext(),event.getTenantDomain());
+                DataHolder.getInstance().removeAPIFromAllTenantMap(event.getApiContext(), event.getTenantDomain());
             } else {
                 ServiceReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateAPI(event);
             }
@@ -242,7 +243,7 @@ public class GatewayJMSMessageListener implements MessageListener {
             ApplicationRegistrationEvent event = new Gson().fromJson(eventJson, ApplicationRegistrationEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeApplicationKeyMapping(event);
         } else if (EventType.SCOPE_CREATE.toString().equals(eventType)) {
-            ScopeEvent event = new Gson().fromJson(eventJson,ScopeEvent.class);
+            ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().addScope(event);
         } else if (EventType.SCOPE_UPDATE.toString().equals(eventType)) {
             ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
@@ -251,8 +252,8 @@ public class GatewayJMSMessageListener implements MessageListener {
             ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().deleteScope(event);
         } else if (EventType.POLICY_CREATE.toString().equals(eventType) ||
-            EventType.POLICY_DELETE.toString().equals(eventType) ||
-            EventType.POLICY_UPDATE.toString().equals(eventType)) {
+                EventType.POLICY_DELETE.toString().equals(eventType) ||
+                EventType.POLICY_UPDATE.toString().equals(eventType)) {
             PolicyEvent event = new Gson().fromJson(eventJson, PolicyEvent.class);
             boolean updatePolicy = false;
             boolean deletePolicy = false;
@@ -325,6 +326,26 @@ public class GatewayJMSMessageListener implements MessageListener {
         } else if (EventType.UDATE_API_LOG_LEVEL.toString().equals(eventType)) {
             APIEvent apiEvent = new Gson().fromJson(eventJson, APIEvent.class);
             APILoggerManager.getInstance().updateLoggerMap(apiEvent.getApiContext(), apiEvent.getLogLevel());
+        } else if (EventType.CUSTOM_POLICY_ADD.toString().equals(eventType)) {
+            KeyTemplateEvent keyTemplateEvent = new Gson().fromJson(eventJson, KeyTemplateEvent.class);
+            String key = keyTemplateEvent.getKeyTemplate();
+            String keyTemplateValue = keyTemplateEvent.getKeyTemplate();
+            ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
+                    .addKeyTemplate(key, keyTemplateValue);
+        } else if (EventType.CUSTOM_POLICY_DELETE.toString().equals(eventType)) {
+            KeyTemplateEvent keyTemplateEvent = new Gson().fromJson(eventJson, KeyTemplateEvent.class);
+            String key = keyTemplateEvent.getKeyTemplate();
+            ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
+                    .removeKeyTemplate(key);
+        } else if (EventType.CUSTOM_POLICY_UPDATE.toString().equals(eventType)) {
+            KeyTemplateEvent keyTemplateEvent = new Gson().fromJson(eventJson, KeyTemplateEvent.class);
+            String oldKey = keyTemplateEvent.getOldKeyTemplate();
+            String newKey = keyTemplateEvent.getNewKeyTemplate();
+            String newTemplateValue = newKey;
+            ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
+                    .removeKeyTemplate(oldKey);
+            ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
+                    .addKeyTemplate(newKey, newTemplateValue);
         }
     }
 

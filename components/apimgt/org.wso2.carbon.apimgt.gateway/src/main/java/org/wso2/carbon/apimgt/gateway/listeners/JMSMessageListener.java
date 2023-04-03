@@ -97,7 +97,7 @@ public class JMSMessageListener implements MessageListener {
                              * keyTemplateValue - Value of key template
                              * keyTemplateState - whether key template active or not
                              */
-                            handleKeyTemplateMessage(payloadData);
+                            // handleKeyTemplateMessage(payloadData);
                         }
                     }
                 }else{
@@ -264,20 +264,4 @@ public class JMSMessageListener implements MessageListener {
         }
         return null;
     }
-
-    private synchronized void handleKeyTemplateMessage(JsonNode msg) {
-        if (log.isDebugEnabled()) {
-            log.debug("Received Key -  KeyTemplate : " + msg.get(APIConstants.POLICY_TEMPLATE_KEY).asText());
-        }
-        String keyTemplateValue = msg.get(APIConstants.POLICY_TEMPLATE_KEY).asText();
-        String keyTemplateState = msg.get(APIConstants.TEMPLATE_KEY_STATE).asText();
-        if (APIConstants.AdvancedThrottleConstants.ADD.equals(keyTemplateState)) {
-            ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
-                    .addKeyTemplate(keyTemplateValue, keyTemplateValue);
-        } else {
-            ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
-                    .removeKeyTemplate(keyTemplateValue);
-        }
-    }
-
 }

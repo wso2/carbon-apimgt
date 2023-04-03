@@ -2601,6 +2601,7 @@ public final class APIConstants {
         SCOPE,
         CERTIFICATE,
         GA_CONFIG,
+        KEY_TEMPLATE,
         CORRELATION_CONFIG
     }
 
@@ -2631,6 +2632,9 @@ public final class APIConstants {
         ENDPOINT_CERTIFICATE_REMOVE,
         GA_CONFIG_UPDATE,
         UDATE_API_LOG_LEVEL,
+        CUSTOM_POLICY_ADD,
+        CUSTOM_POLICY_DELETE,
+        CUSTOM_POLICY_UPDATE,
         UPDATE_CORRELATION_CONFIGS
     }
 
