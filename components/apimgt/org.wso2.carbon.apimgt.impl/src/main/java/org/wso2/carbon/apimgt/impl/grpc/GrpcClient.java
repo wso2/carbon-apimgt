@@ -15,13 +15,13 @@
  */
 package org.wso2.carbon.apimgt.impl.grpc;
 
-import choreo.apis.Types;
-import choreo.apis.Types.Group;
-import choreo.apis.UserServiceGrpc;
-import choreo.apis.UserServiceGrpc.UserServiceBlockingStub;
-import choreo.apis.UserServiceOuterClass;
-import choreo.apis.UserServiceOuterClass.ListUserGroupsRequest;
-import choreo.apis.UserServiceOuterClass.ListUserGroupsResponse;
+import org.wso2.carbon.apimgt.impl.choreo.apis.Types;
+import org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group;
+import org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceGrpc;
+import org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceGrpc.UserServiceBlockingStub;
+import org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass;
+import org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsRequest;
+import org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Metadata;
@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.List;
 
-import static choreo.apis.UserServiceGrpc.newBlockingStub;
+import static org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceGrpc.newBlockingStub;
 import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
 
 public class GrpcClient {

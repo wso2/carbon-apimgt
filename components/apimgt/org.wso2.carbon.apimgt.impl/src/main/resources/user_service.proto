@@ -2,7 +2,7 @@ syntax = "proto3";
 
 //go:generate go run ${PROJECT_DIR}/tools/fake_gen.go
 
-package choreo.apis;
+package org.wso2.carbon.apimgt.impl.choreo.apis;
 
 import "types.proto";
 import "validate/validate.proto";

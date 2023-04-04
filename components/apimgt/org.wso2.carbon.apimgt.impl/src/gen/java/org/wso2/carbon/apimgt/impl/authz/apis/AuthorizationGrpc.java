@@ -1,4 +1,4 @@
-package authz.apis;
+package org.wso2.carbon.apimgt.impl.authz.apis;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
 import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
@@ -24,33 +24,33 @@ public final class AuthorizationGrpc {
 
   private AuthorizationGrpc() {}
 
-  public static final String SERVICE_NAME = "authz.apis.Authorization";
+  public static final String SERVICE_NAME = "org.wso2.carbon.apimgt.impl.authz.apis.Authorization";
 
   // Static method descriptors that strictly reflect the proto.
-  private static volatile io.grpc.MethodDescriptor<authz.apis.AuthorizationService.AuthorizationRequest,
-      authz.apis.AuthorizationService.AuthorizationResponse> getAuthorizeMethod;
+  private static volatile io.grpc.MethodDescriptor<org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest,
+      org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse> getAuthorizeMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "authorize",
-      requestType = authz.apis.AuthorizationService.AuthorizationRequest.class,
-      responseType = authz.apis.AuthorizationService.AuthorizationResponse.class,
+      requestType = org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest.class,
+      responseType = org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<authz.apis.AuthorizationService.AuthorizationRequest,
-      authz.apis.AuthorizationService.AuthorizationResponse> getAuthorizeMethod() {
-    io.grpc.MethodDescriptor<authz.apis.AuthorizationService.AuthorizationRequest, authz.apis.AuthorizationService.AuthorizationResponse> getAuthorizeMethod;
+  public static io.grpc.MethodDescriptor<org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest,
+      org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse> getAuthorizeMethod() {
+    io.grpc.MethodDescriptor<org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest, org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse> getAuthorizeMethod;
     if ((getAuthorizeMethod = AuthorizationGrpc.getAuthorizeMethod) == null) {
       synchronized (AuthorizationGrpc.class) {
         if ((getAuthorizeMethod = AuthorizationGrpc.getAuthorizeMethod) == null) {
           AuthorizationGrpc.getAuthorizeMethod = getAuthorizeMethod = 
-              io.grpc.MethodDescriptor.<authz.apis.AuthorizationService.AuthorizationRequest, authz.apis.AuthorizationService.AuthorizationResponse>newBuilder()
+              io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest, org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "authz.apis.Authorization", "authorize"))
+                  "org.wso2.carbon.apimgt.impl.authz.apis.Authorization", "authorize"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  authz.apis.AuthorizationService.AuthorizationRequest.getDefaultInstance()))
+                  org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  authz.apis.AuthorizationService.AuthorizationResponse.getDefaultInstance()))
+                  org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse.getDefaultInstance()))
                   .setSchemaDescriptor(new AuthorizationMethodDescriptorSupplier("authorize"))
                   .build();
           }
@@ -88,8 +88,8 @@ public final class AuthorizationGrpc {
 
     /**
      */
-    public void authorize(authz.apis.AuthorizationService.AuthorizationRequest request,
-        io.grpc.stub.StreamObserver<authz.apis.AuthorizationService.AuthorizationResponse> responseObserver) {
+    public void authorize(org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest request,
+        io.grpc.stub.StreamObserver<org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getAuthorizeMethod(), responseObserver);
     }
 
@@ -99,8 +99,8 @@ public final class AuthorizationGrpc {
             getAuthorizeMethod(),
             asyncUnaryCall(
               new MethodHandlers<
-                authz.apis.AuthorizationService.AuthorizationRequest,
-                authz.apis.AuthorizationService.AuthorizationResponse>(
+                org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest,
+                org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse>(
                   this, METHODID_AUTHORIZE)))
           .build();
     }
@@ -126,8 +126,8 @@ public final class AuthorizationGrpc {
 
     /**
      */
-    public void authorize(authz.apis.AuthorizationService.AuthorizationRequest request,
-        io.grpc.stub.StreamObserver<authz.apis.AuthorizationService.AuthorizationResponse> responseObserver) {
+    public void authorize(org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest request,
+        io.grpc.stub.StreamObserver<org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getAuthorizeMethod(), getCallOptions()), request, responseObserver);
     }
@@ -153,7 +153,7 @@ public final class AuthorizationGrpc {
 
     /**
      */
-    public authz.apis.AuthorizationService.AuthorizationResponse authorize(authz.apis.AuthorizationService.AuthorizationRequest request) {
+    public org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse authorize(org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest request) {
       return blockingUnaryCall(
           getChannel(), getAuthorizeMethod(), getCallOptions(), request);
     }
@@ -179,8 +179,8 @@ public final class AuthorizationGrpc {
 
     /**
      */
-    public com.google.common.util.concurrent.ListenableFuture<authz.apis.AuthorizationService.AuthorizationResponse> authorize(
-        authz.apis.AuthorizationService.AuthorizationRequest request) {
+    public com.google.common.util.concurrent.ListenableFuture<org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse> authorize(
+        org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest request) {
       return futureUnaryCall(
           getChannel().newCall(getAuthorizeMethod(), getCallOptions()), request);
     }
@@ -206,8 +206,8 @@ public final class AuthorizationGrpc {
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
         case METHODID_AUTHORIZE:
-          serviceImpl.authorize((authz.apis.AuthorizationService.AuthorizationRequest) request,
-              (io.grpc.stub.StreamObserver<authz.apis.AuthorizationService.AuthorizationResponse>) responseObserver);
+          serviceImpl.authorize((org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest) request,
+              (io.grpc.stub.StreamObserver<org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -231,7 +231,7 @@ public final class AuthorizationGrpc {
 
     @java.lang.Override
     public com.google.protobuf.Descriptors.FileDescriptor getFileDescriptor() {
-      return authz.apis.AuthorizationService.getDescriptor();
+      return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.getDescriptor();
     }
 
     @java.lang.Override

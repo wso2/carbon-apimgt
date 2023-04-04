@@ -6,7 +6,7 @@
 
 syntax = "proto3";
 
-package authz.apis;
+package org.wso2.carbon.apimgt.impl.authz.apis;
 
 service Authorization {
     rpc authorize(AuthorizationRequest) returns (AuthorizationResponse) {}
