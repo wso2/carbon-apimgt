@@ -150,29 +150,26 @@ class LogUtils {
             }
         }
         boolean isResourceLevelHasHighPriority = false;
-        if (apiLogLevel != null || resourceLogLevel != null) {
+        if (resourceLogLevel != null) {
             switch (resourceLogLevel) {
                 case APIConstants.LOG_LEVEL_FULL:
                     isResourceLevelHasHighPriority = true;
                     break;
                 case APIConstants.LOG_LEVEL_STANDARD:
-                    if (apiLogLevel.equals(APIConstants.LOG_LEVEL_BASIC)
-                            || apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF)) {
+                    if (apiLogLevel != null && apiLogLevel.equals(APIConstants.LOG_LEVEL_BASIC)) {
                         isResourceLevelHasHighPriority = true;
                         break;
                     } else {
                         break;
                     }
                 case APIConstants.LOG_LEVEL_BASIC:
-                    if (apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF)) {
+                    if (apiLogLevel == null) {
                         isResourceLevelHasHighPriority = true;
                     } else {
                         break;
                     }
-                case APIConstants.LOG_LEVEL_OFF:
-                    break;
             }
-            if (isResourceLevelHasHighPriority) {
+            if (isResourceLevelHasHighPriority || apiLogLevel == null) {
                 ctx.setProperty(LogsHandler.LOG_LEVEL, resourceLogLevel);
                 ctx.setProperty(LogsHandler.RESOURCE_PATH, resourcePath);
                 ctx.setProperty(LogsHandler.RESOURCE_METHOD, resourceMethod);
@@ -183,7 +180,12 @@ class LogUtils {
                 ctx.setProperty("API_TO", apiCtx);
                 return apiLogLevel;
             }
+        } else if (apiLogLevel != null) {
+            ctx.setProperty(LogsHandler.LOG_LEVEL, apiLogLevel);
+            ctx.setProperty("API_TO", apiCtx);
+            return apiLogLevel;
+        } else {
+            return null;
         }
-        return null;
     }
 }
