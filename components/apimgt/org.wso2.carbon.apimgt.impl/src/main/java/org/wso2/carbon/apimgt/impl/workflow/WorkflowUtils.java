@@ -304,7 +304,7 @@ public class WorkflowUtils {
         } catch (APIManagementException e) {
             String errorMsg = "Could not complete api state change workflow";
             log.error(errorMsg, e);
-        } catch (APIPersistenceException | PersistenceException e) {
+        } catch (PersistenceException e) {
             log.error("Error while accessing lifecycle information ", e);
         }
     }
