@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2023, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2023, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -22,6 +22,9 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 
+/**
+ * The key template notification implementation in which key template events are published to gateway.
+ */
 public class KeyTemplateNotifier extends AbstractNotifier {
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
