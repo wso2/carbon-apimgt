@@ -16,13 +16,14 @@
 
 package org.wso2.carbon.apimgt.persistence.exceptions;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 
 /**
  * This is the custom exception class for API Persistence.
  */
-public class APIPersistenceException extends Exception {
+public class APIPersistenceException extends APIManagementException {
 
     private ErrorHandler errorHandler;
 

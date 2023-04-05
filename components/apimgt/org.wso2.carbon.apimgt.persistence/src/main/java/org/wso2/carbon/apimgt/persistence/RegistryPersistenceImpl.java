@@ -1761,7 +1761,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
             apiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, wsdlRegistryPath);
             apiArtifactManager.updateGenericArtifact(apiArtifact);
-        } catch (APIPersistenceException | APIManagementException | RegistryException e) {
+        } catch (APIManagementException | RegistryException e) {
             throw new WSDLPersistenceException("Error while saving the wsdl for api " + apiId, e);
         } finally {
             if (isTenantFlowStarted) {
@@ -1885,7 +1885,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     new APIIdentifier(apiProviderName, apiName, apiVersion), ((UserRegistry) registry).getTenantId());
             RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRolesArr, resourcePath);
 
-        } catch (RegistryException | APIPersistenceException| APIManagementException e) {
+        } catch (RegistryException | APIManagementException e) {
             throw new OASPersistenceException("Error while adding OSA Definition for " + apiId, e);
         } finally {
             if (isTenantFlowStarted) {
@@ -1982,7 +1982,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             ((UserRegistry) registry).getTenantId());
             RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRolesArr, resourcePath);
 
-        } catch (RegistryException | APIPersistenceException | APIManagementException e) {
+        } catch (RegistryException | APIManagementException e) {
             throw new AsyncSpecPersistenceException("Error while adding AsyncApi Definition for " + apiId, e);
         } finally {
             if (isTenantFlowStarted) {
@@ -2073,7 +2073,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             RegistryPersistenceUtil.setResourcePermissions(api.apiProvider, api.visibility, api.visibleRoles,
                     saveResourcePath);
 
-        } catch (RegistryException | APIManagementException | APIPersistenceException e) {
+        } catch (RegistryException | APIManagementException e) {
             throw new GraphQLPersistenceException("Error while adding Graphql Definition for api " + apiId, e);
         } finally {
             if (tenantFlowStarted) {
@@ -2167,7 +2167,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
             documentation.setId(docArtifact.getId());
             return documentation;
-        } catch (RegistryException | APIManagementException | UserStoreException | APIPersistenceException e) {
+        } catch (RegistryException | APIManagementException | UserStoreException e) {
             throw new DocumentationPersistenceException("Failed to add documentation", e);
         } finally {
             if (tenantFlowStarted) {
@@ -2236,7 +2236,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         registry);
             }
             return documentation;
-        } catch (RegistryException | APIManagementException | APIPersistenceException e) {
+        } catch (RegistryException | APIManagementException e) {
             throw new DocumentationPersistenceException("Failed to update documentation", e);
         } finally {
             if (tenantFlowStarted) {
@@ -2448,8 +2448,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 updateDocArtifact.setAttribute("toggle", Boolean.toString(!toggle));
                 docArtifactManager.updateGenericArtifact(updateDocArtifact);
             } 
-        } catch (APIPersistenceException | RegistryException | APIManagementException | PersistenceException
-                | UserStoreException e) {
+        } catch (RegistryException | APIManagementException | PersistenceException | UserStoreException e) {
             throw new DocumentationPersistenceException("Error while adding document content", e);
         } finally {
             if (isTenantFlowStarted) {
@@ -2734,7 +2733,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             apiArtifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL, savedFilePath);
             apiArtifactManager.updateGenericArtifact(apiArtifact);
-        } catch (APIPersistenceException | GovernanceException | PersistenceException | APIManagementException e) {
+        } catch (GovernanceException | PersistenceException | APIManagementException e) {
             throw new ThumbnailPersistenceException("Error while saving thumbnail for api " + apiId, e);
         } finally {
             if (isTenantFlowStarted) {
