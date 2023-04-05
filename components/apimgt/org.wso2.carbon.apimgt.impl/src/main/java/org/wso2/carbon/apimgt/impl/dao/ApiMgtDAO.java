@@ -9420,7 +9420,6 @@ public class ApiMgtDAO {
         }
     }
 
-
     public String getKeyMappingIdFromApplicationIdKeyTypeAndKeyManager(int applicationId, String tokenType,
                                                                        String keyManagerName)
             throws APIManagementException {
