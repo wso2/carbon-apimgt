@@ -9396,6 +9396,31 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Delete an application to key manager key mapping entry
+     *
+     * @param applicationId (int) id of the application
+     * @param keyType       key type (PRODUCTION/SANDBOX/..)
+     * @param keyManager    key manager name
+     * @throws APIManagementException
+     */
+    public void deleteApplicationKeyMapping(int applicationId, String keyType, String keyManager) throws APIManagementException {
+        String deleteKeyMappingQuery = SQLConstants.DELETE_APPLICATION_KEY_MAPPING_BY_APP_KEY_TYPE_KEY_MANAGER_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(deleteKeyMappingQuery)){
+            connection.setAutoCommit(false);
+            ps.setInt(1, applicationId);
+            ps.setString(2, keyType);
+            ps.setString(3, keyManager);
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while removing application key-mapping entry for applicationId: " + applicationId +
+                    ", keyType: " + keyType + ", keyManager: " + keyManager, e);
+        }
+    }
+
+
     public String getKeyMappingIdFromApplicationIdKeyTypeAndKeyManager(int applicationId, String tokenType,
                                                                        String keyManagerName)
             throws APIManagementException {
