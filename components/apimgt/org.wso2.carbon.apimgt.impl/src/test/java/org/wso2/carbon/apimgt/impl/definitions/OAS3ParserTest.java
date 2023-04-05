@@ -239,7 +239,7 @@ public class OAS3ParserTest extends OASTestBase {
         APIDefinition parser = OASParserUtil.getOASParser(oasDefinition);
         String response = parser.getOASDefinitionForPublisher(api, oasDefinition);
         Assert.assertEquals(oasDefinitionEdited, response);
-
+    }
     // Test case for an API with clientCredentials security scheme
     @Test
     public void testProcessOtherSchemeScopesWithClientCredentialsScheme() throws Exception {
