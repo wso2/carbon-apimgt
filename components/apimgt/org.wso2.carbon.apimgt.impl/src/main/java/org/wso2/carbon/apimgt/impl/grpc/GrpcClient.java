@@ -39,8 +39,8 @@ public class GrpcClient {
 
     private static final Log log = LogFactory.getLog(GrpcClient.class);
     private static volatile UserServiceBlockingStub userServiceBlockingStub = null;
-    private static final Metadata.Key<String> USER_IDP_METADATA_KEY =
-            Metadata.Key.of("user-idp-id", ASCII_STRING_MARSHALLER);
+    private static final Metadata.Key<String> USER_IDP_METADATA_KEY = Metadata.Key.of("user-idp-id",
+            ASCII_STRING_MARSHALLER);
 
     private GrpcClient() {
     }
@@ -48,12 +48,9 @@ public class GrpcClient {
     public static void init() throws GrpcClientException {
         synchronized (GrpcClient.class) {
             if (userServiceBlockingStub == null) {
-
-            ManagedChannel managedChannel = ManagedChannelBuilder
-                    .forTarget(GrpcConfig.getInstance().getAppServiceUrl())
-                    .usePlaintext().build();
-            userServiceBlockingStub = newBlockingStub(managedChannel);
-            log.info("Grpc client initialted successfully");
+                ManagedChannel managedChannel = ManagedChannelBuilder.forTarget(
+                        GrpcConfig.getInstance().getAppServiceUrl()).usePlaintext().build();
+                userServiceBlockingStub = newBlockingStub(managedChannel);
             }
         }
     }
@@ -66,15 +63,15 @@ public class GrpcClient {
         if (log.isDebugEnabled()) {
             log.debug(String.format("Getting user groups for IDP ID: %s ", userUuid));
         }
-        ListUserGroupsRequest findUsersByOrganizationRequest = ListUserGroupsRequest.newBuilder()
-                .setUserIdpId(userUuid)
+        ListUserGroupsRequest findUsersByOrganizationRequest = ListUserGroupsRequest.newBuilder().setUserIdpId(userUuid)
                 .build();
         ListUserGroupsResponse listUserGroupsResponse;
         List<Group> groupList;
         long startTime = System.currentTimeMillis();
         listUserGroupsResponse = userServiceBlockingStub.listUserGroups(findUsersByOrganizationRequest);
         if (log.isDebugEnabled()) {
-            log.debug(String.format("Requesting user groups completed for IDP ID: %s , request time : %d", userUuid, System.currentTimeMillis() - startTime));
+            log.debug(String.format("Requesting user groups completed for IDP ID: %s , request time : %d", userUuid,
+                    System.currentTimeMillis() - startTime));
         }
         groupList = listUserGroupsResponse.getGroupsList();
 
@@ -90,67 +87,68 @@ public class GrpcClient {
         }
         long startTime = System.currentTimeMillis();
         UserServiceOuterClass.GetUserRolesRequest request = UserServiceOuterClass.GetUserRolesRequest.newBuilder()
-                .setOrganizationName(org)
-                .setUserIdpId(idpId)
-                .build();
+                .setOrganizationName(org).setUserIdpId(idpId).build();
         if (log.isDebugEnabled()) {
-            log.debug(String.format("Request to get user roles completed. Org: %s, IdpUserId: %s, request time : %d", org, idpId,
-                    System.currentTimeMillis() - startTime));
+            log.debug(
+                    String.format("Request to get user roles completed. Org: %s, IdpUserId: %s, request time : %d", org,
+                            idpId, System.currentTimeMillis() - startTime));
         }
 
         Metadata metadata = new Metadata();
         metadata.put(USER_IDP_METADATA_KEY, idpId);
 
-        UserServiceGrpc.UserServiceBlockingStub stubWithInterceptor = MetadataUtils.attachHeaders(userServiceBlockingStub, metadata);
+        UserServiceGrpc.UserServiceBlockingStub stubWithInterceptor = MetadataUtils.attachHeaders(
+                userServiceBlockingStub, metadata);
         UserServiceOuterClass.GetUserRolesResponse response = stubWithInterceptor.getUserRoles(request);
         if (log.isDebugEnabled()) {
             long requestTime = System.currentTimeMillis() - startTime;
-            log.debug(String.format("User info request completed. Org: %s, IdpUserId: %s, Request time: %d",
-                    org, idpId, requestTime));
+            log.debug(String.format("User info request completed. Org: %s, IdpUserId: %s, Request time: %d", org, idpId,
+                    requestTime));
         }
         return response.getRolesList();
     }
 
-    public static List<Types.Role> findEnterpriseUserRolesForGroups(String org, String idpId, List<String> groupList) throws GrpcClientException {
+    public static List<Types.Role> findEnterpriseUserRolesForGroups(String org, String idpId, List<String> groupList)
+            throws GrpcClientException {
         if (userServiceBlockingStub == null) {
             init();
         }
         if (log.isDebugEnabled()) {
-            log.debug(String.format("Getting user roles for  user IDP ID: %s of org : %s for groups: %s", idpId, org, groupList));
+            log.debug(String.format("Getting user roles for  user IDP ID: %s of org : %s for groups: %s", idpId, org,
+                    groupList));
         }
         long startTime = System.currentTimeMillis();
         UserServiceOuterClass.GetEnterpriseUserRolesRequest request = UserServiceOuterClass.GetEnterpriseUserRolesRequest.newBuilder()
-                .setOrganizationName(org)
-                .setUserIdpId(idpId)
-                .addAllGroupList(groupList)
-                .build();
+                .setOrganizationName(org).setUserIdpId(idpId).addAllGroupList(groupList).build();
         if (log.isDebugEnabled()) {
-            log.debug(String.format("Request to get user roles completed. Org: %s, Groups: %s, request time : %d", org, groupList,
-                    System.currentTimeMillis() - startTime));
+            log.debug(String.format("Request to get user roles completed. Org: %s, Groups: %s, request time : %d", org,
+                    groupList, System.currentTimeMillis() - startTime));
         }
 
         Metadata metadata = new Metadata();
         metadata.put(USER_IDP_METADATA_KEY, idpId);
 
-        UserServiceGrpc.UserServiceBlockingStub stubWithInterceptor = MetadataUtils.attachHeaders(userServiceBlockingStub, metadata);
+        UserServiceGrpc.UserServiceBlockingStub stubWithInterceptor = MetadataUtils.attachHeaders(
+                userServiceBlockingStub, metadata);
         startTime = System.currentTimeMillis();
         UserServiceOuterClass.GetUserRolesResponse response = stubWithInterceptor.getEnterpriseUserRoles(request);
         if (log.isDebugEnabled()) {
             long requestTime = System.currentTimeMillis() - startTime;
-            log.debug(String.format("User info request completed. Org: %s, Groups: %s, Request time: %d",
-                    org, groupList, requestTime));
+            log.debug(
+                    String.format("User info request completed. Org: %s, Groups: %s, Request time: %d", org, groupList,
+                            requestTime));
         }
         return response.getRolesList();
     }
 
-    public static Types.Organization findOrganizationByHandle(String orgHandle, String idpId) throws GrpcClientException {
+    public static Types.Organization findOrganizationByHandle(String orgHandle, String idpId)
+            throws GrpcClientException {
         if (userServiceBlockingStub == null) {
             init();
         }
         long startTime = System.currentTimeMillis();
         UserServiceOuterClass.GetOrganizationRequest request = UserServiceOuterClass.GetOrganizationRequest.newBuilder()
-                .setOrganizationName(orgHandle)
-                .build();
+                .setOrganizationName(orgHandle).build();
 
         Metadata metadata = new Metadata();
         metadata.put(USER_IDP_METADATA_KEY, idpId);
@@ -162,7 +160,8 @@ public class GrpcClient {
         UserServiceOuterClass.GetOrganizationResponse response = stub.getOrganization(request);
         if (log.isDebugEnabled()) {
             long requestTime = System.currentTimeMillis() - startTime;
-            log.debug(String.format("Get organization request completed. orgHandle: %s, Request time: %d, orgUuid: %s, idpId: %s",
+            log.debug(String.format(
+                    "Get organization request completed. orgHandle: %s, Request time: %d, orgUuid: %s, idpId: %s",
                     orgHandle, requestTime, response.getOrganization().getUuid(), idpId));
         }
         return response.getOrganization();
@@ -174,8 +173,7 @@ public class GrpcClient {
         }
         long startTime = System.currentTimeMillis();
         UserServiceOuterClass.FindUserOrganizationsRequest request = UserServiceOuterClass.FindUserOrganizationsRequest.newBuilder()
-                .setUser(Types.User.newBuilder().setIdpId(idpId).build())
-                .build();
+                .setUser(Types.User.newBuilder().setIdpId(idpId).build()).build();
 
         Metadata metadata = new Metadata();
         metadata.put(USER_IDP_METADATA_KEY, idpId);
@@ -187,8 +185,9 @@ public class GrpcClient {
         UserServiceOuterClass.FindUserOrganizationsResponse response = stub.findUserOrganizations(request);
         if (log.isDebugEnabled()) {
             long requestTime = System.currentTimeMillis() - startTime;
-            log.debug(String.format("Get user organizations request completed. IdpUserId: %s, Request time: %d, OrgCount: %d",
-                    idpId, requestTime, response.getOrganizationsList().size()));
+            log.debug(String.format(
+                    "Get user organizations request completed. IdpUserId: %s, Request time: %d, OrgCount: %d", idpId,
+                    requestTime, response.getOrganizationsList().size()));
         }
         return response.getOrganizationsList();
     }
