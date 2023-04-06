@@ -414,27 +414,27 @@
         <dependency>
             <groupId>io.envoyproxy.protoc-gen-validate</groupId>
             <artifactId>pgv-java-stub</artifactId>
-            <version>0.4.1</version>
+            <version>${io.envoyproxy.protoc-gen-validate.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.17.3</version>
+            <version>${com.google.protobuf.version}</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
-            <version>1.39.0</version>
+            <version>${io.grpc.version}</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
-            <version>1.39.0</version>
+            <version>${io.grpc.version}</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
-            <version>1.39.0</version>
+            <version>${io.grpc.version}</version>
         </dependency>
     </dependencies>
     <build>
@@ -442,7 +442,7 @@
             <extension>
                 <groupId>kr.motd.maven</groupId>
                 <artifactId>os-maven-plugin</artifactId>
-                <version>1.4.1.Final</version>
+                <version>${kr.motd.maven.version}</version>
             </extension>
         </extensions>
 
@@ -668,7 +668,7 @@
                             <pluginParameter>lang=java</pluginParameter>
                             <pluginId>java-pgv</pluginId>
                             <pluginArtifact>
-                                io.envoyproxy.protoc-gen-validate:protoc-gen-validate:0.4.1:exe:${os.detected.classifier}
+                                io.envoyproxy.protoc-gen-validate:protoc-gen-validate:${io.envoyproxy.protoc-gen-validate.version}:exe:${os.detected.classifier}
                             </pluginArtifact>
                         </configuration>
                     </execution>

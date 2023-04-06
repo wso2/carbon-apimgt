@@ -2191,5 +2191,10 @@
         <log4j2.version>2.17.1</log4j2.version>
         <jinjava.version>2.5.6</jinjava.version>
         <h2.orbit.version>2.1.210.wso2v1</h2.orbit.version>
+
+        <io.grpc.version>1.39.0</io.grpc.version>
+        <com.google.protobuf.version>3.17.3</com.google.protobuf.version>
+        <io.envoyproxy.protoc-gen-validate.version>0.4.1</io.envoyproxy.protoc-gen-validate.version>
+        <kr.motd.maven.version>1.4.1.Final</kr.motd.maven.version>
     </properties>
 </project>
