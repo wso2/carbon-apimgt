@@ -8979,6 +8979,10 @@ components:
               throttlingPolicy: Unlimited
           items:
             $ref: '#/components/schemas/APIOperations'
+        globalPolicies:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlobalPolicies'
         threatProtectionPolicies:
           type: object
           properties:
@@ -9493,6 +9497,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/APIOperations'
+        globalPolicies:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlobalPolicies'
     ResourcePath:
       title: ResourcePath
       required:
@@ -11065,6 +11073,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/APIOperations'
+            globalPolicies:
+              type: array
+              items:
+                $ref: '#/components/schemas/GlobalPolicies'
             graphQLSchema:
               $ref: '#/components/schemas/GraphQLSchema'
           description: Summary of the GraphQL including the basic information
@@ -11754,6 +11766,23 @@ components:
           type: object
           additionalProperties:
             type: object
+    GlobalPolicy:
+      title: Global Policy
+      type: object
+      required:
+        - policyName
+      properties:
+        policyName:
+          type: string
+        policyVersion:
+          type: string
+          default: v1
+        policyId:
+          type: string
+        parameters:
+          type: object
+          additionalProperties:
+            type: object
     APIOperationPolicies:
       title: API Operation Level Policies
       properties:
@@ -11769,6 +11798,24 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OperationPolicy'
+    GlobalPolicies:
+      title: Global Policies
+      properties:
+        gatewayLabel:
+          type: string
+          example: gateway1
+        request:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlobalPolicy'
+        response:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlobalPolicy'
+        fault:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlobalPolicy'
     GatewayEnvironmentProtocolURI:
       title: Gateway Environment protocols and URIs
       required:
