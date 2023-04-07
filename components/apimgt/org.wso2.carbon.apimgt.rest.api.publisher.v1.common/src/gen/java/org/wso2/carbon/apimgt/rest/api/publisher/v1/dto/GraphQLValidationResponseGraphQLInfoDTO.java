@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GlobalPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import javax.validation.constraints.*;
 
@@ -28,6 +29,7 @@ import javax.validation.Valid;
 public class GraphQLValidationResponseGraphQLInfoDTO   {
   
     private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
+    private List<GlobalPoliciesDTO> globalPolicies = new ArrayList<GlobalPoliciesDTO>();
     private GraphQLSchemaDTO graphQLSchema = null;
 
   /**
@@ -46,6 +48,24 @@ public class GraphQLValidationResponseGraphQLInfoDTO   {
   }
   public void setOperations(List<APIOperationsDTO> operations) {
     this.operations = operations;
+  }
+
+  /**
+   **/
+  public GraphQLValidationResponseGraphQLInfoDTO globalPolicies(List<GlobalPoliciesDTO> globalPolicies) {
+    this.globalPolicies = globalPolicies;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("globalPolicies")
+  public List<GlobalPoliciesDTO> getGlobalPolicies() {
+    return globalPolicies;
+  }
+  public void setGlobalPolicies(List<GlobalPoliciesDTO> globalPolicies) {
+    this.globalPolicies = globalPolicies;
   }
 
   /**
@@ -77,12 +97,13 @@ public class GraphQLValidationResponseGraphQLInfoDTO   {
     }
     GraphQLValidationResponseGraphQLInfoDTO graphQLValidationResponseGraphQLInfo = (GraphQLValidationResponseGraphQLInfoDTO) o;
     return Objects.equals(operations, graphQLValidationResponseGraphQLInfo.operations) &&
+        Objects.equals(globalPolicies, graphQLValidationResponseGraphQLInfo.globalPolicies) &&
         Objects.equals(graphQLSchema, graphQLValidationResponseGraphQLInfo.graphQLSchema);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(operations, graphQLSchema);
+    return Objects.hash(operations, globalPolicies, graphQLSchema);
   }
 
   @Override
@@ -91,6 +112,7 @@ public class GraphQLValidationResponseGraphQLInfoDTO   {
     sb.append("class GraphQLValidationResponseGraphQLInfoDTO {\n");
     
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
+    sb.append("    globalPolicies: ").append(toIndentedString(globalPolicies)).append("\n");
     sb.append("    graphQLSchema: ").append(toIndentedString(graphQLSchema)).append("\n");
     sb.append("}");
     return sb.toString();
