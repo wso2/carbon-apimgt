@@ -165,6 +165,7 @@ public class ChoreoApiMgtDAO {
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
                     String dataPlaneId = rs.getString("DATA_PLANE_ID");
+                    String gwAccessibilityType = rs.getString("ACCESSIBILITY_TYPE");
 
                     Environment env = new Environment();
                     env.setId(id);
@@ -174,6 +175,7 @@ public class ChoreoApiMgtDAO {
                     env.setDescription(description);
                     env.setProvider(provider);
                     env.setDataPlaneId(dataPlaneId);
+                    env.setAccessibilityType(gwAccessibilityType);
                     env.setVhosts(ApiMgtDAO.getInstance().getVhostGatewayEnvironments(connection, id));
                     envList.add(env);
                 }
@@ -214,6 +216,31 @@ public class ChoreoApiMgtDAO {
                     + environmentsSet + " of Organization: " + organization, e);
         }
         return envToDataPlaneIdMap;
+    }
+
+    /**
+     * Checks whether a given environment name in given organization is already exists in the DB
+     *
+     * @param name         String represents the name of the environment
+     * @param organization string represents organizationId
+     * @return true if the environment is exists and false otherwise
+     * @throws APIManagementException if failed to check the environment name
+     */
+    public boolean isEnvNameExists(String name, String organization) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_BY_NAME_SQL)) {
+            prepStmt.setString(1, organization);
+            prepStmt.setString(2, name);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Failed to check the availability of the provided environment name " +
+                    name + " of Organization: " + organization, e);
+        }
+        return false;
     }
 
     /**

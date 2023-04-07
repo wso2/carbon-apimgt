@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentNameValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApiService;
@@ -105,6 +106,23 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
     public Response environmentsPost(@ApiParam(value = "Environment object that should to be added " ,required=true) EnvironmentDTO environmentDTO) throws APIManagementException{
         return delegate.environmentsPost(environmentDTO, securityContext);
+    }
+
+    @POST
+    @Path("/validate-name")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Validate provided environment name", notes = "Using this operation, it is possible check whether the given environment name is valid ", response = EnvironmentNameValidationResponseDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
+        })
+    }, tags={ "Environments", "Validation",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Environment name validation information is returned ", response = EnvironmentNameValidationResponseDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
+    public Response validateEnvName( @NotNull @ApiParam(value = "Name of the environment",required=true)  @QueryParam("name") String name) throws APIManagementException{
+        return delegate.validateEnvName(name, securityContext);
     }
 
     @POST

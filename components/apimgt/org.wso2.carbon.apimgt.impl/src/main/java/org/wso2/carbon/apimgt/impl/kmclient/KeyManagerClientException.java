@@ -16,17 +16,19 @@
 
 package org.wso2.carbon.apimgt.impl.kmclient;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+
 /**
  * This is the custom exception class for exceptions in the Feign Key Manager Client.
  */
-public class KeyManagerClientException extends Exception {
+public class KeyManagerClientException extends APIManagementException {
 
     private int statusCode;
     private String reason;
 
     public KeyManagerClientException() {
-
-        super();
+        super(ExceptionCodes.INTERNAL_ERROR);
     }
 
     public KeyManagerClientException(String message) {

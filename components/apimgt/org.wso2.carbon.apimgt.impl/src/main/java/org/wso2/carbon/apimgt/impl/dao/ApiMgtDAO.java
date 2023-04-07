@@ -9396,6 +9396,30 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Delete an application to key manager key mapping entry
+     *
+     * @param applicationId (int) id of the application
+     * @param keyType       key type (PRODUCTION/SANDBOX/..)
+     * @param keyManager    key manager name
+     * @throws APIManagementException
+     */
+    public void deleteApplicationKeyMapping(int applicationId, String keyType, String keyManager) throws APIManagementException {
+        String deleteKeyMappingQuery = SQLConstants.DELETE_APPLICATION_KEY_MAPPING_BY_APP_KEY_TYPE_KEY_MANAGER_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(deleteKeyMappingQuery)){
+            connection.setAutoCommit(false);
+            ps.setInt(1, applicationId);
+            ps.setString(2, keyType);
+            ps.setString(3, keyManager);
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while removing application key-mapping entry for applicationId: " + applicationId +
+                    ", keyType: " + keyType + ", keyManager: " + keyManager, e);
+        }
+    }
+
     public String getKeyMappingIdFromApplicationIdKeyTypeAndKeyManager(int applicationId, String tokenType,
                                                                        String keyManagerName)
             throws APIManagementException {
@@ -13867,6 +13891,7 @@ public class ApiMgtDAO {
                     String displayName = rs.getString("DISPLAY_NAME");
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
+                    String gwAccessibilityType = rs.getString("ACCESSIBILITY_TYPE");
 
                     Environment env = new Environment();
                     env.setId(id);
@@ -13875,6 +13900,7 @@ public class ApiMgtDAO {
                     env.setDisplayName(displayName);
                     env.setDescription(description);
                     env.setProvider(provider);
+                    env.setAccessibilityType(gwAccessibilityType);
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                     envList.add(env);
                 }
@@ -13907,6 +13933,7 @@ public class ApiMgtDAO {
                     String displayName = rs.getString("DISPLAY_NAME");
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
+                    String gwAccessibilityType = rs.getString("ACCESSIBILITY_TYPE");
 
                     env = new Environment();
                     env.setId(id);
@@ -13915,6 +13942,7 @@ public class ApiMgtDAO {
                     env.setDisplayName(displayName);
                     env.setDescription(description);
                     env.setProvider(provider);
+                    env.setAccessibilityType(gwAccessibilityType);
                     env.setDataPlaneId(ChoreoApiMgtDAO.getInstance().getDataPlaneIdForEnvironment(connection, uuid));
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                 }
@@ -13948,7 +13976,8 @@ public class ApiMgtDAO {
                 prepStmt.setString(3, environment.getDisplayName());
                 prepStmt.setString(4, environment.getDescription());
                 prepStmt.setString(5, environment.getProvider());
-                prepStmt.setString(6, tenantDomain);
+                prepStmt.setString(6, environment.getAccessibilityType());
+                prepStmt.setString(7, tenantDomain);
                 prepStmt.executeUpdate();
 
                 ResultSet rs = prepStmt.getGeneratedKeys();
@@ -14090,7 +14119,8 @@ public class ApiMgtDAO {
             try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_ENVIRONMENT_SQL)) {
                 prepStmt.setString(1, environment.getDisplayName());
                 prepStmt.setString(2, environment.getDescription());
-                prepStmt.setString(3, environment.getUuid());
+                prepStmt.setString(3, environment.getAccessibilityType());
+                prepStmt.setString(4, environment.getUuid());
                 prepStmt.executeUpdate();
                 deleteGatewayVhosts(connection, environment.getId());
                 addGatewayVhosts(connection, environment.getId(), environment.getVhosts());

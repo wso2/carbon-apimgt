@@ -644,6 +644,14 @@ public class APIManagerConfiguration {
         } else {
             environment.setDescription("");
         }
+        OMElement gatewayAccessibilityType =
+                environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_ACCESSIBILITY_TYPE));
+        if (gatewayAccessibilityType != null && gatewayAccessibilityType.getText() != null &&
+                !"".equals(gatewayAccessibilityType.getText())) {
+            environment.setAccessibilityType(gatewayAccessibilityType.getText());
+        } else {
+            environment.setAccessibilityType(APIConstants.API_GATEWAY_ACCESSIBILITY_TYPE_EXTERNAL);
+        }
         environment.setReadOnly(true);
         OMElement dataPlaneId =
                 environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_DATA_PLANE_ID));

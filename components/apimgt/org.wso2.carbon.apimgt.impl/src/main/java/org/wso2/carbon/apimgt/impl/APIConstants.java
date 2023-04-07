@@ -707,7 +707,9 @@ public final class APIConstants {
     public static final String API_GATEWAY_ADDITIONAL_PROPERTIES = "Properties";
     public static final String API_GATEWAY_ADDITIONAL_PROPERTY = "Property";
     public static final String API_GATEWAY_DATA_PLANE_ID = "DataPlaneId";
-
+    public static final String API_GATEWAY_ACCESSIBILITY_TYPE = "GatewayEnvironmentType";
+    public static final String API_GATEWAY_ACCESSIBILITY_TYPE_EXTERNAL = "external";
+    public static final String API_GATEWAY_ACCESSIBILITY_TYPE_INTERNAL = "internal";
 
     public static final String CACHE_CONFIGS = "CacheConfigurations.";
     public static final String GATEWAY_TOKEN_CACHE_ENABLED = CACHE_CONFIGS + "EnableGatewayTokenCache";
@@ -2830,6 +2832,10 @@ public final class APIConstants {
         public static final String DEPLOYMENT_DESCRIPTOR_FILE_TYPE = "deployments";
         public static final String ENVIRONMENT_SPECIFIC_API_PROPERTY_FILE = "env_properties";
         public static final String ENVIRONMENT_SPECIFIC_API_PROPERTY_KEY_NAME = "apis";
+        public static final String DEPLOYMENT_TYPE_SANDBOX_PREFIXES_DEFAULT = "dev, stg, stage, staging, sandbox, preprod";
+        public static final String DEPLOYMENT_TYPE_PROD_PREFIXES_DEFAULT = "prod";
+        public static final String ENV_DEPLOYMENT_TYPE_SANDBOX_PREFIXES = "DEPLOYMENT_TYPE_SANDBOX_PREFIXES";
+        public static final String ENV_DEPLOYMENT_TYPE_PROD_PREFIXES = "DEPLOYMENT_TYPE_PROD_PREFIXES";
     }
 
     public static class OrganizationDeletion {

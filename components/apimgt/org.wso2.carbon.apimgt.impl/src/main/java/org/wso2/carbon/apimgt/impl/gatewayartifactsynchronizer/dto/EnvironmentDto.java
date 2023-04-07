@@ -28,6 +28,12 @@ import org.apache.commons.lang3.StringUtils;
 public class EnvironmentDto {
     private String name;
     private String vhost;
+    private DeploymentType deploymentType;
+
+    public enum DeploymentType {
+        PRODUCTION,
+        SANDBOX
+    }
 
     private long deployedTimeStamp;
 
@@ -37,6 +43,14 @@ public class EnvironmentDto {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setDeploymentType(DeploymentType deploymentType) {
+        this.deploymentType = deploymentType;
+    }
+
+    public DeploymentType getDeploymentType() {
+        return deploymentType;
     }
 
     public String getVhost() {

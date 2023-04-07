@@ -108,6 +108,17 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         }
         return null;
     }
+
+    @Override
+    public Response validateEnvName(String name, MessageContext messageContext) throws APIManagementException {
+        APIAdmin apiAdmin = new APIAdminImpl();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        boolean isEnvNameExist = apiAdmin.isEnvNameExist(name, organization);
+        EnvironmentNameValidationResponseDTO envNameValidationResponseDTO = new EnvironmentNameValidationResponseDTO();
+        envNameValidationResponseDTO.setValidity(!isEnvNameExist);
+        return Response.ok().entity(envNameValidationResponseDTO).build();
+    }
+
     @Override
     public Response validateVhost(String vHost, MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();

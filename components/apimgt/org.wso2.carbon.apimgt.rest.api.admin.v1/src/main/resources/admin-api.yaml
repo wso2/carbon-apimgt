@@ -1808,7 +1808,50 @@ paths:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/environments/d7cf8523-9180-4255-84fa-6cb171c1f779"'
-
+  ######################################################
+  # The "Environment name" resource API
+  ######################################################
+  /environments/validate-name:
+    post:
+      tags:
+        - Environments
+        - Validation
+      summary: Validate provided environment name
+      description: |
+        Using this operation, it is possible check whether the given environment name is valid
+      operationId: validateEnvName
+      parameters:
+        - name: name
+          in: query
+          description: Name of the environment
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            Environment name validation information is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentNameValidationResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:environment_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v3/environments/validate-name?name=testenv123"'
   ######################################################
   # The "Environment vHost" resource API
   ######################################################
@@ -4084,6 +4127,10 @@ components:
           type: string
           readOnly: true
           example: sce92bdc-e1e6-325c-a6f2-626218a021e3
+        gatewayAccessibilityType:
+          type: string
+          readOnly: true
+          example: external
         vhosts:
           type: array
           minItems: 1
@@ -4142,6 +4189,15 @@ components:
         wssPort:
           type: integer
           example: 8099
+    EnvironmentNameValidationResponse:
+      title: Environment name validation response
+      required:
+        - validity
+      type: object
+      properties:
+        validity:
+          type: boolean
+          example: true
     VHostValidationResponse:
       title: VHost validation response
       required:
