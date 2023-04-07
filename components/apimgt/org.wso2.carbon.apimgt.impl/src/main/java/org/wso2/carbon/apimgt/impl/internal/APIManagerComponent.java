@@ -86,6 +86,7 @@ import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ScopesNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.KeyTemplateNotifier;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.KeyMgtConfigDeployer;
@@ -207,6 +208,7 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(),new GoogleAnalyticsNotifier(),null);
             bundleContext.registerService(Notifier.class.getName(),new ExternalGatewayNotifier(),null);
             bundleContext.registerService(Notifier.class.getName(),new ExternallyDeployedApiNotifier(),null);
+            bundleContext.registerService(Notifier.class.getName(),new KeyTemplateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);

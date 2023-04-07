@@ -227,7 +227,12 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                 if (corsSequence != null) {
                     corsSequence.mediate(messageContext);
                 }
-                Utils.send(messageContext, HttpStatus.SC_OK);
+                if (messageContext.getProperty(APIMgtGatewayConstants.HTTP_SC) != null) {
+                    Utils.send(messageContext, Integer.parseInt(
+                            messageContext.getProperty(APIMgtGatewayConstants.HTTP_SC).toString()));
+                } else {
+                    Utils.send(messageContext, HttpStatus.SC_OK);
+                }
                 return false;
             } else if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(apiImplementationType)) {
                 setCORSHeaders(messageContext, selectedResource);
@@ -328,6 +333,10 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         }
 
         messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
+        //If the request origin is not allowed, set the HTTP status code to 403
+        if (allowedOrigin == null) {
+            messageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, HttpStatus.SC_FORBIDDEN);
+        }
         String allowedMethods;
         StringBuffer allowedMethodsBuffer = new StringBuffer(20);
         if (selectedResource != null) {

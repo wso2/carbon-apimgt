@@ -861,9 +861,13 @@ public class OAS2Parser extends APIDefinition {
                 swagger.setVendorExtension(APIConstants.X_WSO2_MUTUAL_SSL, mutualSSLOptional);
             }
         }
-        // This app security is should given in resource level,
-        // otherwise the default oauth2 scheme defined at each resouce level will override application securities
+        // This app security should be given in both root level and resource level,
+        // otherwise the default oauth2 scheme defined at each resource level will override application securities
         JsonNode appSecurityExtension = OASParserUtil.getAppSecurity(apiSecurity);
+        if (swagger.getVendorExtensions() != null && !(swagger.getVendorExtensions()
+                .containsKey(APIConstants.X_WSO2_APP_SECURITY))) {
+            swagger.setVendorExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
+        }
         for (String pathKey : swagger.getPaths().keySet()) {
             Path path = swagger.getPath(pathKey);
             Map<HttpMethod, Operation> operationMap = path.getOperationMap();
@@ -872,7 +876,6 @@ public class OAS2Parser extends APIDefinition {
                 operation.setVendorExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
             }
         }
-        swagger.setVendorExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
         swagger.setVendorExtension(APIConstants.X_WSO2_RESPONSE_CACHE,
                 OASParserUtil.getResponseCacheConfig(api.getResponseCache(), api.getCacheTimeout()));
 
