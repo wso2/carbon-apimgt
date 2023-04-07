@@ -4130,6 +4130,27 @@ public class SQLConstants {
     }
 
     /**
+     * Static class to hold database queries related to AM_Global_POLICY_MAPPING table
+     */
+    public static class GlobalPolicyConstants {
+        public static final String ADD_GLOBAL_POLICY =
+                "INSERT INTO AM_GLOBAL_POLICY(POLICY_UUID, GATEWAY_LABEL) VALUES (?,?)";
+
+        public static final String ADD_GLOBAL_POLICY_WITH_DEPLOYMENT =
+                "INSERT INTO AM_GLOBAL_POLICY (POLICY_UUID, GATEWAY_LABEL, IS_DEPLOYED) VALUES (?,?,?)";
+
+        // Global policy mapping
+        public static final String ADD_GLOBAL_POLICY_MAPPING =
+                "INSERT INTO AM_GLOBAL_POLICY_MAPPING " +
+                        " (POLICY_UUID, DIRECTION, PARAMETERS, POLICY_ORDER) " +
+                        " VALUES (?,?,?,?)";
+
+        public static final String DELETE_GLOBAL_POLICY_BY_POLICY_ID =
+                "DELETE FROM AM_GLOBAL_POLICY WHERE POLICY_UUID = ?";
+
+    }
+
+    /**
      * Static class to hold database queries related to AM_SYSTEM_CONFIGS table
      */
     public static class SystemConfigsConstants {
