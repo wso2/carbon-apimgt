@@ -138,10 +138,10 @@ class LogUtils {
             Map<String, String> key = entry.getKey();
             String apiResourcePath = apiCtx.split("/", 3)[2];
             String logResourcePath = key.get("resourcePath");
-            String resourcePathRegexPattern = logResourcePath.replace("/","\\/");
-            resourcePathRegexPattern = resourcePathRegexPattern.replaceAll("\\{.*?\\}","\\\\d+");
-            if(("/"+apiResourcePath).matches(resourcePathRegexPattern)
-                    && apiHttpMethod.equals(key.get("resourceMethod"))){
+            String resourcePathRegexPattern = logResourcePath.replace("/", "\\/");
+            resourcePathRegexPattern = resourcePathRegexPattern.replaceAll("\\{.*?\\}", "\\\\d+");
+            if (("/" + apiResourcePath).matches(resourcePathRegexPattern)
+                    && apiHttpMethod.equals(key.get("resourceMethod"))) {
                 if (key.get("context").startsWith(key.get("context") + "/") ||
                         key.get("context").equals(key.get("context"))) {
                     resourceLogLevel = entry.getValue();
