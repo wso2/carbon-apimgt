@@ -7,7 +7,6 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GlobalPoliciesDTO;
 import javax.validation.constraints.*;
 
 
@@ -28,7 +27,6 @@ public class ProductAPIDTO   {
     private String apiId = null;
     private String version = null;
     private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
-    private List<GlobalPoliciesDTO> globalPolicies = new ArrayList<GlobalPoliciesDTO>();
 
   /**
    **/
@@ -100,24 +98,6 @@ public class ProductAPIDTO   {
     this.operations = operations;
   }
 
-  /**
-   **/
-  public ProductAPIDTO globalPolicies(List<GlobalPoliciesDTO> globalPolicies) {
-    this.globalPolicies = globalPolicies;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("globalPolicies")
-  public List<GlobalPoliciesDTO> getGlobalPolicies() {
-    return globalPolicies;
-  }
-  public void setGlobalPolicies(List<GlobalPoliciesDTO> globalPolicies) {
-    this.globalPolicies = globalPolicies;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -131,13 +111,12 @@ public class ProductAPIDTO   {
     return Objects.equals(name, productAPI.name) &&
         Objects.equals(apiId, productAPI.apiId) &&
         Objects.equals(version, productAPI.version) &&
-        Objects.equals(operations, productAPI.operations) &&
-        Objects.equals(globalPolicies, productAPI.globalPolicies);
+        Objects.equals(operations, productAPI.operations);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, apiId, version, operations, globalPolicies);
+    return Objects.hash(name, apiId, version, operations);
   }
 
   @Override
@@ -149,7 +128,6 @@ public class ProductAPIDTO   {
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
-    sb.append("    globalPolicies: ").append(toIndentedString(globalPolicies)).append("\n");
     sb.append("}");
     return sb.toString();
   }

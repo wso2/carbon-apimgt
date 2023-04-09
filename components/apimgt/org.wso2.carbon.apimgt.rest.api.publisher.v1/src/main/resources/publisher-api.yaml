@@ -8125,6 +8125,50 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
 
+  /global-policies:
+    post:
+      tags:
+        - Global Policies
+      summary: Engage global policies to the gateways
+      description: |
+        This operation can be used to add global policies to the gateway/s.
+      operationId: addGlobalPolicy
+      requestBody:
+        description: Policy details object that needs to be added.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GlobalPolicies'
+        required: true
+      responses:
+        201:
+          description: |
+            OK.
+            Shared operation policy uploaded
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalPolicies'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:common_operation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+              -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/global-policies"'
+
   /api-products/change-lifecycle:
     post:
       tags:
@@ -8979,10 +9023,6 @@ components:
               throttlingPolicy: Unlimited
           items:
             $ref: '#/components/schemas/APIOperations'
-        globalPolicies:
-          type: array
-          items:
-            $ref: '#/components/schemas/GlobalPolicies'
         threatProtectionPolicies:
           type: object
           properties:
@@ -9497,10 +9537,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/APIOperations'
-        globalPolicies:
-          type: array
-          items:
-            $ref: '#/components/schemas/GlobalPolicies'
     ResourcePath:
       title: ResourcePath
       required:
@@ -11073,10 +11109,6 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/APIOperations'
-            globalPolicies:
-              type: array
-              items:
-                $ref: '#/components/schemas/GlobalPolicies'
             graphQLSchema:
               $ref: '#/components/schemas/GraphQLSchema'
           description: Summary of the GraphQL including the basic information
@@ -11766,6 +11798,21 @@ components:
           type: object
           additionalProperties:
             type: object
+    APIOperationPolicies:
+      title: API Operation Level Policies
+      properties:
+        request:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
+        response:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
+        fault:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
     GlobalPolicy:
       title: Global Policy
       type: object
@@ -11783,21 +11830,6 @@ components:
           type: object
           additionalProperties:
             type: object
-    APIOperationPolicies:
-      title: API Operation Level Policies
-      properties:
-        request:
-          type: array
-          items:
-            $ref: '#/components/schemas/OperationPolicy'
-        response:
-          type: array
-          items:
-            $ref: '#/components/schemas/OperationPolicy'
-        fault:
-          type: array
-          items:
-            $ref: '#/components/schemas/OperationPolicy'
     GlobalPolicies:
       title: Global Policies
       properties:

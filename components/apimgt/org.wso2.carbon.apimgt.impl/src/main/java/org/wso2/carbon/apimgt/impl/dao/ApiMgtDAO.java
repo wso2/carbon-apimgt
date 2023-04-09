@@ -19793,4 +19793,64 @@ public class ApiMgtDAO {
         return list;
     }
 
+//    /**
+//     * Add a new Global policy to the database
+//     *
+//     * @param gatewayLabel      Unique Identifier of API
+//     * @param isDeployed     Unique Identifier of API revision
+//     * @param policyData   Unique Identifier of API
+//     * @return UUID of the newly created shared policy
+//     * @throws APIManagementException
+//     */
+//    public String addGlobalPolicy(String apiUUID, String revisionUUID,
+//            OperationPolicyData policyData)
+//            throws APIManagementException {
+//
+//        OperationPolicySpecification policySpecification = policyData.getSpecification();
+//        try (Connection connection = APIMgtDBUtil.getConnection()) {
+//            try {
+//                connection.setAutoCommit(false);
+//                String policyID = addAPISpecificOperationPolicy(connection, policyData, apiUUID, revisionUUID,
+//                        null, null);
+//                connection.commit();
+//                return policyID;
+//            } catch (SQLException e) {
+//                connection.rollback();
+//                handleException("Failed to add API specific operation policy " + policySpecification.getName()
+//                        + " for API " + apiUUID, e);
+//            }
+//        } catch (SQLException e) {
+//            handleException("Failed to add API specific operation policy " + policySpecification.getName()
+//                    + " for API " + apiUUID, e);
+//        }
+//        return null;
+//    }
+//
+//    private String addAPISpecificOperationPolicy(Connection connection, OperationPolicyData policyData,
+//            String apiUUID, String revisionUUID, String policyUUID,
+//            String clonedPolicyUUID)
+//            throws SQLException {
+//
+//        policyData.setPolicyId(policyUUID);
+//        policyUUID = addOperationPolicyContent(connection, policyData);
+//
+//        String dbQuery;
+//        if (revisionUUID != null) {
+//            dbQuery = SQLConstants.OperationPolicyConstants.ADD_API_SPECIFIC_OPERATION_POLICY_WITH_REVISION;
+//        } else {
+//            dbQuery = SQLConstants.OperationPolicyConstants.ADD_API_SPECIFIC_OPERATION_POLICY;
+//        }
+//
+//        try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+//            statement.setString(1, policyUUID);
+//            statement.setString(2, apiUUID);
+//            statement.setString(3, clonedPolicyUUID);
+//            if (revisionUUID != null) {
+//                statement.setString(4, revisionUUID);
+//            }
+//            statement.executeUpdate();
+//        }
+//        return policyUUID;
+//    }
+
 }
