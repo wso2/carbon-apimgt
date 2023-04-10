@@ -1182,11 +1182,14 @@ public class ImportUtils {
             JsonObject config = endpointConfigObject.get(APIConstants.ENDPOINT_SPECIFIC_CONFIG).
                     getAsJsonObject();
             if (config.has(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION)) {
-                Double actionDuration = config.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).
-                        getAsDouble();
-                Integer value = (int) Math.round(actionDuration);
-                config.remove(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
-                config.addProperty(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION, value.toString());
+                if (config.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).getAsString().isEmpty()) {
+                    config.remove(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
+                } else {
+                    Double actionDuration = config.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).getAsDouble();
+                    Integer value = (int) Math.round(actionDuration);
+                    config.remove(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
+                    config.addProperty(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION, value.toString());
+                }
             }
         }
         return endpointConfigObject;
