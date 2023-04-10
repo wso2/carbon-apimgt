@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * This class implements the API endpoint URLs extractor functionality.
@@ -97,6 +98,9 @@ public class APIEndpointUrlExtractorImpl implements APIEndpointUrlExtractor {
             hostInfos.add(new HostInfo(vHostFromCustomDomain.getHost(), true));
         } else {
             Map<String, Environment> allEnvironments = APIUtil.getEnvironments(organization);
+
+            log.debug("All Environments: " + String.join(",", allEnvironments.keySet()));
+
             Environment environment = allEnvironments.get(environmentName);
 
             if (environment == null) {

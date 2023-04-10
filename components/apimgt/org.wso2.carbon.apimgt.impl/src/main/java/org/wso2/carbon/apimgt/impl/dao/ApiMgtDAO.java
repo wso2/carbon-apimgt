@@ -13908,6 +13908,8 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to get Environments in tenant domain: " + tenantDomain, e);
         }
+        log.debug("Environments retrieved for organization: " + tenantDomain + " Env names: " + envList.stream()
+                .map(Environment::getName).collect(Collectors.joining(", ")));
         return envList;
     }
 
