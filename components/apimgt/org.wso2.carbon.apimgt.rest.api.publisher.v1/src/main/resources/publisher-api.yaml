@@ -8138,7 +8138,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GlobalPolicies'
+              type: array
+              items:
+                $ref: '#/components/schemas/GlobalPolicies'
         required: true
       responses:
         201:
@@ -8166,7 +8168,7 @@ paths:
             - apim:common_operation_policy_manage
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
               -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/global-policies"'
 
   /api-products/change-lifecycle:

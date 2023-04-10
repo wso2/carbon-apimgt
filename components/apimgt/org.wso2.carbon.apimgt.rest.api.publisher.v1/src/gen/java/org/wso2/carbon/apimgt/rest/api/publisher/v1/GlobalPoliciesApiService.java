@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GlobalPoliciesDTO;
+import java.util.List;
 
 import java.util.List;
 
@@ -21,5 +22,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface GlobalPoliciesApiService {
-      public Response addGlobalPolicy(GlobalPoliciesDTO globalPoliciesDTO, MessageContext messageContext) throws APIManagementException;
+      public Response addGlobalPolicy(List<GlobalPoliciesDTO> globalPoliciesDTO, MessageContext messageContext) throws APIManagementException;
 }

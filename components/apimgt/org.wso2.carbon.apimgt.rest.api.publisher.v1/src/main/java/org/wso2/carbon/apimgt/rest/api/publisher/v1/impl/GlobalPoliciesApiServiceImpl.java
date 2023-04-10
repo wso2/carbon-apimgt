@@ -19,7 +19,7 @@ import javax.ws.rs.core.SecurityContext;
 
 public class GlobalPoliciesApiServiceImpl implements GlobalPoliciesApiService {
 
-    public Response addGlobalPolicy(GlobalPoliciesDTO globalPoliciesDTO, MessageContext messageContext) {
+    public Response addGlobalPolicy(List<GlobalPoliciesDTO> globalPoliciesDTO, MessageContext messageContext) {
         // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
