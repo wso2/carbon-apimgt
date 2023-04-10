@@ -3263,7 +3263,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     private String getOpenAPIDefinitionForDeployment(API api, String environmentName)
             throws APIManagementException {
-        String apiTenantDomain;
         String updatedDefinition = null;
         String definition;
         if(api.getSwaggerDefinition() != null) {
@@ -3274,10 +3273,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIDefinition oasParser = OASParserUtil.getOASParser(definition);
         api.setScopes(oasParser.getScopes(definition));
         api.setUriTemplates(oasParser.getURITemplates(definition));
-        apiTenantDomain = MultitenantUtils.getTenantDomain(
-                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        api.setContext(getBasePath(apiTenantDomain, api.getContext()));
-        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, apiTenantDomain, environmentName);
+        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, api.getOrganization(), environmentName);
         return updatedDefinition;
     }
 
