@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GlobalPoliciesDTO;
+import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.GlobalPoliciesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.GlobalPoliciesApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -50,7 +51,7 @@ GlobalPoliciesApiService delegate = new GlobalPoliciesApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response addGlobalPolicy(@ApiParam(value = "Policy details object that needs to be added." ,required=true) GlobalPoliciesDTO globalPoliciesDTO) throws APIManagementException{
+    public Response addGlobalPolicy(@ApiParam(value = "Policy details object that needs to be added." ,required=true) List<GlobalPoliciesDTO> globalPoliciesDTO) throws APIManagementException{
         return delegate.addGlobalPolicy(globalPoliciesDTO, securityContext);
     }
 }
