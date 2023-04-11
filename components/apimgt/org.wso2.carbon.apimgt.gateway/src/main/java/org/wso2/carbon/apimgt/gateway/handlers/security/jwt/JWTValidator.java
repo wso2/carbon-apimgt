@@ -188,6 +188,10 @@ public class JWTValidator {
 
                 log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
                 apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(synCtx, jwtValidationInfo);
+                synCtx.setProperty(
+                        APIMgtGatewayConstants.APPLICATION_NAME, apiKeyValidationInfoDTO.getApplicationName()
+                );
+                synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, apiKeyValidationInfoDTO.getEndUserName());
 
                 if (log.isDebugEnabled()) {
                     log.debug("Subscription validation via Key Manager. Status: "
