@@ -8705,6 +8705,13 @@ components:
             Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified
             in tenant or system level will be used.
           example: Authorization
+        apiKeyHeader:
+          type: string
+          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\s+]*$)'
+          description: |
+            Name of the API key header used for invoking the API. If it is not set, API key header name specified
+            in tenant or system level will be used.
+          example: apiKey
         securityScheme:
           type: array
           description: |
