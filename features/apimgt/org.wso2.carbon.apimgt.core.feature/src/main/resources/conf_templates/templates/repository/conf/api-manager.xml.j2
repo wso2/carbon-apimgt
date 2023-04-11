@@ -356,6 +356,10 @@
         <!--Authorization header-->
         <AuthorizationHeader>{{apim.oauth_config.auth_header}}</AuthorizationHeader>
         {% endif %}
+        {% if apim.oauth_config.api_key_header is defined %}
+        <!--API key header-->
+        <ApiKeyHeader>{{apim.oauth_config.api_key_header}}</ApiKeyHeader>
+        {% endif %}
         <!-- Scope used for marking Application Tokens. If a token is generated with this scope, they will be treated as Application Access Tokens -->
         <ApplicationTokenScope>{{apim.oauth_config.default_app_scope}}</ApplicationTokenScope>
         <!-- All  scopes under the AllowedScopes element are not validating against roles that has assigned to it.
