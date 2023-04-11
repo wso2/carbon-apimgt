@@ -335,6 +335,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_OUTSEQUENCE = "overview_outSequence";
     public static final String API_OVERVIEW_FAULTSEQUENCE = "overview_faultSequence";
     public static final String API_OVERVIEW_AUTHORIZATION_HEADER = "overview_authorizationHeader";
+    public static final String API_OVERVIEW_API_KEY_HEADER = "overview_apiKeyHeader";
     public static final String API_OVERVIEW_API_SECURITY = "overview_apiSecurity";
     public static final String API_OVERVIEW_WS_URI_MAPPING = "overview_wsUriMapping";
     public static final String AUTHORIZATION_HEADER_BASIC = "Basic";
@@ -458,10 +459,12 @@ public final class APIConstants {
     public static final String MEDIATOR_CONFIG = "MediatorConfigs.";
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
+    public static final String API_KEY_HEADER = "ApiKeyHeader";
     public static final String API_SECURITY = "APISecurity";
     public static final String API_LEVEL_POLICY = "APILevelPolicy";
     public static final String CERTIFICATE_INFORMATION = "CertificateInformation";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
+    public static final String API_KEY_HEADER_DEFAULT = "ApiKey";
     public static final String HEADER_TENANT = "xWSO2Tenant";
     public static final String X_WSO2_TENANT_HEADER = "X-WSO2-Tenant";
     public static final String AUTHORIZATION_QUERY_PARAM_DEFAULT = "access_token";
