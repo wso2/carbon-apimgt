@@ -1150,6 +1150,12 @@ public class PublisherCommonUtils {
         if (body.getAuthorizationHeader() == null) {
             body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
+        if (body.getApiKeyHeader() == null) {
+            body.setApiKeyHeader(APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.API_KEY_HEADER));
+        }
+        if (body.getApiKeyHeader() == null) {
+            body.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+        }
 
         if (body.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED && body.getVisibleRoles().isEmpty()) {
             throw new APIManagementException(
