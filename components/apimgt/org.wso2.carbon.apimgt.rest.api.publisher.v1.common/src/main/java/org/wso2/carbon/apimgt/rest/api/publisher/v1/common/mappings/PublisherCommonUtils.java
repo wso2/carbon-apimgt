@@ -110,7 +110,7 @@ import java.util.Set;
 public class PublisherCommonUtils {
 
     private static final Log log = LogFactory.getLog(PublisherCommonUtils.class);
-
+    public static final String SESSION_TIMEOUT_CONFIG_KEY = "sessionTimeOut";
     /**
      * Update an API.
      *
@@ -916,6 +916,49 @@ public class PublisherCommonUtils {
             }
         }
         return containsEndpoint && isValidProdUrl && isValidSandboxUrl;
+    }
+
+    /**
+     * Validate endpoint configurations.
+     *
+     * @param apiDto the APIDTO object containing the endpoint configuration to validate
+     * @return true if the endpoint configuration is valid, false otherwise
+     */
+    public static boolean validateEndpointConfigs(APIDTO apiDto) {
+        Map endpointConfigsMap = (Map) apiDto.getEndpointConfig();
+        if (endpointConfigsMap != null) {
+            for (Object config : endpointConfigsMap.keySet()) {
+                if (config instanceof String) {
+                    if (SESSION_TIMEOUT_CONFIG_KEY.equals(config)) {
+                        Object value = endpointConfigsMap.get(config);
+                        if (value == null) {
+                            continue;
+                        }
+                        String strVal;
+                        if (value instanceof String) {
+                            strVal = (String) value;
+                            if (strVal.length() == 0) {
+                                continue;
+                            }
+                        } else if (value instanceof Integer || value instanceof Long) {
+                            strVal = value.toString();
+                        } else if (value instanceof Double) {
+                            strVal = Integer.toString(((Double) value).intValue());
+                        } else {
+                            return false;
+                        }
+                        try {
+                            Long.parseLong(strVal);
+                        } catch (NumberFormatException e) {
+                            log.error("Failed to parse " + SESSION_TIMEOUT_CONFIG_KEY, e);
+                            return false;
+                        }
+                        endpointConfigsMap.put(config, strVal);
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**

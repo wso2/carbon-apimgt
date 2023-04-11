@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -392,5 +393,37 @@ public class PublisherCommonUtilsTest {
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
         Assert.assertTrue(PublisherCommonUtils.validateEndpoints(apiDto));
+    }
+
+    /**
+     * Tests the validation of endpoint configurations for an APIDTO object.
+     * This method checks if the validation of session timeout values in the
+     * endpoint configuration map is working as expected.
+     * The session timeout value can be an integer, long or a numeric string that can be parsed as a long.
+     */
+    @Test
+    public void testValidateEndpointConfigs() {
+        APIDTO apiDTO = new APIDTO();
+        LinkedHashMap<Object, Object> endpointConfigs = new LinkedHashMap<>();
+        apiDTO.setEndpointConfig(endpointConfigs);
+        endpointConfigs.put(PublisherCommonUtils.SESSION_TIMEOUT_CONFIG_KEY, 300);
+        boolean flag = PublisherCommonUtils.validateEndpointConfigs(apiDTO);
+        Assert.assertTrue(flag);
+        endpointConfigs.put(PublisherCommonUtils.SESSION_TIMEOUT_CONFIG_KEY, "300");
+        flag = PublisherCommonUtils.validateEndpointConfigs(apiDTO);
+        Assert.assertTrue(flag);
+        endpointConfigs.put(PublisherCommonUtils.SESSION_TIMEOUT_CONFIG_KEY, "300e");
+        flag = PublisherCommonUtils.validateEndpointConfigs(apiDTO);
+        Assert.assertFalse(flag);
+        endpointConfigs.put(PublisherCommonUtils.SESSION_TIMEOUT_CONFIG_KEY, "300.0");
+        flag = PublisherCommonUtils.validateEndpointConfigs(apiDTO);
+        Assert.assertFalse(flag);
+        endpointConfigs.put(PublisherCommonUtils.SESSION_TIMEOUT_CONFIG_KEY, "sdwed");
+        flag = PublisherCommonUtils.validateEndpointConfigs(apiDTO);
+        Assert.assertFalse(flag);
+        endpointConfigs.put(PublisherCommonUtils.SESSION_TIMEOUT_CONFIG_KEY, "1000000000000000000000000000000000");
+        flag = PublisherCommonUtils.validateEndpointConfigs(apiDTO);
+        Assert.assertFalse(flag);
+
     }
 }
