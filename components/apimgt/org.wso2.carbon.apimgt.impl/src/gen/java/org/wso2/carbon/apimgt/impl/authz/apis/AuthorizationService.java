@@ -15,7 +15,7 @@ public final class AuthorizationService {
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
   public interface AuthorizationRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationRequest)
+      // @@protoc_insertion_point(interface_extends:authz.apis.AuthorizationRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -81,11 +81,11 @@ public final class AuthorizationService {
         getScopesBytes(int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationRequest}
+   * Protobuf type {@code authz.apis.AuthorizationRequest}
    */
   public  static final class AuthorizationRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationRequest)
+      // @@protoc_insertion_point(message_implements:authz.apis.AuthorizationRequest)
       AuthorizationRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use AuthorizationRequest.newBuilder() to construct.
@@ -180,13 +180,13 @@ public final class AuthorizationService {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_authz_apis_AuthorizationRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_authz_apis_AuthorizationRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest.class, org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest.Builder.class);
     }
@@ -486,21 +486,21 @@ public final class AuthorizationService {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationRequest}
+     * Protobuf type {@code authz.apis.AuthorizationRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationRequest)
+        // @@protoc_insertion_point(builder_implements:authz.apis.AuthorizationRequest)
         org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_authz_apis_AuthorizationRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_authz_apis_AuthorizationRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest.class, org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest.Builder.class);
       }
@@ -535,7 +535,7 @@ public final class AuthorizationService {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_authz_apis_AuthorizationRequest_descriptor;
       }
 
       @java.lang.Override
@@ -977,10 +977,10 @@ public final class AuthorizationService {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationRequest)
+      // @@protoc_insertion_point(builder_scope:authz.apis.AuthorizationRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationRequest)
+    // @@protoc_insertion_point(class_scope:authz.apis.AuthorizationRequest)
     private static final org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest();
@@ -1018,7 +1018,7 @@ public final class AuthorizationService {
   }
 
   public interface AuthorizationResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationResponse)
+      // @@protoc_insertion_point(interface_extends:authz.apis.AuthorizationResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -1047,11 +1047,11 @@ public final class AuthorizationService {
         getScopesBytes(int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationResponse}
+   * Protobuf type {@code authz.apis.AuthorizationResponse}
    */
   public  static final class AuthorizationResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationResponse)
+      // @@protoc_insertion_point(message_implements:authz.apis.AuthorizationResponse)
       AuthorizationResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use AuthorizationResponse.newBuilder() to construct.
@@ -1126,13 +1126,13 @@ public final class AuthorizationService {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_authz_apis_AuthorizationResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_authz_apis_AuthorizationResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse.class, org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse.Builder.class);
     }
@@ -1334,21 +1334,21 @@ public final class AuthorizationService {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationResponse}
+     * Protobuf type {@code authz.apis.AuthorizationResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationResponse)
+        // @@protoc_insertion_point(builder_implements:authz.apis.AuthorizationResponse)
         org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_authz_apis_AuthorizationResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_authz_apis_AuthorizationResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse.class, org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse.Builder.class);
       }
@@ -1379,7 +1379,7 @@ public final class AuthorizationService {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.internal_static_authz_apis_AuthorizationResponse_descriptor;
       }
 
       @java.lang.Override
@@ -1615,10 +1615,10 @@ public final class AuthorizationService {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationResponse)
+      // @@protoc_insertion_point(builder_scope:authz.apis.AuthorizationResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationResponse)
+    // @@protoc_insertion_point(class_scope:authz.apis.AuthorizationResponse)
     private static final org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse();
@@ -1656,15 +1656,15 @@ public final class AuthorizationService {
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationRequest_descriptor;
+    internal_static_authz_apis_AuthorizationRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationRequest_fieldAccessorTable;
+      internal_static_authz_apis_AuthorizationRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationResponse_descriptor;
+    internal_static_authz_apis_AuthorizationResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationResponse_fieldAccessorTable;
+      internal_static_authz_apis_AuthorizationResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -1674,31 +1674,30 @@ public final class AuthorizationService {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\033authorization_service.proto\022&org.wso2." +
-      "carbon.apimgt.impl.authz.apis\"N\n\024Authori" +
-      "zationRequest\022\026\n\016organizationId\030\001 \001(\t\022\016\n" +
-      "\006groups\030\002 \003(\t\022\016\n\006scopes\030\003 \003(\t\"\'\n\025Authori" +
-      "zationResponse\022\016\n\006scopes\030\001 \003(\t2\234\001\n\rAutho" +
-      "rization\022\212\001\n\tauthorize\022<.org.wso2.carbon" +
-      ".apimgt.impl.authz.apis.AuthorizationReq" +
-      "uest\032=.org.wso2.carbon.apimgt.impl.authz" +
-      ".apis.AuthorizationResponse\"\000b\006proto3"
+      "\n\033authorization_service.proto\022\nauthz.api" +
+      "s\"N\n\024AuthorizationRequest\022\026\n\016organizatio" +
+      "nId\030\001 \001(\t\022\016\n\006groups\030\002 \003(\t\022\016\n\006scopes\030\003 \003(" +
+      "\t\"\'\n\025AuthorizationResponse\022\016\n\006scopes\030\001 \003" +
+      "(\t2c\n\rAuthorization\022R\n\tauthorize\022 .authz" +
+      ".apis.AuthorizationRequest\032!.authz.apis." +
+      "AuthorizationResponse\"\000B(\n&org.wso2.carb" +
+      "on.apimgt.impl.authz.apisb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         });
-    internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationRequest_descriptor =
+    internal_static_authz_apis_AuthorizationRequest_descriptor =
       getDescriptor().getMessageTypes().get(0);
-    internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationRequest_fieldAccessorTable = new
+    internal_static_authz_apis_AuthorizationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationRequest_descriptor,
+        internal_static_authz_apis_AuthorizationRequest_descriptor,
         new java.lang.String[] { "OrganizationId", "Groups", "Scopes", });
-    internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationResponse_descriptor =
+    internal_static_authz_apis_AuthorizationResponse_descriptor =
       getDescriptor().getMessageTypes().get(1);
-    internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationResponse_fieldAccessorTable = new
+    internal_static_authz_apis_AuthorizationResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_authz_apis_AuthorizationResponse_descriptor,
+        internal_static_authz_apis_AuthorizationResponse_descriptor,
         new java.lang.String[] { "Scopes", });
   }
 

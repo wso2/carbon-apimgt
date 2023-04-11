@@ -429,12 +429,12 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
-            <version>${io.grpc.version}</version>
+            <version>${grpc-stub.version}</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
-            <version>${io.grpc.version}</version>
+            <version>${grpc-netty-shaded.version}</version>
         </dependency>
     </dependencies>
     <build>
@@ -564,7 +564,12 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.wso2.carbon.apimgt.impl.internal.*
+                            org.wso2.carbon.apimgt.impl.internal.*,
+                            io.grpc.*,
+                            io.envoyproxy.*,
+                            com.google.protobuf.*,
+                            com.google.common.util.concurrent.*,
+                            io.perfmark.*,
                         </Private-Package>
                         <Export-Package>
                             !org.apache.commons.codec.*,

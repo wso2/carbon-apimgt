@@ -24,7 +24,7 @@ public final class AuthorizationGrpc {
 
   private AuthorizationGrpc() {}
 
-  public static final String SERVICE_NAME = "org.wso2.carbon.apimgt.impl.authz.apis.Authorization";
+  public static final String SERVICE_NAME = "authz.apis.Authorization";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest,
@@ -45,7 +45,7 @@ public final class AuthorizationGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest, org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.authz.apis.Authorization", "authorize"))
+                  "authz.apis.Authorization", "authorize"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.authz.apis.AuthorizationService.AuthorizationRequest.getDefaultInstance()))

@@ -1,6 +1,7 @@
 syntax = "proto3";
 
-package org.wso2.carbon.apimgt.impl.choreo.apis;
+package choreo.apis;
+option java_package = "org.wso2.carbon.apimgt.impl.choreo.apis";
 
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";

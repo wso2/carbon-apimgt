@@ -24,7 +24,7 @@ public final class UserServiceGrpc {
 
   private UserServiceGrpc() {}
 
-  public static final String SERVICE_NAME = "org.wso2.carbon.apimgt.impl.choreo.apis.UserService";
+  public static final String SERVICE_NAME = "choreo.apis.UserService";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserRequest,
@@ -45,7 +45,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "RegisterUser"))
+                  "choreo.apis.UserService", "RegisterUser"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserRequest.getDefaultInstance()))
@@ -77,7 +77,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ValidateUserRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ValidateUserResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "ValidateUser"))
+                  "choreo.apis.UserService", "ValidateUser"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ValidateUserRequest.getDefaultInstance()))
@@ -109,7 +109,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserFromIdpIdRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserFromIdpIdResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "FindUserFromIdpId"))
+                  "choreo.apis.UserService", "FindUserFromIdpId"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserFromIdpIdRequest.getDefaultInstance()))
@@ -141,7 +141,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AddOrganizationUsersRequest, com.google.protobuf.Empty>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "AddOrganizationUsers"))
+                  "choreo.apis.UserService", "AddOrganizationUsers"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AddOrganizationUsersRequest.getDefaultInstance()))
@@ -173,7 +173,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationUserRequest, com.google.protobuf.Empty>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "DeleteOrganizationUser"))
+                  "choreo.apis.UserService", "DeleteOrganizationUser"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationUserRequest.getDefaultInstance()))
@@ -205,7 +205,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserOrganizationsRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserOrganizationsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "FindUserOrganizations"))
+                  "choreo.apis.UserService", "FindUserOrganizations"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserOrganizationsRequest.getDefaultInstance()))
@@ -237,7 +237,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "FindUsersByOrganization"))
+                  "choreo.apis.UserService", "FindUsersByOrganization"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationRequest.getDefaultInstance()))
@@ -269,7 +269,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationByRoleRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationByRoleResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "FindUsersByOrganizationByRole"))
+                  "choreo.apis.UserService", "FindUsersByOrganizationByRole"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationByRoleRequest.getDefaultInstance()))
@@ -301,7 +301,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateUserFeedbackRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateUserFeedbackResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "CreateUserFeedback"))
+                  "choreo.apis.UserService", "CreateUserFeedback"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateUserFeedbackRequest.getDefaultInstance()))
@@ -333,7 +333,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserInfoRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserInfoResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "GetUserInfo"))
+                  "choreo.apis.UserService", "GetUserInfo"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserInfoRequest.getDefaultInstance()))
@@ -365,7 +365,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "GetUserRoles"))
+                  "choreo.apis.UserService", "GetUserRoles"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesRequest.getDefaultInstance()))
@@ -397,7 +397,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetEnterpriseUserRolesRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "GetEnterpriseUserRoles"))
+                  "choreo.apis.UserService", "GetEnterpriseUserRoles"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetEnterpriseUserRolesRequest.getDefaultInstance()))
@@ -429,7 +429,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateMembersOfRoleRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateMembersOfRoleResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "UpdateMembersOfRole"))
+                  "choreo.apis.UserService", "UpdateMembersOfRole"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateMembersOfRoleRequest.getDefaultInstance()))
@@ -461,7 +461,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRolesOfMemberRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRolesOfMemberResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "UpdateRolesOfMember"))
+                  "choreo.apis.UserService", "UpdateRolesOfMember"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRolesOfMemberRequest.getDefaultInstance()))
@@ -493,7 +493,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.StartInvitationFlowRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.StartInvitationFlowResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "StartInvitationFlow"))
+                  "choreo.apis.UserService", "StartInvitationFlow"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.StartInvitationFlowRequest.getDefaultInstance()))
@@ -525,7 +525,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateOrganizationRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateOrganizationResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "CreateOrganization"))
+                  "choreo.apis.UserService", "CreateOrganization"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateOrganizationRequest.getDefaultInstance()))
@@ -557,7 +557,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetOrganizationRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetOrganizationResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "GetOrganization"))
+                  "choreo.apis.UserService", "GetOrganization"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetOrganizationRequest.getDefaultInstance()))
@@ -589,7 +589,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateOrganizationRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateOrganizationResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "UpdateOrganization"))
+                  "choreo.apis.UserService", "UpdateOrganization"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateOrganizationRequest.getDefaultInstance()))
@@ -621,7 +621,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "DeleteOrganization"))
+                  "choreo.apis.UserService", "DeleteOrganization"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationRequest.getDefaultInstance()))
@@ -653,7 +653,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationsRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "ListOrganizations"))
+                  "choreo.apis.UserService", "ListOrganizations"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationsRequest.getDefaultInstance()))
@@ -685,7 +685,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationEnvIdsRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationEnvIdsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "ListOrganizationEnvIds"))
+                  "choreo.apis.UserService", "ListOrganizationEnvIds"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationEnvIdsRequest.getDefaultInstance()))
@@ -717,7 +717,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateDefaultEnvironmentsForOrgsRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateDefaultEnvironmentsForOrgsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "CreateDefaultEnvironmentsForOrgs"))
+                  "choreo.apis.UserService", "CreateDefaultEnvironmentsForOrgs"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateDefaultEnvironmentsForOrgsRequest.getDefaultInstance()))
@@ -749,7 +749,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateGroupRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateGroupResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "CreateGroup"))
+                  "choreo.apis.UserService", "CreateGroup"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateGroupRequest.getDefaultInstance()))
@@ -781,7 +781,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateGroupRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateGroupResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "UpdateGroup"))
+                  "choreo.apis.UserService", "UpdateGroup"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateGroupRequest.getDefaultInstance()))
@@ -813,7 +813,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListGroupsRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListGroupsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "ListGroups"))
+                  "choreo.apis.UserService", "ListGroups"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListGroupsRequest.getDefaultInstance()))
@@ -845,7 +845,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "ListUserGroups"))
+                  "choreo.apis.UserService", "ListUserGroups"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsRequest.getDefaultInstance()))
@@ -877,7 +877,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetGroupInfoRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetGroupInfoResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "GetGroupInfo"))
+                  "choreo.apis.UserService", "GetGroupInfo"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetGroupInfoRequest.getDefaultInstance()))
@@ -909,7 +909,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteGroupRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteGroupResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "DeleteGroup"))
+                  "choreo.apis.UserService", "DeleteGroup"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteGroupRequest.getDefaultInstance()))
@@ -941,7 +941,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RemoveMemberFromGroupRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RemoveMemberFromGroupResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "RemoveMemberFromGroup"))
+                  "choreo.apis.UserService", "RemoveMemberFromGroup"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RemoveMemberFromGroupRequest.getDefaultInstance()))
@@ -973,7 +973,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateRoleRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateRoleResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "CreateRole"))
+                  "choreo.apis.UserService", "CreateRole"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateRoleRequest.getDefaultInstance()))
@@ -1005,7 +1005,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRoleRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRoleResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "UpdateRole"))
+                  "choreo.apis.UserService", "UpdateRole"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRoleRequest.getDefaultInstance()))
@@ -1037,7 +1037,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetRoleInfoRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetRoleInfoResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "GetRoleInfo"))
+                  "choreo.apis.UserService", "GetRoleInfo"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetRoleInfoRequest.getDefaultInstance()))
@@ -1069,7 +1069,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteRoleRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteRoleResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "DeleteRole"))
+                  "choreo.apis.UserService", "DeleteRole"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteRoleRequest.getDefaultInstance()))
@@ -1101,7 +1101,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListRolesRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListRolesResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "ListRoles"))
+                  "choreo.apis.UserService", "ListRoles"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListRolesRequest.getDefaultInstance()))
@@ -1133,7 +1133,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetPermissionListRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetPermissionListResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "GetPermissionList"))
+                  "choreo.apis.UserService", "GetPermissionList"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetPermissionListRequest.getDefaultInstance()))
@@ -1165,7 +1165,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.SendMemberInvitationRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.SendMemberInvitationResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "SendMemberInvitation"))
+                  "choreo.apis.UserService", "SendMemberInvitation"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.SendMemberInvitationRequest.getDefaultInstance()))
@@ -1197,7 +1197,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AcceptMemberInvitationRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AcceptMemberInvitationResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "AcceptMemberInvitation"))
+                  "choreo.apis.UserService", "AcceptMemberInvitation"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AcceptMemberInvitationRequest.getDefaultInstance()))
@@ -1229,7 +1229,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindMemberInvitationRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindMemberInvitationResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "FindMemberInvitation"))
+                  "choreo.apis.UserService", "FindMemberInvitation"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindMemberInvitationRequest.getDefaultInstance()))
@@ -1261,7 +1261,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteMemberInvitationRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteMemberInvitationResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "DeleteMemberInvitation"))
+                  "choreo.apis.UserService", "DeleteMemberInvitation"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteMemberInvitationRequest.getDefaultInstance()))
@@ -1293,7 +1293,7 @@ public final class UserServiceGrpc {
               io.grpc.MethodDescriptor.<org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListMemberInvitationsRequest, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListMemberInvitationsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "org.wso2.carbon.apimgt.impl.choreo.apis.UserService", "ListMemberInvitations"))
+                  "choreo.apis.UserService", "ListMemberInvitations"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListMemberInvitationsRequest.getDefaultInstance()))

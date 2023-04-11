@@ -15,7 +15,7 @@ public final class Types {
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
   /**
-   * Protobuf enum {@code org.wso2.carbon.apimgt.impl.choreo.apis.testStatusEnum}
+   * Protobuf enum {@code choreo.apis.testStatusEnum}
    */
   public enum testStatusEnum
       implements com.google.protobuf.ProtocolMessageEnum {
@@ -115,11 +115,11 @@ public final class Types {
       this.value = value;
     }
 
-    // @@protoc_insertion_point(enum_scope:org.wso2.carbon.apimgt.impl.choreo.apis.testStatusEnum)
+    // @@protoc_insertion_point(enum_scope:choreo.apis.testStatusEnum)
   }
 
   /**
-   * Protobuf enum {@code org.wso2.carbon.apimgt.impl.choreo.apis.deploymentStatusEnum}
+   * Protobuf enum {@code choreo.apis.deploymentStatusEnum}
    */
   public enum deploymentStatusEnum
       implements com.google.protobuf.ProtocolMessageEnum {
@@ -246,11 +246,11 @@ public final class Types {
       this.value = value;
     }
 
-    // @@protoc_insertion_point(enum_scope:org.wso2.carbon.apimgt.impl.choreo.apis.deploymentStatusEnum)
+    // @@protoc_insertion_point(enum_scope:choreo.apis.deploymentStatusEnum)
   }
 
   /**
-   * Protobuf enum {@code org.wso2.carbon.apimgt.impl.choreo.apis.KeyType}
+   * Protobuf enum {@code choreo.apis.KeyType}
    */
   public enum KeyType
       implements com.google.protobuf.ProtocolMessageEnum {
@@ -404,11 +404,11 @@ public final class Types {
       this.value = value;
     }
 
-    // @@protoc_insertion_point(enum_scope:org.wso2.carbon.apimgt.impl.choreo.apis.KeyType)
+    // @@protoc_insertion_point(enum_scope:choreo.apis.KeyType)
   }
 
   public interface UserOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.User)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.User)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -466,49 +466,49 @@ public final class Types {
         getDisplayNameBytes();
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+     * <code>repeated .choreo.apis.Group groups = 6;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group> 
         getGroupsList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+     * <code>repeated .choreo.apis.Group groups = 6;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroups(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+     * <code>repeated .choreo.apis.Group groups = 6;</code>
      */
     int getGroupsCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+     * <code>repeated .choreo.apis.Group groups = 6;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> 
         getGroupsOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+     * <code>repeated .choreo.apis.Group groups = 6;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupsOrBuilder(
         int index);
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+     * <code>repeated .choreo.apis.Role roles = 7;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> 
         getRolesList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+     * <code>repeated .choreo.apis.Role roles = 7;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRoles(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+     * <code>repeated .choreo.apis.Role roles = 7;</code>
      */
     int getRolesCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+     * <code>repeated .choreo.apis.Role roles = 7;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> 
         getRolesOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+     * <code>repeated .choreo.apis.Role roles = 7;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRolesOrBuilder(
         int index);
@@ -550,11 +550,11 @@ public final class Types {
     com.google.protobuf.TimestampOrBuilder getExpiredAtOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.User}
+   * Protobuf type {@code choreo.apis.User}
    */
   public  static final class User extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.User)
+      // @@protoc_insertion_point(message_implements:choreo.apis.User)
       UserOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use User.newBuilder() to construct.
@@ -706,13 +706,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_User_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_User_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_User_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_User_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder.class);
     }
@@ -874,32 +874,32 @@ public final class Types {
     public static final int GROUPS_FIELD_NUMBER = 6;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group> groups_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+     * <code>repeated .choreo.apis.Group groups = 6;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group> getGroupsList() {
       return groups_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+     * <code>repeated .choreo.apis.Group groups = 6;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> 
         getGroupsOrBuilderList() {
       return groups_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+     * <code>repeated .choreo.apis.Group groups = 6;</code>
      */
     public int getGroupsCount() {
       return groups_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+     * <code>repeated .choreo.apis.Group groups = 6;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroups(int index) {
       return groups_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+     * <code>repeated .choreo.apis.Group groups = 6;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupsOrBuilder(
         int index) {
@@ -909,32 +909,32 @@ public final class Types {
     public static final int ROLES_FIELD_NUMBER = 7;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> roles_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+     * <code>repeated .choreo.apis.Role roles = 7;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> getRolesList() {
       return roles_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+     * <code>repeated .choreo.apis.Role roles = 7;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> 
         getRolesOrBuilderList() {
       return roles_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+     * <code>repeated .choreo.apis.Role roles = 7;</code>
      */
     public int getRolesCount() {
       return roles_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+     * <code>repeated .choreo.apis.Role roles = 7;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRoles(int index) {
       return roles_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+     * <code>repeated .choreo.apis.Role roles = 7;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRolesOrBuilder(
         int index) {
@@ -1264,21 +1264,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.User}
+     * Protobuf type {@code choreo.apis.User}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.User)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.User)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_User_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_User_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_User_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_User_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder.class);
       }
@@ -1345,7 +1345,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_User_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_User_descriptor;
       }
 
       @java.lang.Override
@@ -1905,7 +1905,7 @@ public final class Types {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> groupsBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group> getGroupsList() {
         if (groupsBuilder_ == null) {
@@ -1915,7 +1915,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public int getGroupsCount() {
         if (groupsBuilder_ == null) {
@@ -1925,7 +1925,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroups(int index) {
         if (groupsBuilder_ == null) {
@@ -1935,7 +1935,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public Builder setGroups(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group value) {
@@ -1952,7 +1952,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public Builder setGroups(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder builderForValue) {
@@ -1966,7 +1966,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public Builder addGroups(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group value) {
         if (groupsBuilder_ == null) {
@@ -1982,7 +1982,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public Builder addGroups(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group value) {
@@ -1999,7 +1999,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public Builder addGroups(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder builderForValue) {
@@ -2013,7 +2013,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public Builder addGroups(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder builderForValue) {
@@ -2027,7 +2027,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public Builder addAllGroups(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group> values) {
@@ -2042,7 +2042,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public Builder clearGroups() {
         if (groupsBuilder_ == null) {
@@ -2055,7 +2055,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public Builder removeGroups(int index) {
         if (groupsBuilder_ == null) {
@@ -2068,14 +2068,14 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder getGroupsBuilder(
           int index) {
         return getGroupsFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupsOrBuilder(
           int index) {
@@ -2085,7 +2085,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> 
            getGroupsOrBuilderList() {
@@ -2096,14 +2096,14 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder addGroupsBuilder() {
         return getGroupsFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder addGroupsBuilder(
           int index) {
@@ -2111,7 +2111,7 @@ public final class Types {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 6;</code>
+       * <code>repeated .choreo.apis.Group groups = 6;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder> 
            getGroupsBuilderList() {
@@ -2145,7 +2145,7 @@ public final class Types {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> rolesBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> getRolesList() {
         if (rolesBuilder_ == null) {
@@ -2155,7 +2155,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public int getRolesCount() {
         if (rolesBuilder_ == null) {
@@ -2165,7 +2165,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRoles(int index) {
         if (rolesBuilder_ == null) {
@@ -2175,7 +2175,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public Builder setRoles(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
@@ -2192,7 +2192,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public Builder setRoles(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder builderForValue) {
@@ -2206,7 +2206,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public Builder addRoles(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
         if (rolesBuilder_ == null) {
@@ -2222,7 +2222,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public Builder addRoles(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
@@ -2239,7 +2239,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public Builder addRoles(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder builderForValue) {
@@ -2253,7 +2253,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public Builder addRoles(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder builderForValue) {
@@ -2267,7 +2267,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public Builder addAllRoles(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> values) {
@@ -2282,7 +2282,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public Builder clearRoles() {
         if (rolesBuilder_ == null) {
@@ -2295,7 +2295,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public Builder removeRoles(int index) {
         if (rolesBuilder_ == null) {
@@ -2308,14 +2308,14 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder getRolesBuilder(
           int index) {
         return getRolesFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRolesOrBuilder(
           int index) {
@@ -2325,7 +2325,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> 
            getRolesOrBuilderList() {
@@ -2336,14 +2336,14 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder addRolesBuilder() {
         return getRolesFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder addRolesBuilder(
           int index) {
@@ -2351,7 +2351,7 @@ public final class Types {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 7;</code>
+       * <code>repeated .choreo.apis.Role roles = 7;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder> 
            getRolesBuilderList() {
@@ -2652,10 +2652,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.User)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.User)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.User)
+    // @@protoc_insertion_point(class_scope:choreo.apis.User)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.User DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.User();
@@ -2693,7 +2693,7 @@ public final class Types {
   }
 
   public interface OrganizationOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.Organization)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.Organization)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -2739,11 +2739,11 @@ public final class Types {
         getNameBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Organization}
+   * Protobuf type {@code choreo.apis.Organization}
    */
   public  static final class Organization extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Organization)
+      // @@protoc_insertion_point(message_implements:choreo.apis.Organization)
       OrganizationOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Organization.newBuilder() to construct.
@@ -2830,13 +2830,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Organization_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Organization_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Organization_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Organization_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder.class);
     }
@@ -3146,21 +3146,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Organization}
+     * Protobuf type {@code choreo.apis.Organization}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Organization)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.Organization)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Organization_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Organization_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Organization_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Organization_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder.class);
       }
@@ -3197,7 +3197,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Organization_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Organization_descriptor;
       }
 
       @java.lang.Override
@@ -3583,10 +3583,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Organization)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.Organization)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Organization)
+    // @@protoc_insertion_point(class_scope:choreo.apis.Organization)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization();
@@ -3624,7 +3624,7 @@ public final class Types {
   }
 
   public interface MemberInvitationOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.MemberInvitation)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -3707,11 +3707,11 @@ public final class Types {
         getApplicationBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation}
+   * Protobuf type {@code choreo.apis.MemberInvitation}
    */
   public  static final class MemberInvitation extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation)
+      // @@protoc_insertion_point(message_implements:choreo.apis.MemberInvitation)
       MemberInvitationOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use MemberInvitation.newBuilder() to construct.
@@ -3819,13 +3819,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MemberInvitation_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_MemberInvitation_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MemberInvitation_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_MemberInvitation_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.Builder.class);
     }
@@ -4233,21 +4233,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation}
+     * Protobuf type {@code choreo.apis.MemberInvitation}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.MemberInvitation)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitationOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MemberInvitation_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_MemberInvitation_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MemberInvitation_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_MemberInvitation_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.Builder.class);
       }
@@ -4288,7 +4288,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MemberInvitation_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_MemberInvitation_descriptor;
       }
 
       @java.lang.Override
@@ -4882,10 +4882,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.MemberInvitation)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation)
+    // @@protoc_insertion_point(class_scope:choreo.apis.MemberInvitation)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation();
@@ -4923,7 +4923,7 @@ public final class Types {
   }
 
   public interface GroupOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.Group)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.Group)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -4999,73 +4999,73 @@ public final class Types {
         getHandleBytes();
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+     * <code>repeated .choreo.apis.Role roles = 8;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> 
         getRolesList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+     * <code>repeated .choreo.apis.Role roles = 8;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRoles(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+     * <code>repeated .choreo.apis.Role roles = 8;</code>
      */
     int getRolesCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+     * <code>repeated .choreo.apis.Role roles = 8;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> 
         getRolesOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+     * <code>repeated .choreo.apis.Role roles = 8;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRolesOrBuilder(
         int index);
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+     * <code>repeated .choreo.apis.User users = 9;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> 
         getUsersList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+     * <code>repeated .choreo.apis.User users = 9;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUsers(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+     * <code>repeated .choreo.apis.User users = 9;</code>
      */
     int getUsersCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+     * <code>repeated .choreo.apis.User users = 9;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
         getUsersOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+     * <code>repeated .choreo.apis.User users = 9;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUsersOrBuilder(
         int index);
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+     * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag> 
         getTagsList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+     * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag getTags(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+     * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
      */
     int getTagsCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+     * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder> 
         getTagsOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+     * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder getTagsOrBuilder(
         int index);
@@ -5125,11 +5125,11 @@ public final class Types {
     com.google.protobuf.TimestampOrBuilder getUpdatedAtOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Group}
+   * Protobuf type {@code choreo.apis.Group}
    */
   public  static final class Group extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Group)
+      // @@protoc_insertion_point(message_implements:choreo.apis.Group)
       GroupOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Group.newBuilder() to construct.
@@ -5315,13 +5315,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Group_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Group_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Group_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Group_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder.class);
     }
@@ -5529,32 +5529,32 @@ public final class Types {
     public static final int ROLES_FIELD_NUMBER = 8;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> roles_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+     * <code>repeated .choreo.apis.Role roles = 8;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> getRolesList() {
       return roles_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+     * <code>repeated .choreo.apis.Role roles = 8;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> 
         getRolesOrBuilderList() {
       return roles_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+     * <code>repeated .choreo.apis.Role roles = 8;</code>
      */
     public int getRolesCount() {
       return roles_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+     * <code>repeated .choreo.apis.Role roles = 8;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRoles(int index) {
       return roles_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+     * <code>repeated .choreo.apis.Role roles = 8;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRolesOrBuilder(
         int index) {
@@ -5564,32 +5564,32 @@ public final class Types {
     public static final int USERS_FIELD_NUMBER = 9;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> users_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+     * <code>repeated .choreo.apis.User users = 9;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> getUsersList() {
       return users_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+     * <code>repeated .choreo.apis.User users = 9;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
         getUsersOrBuilderList() {
       return users_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+     * <code>repeated .choreo.apis.User users = 9;</code>
      */
     public int getUsersCount() {
       return users_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+     * <code>repeated .choreo.apis.User users = 9;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUsers(int index) {
       return users_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+     * <code>repeated .choreo.apis.User users = 9;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUsersOrBuilder(
         int index) {
@@ -5599,32 +5599,32 @@ public final class Types {
     public static final int TAGS_FIELD_NUMBER = 10;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag> tags_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+     * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag> getTagsList() {
       return tags_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+     * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder> 
         getTagsOrBuilderList() {
       return tags_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+     * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
      */
     public int getTagsCount() {
       return tags_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+     * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag getTags(int index) {
       return tags_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+     * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder getTagsOrBuilder(
         int index) {
@@ -6059,21 +6059,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Group}
+     * Protobuf type {@code choreo.apis.Group}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Group)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.Group)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Group_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Group_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Group_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Group_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder.class);
       }
@@ -6153,7 +6153,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Group_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Group_descriptor;
       }
 
       @java.lang.Override
@@ -6869,7 +6869,7 @@ public final class Types {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> rolesBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> getRolesList() {
         if (rolesBuilder_ == null) {
@@ -6879,7 +6879,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public int getRolesCount() {
         if (rolesBuilder_ == null) {
@@ -6889,7 +6889,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRoles(int index) {
         if (rolesBuilder_ == null) {
@@ -6899,7 +6899,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public Builder setRoles(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
@@ -6916,7 +6916,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public Builder setRoles(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder builderForValue) {
@@ -6930,7 +6930,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public Builder addRoles(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
         if (rolesBuilder_ == null) {
@@ -6946,7 +6946,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public Builder addRoles(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
@@ -6963,7 +6963,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public Builder addRoles(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder builderForValue) {
@@ -6977,7 +6977,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public Builder addRoles(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder builderForValue) {
@@ -6991,7 +6991,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public Builder addAllRoles(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> values) {
@@ -7006,7 +7006,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public Builder clearRoles() {
         if (rolesBuilder_ == null) {
@@ -7019,7 +7019,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public Builder removeRoles(int index) {
         if (rolesBuilder_ == null) {
@@ -7032,14 +7032,14 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder getRolesBuilder(
           int index) {
         return getRolesFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRolesOrBuilder(
           int index) {
@@ -7049,7 +7049,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> 
            getRolesOrBuilderList() {
@@ -7060,14 +7060,14 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder addRolesBuilder() {
         return getRolesFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder addRolesBuilder(
           int index) {
@@ -7075,7 +7075,7 @@ public final class Types {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 8;</code>
+       * <code>repeated .choreo.apis.Role roles = 8;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder> 
            getRolesBuilderList() {
@@ -7109,7 +7109,7 @@ public final class Types {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> usersBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> getUsersList() {
         if (usersBuilder_ == null) {
@@ -7119,7 +7119,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public int getUsersCount() {
         if (usersBuilder_ == null) {
@@ -7129,7 +7129,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUsers(int index) {
         if (usersBuilder_ == null) {
@@ -7139,7 +7139,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public Builder setUsers(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
@@ -7156,7 +7156,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public Builder setUsers(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -7170,7 +7170,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public Builder addUsers(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (usersBuilder_ == null) {
@@ -7186,7 +7186,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public Builder addUsers(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
@@ -7203,7 +7203,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public Builder addUsers(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -7217,7 +7217,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public Builder addUsers(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -7231,7 +7231,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public Builder addAllUsers(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> values) {
@@ -7246,7 +7246,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public Builder clearUsers() {
         if (usersBuilder_ == null) {
@@ -7259,7 +7259,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public Builder removeUsers(int index) {
         if (usersBuilder_ == null) {
@@ -7272,14 +7272,14 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder getUsersBuilder(
           int index) {
         return getUsersFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUsersOrBuilder(
           int index) {
@@ -7289,7 +7289,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
            getUsersOrBuilderList() {
@@ -7300,14 +7300,14 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder addUsersBuilder() {
         return getUsersFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder addUsersBuilder(
           int index) {
@@ -7315,7 +7315,7 @@ public final class Types {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 9;</code>
+       * <code>repeated .choreo.apis.User users = 9;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder> 
            getUsersBuilderList() {
@@ -7349,7 +7349,7 @@ public final class Types {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder> tagsBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag> getTagsList() {
         if (tagsBuilder_ == null) {
@@ -7359,7 +7359,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public int getTagsCount() {
         if (tagsBuilder_ == null) {
@@ -7369,7 +7369,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag getTags(int index) {
         if (tagsBuilder_ == null) {
@@ -7379,7 +7379,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public Builder setTags(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag value) {
@@ -7396,7 +7396,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public Builder setTags(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder builderForValue) {
@@ -7410,7 +7410,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public Builder addTags(org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag value) {
         if (tagsBuilder_ == null) {
@@ -7426,7 +7426,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public Builder addTags(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag value) {
@@ -7443,7 +7443,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public Builder addTags(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder builderForValue) {
@@ -7457,7 +7457,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public Builder addTags(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder builderForValue) {
@@ -7471,7 +7471,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public Builder addAllTags(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag> values) {
@@ -7486,7 +7486,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public Builder clearTags() {
         if (tagsBuilder_ == null) {
@@ -7499,7 +7499,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public Builder removeTags(int index) {
         if (tagsBuilder_ == null) {
@@ -7512,14 +7512,14 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder getTagsBuilder(
           int index) {
         return getTagsFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder getTagsOrBuilder(
           int index) {
@@ -7529,7 +7529,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder> 
            getTagsOrBuilderList() {
@@ -7540,14 +7540,14 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder addTagsBuilder() {
         return getTagsFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder addTagsBuilder(
           int index) {
@@ -7555,7 +7555,7 @@ public final class Types {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag tags = 10;</code>
+       * <code>repeated .choreo.apis.GroupTag tags = 10;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder> 
            getTagsBuilderList() {
@@ -7978,10 +7978,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Group)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.Group)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Group)
+    // @@protoc_insertion_point(class_scope:choreo.apis.Group)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group();
@@ -8019,7 +8019,7 @@ public final class Types {
   }
 
   public interface PermissionOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.Permission)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.Permission)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -8113,11 +8113,11 @@ public final class Types {
     com.google.protobuf.TimestampOrBuilder getUpdatedAtOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Permission}
+   * Protobuf type {@code choreo.apis.Permission}
    */
   public  static final class Permission extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Permission)
+      // @@protoc_insertion_point(message_implements:choreo.apis.Permission)
       PermissionOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Permission.newBuilder() to construct.
@@ -8242,13 +8242,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Permission_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Permission_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Permission_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Permission_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder.class);
     }
@@ -8704,21 +8704,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Permission}
+     * Protobuf type {@code choreo.apis.Permission}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Permission)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.Permission)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Permission_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Permission_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Permission_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Permission_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder.class);
       }
@@ -8771,7 +8771,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Permission_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Permission_descriptor;
       }
 
       @java.lang.Override
@@ -9526,10 +9526,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Permission)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.Permission)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Permission)
+    // @@protoc_insertion_point(class_scope:choreo.apis.Permission)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission();
@@ -9567,7 +9567,7 @@ public final class Types {
   }
 
   public interface RoleOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.Role)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.Role)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -9619,73 +9619,73 @@ public final class Types {
     boolean getDefaultRole();
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+     * <code>repeated .choreo.apis.Permission permissions = 6;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> 
         getPermissionsList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+     * <code>repeated .choreo.apis.Permission permissions = 6;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission getPermissions(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+     * <code>repeated .choreo.apis.Permission permissions = 6;</code>
      */
     int getPermissionsCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+     * <code>repeated .choreo.apis.Permission permissions = 6;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder> 
         getPermissionsOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+     * <code>repeated .choreo.apis.Permission permissions = 6;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder getPermissionsOrBuilder(
         int index);
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+     * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag> 
         getTagsList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+     * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag getTags(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+     * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
      */
     int getTagsCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+     * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTagOrBuilder> 
         getTagsOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+     * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTagOrBuilder getTagsOrBuilder(
         int index);
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+     * <code>repeated .choreo.apis.User users = 8;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> 
         getUsersList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+     * <code>repeated .choreo.apis.User users = 8;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUsers(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+     * <code>repeated .choreo.apis.User users = 8;</code>
      */
     int getUsersCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+     * <code>repeated .choreo.apis.User users = 8;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
         getUsersOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+     * <code>repeated .choreo.apis.User users = 8;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUsersOrBuilder(
         int index);
@@ -9745,11 +9745,11 @@ public final class Types {
     com.google.protobuf.TimestampOrBuilder getUpdatedAtOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Role}
+   * Protobuf type {@code choreo.apis.Role}
    */
   public  static final class Role extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Role)
+      // @@protoc_insertion_point(message_implements:choreo.apis.Role)
       RoleOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Role.newBuilder() to construct.
@@ -9921,13 +9921,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Role_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Role_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Role_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Role_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder.class);
     }
@@ -10063,32 +10063,32 @@ public final class Types {
     public static final int PERMISSIONS_FIELD_NUMBER = 6;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> permissions_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+     * <code>repeated .choreo.apis.Permission permissions = 6;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> getPermissionsList() {
       return permissions_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+     * <code>repeated .choreo.apis.Permission permissions = 6;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder> 
         getPermissionsOrBuilderList() {
       return permissions_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+     * <code>repeated .choreo.apis.Permission permissions = 6;</code>
      */
     public int getPermissionsCount() {
       return permissions_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+     * <code>repeated .choreo.apis.Permission permissions = 6;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission getPermissions(int index) {
       return permissions_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+     * <code>repeated .choreo.apis.Permission permissions = 6;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder getPermissionsOrBuilder(
         int index) {
@@ -10098,32 +10098,32 @@ public final class Types {
     public static final int TAGS_FIELD_NUMBER = 7;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag> tags_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+     * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag> getTagsList() {
       return tags_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+     * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTagOrBuilder> 
         getTagsOrBuilderList() {
       return tags_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+     * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
      */
     public int getTagsCount() {
       return tags_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+     * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag getTags(int index) {
       return tags_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+     * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTagOrBuilder getTagsOrBuilder(
         int index) {
@@ -10133,32 +10133,32 @@ public final class Types {
     public static final int USERS_FIELD_NUMBER = 8;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> users_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+     * <code>repeated .choreo.apis.User users = 8;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> getUsersList() {
       return users_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+     * <code>repeated .choreo.apis.User users = 8;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
         getUsersOrBuilderList() {
       return users_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+     * <code>repeated .choreo.apis.User users = 8;</code>
      */
     public int getUsersCount() {
       return users_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+     * <code>repeated .choreo.apis.User users = 8;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUsers(int index) {
       return users_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+     * <code>repeated .choreo.apis.User users = 8;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUsersOrBuilder(
         int index) {
@@ -10573,21 +10573,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Role}
+     * Protobuf type {@code choreo.apis.Role}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Role)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.Role)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Role_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Role_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Role_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Role_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder.class);
       }
@@ -10663,7 +10663,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Role_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Role_descriptor;
       }
 
       @java.lang.Override
@@ -11217,7 +11217,7 @@ public final class Types {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder> permissionsBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> getPermissionsList() {
         if (permissionsBuilder_ == null) {
@@ -11227,7 +11227,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public int getPermissionsCount() {
         if (permissionsBuilder_ == null) {
@@ -11237,7 +11237,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission getPermissions(int index) {
         if (permissionsBuilder_ == null) {
@@ -11247,7 +11247,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public Builder setPermissions(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission value) {
@@ -11264,7 +11264,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public Builder setPermissions(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder builderForValue) {
@@ -11278,7 +11278,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public Builder addPermissions(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission value) {
         if (permissionsBuilder_ == null) {
@@ -11294,7 +11294,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public Builder addPermissions(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission value) {
@@ -11311,7 +11311,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public Builder addPermissions(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder builderForValue) {
@@ -11325,7 +11325,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public Builder addPermissions(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder builderForValue) {
@@ -11339,7 +11339,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public Builder addAllPermissions(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> values) {
@@ -11354,7 +11354,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public Builder clearPermissions() {
         if (permissionsBuilder_ == null) {
@@ -11367,7 +11367,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public Builder removePermissions(int index) {
         if (permissionsBuilder_ == null) {
@@ -11380,14 +11380,14 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder getPermissionsBuilder(
           int index) {
         return getPermissionsFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder getPermissionsOrBuilder(
           int index) {
@@ -11397,7 +11397,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder> 
            getPermissionsOrBuilderList() {
@@ -11408,14 +11408,14 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder addPermissionsBuilder() {
         return getPermissionsFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder addPermissionsBuilder(
           int index) {
@@ -11423,7 +11423,7 @@ public final class Types {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissions = 6;</code>
+       * <code>repeated .choreo.apis.Permission permissions = 6;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder> 
            getPermissionsBuilderList() {
@@ -11457,7 +11457,7 @@ public final class Types {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTagOrBuilder> tagsBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag> getTagsList() {
         if (tagsBuilder_ == null) {
@@ -11467,7 +11467,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public int getTagsCount() {
         if (tagsBuilder_ == null) {
@@ -11477,7 +11477,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag getTags(int index) {
         if (tagsBuilder_ == null) {
@@ -11487,7 +11487,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public Builder setTags(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag value) {
@@ -11504,7 +11504,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public Builder setTags(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag.Builder builderForValue) {
@@ -11518,7 +11518,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public Builder addTags(org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag value) {
         if (tagsBuilder_ == null) {
@@ -11534,7 +11534,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public Builder addTags(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag value) {
@@ -11551,7 +11551,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public Builder addTags(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag.Builder builderForValue) {
@@ -11565,7 +11565,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public Builder addTags(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag.Builder builderForValue) {
@@ -11579,7 +11579,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public Builder addAllTags(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag> values) {
@@ -11594,7 +11594,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public Builder clearTags() {
         if (tagsBuilder_ == null) {
@@ -11607,7 +11607,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public Builder removeTags(int index) {
         if (tagsBuilder_ == null) {
@@ -11620,14 +11620,14 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag.Builder getTagsBuilder(
           int index) {
         return getTagsFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTagOrBuilder getTagsOrBuilder(
           int index) {
@@ -11637,7 +11637,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTagOrBuilder> 
            getTagsOrBuilderList() {
@@ -11648,14 +11648,14 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag.Builder addTagsBuilder() {
         return getTagsFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag.Builder addTagsBuilder(
           int index) {
@@ -11663,7 +11663,7 @@ public final class Types {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag tags = 7;</code>
+       * <code>repeated .choreo.apis.RoleTag tags = 7;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag.Builder> 
            getTagsBuilderList() {
@@ -11697,7 +11697,7 @@ public final class Types {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> usersBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> getUsersList() {
         if (usersBuilder_ == null) {
@@ -11707,7 +11707,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public int getUsersCount() {
         if (usersBuilder_ == null) {
@@ -11717,7 +11717,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUsers(int index) {
         if (usersBuilder_ == null) {
@@ -11727,7 +11727,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public Builder setUsers(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
@@ -11744,7 +11744,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public Builder setUsers(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -11758,7 +11758,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public Builder addUsers(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (usersBuilder_ == null) {
@@ -11774,7 +11774,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public Builder addUsers(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
@@ -11791,7 +11791,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public Builder addUsers(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -11805,7 +11805,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public Builder addUsers(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -11819,7 +11819,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public Builder addAllUsers(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> values) {
@@ -11834,7 +11834,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public Builder clearUsers() {
         if (usersBuilder_ == null) {
@@ -11847,7 +11847,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public Builder removeUsers(int index) {
         if (usersBuilder_ == null) {
@@ -11860,14 +11860,14 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder getUsersBuilder(
           int index) {
         return getUsersFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUsersOrBuilder(
           int index) {
@@ -11877,7 +11877,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
            getUsersOrBuilderList() {
@@ -11888,14 +11888,14 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder addUsersBuilder() {
         return getUsersFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder addUsersBuilder(
           int index) {
@@ -11903,7 +11903,7 @@ public final class Types {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 8;</code>
+       * <code>repeated .choreo.apis.User users = 8;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder> 
            getUsersBuilderList() {
@@ -12326,10 +12326,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Role)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.Role)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Role)
+    // @@protoc_insertion_point(class_scope:choreo.apis.Role)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role();
@@ -12367,7 +12367,7 @@ public final class Types {
   }
 
   public interface GroupTagOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.GroupTag)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -12467,11 +12467,11 @@ public final class Types {
     com.google.protobuf.TimestampOrBuilder getUpdatedAtOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag}
+   * Protobuf type {@code choreo.apis.GroupTag}
    */
   public  static final class GroupTag extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag)
+      // @@protoc_insertion_point(message_implements:choreo.apis.GroupTag)
       GroupTagOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use GroupTag.newBuilder() to construct.
@@ -12598,13 +12598,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GroupTag_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_GroupTag_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GroupTag_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_GroupTag_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder.class);
     }
@@ -13084,21 +13084,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag}
+     * Protobuf type {@code choreo.apis.GroupTag}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.GroupTag)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GroupTag_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_GroupTag_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GroupTag_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_GroupTag_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder.class);
       }
@@ -13151,7 +13151,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GroupTag_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_GroupTag_descriptor;
       }
 
       @java.lang.Override
@@ -13953,10 +13953,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.GroupTag)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag)
+    // @@protoc_insertion_point(class_scope:choreo.apis.GroupTag)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag();
@@ -13994,7 +13994,7 @@ public final class Types {
   }
 
   public interface RoleTagOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.RoleTag)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -14070,11 +14070,11 @@ public final class Types {
     com.google.protobuf.TimestampOrBuilder getUpdatedAtOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag}
+   * Protobuf type {@code choreo.apis.RoleTag}
    */
   public  static final class RoleTag extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag)
+      // @@protoc_insertion_point(message_implements:choreo.apis.RoleTag)
       RoleTagOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use RoleTag.newBuilder() to construct.
@@ -14187,13 +14187,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RoleTag_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_RoleTag_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RoleTag_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_RoleTag_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag.Builder.class);
     }
@@ -14581,21 +14581,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag}
+     * Protobuf type {@code choreo.apis.RoleTag}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.RoleTag)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTagOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RoleTag_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_RoleTag_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RoleTag_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_RoleTag_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag.Builder.class);
       }
@@ -14644,7 +14644,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RoleTag_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_RoleTag_descriptor;
       }
 
       @java.lang.Override
@@ -15284,10 +15284,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.RoleTag)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.RoleTag)
+    // @@protoc_insertion_point(class_scope:choreo.apis.RoleTag)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleTag();
@@ -15325,7 +15325,7 @@ public final class Types {
   }
 
   public interface ApplicationOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.Application)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.Application)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -15413,12 +15413,12 @@ public final class Types {
         getWorkingFileBytes();
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.DeployType deploy_type = 9;</code>
+     * <code>.choreo.apis.Application.DeployType deploy_type = 9;</code>
      * @return The enum numeric value on the wire for deployType.
      */
     int getDeployTypeValue();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.DeployType deploy_type = 9;</code>
+     * <code>.choreo.apis.Application.DeployType deploy_type = 9;</code>
      * @return The deployType.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.DeployType getDeployType();
@@ -15463,27 +15463,27 @@ public final class Types {
     com.google.protobuf.TimestampOrBuilder getCreatedAtOrBuilder();
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability observability = 13;</code>
+     * <code>.choreo.apis.Application.Observability observability = 13;</code>
      * @return Whether the observability field is set.
      */
     boolean hasObservability();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability observability = 13;</code>
+     * <code>.choreo.apis.Application.Observability observability = 13;</code>
      * @return The observability.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability getObservability();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability observability = 13;</code>
+     * <code>.choreo.apis.Application.Observability observability = 13;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.ObservabilityOrBuilder getObservabilityOrBuilder();
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Status status = 14;</code>
+     * <code>.choreo.apis.Application.Status status = 14;</code>
      * @return The enum numeric value on the wire for status.
      */
     int getStatusValue();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Status status = 14;</code>
+     * <code>.choreo.apis.Application.Status status = 14;</code>
      * @return The status.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Status getStatus();
@@ -15555,11 +15555,11 @@ public final class Types {
         getApplicationIdBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Application}
+   * Protobuf type {@code choreo.apis.Application}
    */
   public  static final class Application extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Application)
+      // @@protoc_insertion_point(message_implements:choreo.apis.Application)
       ApplicationOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Application.newBuilder() to construct.
@@ -15766,19 +15766,19 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Application_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Application_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Builder.class);
     }
 
     /**
-     * Protobuf enum {@code org.wso2.carbon.apimgt.impl.choreo.apis.Application.DeployType}
+     * Protobuf enum {@code choreo.apis.Application.DeployType}
      */
     public enum DeployType
         implements com.google.protobuf.ProtocolMessageEnum {
@@ -15896,11 +15896,11 @@ public final class Types {
         this.value = value;
       }
 
-      // @@protoc_insertion_point(enum_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Application.DeployType)
+      // @@protoc_insertion_point(enum_scope:choreo.apis.Application.DeployType)
     }
 
     /**
-     * Protobuf enum {@code org.wso2.carbon.apimgt.impl.choreo.apis.Application.Status}
+     * Protobuf enum {@code choreo.apis.Application.Status}
      */
     public enum Status
         implements com.google.protobuf.ProtocolMessageEnum {
@@ -16009,11 +16009,11 @@ public final class Types {
         this.value = value;
       }
 
-      // @@protoc_insertion_point(enum_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Application.Status)
+      // @@protoc_insertion_point(enum_scope:choreo.apis.Application.Status)
     }
 
     public interface ObservabilityOrBuilder extends
-        // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability)
+        // @@protoc_insertion_point(interface_extends:choreo.apis.Application.Observability)
         com.google.protobuf.MessageOrBuilder {
 
       /**
@@ -16041,11 +16041,11 @@ public final class Types {
           getLatestVersionBytes();
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability}
+     * Protobuf type {@code choreo.apis.Application.Observability}
      */
     public  static final class Observability extends
         com.google.protobuf.GeneratedMessageV3 implements
-        // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability)
+        // @@protoc_insertion_point(message_implements:choreo.apis.Application.Observability)
         ObservabilityOrBuilder {
     private static final long serialVersionUID = 0L;
       // Use Observability.newBuilder() to construct.
@@ -16120,13 +16120,13 @@ public final class Types {
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_Observability_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Application_Observability_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_Observability_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Application_Observability_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability.Builder.class);
       }
@@ -16368,21 +16368,21 @@ public final class Types {
         return builder;
       }
       /**
-       * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability}
+       * Protobuf type {@code choreo.apis.Application.Observability}
        */
       public static final class Builder extends
           com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-          // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability)
+          // @@protoc_insertion_point(builder_implements:choreo.apis.Application.Observability)
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.ObservabilityOrBuilder {
         public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
-          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_Observability_descriptor;
+          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Application_Observability_descriptor;
         }
 
         @java.lang.Override
         protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
             internalGetFieldAccessorTable() {
-          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_Observability_fieldAccessorTable
+          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Application_Observability_fieldAccessorTable
               .ensureFieldAccessorsInitialized(
                   org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability.Builder.class);
         }
@@ -16415,7 +16415,7 @@ public final class Types {
         @java.lang.Override
         public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_Observability_descriptor;
+          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Application_Observability_descriptor;
         }
 
         @java.lang.Override
@@ -16686,10 +16686,10 @@ public final class Types {
         }
 
 
-        // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability)
+        // @@protoc_insertion_point(builder_scope:choreo.apis.Application.Observability)
       }
 
-      // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability)
+      // @@protoc_insertion_point(class_scope:choreo.apis.Application.Observability)
       private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability DEFAULT_INSTANCE;
       static {
         DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability();
@@ -16965,14 +16965,14 @@ public final class Types {
     public static final int DEPLOY_TYPE_FIELD_NUMBER = 9;
     private int deployType_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.DeployType deploy_type = 9;</code>
+     * <code>.choreo.apis.Application.DeployType deploy_type = 9;</code>
      * @return The enum numeric value on the wire for deployType.
      */
     public int getDeployTypeValue() {
       return deployType_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.DeployType deploy_type = 9;</code>
+     * <code>.choreo.apis.Application.DeployType deploy_type = 9;</code>
      * @return The deployType.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.DeployType getDeployType() {
@@ -17079,21 +17079,21 @@ public final class Types {
     public static final int OBSERVABILITY_FIELD_NUMBER = 13;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability observability_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability observability = 13;</code>
+     * <code>.choreo.apis.Application.Observability observability = 13;</code>
      * @return Whether the observability field is set.
      */
     public boolean hasObservability() {
       return observability_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability observability = 13;</code>
+     * <code>.choreo.apis.Application.Observability observability = 13;</code>
      * @return The observability.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability getObservability() {
       return observability_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability.getDefaultInstance() : observability_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability observability = 13;</code>
+     * <code>.choreo.apis.Application.Observability observability = 13;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.ObservabilityOrBuilder getObservabilityOrBuilder() {
       return getObservability();
@@ -17102,14 +17102,14 @@ public final class Types {
     public static final int STATUS_FIELD_NUMBER = 14;
     private int status_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Status status = 14;</code>
+     * <code>.choreo.apis.Application.Status status = 14;</code>
      * @return The enum numeric value on the wire for status.
      */
     public int getStatusValue() {
       return status_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Status status = 14;</code>
+     * <code>.choreo.apis.Application.Status status = 14;</code>
      * @return The status.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Status getStatus() {
@@ -17671,21 +17671,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Application}
+     * Protobuf type {@code choreo.apis.Application}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Application)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.Application)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.ApplicationOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Application_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Application_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Builder.class);
       }
@@ -17762,7 +17762,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Application_descriptor;
       }
 
       @java.lang.Override
@@ -18478,14 +18478,14 @@ public final class Types {
 
       private int deployType_ = 0;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.DeployType deploy_type = 9;</code>
+       * <code>.choreo.apis.Application.DeployType deploy_type = 9;</code>
        * @return The enum numeric value on the wire for deployType.
        */
       public int getDeployTypeValue() {
         return deployType_;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.DeployType deploy_type = 9;</code>
+       * <code>.choreo.apis.Application.DeployType deploy_type = 9;</code>
        * @param value The enum numeric value on the wire for deployType to set.
        * @return This builder for chaining.
        */
@@ -18495,7 +18495,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.DeployType deploy_type = 9;</code>
+       * <code>.choreo.apis.Application.DeployType deploy_type = 9;</code>
        * @return The deployType.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.DeployType getDeployType() {
@@ -18504,7 +18504,7 @@ public final class Types {
         return result == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.DeployType.UNRECOGNIZED : result;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.DeployType deploy_type = 9;</code>
+       * <code>.choreo.apis.Application.DeployType deploy_type = 9;</code>
        * @param value The deployType to set.
        * @return This builder for chaining.
        */
@@ -18518,7 +18518,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.DeployType deploy_type = 9;</code>
+       * <code>.choreo.apis.Application.DeployType deploy_type = 9;</code>
        * @return This builder for chaining.
        */
       public Builder clearDeployType() {
@@ -18803,14 +18803,14 @@ public final class Types {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.ObservabilityOrBuilder> observabilityBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability observability = 13;</code>
+       * <code>.choreo.apis.Application.Observability observability = 13;</code>
        * @return Whether the observability field is set.
        */
       public boolean hasObservability() {
         return observabilityBuilder_ != null || observability_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability observability = 13;</code>
+       * <code>.choreo.apis.Application.Observability observability = 13;</code>
        * @return The observability.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability getObservability() {
@@ -18821,7 +18821,7 @@ public final class Types {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability observability = 13;</code>
+       * <code>.choreo.apis.Application.Observability observability = 13;</code>
        */
       public Builder setObservability(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability value) {
         if (observabilityBuilder_ == null) {
@@ -18837,7 +18837,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability observability = 13;</code>
+       * <code>.choreo.apis.Application.Observability observability = 13;</code>
        */
       public Builder setObservability(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability.Builder builderForValue) {
@@ -18851,7 +18851,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability observability = 13;</code>
+       * <code>.choreo.apis.Application.Observability observability = 13;</code>
        */
       public Builder mergeObservability(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability value) {
         if (observabilityBuilder_ == null) {
@@ -18869,7 +18869,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability observability = 13;</code>
+       * <code>.choreo.apis.Application.Observability observability = 13;</code>
        */
       public Builder clearObservability() {
         if (observabilityBuilder_ == null) {
@@ -18883,7 +18883,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability observability = 13;</code>
+       * <code>.choreo.apis.Application.Observability observability = 13;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability.Builder getObservabilityBuilder() {
         
@@ -18891,7 +18891,7 @@ public final class Types {
         return getObservabilityFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability observability = 13;</code>
+       * <code>.choreo.apis.Application.Observability observability = 13;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.ObservabilityOrBuilder getObservabilityOrBuilder() {
         if (observabilityBuilder_ != null) {
@@ -18902,7 +18902,7 @@ public final class Types {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Observability observability = 13;</code>
+       * <code>.choreo.apis.Application.Observability observability = 13;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Observability.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.ObservabilityOrBuilder> 
@@ -18920,14 +18920,14 @@ public final class Types {
 
       private int status_ = 0;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Status status = 14;</code>
+       * <code>.choreo.apis.Application.Status status = 14;</code>
        * @return The enum numeric value on the wire for status.
        */
       public int getStatusValue() {
         return status_;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Status status = 14;</code>
+       * <code>.choreo.apis.Application.Status status = 14;</code>
        * @param value The enum numeric value on the wire for status to set.
        * @return This builder for chaining.
        */
@@ -18937,7 +18937,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Status status = 14;</code>
+       * <code>.choreo.apis.Application.Status status = 14;</code>
        * @return The status.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Status getStatus() {
@@ -18946,7 +18946,7 @@ public final class Types {
         return result == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application.Status.UNRECOGNIZED : result;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Status status = 14;</code>
+       * <code>.choreo.apis.Application.Status status = 14;</code>
        * @param value The status to set.
        * @return This builder for chaining.
        */
@@ -18960,7 +18960,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Application.Status status = 14;</code>
+       * <code>.choreo.apis.Application.Status status = 14;</code>
        * @return This builder for chaining.
        */
       public Builder clearStatus() {
@@ -19392,10 +19392,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Application)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.Application)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Application)
+    // @@protoc_insertion_point(class_scope:choreo.apis.Application)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.Application();
@@ -19433,7 +19433,7 @@ public final class Types {
   }
 
   public interface EnvironmentInfoOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentInfo)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.EnvironmentInfo)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -19473,11 +19473,11 @@ public final class Types {
         getStatusBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentInfo}
+   * Protobuf type {@code choreo.apis.EnvironmentInfo}
    */
   public  static final class EnvironmentInfo extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentInfo)
+      // @@protoc_insertion_point(message_implements:choreo.apis.EnvironmentInfo)
       EnvironmentInfoOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use EnvironmentInfo.newBuilder() to construct.
@@ -19559,13 +19559,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentInfo_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_EnvironmentInfo_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentInfo_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_EnvironmentInfo_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentInfo.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentInfo.Builder.class);
     }
@@ -19853,21 +19853,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentInfo}
+     * Protobuf type {@code choreo.apis.EnvironmentInfo}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentInfo)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.EnvironmentInfo)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentInfoOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentInfo_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_EnvironmentInfo_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentInfo_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_EnvironmentInfo_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentInfo.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentInfo.Builder.class);
       }
@@ -19902,7 +19902,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentInfo_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_EnvironmentInfo_descriptor;
       }
 
       @java.lang.Override
@@ -20254,10 +20254,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentInfo)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.EnvironmentInfo)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentInfo)
+    // @@protoc_insertion_point(class_scope:choreo.apis.EnvironmentInfo)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentInfo DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentInfo();
@@ -20295,7 +20295,7 @@ public final class Types {
   }
 
   public interface AuthRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.AuthRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.AuthRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -20347,11 +20347,11 @@ public final class Types {
         getBetaInviteCorrelationKeyBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.AuthRequest}
+   * Protobuf type {@code choreo.apis.AuthRequest}
    */
   public  static final class AuthRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.AuthRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.AuthRequest)
       AuthRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use AuthRequest.newBuilder() to construct.
@@ -20440,13 +20440,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_AuthRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_AuthRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.AuthRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.AuthRequest.Builder.class);
     }
@@ -20780,21 +20780,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.AuthRequest}
+     * Protobuf type {@code choreo.apis.AuthRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.AuthRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.AuthRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.AuthRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_AuthRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_AuthRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.AuthRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.AuthRequest.Builder.class);
       }
@@ -20831,7 +20831,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_AuthRequest_descriptor;
       }
 
       @java.lang.Override
@@ -21264,10 +21264,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.AuthRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.AuthRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.AuthRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.AuthRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.AuthRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.AuthRequest();
@@ -21305,7 +21305,7 @@ public final class Types {
   }
 
   public interface AuthResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.AuthResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.AuthResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -21369,25 +21369,25 @@ public final class Types {
         getIdpIdBytes();
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 6;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> 
         getOrganizationsList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 6;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganizations(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 6;</code>
      */
     int getOrganizationsCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 6;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
         getOrganizationsOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 6;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationsOrBuilder(
         int index);
@@ -21435,11 +21435,11 @@ public final class Types {
     boolean getIsAnonymous();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.AuthResponse}
+   * Protobuf type {@code choreo.apis.AuthResponse}
    */
   public  static final class AuthResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.AuthResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.AuthResponse)
       AuthResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use AuthResponse.newBuilder() to construct.
@@ -21585,13 +21585,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_AuthResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_AuthResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.AuthResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.AuthResponse.Builder.class);
     }
@@ -21779,32 +21779,32 @@ public final class Types {
     public static final int ORGANIZATIONS_FIELD_NUMBER = 6;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> organizations_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 6;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> getOrganizationsList() {
       return organizations_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 6;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
         getOrganizationsOrBuilderList() {
       return organizations_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 6;</code>
      */
     public int getOrganizationsCount() {
       return organizations_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 6;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganizations(int index) {
       return organizations_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 6;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationsOrBuilder(
         int index) {
@@ -22141,21 +22141,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.AuthResponse}
+     * Protobuf type {@code choreo.apis.AuthResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.AuthResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.AuthResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.AuthResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_AuthResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_AuthResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.AuthResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.AuthResponse.Builder.class);
       }
@@ -22217,7 +22217,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_AuthResponse_descriptor;
       }
 
       @java.lang.Override
@@ -22793,7 +22793,7 @@ public final class Types {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> organizationsBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> getOrganizationsList() {
         if (organizationsBuilder_ == null) {
@@ -22803,7 +22803,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public int getOrganizationsCount() {
         if (organizationsBuilder_ == null) {
@@ -22813,7 +22813,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganizations(int index) {
         if (organizationsBuilder_ == null) {
@@ -22823,7 +22823,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public Builder setOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
@@ -22840,7 +22840,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public Builder setOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -22854,7 +22854,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public Builder addOrganizations(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationsBuilder_ == null) {
@@ -22870,7 +22870,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public Builder addOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
@@ -22887,7 +22887,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public Builder addOrganizations(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -22901,7 +22901,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public Builder addOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -22915,7 +22915,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public Builder addAllOrganizations(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> values) {
@@ -22930,7 +22930,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public Builder clearOrganizations() {
         if (organizationsBuilder_ == null) {
@@ -22943,7 +22943,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public Builder removeOrganizations(int index) {
         if (organizationsBuilder_ == null) {
@@ -22956,14 +22956,14 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder getOrganizationsBuilder(
           int index) {
         return getOrganizationsFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationsOrBuilder(
           int index) {
@@ -22973,7 +22973,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
            getOrganizationsOrBuilderList() {
@@ -22984,14 +22984,14 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder addOrganizationsBuilder() {
         return getOrganizationsFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder addOrganizationsBuilder(
           int index) {
@@ -22999,7 +22999,7 @@ public final class Types {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 6;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 6;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder> 
            getOrganizationsBuilderList() {
@@ -23330,10 +23330,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.AuthResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.AuthResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.AuthResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.AuthResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.AuthResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.AuthResponse();
@@ -23371,7 +23371,7 @@ public final class Types {
   }
 
   public interface TriggerParamsOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.TriggerParams)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -23447,22 +23447,22 @@ public final class Types {
         getCronBytes();
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
+     * <code>.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
      * @return The enum numeric value on the wire for deploymentType.
      */
     int getDeploymentTypeValue();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
+     * <code>.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
      * @return The deploymentType.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.TriggerParams.DType getDeploymentType();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams}
+   * Protobuf type {@code choreo.apis.TriggerParams}
    */
   public  static final class TriggerParams extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams)
+      // @@protoc_insertion_point(message_implements:choreo.apis.TriggerParams)
       TriggerParamsOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use TriggerParams.newBuilder() to construct.
@@ -23572,19 +23572,19 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TriggerParams_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_TriggerParams_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TriggerParams_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_TriggerParams_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.TriggerParams.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.TriggerParams.Builder.class);
     }
 
     /**
-     * Protobuf enum {@code org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams.DType}
+     * Protobuf enum {@code choreo.apis.TriggerParams.DType}
      */
     public enum DType
         implements com.google.protobuf.ProtocolMessageEnum {
@@ -23693,7 +23693,7 @@ public final class Types {
         this.value = value;
       }
 
-      // @@protoc_insertion_point(enum_scope:org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams.DType)
+      // @@protoc_insertion_point(enum_scope:choreo.apis.TriggerParams.DType)
     }
 
     public static final int ORG_FIELD_NUMBER = 1;
@@ -23915,14 +23915,14 @@ public final class Types {
     public static final int DEPLOYMENTTYPE_FIELD_NUMBER = 7;
     private int deploymentType_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
+     * <code>.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
      * @return The enum numeric value on the wire for deploymentType.
      */
     public int getDeploymentTypeValue() {
       return deploymentType_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
+     * <code>.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
      * @return The deploymentType.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.TriggerParams.DType getDeploymentType() {
@@ -24146,21 +24146,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams}
+     * Protobuf type {@code choreo.apis.TriggerParams}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.TriggerParams)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.TriggerParamsOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TriggerParams_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_TriggerParams_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TriggerParams_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_TriggerParams_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.TriggerParams.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.TriggerParams.Builder.class);
       }
@@ -24203,7 +24203,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TriggerParams_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_TriggerParams_descriptor;
       }
 
       @java.lang.Override
@@ -24792,14 +24792,14 @@ public final class Types {
 
       private int deploymentType_ = 0;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
+       * <code>.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
        * @return The enum numeric value on the wire for deploymentType.
        */
       public int getDeploymentTypeValue() {
         return deploymentType_;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
+       * <code>.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
        * @param value The enum numeric value on the wire for deploymentType to set.
        * @return This builder for chaining.
        */
@@ -24809,7 +24809,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
+       * <code>.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
        * @return The deploymentType.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.TriggerParams.DType getDeploymentType() {
@@ -24818,7 +24818,7 @@ public final class Types {
         return result == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.TriggerParams.DType.UNRECOGNIZED : result;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
+       * <code>.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
        * @param value The deploymentType to set.
        * @return This builder for chaining.
        */
@@ -24832,7 +24832,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
+       * <code>.choreo.apis.TriggerParams.DType deploymentType = 7;</code>
        * @return This builder for chaining.
        */
       public Builder clearDeploymentType() {
@@ -24854,10 +24854,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.TriggerParams)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.TriggerParams)
+    // @@protoc_insertion_point(class_scope:choreo.apis.TriggerParams)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.TriggerParams DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.TriggerParams();
@@ -24895,7 +24895,7 @@ public final class Types {
   }
 
   public interface DeploymentRunOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.DeploymentRun)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.DeploymentRun)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -24911,11 +24911,11 @@ public final class Types {
     long getCreatedAt();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeploymentRun}
+   * Protobuf type {@code choreo.apis.DeploymentRun}
    */
   public  static final class DeploymentRun extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeploymentRun)
+      // @@protoc_insertion_point(message_implements:choreo.apis.DeploymentRun)
       DeploymentRunOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use DeploymentRun.newBuilder() to construct.
@@ -24986,13 +24986,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRun_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_DeploymentRun_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRun_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_DeploymentRun_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.DeploymentRun.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.DeploymentRun.Builder.class);
     }
@@ -25186,21 +25186,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeploymentRun}
+     * Protobuf type {@code choreo.apis.DeploymentRun}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeploymentRun)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.DeploymentRun)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.DeploymentRunOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRun_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_DeploymentRun_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRun_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_DeploymentRun_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.DeploymentRun.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.DeploymentRun.Builder.class);
       }
@@ -25233,7 +25233,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRun_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_DeploymentRun_descriptor;
       }
 
       @java.lang.Override
@@ -25410,10 +25410,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeploymentRun)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.DeploymentRun)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeploymentRun)
+    // @@protoc_insertion_point(class_scope:choreo.apis.DeploymentRun)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.DeploymentRun DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.DeploymentRun();
@@ -25451,7 +25451,7 @@ public final class Types {
   }
 
   public interface DeploymentRunStatusOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.DeploymentRunStatus)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.DeploymentRunStatus)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -25479,11 +25479,11 @@ public final class Types {
         getConclusionBytes();
 
     /**
-     * <code>map&lt;string, .org.wso2.carbon.apimgt.impl.choreo.apis.Phase&gt; phases = 3;</code>
+     * <code>map&lt;string, .choreo.apis.Phase&gt; phases = 3;</code>
      */
     int getPhasesCount();
     /**
-     * <code>map&lt;string, .org.wso2.carbon.apimgt.impl.choreo.apis.Phase&gt; phases = 3;</code>
+     * <code>map&lt;string, .choreo.apis.Phase&gt; phases = 3;</code>
      */
     boolean containsPhases(
         java.lang.String key);
@@ -25494,19 +25494,19 @@ public final class Types {
     java.util.Map<java.lang.String, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase>
     getPhases();
     /**
-     * <code>map&lt;string, .org.wso2.carbon.apimgt.impl.choreo.apis.Phase&gt; phases = 3;</code>
+     * <code>map&lt;string, .choreo.apis.Phase&gt; phases = 3;</code>
      */
     java.util.Map<java.lang.String, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase>
     getPhasesMap();
     /**
-     * <code>map&lt;string, .org.wso2.carbon.apimgt.impl.choreo.apis.Phase&gt; phases = 3;</code>
+     * <code>map&lt;string, .choreo.apis.Phase&gt; phases = 3;</code>
      */
 
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase getPhasesOrDefault(
         java.lang.String key,
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase defaultValue);
     /**
-     * <code>map&lt;string, .org.wso2.carbon.apimgt.impl.choreo.apis.Phase&gt; phases = 3;</code>
+     * <code>map&lt;string, .choreo.apis.Phase&gt; phases = 3;</code>
      */
 
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase getPhasesOrThrow(
@@ -25525,11 +25525,11 @@ public final class Types {
         getErrorMsgBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeploymentRunStatus}
+   * Protobuf type {@code choreo.apis.DeploymentRunStatus}
    */
   public  static final class DeploymentRunStatus extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeploymentRunStatus)
+      // @@protoc_insertion_point(message_implements:choreo.apis.DeploymentRunStatus)
       DeploymentRunStatusOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use DeploymentRunStatus.newBuilder() to construct.
@@ -25625,7 +25625,7 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRunStatus_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_DeploymentRunStatus_descriptor;
     }
 
     @SuppressWarnings({"rawtypes"})
@@ -25643,7 +25643,7 @@ public final class Types {
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRunStatus_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_DeploymentRunStatus_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.DeploymentRunStatus.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.DeploymentRunStatus.Builder.class);
     }
@@ -25726,7 +25726,7 @@ public final class Types {
           java.lang.String, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase> defaultEntry =
               com.google.protobuf.MapEntry
               .<java.lang.String, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase>newDefaultInstance(
-                  org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRunStatus_PhasesEntry_descriptor, 
+                  org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_DeploymentRunStatus_PhasesEntry_descriptor, 
                   com.google.protobuf.WireFormat.FieldType.STRING,
                   "",
                   com.google.protobuf.WireFormat.FieldType.MESSAGE,
@@ -25747,7 +25747,7 @@ public final class Types {
       return internalGetPhases().getMap().size();
     }
     /**
-     * <code>map&lt;string, .org.wso2.carbon.apimgt.impl.choreo.apis.Phase&gt; phases = 3;</code>
+     * <code>map&lt;string, .choreo.apis.Phase&gt; phases = 3;</code>
      */
 
     public boolean containsPhases(
@@ -25763,14 +25763,14 @@ public final class Types {
       return getPhasesMap();
     }
     /**
-     * <code>map&lt;string, .org.wso2.carbon.apimgt.impl.choreo.apis.Phase&gt; phases = 3;</code>
+     * <code>map&lt;string, .choreo.apis.Phase&gt; phases = 3;</code>
      */
 
     public java.util.Map<java.lang.String, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase> getPhasesMap() {
       return internalGetPhases().getMap();
     }
     /**
-     * <code>map&lt;string, .org.wso2.carbon.apimgt.impl.choreo.apis.Phase&gt; phases = 3;</code>
+     * <code>map&lt;string, .choreo.apis.Phase&gt; phases = 3;</code>
      */
 
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase getPhasesOrDefault(
@@ -25782,7 +25782,7 @@ public final class Types {
       return map.containsKey(key) ? map.get(key) : defaultValue;
     }
     /**
-     * <code>map&lt;string, .org.wso2.carbon.apimgt.impl.choreo.apis.Phase&gt; phases = 3;</code>
+     * <code>map&lt;string, .choreo.apis.Phase&gt; phases = 3;</code>
      */
 
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase getPhasesOrThrow(
@@ -26029,15 +26029,15 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeploymentRunStatus}
+     * Protobuf type {@code choreo.apis.DeploymentRunStatus}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeploymentRunStatus)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.DeploymentRunStatus)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.DeploymentRunStatusOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRunStatus_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_DeploymentRunStatus_descriptor;
       }
 
       @SuppressWarnings({"rawtypes"})
@@ -26065,7 +26065,7 @@ public final class Types {
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRunStatus_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_DeploymentRunStatus_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.DeploymentRunStatus.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.DeploymentRunStatus.Builder.class);
       }
@@ -26101,7 +26101,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRunStatus_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_DeploymentRunStatus_descriptor;
       }
 
       @java.lang.Override
@@ -26398,7 +26398,7 @@ public final class Types {
         return internalGetPhases().getMap().size();
       }
       /**
-       * <code>map&lt;string, .org.wso2.carbon.apimgt.impl.choreo.apis.Phase&gt; phases = 3;</code>
+       * <code>map&lt;string, .choreo.apis.Phase&gt; phases = 3;</code>
        */
 
       public boolean containsPhases(
@@ -26414,14 +26414,14 @@ public final class Types {
         return getPhasesMap();
       }
       /**
-       * <code>map&lt;string, .org.wso2.carbon.apimgt.impl.choreo.apis.Phase&gt; phases = 3;</code>
+       * <code>map&lt;string, .choreo.apis.Phase&gt; phases = 3;</code>
        */
 
       public java.util.Map<java.lang.String, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase> getPhasesMap() {
         return internalGetPhases().getMap();
       }
       /**
-       * <code>map&lt;string, .org.wso2.carbon.apimgt.impl.choreo.apis.Phase&gt; phases = 3;</code>
+       * <code>map&lt;string, .choreo.apis.Phase&gt; phases = 3;</code>
        */
 
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase getPhasesOrDefault(
@@ -26433,7 +26433,7 @@ public final class Types {
         return map.containsKey(key) ? map.get(key) : defaultValue;
       }
       /**
-       * <code>map&lt;string, .org.wso2.carbon.apimgt.impl.choreo.apis.Phase&gt; phases = 3;</code>
+       * <code>map&lt;string, .choreo.apis.Phase&gt; phases = 3;</code>
        */
 
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase getPhasesOrThrow(
@@ -26453,7 +26453,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>map&lt;string, .org.wso2.carbon.apimgt.impl.choreo.apis.Phase&gt; phases = 3;</code>
+       * <code>map&lt;string, .choreo.apis.Phase&gt; phases = 3;</code>
        */
 
       public Builder removePhases(
@@ -26472,7 +26472,7 @@ public final class Types {
         return internalGetMutablePhases().getMutableMap();
       }
       /**
-       * <code>map&lt;string, .org.wso2.carbon.apimgt.impl.choreo.apis.Phase&gt; phases = 3;</code>
+       * <code>map&lt;string, .choreo.apis.Phase&gt; phases = 3;</code>
        */
       public Builder putPhases(
           java.lang.String key,
@@ -26484,7 +26484,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>map&lt;string, .org.wso2.carbon.apimgt.impl.choreo.apis.Phase&gt; phases = 3;</code>
+       * <code>map&lt;string, .choreo.apis.Phase&gt; phases = 3;</code>
        */
 
       public Builder putAllPhases(
@@ -26582,10 +26582,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeploymentRunStatus)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.DeploymentRunStatus)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeploymentRunStatus)
+    // @@protoc_insertion_point(class_scope:choreo.apis.DeploymentRunStatus)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.DeploymentRunStatus DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.DeploymentRunStatus();
@@ -26623,7 +26623,7 @@ public final class Types {
   }
 
   public interface PhaseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.Phase)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.Phase)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -26651,11 +26651,11 @@ public final class Types {
         getConclusionBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Phase}
+   * Protobuf type {@code choreo.apis.Phase}
    */
   public  static final class Phase extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Phase)
+      // @@protoc_insertion_point(message_implements:choreo.apis.Phase)
       PhaseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Phase.newBuilder() to construct.
@@ -26730,13 +26730,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Phase_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Phase_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Phase_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Phase_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase.Builder.class);
     }
@@ -26978,21 +26978,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Phase}
+     * Protobuf type {@code choreo.apis.Phase}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Phase)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.Phase)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.PhaseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Phase_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Phase_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Phase_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Phase_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase.Builder.class);
       }
@@ -27025,7 +27025,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Phase_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Phase_descriptor;
       }
 
       @java.lang.Override
@@ -27296,10 +27296,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Phase)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.Phase)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Phase)
+    // @@protoc_insertion_point(class_scope:choreo.apis.Phase)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.Phase();
@@ -27337,7 +27337,7 @@ public final class Types {
   }
 
   public interface EnvironmentOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.Environment)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.Environment)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -27419,11 +27419,11 @@ public final class Types {
     long getUpdatedAt();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Environment}
+   * Protobuf type {@code choreo.apis.Environment}
    */
   public  static final class Environment extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Environment)
+      // @@protoc_insertion_point(message_implements:choreo.apis.Environment)
       EnvironmentOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Environment.newBuilder() to construct.
@@ -27537,13 +27537,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Environment_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Environment_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Environment_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Environment_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.Environment.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Environment.Builder.class);
     }
@@ -27987,21 +27987,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Environment}
+     * Protobuf type {@code choreo.apis.Environment}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Environment)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.Environment)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Environment_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Environment_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Environment_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Environment_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.Environment.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Environment.Builder.class);
       }
@@ -28048,7 +28048,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Environment_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Environment_descriptor;
       }
 
       @java.lang.Override
@@ -28651,10 +28651,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Environment)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.Environment)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Environment)
+    // @@protoc_insertion_point(class_scope:choreo.apis.Environment)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.Environment DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.Environment();
@@ -28692,7 +28692,7 @@ public final class Types {
   }
 
   public interface ApplicationToEnvMapperOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ApplicationToEnvMapper)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ApplicationToEnvMapper)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -28720,12 +28720,12 @@ public final class Types {
         getDeploymentBuildIdBytes();
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.deploymentStatusEnum status = 4;</code>
+     * <code>.choreo.apis.deploymentStatusEnum status = 4;</code>
      * @return The enum numeric value on the wire for status.
      */
     int getStatusValue();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.deploymentStatusEnum status = 4;</code>
+     * <code>.choreo.apis.deploymentStatusEnum status = 4;</code>
      * @return The status.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.deploymentStatusEnum getStatus();
@@ -28743,11 +28743,11 @@ public final class Types {
     long getUpdatedAt();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ApplicationToEnvMapper}
+   * Protobuf type {@code choreo.apis.ApplicationToEnvMapper}
    */
   public  static final class ApplicationToEnvMapper extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ApplicationToEnvMapper)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ApplicationToEnvMapper)
       ApplicationToEnvMapperOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ApplicationToEnvMapper.newBuilder() to construct.
@@ -28842,13 +28842,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationToEnvMapper_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ApplicationToEnvMapper_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationToEnvMapper_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ApplicationToEnvMapper_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.ApplicationToEnvMapper.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ApplicationToEnvMapper.Builder.class);
     }
@@ -28912,14 +28912,14 @@ public final class Types {
     public static final int STATUS_FIELD_NUMBER = 4;
     private int status_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.deploymentStatusEnum status = 4;</code>
+     * <code>.choreo.apis.deploymentStatusEnum status = 4;</code>
      * @return The enum numeric value on the wire for status.
      */
     public int getStatusValue() {
       return status_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.deploymentStatusEnum status = 4;</code>
+     * <code>.choreo.apis.deploymentStatusEnum status = 4;</code>
      * @return The status.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.deploymentStatusEnum getStatus() {
@@ -29161,21 +29161,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ApplicationToEnvMapper}
+     * Protobuf type {@code choreo.apis.ApplicationToEnvMapper}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ApplicationToEnvMapper)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ApplicationToEnvMapper)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.ApplicationToEnvMapperOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationToEnvMapper_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ApplicationToEnvMapper_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationToEnvMapper_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ApplicationToEnvMapper_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.ApplicationToEnvMapper.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ApplicationToEnvMapper.Builder.class);
       }
@@ -29216,7 +29216,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationToEnvMapper_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ApplicationToEnvMapper_descriptor;
       }
 
       @java.lang.Override
@@ -29476,14 +29476,14 @@ public final class Types {
 
       private int status_ = 0;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.deploymentStatusEnum status = 4;</code>
+       * <code>.choreo.apis.deploymentStatusEnum status = 4;</code>
        * @return The enum numeric value on the wire for status.
        */
       public int getStatusValue() {
         return status_;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.deploymentStatusEnum status = 4;</code>
+       * <code>.choreo.apis.deploymentStatusEnum status = 4;</code>
        * @param value The enum numeric value on the wire for status to set.
        * @return This builder for chaining.
        */
@@ -29493,7 +29493,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.deploymentStatusEnum status = 4;</code>
+       * <code>.choreo.apis.deploymentStatusEnum status = 4;</code>
        * @return The status.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.deploymentStatusEnum getStatus() {
@@ -29502,7 +29502,7 @@ public final class Types {
         return result == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.deploymentStatusEnum.UNRECOGNIZED : result;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.deploymentStatusEnum status = 4;</code>
+       * <code>.choreo.apis.deploymentStatusEnum status = 4;</code>
        * @param value The status to set.
        * @return This builder for chaining.
        */
@@ -29516,7 +29516,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.deploymentStatusEnum status = 4;</code>
+       * <code>.choreo.apis.deploymentStatusEnum status = 4;</code>
        * @return This builder for chaining.
        */
       public Builder clearStatus() {
@@ -29598,10 +29598,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ApplicationToEnvMapper)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ApplicationToEnvMapper)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ApplicationToEnvMapper)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ApplicationToEnvMapper)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.ApplicationToEnvMapper DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.ApplicationToEnvMapper();
@@ -29639,7 +29639,7 @@ public final class Types {
   }
 
   public interface WebsocketRawMessageOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketRawMessage)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.WebsocketRawMessage)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -29655,11 +29655,11 @@ public final class Types {
     com.google.protobuf.ByteString getMessage();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketRawMessage}
+   * Protobuf type {@code choreo.apis.WebsocketRawMessage}
    */
   public  static final class WebsocketRawMessage extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketRawMessage)
+      // @@protoc_insertion_point(message_implements:choreo.apis.WebsocketRawMessage)
       WebsocketRawMessageOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use WebsocketRawMessage.newBuilder() to construct.
@@ -29731,13 +29731,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketRawMessage_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WebsocketRawMessage_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketRawMessage_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WebsocketRawMessage_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketRawMessage.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketRawMessage.Builder.class);
     }
@@ -29929,21 +29929,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketRawMessage}
+     * Protobuf type {@code choreo.apis.WebsocketRawMessage}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketRawMessage)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.WebsocketRawMessage)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketRawMessageOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketRawMessage_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WebsocketRawMessage_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketRawMessage_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WebsocketRawMessage_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketRawMessage.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketRawMessage.Builder.class);
       }
@@ -29976,7 +29976,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketRawMessage_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WebsocketRawMessage_descriptor;
       }
 
       @java.lang.Override
@@ -30156,10 +30156,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketRawMessage)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.WebsocketRawMessage)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketRawMessage)
+    // @@protoc_insertion_point(class_scope:choreo.apis.WebsocketRawMessage)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketRawMessage DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketRawMessage();
@@ -30197,16 +30197,16 @@ public final class Types {
   }
 
   public interface WebsocketMessageOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.WebsocketMessage)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage.Type type = 1;</code>
+     * <code>.choreo.apis.WebsocketMessage.Type type = 1;</code>
      * @return The enum numeric value on the wire for type.
      */
     int getTypeValue();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage.Type type = 1;</code>
+     * <code>.choreo.apis.WebsocketMessage.Type type = 1;</code>
      * @return The type.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketMessage.Type getType();
@@ -30227,11 +30227,11 @@ public final class Types {
     com.google.protobuf.AnyOrBuilder getMessageOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage}
+   * Protobuf type {@code choreo.apis.WebsocketMessage}
    */
   public  static final class WebsocketMessage extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage)
+      // @@protoc_insertion_point(message_implements:choreo.apis.WebsocketMessage)
       WebsocketMessageOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use WebsocketMessage.newBuilder() to construct.
@@ -30312,19 +30312,19 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketMessage_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WebsocketMessage_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketMessage_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WebsocketMessage_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketMessage.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketMessage.Builder.class);
     }
 
     /**
-     * Protobuf enum {@code org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage.Type}
+     * Protobuf enum {@code choreo.apis.WebsocketMessage.Type}
      */
     public enum Type
         implements com.google.protobuf.ProtocolMessageEnum {
@@ -30442,20 +30442,20 @@ public final class Types {
         this.value = value;
       }
 
-      // @@protoc_insertion_point(enum_scope:org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage.Type)
+      // @@protoc_insertion_point(enum_scope:choreo.apis.WebsocketMessage.Type)
     }
 
     public static final int TYPE_FIELD_NUMBER = 1;
     private int type_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage.Type type = 1;</code>
+     * <code>.choreo.apis.WebsocketMessage.Type type = 1;</code>
      * @return The enum numeric value on the wire for type.
      */
     public int getTypeValue() {
       return type_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage.Type type = 1;</code>
+     * <code>.choreo.apis.WebsocketMessage.Type type = 1;</code>
      * @return The type.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketMessage.Type getType() {
@@ -30658,21 +30658,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage}
+     * Protobuf type {@code choreo.apis.WebsocketMessage}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.WebsocketMessage)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketMessageOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketMessage_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WebsocketMessage_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketMessage_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WebsocketMessage_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketMessage.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketMessage.Builder.class);
       }
@@ -30709,7 +30709,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketMessage_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WebsocketMessage_descriptor;
       }
 
       @java.lang.Override
@@ -30820,14 +30820,14 @@ public final class Types {
 
       private int type_ = 0;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage.Type type = 1;</code>
+       * <code>.choreo.apis.WebsocketMessage.Type type = 1;</code>
        * @return The enum numeric value on the wire for type.
        */
       public int getTypeValue() {
         return type_;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage.Type type = 1;</code>
+       * <code>.choreo.apis.WebsocketMessage.Type type = 1;</code>
        * @param value The enum numeric value on the wire for type to set.
        * @return This builder for chaining.
        */
@@ -30837,7 +30837,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage.Type type = 1;</code>
+       * <code>.choreo.apis.WebsocketMessage.Type type = 1;</code>
        * @return The type.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketMessage.Type getType() {
@@ -30846,7 +30846,7 @@ public final class Types {
         return result == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketMessage.Type.UNRECOGNIZED : result;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage.Type type = 1;</code>
+       * <code>.choreo.apis.WebsocketMessage.Type type = 1;</code>
        * @param value The type to set.
        * @return This builder for chaining.
        */
@@ -30860,7 +30860,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage.Type type = 1;</code>
+       * <code>.choreo.apis.WebsocketMessage.Type type = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearType() {
@@ -31001,10 +31001,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.WebsocketMessage)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.WebsocketMessage)
+    // @@protoc_insertion_point(class_scope:choreo.apis.WebsocketMessage)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketMessage DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.WebsocketMessage();
@@ -31042,16 +31042,16 @@ public final class Types {
   }
 
   public interface WorkspaceFileInfoOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.WorkspaceFileInfo)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
+     * <code>.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
      * @return The enum numeric value on the wire for type.
      */
     int getTypeValue();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
+     * <code>.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
      * @return The type.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceFileInfo.Type getType();
@@ -31112,11 +31112,11 @@ public final class Types {
         getFilesBytes(int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo}
+   * Protobuf type {@code choreo.apis.WorkspaceFileInfo}
    */
   public  static final class WorkspaceFileInfo extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo)
+      // @@protoc_insertion_point(message_implements:choreo.apis.WorkspaceFileInfo)
       WorkspaceFileInfoOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use WorkspaceFileInfo.newBuilder() to construct.
@@ -31217,19 +31217,19 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceFileInfo_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WorkspaceFileInfo_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceFileInfo_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WorkspaceFileInfo_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceFileInfo.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceFileInfo.Builder.class);
     }
 
     /**
-     * Protobuf enum {@code org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo.Type}
+     * Protobuf enum {@code choreo.apis.WorkspaceFileInfo.Type}
      */
     public enum Type
         implements com.google.protobuf.ProtocolMessageEnum {
@@ -31338,20 +31338,20 @@ public final class Types {
         this.value = value;
       }
 
-      // @@protoc_insertion_point(enum_scope:org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo.Type)
+      // @@protoc_insertion_point(enum_scope:choreo.apis.WorkspaceFileInfo.Type)
     }
 
     public static final int TYPE_FIELD_NUMBER = 1;
     private int type_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
+     * <code>.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
      * @return The enum numeric value on the wire for type.
      */
     public int getTypeValue() {
       return type_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
+     * <code>.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
      * @return The type.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceFileInfo.Type getType() {
@@ -31681,21 +31681,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo}
+     * Protobuf type {@code choreo.apis.WorkspaceFileInfo}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.WorkspaceFileInfo)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceFileInfoOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceFileInfo_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WorkspaceFileInfo_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceFileInfo_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WorkspaceFileInfo_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceFileInfo.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceFileInfo.Builder.class);
       }
@@ -31734,7 +31734,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceFileInfo_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WorkspaceFileInfo_descriptor;
       }
 
       @java.lang.Override
@@ -31868,14 +31868,14 @@ public final class Types {
 
       private int type_ = 0;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
+       * <code>.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
        * @return The enum numeric value on the wire for type.
        */
       public int getTypeValue() {
         return type_;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
+       * <code>.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
        * @param value The enum numeric value on the wire for type to set.
        * @return This builder for chaining.
        */
@@ -31885,7 +31885,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
+       * <code>.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
        * @return The type.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceFileInfo.Type getType() {
@@ -31894,7 +31894,7 @@ public final class Types {
         return result == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceFileInfo.Type.UNRECOGNIZED : result;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
+       * <code>.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
        * @param value The type to set.
        * @return This builder for chaining.
        */
@@ -31908,7 +31908,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
+       * <code>.choreo.apis.WorkspaceFileInfo.Type type = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearType() {
@@ -32222,10 +32222,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.WorkspaceFileInfo)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceFileInfo)
+    // @@protoc_insertion_point(class_scope:choreo.apis.WorkspaceFileInfo)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceFileInfo DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceFileInfo();
@@ -32263,16 +32263,16 @@ public final class Types {
   }
 
   public interface WorkspaceApplicationLogLineOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.WorkspaceApplicationLogLine)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
+     * <code>.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
      * @return The enum numeric value on the wire for type.
      */
     int getTypeValue();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
+     * <code>.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
      * @return The type.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceApplicationLogLine.Type getType();
@@ -32290,11 +32290,11 @@ public final class Types {
         getDataBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine}
+   * Protobuf type {@code choreo.apis.WorkspaceApplicationLogLine}
    */
   public  static final class WorkspaceApplicationLogLine extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine)
+      // @@protoc_insertion_point(message_implements:choreo.apis.WorkspaceApplicationLogLine)
       WorkspaceApplicationLogLineOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use WorkspaceApplicationLogLine.newBuilder() to construct.
@@ -32369,19 +32369,19 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceApplicationLogLine_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WorkspaceApplicationLogLine_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceApplicationLogLine_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WorkspaceApplicationLogLine_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceApplicationLogLine.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceApplicationLogLine.Builder.class);
     }
 
     /**
-     * Protobuf enum {@code org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine.Type}
+     * Protobuf enum {@code choreo.apis.WorkspaceApplicationLogLine.Type}
      */
     public enum Type
         implements com.google.protobuf.ProtocolMessageEnum {
@@ -32499,20 +32499,20 @@ public final class Types {
         this.value = value;
       }
 
-      // @@protoc_insertion_point(enum_scope:org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine.Type)
+      // @@protoc_insertion_point(enum_scope:choreo.apis.WorkspaceApplicationLogLine.Type)
     }
 
     public static final int TYPE_FIELD_NUMBER = 1;
     private int type_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
+     * <code>.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
      * @return The enum numeric value on the wire for type.
      */
     public int getTypeValue() {
       return type_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
+     * <code>.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
      * @return The type.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceApplicationLogLine.Type getType() {
@@ -32722,21 +32722,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine}
+     * Protobuf type {@code choreo.apis.WorkspaceApplicationLogLine}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.WorkspaceApplicationLogLine)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceApplicationLogLineOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceApplicationLogLine_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WorkspaceApplicationLogLine_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceApplicationLogLine_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WorkspaceApplicationLogLine_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceApplicationLogLine.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceApplicationLogLine.Builder.class);
       }
@@ -32769,7 +32769,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceApplicationLogLine_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_WorkspaceApplicationLogLine_descriptor;
       }
 
       @java.lang.Override
@@ -32877,14 +32877,14 @@ public final class Types {
 
       private int type_ = 0;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
+       * <code>.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
        * @return The enum numeric value on the wire for type.
        */
       public int getTypeValue() {
         return type_;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
+       * <code>.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
        * @param value The enum numeric value on the wire for type to set.
        * @return This builder for chaining.
        */
@@ -32894,7 +32894,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
+       * <code>.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
        * @return The type.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceApplicationLogLine.Type getType() {
@@ -32903,7 +32903,7 @@ public final class Types {
         return result == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceApplicationLogLine.Type.UNRECOGNIZED : result;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
+       * <code>.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
        * @param value The type to set.
        * @return This builder for chaining.
        */
@@ -32917,7 +32917,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
+       * <code>.choreo.apis.WorkspaceApplicationLogLine.Type type = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearType() {
@@ -33015,10 +33015,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.WorkspaceApplicationLogLine)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.WorkspaceApplicationLogLine)
+    // @@protoc_insertion_point(class_scope:choreo.apis.WorkspaceApplicationLogLine)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceApplicationLogLine DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.WorkspaceApplicationLogLine();
@@ -33056,16 +33056,16 @@ public final class Types {
   }
 
   public interface ErrorOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.Error)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.Error)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Error.Code code = 1;</code>
+     * <code>.choreo.apis.Error.Code code = 1;</code>
      * @return The enum numeric value on the wire for code.
      */
     int getCodeValue();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Error.Code code = 1;</code>
+     * <code>.choreo.apis.Error.Code code = 1;</code>
      * @return The code.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Error.Code getCode();
@@ -33107,11 +33107,11 @@ public final class Types {
         getCauseBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Error}
+   * Protobuf type {@code choreo.apis.Error}
    */
   public  static final class Error extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Error)
+      // @@protoc_insertion_point(message_implements:choreo.apis.Error)
       ErrorOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Error.newBuilder() to construct.
@@ -33200,13 +33200,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Error_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Error_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Error_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Error_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.Error.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Error.Builder.class);
     }
@@ -33216,7 +33216,7 @@ public final class Types {
      * Make sure to change github.com/wso2-enterprise/choreo-runtime/pkg/errors package if the error codes were changed or added
      * </pre>
      *
-     * Protobuf enum {@code org.wso2.carbon.apimgt.impl.choreo.apis.Error.Code}
+     * Protobuf enum {@code choreo.apis.Error.Code}
      */
     public enum Code
         implements com.google.protobuf.ProtocolMessageEnum {
@@ -33424,20 +33424,20 @@ public final class Types {
         this.value = value;
       }
 
-      // @@protoc_insertion_point(enum_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Error.Code)
+      // @@protoc_insertion_point(enum_scope:choreo.apis.Error.Code)
     }
 
     public static final int CODE_FIELD_NUMBER = 1;
     private int code_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Error.Code code = 1;</code>
+     * <code>.choreo.apis.Error.Code code = 1;</code>
      * @return The enum numeric value on the wire for code.
      */
     public int getCodeValue() {
       return code_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Error.Code code = 1;</code>
+     * <code>.choreo.apis.Error.Code code = 1;</code>
      * @return The code.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Error.Code getCode() {
@@ -33739,21 +33739,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Error}
+     * Protobuf type {@code choreo.apis.Error}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Error)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.Error)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.ErrorOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Error_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Error_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Error_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Error_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.Error.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Error.Builder.class);
       }
@@ -33790,7 +33790,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Error_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Error_descriptor;
       }
 
       @java.lang.Override
@@ -33908,14 +33908,14 @@ public final class Types {
 
       private int code_ = 0;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Error.Code code = 1;</code>
+       * <code>.choreo.apis.Error.Code code = 1;</code>
        * @return The enum numeric value on the wire for code.
        */
       public int getCodeValue() {
         return code_;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Error.Code code = 1;</code>
+       * <code>.choreo.apis.Error.Code code = 1;</code>
        * @param value The enum numeric value on the wire for code to set.
        * @return This builder for chaining.
        */
@@ -33925,7 +33925,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Error.Code code = 1;</code>
+       * <code>.choreo.apis.Error.Code code = 1;</code>
        * @return The code.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Error.Code getCode() {
@@ -33934,7 +33934,7 @@ public final class Types {
         return result == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Error.Code.UNRECOGNIZED : result;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Error.Code code = 1;</code>
+       * <code>.choreo.apis.Error.Code code = 1;</code>
        * @param value The code to set.
        * @return This builder for chaining.
        */
@@ -33948,7 +33948,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Error.Code code = 1;</code>
+       * <code>.choreo.apis.Error.Code code = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearCode() {
@@ -34198,10 +34198,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Error)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.Error)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Error)
+    // @@protoc_insertion_point(class_scope:choreo.apis.Error)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.Error DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.Error();
@@ -34239,7 +34239,7 @@ public final class Types {
   }
 
   public interface ConfigurationOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.Configuration)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.Configuration)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -34297,11 +34297,11 @@ public final class Types {
     long getGroupId();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Configuration}
+   * Protobuf type {@code choreo.apis.Configuration}
    */
   public  static final class Configuration extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Configuration)
+      // @@protoc_insertion_point(message_implements:choreo.apis.Configuration)
       ConfigurationOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Configuration.newBuilder() to construct.
@@ -34398,13 +34398,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Configuration_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Configuration_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Configuration_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Configuration_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration.Builder.class);
     }
@@ -34758,21 +34758,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Configuration}
+     * Protobuf type {@code choreo.apis.Configuration}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Configuration)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.Configuration)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigurationOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Configuration_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Configuration_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Configuration_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Configuration_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration.Builder.class);
       }
@@ -34813,7 +34813,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Configuration_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Configuration_descriptor;
       }
 
       @java.lang.Override
@@ -35267,10 +35267,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Configuration)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.Configuration)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Configuration)
+    // @@protoc_insertion_point(class_scope:choreo.apis.Configuration)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration();
@@ -35308,7 +35308,7 @@ public final class Types {
   }
 
   public interface SecretOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.Secret)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.Secret)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -35390,11 +35390,11 @@ public final class Types {
         getEncryptKeyVersionBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Secret}
+   * Protobuf type {@code choreo.apis.Secret}
    */
   public  static final class Secret extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Secret)
+      // @@protoc_insertion_point(message_implements:choreo.apis.Secret)
       SecretOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Secret.newBuilder() to construct.
@@ -35505,13 +35505,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Secret_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Secret_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Secret_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Secret_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret.Builder.class);
     }
@@ -35957,21 +35957,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Secret}
+     * Protobuf type {@code choreo.apis.Secret}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Secret)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.Secret)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.SecretOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Secret_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Secret_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Secret_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Secret_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret.Builder.class);
       }
@@ -36016,7 +36016,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Secret_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Secret_descriptor;
       }
 
       @java.lang.Override
@@ -36632,10 +36632,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Secret)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.Secret)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Secret)
+    // @@protoc_insertion_point(class_scope:choreo.apis.Secret)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret();
@@ -36673,7 +36673,7 @@ public final class Types {
   }
 
   public interface ConfigurationGroupOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ConfigurationGroup)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ConfigurationGroup)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -36725,59 +36725,59 @@ public final class Types {
         getDisplayNameBytes();
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+     * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration> 
         getConfigurationsList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+     * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration getConfigurations(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+     * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
      */
     int getConfigurationsCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+     * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigurationOrBuilder> 
         getConfigurationsOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+     * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigurationOrBuilder getConfigurationsOrBuilder(
         int index);
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+     * <code>repeated .choreo.apis.Secret secrets = 7;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret> 
         getSecretsList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+     * <code>repeated .choreo.apis.Secret secrets = 7;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret getSecrets(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+     * <code>repeated .choreo.apis.Secret secrets = 7;</code>
      */
     int getSecretsCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+     * <code>repeated .choreo.apis.Secret secrets = 7;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.SecretOrBuilder> 
         getSecretsOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+     * <code>repeated .choreo.apis.Secret secrets = 7;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.SecretOrBuilder getSecretsOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ConfigurationGroup}
+   * Protobuf type {@code choreo.apis.ConfigurationGroup}
    */
   public  static final class ConfigurationGroup extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ConfigurationGroup)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ConfigurationGroup)
       ConfigurationGroupOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ConfigurationGroup.newBuilder() to construct.
@@ -36896,13 +36896,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigurationGroup_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConfigurationGroup_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigurationGroup_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConfigurationGroup_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigurationGroup.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigurationGroup.Builder.class);
     }
@@ -37038,32 +37038,32 @@ public final class Types {
     public static final int CONFIGURATIONS_FIELD_NUMBER = 6;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration> configurations_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+     * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration> getConfigurationsList() {
       return configurations_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+     * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigurationOrBuilder> 
         getConfigurationsOrBuilderList() {
       return configurations_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+     * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
      */
     public int getConfigurationsCount() {
       return configurations_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+     * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration getConfigurations(int index) {
       return configurations_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+     * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigurationOrBuilder getConfigurationsOrBuilder(
         int index) {
@@ -37073,32 +37073,32 @@ public final class Types {
     public static final int SECRETS_FIELD_NUMBER = 7;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret> secrets_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+     * <code>repeated .choreo.apis.Secret secrets = 7;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret> getSecretsList() {
       return secrets_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+     * <code>repeated .choreo.apis.Secret secrets = 7;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.SecretOrBuilder> 
         getSecretsOrBuilderList() {
       return secrets_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+     * <code>repeated .choreo.apis.Secret secrets = 7;</code>
      */
     public int getSecretsCount() {
       return secrets_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+     * <code>repeated .choreo.apis.Secret secrets = 7;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret getSecrets(int index) {
       return secrets_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+     * <code>repeated .choreo.apis.Secret secrets = 7;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.SecretOrBuilder getSecretsOrBuilder(
         int index) {
@@ -37330,21 +37330,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ConfigurationGroup}
+     * Protobuf type {@code choreo.apis.ConfigurationGroup}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ConfigurationGroup)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ConfigurationGroup)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigurationGroupOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigurationGroup_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConfigurationGroup_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigurationGroup_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConfigurationGroup_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigurationGroup.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigurationGroup.Builder.class);
       }
@@ -37397,7 +37397,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigurationGroup_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConfigurationGroup_descriptor;
       }
 
       @java.lang.Override
@@ -37890,7 +37890,7 @@ public final class Types {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigurationOrBuilder> configurationsBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration> getConfigurationsList() {
         if (configurationsBuilder_ == null) {
@@ -37900,7 +37900,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public int getConfigurationsCount() {
         if (configurationsBuilder_ == null) {
@@ -37910,7 +37910,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration getConfigurations(int index) {
         if (configurationsBuilder_ == null) {
@@ -37920,7 +37920,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public Builder setConfigurations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration value) {
@@ -37937,7 +37937,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public Builder setConfigurations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration.Builder builderForValue) {
@@ -37951,7 +37951,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public Builder addConfigurations(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration value) {
         if (configurationsBuilder_ == null) {
@@ -37967,7 +37967,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public Builder addConfigurations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration value) {
@@ -37984,7 +37984,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public Builder addConfigurations(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration.Builder builderForValue) {
@@ -37998,7 +37998,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public Builder addConfigurations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration.Builder builderForValue) {
@@ -38012,7 +38012,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public Builder addAllConfigurations(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration> values) {
@@ -38027,7 +38027,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public Builder clearConfigurations() {
         if (configurationsBuilder_ == null) {
@@ -38040,7 +38040,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public Builder removeConfigurations(int index) {
         if (configurationsBuilder_ == null) {
@@ -38053,14 +38053,14 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration.Builder getConfigurationsBuilder(
           int index) {
         return getConfigurationsFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigurationOrBuilder getConfigurationsOrBuilder(
           int index) {
@@ -38070,7 +38070,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigurationOrBuilder> 
            getConfigurationsOrBuilderList() {
@@ -38081,14 +38081,14 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration.Builder addConfigurationsBuilder() {
         return getConfigurationsFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration.Builder addConfigurationsBuilder(
           int index) {
@@ -38096,7 +38096,7 @@ public final class Types {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Configuration configurations = 6;</code>
+       * <code>repeated .choreo.apis.Configuration configurations = 6;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Configuration.Builder> 
            getConfigurationsBuilderList() {
@@ -38130,7 +38130,7 @@ public final class Types {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.SecretOrBuilder> secretsBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret> getSecretsList() {
         if (secretsBuilder_ == null) {
@@ -38140,7 +38140,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public int getSecretsCount() {
         if (secretsBuilder_ == null) {
@@ -38150,7 +38150,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret getSecrets(int index) {
         if (secretsBuilder_ == null) {
@@ -38160,7 +38160,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public Builder setSecrets(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret value) {
@@ -38177,7 +38177,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public Builder setSecrets(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret.Builder builderForValue) {
@@ -38191,7 +38191,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public Builder addSecrets(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret value) {
         if (secretsBuilder_ == null) {
@@ -38207,7 +38207,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public Builder addSecrets(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret value) {
@@ -38224,7 +38224,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public Builder addSecrets(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret.Builder builderForValue) {
@@ -38238,7 +38238,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public Builder addSecrets(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret.Builder builderForValue) {
@@ -38252,7 +38252,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public Builder addAllSecrets(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret> values) {
@@ -38267,7 +38267,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public Builder clearSecrets() {
         if (secretsBuilder_ == null) {
@@ -38280,7 +38280,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public Builder removeSecrets(int index) {
         if (secretsBuilder_ == null) {
@@ -38293,14 +38293,14 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret.Builder getSecretsBuilder(
           int index) {
         return getSecretsFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.SecretOrBuilder getSecretsOrBuilder(
           int index) {
@@ -38310,7 +38310,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.SecretOrBuilder> 
            getSecretsOrBuilderList() {
@@ -38321,14 +38321,14 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret.Builder addSecretsBuilder() {
         return getSecretsFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret.Builder addSecretsBuilder(
           int index) {
@@ -38336,7 +38336,7 @@ public final class Types {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Secret secrets = 7;</code>
+       * <code>repeated .choreo.apis.Secret secrets = 7;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Secret.Builder> 
            getSecretsBuilderList() {
@@ -38369,10 +38369,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ConfigurationGroup)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ConfigurationGroup)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ConfigurationGroup)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ConfigurationGroup)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigurationGroup DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigurationGroup();
@@ -38410,7 +38410,7 @@ public final class Types {
   }
 
   public interface ConnectionConfigOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ConnectionConfig)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -38426,26 +38426,26 @@ public final class Types {
         getConnectorNameBytes();
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
+     * <code>.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
      * @return Whether the oauth2Config field is set.
      */
     boolean hasOauth2Config();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
+     * <code>.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
      * @return The oauth2Config.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2 getOauth2Config();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
+     * <code>.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2OrBuilder getOauth2ConfigOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig}
+   * Protobuf type {@code choreo.apis.ConnectionConfig}
    */
   public  static final class ConnectionConfig extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ConnectionConfig)
       ConnectionConfigOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ConnectionConfig.newBuilder() to construct.
@@ -38526,19 +38526,19 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConnectionConfig_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConnectionConfig_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.Builder.class);
     }
 
     public interface oauth2OrBuilder extends
-        // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2)
+        // @@protoc_insertion_point(interface_extends:choreo.apis.ConnectionConfig.oauth2)
         com.google.protobuf.MessageOrBuilder {
 
       /**
@@ -38615,35 +38615,35 @@ public final class Types {
           getScopesBytes(int index);
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+       * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
        */
       java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter> 
           getParamsList();
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+       * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
        */
       org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter getParams(int index);
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+       * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
        */
       int getParamsCount();
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+       * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
        */
       java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameterOrBuilder> 
           getParamsOrBuilderList();
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+       * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
        */
       org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameterOrBuilder getParamsOrBuilder(
           int index);
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2}
+     * Protobuf type {@code choreo.apis.ConnectionConfig.oauth2}
      */
     public  static final class oauth2 extends
         com.google.protobuf.GeneratedMessageV3 implements
-        // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2)
+        // @@protoc_insertion_point(message_implements:choreo.apis.ConnectionConfig.oauth2)
         oauth2OrBuilder {
     private static final long serialVersionUID = 0L;
       // Use oauth2.newBuilder() to construct.
@@ -38759,13 +38759,13 @@ public final class Types {
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_oauth2_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConnectionConfig_oauth2_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_oauth2_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConnectionConfig_oauth2_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2.Builder.class);
       }
@@ -38952,32 +38952,32 @@ public final class Types {
       public static final int PARAMS_FIELD_NUMBER = 6;
       private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter> params_;
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+       * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter> getParamsList() {
         return params_;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+       * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameterOrBuilder> 
           getParamsOrBuilderList() {
         return params_;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+       * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
        */
       public int getParamsCount() {
         return params_.size();
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+       * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter getParams(int index) {
         return params_.get(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+       * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameterOrBuilder getParamsOrBuilder(
           int index) {
@@ -39199,21 +39199,21 @@ public final class Types {
         return builder;
       }
       /**
-       * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2}
+       * Protobuf type {@code choreo.apis.ConnectionConfig.oauth2}
        */
       public static final class Builder extends
           com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-          // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2)
+          // @@protoc_insertion_point(builder_implements:choreo.apis.ConnectionConfig.oauth2)
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2OrBuilder {
         public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
-          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_oauth2_descriptor;
+          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConnectionConfig_oauth2_descriptor;
         }
 
         @java.lang.Override
         protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
             internalGetFieldAccessorTable() {
-          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_oauth2_fieldAccessorTable
+          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConnectionConfig_oauth2_fieldAccessorTable
               .ensureFieldAccessorsInitialized(
                   org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2.Builder.class);
         }
@@ -39259,7 +39259,7 @@ public final class Types {
         @java.lang.Override
         public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_oauth2_descriptor;
+          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConnectionConfig_oauth2_descriptor;
         }
 
         @java.lang.Override
@@ -39855,7 +39855,7 @@ public final class Types {
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameterOrBuilder> paramsBuilder_;
 
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter> getParamsList() {
           if (paramsBuilder_ == null) {
@@ -39865,7 +39865,7 @@ public final class Types {
           }
         }
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public int getParamsCount() {
           if (paramsBuilder_ == null) {
@@ -39875,7 +39875,7 @@ public final class Types {
           }
         }
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter getParams(int index) {
           if (paramsBuilder_ == null) {
@@ -39885,7 +39885,7 @@ public final class Types {
           }
         }
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public Builder setParams(
             int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter value) {
@@ -39902,7 +39902,7 @@ public final class Types {
           return this;
         }
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public Builder setParams(
             int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter.Builder builderForValue) {
@@ -39916,7 +39916,7 @@ public final class Types {
           return this;
         }
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public Builder addParams(org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter value) {
           if (paramsBuilder_ == null) {
@@ -39932,7 +39932,7 @@ public final class Types {
           return this;
         }
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public Builder addParams(
             int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter value) {
@@ -39949,7 +39949,7 @@ public final class Types {
           return this;
         }
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public Builder addParams(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter.Builder builderForValue) {
@@ -39963,7 +39963,7 @@ public final class Types {
           return this;
         }
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public Builder addParams(
             int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter.Builder builderForValue) {
@@ -39977,7 +39977,7 @@ public final class Types {
           return this;
         }
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public Builder addAllParams(
             java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter> values) {
@@ -39992,7 +39992,7 @@ public final class Types {
           return this;
         }
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public Builder clearParams() {
           if (paramsBuilder_ == null) {
@@ -40005,7 +40005,7 @@ public final class Types {
           return this;
         }
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public Builder removeParams(int index) {
           if (paramsBuilder_ == null) {
@@ -40018,14 +40018,14 @@ public final class Types {
           return this;
         }
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter.Builder getParamsBuilder(
             int index) {
           return getParamsFieldBuilder().getBuilder(index);
         }
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameterOrBuilder getParamsOrBuilder(
             int index) {
@@ -40035,7 +40035,7 @@ public final class Types {
           }
         }
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameterOrBuilder> 
              getParamsOrBuilderList() {
@@ -40046,14 +40046,14 @@ public final class Types {
           }
         }
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter.Builder addParamsBuilder() {
           return getParamsFieldBuilder().addBuilder(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter.getDefaultInstance());
         }
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter.Builder addParamsBuilder(
             int index) {
@@ -40061,7 +40061,7 @@ public final class Types {
               index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter.getDefaultInstance());
         }
         /**
-         * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter params = 6;</code>
+         * <code>repeated .choreo.apis.ConnectionConfig.parameter params = 6;</code>
          */
         public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter.Builder> 
              getParamsBuilderList() {
@@ -40094,10 +40094,10 @@ public final class Types {
         }
 
 
-        // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2)
+        // @@protoc_insertion_point(builder_scope:choreo.apis.ConnectionConfig.oauth2)
       }
 
-      // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2)
+      // @@protoc_insertion_point(class_scope:choreo.apis.ConnectionConfig.oauth2)
       private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2 DEFAULT_INSTANCE;
       static {
         DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2();
@@ -40135,7 +40135,7 @@ public final class Types {
     }
 
     public interface parameterOrBuilder extends
-        // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter)
+        // @@protoc_insertion_point(interface_extends:choreo.apis.ConnectionConfig.parameter)
         com.google.protobuf.MessageOrBuilder {
 
       /**
@@ -40163,11 +40163,11 @@ public final class Types {
           getValueBytes();
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter}
+     * Protobuf type {@code choreo.apis.ConnectionConfig.parameter}
      */
     public  static final class parameter extends
         com.google.protobuf.GeneratedMessageV3 implements
-        // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter)
+        // @@protoc_insertion_point(message_implements:choreo.apis.ConnectionConfig.parameter)
         parameterOrBuilder {
     private static final long serialVersionUID = 0L;
       // Use parameter.newBuilder() to construct.
@@ -40242,13 +40242,13 @@ public final class Types {
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_parameter_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConnectionConfig_parameter_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_parameter_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConnectionConfig_parameter_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter.Builder.class);
       }
@@ -40490,21 +40490,21 @@ public final class Types {
         return builder;
       }
       /**
-       * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter}
+       * Protobuf type {@code choreo.apis.ConnectionConfig.parameter}
        */
       public static final class Builder extends
           com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-          // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter)
+          // @@protoc_insertion_point(builder_implements:choreo.apis.ConnectionConfig.parameter)
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameterOrBuilder {
         public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
-          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_parameter_descriptor;
+          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConnectionConfig_parameter_descriptor;
         }
 
         @java.lang.Override
         protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
             internalGetFieldAccessorTable() {
-          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_parameter_fieldAccessorTable
+          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConnectionConfig_parameter_fieldAccessorTable
               .ensureFieldAccessorsInitialized(
                   org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter.Builder.class);
         }
@@ -40537,7 +40537,7 @@ public final class Types {
         @java.lang.Override
         public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_parameter_descriptor;
+          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConnectionConfig_parameter_descriptor;
         }
 
         @java.lang.Override
@@ -40808,10 +40808,10 @@ public final class Types {
         }
 
 
-        // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter)
+        // @@protoc_insertion_point(builder_scope:choreo.apis.ConnectionConfig.parameter)
       }
 
-      // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.parameter)
+      // @@protoc_insertion_point(class_scope:choreo.apis.ConnectionConfig.parameter)
       private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter DEFAULT_INSTANCE;
       static {
         DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.parameter();
@@ -40887,21 +40887,21 @@ public final class Types {
     public static final int OAUTH2_CONFIG_FIELD_NUMBER = 2;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2 oauth2Config_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
+     * <code>.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
      * @return Whether the oauth2Config field is set.
      */
     public boolean hasOauth2Config() {
       return oauth2Config_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
+     * <code>.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
      * @return The oauth2Config.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2 getOauth2Config() {
       return oauth2Config_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2.getDefaultInstance() : oauth2Config_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
+     * <code>.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2OrBuilder getOauth2ConfigOrBuilder() {
       return getOauth2Config();
@@ -41078,21 +41078,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig}
+     * Protobuf type {@code choreo.apis.ConnectionConfig}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ConnectionConfig)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfigOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConnectionConfig_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConnectionConfig_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.Builder.class);
       }
@@ -41129,7 +41129,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConnectionConfig_descriptor;
       }
 
       @java.lang.Override
@@ -41319,14 +41319,14 @@ public final class Types {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2OrBuilder> oauth2ConfigBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
+       * <code>.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
        * @return Whether the oauth2Config field is set.
        */
       public boolean hasOauth2Config() {
         return oauth2ConfigBuilder_ != null || oauth2Config_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
+       * <code>.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
        * @return The oauth2Config.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2 getOauth2Config() {
@@ -41337,7 +41337,7 @@ public final class Types {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
+       * <code>.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
        */
       public Builder setOauth2Config(org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2 value) {
         if (oauth2ConfigBuilder_ == null) {
@@ -41353,7 +41353,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
+       * <code>.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
        */
       public Builder setOauth2Config(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2.Builder builderForValue) {
@@ -41367,7 +41367,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
+       * <code>.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
        */
       public Builder mergeOauth2Config(org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2 value) {
         if (oauth2ConfigBuilder_ == null) {
@@ -41385,7 +41385,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
+       * <code>.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
        */
       public Builder clearOauth2Config() {
         if (oauth2ConfigBuilder_ == null) {
@@ -41399,7 +41399,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
+       * <code>.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2.Builder getOauth2ConfigBuilder() {
         
@@ -41407,7 +41407,7 @@ public final class Types {
         return getOauth2ConfigFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
+       * <code>.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2OrBuilder getOauth2ConfigOrBuilder() {
         if (oauth2ConfigBuilder_ != null) {
@@ -41418,7 +41418,7 @@ public final class Types {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
+       * <code>.choreo.apis.ConnectionConfig.oauth2 oauth2_config = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig.oauth2OrBuilder> 
@@ -41446,10 +41446,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ConnectionConfig)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ConnectionConfig)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ConnectionConfig)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionConfig();
@@ -41487,7 +41487,7 @@ public final class Types {
   }
 
   public interface ConnectionOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.Connection)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.Connection)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -41545,17 +41545,17 @@ public final class Types {
         getUserAccountIdentifierBytes();
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Token token = 6;</code>
+     * <code>.choreo.apis.Token token = 6;</code>
      * @return Whether the token field is set.
      */
     boolean hasToken();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Token token = 6;</code>
+     * <code>.choreo.apis.Token token = 6;</code>
      * @return The token.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token getToken();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Token token = 6;</code>
+     * <code>.choreo.apis.Token token = 6;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.TokenOrBuilder getTokenOrBuilder();
 
@@ -41572,25 +41572,25 @@ public final class Types {
         getOrganizationNameBytes();
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+     * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping> 
         getCodeVariableKeysList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+     * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping getCodeVariableKeys(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+     * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
      */
     int getCodeVariableKeysCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+     * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mappingOrBuilder> 
         getCodeVariableKeysOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+     * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mappingOrBuilder getCodeVariableKeysOrBuilder(
         int index);
@@ -41620,11 +41620,11 @@ public final class Types {
         getTypeBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Connection}
+   * Protobuf type {@code choreo.apis.Connection}
    */
   public  static final class Connection extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Connection)
+      // @@protoc_insertion_point(message_implements:choreo.apis.Connection)
       ConnectionOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Connection.newBuilder() to construct.
@@ -41769,19 +41769,19 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Connection_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Connection_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.Builder.class);
     }
 
     public interface code_var_mappingOrBuilder extends
-        // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping)
+        // @@protoc_insertion_point(interface_extends:choreo.apis.Connection.code_var_mapping)
         com.google.protobuf.MessageOrBuilder {
 
       /**
@@ -41809,11 +41809,11 @@ public final class Types {
           getCodeVariableKeyBytes();
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping}
+     * Protobuf type {@code choreo.apis.Connection.code_var_mapping}
      */
     public  static final class code_var_mapping extends
         com.google.protobuf.GeneratedMessageV3 implements
-        // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping)
+        // @@protoc_insertion_point(message_implements:choreo.apis.Connection.code_var_mapping)
         code_var_mappingOrBuilder {
     private static final long serialVersionUID = 0L;
       // Use code_var_mapping.newBuilder() to construct.
@@ -41888,13 +41888,13 @@ public final class Types {
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_code_var_mapping_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Connection_code_var_mapping_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_code_var_mapping_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Connection_code_var_mapping_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping.Builder.class);
       }
@@ -42136,21 +42136,21 @@ public final class Types {
         return builder;
       }
       /**
-       * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping}
+       * Protobuf type {@code choreo.apis.Connection.code_var_mapping}
        */
       public static final class Builder extends
           com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-          // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping)
+          // @@protoc_insertion_point(builder_implements:choreo.apis.Connection.code_var_mapping)
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mappingOrBuilder {
         public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
-          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_code_var_mapping_descriptor;
+          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Connection_code_var_mapping_descriptor;
         }
 
         @java.lang.Override
         protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
             internalGetFieldAccessorTable() {
-          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_code_var_mapping_fieldAccessorTable
+          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Connection_code_var_mapping_fieldAccessorTable
               .ensureFieldAccessorsInitialized(
                   org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping.Builder.class);
         }
@@ -42183,7 +42183,7 @@ public final class Types {
         @java.lang.Override
         public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_code_var_mapping_descriptor;
+          return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Connection_code_var_mapping_descriptor;
         }
 
         @java.lang.Override
@@ -42454,10 +42454,10 @@ public final class Types {
         }
 
 
-        // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping)
+        // @@protoc_insertion_point(builder_scope:choreo.apis.Connection.code_var_mapping)
       }
 
-      // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping)
+      // @@protoc_insertion_point(class_scope:choreo.apis.Connection.code_var_mapping)
       private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping DEFAULT_INSTANCE;
       static {
         DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping();
@@ -42651,21 +42651,21 @@ public final class Types {
     public static final int TOKEN_FIELD_NUMBER = 6;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token token_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Token token = 6;</code>
+     * <code>.choreo.apis.Token token = 6;</code>
      * @return Whether the token field is set.
      */
     public boolean hasToken() {
       return token_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Token token = 6;</code>
+     * <code>.choreo.apis.Token token = 6;</code>
      * @return The token.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token getToken() {
       return token_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token.getDefaultInstance() : token_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Token token = 6;</code>
+     * <code>.choreo.apis.Token token = 6;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.TokenOrBuilder getTokenOrBuilder() {
       return getToken();
@@ -42710,32 +42710,32 @@ public final class Types {
     public static final int CODE_VARIABLE_KEYS_FIELD_NUMBER = 8;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping> codeVariableKeys_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+     * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping> getCodeVariableKeysList() {
       return codeVariableKeys_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+     * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mappingOrBuilder> 
         getCodeVariableKeysOrBuilderList() {
       return codeVariableKeys_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+     * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
      */
     public int getCodeVariableKeysCount() {
       return codeVariableKeys_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+     * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping getCodeVariableKeys(int index) {
       return codeVariableKeys_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+     * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mappingOrBuilder getCodeVariableKeysOrBuilder(
         int index) {
@@ -43068,21 +43068,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Connection}
+     * Protobuf type {@code choreo.apis.Connection}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Connection)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.Connection)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConnectionOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Connection_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Connection_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.Builder.class);
       }
@@ -43142,7 +43142,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Connection_descriptor;
       }
 
       @java.lang.Override
@@ -43664,14 +43664,14 @@ public final class Types {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.TokenOrBuilder> tokenBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Token token = 6;</code>
+       * <code>.choreo.apis.Token token = 6;</code>
        * @return Whether the token field is set.
        */
       public boolean hasToken() {
         return tokenBuilder_ != null || token_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Token token = 6;</code>
+       * <code>.choreo.apis.Token token = 6;</code>
        * @return The token.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token getToken() {
@@ -43682,7 +43682,7 @@ public final class Types {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Token token = 6;</code>
+       * <code>.choreo.apis.Token token = 6;</code>
        */
       public Builder setToken(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token value) {
         if (tokenBuilder_ == null) {
@@ -43698,7 +43698,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Token token = 6;</code>
+       * <code>.choreo.apis.Token token = 6;</code>
        */
       public Builder setToken(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token.Builder builderForValue) {
@@ -43712,7 +43712,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Token token = 6;</code>
+       * <code>.choreo.apis.Token token = 6;</code>
        */
       public Builder mergeToken(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token value) {
         if (tokenBuilder_ == null) {
@@ -43730,7 +43730,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Token token = 6;</code>
+       * <code>.choreo.apis.Token token = 6;</code>
        */
       public Builder clearToken() {
         if (tokenBuilder_ == null) {
@@ -43744,7 +43744,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Token token = 6;</code>
+       * <code>.choreo.apis.Token token = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token.Builder getTokenBuilder() {
         
@@ -43752,7 +43752,7 @@ public final class Types {
         return getTokenFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Token token = 6;</code>
+       * <code>.choreo.apis.Token token = 6;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.TokenOrBuilder getTokenOrBuilder() {
         if (tokenBuilder_ != null) {
@@ -43763,7 +43763,7 @@ public final class Types {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Token token = 6;</code>
+       * <code>.choreo.apis.Token token = 6;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.TokenOrBuilder> 
@@ -43868,7 +43868,7 @@ public final class Types {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mappingOrBuilder> codeVariableKeysBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping> getCodeVariableKeysList() {
         if (codeVariableKeysBuilder_ == null) {
@@ -43878,7 +43878,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public int getCodeVariableKeysCount() {
         if (codeVariableKeysBuilder_ == null) {
@@ -43888,7 +43888,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping getCodeVariableKeys(int index) {
         if (codeVariableKeysBuilder_ == null) {
@@ -43898,7 +43898,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public Builder setCodeVariableKeys(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping value) {
@@ -43915,7 +43915,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public Builder setCodeVariableKeys(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping.Builder builderForValue) {
@@ -43929,7 +43929,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public Builder addCodeVariableKeys(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping value) {
         if (codeVariableKeysBuilder_ == null) {
@@ -43945,7 +43945,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public Builder addCodeVariableKeys(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping value) {
@@ -43962,7 +43962,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public Builder addCodeVariableKeys(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping.Builder builderForValue) {
@@ -43976,7 +43976,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public Builder addCodeVariableKeys(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping.Builder builderForValue) {
@@ -43990,7 +43990,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public Builder addAllCodeVariableKeys(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping> values) {
@@ -44005,7 +44005,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public Builder clearCodeVariableKeys() {
         if (codeVariableKeysBuilder_ == null) {
@@ -44018,7 +44018,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public Builder removeCodeVariableKeys(int index) {
         if (codeVariableKeysBuilder_ == null) {
@@ -44031,14 +44031,14 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping.Builder getCodeVariableKeysBuilder(
           int index) {
         return getCodeVariableKeysFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mappingOrBuilder getCodeVariableKeysOrBuilder(
           int index) {
@@ -44048,7 +44048,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mappingOrBuilder> 
            getCodeVariableKeysOrBuilderList() {
@@ -44059,14 +44059,14 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping.Builder addCodeVariableKeysBuilder() {
         return getCodeVariableKeysFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping.Builder addCodeVariableKeysBuilder(
           int index) {
@@ -44074,7 +44074,7 @@ public final class Types {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
+       * <code>repeated .choreo.apis.Connection.code_var_mapping code_variable_keys = 8;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection.code_var_mapping.Builder> 
            getCodeVariableKeysBuilderList() {
@@ -44243,10 +44243,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Connection)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.Connection)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Connection)
+    // @@protoc_insertion_point(class_scope:choreo.apis.Connection)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.Connection();
@@ -44284,7 +44284,7 @@ public final class Types {
   }
 
   public interface OnPremKeyOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.OnPremKey)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.OnPremKey)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -44441,11 +44441,11 @@ public final class Types {
     com.google.protobuf.TimestampOrBuilder getUpdatedAtOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.OnPremKey}
+   * Protobuf type {@code choreo.apis.OnPremKey}
    */
   public  static final class OnPremKey extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.OnPremKey)
+      // @@protoc_insertion_point(message_implements:choreo.apis.OnPremKey)
       OnPremKeyOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use OnPremKey.newBuilder() to construct.
@@ -44611,13 +44611,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKey_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_OnPremKey_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKey_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_OnPremKey_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.OnPremKey.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OnPremKey.Builder.class);
     }
@@ -45296,21 +45296,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.OnPremKey}
+     * Protobuf type {@code choreo.apis.OnPremKey}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.OnPremKey)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.OnPremKey)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.OnPremKeyOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKey_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_OnPremKey_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKey_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_OnPremKey_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.OnPremKey.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OnPremKey.Builder.class);
       }
@@ -45377,7 +45377,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKey_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_OnPremKey_descriptor;
       }
 
       @java.lang.Override
@@ -46583,10 +46583,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.OnPremKey)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.OnPremKey)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.OnPremKey)
+    // @@protoc_insertion_point(class_scope:choreo.apis.OnPremKey)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.OnPremKey DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.OnPremKey();
@@ -46624,7 +46624,7 @@ public final class Types {
   }
 
   public interface OnPremKeySubscriptionOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.OnPremKeySubscription)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.OnPremKeySubscription)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -46694,11 +46694,11 @@ public final class Types {
     com.google.protobuf.TimestampOrBuilder getEndDateOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.OnPremKeySubscription}
+   * Protobuf type {@code choreo.apis.OnPremKeySubscription}
    */
   public  static final class OnPremKeySubscription extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.OnPremKeySubscription)
+      // @@protoc_insertion_point(message_implements:choreo.apis.OnPremKeySubscription)
       OnPremKeySubscriptionOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use OnPremKeySubscription.newBuilder() to construct.
@@ -46809,13 +46809,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKeySubscription_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_OnPremKeySubscription_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKeySubscription_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_OnPremKeySubscription_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.OnPremKeySubscription.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OnPremKeySubscription.Builder.class);
     }
@@ -47179,21 +47179,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.OnPremKeySubscription}
+     * Protobuf type {@code choreo.apis.OnPremKeySubscription}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.OnPremKeySubscription)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.OnPremKeySubscription)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.OnPremKeySubscriptionOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKeySubscription_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_OnPremKeySubscription_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKeySubscription_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_OnPremKeySubscription_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.OnPremKeySubscription.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OnPremKeySubscription.Builder.class);
       }
@@ -47242,7 +47242,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKeySubscription_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_OnPremKeySubscription_descriptor;
       }
 
       @java.lang.Override
@@ -47835,10 +47835,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.OnPremKeySubscription)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.OnPremKeySubscription)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.OnPremKeySubscription)
+    // @@protoc_insertion_point(class_scope:choreo.apis.OnPremKeySubscription)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.OnPremKeySubscription DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.OnPremKeySubscription();
@@ -47876,7 +47876,7 @@ public final class Types {
   }
 
   public interface TokenInfoOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.TokenInfo)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.TokenInfo)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -47940,11 +47940,11 @@ public final class Types {
         getTokenUrlBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.TokenInfo}
+   * Protobuf type {@code choreo.apis.TokenInfo}
    */
   public  static final class TokenInfo extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.TokenInfo)
+      // @@protoc_insertion_point(message_implements:choreo.apis.TokenInfo)
       TokenInfoOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use TokenInfo.newBuilder() to construct.
@@ -48040,13 +48040,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TokenInfo_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_TokenInfo_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TokenInfo_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_TokenInfo_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.TokenInfo.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.TokenInfo.Builder.class);
     }
@@ -48426,21 +48426,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.TokenInfo}
+     * Protobuf type {@code choreo.apis.TokenInfo}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.TokenInfo)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.TokenInfo)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.TokenInfoOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TokenInfo_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_TokenInfo_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TokenInfo_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_TokenInfo_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.TokenInfo.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.TokenInfo.Builder.class);
       }
@@ -48479,7 +48479,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TokenInfo_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_TokenInfo_descriptor;
       }
 
       @java.lang.Override
@@ -48993,10 +48993,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.TokenInfo)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.TokenInfo)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.TokenInfo)
+    // @@protoc_insertion_point(class_scope:choreo.apis.TokenInfo)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.TokenInfo DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.TokenInfo();
@@ -49034,7 +49034,7 @@ public final class Types {
   }
 
   public interface TokenOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.Token)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.Token)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -49110,11 +49110,11 @@ public final class Types {
         getClientSecretBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Token}
+   * Protobuf type {@code choreo.apis.Token}
    */
   public  static final class Token extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Token)
+      // @@protoc_insertion_point(message_implements:choreo.apis.Token)
       TokenOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Token.newBuilder() to construct.
@@ -49217,13 +49217,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Token_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Token_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Token_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Token_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token.Builder.class);
     }
@@ -49649,21 +49649,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Token}
+     * Protobuf type {@code choreo.apis.Token}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Token)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.Token)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.TokenOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Token_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Token_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Token_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Token_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token.Builder.class);
       }
@@ -49704,7 +49704,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Token_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Token_descriptor;
       }
 
       @java.lang.Override
@@ -50299,10 +50299,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Token)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.Token)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Token)
+    // @@protoc_insertion_point(class_scope:choreo.apis.Token)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.Token();
@@ -50340,7 +50340,7 @@ public final class Types {
   }
 
   public interface ConfigMappingInfoOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMappingInfo)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ConfigMappingInfo)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -50362,35 +50362,35 @@ public final class Types {
         getDisplayNameBytes();
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+     * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping> 
         getConfigMappingList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+     * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping getConfigMapping(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+     * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
      */
     int getConfigMappingCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+     * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMappingOrBuilder> 
         getConfigMappingOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+     * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMappingOrBuilder getConfigMappingOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMappingInfo}
+   * Protobuf type {@code choreo.apis.ConfigMappingInfo}
    */
   public  static final class ConfigMappingInfo extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMappingInfo)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ConfigMappingInfo)
       ConfigMappingInfoOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ConfigMappingInfo.newBuilder() to construct.
@@ -50477,13 +50477,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMappingInfo_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConfigMappingInfo_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMappingInfo_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConfigMappingInfo_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMappingInfo.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMappingInfo.Builder.class);
     }
@@ -50537,32 +50537,32 @@ public final class Types {
     public static final int CONFIG_MAPPING_FIELD_NUMBER = 3;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping> configMapping_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+     * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping> getConfigMappingList() {
       return configMapping_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+     * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMappingOrBuilder> 
         getConfigMappingOrBuilderList() {
       return configMapping_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+     * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
      */
     public int getConfigMappingCount() {
       return configMapping_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+     * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping getConfigMapping(int index) {
       return configMapping_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+     * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMappingOrBuilder getConfigMappingOrBuilder(
         int index) {
@@ -50749,21 +50749,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMappingInfo}
+     * Protobuf type {@code choreo.apis.ConfigMappingInfo}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMappingInfo)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ConfigMappingInfo)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMappingInfoOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMappingInfo_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConfigMappingInfo_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMappingInfo_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConfigMappingInfo_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMappingInfo.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMappingInfo.Builder.class);
       }
@@ -50803,7 +50803,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMappingInfo_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConfigMappingInfo_descriptor;
       }
 
       @java.lang.Override
@@ -51065,7 +51065,7 @@ public final class Types {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMappingOrBuilder> configMappingBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping> getConfigMappingList() {
         if (configMappingBuilder_ == null) {
@@ -51075,7 +51075,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public int getConfigMappingCount() {
         if (configMappingBuilder_ == null) {
@@ -51085,7 +51085,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping getConfigMapping(int index) {
         if (configMappingBuilder_ == null) {
@@ -51095,7 +51095,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public Builder setConfigMapping(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping value) {
@@ -51112,7 +51112,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public Builder setConfigMapping(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping.Builder builderForValue) {
@@ -51126,7 +51126,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public Builder addConfigMapping(org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping value) {
         if (configMappingBuilder_ == null) {
@@ -51142,7 +51142,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public Builder addConfigMapping(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping value) {
@@ -51159,7 +51159,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public Builder addConfigMapping(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping.Builder builderForValue) {
@@ -51173,7 +51173,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public Builder addConfigMapping(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping.Builder builderForValue) {
@@ -51187,7 +51187,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public Builder addAllConfigMapping(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping> values) {
@@ -51202,7 +51202,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public Builder clearConfigMapping() {
         if (configMappingBuilder_ == null) {
@@ -51215,7 +51215,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public Builder removeConfigMapping(int index) {
         if (configMappingBuilder_ == null) {
@@ -51228,14 +51228,14 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping.Builder getConfigMappingBuilder(
           int index) {
         return getConfigMappingFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMappingOrBuilder getConfigMappingOrBuilder(
           int index) {
@@ -51245,7 +51245,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMappingOrBuilder> 
            getConfigMappingOrBuilderList() {
@@ -51256,14 +51256,14 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping.Builder addConfigMappingBuilder() {
         return getConfigMappingFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping.Builder addConfigMappingBuilder(
           int index) {
@@ -51271,7 +51271,7 @@ public final class Types {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping config_mapping = 3;</code>
+       * <code>repeated .choreo.apis.ConfigMapping config_mapping = 3;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping.Builder> 
            getConfigMappingBuilderList() {
@@ -51304,10 +51304,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMappingInfo)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ConfigMappingInfo)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMappingInfo)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ConfigMappingInfo)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMappingInfo DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMappingInfo();
@@ -51345,7 +51345,7 @@ public final class Types {
   }
 
   public interface ConfigMappingOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ConfigMapping)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -51361,12 +51361,12 @@ public final class Types {
     long getConnectionId();
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.KeyType key_type = 3;</code>
+     * <code>.choreo.apis.KeyType key_type = 3;</code>
      * @return The enum numeric value on the wire for keyType.
      */
     int getKeyTypeValue();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.KeyType key_type = 3;</code>
+     * <code>.choreo.apis.KeyType key_type = 3;</code>
      * @return The keyType.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.KeyType getKeyType();
@@ -51414,11 +51414,11 @@ public final class Types {
     boolean getSecret();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping}
+   * Protobuf type {@code choreo.apis.ConfigMapping}
    */
   public  static final class ConfigMapping extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ConfigMapping)
       ConfigMappingOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ConfigMapping.newBuilder() to construct.
@@ -51522,13 +51522,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMapping_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConfigMapping_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMapping_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConfigMapping_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping.Builder.class);
     }
@@ -51556,14 +51556,14 @@ public final class Types {
     public static final int KEY_TYPE_FIELD_NUMBER = 3;
     private int keyType_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.KeyType key_type = 3;</code>
+     * <code>.choreo.apis.KeyType key_type = 3;</code>
      * @return The enum numeric value on the wire for keyType.
      */
     public int getKeyTypeValue() {
       return keyType_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.KeyType key_type = 3;</code>
+     * <code>.choreo.apis.KeyType key_type = 3;</code>
      * @return The keyType.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.KeyType getKeyType() {
@@ -51911,21 +51911,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping}
+     * Protobuf type {@code choreo.apis.ConfigMapping}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ConfigMapping)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMappingOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMapping_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConfigMapping_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMapping_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConfigMapping_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping.Builder.class);
       }
@@ -51968,7 +51968,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMapping_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ConfigMapping_descriptor;
       }
 
       @java.lang.Override
@@ -52158,14 +52158,14 @@ public final class Types {
 
       private int keyType_ = 0;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.KeyType key_type = 3;</code>
+       * <code>.choreo.apis.KeyType key_type = 3;</code>
        * @return The enum numeric value on the wire for keyType.
        */
       public int getKeyTypeValue() {
         return keyType_;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.KeyType key_type = 3;</code>
+       * <code>.choreo.apis.KeyType key_type = 3;</code>
        * @param value The enum numeric value on the wire for keyType to set.
        * @return This builder for chaining.
        */
@@ -52175,7 +52175,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.KeyType key_type = 3;</code>
+       * <code>.choreo.apis.KeyType key_type = 3;</code>
        * @return The keyType.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.KeyType getKeyType() {
@@ -52184,7 +52184,7 @@ public final class Types {
         return result == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.KeyType.UNRECOGNIZED : result;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.KeyType key_type = 3;</code>
+       * <code>.choreo.apis.KeyType key_type = 3;</code>
        * @param value The keyType to set.
        * @return This builder for chaining.
        */
@@ -52198,7 +52198,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.KeyType key_type = 3;</code>
+       * <code>.choreo.apis.KeyType key_type = 3;</code>
        * @return This builder for chaining.
        */
       public Builder clearKeyType() {
@@ -52478,10 +52478,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ConfigMapping)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ConfigMapping)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ConfigMapping)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.ConfigMapping();
@@ -52519,7 +52519,7 @@ public final class Types {
   }
 
   public interface MappedConfigDataOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.MappedConfigData)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.MappedConfigData)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -52565,11 +52565,11 @@ public final class Types {
     boolean getSecret();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.MappedConfigData}
+   * Protobuf type {@code choreo.apis.MappedConfigData}
    */
   public  static final class MappedConfigData extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.MappedConfigData)
+      // @@protoc_insertion_point(message_implements:choreo.apis.MappedConfigData)
       MappedConfigDataOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use MappedConfigData.newBuilder() to construct.
@@ -52656,13 +52656,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MappedConfigData_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_MappedConfigData_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MappedConfigData_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_MappedConfigData_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.MappedConfigData.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.MappedConfigData.Builder.class);
     }
@@ -52972,21 +52972,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.MappedConfigData}
+     * Protobuf type {@code choreo.apis.MappedConfigData}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.MappedConfigData)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.MappedConfigData)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.MappedConfigDataOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MappedConfigData_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_MappedConfigData_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MappedConfigData_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_MappedConfigData_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.MappedConfigData.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.MappedConfigData.Builder.class);
       }
@@ -53023,7 +53023,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MappedConfigData_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_MappedConfigData_descriptor;
       }
 
       @java.lang.Override
@@ -53409,10 +53409,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.MappedConfigData)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.MappedConfigData)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.MappedConfigData)
+    // @@protoc_insertion_point(class_scope:choreo.apis.MappedConfigData)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.MappedConfigData DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.MappedConfigData();
@@ -53450,7 +53450,7 @@ public final class Types {
   }
 
   public interface ApplicationCountOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ApplicationCount)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ApplicationCount)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -53460,11 +53460,11 @@ public final class Types {
     long getCount();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ApplicationCount}
+   * Protobuf type {@code choreo.apis.ApplicationCount}
    */
   public  static final class ApplicationCount extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ApplicationCount)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ApplicationCount)
       ApplicationCountOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ApplicationCount.newBuilder() to construct.
@@ -53530,13 +53530,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationCount_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ApplicationCount_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationCount_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ApplicationCount_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.ApplicationCount.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ApplicationCount.Builder.class);
     }
@@ -53708,21 +53708,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ApplicationCount}
+     * Protobuf type {@code choreo.apis.ApplicationCount}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ApplicationCount)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ApplicationCount)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.ApplicationCountOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationCount_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ApplicationCount_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationCount_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ApplicationCount_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.ApplicationCount.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.ApplicationCount.Builder.class);
       }
@@ -53753,7 +53753,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationCount_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_ApplicationCount_descriptor;
       }
 
       @java.lang.Override
@@ -53896,10 +53896,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ApplicationCount)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ApplicationCount)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ApplicationCount)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ApplicationCount)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.ApplicationCount DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.ApplicationCount();
@@ -53937,7 +53937,7 @@ public final class Types {
   }
 
   public interface EnvironmentIdOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.EnvironmentId)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -53959,11 +53959,11 @@ public final class Types {
         getEnvironmentIdBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId}
+   * Protobuf type {@code choreo.apis.EnvironmentId}
    */
   public  static final class EnvironmentId extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId)
+      // @@protoc_insertion_point(message_implements:choreo.apis.EnvironmentId)
       EnvironmentIdOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use EnvironmentId.newBuilder() to construct.
@@ -54036,13 +54036,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentId_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_EnvironmentId_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentId_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_EnvironmentId_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId.Builder.class);
     }
@@ -54260,21 +54260,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId}
+     * Protobuf type {@code choreo.apis.EnvironmentId}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.EnvironmentId)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentIdOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentId_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_EnvironmentId_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentId_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_EnvironmentId_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId.Builder.class);
       }
@@ -54307,7 +54307,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentId_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_EnvironmentId_descriptor;
       }
 
       @java.lang.Override
@@ -54531,10 +54531,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.EnvironmentId)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId)
+    // @@protoc_insertion_point(class_scope:choreo.apis.EnvironmentId)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId();
@@ -54572,7 +54572,7 @@ public final class Types {
   }
 
   public interface PaginationOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.Pagination)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.Pagination)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -54618,11 +54618,11 @@ public final class Types {
         getNextBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Pagination}
+   * Protobuf type {@code choreo.apis.Pagination}
    */
   public  static final class Pagination extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Pagination)
+      // @@protoc_insertion_point(message_implements:choreo.apis.Pagination)
       PaginationOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Pagination.newBuilder() to construct.
@@ -54712,13 +54712,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Pagination_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Pagination_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Pagination_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Pagination_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination.Builder.class);
     }
@@ -55026,21 +55026,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.Pagination}
+     * Protobuf type {@code choreo.apis.Pagination}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.Pagination)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.Pagination)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginationOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Pagination_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Pagination_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Pagination_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Pagination_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination.Builder.class);
       }
@@ -55079,7 +55079,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Pagination_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_Pagination_descriptor;
       }
 
       @java.lang.Override
@@ -55452,10 +55452,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Pagination)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.Pagination)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.Pagination)
+    // @@protoc_insertion_point(class_scope:choreo.apis.Pagination)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination();
@@ -55493,7 +55493,7 @@ public final class Types {
   }
 
   public interface PaginatedRoleOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.PaginatedRole)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -55503,50 +55503,50 @@ public final class Types {
     long getCount();
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+     * <code>repeated .choreo.apis.Role list = 2;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> 
         getListList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+     * <code>repeated .choreo.apis.Role list = 2;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getList(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+     * <code>repeated .choreo.apis.Role list = 2;</code>
      */
     int getListCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+     * <code>repeated .choreo.apis.Role list = 2;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> 
         getListOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+     * <code>repeated .choreo.apis.Role list = 2;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getListOrBuilder(
         int index);
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Pagination pagination = 3;</code>
+     * <code>.choreo.apis.Pagination pagination = 3;</code>
      * @return Whether the pagination field is set.
      */
     boolean hasPagination();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Pagination pagination = 3;</code>
+     * <code>.choreo.apis.Pagination pagination = 3;</code>
      * @return The pagination.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination getPagination();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Pagination pagination = 3;</code>
+     * <code>.choreo.apis.Pagination pagination = 3;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginationOrBuilder getPaginationOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole}
+   * Protobuf type {@code choreo.apis.PaginatedRole}
    */
   public  static final class PaginatedRole extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole)
+      // @@protoc_insertion_point(message_implements:choreo.apis.PaginatedRole)
       PaginatedRoleOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use PaginatedRole.newBuilder() to construct.
@@ -55639,13 +55639,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PaginatedRole_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_PaginatedRole_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PaginatedRole_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_PaginatedRole_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole.Builder.class);
     }
@@ -55663,32 +55663,32 @@ public final class Types {
     public static final int LIST_FIELD_NUMBER = 2;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> list_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+     * <code>repeated .choreo.apis.Role list = 2;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> getListList() {
       return list_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+     * <code>repeated .choreo.apis.Role list = 2;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> 
         getListOrBuilderList() {
       return list_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+     * <code>repeated .choreo.apis.Role list = 2;</code>
      */
     public int getListCount() {
       return list_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+     * <code>repeated .choreo.apis.Role list = 2;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getList(int index) {
       return list_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+     * <code>repeated .choreo.apis.Role list = 2;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getListOrBuilder(
         int index) {
@@ -55698,21 +55698,21 @@ public final class Types {
     public static final int PAGINATION_FIELD_NUMBER = 3;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination pagination_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Pagination pagination = 3;</code>
+     * <code>.choreo.apis.Pagination pagination = 3;</code>
      * @return Whether the pagination field is set.
      */
     public boolean hasPagination() {
       return pagination_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Pagination pagination = 3;</code>
+     * <code>.choreo.apis.Pagination pagination = 3;</code>
      * @return The pagination.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination getPagination() {
       return pagination_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination.getDefaultInstance() : pagination_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Pagination pagination = 3;</code>
+     * <code>.choreo.apis.Pagination pagination = 3;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginationOrBuilder getPaginationOrBuilder() {
       return getPagination();
@@ -55904,21 +55904,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole}
+     * Protobuf type {@code choreo.apis.PaginatedRole}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.PaginatedRole)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRoleOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PaginatedRole_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_PaginatedRole_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PaginatedRole_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_PaginatedRole_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole.Builder.class);
       }
@@ -55962,7 +55962,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PaginatedRole_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_PaginatedRole_descriptor;
       }
 
       @java.lang.Override
@@ -56151,7 +56151,7 @@ public final class Types {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> listBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> getListList() {
         if (listBuilder_ == null) {
@@ -56161,7 +56161,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public int getListCount() {
         if (listBuilder_ == null) {
@@ -56171,7 +56171,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getList(int index) {
         if (listBuilder_ == null) {
@@ -56181,7 +56181,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public Builder setList(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
@@ -56198,7 +56198,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public Builder setList(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder builderForValue) {
@@ -56212,7 +56212,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public Builder addList(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
         if (listBuilder_ == null) {
@@ -56228,7 +56228,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public Builder addList(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
@@ -56245,7 +56245,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public Builder addList(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder builderForValue) {
@@ -56259,7 +56259,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public Builder addList(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder builderForValue) {
@@ -56273,7 +56273,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public Builder addAllList(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> values) {
@@ -56288,7 +56288,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public Builder clearList() {
         if (listBuilder_ == null) {
@@ -56301,7 +56301,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public Builder removeList(int index) {
         if (listBuilder_ == null) {
@@ -56314,14 +56314,14 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder getListBuilder(
           int index) {
         return getListFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getListOrBuilder(
           int index) {
@@ -56331,7 +56331,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> 
            getListOrBuilderList() {
@@ -56342,14 +56342,14 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder addListBuilder() {
         return getListFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder addListBuilder(
           int index) {
@@ -56357,7 +56357,7 @@ public final class Types {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role list = 2;</code>
+       * <code>repeated .choreo.apis.Role list = 2;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder> 
            getListBuilderList() {
@@ -56382,14 +56382,14 @@ public final class Types {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginationOrBuilder> paginationBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Pagination pagination = 3;</code>
+       * <code>.choreo.apis.Pagination pagination = 3;</code>
        * @return Whether the pagination field is set.
        */
       public boolean hasPagination() {
         return paginationBuilder_ != null || pagination_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Pagination pagination = 3;</code>
+       * <code>.choreo.apis.Pagination pagination = 3;</code>
        * @return The pagination.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination getPagination() {
@@ -56400,7 +56400,7 @@ public final class Types {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Pagination pagination = 3;</code>
+       * <code>.choreo.apis.Pagination pagination = 3;</code>
        */
       public Builder setPagination(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination value) {
         if (paginationBuilder_ == null) {
@@ -56416,7 +56416,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Pagination pagination = 3;</code>
+       * <code>.choreo.apis.Pagination pagination = 3;</code>
        */
       public Builder setPagination(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination.Builder builderForValue) {
@@ -56430,7 +56430,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Pagination pagination = 3;</code>
+       * <code>.choreo.apis.Pagination pagination = 3;</code>
        */
       public Builder mergePagination(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination value) {
         if (paginationBuilder_ == null) {
@@ -56448,7 +56448,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Pagination pagination = 3;</code>
+       * <code>.choreo.apis.Pagination pagination = 3;</code>
        */
       public Builder clearPagination() {
         if (paginationBuilder_ == null) {
@@ -56462,7 +56462,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Pagination pagination = 3;</code>
+       * <code>.choreo.apis.Pagination pagination = 3;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination.Builder getPaginationBuilder() {
         
@@ -56470,7 +56470,7 @@ public final class Types {
         return getPaginationFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Pagination pagination = 3;</code>
+       * <code>.choreo.apis.Pagination pagination = 3;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginationOrBuilder getPaginationOrBuilder() {
         if (paginationBuilder_ != null) {
@@ -56481,7 +56481,7 @@ public final class Types {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Pagination pagination = 3;</code>
+       * <code>.choreo.apis.Pagination pagination = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Pagination.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginationOrBuilder> 
@@ -56509,10 +56509,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.PaginatedRole)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole)
+    // @@protoc_insertion_point(class_scope:choreo.apis.PaginatedRole)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole();
@@ -56550,7 +56550,7 @@ public final class Types {
   }
 
   public interface PermissionTreeOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.PermissionTree)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -56566,35 +56566,35 @@ public final class Types {
         getDomainBytes();
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+     * <code>repeated .choreo.apis.Permission list = 2;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> 
         getListList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+     * <code>repeated .choreo.apis.Permission list = 2;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission getList(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+     * <code>repeated .choreo.apis.Permission list = 2;</code>
      */
     int getListCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+     * <code>repeated .choreo.apis.Permission list = 2;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder> 
         getListOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+     * <code>repeated .choreo.apis.Permission list = 2;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder getListOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree}
+   * Protobuf type {@code choreo.apis.PermissionTree}
    */
   public  static final class PermissionTree extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree)
+      // @@protoc_insertion_point(message_implements:choreo.apis.PermissionTree)
       PermissionTreeOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use PermissionTree.newBuilder() to construct.
@@ -56676,13 +56676,13 @@ public final class Types {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PermissionTree_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_PermissionTree_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PermissionTree_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_PermissionTree_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree.Builder.class);
     }
@@ -56726,32 +56726,32 @@ public final class Types {
     public static final int LIST_FIELD_NUMBER = 2;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> list_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+     * <code>repeated .choreo.apis.Permission list = 2;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> getListList() {
       return list_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+     * <code>repeated .choreo.apis.Permission list = 2;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder> 
         getListOrBuilderList() {
       return list_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+     * <code>repeated .choreo.apis.Permission list = 2;</code>
      */
     public int getListCount() {
       return list_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+     * <code>repeated .choreo.apis.Permission list = 2;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission getList(int index) {
       return list_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+     * <code>repeated .choreo.apis.Permission list = 2;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder getListOrBuilder(
         int index) {
@@ -56926,21 +56926,21 @@ public final class Types {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree}
+     * Protobuf type {@code choreo.apis.PermissionTree}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.PermissionTree)
         org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTreeOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PermissionTree_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_PermissionTree_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PermissionTree_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_PermissionTree_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree.class, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree.Builder.class);
       }
@@ -56978,7 +56978,7 @@ public final class Types {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PermissionTree_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.Types.internal_static_choreo_apis_PermissionTree_descriptor;
       }
 
       @java.lang.Override
@@ -57206,7 +57206,7 @@ public final class Types {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder> listBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> getListList() {
         if (listBuilder_ == null) {
@@ -57216,7 +57216,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public int getListCount() {
         if (listBuilder_ == null) {
@@ -57226,7 +57226,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission getList(int index) {
         if (listBuilder_ == null) {
@@ -57236,7 +57236,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public Builder setList(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission value) {
@@ -57253,7 +57253,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public Builder setList(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder builderForValue) {
@@ -57267,7 +57267,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public Builder addList(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission value) {
         if (listBuilder_ == null) {
@@ -57283,7 +57283,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public Builder addList(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission value) {
@@ -57300,7 +57300,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public Builder addList(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder builderForValue) {
@@ -57314,7 +57314,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public Builder addList(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder builderForValue) {
@@ -57328,7 +57328,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public Builder addAllList(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> values) {
@@ -57343,7 +57343,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public Builder clearList() {
         if (listBuilder_ == null) {
@@ -57356,7 +57356,7 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public Builder removeList(int index) {
         if (listBuilder_ == null) {
@@ -57369,14 +57369,14 @@ public final class Types {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder getListBuilder(
           int index) {
         return getListFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder getListOrBuilder(
           int index) {
@@ -57386,7 +57386,7 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder> 
            getListOrBuilderList() {
@@ -57397,14 +57397,14 @@ public final class Types {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder addListBuilder() {
         return getListFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder addListBuilder(
           int index) {
@@ -57412,7 +57412,7 @@ public final class Types {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission list = 2;</code>
+       * <code>repeated .choreo.apis.Permission list = 2;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder> 
            getListBuilderList() {
@@ -57445,10 +57445,10 @@ public final class Types {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.PermissionTree)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree)
+    // @@protoc_insertion_point(class_scope:choreo.apis.PermissionTree)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree();
@@ -57486,230 +57486,230 @@ public final class Types {
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_User_descriptor;
+    internal_static_choreo_apis_User_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_User_fieldAccessorTable;
+      internal_static_choreo_apis_User_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Organization_descriptor;
+    internal_static_choreo_apis_Organization_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Organization_fieldAccessorTable;
+      internal_static_choreo_apis_Organization_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MemberInvitation_descriptor;
+    internal_static_choreo_apis_MemberInvitation_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MemberInvitation_fieldAccessorTable;
+      internal_static_choreo_apis_MemberInvitation_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Group_descriptor;
+    internal_static_choreo_apis_Group_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Group_fieldAccessorTable;
+      internal_static_choreo_apis_Group_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Permission_descriptor;
+    internal_static_choreo_apis_Permission_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Permission_fieldAccessorTable;
+      internal_static_choreo_apis_Permission_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Role_descriptor;
+    internal_static_choreo_apis_Role_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Role_fieldAccessorTable;
+      internal_static_choreo_apis_Role_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GroupTag_descriptor;
+    internal_static_choreo_apis_GroupTag_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GroupTag_fieldAccessorTable;
+      internal_static_choreo_apis_GroupTag_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RoleTag_descriptor;
+    internal_static_choreo_apis_RoleTag_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RoleTag_fieldAccessorTable;
+      internal_static_choreo_apis_RoleTag_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_descriptor;
+    internal_static_choreo_apis_Application_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_fieldAccessorTable;
+      internal_static_choreo_apis_Application_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_Observability_descriptor;
+    internal_static_choreo_apis_Application_Observability_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_Observability_fieldAccessorTable;
+      internal_static_choreo_apis_Application_Observability_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentInfo_descriptor;
+    internal_static_choreo_apis_EnvironmentInfo_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentInfo_fieldAccessorTable;
+      internal_static_choreo_apis_EnvironmentInfo_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthRequest_descriptor;
+    internal_static_choreo_apis_AuthRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthRequest_fieldAccessorTable;
+      internal_static_choreo_apis_AuthRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthResponse_descriptor;
+    internal_static_choreo_apis_AuthResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthResponse_fieldAccessorTable;
+      internal_static_choreo_apis_AuthResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TriggerParams_descriptor;
+    internal_static_choreo_apis_TriggerParams_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TriggerParams_fieldAccessorTable;
+      internal_static_choreo_apis_TriggerParams_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRun_descriptor;
+    internal_static_choreo_apis_DeploymentRun_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRun_fieldAccessorTable;
+      internal_static_choreo_apis_DeploymentRun_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRunStatus_descriptor;
+    internal_static_choreo_apis_DeploymentRunStatus_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRunStatus_fieldAccessorTable;
+      internal_static_choreo_apis_DeploymentRunStatus_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRunStatus_PhasesEntry_descriptor;
+    internal_static_choreo_apis_DeploymentRunStatus_PhasesEntry_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRunStatus_PhasesEntry_fieldAccessorTable;
+      internal_static_choreo_apis_DeploymentRunStatus_PhasesEntry_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Phase_descriptor;
+    internal_static_choreo_apis_Phase_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Phase_fieldAccessorTable;
+      internal_static_choreo_apis_Phase_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Environment_descriptor;
+    internal_static_choreo_apis_Environment_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Environment_fieldAccessorTable;
+      internal_static_choreo_apis_Environment_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationToEnvMapper_descriptor;
+    internal_static_choreo_apis_ApplicationToEnvMapper_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationToEnvMapper_fieldAccessorTable;
+      internal_static_choreo_apis_ApplicationToEnvMapper_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketRawMessage_descriptor;
+    internal_static_choreo_apis_WebsocketRawMessage_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketRawMessage_fieldAccessorTable;
+      internal_static_choreo_apis_WebsocketRawMessage_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketMessage_descriptor;
+    internal_static_choreo_apis_WebsocketMessage_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketMessage_fieldAccessorTable;
+      internal_static_choreo_apis_WebsocketMessage_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceFileInfo_descriptor;
+    internal_static_choreo_apis_WorkspaceFileInfo_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceFileInfo_fieldAccessorTable;
+      internal_static_choreo_apis_WorkspaceFileInfo_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceApplicationLogLine_descriptor;
+    internal_static_choreo_apis_WorkspaceApplicationLogLine_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceApplicationLogLine_fieldAccessorTable;
+      internal_static_choreo_apis_WorkspaceApplicationLogLine_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Error_descriptor;
+    internal_static_choreo_apis_Error_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Error_fieldAccessorTable;
+      internal_static_choreo_apis_Error_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Configuration_descriptor;
+    internal_static_choreo_apis_Configuration_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Configuration_fieldAccessorTable;
+      internal_static_choreo_apis_Configuration_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Secret_descriptor;
+    internal_static_choreo_apis_Secret_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Secret_fieldAccessorTable;
+      internal_static_choreo_apis_Secret_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigurationGroup_descriptor;
+    internal_static_choreo_apis_ConfigurationGroup_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigurationGroup_fieldAccessorTable;
+      internal_static_choreo_apis_ConfigurationGroup_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_descriptor;
+    internal_static_choreo_apis_ConnectionConfig_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_fieldAccessorTable;
+      internal_static_choreo_apis_ConnectionConfig_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_oauth2_descriptor;
+    internal_static_choreo_apis_ConnectionConfig_oauth2_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_oauth2_fieldAccessorTable;
+      internal_static_choreo_apis_ConnectionConfig_oauth2_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_parameter_descriptor;
+    internal_static_choreo_apis_ConnectionConfig_parameter_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_parameter_fieldAccessorTable;
+      internal_static_choreo_apis_ConnectionConfig_parameter_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_descriptor;
+    internal_static_choreo_apis_Connection_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_fieldAccessorTable;
+      internal_static_choreo_apis_Connection_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_code_var_mapping_descriptor;
+    internal_static_choreo_apis_Connection_code_var_mapping_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_code_var_mapping_fieldAccessorTable;
+      internal_static_choreo_apis_Connection_code_var_mapping_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKey_descriptor;
+    internal_static_choreo_apis_OnPremKey_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKey_fieldAccessorTable;
+      internal_static_choreo_apis_OnPremKey_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKeySubscription_descriptor;
+    internal_static_choreo_apis_OnPremKeySubscription_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKeySubscription_fieldAccessorTable;
+      internal_static_choreo_apis_OnPremKeySubscription_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TokenInfo_descriptor;
+    internal_static_choreo_apis_TokenInfo_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TokenInfo_fieldAccessorTable;
+      internal_static_choreo_apis_TokenInfo_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Token_descriptor;
+    internal_static_choreo_apis_Token_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Token_fieldAccessorTable;
+      internal_static_choreo_apis_Token_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMappingInfo_descriptor;
+    internal_static_choreo_apis_ConfigMappingInfo_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMappingInfo_fieldAccessorTable;
+      internal_static_choreo_apis_ConfigMappingInfo_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMapping_descriptor;
+    internal_static_choreo_apis_ConfigMapping_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMapping_fieldAccessorTable;
+      internal_static_choreo_apis_ConfigMapping_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MappedConfigData_descriptor;
+    internal_static_choreo_apis_MappedConfigData_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MappedConfigData_fieldAccessorTable;
+      internal_static_choreo_apis_MappedConfigData_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationCount_descriptor;
+    internal_static_choreo_apis_ApplicationCount_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationCount_fieldAccessorTable;
+      internal_static_choreo_apis_ApplicationCount_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentId_descriptor;
+    internal_static_choreo_apis_EnvironmentId_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentId_fieldAccessorTable;
+      internal_static_choreo_apis_EnvironmentId_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Pagination_descriptor;
+    internal_static_choreo_apis_Pagination_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Pagination_fieldAccessorTable;
+      internal_static_choreo_apis_Pagination_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PaginatedRole_descriptor;
+    internal_static_choreo_apis_PaginatedRole_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PaginatedRole_fieldAccessorTable;
+      internal_static_choreo_apis_PaginatedRole_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PermissionTree_descriptor;
+    internal_static_choreo_apis_PermissionTree_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PermissionTree_fieldAccessorTable;
+      internal_static_choreo_apis_PermissionTree_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -57719,242 +57719,221 @@ public final class Types {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\013types.proto\022\'org.wso2.carbon.apimgt.im" +
-      "pl.choreo.apis\032\031google/protobuf/any.prot" +
-      "o\032\037google/protobuf/timestamp.proto\032\027vali" +
-      "date/validate.proto\"\332\002\n\004User\022\n\n\002id\030\001 \001(\003" +
-      "\022\030\n\006idp_id\030\002 \001(\tB\010\372B\005r\003\260\001\001\022\023\n\013picture_ur" +
-      "l\030\003 \001(\t\022\r\n\005email\030\004 \001(\t\022\024\n\014display_name\030\005" +
-      " \001(\t\022>\n\006groups\030\006 \003(\0132..org.wso2.carbon.a" +
-      "pimgt.impl.choreo.apis.Group\022<\n\005roles\030\007 " +
-      "\003(\0132-.org.wso2.carbon.apimgt.impl.choreo" +
-      ".apis.Role\022\024\n\014is_anonymous\030\010 \001(\010\022.\n\ncrea" +
-      "ted_at\030\t \001(\0132\032.google.protobuf.Timestamp" +
-      "\022.\n\nexpired_at\030\n \001(\0132\032.google.protobuf.T" +
-      "imestamp\"b\n\014Organization\022\n\n\002id\030\001 \001(\003\022\026\n\004" +
-      "uuid\030\002 \001(\tB\010\372B\005r\003\260\001\001\022\027\n\006handle\030\003 \001(\tB\007\372B" +
-      "\004r\002\020\001\022\025\n\004name\030\004 \001(\tB\007\372B\004r\002\020\001\"\202\001\n\020MemberI" +
-      "nvitation\022\n\n\002id\030\001 \001(\003\022\014\n\004uuid\030\002 \001(\t\022\026\n\005e" +
-      "mail\030\003 \001(\tB\007\372B\004r\002`\001\022\027\n\006handle\030\004 \001(\tB\007\372B\004" +
-      "r\002\020\001\022\016\n\006groups\030\005 \003(\t\022\023\n\013application\030\006 \001(" +
-      "\t\"\370\003\n\005Group\022\n\n\002id\030\001 \001(\003\022\020\n\010org_name\030\002 \001(" +
-      "\t\022\020\n\010org_uuid\030\003 \001(\t\022\023\n\013description\030\004 \001(\t" +
-      "\022\025\n\rdefault_group\030\005 \001(\010\022\035\n\014display_name\030" +
-      "\006 \001(\tB\007\372B\004r\002\020\001\022/\n\006handle\030\007 \001(\tB\037\372B\004r\002\030\036\372" +
-      "B\025r\0232\021^[a-z][a-z0-9-]+$\022<\n\005roles\030\010 \003(\0132-" +
-      ".org.wso2.carbon.apimgt.impl.choreo.apis" +
-      ".Role\022<\n\005users\030\t \003(\0132-.org.wso2.carbon.a" +
-      "pimgt.impl.choreo.apis.User\022?\n\004tags\030\n \003(" +
-      "\01321.org.wso2.carbon.apimgt.impl.choreo.a" +
-      "pis.GroupTag\022\022\n\ncreated_by\030\013 \001(\t\022\022\n\nupda" +
-      "ted_by\030\014 \001(\t\022.\n\ncreated_at\030\r \001(\0132\032.googl" +
-      "e.protobuf.Timestamp\022.\n\nupdated_at\030\016 \001(\013" +
-      "2\032.google.protobuf.Timestamp\"\344\001\n\nPermiss" +
-      "ion\022\n\n\002id\030\001 \001(\003\022\027\n\006handle\030\002 \001(\tB\007\372B\004r\002\030\036" +
-      "\022\024\n\014display_name\030\003 \001(\t\022\023\n\013domain_area\030\004 " +
-      "\001(\t\022\023\n\013description\030\005 \001(\t\022\021\n\tparent_id\030\006 " +
-      "\001(\003\022.\n\ncreated_at\030\007 \001(\0132\032.google.protobu" +
-      "f.Timestamp\022.\n\nupdated_at\030\010 \001(\0132\032.google" +
-      ".protobuf.Timestamp\"\335\003\n\004Role\022\n\n\002id\030\001 \001(\003" +
-      "\022\023\n\013description\030\002 \001(\t\022\035\n\014display_name\030\003 " +
-      "\001(\tB\007\372B\004r\002\020\001\022/\n\006handle\030\004 \001(\tB\037\372B\004r\002\030\036\372B\025" +
-      "r\0232\021^[a-z][a-z0-9-]+$\022\024\n\014default_role\030\005 " +
-      "\001(\010\022H\n\013permissions\030\006 \003(\01323.org.wso2.carb" +
-      "on.apimgt.impl.choreo.apis.Permission\022>\n" +
-      "\004tags\030\007 \003(\01320.org.wso2.carbon.apimgt.imp" +
-      "l.choreo.apis.RoleTag\022<\n\005users\030\010 \003(\0132-.o" +
-      "rg.wso2.carbon.apimgt.impl.choreo.apis.U" +
-      "ser\022\022\n\ncreated_by\030\t \001(\t\022\022\n\nupdated_by\030\n " +
-      "\001(\t\022.\n\ncreated_at\030\013 \001(\0132\032.google.protobu" +
-      "f.Timestamp\022.\n\nupdated_at\030\014 \001(\0132\032.google" +
-      ".protobuf.Timestamp\"\363\001\n\010GroupTag\022\n\n\002id\030\001" +
-      " \001(\003\022\020\n\010org_name\030\002 \001(\t\022\020\n\010org_uuid\030\003 \001(\t" +
-      "\022\022\n\ngroup_name\030\004 \001(\t\022/\n\006handle\030\005 \001(\tB\037\372B" +
-      "\004r\002\030\036\372B\025r\0232\021^[A-Za-z0-9-_ ]+$\022\022\n\ncreated" +
-      "_by\030\006 \001(\t\022.\n\ncreated_at\030\007 \001(\0132\032.google.p" +
-      "rotobuf.Timestamp\022.\n\nupdated_at\030\t \001(\0132\032." +
-      "google.protobuf.Timestamp\"\317\001\n\007RoleTag\022\n\n" +
-      "\002id\030\001 \001(\003\022\023\n\013role_handle\030\002 \001(\t\022/\n\006handle" +
-      "\030\003 \001(\tB\037\372B\004r\002\030\036\372B\025r\0232\021^[A-Za-z0-9-_ ]+$\022" +
-      "\022\n\ncreated_by\030\004 \001(\t\022.\n\ncreated_at\030\005 \001(\0132" +
-      "\032.google.protobuf.Timestamp\022.\n\nupdated_a" +
-      "t\030\006 \001(\0132\032.google.protobuf.Timestamp\"\365\006\n\013" +
-      "Application\022\n\n\002id\030\001 \001(\003\022-\n\004name\030\002 \001(\tB\037\372" +
-      "B\004r\002\030\036\372B\025r\0232\021^[a-z][a-z0-9-]+$\022\027\n\017organi" +
-      "zation_id\030\003 \001(\003\022\"\n\014organization\030\004 \001(\tB\007\372" +
-      "B\004r\002\020\001R\003org\022\035\n\014display_name\030\005 \001(\tB\007\372B\004r\002" +
-      "\020\001\022\024\n\014display_type\030\006 \001(\t\022\022\n\ngit_remote\030\007" +
-      " \001(\t\022\024\n\014working_file\030\010 \001(\t\022T\n\013deploy_typ" +
-      "e\030\t \001(\0162?.org.wso2.carbon.apimgt.impl.ch" +
+      "\n\013types.proto\022\013choreo.apis\032\031google/proto" +
+      "buf/any.proto\032\037google/protobuf/timestamp" +
+      ".proto\032\027validate/validate.proto\"\242\002\n\004User" +
+      "\022\n\n\002id\030\001 \001(\003\022\030\n\006idp_id\030\002 \001(\tB\010\372B\005r\003\260\001\001\022\023" +
+      "\n\013picture_url\030\003 \001(\t\022\r\n\005email\030\004 \001(\t\022\024\n\014di" +
+      "splay_name\030\005 \001(\t\022\"\n\006groups\030\006 \003(\0132\022.chore" +
+      "o.apis.Group\022 \n\005roles\030\007 \003(\0132\021.choreo.api" +
+      "s.Role\022\024\n\014is_anonymous\030\010 \001(\010\022.\n\ncreated_" +
+      "at\030\t \001(\0132\032.google.protobuf.Timestamp\022.\n\n" +
+      "expired_at\030\n \001(\0132\032.google.protobuf.Times" +
+      "tamp\"b\n\014Organization\022\n\n\002id\030\001 \001(\003\022\026\n\004uuid" +
+      "\030\002 \001(\tB\010\372B\005r\003\260\001\001\022\027\n\006handle\030\003 \001(\tB\007\372B\004r\002\020" +
+      "\001\022\025\n\004name\030\004 \001(\tB\007\372B\004r\002\020\001\"\202\001\n\020MemberInvit" +
+      "ation\022\n\n\002id\030\001 \001(\003\022\014\n\004uuid\030\002 \001(\t\022\026\n\005email" +
+      "\030\003 \001(\tB\007\372B\004r\002`\001\022\027\n\006handle\030\004 \001(\tB\007\372B\004r\002\020\001" +
+      "\022\016\n\006groups\030\005 \003(\t\022\023\n\013application\030\006 \001(\t\"\244\003" +
+      "\n\005Group\022\n\n\002id\030\001 \001(\003\022\020\n\010org_name\030\002 \001(\t\022\020\n" +
+      "\010org_uuid\030\003 \001(\t\022\023\n\013description\030\004 \001(\t\022\025\n\r" +
+      "default_group\030\005 \001(\010\022\035\n\014display_name\030\006 \001(" +
+      "\tB\007\372B\004r\002\020\001\022/\n\006handle\030\007 \001(\tB\037\372B\004r\002\030\036\372B\025r\023" +
+      "2\021^[a-z][a-z0-9-]+$\022 \n\005roles\030\010 \003(\0132\021.cho" +
+      "reo.apis.Role\022 \n\005users\030\t \003(\0132\021.choreo.ap" +
+      "is.User\022#\n\004tags\030\n \003(\0132\025.choreo.apis.Grou" +
+      "pTag\022\022\n\ncreated_by\030\013 \001(\t\022\022\n\nupdated_by\030\014" +
+      " \001(\t\022.\n\ncreated_at\030\r \001(\0132\032.google.protob" +
+      "uf.Timestamp\022.\n\nupdated_at\030\016 \001(\0132\032.googl" +
+      "e.protobuf.Timestamp\"\344\001\n\nPermission\022\n\n\002i" +
+      "d\030\001 \001(\003\022\027\n\006handle\030\002 \001(\tB\007\372B\004r\002\030\036\022\024\n\014disp" +
+      "lay_name\030\003 \001(\t\022\023\n\013domain_area\030\004 \001(\t\022\023\n\013d" +
+      "escription\030\005 \001(\t\022\021\n\tparent_id\030\006 \001(\003\022.\n\nc" +
+      "reated_at\030\007 \001(\0132\032.google.protobuf.Timest" +
+      "amp\022.\n\nupdated_at\030\010 \001(\0132\032.google.protobu" +
+      "f.Timestamp\"\211\003\n\004Role\022\n\n\002id\030\001 \001(\003\022\023\n\013desc" +
+      "ription\030\002 \001(\t\022\035\n\014display_name\030\003 \001(\tB\007\372B\004" +
+      "r\002\020\001\022/\n\006handle\030\004 \001(\tB\037\372B\004r\002\030\036\372B\025r\0232\021^[a-" +
+      "z][a-z0-9-]+$\022\024\n\014default_role\030\005 \001(\010\022,\n\013p" +
+      "ermissions\030\006 \003(\0132\027.choreo.apis.Permissio" +
+      "n\022\"\n\004tags\030\007 \003(\0132\024.choreo.apis.RoleTag\022 \n" +
+      "\005users\030\010 \003(\0132\021.choreo.apis.User\022\022\n\ncreat" +
+      "ed_by\030\t \001(\t\022\022\n\nupdated_by\030\n \001(\t\022.\n\ncreat" +
+      "ed_at\030\013 \001(\0132\032.google.protobuf.Timestamp\022" +
+      ".\n\nupdated_at\030\014 \001(\0132\032.google.protobuf.Ti" +
+      "mestamp\"\363\001\n\010GroupTag\022\n\n\002id\030\001 \001(\003\022\020\n\010org_" +
+      "name\030\002 \001(\t\022\020\n\010org_uuid\030\003 \001(\t\022\022\n\ngroup_na" +
+      "me\030\004 \001(\t\022/\n\006handle\030\005 \001(\tB\037\372B\004r\002\030\036\372B\025r\0232\021" +
+      "^[A-Za-z0-9-_ ]+$\022\022\n\ncreated_by\030\006 \001(\t\022.\n" +
+      "\ncreated_at\030\007 \001(\0132\032.google.protobuf.Time" +
+      "stamp\022.\n\nupdated_at\030\t \001(\0132\032.google.proto" +
+      "buf.Timestamp\"\317\001\n\007RoleTag\022\n\n\002id\030\001 \001(\003\022\023\n" +
+      "\013role_handle\030\002 \001(\t\022/\n\006handle\030\003 \001(\tB\037\372B\004r" +
+      "\002\030\036\372B\025r\0232\021^[A-Za-z0-9-_ ]+$\022\022\n\ncreated_b" +
+      "y\030\004 \001(\t\022.\n\ncreated_at\030\005 \001(\0132\032.google.pro" +
+      "tobuf.Timestamp\022.\n\nupdated_at\030\006 \001(\0132\032.go" +
+      "ogle.protobuf.Timestamp\"\241\006\n\013Application\022" +
+      "\n\n\002id\030\001 \001(\003\022-\n\004name\030\002 \001(\tB\037\372B\004r\002\030\036\372B\025r\0232" +
+      "\021^[a-z][a-z0-9-]+$\022\027\n\017organization_id\030\003 " +
+      "\001(\003\022\"\n\014organization\030\004 \001(\tB\007\372B\004r\002\020\001R\003org\022" +
+      "\035\n\014display_name\030\005 \001(\tB\007\372B\004r\002\020\001\022\024\n\014displa" +
+      "y_type\030\006 \001(\t\022\022\n\ngit_remote\030\007 \001(\t\022\024\n\014work" +
+      "ing_file\030\010 \001(\t\0228\n\013deploy_type\030\t \001(\0162#.ch" +
       "oreo.apis.Application.DeployType\022\025\n\rcron" +
       "_schedule\030\n \001(\t\022\020\n\010template\030\013 \001(\t\022.\n\ncre" +
       "ated_at\030\014 \001(\0132\032.google.protobuf.Timestam" +
-      "p\022Y\n\robservability\030\r \001(\0132B.org.wso2.carb" +
-      "on.apimgt.impl.choreo.apis.Application.O" +
-      "bservability\022K\n\006status\030\016 \001(\0162;.org.wso2." +
-      "carbon.apimgt.impl.choreo.apis.Applicati" +
-      "on.Status\022\025\n\rtemplate_code\030\017 \001(\t\022\021\n\tpre_" +
-      "built\030\020 \001(\010\022\030\n\020sample_reference\030\021 \001(\t\022\024\n" +
-      "\014docker_image\030\022 \001(\t\022\022\n\nproject_id\030\023 \001(\t\022" +
-      "\026\n\016application_id\030\024 \001(\t\032D\n\rObservability" +
-      "\022\033\n\002id\030\001 \001(\tR\017observabilityId\022\026\n\016latest_" +
-      "version\030\002 \001(\t\";\n\nDeployType\022\013\n\007Unknown\020\000" +
-      "\022\007\n\003Job\020\001\022\013\n\007Service\020\002\022\n\n\006Custom\020\003\"/\n\006St" +
-      "atus\022\013\n\007unknown\020\000\022\013\n\007stopped\020\001\022\013\n\007runnin" +
-      "g\020\002\"P\n\017EnvironmentInfo\022\022\n\naccess_url\030\001 \001" +
-      "(\t\022\031\n\021observability_url\030\002 \001(\t\022\016\n\006status\030" +
-      "\003 \001(\t\"\200\001\n\013AuthRequest\022\014\n\004code\030\001 \001(\t\022$\n\tp" +
-      "roviders\030\002 \001(\tR\021authenticatedIdPs\022\024\n\014red" +
-      "irect_url\030\003 \001(\t\022\'\n\033beta_invite_correlati" +
-      "on_key\030\004 \001(\tR\002ck\"\330\002\n\014AuthResponse\022\r\n\005tok" +
-      "en\030\001 \001(\t\022\024\n\014display_name\030\002 \001(\t\022\022\n\nuser_e" +
-      "mail\030\003 \001(\t\022 \n\030user_profile_picture_url\030\004" +
-      " \001(\t\022\016\n\006idp_id\030\005 \001(\t\022L\n\rorganizations\030\006 " +
-      "\003(\01325.org.wso2.carbon.apimgt.impl.choreo" +
-      ".apis.Organization\022\017\n\007user_id\030\007 \001(\003\0223\n\017u" +
-      "ser_created_at\030\010 \001(\0132\032.google.protobuf.T" +
-      "imestamp\0223\n\017user_expired_at\030\t \001(\0132\032.goog" +
-      "le.protobuf.Timestamp\022\024\n\014is_anonymous\030\n " +
-      "\001(\010\"\343\001\n\rTriggerParams\022\013\n\003org\030\001 \001(\t\022\013\n\003ap" +
-      "p\030\002 \001(\t\022\r\n\005appId\030\003 \001(\t\022\n\n\002ns\030\004 \001(\t\022\020\n\010ho" +
-      "stname\030\005 \001(\t\022\014\n\004cron\030\006 \001(\t\022T\n\016deployment" +
-      "Type\030\007 \001(\0162<.org.wso2.carbon.apimgt.impl" +
-      ".choreo.apis.TriggerParams.DType\"\'\n\005DTyp" +
-      "e\022\007\n\003Job\020\000\022\013\n\007Service\020\001\022\010\n\004Cron\020\002\".\n\rDep" +
-      "loymentRun\022\n\n\002id\030\001 \001(\003\022\021\n\tcreatedAt\030\002 \001(" +
-      "\003\"\203\002\n\023DeploymentRunStatus\022\r\n\005state\030\001 \001(\t" +
-      "\022\022\n\nconclusion\030\002 \001(\t\022X\n\006phases\030\003 \003(\0132H.o" +
-      "rg.wso2.carbon.apimgt.impl.choreo.apis.D" +
-      "eploymentRunStatus.PhasesEntry\022\020\n\010errorM" +
-      "sg\030\004 \001(\t\032]\n\013PhasesEntry\022\013\n\003key\030\001 \001(\t\022=\n\005" +
-      "value\030\002 \001(\0132..org.wso2.carbon.apimgt.imp" +
-      "l.choreo.apis.Phase:\0028\001\"*\n\005Phase\022\r\n\005stat" +
-      "e\030\001 \001(\t\022\022\n\nconclusion\030\002 \001(\t\"\330\001\n\013Environm" +
-      "ent\022\n\n\002id\030\001 \001(\003\022\r\n\005orgId\030\002 \001(\003\022\013\n\003org\030\003 " +
-      "\001(\t\022\035\n\014display_name\030\004 \001(\tB\007\372B\004r\002\020\001\022-\n\004na" +
-      "me\030\005 \001(\tB\037\372B\004r\002\030\036\372B\025r\0232\021^[a-z][a-z0-9-]+" +
-      "$\022\026\n\016k8s_cluster_id\030\006 \001(\003\022\025\n\rk8s_namespa" +
-      "ce\030\007 \001(\t\022\021\n\tcreatedAt\030\010 \001(\003\022\021\n\tupdatedAt" +
-      "\030\t \001(\003\"\306\001\n\026ApplicationToEnvMapper\022\r\n\005app" +
-      "Id\030\001 \001(\003\022\r\n\005envId\030\002 \001(\003\022\031\n\021deploymentBui" +
-      "ldId\030\003 \001(\t\022M\n\006status\030\004 \001(\0162=.org.wso2.ca" +
-      "rbon.apimgt.impl.choreo.apis.deploymentS" +
-      "tatusEnum\022\021\n\tcreatedAt\030\006 \001(\003\022\021\n\tupdatedA" +
-      "t\030\007 \001(\003\"4\n\023WebsocketRawMessage\022\014\n\004type\030\001" +
-      " \001(\005\022\017\n\007message\030\002 \001(\014\"\276\001\n\020WebsocketMessa" +
-      "ge\022L\n\004type\030\001 \001(\0162>.org.wso2.carbon.apimg" +
-      "t.impl.choreo.apis.WebsocketMessage.Type" +
-      "\022%\n\007message\030\002 \001(\0132\024.google.protobuf.Any\"" +
-      "5\n\004Type\022\013\n\007unknown\020\000\022\013\n\007control\020\001\022\010\n\004dat" +
-      "a\020\002\022\t\n\005error\020\003\"\317\001\n\021WorkspaceFileInfo\022M\n\004" +
-      "type\030\001 \001(\0162?.org.wso2.carbon.apimgt.impl" +
-      ".choreo.apis.WorkspaceFileInfo.Type\022\025\n\004p" +
-      "ath\030\002 \001(\tB\007\372B\004r\002\020\001\022\014\n\004size\030\003 \001(\004\022\017\n\007cont" +
-      "ent\030\004 \001(\t\022\r\n\005files\030\005 \003(\t\"&\n\004Type\022\013\n\007unkn" +
-      "own\020\000\022\007\n\003dir\020\001\022\010\n\004file\020\002\"\274\001\n\033WorkspaceAp" +
-      "plicationLogLine\022W\n\004type\030\001 \001(\0162I.org.wso" +
-      "2.carbon.apimgt.impl.choreo.apis.Workspa" +
+      "p\022=\n\robservability\030\r \001(\0132&.choreo.apis.A" +
+      "pplication.Observability\022/\n\006status\030\016 \001(\016" +
+      "2\037.choreo.apis.Application.Status\022\025\n\rtem" +
+      "plate_code\030\017 \001(\t\022\021\n\tpre_built\030\020 \001(\010\022\030\n\020s" +
+      "ample_reference\030\021 \001(\t\022\024\n\014docker_image\030\022 " +
+      "\001(\t\022\022\n\nproject_id\030\023 \001(\t\022\026\n\016application_i" +
+      "d\030\024 \001(\t\032D\n\rObservability\022\033\n\002id\030\001 \001(\tR\017ob" +
+      "servabilityId\022\026\n\016latest_version\030\002 \001(\t\";\n" +
+      "\nDeployType\022\013\n\007Unknown\020\000\022\007\n\003Job\020\001\022\013\n\007Ser" +
+      "vice\020\002\022\n\n\006Custom\020\003\"/\n\006Status\022\013\n\007unknown\020" +
+      "\000\022\013\n\007stopped\020\001\022\013\n\007running\020\002\"P\n\017Environme" +
+      "ntInfo\022\022\n\naccess_url\030\001 \001(\t\022\031\n\021observabil" +
+      "ity_url\030\002 \001(\t\022\016\n\006status\030\003 \001(\t\"\200\001\n\013AuthRe" +
+      "quest\022\014\n\004code\030\001 \001(\t\022$\n\tproviders\030\002 \001(\tR\021" +
+      "authenticatedIdPs\022\024\n\014redirect_url\030\003 \001(\t\022" +
+      "\'\n\033beta_invite_correlation_key\030\004 \001(\tR\002ck" +
+      "\"\274\002\n\014AuthResponse\022\r\n\005token\030\001 \001(\t\022\024\n\014disp" +
+      "lay_name\030\002 \001(\t\022\022\n\nuser_email\030\003 \001(\t\022 \n\030us" +
+      "er_profile_picture_url\030\004 \001(\t\022\016\n\006idp_id\030\005" +
+      " \001(\t\0220\n\rorganizations\030\006 \003(\0132\031.choreo.api" +
+      "s.Organization\022\017\n\007user_id\030\007 \001(\003\0223\n\017user_" +
+      "created_at\030\010 \001(\0132\032.google.protobuf.Times" +
+      "tamp\0223\n\017user_expired_at\030\t \001(\0132\032.google.p" +
+      "rotobuf.Timestamp\022\024\n\014is_anonymous\030\n \001(\010\"" +
+      "\307\001\n\rTriggerParams\022\013\n\003org\030\001 \001(\t\022\013\n\003app\030\002 " +
+      "\001(\t\022\r\n\005appId\030\003 \001(\t\022\n\n\002ns\030\004 \001(\t\022\020\n\010hostna" +
+      "me\030\005 \001(\t\022\014\n\004cron\030\006 \001(\t\0228\n\016deploymentType" +
+      "\030\007 \001(\0162 .choreo.apis.TriggerParams.DType" +
+      "\"\'\n\005DType\022\007\n\003Job\020\000\022\013\n\007Service\020\001\022\010\n\004Cron\020" +
+      "\002\".\n\rDeploymentRun\022\n\n\002id\030\001 \001(\003\022\021\n\tcreate" +
+      "dAt\030\002 \001(\003\"\313\001\n\023DeploymentRunStatus\022\r\n\005sta" +
+      "te\030\001 \001(\t\022\022\n\nconclusion\030\002 \001(\t\022<\n\006phases\030\003" +
+      " \003(\0132,.choreo.apis.DeploymentRunStatus.P" +
+      "hasesEntry\022\020\n\010errorMsg\030\004 \001(\t\032A\n\013PhasesEn" +
+      "try\022\013\n\003key\030\001 \001(\t\022!\n\005value\030\002 \001(\0132\022.choreo" +
+      ".apis.Phase:\0028\001\"*\n\005Phase\022\r\n\005state\030\001 \001(\t\022" +
+      "\022\n\nconclusion\030\002 \001(\t\"\330\001\n\013Environment\022\n\n\002i" +
+      "d\030\001 \001(\003\022\r\n\005orgId\030\002 \001(\003\022\013\n\003org\030\003 \001(\t\022\035\n\014d" +
+      "isplay_name\030\004 \001(\tB\007\372B\004r\002\020\001\022-\n\004name\030\005 \001(\t" +
+      "B\037\372B\004r\002\030\036\372B\025r\0232\021^[a-z][a-z0-9-]+$\022\026\n\016k8s" +
+      "_cluster_id\030\006 \001(\003\022\025\n\rk8s_namespace\030\007 \001(\t" +
+      "\022\021\n\tcreatedAt\030\010 \001(\003\022\021\n\tupdatedAt\030\t \001(\003\"\252" +
+      "\001\n\026ApplicationToEnvMapper\022\r\n\005appId\030\001 \001(\003" +
+      "\022\r\n\005envId\030\002 \001(\003\022\031\n\021deploymentBuildId\030\003 \001" +
+      "(\t\0221\n\006status\030\004 \001(\0162!.choreo.apis.deploym" +
+      "entStatusEnum\022\021\n\tcreatedAt\030\006 \001(\003\022\021\n\tupda" +
+      "tedAt\030\007 \001(\003\"4\n\023WebsocketRawMessage\022\014\n\004ty" +
+      "pe\030\001 \001(\005\022\017\n\007message\030\002 \001(\014\"\242\001\n\020WebsocketM" +
+      "essage\0220\n\004type\030\001 \001(\0162\".choreo.apis.Webso" +
+      "cketMessage.Type\022%\n\007message\030\002 \001(\0132\024.goog" +
+      "le.protobuf.Any\"5\n\004Type\022\013\n\007unknown\020\000\022\013\n\007" +
+      "control\020\001\022\010\n\004data\020\002\022\t\n\005error\020\003\"\263\001\n\021Works" +
+      "paceFileInfo\0221\n\004type\030\001 \001(\0162#.choreo.apis" +
+      ".WorkspaceFileInfo.Type\022\025\n\004path\030\002 \001(\tB\007\372" +
+      "B\004r\002\020\001\022\014\n\004size\030\003 \001(\004\022\017\n\007content\030\004 \001(\t\022\r\n" +
+      "\005files\030\005 \003(\t\"&\n\004Type\022\013\n\007unknown\020\000\022\007\n\003dir" +
+      "\020\001\022\010\n\004file\020\002\"\240\001\n\033WorkspaceApplicationLog" +
+      "Line\022;\n\004type\030\001 \001(\0162-.choreo.apis.Workspa" +
       "ceApplicationLogLine.Type\022\014\n\004data\030\002 \001(\t\"" +
       "6\n\004Type\022\013\n\007UNKNOWN\020\000\022\n\n\006STDOUT\020\001\022\n\n\006STDE" +
-      "RR\020\002\022\t\n\005ERROR\020\003\"\271\003\n\005Error\022A\n\004code\030\001 \001(\0162" +
-      "3.org.wso2.carbon.apimgt.impl.choreo.api" +
-      "s.Error.Code\022\014\n\004type\030\002 \001(\t\022\017\n\007message\030\003 " +
-      "\001(\t\022\r\n\005cause\030\004 \001(\t\"\276\002\n\004Code\022\013\n\007UNKNOWN\020\000" +
-      "\022\023\n\016UNKNOWN_CLIENT\020\351\007\022\024\n\017INVALID_REQUEST" +
-      "\020\352\007\022\016\n\tNOT_FOUND\020\353\007\022\023\n\016NOT_AUTHORIZED\020\354\007" +
-      "\022\016\n\tFORBIDDEN\020\355\007\022\031\n\024INVITATION_NOT_FOUND" +
-      "\020\362\007\022\034\n\027INVITATION_ALREADY_USED\020\363\007\022\027\n\022DUP" +
-      "LICATE_RESOURCE\020\364\007\022\026\n\021TOO_MANY_REQUESTS\020" +
-      "\365\007\022\023\n\016UNKNOWN_SERVER\020\321\017\022\r\n\010INTERNAL\020\322\017\022\020" +
-      "\n\013UNAVAILABLE\020\323\017\022\022\n\rUNIMPLEMENTED\020\324\017\"\005\010\001" +
-      "\020\347\007\"\006\010\350\007\020\350\007\"\006\010\320\017\020\320\017\"\203\001\n\rConfiguration\022\n\n" +
-      "\002id\030\001 \001(\003\022\027\n\017organization_id\030\002 \001(\003\022\024\n\003ke" +
-      "y\030\003 \001(\tB\007\372B\004r\002\020\001\022\026\n\005value\030\004 \001(\tB\007\372B\004r\002\020\001" +
-      "\022\r\n\005scope\030\005 \001(\t\022\020\n\010group_id\030\006 \001(\003\"\262\001\n\006Se" +
-      "cret\022\n\n\002id\030\001 \001(\003\022\027\n\017organization_id\030\002 \001(" +
-      "\003\022\024\n\003key\030\003 \001(\tB\007\372B\004r\002\020\001\022 \n\017encrypted_val" +
-      "ue\030\004 \001(\tB\007\372B\004r\002\020\001\022\r\n\005value\030\005 \001(\t\022\r\n\005scop" +
-      "e\030\006 \001(\t\022\020\n\010group_id\030\007 \001(\003\022\033\n\023encrypt_key" +
-      "_version\030\010 \001(\t\"\376\001\n\022ConfigurationGroup\022\n\n" +
-      "\002id\030\001 \001(\003\022\027\n\017organization_id\030\002 \001(\003\022\r\n\005sc" +
-      "ope\030\003 \001(\t\022\014\n\004name\030\004 \001(\t\022\024\n\014display_name\030" +
-      "\005 \001(\t\022N\n\016configurations\030\006 \003(\01326.org.wso2" +
-      ".carbon.apimgt.impl.choreo.apis.Configur" +
-      "ation\022@\n\007secrets\030\007 \003(\0132/.org.wso2.carbon" +
-      ".apimgt.impl.choreo.apis.Secret\"\232\003\n\020Conn" +
-      "ectionConfig\022\037\n\016connector_name\030\001 \001(\tB\007\372B" +
-      "\004r\002\020\001\022W\n\roauth2_config\030\002 \001(\0132@.org.wso2." +
-      "carbon.apimgt.impl.choreo.apis.Connectio" +
-      "nConfig.oauth2\032\342\001\n\006oauth2\022\035\n\014api_base_ur" +
-      "l\030\001 \001(\tB\007\372B\004r\002\020\001\022\032\n\tclient_id\030\002 \001(\tB\007\372B\004" +
-      "r\002\020\001\022\031\n\010auth_url\030\003 \001(\tB\007\372B\004r\002\020\001\022\035\n\014redir" +
-      "ect_url\030\004 \001(\tB\007\372B\004r\002\020\001\022\016\n\006scopes\030\005 \003(\t\022S" +
-      "\n\006params\030\006 \003(\0132C.org.wso2.carbon.apimgt." +
-      "impl.choreo.apis.ConnectionConfig.parame" +
-      "ter\032\'\n\tparameter\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002" +
-      " \001(\t\"\306\003\n\nConnection\022\n\n\002id\030\001 \001(\003\022\027\n\006handl" +
-      "e\030\002 \001(\tB\007\372B\004r\002\020\001\022\035\n\014display_name\030\003 \001(\tB\007" +
-      "\372B\004r\002\020\001\022\037\n\016connector_name\030\004 \001(\tB\007\372B\004r\002\020\001" +
-      "\022\037\n\027user_account_identifier\030\005 \001(\t\022=\n\005tok" +
-      "en\030\006 \001(\0132..org.wso2.carbon.apimgt.impl.c" +
-      "horeo.apis.Token\022\031\n\021organization_name\030\007 " +
-      "\001(\t\022`\n\022code_variable_keys\030\010 \003(\0132D.org.ws" +
-      "o2.carbon.apimgt.impl.choreo.apis.Connec" +
-      "tion.code_var_mapping\022\021\n\tis_shared\030\t \001(\010" +
-      "\022\017\n\007is_used\030\n \001(\010\022\025\n\004type\030\013 \001(\tB\007\372B\004r\002\020\001" +
-      "\032;\n\020code_var_mapping\022\014\n\004name\030\001 \001(\t\022\031\n\021co" +
-      "de_variable_key\030\002 \001(\t\"\330\002\n\tOnPremKey\022\n\n\002i" +
-      "d\030\001 \001(\003\022\016\n\006org_id\030\002 \001(\003\022\020\n\010org_name\030\003 \001(" +
-      "\t\022\020\n\010org_uuid\030\004 \001(\t\022\013\n\003key\030\005 \001(\t\022\016\n\006stat" +
-      "us\030\006 \001(\t\022\035\n\014display_name\030\007 \001(\tB\007\372B\004r\002\020\001\022" +
-      "\027\n\006handle\030\010 \001(\tB\007\372B\004r\002\030$\022\022\n\ncreated_by\030\t" +
-      " \001(\t\022\022\n\nupdated_by\030\n \001(\t\022.\n\nexpires_at\030\013" +
-      " \001(\0132\032.google.protobuf.Timestamp\022.\n\ncrea" +
-      "ted_at\030\014 \001(\0132\032.google.protobuf.Timestamp" +
-      "\022.\n\nupdated_at\030\r \001(\0132\032.google.protobuf.T" +
-      "imestamp\"\264\001\n\025OnPremKeySubscription\022\n\n\002id" +
-      "\030\001 \001(\003\022\020\n\010org_name\030\002 \001(\t\022\014\n\004plan\030\003 \001(\t\022\021" +
-      "\n\tisExpired\030\004 \001(\010\022.\n\nstart_date\030\005 \001(\0132\032." +
-      "google.protobuf.Timestamp\022,\n\010end_date\030\006 " +
-      "\001(\0132\032.google.protobuf.Timestamp\"u\n\tToken" +
-      "Info\022\024\n\014access_token\030\001 \001(\t\022\025\n\rrefresh_to" +
-      "ken\030\002 \001(\t\022\021\n\tclient_id\030\003 \001(\t\022\025\n\rclient_s" +
-      "ecret\030\004 \001(\t\022\021\n\ttoken_url\030\005 \001(\t\"\202\001\n\005Token" +
-      "\022\024\n\014access_token\030\001 \001(\t\022\r\n\005token\030\002 \001(\t\022\025\n" +
-      "\rrefresh_token\030\003 \001(\t\022\023\n\013refresh_url\030\004 \001(" +
-      "\t\022\021\n\tclient_id\030\005 \001(\t\022\025\n\rclient_secret\030\006 " +
-      "\001(\t\"\205\001\n\021ConfigMappingInfo\022\n\n\002id\030\001 \001(\003\022\024\n" +
-      "\014display_name\030\002 \001(\t\022N\n\016config_mapping\030\003 " +
-      "\003(\01326.org.wso2.carbon.apimgt.impl.choreo" +
-      ".apis.ConfigMapping\"\311\001\n\rConfigMapping\022\n\n" +
-      "\002id\030\001 \001(\003\022\025\n\rconnection_id\030\002 \001(\003\022B\n\010key_" +
-      "type\030\003 \001(\01620.org.wso2.carbon.apimgt.impl" +
-      ".choreo.apis.KeyType\022\020\n\010key_name\030\004 \001(\t\022 " +
-      "\n\017config_key_name\030\005 \001(\tB\007\372B\004r\002\020\001\022\r\n\005valu" +
-      "e\030\006 \001(\t\022\016\n\006secret\030\007 \001(\010\"n\n\020MappedConfigD" +
-      "ata\022\031\n\010key_type\030\001 \001(\tB\007\372B\004r\002\020\001\022 \n\017config" +
-      "_key_name\030\002 \001(\tB\007\372B\004r\002\020\001\022\r\n\005value\030\003 \001(\t\022" +
-      "\016\n\006secret\030\004 \001(\010\"!\n\020ApplicationCount\022\r\n\005c" +
-      "ount\030\001 \001(\003\"<\n\rEnvironmentId\022\n\n\002id\030\001 \001(\003\022" +
-      "\037\n\016environment_id\030\002 \001(\tB\007\372B\004r\002\020\001\"Z\n\nPagi" +
-      "nation\022\016\n\006offset\030\001 \001(\003\022\r\n\005limit\030\002 \001(\003\022\r\n" +
-      "\005total\030\003 \001(\003\022\020\n\010previous\030\004 \001(\t\022\014\n\004next\030\005" +
-      " \001(\t\"\244\001\n\rPaginatedRole\022\r\n\005count\030\001 \001(\003\022;\n" +
-      "\004list\030\002 \003(\0132-.org.wso2.carbon.apimgt.imp" +
-      "l.choreo.apis.Role\022G\n\npagination\030\003 \001(\01323" +
-      ".org.wso2.carbon.apimgt.impl.choreo.apis" +
-      ".Pagination\"c\n\016PermissionTree\022\016\n\006domain\030" +
-      "\001 \001(\t\022A\n\004list\030\002 \003(\01323.org.wso2.carbon.ap" +
-      "imgt.impl.choreo.apis.Permission**\n\016test" +
-      "StatusEnum\022\013\n\007running\020\000\022\013\n\007stopped\020\001*a\n\024" +
-      "deploymentStatusEnum\022\r\n\tdeploying\020\000\022\014\n\010d" +
-      "eployed\020\001\022\017\n\013undeploying\020\002\022\016\n\nundeployed" +
-      "\020\004\022\013\n\007pending\020\005*\235\001\n\007KeyType\022\016\n\nunknownKe" +
-      "y\020\000\022\016\n\ntokenEpKey\020\001\022\022\n\016accessTokenKey\020\002\022" +
-      "\023\n\017refreshTokenKey\020\003\022\024\n\020invocationUrlKey" +
-      "\020\004\022\017\n\013clientIdKey\020\005\022\023\n\017clientSecretKey\020\006" +
-      "\022\r\n\tcustomKey\020\007B4Z2github.com/wso2-enter" +
-      "prise/choreo-runtime/pkg/apisb\006proto3"
+      "RR\020\002\022\t\n\005ERROR\020\003\"\235\003\n\005Error\022%\n\004code\030\001 \001(\0162" +
+      "\027.choreo.apis.Error.Code\022\014\n\004type\030\002 \001(\t\022\017" +
+      "\n\007message\030\003 \001(\t\022\r\n\005cause\030\004 \001(\t\"\276\002\n\004Code\022" +
+      "\013\n\007UNKNOWN\020\000\022\023\n\016UNKNOWN_CLIENT\020\351\007\022\024\n\017INV" +
+      "ALID_REQUEST\020\352\007\022\016\n\tNOT_FOUND\020\353\007\022\023\n\016NOT_A" +
+      "UTHORIZED\020\354\007\022\016\n\tFORBIDDEN\020\355\007\022\031\n\024INVITATI" +
+      "ON_NOT_FOUND\020\362\007\022\034\n\027INVITATION_ALREADY_US" +
+      "ED\020\363\007\022\027\n\022DUPLICATE_RESOURCE\020\364\007\022\026\n\021TOO_MA" +
+      "NY_REQUESTS\020\365\007\022\023\n\016UNKNOWN_SERVER\020\321\017\022\r\n\010I" +
+      "NTERNAL\020\322\017\022\020\n\013UNAVAILABLE\020\323\017\022\022\n\rUNIMPLEM" +
+      "ENTED\020\324\017\"\005\010\001\020\347\007\"\006\010\350\007\020\350\007\"\006\010\320\017\020\320\017\"\203\001\n\rConf" +
+      "iguration\022\n\n\002id\030\001 \001(\003\022\027\n\017organization_id" +
+      "\030\002 \001(\003\022\024\n\003key\030\003 \001(\tB\007\372B\004r\002\020\001\022\026\n\005value\030\004 " +
+      "\001(\tB\007\372B\004r\002\020\001\022\r\n\005scope\030\005 \001(\t\022\020\n\010group_id\030" +
+      "\006 \001(\003\"\262\001\n\006Secret\022\n\n\002id\030\001 \001(\003\022\027\n\017organiza" +
+      "tion_id\030\002 \001(\003\022\024\n\003key\030\003 \001(\tB\007\372B\004r\002\020\001\022 \n\017e" +
+      "ncrypted_value\030\004 \001(\tB\007\372B\004r\002\020\001\022\r\n\005value\030\005" +
+      " \001(\t\022\r\n\005scope\030\006 \001(\t\022\020\n\010group_id\030\007 \001(\003\022\033\n" +
+      "\023encrypt_key_version\030\010 \001(\t\"\306\001\n\022Configura" +
+      "tionGroup\022\n\n\002id\030\001 \001(\003\022\027\n\017organization_id" +
+      "\030\002 \001(\003\022\r\n\005scope\030\003 \001(\t\022\014\n\004name\030\004 \001(\t\022\024\n\014d" +
+      "isplay_name\030\005 \001(\t\0222\n\016configurations\030\006 \003(" +
+      "\0132\032.choreo.apis.Configuration\022$\n\007secrets" +
+      "\030\007 \003(\0132\023.choreo.apis.Secret\"\342\002\n\020Connecti" +
+      "onConfig\022\037\n\016connector_name\030\001 \001(\tB\007\372B\004r\002\020" +
+      "\001\022;\n\roauth2_config\030\002 \001(\0132$.choreo.apis.C" +
+      "onnectionConfig.oauth2\032\306\001\n\006oauth2\022\035\n\014api" +
+      "_base_url\030\001 \001(\tB\007\372B\004r\002\020\001\022\032\n\tclient_id\030\002 " +
+      "\001(\tB\007\372B\004r\002\020\001\022\031\n\010auth_url\030\003 \001(\tB\007\372B\004r\002\020\001\022" +
+      "\035\n\014redirect_url\030\004 \001(\tB\007\372B\004r\002\020\001\022\016\n\006scopes" +
+      "\030\005 \003(\t\0227\n\006params\030\006 \003(\0132\'.choreo.apis.Con" +
+      "nectionConfig.parameter\032\'\n\tparameter\022\013\n\003" +
+      "key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\"\216\003\n\nConnection\022" +
+      "\n\n\002id\030\001 \001(\003\022\027\n\006handle\030\002 \001(\tB\007\372B\004r\002\020\001\022\035\n\014" +
+      "display_name\030\003 \001(\tB\007\372B\004r\002\020\001\022\037\n\016connector" +
+      "_name\030\004 \001(\tB\007\372B\004r\002\020\001\022\037\n\027user_account_ide" +
+      "ntifier\030\005 \001(\t\022!\n\005token\030\006 \001(\0132\022.choreo.ap" +
+      "is.Token\022\031\n\021organization_name\030\007 \001(\t\022D\n\022c" +
+      "ode_variable_keys\030\010 \003(\0132(.choreo.apis.Co" +
+      "nnection.code_var_mapping\022\021\n\tis_shared\030\t" +
+      " \001(\010\022\017\n\007is_used\030\n \001(\010\022\025\n\004type\030\013 \001(\tB\007\372B\004" +
+      "r\002\020\001\032;\n\020code_var_mapping\022\014\n\004name\030\001 \001(\t\022\031" +
+      "\n\021code_variable_key\030\002 \001(\t\"\330\002\n\tOnPremKey\022" +
+      "\n\n\002id\030\001 \001(\003\022\016\n\006org_id\030\002 \001(\003\022\020\n\010org_name\030" +
+      "\003 \001(\t\022\020\n\010org_uuid\030\004 \001(\t\022\013\n\003key\030\005 \001(\t\022\016\n\006" +
+      "status\030\006 \001(\t\022\035\n\014display_name\030\007 \001(\tB\007\372B\004r" +
+      "\002\020\001\022\027\n\006handle\030\010 \001(\tB\007\372B\004r\002\030$\022\022\n\ncreated_" +
+      "by\030\t \001(\t\022\022\n\nupdated_by\030\n \001(\t\022.\n\nexpires_" +
+      "at\030\013 \001(\0132\032.google.protobuf.Timestamp\022.\n\n" +
+      "created_at\030\014 \001(\0132\032.google.protobuf.Times" +
+      "tamp\022.\n\nupdated_at\030\r \001(\0132\032.google.protob" +
+      "uf.Timestamp\"\264\001\n\025OnPremKeySubscription\022\n" +
+      "\n\002id\030\001 \001(\003\022\020\n\010org_name\030\002 \001(\t\022\014\n\004plan\030\003 \001" +
+      "(\t\022\021\n\tisExpired\030\004 \001(\010\022.\n\nstart_date\030\005 \001(" +
+      "\0132\032.google.protobuf.Timestamp\022,\n\010end_dat" +
+      "e\030\006 \001(\0132\032.google.protobuf.Timestamp\"u\n\tT" +
+      "okenInfo\022\024\n\014access_token\030\001 \001(\t\022\025\n\rrefres" +
+      "h_token\030\002 \001(\t\022\021\n\tclient_id\030\003 \001(\t\022\025\n\rclie" +
+      "nt_secret\030\004 \001(\t\022\021\n\ttoken_url\030\005 \001(\t\"\202\001\n\005T" +
+      "oken\022\024\n\014access_token\030\001 \001(\t\022\r\n\005token\030\002 \001(" +
+      "\t\022\025\n\rrefresh_token\030\003 \001(\t\022\023\n\013refresh_url\030" +
+      "\004 \001(\t\022\021\n\tclient_id\030\005 \001(\t\022\025\n\rclient_secre" +
+      "t\030\006 \001(\t\"i\n\021ConfigMappingInfo\022\n\n\002id\030\001 \001(\003" +
+      "\022\024\n\014display_name\030\002 \001(\t\0222\n\016config_mapping" +
+      "\030\003 \003(\0132\032.choreo.apis.ConfigMapping\"\255\001\n\rC" +
+      "onfigMapping\022\n\n\002id\030\001 \001(\003\022\025\n\rconnection_i" +
+      "d\030\002 \001(\003\022&\n\010key_type\030\003 \001(\0162\024.choreo.apis." +
+      "KeyType\022\020\n\010key_name\030\004 \001(\t\022 \n\017config_key_" +
+      "name\030\005 \001(\tB\007\372B\004r\002\020\001\022\r\n\005value\030\006 \001(\t\022\016\n\006se" +
+      "cret\030\007 \001(\010\"n\n\020MappedConfigData\022\031\n\010key_ty" +
+      "pe\030\001 \001(\tB\007\372B\004r\002\020\001\022 \n\017config_key_name\030\002 \001" +
+      "(\tB\007\372B\004r\002\020\001\022\r\n\005value\030\003 \001(\t\022\016\n\006secret\030\004 \001" +
+      "(\010\"!\n\020ApplicationCount\022\r\n\005count\030\001 \001(\003\"<\n" +
+      "\rEnvironmentId\022\n\n\002id\030\001 \001(\003\022\037\n\016environmen" +
+      "t_id\030\002 \001(\tB\007\372B\004r\002\020\001\"Z\n\nPagination\022\016\n\006off" +
+      "set\030\001 \001(\003\022\r\n\005limit\030\002 \001(\003\022\r\n\005total\030\003 \001(\003\022" +
+      "\020\n\010previous\030\004 \001(\t\022\014\n\004next\030\005 \001(\t\"l\n\rPagin" +
+      "atedRole\022\r\n\005count\030\001 \001(\003\022\037\n\004list\030\002 \003(\0132\021." +
+      "choreo.apis.Role\022+\n\npagination\030\003 \001(\0132\027.c" +
+      "horeo.apis.Pagination\"G\n\016PermissionTree\022" +
+      "\016\n\006domain\030\001 \001(\t\022%\n\004list\030\002 \003(\0132\027.choreo.a" +
+      "pis.Permission**\n\016testStatusEnum\022\013\n\007runn" +
+      "ing\020\000\022\013\n\007stopped\020\001*a\n\024deploymentStatusEn" +
+      "um\022\r\n\tdeploying\020\000\022\014\n\010deployed\020\001\022\017\n\013undep" +
+      "loying\020\002\022\016\n\nundeployed\020\004\022\013\n\007pending\020\005*\235\001" +
+      "\n\007KeyType\022\016\n\nunknownKey\020\000\022\016\n\ntokenEpKey\020" +
+      "\001\022\022\n\016accessTokenKey\020\002\022\023\n\017refreshTokenKey" +
+      "\020\003\022\024\n\020invocationUrlKey\020\004\022\017\n\013clientIdKey\020" +
+      "\005\022\023\n\017clientSecretKey\020\006\022\r\n\tcustomKey\020\007B]\n" +
+      "\'org.wso2.carbon.apimgt.impl.choreo.apis" +
+      "Z2github.com/wso2-enterprise/choreo-runt" +
+      "ime/pkg/apisb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -57963,275 +57942,275 @@ public final class Types {
           com.google.protobuf.TimestampProto.getDescriptor(),
           io.envoyproxy.pgv.validate.Validate.getDescriptor(),
         });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_User_descriptor =
+    internal_static_choreo_apis_User_descriptor =
       getDescriptor().getMessageTypes().get(0);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_User_fieldAccessorTable = new
+    internal_static_choreo_apis_User_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_User_descriptor,
+        internal_static_choreo_apis_User_descriptor,
         new java.lang.String[] { "Id", "IdpId", "PictureUrl", "Email", "DisplayName", "Groups", "Roles", "IsAnonymous", "CreatedAt", "ExpiredAt", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Organization_descriptor =
+    internal_static_choreo_apis_Organization_descriptor =
       getDescriptor().getMessageTypes().get(1);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Organization_fieldAccessorTable = new
+    internal_static_choreo_apis_Organization_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Organization_descriptor,
+        internal_static_choreo_apis_Organization_descriptor,
         new java.lang.String[] { "Id", "Uuid", "Handle", "Name", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MemberInvitation_descriptor =
+    internal_static_choreo_apis_MemberInvitation_descriptor =
       getDescriptor().getMessageTypes().get(2);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MemberInvitation_fieldAccessorTable = new
+    internal_static_choreo_apis_MemberInvitation_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MemberInvitation_descriptor,
+        internal_static_choreo_apis_MemberInvitation_descriptor,
         new java.lang.String[] { "Id", "Uuid", "Email", "Handle", "Groups", "Application", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Group_descriptor =
+    internal_static_choreo_apis_Group_descriptor =
       getDescriptor().getMessageTypes().get(3);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Group_fieldAccessorTable = new
+    internal_static_choreo_apis_Group_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Group_descriptor,
+        internal_static_choreo_apis_Group_descriptor,
         new java.lang.String[] { "Id", "OrgName", "OrgUuid", "Description", "DefaultGroup", "DisplayName", "Handle", "Roles", "Users", "Tags", "CreatedBy", "UpdatedBy", "CreatedAt", "UpdatedAt", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Permission_descriptor =
+    internal_static_choreo_apis_Permission_descriptor =
       getDescriptor().getMessageTypes().get(4);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Permission_fieldAccessorTable = new
+    internal_static_choreo_apis_Permission_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Permission_descriptor,
+        internal_static_choreo_apis_Permission_descriptor,
         new java.lang.String[] { "Id", "Handle", "DisplayName", "DomainArea", "Description", "ParentId", "CreatedAt", "UpdatedAt", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Role_descriptor =
+    internal_static_choreo_apis_Role_descriptor =
       getDescriptor().getMessageTypes().get(5);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Role_fieldAccessorTable = new
+    internal_static_choreo_apis_Role_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Role_descriptor,
+        internal_static_choreo_apis_Role_descriptor,
         new java.lang.String[] { "Id", "Description", "DisplayName", "Handle", "DefaultRole", "Permissions", "Tags", "Users", "CreatedBy", "UpdatedBy", "CreatedAt", "UpdatedAt", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GroupTag_descriptor =
+    internal_static_choreo_apis_GroupTag_descriptor =
       getDescriptor().getMessageTypes().get(6);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GroupTag_fieldAccessorTable = new
+    internal_static_choreo_apis_GroupTag_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GroupTag_descriptor,
+        internal_static_choreo_apis_GroupTag_descriptor,
         new java.lang.String[] { "Id", "OrgName", "OrgUuid", "GroupName", "Handle", "CreatedBy", "CreatedAt", "UpdatedAt", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RoleTag_descriptor =
+    internal_static_choreo_apis_RoleTag_descriptor =
       getDescriptor().getMessageTypes().get(7);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RoleTag_fieldAccessorTable = new
+    internal_static_choreo_apis_RoleTag_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RoleTag_descriptor,
+        internal_static_choreo_apis_RoleTag_descriptor,
         new java.lang.String[] { "Id", "RoleHandle", "Handle", "CreatedBy", "CreatedAt", "UpdatedAt", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_descriptor =
+    internal_static_choreo_apis_Application_descriptor =
       getDescriptor().getMessageTypes().get(8);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_fieldAccessorTable = new
+    internal_static_choreo_apis_Application_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_descriptor,
+        internal_static_choreo_apis_Application_descriptor,
         new java.lang.String[] { "Id", "Name", "OrganizationId", "Organization", "DisplayName", "DisplayType", "GitRemote", "WorkingFile", "DeployType", "CronSchedule", "Template", "CreatedAt", "Observability", "Status", "TemplateCode", "PreBuilt", "SampleReference", "DockerImage", "ProjectId", "ApplicationId", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_Observability_descriptor =
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_descriptor.getNestedTypes().get(0);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_Observability_fieldAccessorTable = new
+    internal_static_choreo_apis_Application_Observability_descriptor =
+      internal_static_choreo_apis_Application_descriptor.getNestedTypes().get(0);
+    internal_static_choreo_apis_Application_Observability_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Application_Observability_descriptor,
+        internal_static_choreo_apis_Application_Observability_descriptor,
         new java.lang.String[] { "Id", "LatestVersion", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentInfo_descriptor =
+    internal_static_choreo_apis_EnvironmentInfo_descriptor =
       getDescriptor().getMessageTypes().get(9);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentInfo_fieldAccessorTable = new
+    internal_static_choreo_apis_EnvironmentInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentInfo_descriptor,
+        internal_static_choreo_apis_EnvironmentInfo_descriptor,
         new java.lang.String[] { "AccessUrl", "ObservabilityUrl", "Status", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthRequest_descriptor =
+    internal_static_choreo_apis_AuthRequest_descriptor =
       getDescriptor().getMessageTypes().get(10);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_AuthRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthRequest_descriptor,
+        internal_static_choreo_apis_AuthRequest_descriptor,
         new java.lang.String[] { "Code", "Providers", "RedirectUrl", "BetaInviteCorrelationKey", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthResponse_descriptor =
+    internal_static_choreo_apis_AuthResponse_descriptor =
       getDescriptor().getMessageTypes().get(11);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_AuthResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AuthResponse_descriptor,
+        internal_static_choreo_apis_AuthResponse_descriptor,
         new java.lang.String[] { "Token", "DisplayName", "UserEmail", "UserProfilePictureUrl", "IdpId", "Organizations", "UserId", "UserCreatedAt", "UserExpiredAt", "IsAnonymous", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TriggerParams_descriptor =
+    internal_static_choreo_apis_TriggerParams_descriptor =
       getDescriptor().getMessageTypes().get(12);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TriggerParams_fieldAccessorTable = new
+    internal_static_choreo_apis_TriggerParams_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TriggerParams_descriptor,
+        internal_static_choreo_apis_TriggerParams_descriptor,
         new java.lang.String[] { "Org", "App", "AppId", "Ns", "Hostname", "Cron", "DeploymentType", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRun_descriptor =
+    internal_static_choreo_apis_DeploymentRun_descriptor =
       getDescriptor().getMessageTypes().get(13);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRun_fieldAccessorTable = new
+    internal_static_choreo_apis_DeploymentRun_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRun_descriptor,
+        internal_static_choreo_apis_DeploymentRun_descriptor,
         new java.lang.String[] { "Id", "CreatedAt", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRunStatus_descriptor =
+    internal_static_choreo_apis_DeploymentRunStatus_descriptor =
       getDescriptor().getMessageTypes().get(14);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRunStatus_fieldAccessorTable = new
+    internal_static_choreo_apis_DeploymentRunStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRunStatus_descriptor,
+        internal_static_choreo_apis_DeploymentRunStatus_descriptor,
         new java.lang.String[] { "State", "Conclusion", "Phases", "ErrorMsg", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRunStatus_PhasesEntry_descriptor =
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRunStatus_descriptor.getNestedTypes().get(0);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRunStatus_PhasesEntry_fieldAccessorTable = new
+    internal_static_choreo_apis_DeploymentRunStatus_PhasesEntry_descriptor =
+      internal_static_choreo_apis_DeploymentRunStatus_descriptor.getNestedTypes().get(0);
+    internal_static_choreo_apis_DeploymentRunStatus_PhasesEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeploymentRunStatus_PhasesEntry_descriptor,
+        internal_static_choreo_apis_DeploymentRunStatus_PhasesEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Phase_descriptor =
+    internal_static_choreo_apis_Phase_descriptor =
       getDescriptor().getMessageTypes().get(15);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Phase_fieldAccessorTable = new
+    internal_static_choreo_apis_Phase_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Phase_descriptor,
+        internal_static_choreo_apis_Phase_descriptor,
         new java.lang.String[] { "State", "Conclusion", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Environment_descriptor =
+    internal_static_choreo_apis_Environment_descriptor =
       getDescriptor().getMessageTypes().get(16);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Environment_fieldAccessorTable = new
+    internal_static_choreo_apis_Environment_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Environment_descriptor,
+        internal_static_choreo_apis_Environment_descriptor,
         new java.lang.String[] { "Id", "OrgId", "Org", "DisplayName", "Name", "K8SClusterId", "K8SNamespace", "CreatedAt", "UpdatedAt", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationToEnvMapper_descriptor =
+    internal_static_choreo_apis_ApplicationToEnvMapper_descriptor =
       getDescriptor().getMessageTypes().get(17);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationToEnvMapper_fieldAccessorTable = new
+    internal_static_choreo_apis_ApplicationToEnvMapper_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationToEnvMapper_descriptor,
+        internal_static_choreo_apis_ApplicationToEnvMapper_descriptor,
         new java.lang.String[] { "AppId", "EnvId", "DeploymentBuildId", "Status", "CreatedAt", "UpdatedAt", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketRawMessage_descriptor =
+    internal_static_choreo_apis_WebsocketRawMessage_descriptor =
       getDescriptor().getMessageTypes().get(18);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketRawMessage_fieldAccessorTable = new
+    internal_static_choreo_apis_WebsocketRawMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketRawMessage_descriptor,
+        internal_static_choreo_apis_WebsocketRawMessage_descriptor,
         new java.lang.String[] { "Type", "Message", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketMessage_descriptor =
+    internal_static_choreo_apis_WebsocketMessage_descriptor =
       getDescriptor().getMessageTypes().get(19);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketMessage_fieldAccessorTable = new
+    internal_static_choreo_apis_WebsocketMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WebsocketMessage_descriptor,
+        internal_static_choreo_apis_WebsocketMessage_descriptor,
         new java.lang.String[] { "Type", "Message", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceFileInfo_descriptor =
+    internal_static_choreo_apis_WorkspaceFileInfo_descriptor =
       getDescriptor().getMessageTypes().get(20);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceFileInfo_fieldAccessorTable = new
+    internal_static_choreo_apis_WorkspaceFileInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceFileInfo_descriptor,
+        internal_static_choreo_apis_WorkspaceFileInfo_descriptor,
         new java.lang.String[] { "Type", "Path", "Size", "Content", "Files", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceApplicationLogLine_descriptor =
+    internal_static_choreo_apis_WorkspaceApplicationLogLine_descriptor =
       getDescriptor().getMessageTypes().get(21);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceApplicationLogLine_fieldAccessorTable = new
+    internal_static_choreo_apis_WorkspaceApplicationLogLine_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_WorkspaceApplicationLogLine_descriptor,
+        internal_static_choreo_apis_WorkspaceApplicationLogLine_descriptor,
         new java.lang.String[] { "Type", "Data", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Error_descriptor =
+    internal_static_choreo_apis_Error_descriptor =
       getDescriptor().getMessageTypes().get(22);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Error_fieldAccessorTable = new
+    internal_static_choreo_apis_Error_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Error_descriptor,
+        internal_static_choreo_apis_Error_descriptor,
         new java.lang.String[] { "Code", "Type", "Message", "Cause", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Configuration_descriptor =
+    internal_static_choreo_apis_Configuration_descriptor =
       getDescriptor().getMessageTypes().get(23);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Configuration_fieldAccessorTable = new
+    internal_static_choreo_apis_Configuration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Configuration_descriptor,
+        internal_static_choreo_apis_Configuration_descriptor,
         new java.lang.String[] { "Id", "OrganizationId", "Key", "Value", "Scope", "GroupId", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Secret_descriptor =
+    internal_static_choreo_apis_Secret_descriptor =
       getDescriptor().getMessageTypes().get(24);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Secret_fieldAccessorTable = new
+    internal_static_choreo_apis_Secret_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Secret_descriptor,
+        internal_static_choreo_apis_Secret_descriptor,
         new java.lang.String[] { "Id", "OrganizationId", "Key", "EncryptedValue", "Value", "Scope", "GroupId", "EncryptKeyVersion", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigurationGroup_descriptor =
+    internal_static_choreo_apis_ConfigurationGroup_descriptor =
       getDescriptor().getMessageTypes().get(25);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigurationGroup_fieldAccessorTable = new
+    internal_static_choreo_apis_ConfigurationGroup_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigurationGroup_descriptor,
+        internal_static_choreo_apis_ConfigurationGroup_descriptor,
         new java.lang.String[] { "Id", "OrganizationId", "Scope", "Name", "DisplayName", "Configurations", "Secrets", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_descriptor =
+    internal_static_choreo_apis_ConnectionConfig_descriptor =
       getDescriptor().getMessageTypes().get(26);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_fieldAccessorTable = new
+    internal_static_choreo_apis_ConnectionConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_descriptor,
+        internal_static_choreo_apis_ConnectionConfig_descriptor,
         new java.lang.String[] { "ConnectorName", "Oauth2Config", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_oauth2_descriptor =
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_descriptor.getNestedTypes().get(0);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_oauth2_fieldAccessorTable = new
+    internal_static_choreo_apis_ConnectionConfig_oauth2_descriptor =
+      internal_static_choreo_apis_ConnectionConfig_descriptor.getNestedTypes().get(0);
+    internal_static_choreo_apis_ConnectionConfig_oauth2_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_oauth2_descriptor,
+        internal_static_choreo_apis_ConnectionConfig_oauth2_descriptor,
         new java.lang.String[] { "ApiBaseUrl", "ClientId", "AuthUrl", "RedirectUrl", "Scopes", "Params", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_parameter_descriptor =
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_descriptor.getNestedTypes().get(1);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_parameter_fieldAccessorTable = new
+    internal_static_choreo_apis_ConnectionConfig_parameter_descriptor =
+      internal_static_choreo_apis_ConnectionConfig_descriptor.getNestedTypes().get(1);
+    internal_static_choreo_apis_ConnectionConfig_parameter_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConnectionConfig_parameter_descriptor,
+        internal_static_choreo_apis_ConnectionConfig_parameter_descriptor,
         new java.lang.String[] { "Key", "Value", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_descriptor =
+    internal_static_choreo_apis_Connection_descriptor =
       getDescriptor().getMessageTypes().get(27);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_fieldAccessorTable = new
+    internal_static_choreo_apis_Connection_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_descriptor,
+        internal_static_choreo_apis_Connection_descriptor,
         new java.lang.String[] { "Id", "Handle", "DisplayName", "ConnectorName", "UserAccountIdentifier", "Token", "OrganizationName", "CodeVariableKeys", "IsShared", "IsUsed", "Type", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_code_var_mapping_descriptor =
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_descriptor.getNestedTypes().get(0);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_code_var_mapping_fieldAccessorTable = new
+    internal_static_choreo_apis_Connection_code_var_mapping_descriptor =
+      internal_static_choreo_apis_Connection_descriptor.getNestedTypes().get(0);
+    internal_static_choreo_apis_Connection_code_var_mapping_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Connection_code_var_mapping_descriptor,
+        internal_static_choreo_apis_Connection_code_var_mapping_descriptor,
         new java.lang.String[] { "Name", "CodeVariableKey", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKey_descriptor =
+    internal_static_choreo_apis_OnPremKey_descriptor =
       getDescriptor().getMessageTypes().get(28);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKey_fieldAccessorTable = new
+    internal_static_choreo_apis_OnPremKey_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKey_descriptor,
+        internal_static_choreo_apis_OnPremKey_descriptor,
         new java.lang.String[] { "Id", "OrgId", "OrgName", "OrgUuid", "Key", "Status", "DisplayName", "Handle", "CreatedBy", "UpdatedBy", "ExpiresAt", "CreatedAt", "UpdatedAt", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKeySubscription_descriptor =
+    internal_static_choreo_apis_OnPremKeySubscription_descriptor =
       getDescriptor().getMessageTypes().get(29);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKeySubscription_fieldAccessorTable = new
+    internal_static_choreo_apis_OnPremKeySubscription_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_OnPremKeySubscription_descriptor,
+        internal_static_choreo_apis_OnPremKeySubscription_descriptor,
         new java.lang.String[] { "Id", "OrgName", "Plan", "IsExpired", "StartDate", "EndDate", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TokenInfo_descriptor =
+    internal_static_choreo_apis_TokenInfo_descriptor =
       getDescriptor().getMessageTypes().get(30);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TokenInfo_fieldAccessorTable = new
+    internal_static_choreo_apis_TokenInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_TokenInfo_descriptor,
+        internal_static_choreo_apis_TokenInfo_descriptor,
         new java.lang.String[] { "AccessToken", "RefreshToken", "ClientId", "ClientSecret", "TokenUrl", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Token_descriptor =
+    internal_static_choreo_apis_Token_descriptor =
       getDescriptor().getMessageTypes().get(31);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Token_fieldAccessorTable = new
+    internal_static_choreo_apis_Token_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Token_descriptor,
+        internal_static_choreo_apis_Token_descriptor,
         new java.lang.String[] { "AccessToken", "Token", "RefreshToken", "RefreshUrl", "ClientId", "ClientSecret", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMappingInfo_descriptor =
+    internal_static_choreo_apis_ConfigMappingInfo_descriptor =
       getDescriptor().getMessageTypes().get(32);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMappingInfo_fieldAccessorTable = new
+    internal_static_choreo_apis_ConfigMappingInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMappingInfo_descriptor,
+        internal_static_choreo_apis_ConfigMappingInfo_descriptor,
         new java.lang.String[] { "Id", "DisplayName", "ConfigMapping", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMapping_descriptor =
+    internal_static_choreo_apis_ConfigMapping_descriptor =
       getDescriptor().getMessageTypes().get(33);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMapping_fieldAccessorTable = new
+    internal_static_choreo_apis_ConfigMapping_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ConfigMapping_descriptor,
+        internal_static_choreo_apis_ConfigMapping_descriptor,
         new java.lang.String[] { "Id", "ConnectionId", "KeyType", "KeyName", "ConfigKeyName", "Value", "Secret", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MappedConfigData_descriptor =
+    internal_static_choreo_apis_MappedConfigData_descriptor =
       getDescriptor().getMessageTypes().get(34);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MappedConfigData_fieldAccessorTable = new
+    internal_static_choreo_apis_MappedConfigData_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_MappedConfigData_descriptor,
+        internal_static_choreo_apis_MappedConfigData_descriptor,
         new java.lang.String[] { "KeyType", "ConfigKeyName", "Value", "Secret", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationCount_descriptor =
+    internal_static_choreo_apis_ApplicationCount_descriptor =
       getDescriptor().getMessageTypes().get(35);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationCount_fieldAccessorTable = new
+    internal_static_choreo_apis_ApplicationCount_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ApplicationCount_descriptor,
+        internal_static_choreo_apis_ApplicationCount_descriptor,
         new java.lang.String[] { "Count", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentId_descriptor =
+    internal_static_choreo_apis_EnvironmentId_descriptor =
       getDescriptor().getMessageTypes().get(36);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentId_fieldAccessorTable = new
+    internal_static_choreo_apis_EnvironmentId_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_EnvironmentId_descriptor,
+        internal_static_choreo_apis_EnvironmentId_descriptor,
         new java.lang.String[] { "Id", "EnvironmentId", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Pagination_descriptor =
+    internal_static_choreo_apis_Pagination_descriptor =
       getDescriptor().getMessageTypes().get(37);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Pagination_fieldAccessorTable = new
+    internal_static_choreo_apis_Pagination_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_Pagination_descriptor,
+        internal_static_choreo_apis_Pagination_descriptor,
         new java.lang.String[] { "Offset", "Limit", "Total", "Previous", "Next", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PaginatedRole_descriptor =
+    internal_static_choreo_apis_PaginatedRole_descriptor =
       getDescriptor().getMessageTypes().get(38);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PaginatedRole_fieldAccessorTable = new
+    internal_static_choreo_apis_PaginatedRole_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PaginatedRole_descriptor,
+        internal_static_choreo_apis_PaginatedRole_descriptor,
         new java.lang.String[] { "Count", "List", "Pagination", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PermissionTree_descriptor =
+    internal_static_choreo_apis_PermissionTree_descriptor =
       getDescriptor().getMessageTypes().get(39);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PermissionTree_fieldAccessorTable = new
+    internal_static_choreo_apis_PermissionTree_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_PermissionTree_descriptor,
+        internal_static_choreo_apis_PermissionTree_descriptor,
         new java.lang.String[] { "Domain", "List", });
     com.google.protobuf.ExtensionRegistry registry =
         com.google.protobuf.ExtensionRegistry.newInstance();

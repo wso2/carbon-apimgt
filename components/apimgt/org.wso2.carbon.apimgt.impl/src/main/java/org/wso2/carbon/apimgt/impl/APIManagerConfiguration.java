@@ -575,9 +575,10 @@ public class APIManagerConfiguration {
                 setExtensionListenerConfigurations(element);
             } else if (APIConstants.JWT_AUDIENCES.equals(localName)){
                 setRestApiJWTAuthAudiences(element);
-            } else if (APIConstants.CHOREO_TOKEN_HANDLER.equals(localName)) {
-               setGRPCConfiguration(element);
+            } else if (APIConstants.GRPC_CONFIG.equals(localName)) {
+                setGRPCConfiguration(element);
             }
+
             readChildElements(element, nameStack);
             nameStack.pop();
         }

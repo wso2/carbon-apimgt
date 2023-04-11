@@ -15,7 +15,7 @@ public final class UserServiceOuterClass {
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
   public interface CreateGroupRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.CreateGroupRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.CreateGroupRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -61,35 +61,35 @@ public final class UserServiceOuterClass {
         getDescriptionBytes();
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag> 
         getGroupTagArrList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag getGroupTagArr(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     int getGroupTagArrCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder> 
         getGroupTagArrOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder getGroupTagArrOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateGroupRequest}
+   * Protobuf type {@code choreo.apis.CreateGroupRequest}
    */
   public  static final class CreateGroupRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateGroupRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.CreateGroupRequest)
       CreateGroupRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use CreateGroupRequest.newBuilder() to construct.
@@ -190,13 +190,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateGroupRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateGroupRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateGroupRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateGroupRequest.Builder.class);
     }
@@ -322,32 +322,32 @@ public final class UserServiceOuterClass {
     public static final int GROUPTAGARR_FIELD_NUMBER = 5;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag> groupTagArr_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag> getGroupTagArrList() {
       return groupTagArr_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder> 
         getGroupTagArrOrBuilderList() {
       return groupTagArr_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     public int getGroupTagArrCount() {
       return groupTagArr_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag getGroupTagArr(int index) {
       return groupTagArr_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder getGroupTagArrOrBuilder(
         int index) {
@@ -554,21 +554,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateGroupRequest}
+     * Protobuf type {@code choreo.apis.CreateGroupRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateGroupRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.CreateGroupRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateGroupRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateGroupRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateGroupRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateGroupRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateGroupRequest.Builder.class);
       }
@@ -612,7 +612,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateGroupRequest_descriptor;
       }
 
       @java.lang.Override
@@ -1036,7 +1036,7 @@ public final class UserServiceOuterClass {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder> groupTagArrBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag> getGroupTagArrList() {
         if (groupTagArrBuilder_ == null) {
@@ -1046,7 +1046,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public int getGroupTagArrCount() {
         if (groupTagArrBuilder_ == null) {
@@ -1056,7 +1056,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag getGroupTagArr(int index) {
         if (groupTagArrBuilder_ == null) {
@@ -1066,7 +1066,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder setGroupTagArr(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag value) {
@@ -1083,7 +1083,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder setGroupTagArr(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder builderForValue) {
@@ -1097,7 +1097,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder addGroupTagArr(org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag value) {
         if (groupTagArrBuilder_ == null) {
@@ -1113,7 +1113,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder addGroupTagArr(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag value) {
@@ -1130,7 +1130,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder addGroupTagArr(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder builderForValue) {
@@ -1144,7 +1144,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder addGroupTagArr(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder builderForValue) {
@@ -1158,7 +1158,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder addAllGroupTagArr(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag> values) {
@@ -1173,7 +1173,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder clearGroupTagArr() {
         if (groupTagArrBuilder_ == null) {
@@ -1186,7 +1186,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder removeGroupTagArr(int index) {
         if (groupTagArrBuilder_ == null) {
@@ -1199,14 +1199,14 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder getGroupTagArrBuilder(
           int index) {
         return getGroupTagArrFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder getGroupTagArrOrBuilder(
           int index) {
@@ -1216,7 +1216,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder> 
            getGroupTagArrOrBuilderList() {
@@ -1227,14 +1227,14 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder addGroupTagArrBuilder() {
         return getGroupTagArrFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder addGroupTagArrBuilder(
           int index) {
@@ -1242,7 +1242,7 @@ public final class UserServiceOuterClass {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder> 
            getGroupTagArrBuilderList() {
@@ -1275,10 +1275,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateGroupRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.CreateGroupRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateGroupRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.CreateGroupRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateGroupRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateGroupRequest();
@@ -1316,30 +1316,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface CreateGroupResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.CreateGroupResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.CreateGroupResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the group field is set.
      */
     boolean hasGroup();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      * @return The group.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroup();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateGroupResponse}
+   * Protobuf type {@code choreo.apis.CreateGroupResponse}
    */
   public  static final class CreateGroupResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateGroupResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.CreateGroupResponse)
       CreateGroupResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use CreateGroupResponse.newBuilder() to construct.
@@ -1413,13 +1413,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateGroupResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateGroupResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateGroupResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateGroupResponse.Builder.class);
     }
@@ -1427,21 +1427,21 @@ public final class UserServiceOuterClass {
     public static final int GROUP_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group group_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the group field is set.
      */
     public boolean hasGroup() {
       return group_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      * @return The group.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroup() {
       return group_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.getDefaultInstance() : group_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupOrBuilder() {
       return getGroup();
@@ -1608,21 +1608,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateGroupResponse}
+     * Protobuf type {@code choreo.apis.CreateGroupResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateGroupResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.CreateGroupResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateGroupResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateGroupResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateGroupResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateGroupResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateGroupResponse.Builder.class);
       }
@@ -1657,7 +1657,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateGroupResponse_descriptor;
       }
 
       @java.lang.Override
@@ -1766,14 +1766,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> groupBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the group field is set.
        */
       public boolean hasGroup() {
         return groupBuilder_ != null || group_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        * @return The group.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroup() {
@@ -1784,7 +1784,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setGroup(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group value) {
         if (groupBuilder_ == null) {
@@ -1800,7 +1800,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setGroup(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder builderForValue) {
@@ -1814,7 +1814,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeGroup(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group value) {
         if (groupBuilder_ == null) {
@@ -1832,7 +1832,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearGroup() {
         if (groupBuilder_ == null) {
@@ -1846,7 +1846,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder getGroupBuilder() {
         
@@ -1854,7 +1854,7 @@ public final class UserServiceOuterClass {
         return getGroupFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupOrBuilder() {
         if (groupBuilder_ != null) {
@@ -1865,7 +1865,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> 
@@ -1893,10 +1893,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateGroupResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.CreateGroupResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateGroupResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.CreateGroupResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateGroupResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateGroupResponse();
@@ -1934,7 +1934,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface UpdateGroupRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateGroupRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.UpdateGroupRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -1986,35 +1986,35 @@ public final class UserServiceOuterClass {
         getDescriptionBytes();
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag> 
         getGroupTagArrList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag getGroupTagArr(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     int getGroupTagArrCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder> 
         getGroupTagArrOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder getGroupTagArrOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateGroupRequest}
+   * Protobuf type {@code choreo.apis.UpdateGroupRequest}
    */
   public  static final class UpdateGroupRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateGroupRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.UpdateGroupRequest)
       UpdateGroupRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use UpdateGroupRequest.newBuilder() to construct.
@@ -2117,13 +2117,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateGroupRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateGroupRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateGroupRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateGroupRequest.Builder.class);
     }
@@ -2275,32 +2275,32 @@ public final class UserServiceOuterClass {
     public static final int GROUPTAGARR_FIELD_NUMBER = 5;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag> groupTagArr_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag> getGroupTagArrList() {
       return groupTagArr_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder> 
         getGroupTagArrOrBuilderList() {
       return groupTagArr_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     public int getGroupTagArrCount() {
       return groupTagArr_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag getGroupTagArr(int index) {
       return groupTagArr_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+     * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder getGroupTagArrOrBuilder(
         int index) {
@@ -2505,21 +2505,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateGroupRequest}
+     * Protobuf type {@code choreo.apis.UpdateGroupRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateGroupRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.UpdateGroupRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateGroupRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateGroupRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateGroupRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateGroupRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateGroupRequest.Builder.class);
       }
@@ -2563,7 +2563,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateGroupRequest_descriptor;
       }
 
       @java.lang.Override
@@ -3034,7 +3034,7 @@ public final class UserServiceOuterClass {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder> groupTagArrBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag> getGroupTagArrList() {
         if (groupTagArrBuilder_ == null) {
@@ -3044,7 +3044,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public int getGroupTagArrCount() {
         if (groupTagArrBuilder_ == null) {
@@ -3054,7 +3054,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag getGroupTagArr(int index) {
         if (groupTagArrBuilder_ == null) {
@@ -3064,7 +3064,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder setGroupTagArr(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag value) {
@@ -3081,7 +3081,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder setGroupTagArr(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder builderForValue) {
@@ -3095,7 +3095,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder addGroupTagArr(org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag value) {
         if (groupTagArrBuilder_ == null) {
@@ -3111,7 +3111,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder addGroupTagArr(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag value) {
@@ -3128,7 +3128,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder addGroupTagArr(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder builderForValue) {
@@ -3142,7 +3142,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder addGroupTagArr(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder builderForValue) {
@@ -3156,7 +3156,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder addAllGroupTagArr(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag> values) {
@@ -3171,7 +3171,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder clearGroupTagArr() {
         if (groupTagArrBuilder_ == null) {
@@ -3184,7 +3184,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public Builder removeGroupTagArr(int index) {
         if (groupTagArrBuilder_ == null) {
@@ -3197,14 +3197,14 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder getGroupTagArrBuilder(
           int index) {
         return getGroupTagArrFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder getGroupTagArrOrBuilder(
           int index) {
@@ -3214,7 +3214,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTagOrBuilder> 
            getGroupTagArrOrBuilderList() {
@@ -3225,14 +3225,14 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder addGroupTagArrBuilder() {
         return getGroupTagArrFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder addGroupTagArrBuilder(
           int index) {
@@ -3240,7 +3240,7 @@ public final class UserServiceOuterClass {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.GroupTag groupTagArr = 5;</code>
+       * <code>repeated .choreo.apis.GroupTag groupTagArr = 5;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupTag.Builder> 
            getGroupTagArrBuilderList() {
@@ -3273,10 +3273,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateGroupRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.UpdateGroupRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateGroupRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.UpdateGroupRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateGroupRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateGroupRequest();
@@ -3314,30 +3314,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface UpdateGroupResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateGroupResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.UpdateGroupResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the group field is set.
      */
     boolean hasGroup();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      * @return The group.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroup();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateGroupResponse}
+   * Protobuf type {@code choreo.apis.UpdateGroupResponse}
    */
   public  static final class UpdateGroupResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateGroupResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.UpdateGroupResponse)
       UpdateGroupResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use UpdateGroupResponse.newBuilder() to construct.
@@ -3411,13 +3411,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateGroupResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateGroupResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateGroupResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateGroupResponse.Builder.class);
     }
@@ -3425,21 +3425,21 @@ public final class UserServiceOuterClass {
     public static final int GROUP_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group group_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the group field is set.
      */
     public boolean hasGroup() {
       return group_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      * @return The group.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroup() {
       return group_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.getDefaultInstance() : group_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupOrBuilder() {
       return getGroup();
@@ -3606,21 +3606,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateGroupResponse}
+     * Protobuf type {@code choreo.apis.UpdateGroupResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateGroupResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.UpdateGroupResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateGroupResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateGroupResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateGroupResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateGroupResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateGroupResponse.Builder.class);
       }
@@ -3655,7 +3655,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateGroupResponse_descriptor;
       }
 
       @java.lang.Override
@@ -3764,14 +3764,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> groupBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the group field is set.
        */
       public boolean hasGroup() {
         return groupBuilder_ != null || group_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        * @return The group.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroup() {
@@ -3782,7 +3782,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setGroup(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group value) {
         if (groupBuilder_ == null) {
@@ -3798,7 +3798,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setGroup(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder builderForValue) {
@@ -3812,7 +3812,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeGroup(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group value) {
         if (groupBuilder_ == null) {
@@ -3830,7 +3830,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearGroup() {
         if (groupBuilder_ == null) {
@@ -3844,7 +3844,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder getGroupBuilder() {
         
@@ -3852,7 +3852,7 @@ public final class UserServiceOuterClass {
         return getGroupFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupOrBuilder() {
         if (groupBuilder_ != null) {
@@ -3863,7 +3863,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> 
@@ -3891,10 +3891,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateGroupResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.UpdateGroupResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateGroupResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.UpdateGroupResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateGroupResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateGroupResponse();
@@ -3932,7 +3932,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface RemoveMemberFromGroupRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.RemoveMemberFromGroupRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.RemoveMemberFromGroupRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -3972,11 +3972,11 @@ public final class UserServiceOuterClass {
         getIdpIdBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.RemoveMemberFromGroupRequest}
+   * Protobuf type {@code choreo.apis.RemoveMemberFromGroupRequest}
    */
   public  static final class RemoveMemberFromGroupRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.RemoveMemberFromGroupRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.RemoveMemberFromGroupRequest)
       RemoveMemberFromGroupRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use RemoveMemberFromGroupRequest.newBuilder() to construct.
@@ -4058,13 +4058,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RemoveMemberFromGroupRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RemoveMemberFromGroupRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RemoveMemberFromGroupRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RemoveMemberFromGroupRequest.Builder.class);
     }
@@ -4352,21 +4352,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.RemoveMemberFromGroupRequest}
+     * Protobuf type {@code choreo.apis.RemoveMemberFromGroupRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.RemoveMemberFromGroupRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.RemoveMemberFromGroupRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RemoveMemberFromGroupRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RemoveMemberFromGroupRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RemoveMemberFromGroupRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RemoveMemberFromGroupRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RemoveMemberFromGroupRequest.Builder.class);
       }
@@ -4401,7 +4401,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RemoveMemberFromGroupRequest_descriptor;
       }
 
       @java.lang.Override
@@ -4753,10 +4753,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.RemoveMemberFromGroupRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.RemoveMemberFromGroupRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.RemoveMemberFromGroupRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.RemoveMemberFromGroupRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RemoveMemberFromGroupRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RemoveMemberFromGroupRequest();
@@ -4794,30 +4794,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface RemoveMemberFromGroupResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.RemoveMemberFromGroupResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.RemoveMemberFromGroupResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the user field is set.
      */
     boolean hasUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return The user.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.RemoveMemberFromGroupResponse}
+   * Protobuf type {@code choreo.apis.RemoveMemberFromGroupResponse}
    */
   public  static final class RemoveMemberFromGroupResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.RemoveMemberFromGroupResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.RemoveMemberFromGroupResponse)
       RemoveMemberFromGroupResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use RemoveMemberFromGroupResponse.newBuilder() to construct.
@@ -4891,13 +4891,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RemoveMemberFromGroupResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RemoveMemberFromGroupResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RemoveMemberFromGroupResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RemoveMemberFromGroupResponse.Builder.class);
     }
@@ -4905,21 +4905,21 @@ public final class UserServiceOuterClass {
     public static final int USER_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.User user_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the user field is set.
      */
     public boolean hasUser() {
       return user_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return The user.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
       return user_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.getDefaultInstance() : user_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
       return getUser();
@@ -5086,21 +5086,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.RemoveMemberFromGroupResponse}
+     * Protobuf type {@code choreo.apis.RemoveMemberFromGroupResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.RemoveMemberFromGroupResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.RemoveMemberFromGroupResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RemoveMemberFromGroupResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RemoveMemberFromGroupResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RemoveMemberFromGroupResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RemoveMemberFromGroupResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RemoveMemberFromGroupResponse.Builder.class);
       }
@@ -5135,7 +5135,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RemoveMemberFromGroupResponse_descriptor;
       }
 
       @java.lang.Override
@@ -5244,14 +5244,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> userBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the user field is set.
        */
       public boolean hasUser() {
         return userBuilder_ != null || user_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        * @return The user.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
@@ -5262,7 +5262,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -5278,7 +5278,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setUser(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -5292,7 +5292,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -5310,7 +5310,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearUser() {
         if (userBuilder_ == null) {
@@ -5324,7 +5324,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder getUserBuilder() {
         
@@ -5332,7 +5332,7 @@ public final class UserServiceOuterClass {
         return getUserFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
         if (userBuilder_ != null) {
@@ -5343,7 +5343,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
@@ -5371,10 +5371,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.RemoveMemberFromGroupResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.RemoveMemberFromGroupResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.RemoveMemberFromGroupResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.RemoveMemberFromGroupResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RemoveMemberFromGroupResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RemoveMemberFromGroupResponse();
@@ -5412,7 +5412,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface ListGroupsRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ListGroupsRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ListGroupsRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -5490,11 +5490,11 @@ public final class UserServiceOuterClass {
         getOrganizationNameBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListGroupsRequest}
+   * Protobuf type {@code choreo.apis.ListGroupsRequest}
    */
   public  static final class ListGroupsRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListGroupsRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ListGroupsRequest)
       ListGroupsRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ListGroupsRequest.newBuilder() to construct.
@@ -5596,13 +5596,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListGroupsRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListGroupsRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListGroupsRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListGroupsRequest.Builder.class);
     }
@@ -5948,21 +5948,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListGroupsRequest}
+     * Protobuf type {@code choreo.apis.ListGroupsRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListGroupsRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ListGroupsRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListGroupsRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListGroupsRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListGroupsRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListGroupsRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListGroupsRequest.Builder.class);
       }
@@ -5999,7 +5999,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListGroupsRequest_descriptor;
       }
 
       @java.lang.Override
@@ -6522,10 +6522,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListGroupsRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ListGroupsRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListGroupsRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ListGroupsRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListGroupsRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListGroupsRequest();
@@ -6563,39 +6563,39 @@ public final class UserServiceOuterClass {
   }
 
   public interface ListGroupsResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ListGroupsResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ListGroupsResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group> 
         getGroupsList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroups(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     int getGroupsCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> 
         getGroupsOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupsOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListGroupsResponse}
+   * Protobuf type {@code choreo.apis.ListGroupsResponse}
    */
   public  static final class ListGroupsResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListGroupsResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ListGroupsResponse)
       ListGroupsResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ListGroupsResponse.newBuilder() to construct.
@@ -6670,13 +6670,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListGroupsResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListGroupsResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListGroupsResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListGroupsResponse.Builder.class);
     }
@@ -6684,32 +6684,32 @@ public final class UserServiceOuterClass {
     public static final int GROUPS_FIELD_NUMBER = 1;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group> groups_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group> getGroupsList() {
       return groups_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> 
         getGroupsOrBuilderList() {
       return groups_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     public int getGroupsCount() {
       return groups_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroups(int index) {
       return groups_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupsOrBuilder(
         int index) {
@@ -6874,21 +6874,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListGroupsResponse}
+     * Protobuf type {@code choreo.apis.ListGroupsResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListGroupsResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ListGroupsResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListGroupsResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListGroupsResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListGroupsResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListGroupsResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListGroupsResponse.Builder.class);
       }
@@ -6924,7 +6924,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListGroupsResponse_descriptor;
       }
 
       @java.lang.Override
@@ -7071,7 +7071,7 @@ public final class UserServiceOuterClass {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> groupsBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group> getGroupsList() {
         if (groupsBuilder_ == null) {
@@ -7081,7 +7081,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public int getGroupsCount() {
         if (groupsBuilder_ == null) {
@@ -7091,7 +7091,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroups(int index) {
         if (groupsBuilder_ == null) {
@@ -7101,7 +7101,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder setGroups(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group value) {
@@ -7118,7 +7118,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder setGroups(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder builderForValue) {
@@ -7132,7 +7132,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder addGroups(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group value) {
         if (groupsBuilder_ == null) {
@@ -7148,7 +7148,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder addGroups(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group value) {
@@ -7165,7 +7165,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder addGroups(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder builderForValue) {
@@ -7179,7 +7179,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder addGroups(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder builderForValue) {
@@ -7193,7 +7193,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder addAllGroups(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group> values) {
@@ -7208,7 +7208,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder clearGroups() {
         if (groupsBuilder_ == null) {
@@ -7221,7 +7221,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder removeGroups(int index) {
         if (groupsBuilder_ == null) {
@@ -7234,14 +7234,14 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder getGroupsBuilder(
           int index) {
         return getGroupsFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupsOrBuilder(
           int index) {
@@ -7251,7 +7251,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> 
            getGroupsOrBuilderList() {
@@ -7262,14 +7262,14 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder addGroupsBuilder() {
         return getGroupsFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder addGroupsBuilder(
           int index) {
@@ -7277,7 +7277,7 @@ public final class UserServiceOuterClass {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder> 
            getGroupsBuilderList() {
@@ -7310,10 +7310,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListGroupsResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ListGroupsResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListGroupsResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ListGroupsResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListGroupsResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListGroupsResponse();
@@ -7351,7 +7351,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface GetGroupInfoRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.GetGroupInfoRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.GetGroupInfoRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -7404,11 +7404,11 @@ public final class UserServiceOuterClass {
         getOrganizationNameBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetGroupInfoRequest}
+   * Protobuf type {@code choreo.apis.GetGroupInfoRequest}
    */
   public  static final class GetGroupInfoRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetGroupInfoRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.GetGroupInfoRequest)
       GetGroupInfoRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use GetGroupInfoRequest.newBuilder() to construct.
@@ -7497,13 +7497,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetGroupInfoRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetGroupInfoRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetGroupInfoRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetGroupInfoRequest.Builder.class);
     }
@@ -7797,21 +7797,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetGroupInfoRequest}
+     * Protobuf type {@code choreo.apis.GetGroupInfoRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetGroupInfoRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.GetGroupInfoRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetGroupInfoRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetGroupInfoRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetGroupInfoRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetGroupInfoRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetGroupInfoRequest.Builder.class);
       }
@@ -7846,7 +7846,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetGroupInfoRequest_descriptor;
       }
 
       @java.lang.Override
@@ -8244,10 +8244,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetGroupInfoRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.GetGroupInfoRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetGroupInfoRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.GetGroupInfoRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetGroupInfoRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetGroupInfoRequest();
@@ -8285,30 +8285,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface GetGroupInfoResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.GetGroupInfoResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.GetGroupInfoResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the group field is set.
      */
     boolean hasGroup();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      * @return The group.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroup();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetGroupInfoResponse}
+   * Protobuf type {@code choreo.apis.GetGroupInfoResponse}
    */
   public  static final class GetGroupInfoResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetGroupInfoResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.GetGroupInfoResponse)
       GetGroupInfoResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use GetGroupInfoResponse.newBuilder() to construct.
@@ -8382,13 +8382,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetGroupInfoResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetGroupInfoResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetGroupInfoResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetGroupInfoResponse.Builder.class);
     }
@@ -8396,21 +8396,21 @@ public final class UserServiceOuterClass {
     public static final int GROUP_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group group_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the group field is set.
      */
     public boolean hasGroup() {
       return group_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      * @return The group.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroup() {
       return group_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.getDefaultInstance() : group_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupOrBuilder() {
       return getGroup();
@@ -8577,21 +8577,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetGroupInfoResponse}
+     * Protobuf type {@code choreo.apis.GetGroupInfoResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetGroupInfoResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.GetGroupInfoResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetGroupInfoResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetGroupInfoResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetGroupInfoResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetGroupInfoResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetGroupInfoResponse.Builder.class);
       }
@@ -8626,7 +8626,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetGroupInfoResponse_descriptor;
       }
 
       @java.lang.Override
@@ -8735,14 +8735,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> groupBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the group field is set.
        */
       public boolean hasGroup() {
         return groupBuilder_ != null || group_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        * @return The group.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroup() {
@@ -8753,7 +8753,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setGroup(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group value) {
         if (groupBuilder_ == null) {
@@ -8769,7 +8769,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setGroup(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder builderForValue) {
@@ -8783,7 +8783,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeGroup(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group value) {
         if (groupBuilder_ == null) {
@@ -8801,7 +8801,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearGroup() {
         if (groupBuilder_ == null) {
@@ -8815,7 +8815,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder getGroupBuilder() {
         
@@ -8823,7 +8823,7 @@ public final class UserServiceOuterClass {
         return getGroupFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupOrBuilder() {
         if (groupBuilder_ != null) {
@@ -8834,7 +8834,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> 
@@ -8862,10 +8862,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetGroupInfoResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.GetGroupInfoResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetGroupInfoResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.GetGroupInfoResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetGroupInfoResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetGroupInfoResponse();
@@ -8903,7 +8903,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface DeleteGroupRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteGroupRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.DeleteGroupRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -8931,11 +8931,11 @@ public final class UserServiceOuterClass {
         getOrganizationNameBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteGroupRequest}
+   * Protobuf type {@code choreo.apis.DeleteGroupRequest}
    */
   public  static final class DeleteGroupRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteGroupRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.DeleteGroupRequest)
       DeleteGroupRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use DeleteGroupRequest.newBuilder() to construct.
@@ -9010,13 +9010,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteGroupRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteGroupRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteGroupRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteGroupRequest.Builder.class);
     }
@@ -9258,21 +9258,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteGroupRequest}
+     * Protobuf type {@code choreo.apis.DeleteGroupRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteGroupRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.DeleteGroupRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteGroupRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteGroupRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteGroupRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteGroupRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteGroupRequest.Builder.class);
       }
@@ -9305,7 +9305,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteGroupRequest_descriptor;
       }
 
       @java.lang.Override
@@ -9576,10 +9576,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteGroupRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.DeleteGroupRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteGroupRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.DeleteGroupRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteGroupRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteGroupRequest();
@@ -9617,30 +9617,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface DeleteGroupResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteGroupResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.DeleteGroupResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the group field is set.
      */
     boolean hasGroup();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      * @return The group.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroup();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteGroupResponse}
+   * Protobuf type {@code choreo.apis.DeleteGroupResponse}
    */
   public  static final class DeleteGroupResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteGroupResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.DeleteGroupResponse)
       DeleteGroupResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use DeleteGroupResponse.newBuilder() to construct.
@@ -9714,13 +9714,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteGroupResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteGroupResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteGroupResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteGroupResponse.Builder.class);
     }
@@ -9728,21 +9728,21 @@ public final class UserServiceOuterClass {
     public static final int GROUP_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group group_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the group field is set.
      */
     public boolean hasGroup() {
       return group_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      * @return The group.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroup() {
       return group_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.getDefaultInstance() : group_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupOrBuilder() {
       return getGroup();
@@ -9909,21 +9909,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteGroupResponse}
+     * Protobuf type {@code choreo.apis.DeleteGroupResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteGroupResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.DeleteGroupResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteGroupResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteGroupResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteGroupResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteGroupResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteGroupResponse.Builder.class);
       }
@@ -9958,7 +9958,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteGroupResponse_descriptor;
       }
 
       @java.lang.Override
@@ -10067,14 +10067,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> groupBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the group field is set.
        */
       public boolean hasGroup() {
         return groupBuilder_ != null || group_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        * @return The group.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroup() {
@@ -10085,7 +10085,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setGroup(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group value) {
         if (groupBuilder_ == null) {
@@ -10101,7 +10101,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setGroup(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder builderForValue) {
@@ -10115,7 +10115,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeGroup(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group value) {
         if (groupBuilder_ == null) {
@@ -10133,7 +10133,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearGroup() {
         if (groupBuilder_ == null) {
@@ -10147,7 +10147,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder getGroupBuilder() {
         
@@ -10155,7 +10155,7 @@ public final class UserServiceOuterClass {
         return getGroupFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupOrBuilder() {
         if (groupBuilder_ != null) {
@@ -10166,7 +10166,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Group group = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> 
@@ -10194,10 +10194,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteGroupResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.DeleteGroupResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteGroupResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.DeleteGroupResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteGroupResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteGroupResponse();
@@ -10235,7 +10235,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface CreateRoleRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.CreateRoleRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.CreateRoleRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -10275,35 +10275,35 @@ public final class UserServiceOuterClass {
         getDescriptionBytes();
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> 
         getPermissionArrList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission getPermissionArr(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
      */
     int getPermissionArrCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder> 
         getPermissionArrOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder getPermissionArrOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateRoleRequest}
+   * Protobuf type {@code choreo.apis.CreateRoleRequest}
    */
   public  static final class CreateRoleRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateRoleRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.CreateRoleRequest)
       CreateRoleRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use CreateRoleRequest.newBuilder() to construct.
@@ -10399,13 +10399,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateRoleRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateRoleRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateRoleRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateRoleRequest.Builder.class);
     }
@@ -10521,32 +10521,32 @@ public final class UserServiceOuterClass {
     public static final int PERMISSIONARR_FIELD_NUMBER = 4;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> permissionArr_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> getPermissionArrList() {
       return permissionArr_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder> 
         getPermissionArrOrBuilderList() {
       return permissionArr_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
      */
     public int getPermissionArrCount() {
       return permissionArr_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission getPermissionArr(int index) {
       return permissionArr_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder getPermissionArrOrBuilder(
         int index) {
@@ -10741,21 +10741,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateRoleRequest}
+     * Protobuf type {@code choreo.apis.CreateRoleRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateRoleRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.CreateRoleRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateRoleRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateRoleRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateRoleRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateRoleRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateRoleRequest.Builder.class);
       }
@@ -10797,7 +10797,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateRoleRequest_descriptor;
       }
 
       @java.lang.Override
@@ -11187,7 +11187,7 @@ public final class UserServiceOuterClass {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder> permissionArrBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> getPermissionArrList() {
         if (permissionArrBuilder_ == null) {
@@ -11197,7 +11197,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public int getPermissionArrCount() {
         if (permissionArrBuilder_ == null) {
@@ -11207,7 +11207,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission getPermissionArr(int index) {
         if (permissionArrBuilder_ == null) {
@@ -11217,7 +11217,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public Builder setPermissionArr(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission value) {
@@ -11234,7 +11234,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public Builder setPermissionArr(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder builderForValue) {
@@ -11248,7 +11248,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public Builder addPermissionArr(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission value) {
         if (permissionArrBuilder_ == null) {
@@ -11264,7 +11264,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public Builder addPermissionArr(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission value) {
@@ -11281,7 +11281,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public Builder addPermissionArr(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder builderForValue) {
@@ -11295,7 +11295,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public Builder addPermissionArr(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder builderForValue) {
@@ -11309,7 +11309,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public Builder addAllPermissionArr(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> values) {
@@ -11324,7 +11324,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public Builder clearPermissionArr() {
         if (permissionArrBuilder_ == null) {
@@ -11337,7 +11337,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public Builder removePermissionArr(int index) {
         if (permissionArrBuilder_ == null) {
@@ -11350,14 +11350,14 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder getPermissionArrBuilder(
           int index) {
         return getPermissionArrFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder getPermissionArrOrBuilder(
           int index) {
@@ -11367,7 +11367,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder> 
            getPermissionArrOrBuilderList() {
@@ -11378,14 +11378,14 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder addPermissionArrBuilder() {
         return getPermissionArrFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder addPermissionArrBuilder(
           int index) {
@@ -11393,7 +11393,7 @@ public final class UserServiceOuterClass {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 4;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 4;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder> 
            getPermissionArrBuilderList() {
@@ -11426,10 +11426,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateRoleRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.CreateRoleRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateRoleRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.CreateRoleRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateRoleRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateRoleRequest();
@@ -11467,30 +11467,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface CreateRoleResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.CreateRoleResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.CreateRoleResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the role field is set.
      */
     boolean hasRole();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return The role.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRole();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRoleOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateRoleResponse}
+   * Protobuf type {@code choreo.apis.CreateRoleResponse}
    */
   public  static final class CreateRoleResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateRoleResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.CreateRoleResponse)
       CreateRoleResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use CreateRoleResponse.newBuilder() to construct.
@@ -11564,13 +11564,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateRoleResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateRoleResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateRoleResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateRoleResponse.Builder.class);
     }
@@ -11578,21 +11578,21 @@ public final class UserServiceOuterClass {
     public static final int ROLE_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role role_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the role field is set.
      */
     public boolean hasRole() {
       return role_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return The role.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRole() {
       return role_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.getDefaultInstance() : role_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRoleOrBuilder() {
       return getRole();
@@ -11759,21 +11759,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateRoleResponse}
+     * Protobuf type {@code choreo.apis.CreateRoleResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateRoleResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.CreateRoleResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateRoleResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateRoleResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateRoleResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateRoleResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateRoleResponse.Builder.class);
       }
@@ -11808,7 +11808,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateRoleResponse_descriptor;
       }
 
       @java.lang.Override
@@ -11917,14 +11917,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> roleBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the role field is set.
        */
       public boolean hasRole() {
         return roleBuilder_ != null || role_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        * @return The role.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRole() {
@@ -11935,7 +11935,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setRole(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
         if (roleBuilder_ == null) {
@@ -11951,7 +11951,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setRole(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder builderForValue) {
@@ -11965,7 +11965,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeRole(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
         if (roleBuilder_ == null) {
@@ -11983,7 +11983,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearRole() {
         if (roleBuilder_ == null) {
@@ -11997,7 +11997,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder getRoleBuilder() {
         
@@ -12005,7 +12005,7 @@ public final class UserServiceOuterClass {
         return getRoleFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRoleOrBuilder() {
         if (roleBuilder_ != null) {
@@ -12016,7 +12016,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> 
@@ -12044,10 +12044,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateRoleResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.CreateRoleResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateRoleResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.CreateRoleResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateRoleResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateRoleResponse();
@@ -12085,7 +12085,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface GetRoleInfoRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.GetRoleInfoRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.GetRoleInfoRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -12138,11 +12138,11 @@ public final class UserServiceOuterClass {
         getOrganizationNameBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetRoleInfoRequest}
+   * Protobuf type {@code choreo.apis.GetRoleInfoRequest}
    */
   public  static final class GetRoleInfoRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetRoleInfoRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.GetRoleInfoRequest)
       GetRoleInfoRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use GetRoleInfoRequest.newBuilder() to construct.
@@ -12231,13 +12231,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetRoleInfoRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetRoleInfoRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetRoleInfoRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetRoleInfoRequest.Builder.class);
     }
@@ -12531,21 +12531,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetRoleInfoRequest}
+     * Protobuf type {@code choreo.apis.GetRoleInfoRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetRoleInfoRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.GetRoleInfoRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetRoleInfoRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetRoleInfoRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetRoleInfoRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetRoleInfoRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetRoleInfoRequest.Builder.class);
       }
@@ -12580,7 +12580,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetRoleInfoRequest_descriptor;
       }
 
       @java.lang.Override
@@ -12978,10 +12978,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetRoleInfoRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.GetRoleInfoRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetRoleInfoRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.GetRoleInfoRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetRoleInfoRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetRoleInfoRequest();
@@ -13019,30 +13019,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface GetRoleInfoResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.GetRoleInfoResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.GetRoleInfoResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the role field is set.
      */
     boolean hasRole();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return The role.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRole();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRoleOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetRoleInfoResponse}
+   * Protobuf type {@code choreo.apis.GetRoleInfoResponse}
    */
   public  static final class GetRoleInfoResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetRoleInfoResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.GetRoleInfoResponse)
       GetRoleInfoResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use GetRoleInfoResponse.newBuilder() to construct.
@@ -13116,13 +13116,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetRoleInfoResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetRoleInfoResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetRoleInfoResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetRoleInfoResponse.Builder.class);
     }
@@ -13130,21 +13130,21 @@ public final class UserServiceOuterClass {
     public static final int ROLE_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role role_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the role field is set.
      */
     public boolean hasRole() {
       return role_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return The role.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRole() {
       return role_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.getDefaultInstance() : role_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRoleOrBuilder() {
       return getRole();
@@ -13311,21 +13311,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetRoleInfoResponse}
+     * Protobuf type {@code choreo.apis.GetRoleInfoResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetRoleInfoResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.GetRoleInfoResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetRoleInfoResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetRoleInfoResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetRoleInfoResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetRoleInfoResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetRoleInfoResponse.Builder.class);
       }
@@ -13360,7 +13360,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetRoleInfoResponse_descriptor;
       }
 
       @java.lang.Override
@@ -13469,14 +13469,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> roleBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the role field is set.
        */
       public boolean hasRole() {
         return roleBuilder_ != null || role_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        * @return The role.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRole() {
@@ -13487,7 +13487,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setRole(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
         if (roleBuilder_ == null) {
@@ -13503,7 +13503,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setRole(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder builderForValue) {
@@ -13517,7 +13517,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeRole(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
         if (roleBuilder_ == null) {
@@ -13535,7 +13535,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearRole() {
         if (roleBuilder_ == null) {
@@ -13549,7 +13549,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder getRoleBuilder() {
         
@@ -13557,7 +13557,7 @@ public final class UserServiceOuterClass {
         return getRoleFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRoleOrBuilder() {
         if (roleBuilder_ != null) {
@@ -13568,7 +13568,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> 
@@ -13596,10 +13596,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetRoleInfoResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.GetRoleInfoResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetRoleInfoResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.GetRoleInfoResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetRoleInfoResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetRoleInfoResponse();
@@ -13637,7 +13637,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface DeleteRoleRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteRoleRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.DeleteRoleRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -13665,11 +13665,11 @@ public final class UserServiceOuterClass {
         getOrganizationNameBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteRoleRequest}
+   * Protobuf type {@code choreo.apis.DeleteRoleRequest}
    */
   public  static final class DeleteRoleRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteRoleRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.DeleteRoleRequest)
       DeleteRoleRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use DeleteRoleRequest.newBuilder() to construct.
@@ -13744,13 +13744,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteRoleRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteRoleRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteRoleRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteRoleRequest.Builder.class);
     }
@@ -13992,21 +13992,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteRoleRequest}
+     * Protobuf type {@code choreo.apis.DeleteRoleRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteRoleRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.DeleteRoleRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteRoleRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteRoleRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteRoleRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteRoleRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteRoleRequest.Builder.class);
       }
@@ -14039,7 +14039,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteRoleRequest_descriptor;
       }
 
       @java.lang.Override
@@ -14310,10 +14310,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteRoleRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.DeleteRoleRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteRoleRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.DeleteRoleRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteRoleRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteRoleRequest();
@@ -14351,30 +14351,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface DeleteRoleResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteRoleResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.DeleteRoleResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the role field is set.
      */
     boolean hasRole();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return The role.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRole();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRoleOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteRoleResponse}
+   * Protobuf type {@code choreo.apis.DeleteRoleResponse}
    */
   public  static final class DeleteRoleResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteRoleResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.DeleteRoleResponse)
       DeleteRoleResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use DeleteRoleResponse.newBuilder() to construct.
@@ -14448,13 +14448,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteRoleResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteRoleResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteRoleResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteRoleResponse.Builder.class);
     }
@@ -14462,21 +14462,21 @@ public final class UserServiceOuterClass {
     public static final int ROLE_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role role_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the role field is set.
      */
     public boolean hasRole() {
       return role_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return The role.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRole() {
       return role_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.getDefaultInstance() : role_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRoleOrBuilder() {
       return getRole();
@@ -14643,21 +14643,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteRoleResponse}
+     * Protobuf type {@code choreo.apis.DeleteRoleResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteRoleResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.DeleteRoleResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteRoleResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteRoleResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteRoleResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteRoleResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteRoleResponse.Builder.class);
       }
@@ -14692,7 +14692,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteRoleResponse_descriptor;
       }
 
       @java.lang.Override
@@ -14801,14 +14801,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> roleBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the role field is set.
        */
       public boolean hasRole() {
         return roleBuilder_ != null || role_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        * @return The role.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRole() {
@@ -14819,7 +14819,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setRole(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
         if (roleBuilder_ == null) {
@@ -14835,7 +14835,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setRole(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder builderForValue) {
@@ -14849,7 +14849,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeRole(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
         if (roleBuilder_ == null) {
@@ -14867,7 +14867,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearRole() {
         if (roleBuilder_ == null) {
@@ -14881,7 +14881,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder getRoleBuilder() {
         
@@ -14889,7 +14889,7 @@ public final class UserServiceOuterClass {
         return getRoleFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRoleOrBuilder() {
         if (roleBuilder_ != null) {
@@ -14900,7 +14900,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> 
@@ -14928,10 +14928,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteRoleResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.DeleteRoleResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteRoleResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.DeleteRoleResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteRoleResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteRoleResponse();
@@ -14969,7 +14969,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface UpdateRoleRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRoleRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.UpdateRoleRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -15021,35 +15021,35 @@ public final class UserServiceOuterClass {
         getDescriptionBytes();
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> 
         getPermissionArrList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission getPermissionArr(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
      */
     int getPermissionArrCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder> 
         getPermissionArrOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder getPermissionArrOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRoleRequest}
+   * Protobuf type {@code choreo.apis.UpdateRoleRequest}
    */
   public  static final class UpdateRoleRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRoleRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.UpdateRoleRequest)
       UpdateRoleRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use UpdateRoleRequest.newBuilder() to construct.
@@ -15152,13 +15152,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRoleRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRoleRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRoleRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRoleRequest.Builder.class);
     }
@@ -15310,32 +15310,32 @@ public final class UserServiceOuterClass {
     public static final int PERMISSIONARR_FIELD_NUMBER = 5;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> permissionArr_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> getPermissionArrList() {
       return permissionArr_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder> 
         getPermissionArrOrBuilderList() {
       return permissionArr_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
      */
     public int getPermissionArrCount() {
       return permissionArr_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission getPermissionArr(int index) {
       return permissionArr_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+     * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder getPermissionArrOrBuilder(
         int index) {
@@ -15540,21 +15540,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRoleRequest}
+     * Protobuf type {@code choreo.apis.UpdateRoleRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRoleRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.UpdateRoleRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRoleRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRoleRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRoleRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRoleRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRoleRequest.Builder.class);
       }
@@ -15598,7 +15598,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRoleRequest_descriptor;
       }
 
       @java.lang.Override
@@ -16069,7 +16069,7 @@ public final class UserServiceOuterClass {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder> permissionArrBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> getPermissionArrList() {
         if (permissionArrBuilder_ == null) {
@@ -16079,7 +16079,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public int getPermissionArrCount() {
         if (permissionArrBuilder_ == null) {
@@ -16089,7 +16089,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission getPermissionArr(int index) {
         if (permissionArrBuilder_ == null) {
@@ -16099,7 +16099,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public Builder setPermissionArr(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission value) {
@@ -16116,7 +16116,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public Builder setPermissionArr(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder builderForValue) {
@@ -16130,7 +16130,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public Builder addPermissionArr(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission value) {
         if (permissionArrBuilder_ == null) {
@@ -16146,7 +16146,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public Builder addPermissionArr(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission value) {
@@ -16163,7 +16163,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public Builder addPermissionArr(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder builderForValue) {
@@ -16177,7 +16177,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public Builder addPermissionArr(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder builderForValue) {
@@ -16191,7 +16191,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public Builder addAllPermissionArr(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission> values) {
@@ -16206,7 +16206,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public Builder clearPermissionArr() {
         if (permissionArrBuilder_ == null) {
@@ -16219,7 +16219,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public Builder removePermissionArr(int index) {
         if (permissionArrBuilder_ == null) {
@@ -16232,14 +16232,14 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder getPermissionArrBuilder(
           int index) {
         return getPermissionArrFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder getPermissionArrOrBuilder(
           int index) {
@@ -16249,7 +16249,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionOrBuilder> 
            getPermissionArrOrBuilderList() {
@@ -16260,14 +16260,14 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder addPermissionArrBuilder() {
         return getPermissionArrFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder addPermissionArrBuilder(
           int index) {
@@ -16275,7 +16275,7 @@ public final class UserServiceOuterClass {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Permission permissionArr = 5;</code>
+       * <code>repeated .choreo.apis.Permission permissionArr = 5;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Permission.Builder> 
            getPermissionArrBuilderList() {
@@ -16308,10 +16308,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRoleRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.UpdateRoleRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRoleRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.UpdateRoleRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRoleRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRoleRequest();
@@ -16349,30 +16349,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface UpdateRoleResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRoleResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.UpdateRoleResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the role field is set.
      */
     boolean hasRole();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return The role.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRole();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRoleOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRoleResponse}
+   * Protobuf type {@code choreo.apis.UpdateRoleResponse}
    */
   public  static final class UpdateRoleResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRoleResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.UpdateRoleResponse)
       UpdateRoleResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use UpdateRoleResponse.newBuilder() to construct.
@@ -16446,13 +16446,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRoleResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRoleResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRoleResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRoleResponse.Builder.class);
     }
@@ -16460,21 +16460,21 @@ public final class UserServiceOuterClass {
     public static final int ROLE_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role role_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the role field is set.
      */
     public boolean hasRole() {
       return role_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return The role.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRole() {
       return role_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.getDefaultInstance() : role_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRoleOrBuilder() {
       return getRole();
@@ -16641,21 +16641,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRoleResponse}
+     * Protobuf type {@code choreo.apis.UpdateRoleResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRoleResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.UpdateRoleResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRoleResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRoleResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRoleResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRoleResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRoleResponse.Builder.class);
       }
@@ -16690,7 +16690,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRoleResponse_descriptor;
       }
 
       @java.lang.Override
@@ -16799,14 +16799,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> roleBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the role field is set.
        */
       public boolean hasRole() {
         return roleBuilder_ != null || role_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        * @return The role.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRole() {
@@ -16817,7 +16817,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setRole(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
         if (roleBuilder_ == null) {
@@ -16833,7 +16833,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setRole(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder builderForValue) {
@@ -16847,7 +16847,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeRole(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
         if (roleBuilder_ == null) {
@@ -16865,7 +16865,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearRole() {
         if (roleBuilder_ == null) {
@@ -16879,7 +16879,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder getRoleBuilder() {
         
@@ -16887,7 +16887,7 @@ public final class UserServiceOuterClass {
         return getRoleFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRoleOrBuilder() {
         if (roleBuilder_ != null) {
@@ -16898,7 +16898,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> 
@@ -16926,10 +16926,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRoleResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.UpdateRoleResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRoleResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.UpdateRoleResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRoleResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRoleResponse();
@@ -16967,7 +16967,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface ListRolesRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ListRolesRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ListRolesRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -17044,11 +17044,11 @@ public final class UserServiceOuterClass {
         getSearchBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListRolesRequest}
+   * Protobuf type {@code choreo.apis.ListRolesRequest}
    */
   public  static final class ListRolesRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListRolesRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ListRolesRequest)
       ListRolesRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ListRolesRequest.newBuilder() to construct.
@@ -17151,13 +17151,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListRolesRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListRolesRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListRolesRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListRolesRequest.Builder.class);
     }
@@ -17543,21 +17543,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListRolesRequest}
+     * Protobuf type {@code choreo.apis.ListRolesRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListRolesRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ListRolesRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListRolesRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListRolesRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListRolesRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListRolesRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListRolesRequest.Builder.class);
       }
@@ -17596,7 +17596,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListRolesRequest_descriptor;
       }
 
       @java.lang.Override
@@ -18156,10 +18156,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListRolesRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ListRolesRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListRolesRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ListRolesRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListRolesRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListRolesRequest();
@@ -18197,30 +18197,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface ListRolesResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ListRolesResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ListRolesResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole paginatedRole = 1;</code>
+     * <code>.choreo.apis.PaginatedRole paginatedRole = 1;</code>
      * @return Whether the paginatedRole field is set.
      */
     boolean hasPaginatedRole();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole paginatedRole = 1;</code>
+     * <code>.choreo.apis.PaginatedRole paginatedRole = 1;</code>
      * @return The paginatedRole.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole getPaginatedRole();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole paginatedRole = 1;</code>
+     * <code>.choreo.apis.PaginatedRole paginatedRole = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRoleOrBuilder getPaginatedRoleOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListRolesResponse}
+   * Protobuf type {@code choreo.apis.ListRolesResponse}
    */
   public  static final class ListRolesResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListRolesResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ListRolesResponse)
       ListRolesResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ListRolesResponse.newBuilder() to construct.
@@ -18294,13 +18294,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListRolesResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListRolesResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListRolesResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListRolesResponse.Builder.class);
     }
@@ -18308,21 +18308,21 @@ public final class UserServiceOuterClass {
     public static final int PAGINATEDROLE_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole paginatedRole_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole paginatedRole = 1;</code>
+     * <code>.choreo.apis.PaginatedRole paginatedRole = 1;</code>
      * @return Whether the paginatedRole field is set.
      */
     public boolean hasPaginatedRole() {
       return paginatedRole_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole paginatedRole = 1;</code>
+     * <code>.choreo.apis.PaginatedRole paginatedRole = 1;</code>
      * @return The paginatedRole.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole getPaginatedRole() {
       return paginatedRole_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole.getDefaultInstance() : paginatedRole_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole paginatedRole = 1;</code>
+     * <code>.choreo.apis.PaginatedRole paginatedRole = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRoleOrBuilder getPaginatedRoleOrBuilder() {
       return getPaginatedRole();
@@ -18489,21 +18489,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListRolesResponse}
+     * Protobuf type {@code choreo.apis.ListRolesResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListRolesResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ListRolesResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListRolesResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListRolesResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListRolesResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListRolesResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListRolesResponse.Builder.class);
       }
@@ -18538,7 +18538,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListRolesResponse_descriptor;
       }
 
       @java.lang.Override
@@ -18647,14 +18647,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRoleOrBuilder> paginatedRoleBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole paginatedRole = 1;</code>
+       * <code>.choreo.apis.PaginatedRole paginatedRole = 1;</code>
        * @return Whether the paginatedRole field is set.
        */
       public boolean hasPaginatedRole() {
         return paginatedRoleBuilder_ != null || paginatedRole_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole paginatedRole = 1;</code>
+       * <code>.choreo.apis.PaginatedRole paginatedRole = 1;</code>
        * @return The paginatedRole.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole getPaginatedRole() {
@@ -18665,7 +18665,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole paginatedRole = 1;</code>
+       * <code>.choreo.apis.PaginatedRole paginatedRole = 1;</code>
        */
       public Builder setPaginatedRole(org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole value) {
         if (paginatedRoleBuilder_ == null) {
@@ -18681,7 +18681,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole paginatedRole = 1;</code>
+       * <code>.choreo.apis.PaginatedRole paginatedRole = 1;</code>
        */
       public Builder setPaginatedRole(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole.Builder builderForValue) {
@@ -18695,7 +18695,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole paginatedRole = 1;</code>
+       * <code>.choreo.apis.PaginatedRole paginatedRole = 1;</code>
        */
       public Builder mergePaginatedRole(org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole value) {
         if (paginatedRoleBuilder_ == null) {
@@ -18713,7 +18713,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole paginatedRole = 1;</code>
+       * <code>.choreo.apis.PaginatedRole paginatedRole = 1;</code>
        */
       public Builder clearPaginatedRole() {
         if (paginatedRoleBuilder_ == null) {
@@ -18727,7 +18727,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole paginatedRole = 1;</code>
+       * <code>.choreo.apis.PaginatedRole paginatedRole = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole.Builder getPaginatedRoleBuilder() {
         
@@ -18735,7 +18735,7 @@ public final class UserServiceOuterClass {
         return getPaginatedRoleFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole paginatedRole = 1;</code>
+       * <code>.choreo.apis.PaginatedRole paginatedRole = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRoleOrBuilder getPaginatedRoleOrBuilder() {
         if (paginatedRoleBuilder_ != null) {
@@ -18746,7 +18746,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.PaginatedRole paginatedRole = 1;</code>
+       * <code>.choreo.apis.PaginatedRole paginatedRole = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRole.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PaginatedRoleOrBuilder> 
@@ -18774,10 +18774,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListRolesResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ListRolesResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListRolesResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ListRolesResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListRolesResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListRolesResponse();
@@ -18815,7 +18815,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface SendMemberInvitationRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.SendMemberInvitationRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.SendMemberInvitationRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -18893,11 +18893,11 @@ public final class UserServiceOuterClass {
         getAuthenticatedUserEmailBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.SendMemberInvitationRequest}
+   * Protobuf type {@code choreo.apis.SendMemberInvitationRequest}
    */
   public  static final class SendMemberInvitationRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.SendMemberInvitationRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.SendMemberInvitationRequest)
       SendMemberInvitationRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use SendMemberInvitationRequest.newBuilder() to construct.
@@ -18999,13 +18999,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_SendMemberInvitationRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_SendMemberInvitationRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.SendMemberInvitationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.SendMemberInvitationRequest.Builder.class);
     }
@@ -19351,21 +19351,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.SendMemberInvitationRequest}
+     * Protobuf type {@code choreo.apis.SendMemberInvitationRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.SendMemberInvitationRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.SendMemberInvitationRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.SendMemberInvitationRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_SendMemberInvitationRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_SendMemberInvitationRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.SendMemberInvitationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.SendMemberInvitationRequest.Builder.class);
       }
@@ -19402,7 +19402,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_SendMemberInvitationRequest_descriptor;
       }
 
       @java.lang.Override
@@ -19925,10 +19925,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.SendMemberInvitationRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.SendMemberInvitationRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.SendMemberInvitationRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.SendMemberInvitationRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.SendMemberInvitationRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.SendMemberInvitationRequest();
@@ -19966,7 +19966,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface SendMemberInvitationResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.SendMemberInvitationResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.SendMemberInvitationResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -20020,11 +20020,11 @@ public final class UserServiceOuterClass {
         getUnsuccessfulListBytes(int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.SendMemberInvitationResponse}
+   * Protobuf type {@code choreo.apis.SendMemberInvitationResponse}
    */
   public  static final class SendMemberInvitationResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.SendMemberInvitationResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.SendMemberInvitationResponse)
       SendMemberInvitationResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use SendMemberInvitationResponse.newBuilder() to construct.
@@ -20112,13 +20112,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_SendMemberInvitationResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_SendMemberInvitationResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.SendMemberInvitationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.SendMemberInvitationResponse.Builder.class);
     }
@@ -20372,21 +20372,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.SendMemberInvitationResponse}
+     * Protobuf type {@code choreo.apis.SendMemberInvitationResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.SendMemberInvitationResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.SendMemberInvitationResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.SendMemberInvitationResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_SendMemberInvitationResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_SendMemberInvitationResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.SendMemberInvitationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.SendMemberInvitationResponse.Builder.class);
       }
@@ -20419,7 +20419,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_SendMemberInvitationResponse_descriptor;
       }
 
       @java.lang.Override
@@ -20780,10 +20780,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.SendMemberInvitationResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.SendMemberInvitationResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.SendMemberInvitationResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.SendMemberInvitationResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.SendMemberInvitationResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.SendMemberInvitationResponse();
@@ -20821,7 +20821,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface AcceptMemberInvitationRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.AcceptMemberInvitationRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.AcceptMemberInvitationRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -20861,11 +20861,11 @@ public final class UserServiceOuterClass {
         getAuthenticatedUserEmailBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.AcceptMemberInvitationRequest}
+   * Protobuf type {@code choreo.apis.AcceptMemberInvitationRequest}
    */
   public  static final class AcceptMemberInvitationRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.AcceptMemberInvitationRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.AcceptMemberInvitationRequest)
       AcceptMemberInvitationRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use AcceptMemberInvitationRequest.newBuilder() to construct.
@@ -20947,13 +20947,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_AcceptMemberInvitationRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_AcceptMemberInvitationRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AcceptMemberInvitationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AcceptMemberInvitationRequest.Builder.class);
     }
@@ -21241,21 +21241,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.AcceptMemberInvitationRequest}
+     * Protobuf type {@code choreo.apis.AcceptMemberInvitationRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.AcceptMemberInvitationRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.AcceptMemberInvitationRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AcceptMemberInvitationRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_AcceptMemberInvitationRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_AcceptMemberInvitationRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AcceptMemberInvitationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AcceptMemberInvitationRequest.Builder.class);
       }
@@ -21290,7 +21290,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_AcceptMemberInvitationRequest_descriptor;
       }
 
       @java.lang.Override
@@ -21642,10 +21642,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.AcceptMemberInvitationRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.AcceptMemberInvitationRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.AcceptMemberInvitationRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.AcceptMemberInvitationRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AcceptMemberInvitationRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AcceptMemberInvitationRequest();
@@ -21683,7 +21683,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface AcceptMemberInvitationResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.AcceptMemberInvitationResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.AcceptMemberInvitationResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -21705,11 +21705,11 @@ public final class UserServiceOuterClass {
         getMessageBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.AcceptMemberInvitationResponse}
+   * Protobuf type {@code choreo.apis.AcceptMemberInvitationResponse}
    */
   public  static final class AcceptMemberInvitationResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.AcceptMemberInvitationResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.AcceptMemberInvitationResponse)
       AcceptMemberInvitationResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use AcceptMemberInvitationResponse.newBuilder() to construct.
@@ -21782,13 +21782,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_AcceptMemberInvitationResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_AcceptMemberInvitationResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AcceptMemberInvitationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AcceptMemberInvitationResponse.Builder.class);
     }
@@ -22006,21 +22006,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.AcceptMemberInvitationResponse}
+     * Protobuf type {@code choreo.apis.AcceptMemberInvitationResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.AcceptMemberInvitationResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.AcceptMemberInvitationResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AcceptMemberInvitationResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_AcceptMemberInvitationResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_AcceptMemberInvitationResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AcceptMemberInvitationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AcceptMemberInvitationResponse.Builder.class);
       }
@@ -22053,7 +22053,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_AcceptMemberInvitationResponse_descriptor;
       }
 
       @java.lang.Override
@@ -22277,10 +22277,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.AcceptMemberInvitationResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.AcceptMemberInvitationResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.AcceptMemberInvitationResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.AcceptMemberInvitationResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AcceptMemberInvitationResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AcceptMemberInvitationResponse();
@@ -22318,7 +22318,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface FindMemberInvitationRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.FindMemberInvitationRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.FindMemberInvitationRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -22346,11 +22346,11 @@ public final class UserServiceOuterClass {
         getConfirmationKeyBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindMemberInvitationRequest}
+   * Protobuf type {@code choreo.apis.FindMemberInvitationRequest}
    */
   public  static final class FindMemberInvitationRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindMemberInvitationRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.FindMemberInvitationRequest)
       FindMemberInvitationRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use FindMemberInvitationRequest.newBuilder() to construct.
@@ -22425,13 +22425,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindMemberInvitationRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindMemberInvitationRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindMemberInvitationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindMemberInvitationRequest.Builder.class);
     }
@@ -22673,21 +22673,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindMemberInvitationRequest}
+     * Protobuf type {@code choreo.apis.FindMemberInvitationRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindMemberInvitationRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.FindMemberInvitationRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindMemberInvitationRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindMemberInvitationRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindMemberInvitationRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindMemberInvitationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindMemberInvitationRequest.Builder.class);
       }
@@ -22720,7 +22720,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindMemberInvitationRequest_descriptor;
       }
 
       @java.lang.Override
@@ -22991,10 +22991,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindMemberInvitationRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.FindMemberInvitationRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindMemberInvitationRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.FindMemberInvitationRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindMemberInvitationRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindMemberInvitationRequest();
@@ -23032,7 +23032,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface ListMemberInvitationsRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ListMemberInvitationsRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ListMemberInvitationsRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -23060,11 +23060,11 @@ public final class UserServiceOuterClass {
         getGroupHandleBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListMemberInvitationsRequest}
+   * Protobuf type {@code choreo.apis.ListMemberInvitationsRequest}
    */
   public  static final class ListMemberInvitationsRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListMemberInvitationsRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ListMemberInvitationsRequest)
       ListMemberInvitationsRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ListMemberInvitationsRequest.newBuilder() to construct.
@@ -23139,13 +23139,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListMemberInvitationsRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListMemberInvitationsRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListMemberInvitationsRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListMemberInvitationsRequest.Builder.class);
     }
@@ -23387,21 +23387,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListMemberInvitationsRequest}
+     * Protobuf type {@code choreo.apis.ListMemberInvitationsRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListMemberInvitationsRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ListMemberInvitationsRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListMemberInvitationsRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListMemberInvitationsRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListMemberInvitationsRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListMemberInvitationsRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListMemberInvitationsRequest.Builder.class);
       }
@@ -23434,7 +23434,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListMemberInvitationsRequest_descriptor;
       }
 
       @java.lang.Override
@@ -23705,10 +23705,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListMemberInvitationsRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ListMemberInvitationsRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListMemberInvitationsRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ListMemberInvitationsRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListMemberInvitationsRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListMemberInvitationsRequest();
@@ -23746,30 +23746,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface FindMemberInvitationResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.FindMemberInvitationResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.FindMemberInvitationResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the memberInvitation field is set.
      */
     boolean hasMemberInvitation();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
      * @return The memberInvitation.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation getMemberInvitation();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitationOrBuilder getMemberInvitationOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindMemberInvitationResponse}
+   * Protobuf type {@code choreo.apis.FindMemberInvitationResponse}
    */
   public  static final class FindMemberInvitationResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindMemberInvitationResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.FindMemberInvitationResponse)
       FindMemberInvitationResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use FindMemberInvitationResponse.newBuilder() to construct.
@@ -23843,13 +23843,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindMemberInvitationResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindMemberInvitationResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindMemberInvitationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindMemberInvitationResponse.Builder.class);
     }
@@ -23857,21 +23857,21 @@ public final class UserServiceOuterClass {
     public static final int MEMBER_INVITATION_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation memberInvitation_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the memberInvitation field is set.
      */
     public boolean hasMemberInvitation() {
       return memberInvitation_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
      * @return The memberInvitation.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation getMemberInvitation() {
       return memberInvitation_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.getDefaultInstance() : memberInvitation_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitationOrBuilder getMemberInvitationOrBuilder() {
       return getMemberInvitation();
@@ -24038,21 +24038,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindMemberInvitationResponse}
+     * Protobuf type {@code choreo.apis.FindMemberInvitationResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindMemberInvitationResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.FindMemberInvitationResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindMemberInvitationResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindMemberInvitationResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindMemberInvitationResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindMemberInvitationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindMemberInvitationResponse.Builder.class);
       }
@@ -24087,7 +24087,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindMemberInvitationResponse_descriptor;
       }
 
       @java.lang.Override
@@ -24196,14 +24196,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation, org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitationOrBuilder> memberInvitationBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the memberInvitation field is set.
        */
       public boolean hasMemberInvitation() {
         return memberInvitationBuilder_ != null || memberInvitation_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
        * @return The memberInvitation.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation getMemberInvitation() {
@@ -24214,7 +24214,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setMemberInvitation(org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation value) {
         if (memberInvitationBuilder_ == null) {
@@ -24230,7 +24230,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setMemberInvitation(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.Builder builderForValue) {
@@ -24244,7 +24244,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeMemberInvitation(org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation value) {
         if (memberInvitationBuilder_ == null) {
@@ -24262,7 +24262,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearMemberInvitation() {
         if (memberInvitationBuilder_ == null) {
@@ -24276,7 +24276,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.Builder getMemberInvitationBuilder() {
         
@@ -24284,7 +24284,7 @@ public final class UserServiceOuterClass {
         return getMemberInvitationFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitationOrBuilder getMemberInvitationOrBuilder() {
         if (memberInvitationBuilder_ != null) {
@@ -24295,7 +24295,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.MemberInvitation member_invitation = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation, org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitationOrBuilder> 
@@ -24323,10 +24323,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindMemberInvitationResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.FindMemberInvitationResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindMemberInvitationResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.FindMemberInvitationResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindMemberInvitationResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindMemberInvitationResponse();
@@ -24364,39 +24364,39 @@ public final class UserServiceOuterClass {
   }
 
   public interface ListMemberInvitationsResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ListMemberInvitationsResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ListMemberInvitationsResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+     * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation> 
         getInvitationsList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+     * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation getInvitations(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+     * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
      */
     int getInvitationsCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+     * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitationOrBuilder> 
         getInvitationsOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+     * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitationOrBuilder getInvitationsOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListMemberInvitationsResponse}
+   * Protobuf type {@code choreo.apis.ListMemberInvitationsResponse}
    */
   public  static final class ListMemberInvitationsResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListMemberInvitationsResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ListMemberInvitationsResponse)
       ListMemberInvitationsResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ListMemberInvitationsResponse.newBuilder() to construct.
@@ -24471,13 +24471,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListMemberInvitationsResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListMemberInvitationsResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListMemberInvitationsResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListMemberInvitationsResponse.Builder.class);
     }
@@ -24485,32 +24485,32 @@ public final class UserServiceOuterClass {
     public static final int INVITATIONS_FIELD_NUMBER = 1;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation> invitations_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+     * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation> getInvitationsList() {
       return invitations_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+     * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitationOrBuilder> 
         getInvitationsOrBuilderList() {
       return invitations_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+     * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
      */
     public int getInvitationsCount() {
       return invitations_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+     * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation getInvitations(int index) {
       return invitations_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+     * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitationOrBuilder getInvitationsOrBuilder(
         int index) {
@@ -24675,21 +24675,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListMemberInvitationsResponse}
+     * Protobuf type {@code choreo.apis.ListMemberInvitationsResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListMemberInvitationsResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ListMemberInvitationsResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListMemberInvitationsResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListMemberInvitationsResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListMemberInvitationsResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListMemberInvitationsResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListMemberInvitationsResponse.Builder.class);
       }
@@ -24725,7 +24725,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListMemberInvitationsResponse_descriptor;
       }
 
       @java.lang.Override
@@ -24872,7 +24872,7 @@ public final class UserServiceOuterClass {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation, org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitationOrBuilder> invitationsBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation> getInvitationsList() {
         if (invitationsBuilder_ == null) {
@@ -24882,7 +24882,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public int getInvitationsCount() {
         if (invitationsBuilder_ == null) {
@@ -24892,7 +24892,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation getInvitations(int index) {
         if (invitationsBuilder_ == null) {
@@ -24902,7 +24902,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public Builder setInvitations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation value) {
@@ -24919,7 +24919,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public Builder setInvitations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.Builder builderForValue) {
@@ -24933,7 +24933,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public Builder addInvitations(org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation value) {
         if (invitationsBuilder_ == null) {
@@ -24949,7 +24949,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public Builder addInvitations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation value) {
@@ -24966,7 +24966,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public Builder addInvitations(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.Builder builderForValue) {
@@ -24980,7 +24980,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public Builder addInvitations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.Builder builderForValue) {
@@ -24994,7 +24994,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public Builder addAllInvitations(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation> values) {
@@ -25009,7 +25009,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public Builder clearInvitations() {
         if (invitationsBuilder_ == null) {
@@ -25022,7 +25022,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public Builder removeInvitations(int index) {
         if (invitationsBuilder_ == null) {
@@ -25035,14 +25035,14 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.Builder getInvitationsBuilder(
           int index) {
         return getInvitationsFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitationOrBuilder getInvitationsOrBuilder(
           int index) {
@@ -25052,7 +25052,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitationOrBuilder> 
            getInvitationsOrBuilderList() {
@@ -25063,14 +25063,14 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.Builder addInvitationsBuilder() {
         return getInvitationsFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.Builder addInvitationsBuilder(
           int index) {
@@ -25078,7 +25078,7 @@ public final class UserServiceOuterClass {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.MemberInvitation invitations = 1;</code>
+       * <code>repeated .choreo.apis.MemberInvitation invitations = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.MemberInvitation.Builder> 
            getInvitationsBuilderList() {
@@ -25111,10 +25111,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListMemberInvitationsResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ListMemberInvitationsResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListMemberInvitationsResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ListMemberInvitationsResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListMemberInvitationsResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListMemberInvitationsResponse();
@@ -25152,7 +25152,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface DeleteMemberInvitationRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteMemberInvitationRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.DeleteMemberInvitationRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -25180,11 +25180,11 @@ public final class UserServiceOuterClass {
         getEmailBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteMemberInvitationRequest}
+   * Protobuf type {@code choreo.apis.DeleteMemberInvitationRequest}
    */
   public  static final class DeleteMemberInvitationRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteMemberInvitationRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.DeleteMemberInvitationRequest)
       DeleteMemberInvitationRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use DeleteMemberInvitationRequest.newBuilder() to construct.
@@ -25259,13 +25259,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteMemberInvitationRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteMemberInvitationRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteMemberInvitationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteMemberInvitationRequest.Builder.class);
     }
@@ -25507,21 +25507,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteMemberInvitationRequest}
+     * Protobuf type {@code choreo.apis.DeleteMemberInvitationRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteMemberInvitationRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.DeleteMemberInvitationRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteMemberInvitationRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteMemberInvitationRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteMemberInvitationRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteMemberInvitationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteMemberInvitationRequest.Builder.class);
       }
@@ -25554,7 +25554,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteMemberInvitationRequest_descriptor;
       }
 
       @java.lang.Override
@@ -25825,10 +25825,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteMemberInvitationRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.DeleteMemberInvitationRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteMemberInvitationRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.DeleteMemberInvitationRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteMemberInvitationRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteMemberInvitationRequest();
@@ -25866,15 +25866,15 @@ public final class UserServiceOuterClass {
   }
 
   public interface DeleteMemberInvitationResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteMemberInvitationResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.DeleteMemberInvitationResponse)
       com.google.protobuf.MessageOrBuilder {
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteMemberInvitationResponse}
+   * Protobuf type {@code choreo.apis.DeleteMemberInvitationResponse}
    */
   public  static final class DeleteMemberInvitationResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteMemberInvitationResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.DeleteMemberInvitationResponse)
       DeleteMemberInvitationResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use DeleteMemberInvitationResponse.newBuilder() to construct.
@@ -25935,13 +25935,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteMemberInvitationResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteMemberInvitationResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteMemberInvitationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteMemberInvitationResponse.Builder.class);
     }
@@ -26091,21 +26091,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteMemberInvitationResponse}
+     * Protobuf type {@code choreo.apis.DeleteMemberInvitationResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteMemberInvitationResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.DeleteMemberInvitationResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteMemberInvitationResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteMemberInvitationResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteMemberInvitationResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteMemberInvitationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteMemberInvitationResponse.Builder.class);
       }
@@ -26134,7 +26134,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteMemberInvitationResponse_descriptor;
       }
 
       @java.lang.Override
@@ -26243,10 +26243,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteMemberInvitationResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.DeleteMemberInvitationResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteMemberInvitationResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.DeleteMemberInvitationResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteMemberInvitationResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteMemberInvitationResponse();
@@ -26284,21 +26284,21 @@ public final class UserServiceOuterClass {
   }
 
   public interface RegisterUserRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.RegisterUserRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.RegisterUserRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the user field is set.
      */
     boolean hasUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return The user.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder();
 
@@ -26339,11 +26339,11 @@ public final class UserServiceOuterClass {
         getInvitationCorrelationKeyBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.RegisterUserRequest}
+   * Protobuf type {@code choreo.apis.RegisterUserRequest}
    */
   public  static final class RegisterUserRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.RegisterUserRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.RegisterUserRequest)
       RegisterUserRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use RegisterUserRequest.newBuilder() to construct.
@@ -26438,13 +26438,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RegisterUserRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RegisterUserRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserRequest.Builder.class);
     }
@@ -26452,21 +26452,21 @@ public final class UserServiceOuterClass {
     public static final int USER_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.User user_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the user field is set.
      */
     public boolean hasUser() {
       return user_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return The user.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
       return user_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.getDefaultInstance() : user_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
       return getUser();
@@ -26771,21 +26771,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.RegisterUserRequest}
+     * Protobuf type {@code choreo.apis.RegisterUserRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.RegisterUserRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.RegisterUserRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RegisterUserRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RegisterUserRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserRequest.Builder.class);
       }
@@ -26826,7 +26826,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RegisterUserRequest_descriptor;
       }
 
       @java.lang.Override
@@ -26950,14 +26950,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> userBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the user field is set.
        */
       public boolean hasUser() {
         return userBuilder_ != null || user_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        * @return The user.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
@@ -26968,7 +26968,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -26984,7 +26984,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setUser(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -26998,7 +26998,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -27016,7 +27016,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearUser() {
         if (userBuilder_ == null) {
@@ -27030,7 +27030,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder getUserBuilder() {
         
@@ -27038,7 +27038,7 @@ public final class UserServiceOuterClass {
         return getUserFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
         if (userBuilder_ != null) {
@@ -27049,7 +27049,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
@@ -27305,10 +27305,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.RegisterUserRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.RegisterUserRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.RegisterUserRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.RegisterUserRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserRequest();
@@ -27346,45 +27346,45 @@ public final class UserServiceOuterClass {
   }
 
   public interface RegisterUserResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.RegisterUserResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.RegisterUserResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the user field is set.
      */
     boolean hasUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return The user.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder();
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
      * @return Whether the organization field is set.
      */
     boolean hasOrganization();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
      * @return The organization.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.RegisterUserResponse}
+   * Protobuf type {@code choreo.apis.RegisterUserResponse}
    */
   public  static final class RegisterUserResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.RegisterUserResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.RegisterUserResponse)
       RegisterUserResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use RegisterUserResponse.newBuilder() to construct.
@@ -27471,13 +27471,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RegisterUserResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RegisterUserResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserResponse.Builder.class);
     }
@@ -27485,21 +27485,21 @@ public final class UserServiceOuterClass {
     public static final int USER_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.User user_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the user field is set.
      */
     public boolean hasUser() {
       return user_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return The user.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
       return user_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.getDefaultInstance() : user_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
       return getUser();
@@ -27508,21 +27508,21 @@ public final class UserServiceOuterClass {
     public static final int ORGANIZATION_FIELD_NUMBER = 2;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization organization_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
      * @return Whether the organization field is set.
      */
     public boolean hasOrganization() {
       return organization_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
      * @return The organization.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization() {
       return organization_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.getDefaultInstance() : organization_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder() {
       return getOrganization();
@@ -27705,21 +27705,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.RegisterUserResponse}
+     * Protobuf type {@code choreo.apis.RegisterUserResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.RegisterUserResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.RegisterUserResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RegisterUserResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RegisterUserResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserResponse.Builder.class);
       }
@@ -27760,7 +27760,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_RegisterUserResponse_descriptor;
       }
 
       @java.lang.Override
@@ -27877,14 +27877,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> userBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the user field is set.
        */
       public boolean hasUser() {
         return userBuilder_ != null || user_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        * @return The user.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
@@ -27895,7 +27895,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -27911,7 +27911,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setUser(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -27925,7 +27925,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -27943,7 +27943,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearUser() {
         if (userBuilder_ == null) {
@@ -27957,7 +27957,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder getUserBuilder() {
         
@@ -27965,7 +27965,7 @@ public final class UserServiceOuterClass {
         return getUserFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
         if (userBuilder_ != null) {
@@ -27976,7 +27976,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
@@ -27996,14 +27996,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> organizationBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
        * @return Whether the organization field is set.
        */
       public boolean hasOrganization() {
         return organizationBuilder_ != null || organization_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
        * @return The organization.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization() {
@@ -28014,7 +28014,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
        */
       public Builder setOrganization(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationBuilder_ == null) {
@@ -28030,7 +28030,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
        */
       public Builder setOrganization(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -28044,7 +28044,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeOrganization(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationBuilder_ == null) {
@@ -28062,7 +28062,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
        */
       public Builder clearOrganization() {
         if (organizationBuilder_ == null) {
@@ -28076,7 +28076,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder getOrganizationBuilder() {
         
@@ -28084,7 +28084,7 @@ public final class UserServiceOuterClass {
         return getOrganizationFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder() {
         if (organizationBuilder_ != null) {
@@ -28095,7 +28095,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 2 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
@@ -28123,10 +28123,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.RegisterUserResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.RegisterUserResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.RegisterUserResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.RegisterUserResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.RegisterUserResponse();
@@ -28164,7 +28164,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface ValidateUserRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ValidateUserRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ValidateUserRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -28210,11 +28210,11 @@ public final class UserServiceOuterClass {
     boolean getIsAnonymous();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ValidateUserRequest}
+   * Protobuf type {@code choreo.apis.ValidateUserRequest}
    */
   public  static final class ValidateUserRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ValidateUserRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ValidateUserRequest)
       ValidateUserRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ValidateUserRequest.newBuilder() to construct.
@@ -28301,13 +28301,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ValidateUserRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ValidateUserRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ValidateUserRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ValidateUserRequest.Builder.class);
     }
@@ -28617,21 +28617,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ValidateUserRequest}
+     * Protobuf type {@code choreo.apis.ValidateUserRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ValidateUserRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ValidateUserRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ValidateUserRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ValidateUserRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ValidateUserRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ValidateUserRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ValidateUserRequest.Builder.class);
       }
@@ -28668,7 +28668,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ValidateUserRequest_descriptor;
       }
 
       @java.lang.Override
@@ -29054,10 +29054,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ValidateUserRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ValidateUserRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ValidateUserRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ValidateUserRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ValidateUserRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ValidateUserRequest();
@@ -29095,54 +29095,54 @@ public final class UserServiceOuterClass {
   }
 
   public interface ValidateUserResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ValidateUserResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ValidateUserResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      * @return Whether the user field is set.
      */
     boolean hasUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      * @return The user.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder();
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> 
         getOrganizationsList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganizations(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     int getOrganizationsCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
         getOrganizationsOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationsOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ValidateUserResponse}
+   * Protobuf type {@code choreo.apis.ValidateUserResponse}
    */
   public  static final class ValidateUserResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ValidateUserResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ValidateUserResponse)
       ValidateUserResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ValidateUserResponse.newBuilder() to construct.
@@ -29230,13 +29230,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ValidateUserResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ValidateUserResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ValidateUserResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ValidateUserResponse.Builder.class);
     }
@@ -29244,21 +29244,21 @@ public final class UserServiceOuterClass {
     public static final int USER_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.User user_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      * @return Whether the user field is set.
      */
     public boolean hasUser() {
       return user_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      * @return The user.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
       return user_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.getDefaultInstance() : user_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
       return getUser();
@@ -29267,32 +29267,32 @@ public final class UserServiceOuterClass {
     public static final int ORGANIZATIONS_FIELD_NUMBER = 2;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> organizations_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> getOrganizationsList() {
       return organizations_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
         getOrganizationsOrBuilderList() {
       return organizations_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     public int getOrganizationsCount() {
       return organizations_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganizations(int index) {
       return organizations_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationsOrBuilder(
         int index) {
@@ -29473,21 +29473,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ValidateUserResponse}
+     * Protobuf type {@code choreo.apis.ValidateUserResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ValidateUserResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ValidateUserResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ValidateUserResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ValidateUserResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ValidateUserResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ValidateUserResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ValidateUserResponse.Builder.class);
       }
@@ -29529,7 +29529,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ValidateUserResponse_descriptor;
       }
 
       @java.lang.Override
@@ -29675,14 +29675,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> userBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        * @return Whether the user field is set.
        */
       public boolean hasUser() {
         return userBuilder_ != null || user_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        * @return The user.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
@@ -29693,7 +29693,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public Builder setUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -29709,7 +29709,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public Builder setUser(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -29723,7 +29723,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public Builder mergeUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -29741,7 +29741,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public Builder clearUser() {
         if (userBuilder_ == null) {
@@ -29755,7 +29755,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder getUserBuilder() {
         
@@ -29763,7 +29763,7 @@ public final class UserServiceOuterClass {
         return getUserFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
         if (userBuilder_ != null) {
@@ -29774,7 +29774,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
@@ -29803,7 +29803,7 @@ public final class UserServiceOuterClass {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> organizationsBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> getOrganizationsList() {
         if (organizationsBuilder_ == null) {
@@ -29813,7 +29813,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public int getOrganizationsCount() {
         if (organizationsBuilder_ == null) {
@@ -29823,7 +29823,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganizations(int index) {
         if (organizationsBuilder_ == null) {
@@ -29833,7 +29833,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder setOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
@@ -29850,7 +29850,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder setOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -29864,7 +29864,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder addOrganizations(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationsBuilder_ == null) {
@@ -29880,7 +29880,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder addOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
@@ -29897,7 +29897,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder addOrganizations(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -29911,7 +29911,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder addOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -29925,7 +29925,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder addAllOrganizations(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> values) {
@@ -29940,7 +29940,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder clearOrganizations() {
         if (organizationsBuilder_ == null) {
@@ -29953,7 +29953,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder removeOrganizations(int index) {
         if (organizationsBuilder_ == null) {
@@ -29966,14 +29966,14 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder getOrganizationsBuilder(
           int index) {
         return getOrganizationsFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationsOrBuilder(
           int index) {
@@ -29983,7 +29983,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
            getOrganizationsOrBuilderList() {
@@ -29994,14 +29994,14 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder addOrganizationsBuilder() {
         return getOrganizationsFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder addOrganizationsBuilder(
           int index) {
@@ -30009,7 +30009,7 @@ public final class UserServiceOuterClass {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder> 
            getOrganizationsBuilderList() {
@@ -30042,10 +30042,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ValidateUserResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ValidateUserResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ValidateUserResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ValidateUserResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ValidateUserResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ValidateUserResponse();
@@ -30083,7 +30083,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface AddOrganizationUsersRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.AddOrganizationUsersRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.AddOrganizationUsersRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -30136,11 +30136,11 @@ public final class UserServiceOuterClass {
         getGroupBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.AddOrganizationUsersRequest}
+   * Protobuf type {@code choreo.apis.AddOrganizationUsersRequest}
    */
   public  static final class AddOrganizationUsersRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.AddOrganizationUsersRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.AddOrganizationUsersRequest)
       AddOrganizationUsersRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use AddOrganizationUsersRequest.newBuilder() to construct.
@@ -30229,13 +30229,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AddOrganizationUsersRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_AddOrganizationUsersRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AddOrganizationUsersRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_AddOrganizationUsersRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AddOrganizationUsersRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AddOrganizationUsersRequest.Builder.class);
     }
@@ -30529,21 +30529,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.AddOrganizationUsersRequest}
+     * Protobuf type {@code choreo.apis.AddOrganizationUsersRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.AddOrganizationUsersRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.AddOrganizationUsersRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AddOrganizationUsersRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AddOrganizationUsersRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_AddOrganizationUsersRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AddOrganizationUsersRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_AddOrganizationUsersRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AddOrganizationUsersRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AddOrganizationUsersRequest.Builder.class);
       }
@@ -30578,7 +30578,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AddOrganizationUsersRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_AddOrganizationUsersRequest_descriptor;
       }
 
       @java.lang.Override
@@ -30976,10 +30976,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.AddOrganizationUsersRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.AddOrganizationUsersRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.AddOrganizationUsersRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.AddOrganizationUsersRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AddOrganizationUsersRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.AddOrganizationUsersRequest();
@@ -31017,7 +31017,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface DeleteOrganizationUserRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationUserRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.DeleteOrganizationUserRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -31045,11 +31045,11 @@ public final class UserServiceOuterClass {
         getOrganizationNameBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationUserRequest}
+   * Protobuf type {@code choreo.apis.DeleteOrganizationUserRequest}
    */
   public  static final class DeleteOrganizationUserRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationUserRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.DeleteOrganizationUserRequest)
       DeleteOrganizationUserRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use DeleteOrganizationUserRequest.newBuilder() to construct.
@@ -31124,13 +31124,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationUserRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteOrganizationUserRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationUserRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteOrganizationUserRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationUserRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationUserRequest.Builder.class);
     }
@@ -31372,21 +31372,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationUserRequest}
+     * Protobuf type {@code choreo.apis.DeleteOrganizationUserRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationUserRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.DeleteOrganizationUserRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationUserRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationUserRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteOrganizationUserRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationUserRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteOrganizationUserRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationUserRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationUserRequest.Builder.class);
       }
@@ -31419,7 +31419,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationUserRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteOrganizationUserRequest_descriptor;
       }
 
       @java.lang.Override
@@ -31690,10 +31690,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationUserRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.DeleteOrganizationUserRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationUserRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.DeleteOrganizationUserRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationUserRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationUserRequest();
@@ -31731,7 +31731,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface UpdateMembersOfRoleRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateMembersOfRoleRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.UpdateMembersOfRoleRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -31784,11 +31784,11 @@ public final class UserServiceOuterClass {
         getRoleBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateMembersOfRoleRequest}
+   * Protobuf type {@code choreo.apis.UpdateMembersOfRoleRequest}
    */
   public  static final class UpdateMembersOfRoleRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateMembersOfRoleRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.UpdateMembersOfRoleRequest)
       UpdateMembersOfRoleRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use UpdateMembersOfRoleRequest.newBuilder() to construct.
@@ -31877,13 +31877,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateMembersOfRoleRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateMembersOfRoleRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateMembersOfRoleRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateMembersOfRoleRequest.Builder.class);
     }
@@ -32177,21 +32177,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateMembersOfRoleRequest}
+     * Protobuf type {@code choreo.apis.UpdateMembersOfRoleRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateMembersOfRoleRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.UpdateMembersOfRoleRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateMembersOfRoleRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateMembersOfRoleRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateMembersOfRoleRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateMembersOfRoleRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateMembersOfRoleRequest.Builder.class);
       }
@@ -32226,7 +32226,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateMembersOfRoleRequest_descriptor;
       }
 
       @java.lang.Override
@@ -32624,10 +32624,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateMembersOfRoleRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.UpdateMembersOfRoleRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateMembersOfRoleRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.UpdateMembersOfRoleRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateMembersOfRoleRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateMembersOfRoleRequest();
@@ -32665,30 +32665,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface UpdateMembersOfRoleResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateMembersOfRoleResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.UpdateMembersOfRoleResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the role field is set.
      */
     boolean hasRole();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return The role.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRole();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRoleOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateMembersOfRoleResponse}
+   * Protobuf type {@code choreo.apis.UpdateMembersOfRoleResponse}
    */
   public  static final class UpdateMembersOfRoleResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateMembersOfRoleResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.UpdateMembersOfRoleResponse)
       UpdateMembersOfRoleResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use UpdateMembersOfRoleResponse.newBuilder() to construct.
@@ -32762,13 +32762,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateMembersOfRoleResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateMembersOfRoleResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateMembersOfRoleResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateMembersOfRoleResponse.Builder.class);
     }
@@ -32776,21 +32776,21 @@ public final class UserServiceOuterClass {
     public static final int ROLE_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role role_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the role field is set.
      */
     public boolean hasRole() {
       return role_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      * @return The role.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRole() {
       return role_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.getDefaultInstance() : role_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRoleOrBuilder() {
       return getRole();
@@ -32957,21 +32957,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateMembersOfRoleResponse}
+     * Protobuf type {@code choreo.apis.UpdateMembersOfRoleResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateMembersOfRoleResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.UpdateMembersOfRoleResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateMembersOfRoleResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateMembersOfRoleResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateMembersOfRoleResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateMembersOfRoleResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateMembersOfRoleResponse.Builder.class);
       }
@@ -33006,7 +33006,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateMembersOfRoleResponse_descriptor;
       }
 
       @java.lang.Override
@@ -33115,14 +33115,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> roleBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the role field is set.
        */
       public boolean hasRole() {
         return roleBuilder_ != null || role_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        * @return The role.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRole() {
@@ -33133,7 +33133,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setRole(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
         if (roleBuilder_ == null) {
@@ -33149,7 +33149,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setRole(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder builderForValue) {
@@ -33163,7 +33163,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeRole(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
         if (roleBuilder_ == null) {
@@ -33181,7 +33181,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearRole() {
         if (roleBuilder_ == null) {
@@ -33195,7 +33195,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder getRoleBuilder() {
         
@@ -33203,7 +33203,7 @@ public final class UserServiceOuterClass {
         return getRoleFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRoleOrBuilder() {
         if (roleBuilder_ != null) {
@@ -33214,7 +33214,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Role role = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> 
@@ -33242,10 +33242,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateMembersOfRoleResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.UpdateMembersOfRoleResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateMembersOfRoleResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.UpdateMembersOfRoleResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateMembersOfRoleResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateMembersOfRoleResponse();
@@ -33283,7 +33283,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface UpdateRolesOfMemberRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRolesOfMemberRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.UpdateRolesOfMemberRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -33336,11 +33336,11 @@ public final class UserServiceOuterClass {
         getUserIdpIdBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRolesOfMemberRequest}
+   * Protobuf type {@code choreo.apis.UpdateRolesOfMemberRequest}
    */
   public  static final class UpdateRolesOfMemberRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRolesOfMemberRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.UpdateRolesOfMemberRequest)
       UpdateRolesOfMemberRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use UpdateRolesOfMemberRequest.newBuilder() to construct.
@@ -33429,13 +33429,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRolesOfMemberRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRolesOfMemberRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRolesOfMemberRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRolesOfMemberRequest.Builder.class);
     }
@@ -33729,21 +33729,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRolesOfMemberRequest}
+     * Protobuf type {@code choreo.apis.UpdateRolesOfMemberRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRolesOfMemberRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.UpdateRolesOfMemberRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRolesOfMemberRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRolesOfMemberRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRolesOfMemberRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRolesOfMemberRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRolesOfMemberRequest.Builder.class);
       }
@@ -33778,7 +33778,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRolesOfMemberRequest_descriptor;
       }
 
       @java.lang.Override
@@ -34176,10 +34176,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRolesOfMemberRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.UpdateRolesOfMemberRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRolesOfMemberRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.UpdateRolesOfMemberRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRolesOfMemberRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRolesOfMemberRequest();
@@ -34217,30 +34217,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface UpdateRolesOfMemberResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRolesOfMemberResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.UpdateRolesOfMemberResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the user field is set.
      */
     boolean hasUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return The user.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRolesOfMemberResponse}
+   * Protobuf type {@code choreo.apis.UpdateRolesOfMemberResponse}
    */
   public  static final class UpdateRolesOfMemberResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRolesOfMemberResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.UpdateRolesOfMemberResponse)
       UpdateRolesOfMemberResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use UpdateRolesOfMemberResponse.newBuilder() to construct.
@@ -34314,13 +34314,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRolesOfMemberResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRolesOfMemberResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRolesOfMemberResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRolesOfMemberResponse.Builder.class);
     }
@@ -34328,21 +34328,21 @@ public final class UserServiceOuterClass {
     public static final int USER_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.User user_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the user field is set.
      */
     public boolean hasUser() {
       return user_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return The user.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
       return user_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.getDefaultInstance() : user_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
       return getUser();
@@ -34509,21 +34509,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRolesOfMemberResponse}
+     * Protobuf type {@code choreo.apis.UpdateRolesOfMemberResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRolesOfMemberResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.UpdateRolesOfMemberResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRolesOfMemberResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRolesOfMemberResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRolesOfMemberResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRolesOfMemberResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRolesOfMemberResponse.Builder.class);
       }
@@ -34558,7 +34558,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateRolesOfMemberResponse_descriptor;
       }
 
       @java.lang.Override
@@ -34667,14 +34667,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> userBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the user field is set.
        */
       public boolean hasUser() {
         return userBuilder_ != null || user_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        * @return The user.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
@@ -34685,7 +34685,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -34701,7 +34701,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setUser(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -34715,7 +34715,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -34733,7 +34733,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearUser() {
         if (userBuilder_ == null) {
@@ -34747,7 +34747,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder getUserBuilder() {
         
@@ -34755,7 +34755,7 @@ public final class UserServiceOuterClass {
         return getUserFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
         if (userBuilder_ != null) {
@@ -34766,7 +34766,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
@@ -34794,10 +34794,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRolesOfMemberResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.UpdateRolesOfMemberResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateRolesOfMemberResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.UpdateRolesOfMemberResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRolesOfMemberResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateRolesOfMemberResponse();
@@ -34835,30 +34835,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface FindUserOrganizationsRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserOrganizationsRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.FindUserOrganizationsRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the user field is set.
      */
     boolean hasUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return The user.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindUserOrganizationsRequest}
+   * Protobuf type {@code choreo.apis.FindUserOrganizationsRequest}
    */
   public  static final class FindUserOrganizationsRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserOrganizationsRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.FindUserOrganizationsRequest)
       FindUserOrganizationsRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use FindUserOrganizationsRequest.newBuilder() to construct.
@@ -34932,13 +34932,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserOrganizationsRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserOrganizationsRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserOrganizationsRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserOrganizationsRequest.Builder.class);
     }
@@ -34946,21 +34946,21 @@ public final class UserServiceOuterClass {
     public static final int USER_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.User user_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the user field is set.
      */
     public boolean hasUser() {
       return user_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      * @return The user.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
       return user_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.getDefaultInstance() : user_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
       return getUser();
@@ -35127,21 +35127,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindUserOrganizationsRequest}
+     * Protobuf type {@code choreo.apis.FindUserOrganizationsRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserOrganizationsRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.FindUserOrganizationsRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserOrganizationsRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserOrganizationsRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserOrganizationsRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserOrganizationsRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserOrganizationsRequest.Builder.class);
       }
@@ -35176,7 +35176,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserOrganizationsRequest_descriptor;
       }
 
       @java.lang.Override
@@ -35285,14 +35285,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> userBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the user field is set.
        */
       public boolean hasUser() {
         return userBuilder_ != null || user_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        * @return The user.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
@@ -35303,7 +35303,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -35319,7 +35319,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setUser(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -35333,7 +35333,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -35351,7 +35351,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearUser() {
         if (userBuilder_ == null) {
@@ -35365,7 +35365,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder getUserBuilder() {
         
@@ -35373,7 +35373,7 @@ public final class UserServiceOuterClass {
         return getUserFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
         if (userBuilder_ != null) {
@@ -35384,7 +35384,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.User user = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
@@ -35412,10 +35412,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserOrganizationsRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.FindUserOrganizationsRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserOrganizationsRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.FindUserOrganizationsRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserOrganizationsRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserOrganizationsRequest();
@@ -35453,54 +35453,54 @@ public final class UserServiceOuterClass {
   }
 
   public interface FindUserOrganizationsResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserOrganizationsResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.FindUserOrganizationsResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      * @return Whether the user field is set.
      */
     boolean hasUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      * @return The user.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder();
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> 
         getOrganizationsList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganizations(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     int getOrganizationsCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
         getOrganizationsOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationsOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindUserOrganizationsResponse}
+   * Protobuf type {@code choreo.apis.FindUserOrganizationsResponse}
    */
   public  static final class FindUserOrganizationsResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserOrganizationsResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.FindUserOrganizationsResponse)
       FindUserOrganizationsResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use FindUserOrganizationsResponse.newBuilder() to construct.
@@ -35588,13 +35588,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserOrganizationsResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserOrganizationsResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserOrganizationsResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserOrganizationsResponse.Builder.class);
     }
@@ -35602,21 +35602,21 @@ public final class UserServiceOuterClass {
     public static final int USER_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.User user_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      * @return Whether the user field is set.
      */
     public boolean hasUser() {
       return user_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      * @return The user.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
       return user_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.getDefaultInstance() : user_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
       return getUser();
@@ -35625,32 +35625,32 @@ public final class UserServiceOuterClass {
     public static final int ORGANIZATIONS_FIELD_NUMBER = 2;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> organizations_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> getOrganizationsList() {
       return organizations_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
         getOrganizationsOrBuilderList() {
       return organizations_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     public int getOrganizationsCount() {
       return organizations_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganizations(int index) {
       return organizations_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 2;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationsOrBuilder(
         int index) {
@@ -35831,21 +35831,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindUserOrganizationsResponse}
+     * Protobuf type {@code choreo.apis.FindUserOrganizationsResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserOrganizationsResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.FindUserOrganizationsResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserOrganizationsResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserOrganizationsResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserOrganizationsResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserOrganizationsResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserOrganizationsResponse.Builder.class);
       }
@@ -35887,7 +35887,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserOrganizationsResponse_descriptor;
       }
 
       @java.lang.Override
@@ -36033,14 +36033,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> userBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        * @return Whether the user field is set.
        */
       public boolean hasUser() {
         return userBuilder_ != null || user_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        * @return The user.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
@@ -36051,7 +36051,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public Builder setUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -36067,7 +36067,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public Builder setUser(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -36081,7 +36081,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public Builder mergeUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -36099,7 +36099,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public Builder clearUser() {
         if (userBuilder_ == null) {
@@ -36113,7 +36113,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder getUserBuilder() {
         
@@ -36121,7 +36121,7 @@ public final class UserServiceOuterClass {
         return getUserFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
         if (userBuilder_ != null) {
@@ -36132,7 +36132,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
@@ -36161,7 +36161,7 @@ public final class UserServiceOuterClass {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> organizationsBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> getOrganizationsList() {
         if (organizationsBuilder_ == null) {
@@ -36171,7 +36171,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public int getOrganizationsCount() {
         if (organizationsBuilder_ == null) {
@@ -36181,7 +36181,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganizations(int index) {
         if (organizationsBuilder_ == null) {
@@ -36191,7 +36191,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder setOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
@@ -36208,7 +36208,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder setOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -36222,7 +36222,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder addOrganizations(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationsBuilder_ == null) {
@@ -36238,7 +36238,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder addOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
@@ -36255,7 +36255,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder addOrganizations(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -36269,7 +36269,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder addOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -36283,7 +36283,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder addAllOrganizations(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> values) {
@@ -36298,7 +36298,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder clearOrganizations() {
         if (organizationsBuilder_ == null) {
@@ -36311,7 +36311,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public Builder removeOrganizations(int index) {
         if (organizationsBuilder_ == null) {
@@ -36324,14 +36324,14 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder getOrganizationsBuilder(
           int index) {
         return getOrganizationsFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationsOrBuilder(
           int index) {
@@ -36341,7 +36341,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
            getOrganizationsOrBuilderList() {
@@ -36352,14 +36352,14 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder addOrganizationsBuilder() {
         return getOrganizationsFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder addOrganizationsBuilder(
           int index) {
@@ -36367,7 +36367,7 @@ public final class UserServiceOuterClass {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 2;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 2;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder> 
            getOrganizationsBuilderList() {
@@ -36400,10 +36400,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserOrganizationsResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.FindUserOrganizationsResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserOrganizationsResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.FindUserOrganizationsResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserOrganizationsResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserOrganizationsResponse();
@@ -36441,7 +36441,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface FindUsersByOrganizationRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.FindUsersByOrganizationRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -36482,11 +36482,11 @@ public final class UserServiceOuterClass {
         getExcludingGroupsBytes(int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationRequest}
+   * Protobuf type {@code choreo.apis.FindUsersByOrganizationRequest}
    */
   public  static final class FindUsersByOrganizationRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.FindUsersByOrganizationRequest)
       FindUsersByOrganizationRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use FindUsersByOrganizationRequest.newBuilder() to construct.
@@ -36568,13 +36568,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationRequest.Builder.class);
     }
@@ -36822,21 +36822,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationRequest}
+     * Protobuf type {@code choreo.apis.FindUsersByOrganizationRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.FindUsersByOrganizationRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationRequest.Builder.class);
       }
@@ -36869,7 +36869,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationRequest_descriptor;
       }
 
       @java.lang.Override
@@ -37186,10 +37186,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.FindUsersByOrganizationRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.FindUsersByOrganizationRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationRequest();
@@ -37227,39 +37227,39 @@ public final class UserServiceOuterClass {
   }
 
   public interface FindUsersByOrganizationResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.FindUsersByOrganizationResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> 
         getUsersList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUsers(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     int getUsersCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
         getUsersOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUsersOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationResponse}
+   * Protobuf type {@code choreo.apis.FindUsersByOrganizationResponse}
    */
   public  static final class FindUsersByOrganizationResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.FindUsersByOrganizationResponse)
       FindUsersByOrganizationResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use FindUsersByOrganizationResponse.newBuilder() to construct.
@@ -37334,13 +37334,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationResponse.Builder.class);
     }
@@ -37348,32 +37348,32 @@ public final class UserServiceOuterClass {
     public static final int USERS_FIELD_NUMBER = 1;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> users_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> getUsersList() {
       return users_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
         getUsersOrBuilderList() {
       return users_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     public int getUsersCount() {
       return users_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUsers(int index) {
       return users_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUsersOrBuilder(
         int index) {
@@ -37538,21 +37538,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationResponse}
+     * Protobuf type {@code choreo.apis.FindUsersByOrganizationResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.FindUsersByOrganizationResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationResponse.Builder.class);
       }
@@ -37588,7 +37588,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationResponse_descriptor;
       }
 
       @java.lang.Override
@@ -37735,7 +37735,7 @@ public final class UserServiceOuterClass {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> usersBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> getUsersList() {
         if (usersBuilder_ == null) {
@@ -37745,7 +37745,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public int getUsersCount() {
         if (usersBuilder_ == null) {
@@ -37755,7 +37755,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUsers(int index) {
         if (usersBuilder_ == null) {
@@ -37765,7 +37765,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder setUsers(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
@@ -37782,7 +37782,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder setUsers(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -37796,7 +37796,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder addUsers(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (usersBuilder_ == null) {
@@ -37812,7 +37812,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder addUsers(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
@@ -37829,7 +37829,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder addUsers(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -37843,7 +37843,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder addUsers(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -37857,7 +37857,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder addAllUsers(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> values) {
@@ -37872,7 +37872,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder clearUsers() {
         if (usersBuilder_ == null) {
@@ -37885,7 +37885,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder removeUsers(int index) {
         if (usersBuilder_ == null) {
@@ -37898,14 +37898,14 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder getUsersBuilder(
           int index) {
         return getUsersFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUsersOrBuilder(
           int index) {
@@ -37915,7 +37915,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
            getUsersOrBuilderList() {
@@ -37926,14 +37926,14 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder addUsersBuilder() {
         return getUsersFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder addUsersBuilder(
           int index) {
@@ -37941,7 +37941,7 @@ public final class UserServiceOuterClass {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder> 
            getUsersBuilderList() {
@@ -37974,10 +37974,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.FindUsersByOrganizationResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.FindUsersByOrganizationResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationResponse();
@@ -38015,7 +38015,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface FindUsersByOrganizationByRoleRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationByRoleRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.FindUsersByOrganizationByRoleRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -38056,11 +38056,11 @@ public final class UserServiceOuterClass {
         getExcludingRolesBytes(int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationByRoleRequest}
+   * Protobuf type {@code choreo.apis.FindUsersByOrganizationByRoleRequest}
    */
   public  static final class FindUsersByOrganizationByRoleRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationByRoleRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.FindUsersByOrganizationByRoleRequest)
       FindUsersByOrganizationByRoleRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use FindUsersByOrganizationByRoleRequest.newBuilder() to construct.
@@ -38142,13 +38142,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationByRoleRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationByRoleRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationByRoleRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationByRoleRequest.Builder.class);
     }
@@ -38396,21 +38396,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationByRoleRequest}
+     * Protobuf type {@code choreo.apis.FindUsersByOrganizationByRoleRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationByRoleRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.FindUsersByOrganizationByRoleRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationByRoleRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationByRoleRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationByRoleRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationByRoleRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationByRoleRequest.Builder.class);
       }
@@ -38443,7 +38443,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationByRoleRequest_descriptor;
       }
 
       @java.lang.Override
@@ -38760,10 +38760,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationByRoleRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.FindUsersByOrganizationByRoleRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationByRoleRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.FindUsersByOrganizationByRoleRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationByRoleRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationByRoleRequest();
@@ -38801,39 +38801,39 @@ public final class UserServiceOuterClass {
   }
 
   public interface FindUsersByOrganizationByRoleResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationByRoleResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.FindUsersByOrganizationByRoleResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> 
         getUsersList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUsers(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     int getUsersCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
         getUsersOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUsersOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationByRoleResponse}
+   * Protobuf type {@code choreo.apis.FindUsersByOrganizationByRoleResponse}
    */
   public  static final class FindUsersByOrganizationByRoleResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationByRoleResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.FindUsersByOrganizationByRoleResponse)
       FindUsersByOrganizationByRoleResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use FindUsersByOrganizationByRoleResponse.newBuilder() to construct.
@@ -38908,13 +38908,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationByRoleResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationByRoleResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationByRoleResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationByRoleResponse.Builder.class);
     }
@@ -38922,32 +38922,32 @@ public final class UserServiceOuterClass {
     public static final int USERS_FIELD_NUMBER = 1;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> users_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> getUsersList() {
       return users_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
         getUsersOrBuilderList() {
       return users_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     public int getUsersCount() {
       return users_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUsers(int index) {
       return users_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+     * <code>repeated .choreo.apis.User users = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUsersOrBuilder(
         int index) {
@@ -39112,21 +39112,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationByRoleResponse}
+     * Protobuf type {@code choreo.apis.FindUsersByOrganizationByRoleResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationByRoleResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.FindUsersByOrganizationByRoleResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationByRoleResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationByRoleResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationByRoleResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationByRoleResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationByRoleResponse.Builder.class);
       }
@@ -39162,7 +39162,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUsersByOrganizationByRoleResponse_descriptor;
       }
 
       @java.lang.Override
@@ -39309,7 +39309,7 @@ public final class UserServiceOuterClass {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> usersBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> getUsersList() {
         if (usersBuilder_ == null) {
@@ -39319,7 +39319,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public int getUsersCount() {
         if (usersBuilder_ == null) {
@@ -39329,7 +39329,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUsers(int index) {
         if (usersBuilder_ == null) {
@@ -39339,7 +39339,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder setUsers(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
@@ -39356,7 +39356,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder setUsers(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -39370,7 +39370,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder addUsers(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (usersBuilder_ == null) {
@@ -39386,7 +39386,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder addUsers(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
@@ -39403,7 +39403,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder addUsers(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -39417,7 +39417,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder addUsers(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -39431,7 +39431,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder addAllUsers(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.User> values) {
@@ -39446,7 +39446,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder clearUsers() {
         if (usersBuilder_ == null) {
@@ -39459,7 +39459,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public Builder removeUsers(int index) {
         if (usersBuilder_ == null) {
@@ -39472,14 +39472,14 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder getUsersBuilder(
           int index) {
         return getUsersFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUsersOrBuilder(
           int index) {
@@ -39489,7 +39489,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
            getUsersOrBuilderList() {
@@ -39500,14 +39500,14 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder addUsersBuilder() {
         return getUsersFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder addUsersBuilder(
           int index) {
@@ -39515,7 +39515,7 @@ public final class UserServiceOuterClass {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.User users = 1;</code>
+       * <code>repeated .choreo.apis.User users = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder> 
            getUsersBuilderList() {
@@ -39548,10 +39548,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationByRoleResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.FindUsersByOrganizationByRoleResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindUsersByOrganizationByRoleResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.FindUsersByOrganizationByRoleResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationByRoleResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUsersByOrganizationByRoleResponse();
@@ -39589,7 +39589,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface FindUserFromIdpIdRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserFromIdpIdRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.FindUserFromIdpIdRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -39617,11 +39617,11 @@ public final class UserServiceOuterClass {
         getOrganizationNameBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindUserFromIdpIdRequest}
+   * Protobuf type {@code choreo.apis.FindUserFromIdpIdRequest}
    */
   public  static final class FindUserFromIdpIdRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserFromIdpIdRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.FindUserFromIdpIdRequest)
       FindUserFromIdpIdRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use FindUserFromIdpIdRequest.newBuilder() to construct.
@@ -39696,13 +39696,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserFromIdpIdRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserFromIdpIdRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserFromIdpIdRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserFromIdpIdRequest.Builder.class);
     }
@@ -39944,21 +39944,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindUserFromIdpIdRequest}
+     * Protobuf type {@code choreo.apis.FindUserFromIdpIdRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserFromIdpIdRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.FindUserFromIdpIdRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserFromIdpIdRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserFromIdpIdRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserFromIdpIdRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserFromIdpIdRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserFromIdpIdRequest.Builder.class);
       }
@@ -39991,7 +39991,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserFromIdpIdRequest_descriptor;
       }
 
       @java.lang.Override
@@ -40262,10 +40262,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserFromIdpIdRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.FindUserFromIdpIdRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserFromIdpIdRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.FindUserFromIdpIdRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserFromIdpIdRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserFromIdpIdRequest();
@@ -40303,30 +40303,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface FindUserFromIdpIdResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserFromIdpIdResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.FindUserFromIdpIdResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      * @return Whether the user field is set.
      */
     boolean hasUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      * @return The user.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindUserFromIdpIdResponse}
+   * Protobuf type {@code choreo.apis.FindUserFromIdpIdResponse}
    */
   public  static final class FindUserFromIdpIdResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserFromIdpIdResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.FindUserFromIdpIdResponse)
       FindUserFromIdpIdResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use FindUserFromIdpIdResponse.newBuilder() to construct.
@@ -40400,13 +40400,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserFromIdpIdResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserFromIdpIdResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserFromIdpIdResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserFromIdpIdResponse.Builder.class);
     }
@@ -40414,21 +40414,21 @@ public final class UserServiceOuterClass {
     public static final int USER_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.User user_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      * @return Whether the user field is set.
      */
     public boolean hasUser() {
       return user_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      * @return The user.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
       return user_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.getDefaultInstance() : user_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
       return getUser();
@@ -40595,21 +40595,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.FindUserFromIdpIdResponse}
+     * Protobuf type {@code choreo.apis.FindUserFromIdpIdResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserFromIdpIdResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.FindUserFromIdpIdResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserFromIdpIdResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserFromIdpIdResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserFromIdpIdResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserFromIdpIdResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserFromIdpIdResponse.Builder.class);
       }
@@ -40644,7 +40644,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_FindUserFromIdpIdResponse_descriptor;
       }
 
       @java.lang.Override
@@ -40753,14 +40753,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> userBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        * @return Whether the user field is set.
        */
       public boolean hasUser() {
         return userBuilder_ != null || user_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        * @return The user.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
@@ -40771,7 +40771,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public Builder setUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -40787,7 +40787,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public Builder setUser(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -40801,7 +40801,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public Builder mergeUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -40819,7 +40819,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public Builder clearUser() {
         if (userBuilder_ == null) {
@@ -40833,7 +40833,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder getUserBuilder() {
         
@@ -40841,7 +40841,7 @@ public final class UserServiceOuterClass {
         return getUserFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
         if (userBuilder_ != null) {
@@ -40852,7 +40852,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
@@ -40880,10 +40880,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserFromIdpIdResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.FindUserFromIdpIdResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.FindUserFromIdpIdResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.FindUserFromIdpIdResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserFromIdpIdResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.FindUserFromIdpIdResponse();
@@ -40921,7 +40921,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface CreateUserFeedbackRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.CreateUserFeedbackRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.CreateUserFeedbackRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -40967,11 +40967,11 @@ public final class UserServiceOuterClass {
         getImageLinkBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateUserFeedbackRequest}
+   * Protobuf type {@code choreo.apis.CreateUserFeedbackRequest}
    */
   public  static final class CreateUserFeedbackRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateUserFeedbackRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.CreateUserFeedbackRequest)
       CreateUserFeedbackRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use CreateUserFeedbackRequest.newBuilder() to construct.
@@ -41059,13 +41059,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateUserFeedbackRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateUserFeedbackRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateUserFeedbackRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateUserFeedbackRequest.Builder.class);
     }
@@ -41374,21 +41374,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateUserFeedbackRequest}
+     * Protobuf type {@code choreo.apis.CreateUserFeedbackRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateUserFeedbackRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.CreateUserFeedbackRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateUserFeedbackRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateUserFeedbackRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateUserFeedbackRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateUserFeedbackRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateUserFeedbackRequest.Builder.class);
       }
@@ -41425,7 +41425,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateUserFeedbackRequest_descriptor;
       }
 
       @java.lang.Override
@@ -41814,10 +41814,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateUserFeedbackRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.CreateUserFeedbackRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateUserFeedbackRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.CreateUserFeedbackRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateUserFeedbackRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateUserFeedbackRequest();
@@ -41855,7 +41855,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface CreateUserFeedbackResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.CreateUserFeedbackResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.CreateUserFeedbackResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -41871,11 +41871,11 @@ public final class UserServiceOuterClass {
         getIssueUrlBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateUserFeedbackResponse}
+   * Protobuf type {@code choreo.apis.CreateUserFeedbackResponse}
    */
   public  static final class CreateUserFeedbackResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateUserFeedbackResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.CreateUserFeedbackResponse)
       CreateUserFeedbackResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use CreateUserFeedbackResponse.newBuilder() to construct.
@@ -41943,13 +41943,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateUserFeedbackResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateUserFeedbackResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateUserFeedbackResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateUserFeedbackResponse.Builder.class);
     }
@@ -42145,21 +42145,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateUserFeedbackResponse}
+     * Protobuf type {@code choreo.apis.CreateUserFeedbackResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateUserFeedbackResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.CreateUserFeedbackResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateUserFeedbackResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateUserFeedbackResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateUserFeedbackResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateUserFeedbackResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateUserFeedbackResponse.Builder.class);
       }
@@ -42190,7 +42190,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateUserFeedbackResponse_descriptor;
       }
 
       @java.lang.Override
@@ -42380,10 +42380,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateUserFeedbackResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.CreateUserFeedbackResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateUserFeedbackResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.CreateUserFeedbackResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateUserFeedbackResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateUserFeedbackResponse();
@@ -42421,7 +42421,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface GetUserInfoRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserInfoRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.GetUserInfoRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -42474,11 +42474,11 @@ public final class UserServiceOuterClass {
         getIncludesBytes(int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetUserInfoRequest}
+   * Protobuf type {@code choreo.apis.GetUserInfoRequest}
    */
   public  static final class GetUserInfoRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserInfoRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.GetUserInfoRequest)
       GetUserInfoRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use GetUserInfoRequest.newBuilder() to construct.
@@ -42567,13 +42567,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserInfoRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserInfoRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserInfoRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserInfoRequest.Builder.class);
     }
@@ -42867,21 +42867,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetUserInfoRequest}
+     * Protobuf type {@code choreo.apis.GetUserInfoRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserInfoRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.GetUserInfoRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserInfoRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserInfoRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserInfoRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserInfoRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserInfoRequest.Builder.class);
       }
@@ -42916,7 +42916,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserInfoRequest_descriptor;
       }
 
       @java.lang.Override
@@ -43314,10 +43314,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserInfoRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.GetUserInfoRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserInfoRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.GetUserInfoRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserInfoRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserInfoRequest();
@@ -43355,30 +43355,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface GetUserInfoResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserInfoResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.GetUserInfoResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      * @return Whether the user field is set.
      */
     boolean hasUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      * @return The user.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetUserInfoResponse}
+   * Protobuf type {@code choreo.apis.GetUserInfoResponse}
    */
   public  static final class GetUserInfoResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserInfoResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.GetUserInfoResponse)
       GetUserInfoResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use GetUserInfoResponse.newBuilder() to construct.
@@ -43452,13 +43452,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserInfoResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserInfoResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserInfoResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserInfoResponse.Builder.class);
     }
@@ -43466,21 +43466,21 @@ public final class UserServiceOuterClass {
     public static final int USER_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.User user_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      * @return Whether the user field is set.
      */
     public boolean hasUser() {
       return user_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      * @return The user.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
       return user_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.getDefaultInstance() : user_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+     * <code>.choreo.apis.User user = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
       return getUser();
@@ -43647,21 +43647,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetUserInfoResponse}
+     * Protobuf type {@code choreo.apis.GetUserInfoResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserInfoResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.GetUserInfoResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserInfoResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserInfoResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserInfoResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserInfoResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserInfoResponse.Builder.class);
       }
@@ -43696,7 +43696,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserInfoResponse_descriptor;
       }
 
       @java.lang.Override
@@ -43805,14 +43805,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> userBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        * @return Whether the user field is set.
        */
       public boolean hasUser() {
         return userBuilder_ != null || user_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        * @return The user.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User getUser() {
@@ -43823,7 +43823,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public Builder setUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -43839,7 +43839,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public Builder setUser(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder builderForValue) {
@@ -43853,7 +43853,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public Builder mergeUser(org.wso2.carbon.apimgt.impl.choreo.apis.Types.User value) {
         if (userBuilder_ == null) {
@@ -43871,7 +43871,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public Builder clearUser() {
         if (userBuilder_ == null) {
@@ -43885,7 +43885,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder getUserBuilder() {
         
@@ -43893,7 +43893,7 @@ public final class UserServiceOuterClass {
         return getUserFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder getUserOrBuilder() {
         if (userBuilder_ != null) {
@@ -43904,7 +43904,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.User user = 1;</code>
+       * <code>.choreo.apis.User user = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.User, org.wso2.carbon.apimgt.impl.choreo.apis.Types.User.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.UserOrBuilder> 
@@ -43932,10 +43932,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserInfoResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.GetUserInfoResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserInfoResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.GetUserInfoResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserInfoResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserInfoResponse();
@@ -43973,7 +43973,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface GetUserRolesRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserRolesRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.GetUserRolesRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -44001,11 +44001,11 @@ public final class UserServiceOuterClass {
         getOrganizationNameBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetUserRolesRequest}
+   * Protobuf type {@code choreo.apis.GetUserRolesRequest}
    */
   public  static final class GetUserRolesRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserRolesRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.GetUserRolesRequest)
       GetUserRolesRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use GetUserRolesRequest.newBuilder() to construct.
@@ -44080,13 +44080,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserRolesRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserRolesRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesRequest.Builder.class);
     }
@@ -44328,21 +44328,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetUserRolesRequest}
+     * Protobuf type {@code choreo.apis.GetUserRolesRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserRolesRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.GetUserRolesRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserRolesRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserRolesRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesRequest.Builder.class);
       }
@@ -44375,7 +44375,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserRolesRequest_descriptor;
       }
 
       @java.lang.Override
@@ -44646,10 +44646,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserRolesRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.GetUserRolesRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserRolesRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.GetUserRolesRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesRequest();
@@ -44687,7 +44687,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface GetEnterpriseUserRolesRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.GetEnterpriseUserRolesRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.GetEnterpriseUserRolesRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -44740,11 +44740,11 @@ public final class UserServiceOuterClass {
         getGroupListBytes(int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetEnterpriseUserRolesRequest}
+   * Protobuf type {@code choreo.apis.GetEnterpriseUserRolesRequest}
    */
   public  static final class GetEnterpriseUserRolesRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetEnterpriseUserRolesRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.GetEnterpriseUserRolesRequest)
       GetEnterpriseUserRolesRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use GetEnterpriseUserRolesRequest.newBuilder() to construct.
@@ -44833,13 +44833,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetEnterpriseUserRolesRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetEnterpriseUserRolesRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetEnterpriseUserRolesRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetEnterpriseUserRolesRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetEnterpriseUserRolesRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetEnterpriseUserRolesRequest.Builder.class);
     }
@@ -45133,21 +45133,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetEnterpriseUserRolesRequest}
+     * Protobuf type {@code choreo.apis.GetEnterpriseUserRolesRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetEnterpriseUserRolesRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.GetEnterpriseUserRolesRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetEnterpriseUserRolesRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetEnterpriseUserRolesRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetEnterpriseUserRolesRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetEnterpriseUserRolesRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetEnterpriseUserRolesRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetEnterpriseUserRolesRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetEnterpriseUserRolesRequest.Builder.class);
       }
@@ -45182,7 +45182,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetEnterpriseUserRolesRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetEnterpriseUserRolesRequest_descriptor;
       }
 
       @java.lang.Override
@@ -45580,10 +45580,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetEnterpriseUserRolesRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.GetEnterpriseUserRolesRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetEnterpriseUserRolesRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.GetEnterpriseUserRolesRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetEnterpriseUserRolesRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetEnterpriseUserRolesRequest();
@@ -45621,39 +45621,39 @@ public final class UserServiceOuterClass {
   }
 
   public interface GetUserRolesResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserRolesResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.GetUserRolesResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+     * <code>repeated .choreo.apis.Role roles = 1;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> 
         getRolesList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+     * <code>repeated .choreo.apis.Role roles = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRoles(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+     * <code>repeated .choreo.apis.Role roles = 1;</code>
      */
     int getRolesCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+     * <code>repeated .choreo.apis.Role roles = 1;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> 
         getRolesOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+     * <code>repeated .choreo.apis.Role roles = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRolesOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetUserRolesResponse}
+   * Protobuf type {@code choreo.apis.GetUserRolesResponse}
    */
   public  static final class GetUserRolesResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserRolesResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.GetUserRolesResponse)
       GetUserRolesResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use GetUserRolesResponse.newBuilder() to construct.
@@ -45728,13 +45728,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserRolesResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserRolesResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesResponse.Builder.class);
     }
@@ -45742,32 +45742,32 @@ public final class UserServiceOuterClass {
     public static final int ROLES_FIELD_NUMBER = 1;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> roles_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+     * <code>repeated .choreo.apis.Role roles = 1;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> getRolesList() {
       return roles_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+     * <code>repeated .choreo.apis.Role roles = 1;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> 
         getRolesOrBuilderList() {
       return roles_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+     * <code>repeated .choreo.apis.Role roles = 1;</code>
      */
     public int getRolesCount() {
       return roles_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+     * <code>repeated .choreo.apis.Role roles = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRoles(int index) {
       return roles_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+     * <code>repeated .choreo.apis.Role roles = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRolesOrBuilder(
         int index) {
@@ -45932,21 +45932,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetUserRolesResponse}
+     * Protobuf type {@code choreo.apis.GetUserRolesResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserRolesResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.GetUserRolesResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserRolesResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserRolesResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesResponse.Builder.class);
       }
@@ -45982,7 +45982,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetUserRolesResponse_descriptor;
       }
 
       @java.lang.Override
@@ -46129,7 +46129,7 @@ public final class UserServiceOuterClass {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> rolesBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> getRolesList() {
         if (rolesBuilder_ == null) {
@@ -46139,7 +46139,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public int getRolesCount() {
         if (rolesBuilder_ == null) {
@@ -46149,7 +46149,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role getRoles(int index) {
         if (rolesBuilder_ == null) {
@@ -46159,7 +46159,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public Builder setRoles(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
@@ -46176,7 +46176,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public Builder setRoles(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder builderForValue) {
@@ -46190,7 +46190,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public Builder addRoles(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
         if (rolesBuilder_ == null) {
@@ -46206,7 +46206,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public Builder addRoles(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role value) {
@@ -46223,7 +46223,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public Builder addRoles(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder builderForValue) {
@@ -46237,7 +46237,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public Builder addRoles(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder builderForValue) {
@@ -46251,7 +46251,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public Builder addAllRoles(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role> values) {
@@ -46266,7 +46266,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public Builder clearRoles() {
         if (rolesBuilder_ == null) {
@@ -46279,7 +46279,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public Builder removeRoles(int index) {
         if (rolesBuilder_ == null) {
@@ -46292,14 +46292,14 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder getRolesBuilder(
           int index) {
         return getRolesFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder getRolesOrBuilder(
           int index) {
@@ -46309,7 +46309,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.RoleOrBuilder> 
            getRolesOrBuilderList() {
@@ -46320,14 +46320,14 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder addRolesBuilder() {
         return getRolesFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder addRolesBuilder(
           int index) {
@@ -46335,7 +46335,7 @@ public final class UserServiceOuterClass {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Role roles = 1;</code>
+       * <code>repeated .choreo.apis.Role roles = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Role.Builder> 
            getRolesBuilderList() {
@@ -46368,10 +46368,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserRolesResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.GetUserRolesResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetUserRolesResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.GetUserRolesResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetUserRolesResponse();
@@ -46409,7 +46409,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface StartInvitationFlowRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.StartInvitationFlowRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.StartInvitationFlowRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -46437,11 +46437,11 @@ public final class UserServiceOuterClass {
         getEmailBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.StartInvitationFlowRequest}
+   * Protobuf type {@code choreo.apis.StartInvitationFlowRequest}
    */
   public  static final class StartInvitationFlowRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.StartInvitationFlowRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.StartInvitationFlowRequest)
       StartInvitationFlowRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use StartInvitationFlowRequest.newBuilder() to construct.
@@ -46516,13 +46516,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_StartInvitationFlowRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_StartInvitationFlowRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.StartInvitationFlowRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.StartInvitationFlowRequest.Builder.class);
     }
@@ -46764,21 +46764,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.StartInvitationFlowRequest}
+     * Protobuf type {@code choreo.apis.StartInvitationFlowRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.StartInvitationFlowRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.StartInvitationFlowRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.StartInvitationFlowRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_StartInvitationFlowRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_StartInvitationFlowRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.StartInvitationFlowRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.StartInvitationFlowRequest.Builder.class);
       }
@@ -46811,7 +46811,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_StartInvitationFlowRequest_descriptor;
       }
 
       @java.lang.Override
@@ -47082,10 +47082,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.StartInvitationFlowRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.StartInvitationFlowRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.StartInvitationFlowRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.StartInvitationFlowRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.StartInvitationFlowRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.StartInvitationFlowRequest();
@@ -47123,7 +47123,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface StartInvitationFlowResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.StartInvitationFlowResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.StartInvitationFlowResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -47139,11 +47139,11 @@ public final class UserServiceOuterClass {
         getRedirectUrlBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.StartInvitationFlowResponse}
+   * Protobuf type {@code choreo.apis.StartInvitationFlowResponse}
    */
   public  static final class StartInvitationFlowResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.StartInvitationFlowResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.StartInvitationFlowResponse)
       StartInvitationFlowResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use StartInvitationFlowResponse.newBuilder() to construct.
@@ -47211,13 +47211,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_StartInvitationFlowResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_StartInvitationFlowResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.StartInvitationFlowResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.StartInvitationFlowResponse.Builder.class);
     }
@@ -47413,21 +47413,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.StartInvitationFlowResponse}
+     * Protobuf type {@code choreo.apis.StartInvitationFlowResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.StartInvitationFlowResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.StartInvitationFlowResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.StartInvitationFlowResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_StartInvitationFlowResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_StartInvitationFlowResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.StartInvitationFlowResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.StartInvitationFlowResponse.Builder.class);
       }
@@ -47458,7 +47458,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_StartInvitationFlowResponse_descriptor;
       }
 
       @java.lang.Override
@@ -47648,10 +47648,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.StartInvitationFlowResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.StartInvitationFlowResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.StartInvitationFlowResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.StartInvitationFlowResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.StartInvitationFlowResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.StartInvitationFlowResponse();
@@ -47689,21 +47689,21 @@ public final class UserServiceOuterClass {
   }
 
   public interface CreateOrganizationRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.CreateOrganizationRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.CreateOrganizationRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the organization field is set.
      */
     boolean hasOrganization();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return The organization.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder();
 
@@ -47720,11 +47720,11 @@ public final class UserServiceOuterClass {
         getUserEmailBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateOrganizationRequest}
+   * Protobuf type {@code choreo.apis.CreateOrganizationRequest}
    */
   public  static final class CreateOrganizationRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateOrganizationRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.CreateOrganizationRequest)
       CreateOrganizationRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use CreateOrganizationRequest.newBuilder() to construct.
@@ -47805,13 +47805,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateOrganizationRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateOrganizationRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateOrganizationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateOrganizationRequest.Builder.class);
     }
@@ -47819,21 +47819,21 @@ public final class UserServiceOuterClass {
     public static final int ORGANIZATION_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization organization_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the organization field is set.
      */
     public boolean hasOrganization() {
       return organization_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return The organization.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization() {
       return organization_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.getDefaultInstance() : organization_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder() {
       return getOrganization();
@@ -48046,21 +48046,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateOrganizationRequest}
+     * Protobuf type {@code choreo.apis.CreateOrganizationRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateOrganizationRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.CreateOrganizationRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateOrganizationRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateOrganizationRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateOrganizationRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateOrganizationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateOrganizationRequest.Builder.class);
       }
@@ -48097,7 +48097,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateOrganizationRequest_descriptor;
       }
 
       @java.lang.Override
@@ -48211,14 +48211,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> organizationBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the organization field is set.
        */
       public boolean hasOrganization() {
         return organizationBuilder_ != null || organization_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        * @return The organization.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization() {
@@ -48229,7 +48229,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setOrganization(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationBuilder_ == null) {
@@ -48245,7 +48245,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setOrganization(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -48259,7 +48259,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeOrganization(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationBuilder_ == null) {
@@ -48277,7 +48277,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearOrganization() {
         if (organizationBuilder_ == null) {
@@ -48291,7 +48291,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder getOrganizationBuilder() {
         
@@ -48299,7 +48299,7 @@ public final class UserServiceOuterClass {
         return getOrganizationFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder() {
         if (organizationBuilder_ != null) {
@@ -48310,7 +48310,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
@@ -48414,10 +48414,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateOrganizationRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.CreateOrganizationRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateOrganizationRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.CreateOrganizationRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateOrganizationRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateOrganizationRequest();
@@ -48455,30 +48455,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface CreateOrganizationResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.CreateOrganizationResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.CreateOrganizationResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the organization field is set.
      */
     boolean hasOrganization();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return The organization.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateOrganizationResponse}
+   * Protobuf type {@code choreo.apis.CreateOrganizationResponse}
    */
   public  static final class CreateOrganizationResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateOrganizationResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.CreateOrganizationResponse)
       CreateOrganizationResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use CreateOrganizationResponse.newBuilder() to construct.
@@ -48552,13 +48552,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateOrganizationResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateOrganizationResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateOrganizationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateOrganizationResponse.Builder.class);
     }
@@ -48566,21 +48566,21 @@ public final class UserServiceOuterClass {
     public static final int ORGANIZATION_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization organization_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the organization field is set.
      */
     public boolean hasOrganization() {
       return organization_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return The organization.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization() {
       return organization_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.getDefaultInstance() : organization_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder() {
       return getOrganization();
@@ -48747,21 +48747,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateOrganizationResponse}
+     * Protobuf type {@code choreo.apis.CreateOrganizationResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateOrganizationResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.CreateOrganizationResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateOrganizationResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateOrganizationResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateOrganizationResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateOrganizationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateOrganizationResponse.Builder.class);
       }
@@ -48796,7 +48796,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateOrganizationResponse_descriptor;
       }
 
       @java.lang.Override
@@ -48905,14 +48905,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> organizationBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the organization field is set.
        */
       public boolean hasOrganization() {
         return organizationBuilder_ != null || organization_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        * @return The organization.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization() {
@@ -48923,7 +48923,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setOrganization(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationBuilder_ == null) {
@@ -48939,7 +48939,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setOrganization(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -48953,7 +48953,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeOrganization(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationBuilder_ == null) {
@@ -48971,7 +48971,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearOrganization() {
         if (organizationBuilder_ == null) {
@@ -48985,7 +48985,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder getOrganizationBuilder() {
         
@@ -48993,7 +48993,7 @@ public final class UserServiceOuterClass {
         return getOrganizationFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder() {
         if (organizationBuilder_ != null) {
@@ -49004,7 +49004,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
@@ -49032,10 +49032,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateOrganizationResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.CreateOrganizationResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateOrganizationResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.CreateOrganizationResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateOrganizationResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateOrganizationResponse();
@@ -49073,7 +49073,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface GetOrganizationRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.GetOrganizationRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.GetOrganizationRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -49089,11 +49089,11 @@ public final class UserServiceOuterClass {
         getOrganizationNameBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetOrganizationRequest}
+   * Protobuf type {@code choreo.apis.GetOrganizationRequest}
    */
   public  static final class GetOrganizationRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetOrganizationRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.GetOrganizationRequest)
       GetOrganizationRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use GetOrganizationRequest.newBuilder() to construct.
@@ -49161,13 +49161,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetOrganizationRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetOrganizationRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetOrganizationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetOrganizationRequest.Builder.class);
     }
@@ -49363,21 +49363,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetOrganizationRequest}
+     * Protobuf type {@code choreo.apis.GetOrganizationRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetOrganizationRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.GetOrganizationRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetOrganizationRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetOrganizationRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetOrganizationRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetOrganizationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetOrganizationRequest.Builder.class);
       }
@@ -49408,7 +49408,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetOrganizationRequest_descriptor;
       }
 
       @java.lang.Override
@@ -49598,10 +49598,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetOrganizationRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.GetOrganizationRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetOrganizationRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.GetOrganizationRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetOrganizationRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetOrganizationRequest();
@@ -49639,21 +49639,21 @@ public final class UserServiceOuterClass {
   }
 
   public interface GetOrganizationResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.GetOrganizationResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.GetOrganizationResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the organization field is set.
      */
     boolean hasOrganization();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return The organization.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder();
 
@@ -49664,11 +49664,11 @@ public final class UserServiceOuterClass {
     boolean getIsAdmin();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetOrganizationResponse}
+   * Protobuf type {@code choreo.apis.GetOrganizationResponse}
    */
   public  static final class GetOrganizationResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetOrganizationResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.GetOrganizationResponse)
       GetOrganizationResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use GetOrganizationResponse.newBuilder() to construct.
@@ -49747,13 +49747,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetOrganizationResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetOrganizationResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetOrganizationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetOrganizationResponse.Builder.class);
     }
@@ -49761,21 +49761,21 @@ public final class UserServiceOuterClass {
     public static final int ORGANIZATION_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization organization_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the organization field is set.
      */
     public boolean hasOrganization() {
       return organization_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return The organization.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization() {
       return organization_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.getDefaultInstance() : organization_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder() {
       return getOrganization();
@@ -49964,21 +49964,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetOrganizationResponse}
+     * Protobuf type {@code choreo.apis.GetOrganizationResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetOrganizationResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.GetOrganizationResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetOrganizationResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetOrganizationResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetOrganizationResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetOrganizationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetOrganizationResponse.Builder.class);
       }
@@ -50015,7 +50015,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetOrganizationResponse_descriptor;
       }
 
       @java.lang.Override
@@ -50128,14 +50128,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> organizationBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the organization field is set.
        */
       public boolean hasOrganization() {
         return organizationBuilder_ != null || organization_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        * @return The organization.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization() {
@@ -50146,7 +50146,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setOrganization(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationBuilder_ == null) {
@@ -50162,7 +50162,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setOrganization(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -50176,7 +50176,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeOrganization(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationBuilder_ == null) {
@@ -50194,7 +50194,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearOrganization() {
         if (organizationBuilder_ == null) {
@@ -50208,7 +50208,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder getOrganizationBuilder() {
         
@@ -50216,7 +50216,7 @@ public final class UserServiceOuterClass {
         return getOrganizationFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder() {
         if (organizationBuilder_ != null) {
@@ -50227,7 +50227,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
@@ -50285,10 +50285,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetOrganizationResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.GetOrganizationResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetOrganizationResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.GetOrganizationResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetOrganizationResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetOrganizationResponse();
@@ -50326,7 +50326,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface UpdateOrganizationRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateOrganizationRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.UpdateOrganizationRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -50342,26 +50342,26 @@ public final class UserServiceOuterClass {
         getOrganizationNameBytes();
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
      * @return Whether the organization field is set.
      */
     boolean hasOrganization();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
      * @return The organization.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateOrganizationRequest}
+   * Protobuf type {@code choreo.apis.UpdateOrganizationRequest}
    */
   public  static final class UpdateOrganizationRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateOrganizationRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.UpdateOrganizationRequest)
       UpdateOrganizationRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use UpdateOrganizationRequest.newBuilder() to construct.
@@ -50442,13 +50442,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateOrganizationRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateOrganizationRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateOrganizationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateOrganizationRequest.Builder.class);
     }
@@ -50492,21 +50492,21 @@ public final class UserServiceOuterClass {
     public static final int ORGANIZATION_FIELD_NUMBER = 3;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization organization_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
      * @return Whether the organization field is set.
      */
     public boolean hasOrganization() {
       return organization_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
      * @return The organization.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization() {
       return organization_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.getDefaultInstance() : organization_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder() {
       return getOrganization();
@@ -50683,21 +50683,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateOrganizationRequest}
+     * Protobuf type {@code choreo.apis.UpdateOrganizationRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateOrganizationRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.UpdateOrganizationRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateOrganizationRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateOrganizationRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateOrganizationRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateOrganizationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateOrganizationRequest.Builder.class);
       }
@@ -50734,7 +50734,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateOrganizationRequest_descriptor;
       }
 
       @java.lang.Override
@@ -50924,14 +50924,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> organizationBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
        * @return Whether the organization field is set.
        */
       public boolean hasOrganization() {
         return organizationBuilder_ != null || organization_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
        * @return The organization.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization() {
@@ -50942,7 +50942,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
        */
       public Builder setOrganization(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationBuilder_ == null) {
@@ -50958,7 +50958,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
        */
       public Builder setOrganization(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -50972,7 +50972,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeOrganization(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationBuilder_ == null) {
@@ -50990,7 +50990,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
        */
       public Builder clearOrganization() {
         if (organizationBuilder_ == null) {
@@ -51004,7 +51004,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder getOrganizationBuilder() {
         
@@ -51012,7 +51012,7 @@ public final class UserServiceOuterClass {
         return getOrganizationFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder() {
         if (organizationBuilder_ != null) {
@@ -51023,7 +51023,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 3 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
@@ -51051,10 +51051,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateOrganizationRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.UpdateOrganizationRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateOrganizationRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.UpdateOrganizationRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateOrganizationRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateOrganizationRequest();
@@ -51092,30 +51092,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface UpdateOrganizationResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateOrganizationResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.UpdateOrganizationResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the organization field is set.
      */
     boolean hasOrganization();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return The organization.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateOrganizationResponse}
+   * Protobuf type {@code choreo.apis.UpdateOrganizationResponse}
    */
   public  static final class UpdateOrganizationResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateOrganizationResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.UpdateOrganizationResponse)
       UpdateOrganizationResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use UpdateOrganizationResponse.newBuilder() to construct.
@@ -51189,13 +51189,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateOrganizationResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateOrganizationResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateOrganizationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateOrganizationResponse.Builder.class);
     }
@@ -51203,21 +51203,21 @@ public final class UserServiceOuterClass {
     public static final int ORGANIZATION_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization organization_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the organization field is set.
      */
     public boolean hasOrganization() {
       return organization_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return The organization.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization() {
       return organization_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.getDefaultInstance() : organization_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder() {
       return getOrganization();
@@ -51384,21 +51384,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.UpdateOrganizationResponse}
+     * Protobuf type {@code choreo.apis.UpdateOrganizationResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateOrganizationResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.UpdateOrganizationResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateOrganizationResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateOrganizationResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateOrganizationResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateOrganizationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateOrganizationResponse.Builder.class);
       }
@@ -51433,7 +51433,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_UpdateOrganizationResponse_descriptor;
       }
 
       @java.lang.Override
@@ -51542,14 +51542,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> organizationBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the organization field is set.
        */
       public boolean hasOrganization() {
         return organizationBuilder_ != null || organization_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        * @return The organization.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization() {
@@ -51560,7 +51560,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setOrganization(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationBuilder_ == null) {
@@ -51576,7 +51576,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setOrganization(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -51590,7 +51590,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeOrganization(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationBuilder_ == null) {
@@ -51608,7 +51608,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearOrganization() {
         if (organizationBuilder_ == null) {
@@ -51622,7 +51622,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder getOrganizationBuilder() {
         
@@ -51630,7 +51630,7 @@ public final class UserServiceOuterClass {
         return getOrganizationFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder() {
         if (organizationBuilder_ != null) {
@@ -51641,7 +51641,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
@@ -51669,10 +51669,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateOrganizationResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.UpdateOrganizationResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.UpdateOrganizationResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.UpdateOrganizationResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateOrganizationResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.UpdateOrganizationResponse();
@@ -51710,7 +51710,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface DeleteOrganizationRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.DeleteOrganizationRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -51738,11 +51738,11 @@ public final class UserServiceOuterClass {
         getUserEmailBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationRequest}
+   * Protobuf type {@code choreo.apis.DeleteOrganizationRequest}
    */
   public  static final class DeleteOrganizationRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.DeleteOrganizationRequest)
       DeleteOrganizationRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use DeleteOrganizationRequest.newBuilder() to construct.
@@ -51817,13 +51817,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteOrganizationRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteOrganizationRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationRequest.Builder.class);
     }
@@ -52065,21 +52065,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationRequest}
+     * Protobuf type {@code choreo.apis.DeleteOrganizationRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.DeleteOrganizationRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteOrganizationRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteOrganizationRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationRequest.Builder.class);
       }
@@ -52112,7 +52112,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteOrganizationRequest_descriptor;
       }
 
       @java.lang.Override
@@ -52383,10 +52383,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.DeleteOrganizationRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.DeleteOrganizationRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationRequest();
@@ -52424,30 +52424,30 @@ public final class UserServiceOuterClass {
   }
 
   public interface DeleteOrganizationResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.DeleteOrganizationResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the organization field is set.
      */
     boolean hasOrganization();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return The organization.
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization();
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationResponse}
+   * Protobuf type {@code choreo.apis.DeleteOrganizationResponse}
    */
   public  static final class DeleteOrganizationResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.DeleteOrganizationResponse)
       DeleteOrganizationResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use DeleteOrganizationResponse.newBuilder() to construct.
@@ -52521,13 +52521,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteOrganizationResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteOrganizationResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationResponse.Builder.class);
     }
@@ -52535,21 +52535,21 @@ public final class UserServiceOuterClass {
     public static final int ORGANIZATION_FIELD_NUMBER = 1;
     private org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization organization_;
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return Whether the organization field is set.
      */
     public boolean hasOrganization() {
       return organization_ != null;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      * @return The organization.
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization() {
       return organization_ == null ? org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.getDefaultInstance() : organization_;
     }
     /**
-     * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+     * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder() {
       return getOrganization();
@@ -52716,21 +52716,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationResponse}
+     * Protobuf type {@code choreo.apis.DeleteOrganizationResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.DeleteOrganizationResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteOrganizationResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteOrganizationResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationResponse.Builder.class);
       }
@@ -52765,7 +52765,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_DeleteOrganizationResponse_descriptor;
       }
 
       @java.lang.Override
@@ -52874,14 +52874,14 @@ public final class UserServiceOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> organizationBuilder_;
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        * @return Whether the organization field is set.
        */
       public boolean hasOrganization() {
         return organizationBuilder_ != null || organization_ != null;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        * @return The organization.
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganization() {
@@ -52892,7 +52892,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setOrganization(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationBuilder_ == null) {
@@ -52908,7 +52908,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder setOrganization(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -52922,7 +52922,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder mergeOrganization(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationBuilder_ == null) {
@@ -52940,7 +52940,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public Builder clearOrganization() {
         if (organizationBuilder_ == null) {
@@ -52954,7 +52954,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder getOrganizationBuilder() {
         
@@ -52962,7 +52962,7 @@ public final class UserServiceOuterClass {
         return getOrganizationFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationOrBuilder() {
         if (organizationBuilder_ != null) {
@@ -52973,7 +52973,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>.org.wso2.carbon.apimgt.impl.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
+       * <code>.choreo.apis.Organization organization = 1 [(.validate.rules) = { ... }</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
@@ -53001,10 +53001,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.DeleteOrganizationResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.DeleteOrganizationResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.DeleteOrganizationResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.DeleteOrganizationResponse();
@@ -53042,15 +53042,15 @@ public final class UserServiceOuterClass {
   }
 
   public interface ListOrganizationsRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationsRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ListOrganizationsRequest)
       com.google.protobuf.MessageOrBuilder {
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationsRequest}
+   * Protobuf type {@code choreo.apis.ListOrganizationsRequest}
    */
   public  static final class ListOrganizationsRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationsRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ListOrganizationsRequest)
       ListOrganizationsRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ListOrganizationsRequest.newBuilder() to construct.
@@ -53111,13 +53111,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationsRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationsRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationsRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationsRequest.Builder.class);
     }
@@ -53267,21 +53267,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationsRequest}
+     * Protobuf type {@code choreo.apis.ListOrganizationsRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationsRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ListOrganizationsRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationsRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationsRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationsRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationsRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationsRequest.Builder.class);
       }
@@ -53310,7 +53310,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationsRequest_descriptor;
       }
 
       @java.lang.Override
@@ -53419,10 +53419,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationsRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ListOrganizationsRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationsRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ListOrganizationsRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationsRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationsRequest();
@@ -53460,39 +53460,39 @@ public final class UserServiceOuterClass {
   }
 
   public interface ListOrganizationsResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationsResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ListOrganizationsResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> 
         getOrganizationsList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganizations(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     int getOrganizationsCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
         getOrganizationsOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationsOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationsResponse}
+   * Protobuf type {@code choreo.apis.ListOrganizationsResponse}
    */
   public  static final class ListOrganizationsResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationsResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ListOrganizationsResponse)
       ListOrganizationsResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ListOrganizationsResponse.newBuilder() to construct.
@@ -53567,13 +53567,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationsResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationsResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationsResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationsResponse.Builder.class);
     }
@@ -53581,32 +53581,32 @@ public final class UserServiceOuterClass {
     public static final int ORGANIZATIONS_FIELD_NUMBER = 1;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> organizations_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> getOrganizationsList() {
       return organizations_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
         getOrganizationsOrBuilderList() {
       return organizations_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     public int getOrganizationsCount() {
       return organizations_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganizations(int index) {
       return organizations_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationsOrBuilder(
         int index) {
@@ -53771,21 +53771,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationsResponse}
+     * Protobuf type {@code choreo.apis.ListOrganizationsResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationsResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ListOrganizationsResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationsResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationsResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationsResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationsResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationsResponse.Builder.class);
       }
@@ -53821,7 +53821,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationsResponse_descriptor;
       }
 
       @java.lang.Override
@@ -53968,7 +53968,7 @@ public final class UserServiceOuterClass {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> organizationsBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> getOrganizationsList() {
         if (organizationsBuilder_ == null) {
@@ -53978,7 +53978,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public int getOrganizationsCount() {
         if (organizationsBuilder_ == null) {
@@ -53988,7 +53988,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganizations(int index) {
         if (organizationsBuilder_ == null) {
@@ -53998,7 +53998,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder setOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
@@ -54015,7 +54015,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder setOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -54029,7 +54029,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder addOrganizations(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationsBuilder_ == null) {
@@ -54045,7 +54045,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder addOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
@@ -54062,7 +54062,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder addOrganizations(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -54076,7 +54076,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder addOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -54090,7 +54090,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder addAllOrganizations(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> values) {
@@ -54105,7 +54105,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder clearOrganizations() {
         if (organizationsBuilder_ == null) {
@@ -54118,7 +54118,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder removeOrganizations(int index) {
         if (organizationsBuilder_ == null) {
@@ -54131,14 +54131,14 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder getOrganizationsBuilder(
           int index) {
         return getOrganizationsFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationsOrBuilder(
           int index) {
@@ -54148,7 +54148,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
            getOrganizationsOrBuilderList() {
@@ -54159,14 +54159,14 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder addOrganizationsBuilder() {
         return getOrganizationsFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder addOrganizationsBuilder(
           int index) {
@@ -54174,7 +54174,7 @@ public final class UserServiceOuterClass {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder> 
            getOrganizationsBuilderList() {
@@ -54207,10 +54207,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationsResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ListOrganizationsResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationsResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ListOrganizationsResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationsResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationsResponse();
@@ -54248,7 +54248,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface ListUserGroupsRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ListUserGroupsRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ListUserGroupsRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -54264,11 +54264,11 @@ public final class UserServiceOuterClass {
         getUserIdpIdBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListUserGroupsRequest}
+   * Protobuf type {@code choreo.apis.ListUserGroupsRequest}
    */
   public  static final class ListUserGroupsRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListUserGroupsRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ListUserGroupsRequest)
       ListUserGroupsRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ListUserGroupsRequest.newBuilder() to construct.
@@ -54336,13 +54336,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListUserGroupsRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListUserGroupsRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsRequest.Builder.class);
     }
@@ -54538,21 +54538,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListUserGroupsRequest}
+     * Protobuf type {@code choreo.apis.ListUserGroupsRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListUserGroupsRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ListUserGroupsRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListUserGroupsRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListUserGroupsRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsRequest.Builder.class);
       }
@@ -54583,7 +54583,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListUserGroupsRequest_descriptor;
       }
 
       @java.lang.Override
@@ -54773,10 +54773,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListUserGroupsRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ListUserGroupsRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListUserGroupsRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ListUserGroupsRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsRequest();
@@ -54814,39 +54814,39 @@ public final class UserServiceOuterClass {
   }
 
   public interface ListUserGroupsResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ListUserGroupsResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ListUserGroupsResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group> 
         getGroupsList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroups(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     int getGroupsCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> 
         getGroupsOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupsOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListUserGroupsResponse}
+   * Protobuf type {@code choreo.apis.ListUserGroupsResponse}
    */
   public  static final class ListUserGroupsResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListUserGroupsResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ListUserGroupsResponse)
       ListUserGroupsResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ListUserGroupsResponse.newBuilder() to construct.
@@ -54921,13 +54921,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListUserGroupsResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListUserGroupsResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsResponse.Builder.class);
     }
@@ -54935,32 +54935,32 @@ public final class UserServiceOuterClass {
     public static final int GROUPS_FIELD_NUMBER = 1;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group> groups_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group> getGroupsList() {
       return groups_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> 
         getGroupsOrBuilderList() {
       return groups_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     public int getGroupsCount() {
       return groups_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroups(int index) {
       return groups_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+     * <code>repeated .choreo.apis.Group groups = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupsOrBuilder(
         int index) {
@@ -55125,21 +55125,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListUserGroupsResponse}
+     * Protobuf type {@code choreo.apis.ListUserGroupsResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListUserGroupsResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ListUserGroupsResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListUserGroupsResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListUserGroupsResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsResponse.Builder.class);
       }
@@ -55175,7 +55175,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListUserGroupsResponse_descriptor;
       }
 
       @java.lang.Override
@@ -55322,7 +55322,7 @@ public final class UserServiceOuterClass {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> groupsBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group> getGroupsList() {
         if (groupsBuilder_ == null) {
@@ -55332,7 +55332,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public int getGroupsCount() {
         if (groupsBuilder_ == null) {
@@ -55342,7 +55342,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group getGroups(int index) {
         if (groupsBuilder_ == null) {
@@ -55352,7 +55352,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder setGroups(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group value) {
@@ -55369,7 +55369,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder setGroups(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder builderForValue) {
@@ -55383,7 +55383,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder addGroups(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group value) {
         if (groupsBuilder_ == null) {
@@ -55399,7 +55399,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder addGroups(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group value) {
@@ -55416,7 +55416,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder addGroups(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder builderForValue) {
@@ -55430,7 +55430,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder addGroups(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder builderForValue) {
@@ -55444,7 +55444,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder addAllGroups(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group> values) {
@@ -55459,7 +55459,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder clearGroups() {
         if (groupsBuilder_ == null) {
@@ -55472,7 +55472,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public Builder removeGroups(int index) {
         if (groupsBuilder_ == null) {
@@ -55485,14 +55485,14 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder getGroupsBuilder(
           int index) {
         return getGroupsFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder getGroupsOrBuilder(
           int index) {
@@ -55502,7 +55502,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.GroupOrBuilder> 
            getGroupsOrBuilderList() {
@@ -55513,14 +55513,14 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder addGroupsBuilder() {
         return getGroupsFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder addGroupsBuilder(
           int index) {
@@ -55528,7 +55528,7 @@ public final class UserServiceOuterClass {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Group groups = 1;</code>
+       * <code>repeated .choreo.apis.Group groups = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Group.Builder> 
            getGroupsBuilderList() {
@@ -55561,10 +55561,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListUserGroupsResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ListUserGroupsResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListUserGroupsResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ListUserGroupsResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListUserGroupsResponse();
@@ -55602,7 +55602,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface ListOrganizationEnvIdsRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationEnvIdsRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ListOrganizationEnvIdsRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -55618,11 +55618,11 @@ public final class UserServiceOuterClass {
         getOrganizationNameBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationEnvIdsRequest}
+   * Protobuf type {@code choreo.apis.ListOrganizationEnvIdsRequest}
    */
   public  static final class ListOrganizationEnvIdsRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationEnvIdsRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ListOrganizationEnvIdsRequest)
       ListOrganizationEnvIdsRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ListOrganizationEnvIdsRequest.newBuilder() to construct.
@@ -55690,13 +55690,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationEnvIdsRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationEnvIdsRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationEnvIdsRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationEnvIdsRequest.Builder.class);
     }
@@ -55892,21 +55892,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationEnvIdsRequest}
+     * Protobuf type {@code choreo.apis.ListOrganizationEnvIdsRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationEnvIdsRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ListOrganizationEnvIdsRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationEnvIdsRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationEnvIdsRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationEnvIdsRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationEnvIdsRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationEnvIdsRequest.Builder.class);
       }
@@ -55937,7 +55937,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationEnvIdsRequest_descriptor;
       }
 
       @java.lang.Override
@@ -56127,10 +56127,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationEnvIdsRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ListOrganizationEnvIdsRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationEnvIdsRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ListOrganizationEnvIdsRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationEnvIdsRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationEnvIdsRequest();
@@ -56168,39 +56168,39 @@ public final class UserServiceOuterClass {
   }
 
   public interface ListOrganizationEnvIdsResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationEnvIdsResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.ListOrganizationEnvIdsResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+     * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId> 
         getEnvironmentIdsList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+     * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId getEnvironmentIds(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+     * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
      */
     int getEnvironmentIdsCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+     * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentIdOrBuilder> 
         getEnvironmentIdsOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+     * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentIdOrBuilder getEnvironmentIdsOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationEnvIdsResponse}
+   * Protobuf type {@code choreo.apis.ListOrganizationEnvIdsResponse}
    */
   public  static final class ListOrganizationEnvIdsResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationEnvIdsResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.ListOrganizationEnvIdsResponse)
       ListOrganizationEnvIdsResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use ListOrganizationEnvIdsResponse.newBuilder() to construct.
@@ -56275,13 +56275,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationEnvIdsResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationEnvIdsResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationEnvIdsResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationEnvIdsResponse.Builder.class);
     }
@@ -56289,32 +56289,32 @@ public final class UserServiceOuterClass {
     public static final int ENVIRONMENT_IDS_FIELD_NUMBER = 1;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId> environmentIds_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+     * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId> getEnvironmentIdsList() {
       return environmentIds_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+     * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentIdOrBuilder> 
         getEnvironmentIdsOrBuilderList() {
       return environmentIds_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+     * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
      */
     public int getEnvironmentIdsCount() {
       return environmentIds_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+     * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId getEnvironmentIds(int index) {
       return environmentIds_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+     * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentIdOrBuilder getEnvironmentIdsOrBuilder(
         int index) {
@@ -56479,21 +56479,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationEnvIdsResponse}
+     * Protobuf type {@code choreo.apis.ListOrganizationEnvIdsResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationEnvIdsResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.ListOrganizationEnvIdsResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationEnvIdsResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationEnvIdsResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationEnvIdsResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationEnvIdsResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationEnvIdsResponse.Builder.class);
       }
@@ -56529,7 +56529,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_ListOrganizationEnvIdsResponse_descriptor;
       }
 
       @java.lang.Override
@@ -56676,7 +56676,7 @@ public final class UserServiceOuterClass {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId, org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentIdOrBuilder> environmentIdsBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId> getEnvironmentIdsList() {
         if (environmentIdsBuilder_ == null) {
@@ -56686,7 +56686,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public int getEnvironmentIdsCount() {
         if (environmentIdsBuilder_ == null) {
@@ -56696,7 +56696,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId getEnvironmentIds(int index) {
         if (environmentIdsBuilder_ == null) {
@@ -56706,7 +56706,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public Builder setEnvironmentIds(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId value) {
@@ -56723,7 +56723,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public Builder setEnvironmentIds(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId.Builder builderForValue) {
@@ -56737,7 +56737,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public Builder addEnvironmentIds(org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId value) {
         if (environmentIdsBuilder_ == null) {
@@ -56753,7 +56753,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public Builder addEnvironmentIds(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId value) {
@@ -56770,7 +56770,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public Builder addEnvironmentIds(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId.Builder builderForValue) {
@@ -56784,7 +56784,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public Builder addEnvironmentIds(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId.Builder builderForValue) {
@@ -56798,7 +56798,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public Builder addAllEnvironmentIds(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId> values) {
@@ -56813,7 +56813,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public Builder clearEnvironmentIds() {
         if (environmentIdsBuilder_ == null) {
@@ -56826,7 +56826,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public Builder removeEnvironmentIds(int index) {
         if (environmentIdsBuilder_ == null) {
@@ -56839,14 +56839,14 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId.Builder getEnvironmentIdsBuilder(
           int index) {
         return getEnvironmentIdsFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentIdOrBuilder getEnvironmentIdsOrBuilder(
           int index) {
@@ -56856,7 +56856,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentIdOrBuilder> 
            getEnvironmentIdsOrBuilderList() {
@@ -56867,14 +56867,14 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId.Builder addEnvironmentIdsBuilder() {
         return getEnvironmentIdsFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId.Builder addEnvironmentIdsBuilder(
           int index) {
@@ -56882,7 +56882,7 @@ public final class UserServiceOuterClass {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.EnvironmentId environment_ids = 1;</code>
+       * <code>repeated .choreo.apis.EnvironmentId environment_ids = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.EnvironmentId.Builder> 
            getEnvironmentIdsBuilderList() {
@@ -56915,10 +56915,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationEnvIdsResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.ListOrganizationEnvIdsResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.ListOrganizationEnvIdsResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.ListOrganizationEnvIdsResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationEnvIdsResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.ListOrganizationEnvIdsResponse();
@@ -56956,39 +56956,39 @@ public final class UserServiceOuterClass {
   }
 
   public interface CreateDefaultEnvironmentsForOrgsRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.CreateDefaultEnvironmentsForOrgsRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.CreateDefaultEnvironmentsForOrgsRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> 
         getOrganizationsList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganizations(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     int getOrganizationsCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
         getOrganizationsOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationsOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateDefaultEnvironmentsForOrgsRequest}
+   * Protobuf type {@code choreo.apis.CreateDefaultEnvironmentsForOrgsRequest}
    */
   public  static final class CreateDefaultEnvironmentsForOrgsRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateDefaultEnvironmentsForOrgsRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.CreateDefaultEnvironmentsForOrgsRequest)
       CreateDefaultEnvironmentsForOrgsRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use CreateDefaultEnvironmentsForOrgsRequest.newBuilder() to construct.
@@ -57063,13 +57063,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateDefaultEnvironmentsForOrgsRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateDefaultEnvironmentsForOrgsRequest.Builder.class);
     }
@@ -57077,32 +57077,32 @@ public final class UserServiceOuterClass {
     public static final int ORGANIZATIONS_FIELD_NUMBER = 1;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> organizations_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> getOrganizationsList() {
       return organizations_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
         getOrganizationsOrBuilderList() {
       return organizations_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     public int getOrganizationsCount() {
       return organizations_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganizations(int index) {
       return organizations_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+     * <code>repeated .choreo.apis.Organization organizations = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationsOrBuilder(
         int index) {
@@ -57267,21 +57267,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateDefaultEnvironmentsForOrgsRequest}
+     * Protobuf type {@code choreo.apis.CreateDefaultEnvironmentsForOrgsRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateDefaultEnvironmentsForOrgsRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.CreateDefaultEnvironmentsForOrgsRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateDefaultEnvironmentsForOrgsRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateDefaultEnvironmentsForOrgsRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateDefaultEnvironmentsForOrgsRequest.Builder.class);
       }
@@ -57317,7 +57317,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_descriptor;
       }
 
       @java.lang.Override
@@ -57464,7 +57464,7 @@ public final class UserServiceOuterClass {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> organizationsBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> getOrganizationsList() {
         if (organizationsBuilder_ == null) {
@@ -57474,7 +57474,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public int getOrganizationsCount() {
         if (organizationsBuilder_ == null) {
@@ -57484,7 +57484,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization getOrganizations(int index) {
         if (organizationsBuilder_ == null) {
@@ -57494,7 +57494,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder setOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
@@ -57511,7 +57511,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder setOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -57525,7 +57525,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder addOrganizations(org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
         if (organizationsBuilder_ == null) {
@@ -57541,7 +57541,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder addOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization value) {
@@ -57558,7 +57558,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder addOrganizations(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -57572,7 +57572,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder addOrganizations(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder builderForValue) {
@@ -57586,7 +57586,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder addAllOrganizations(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization> values) {
@@ -57601,7 +57601,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder clearOrganizations() {
         if (organizationsBuilder_ == null) {
@@ -57614,7 +57614,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public Builder removeOrganizations(int index) {
         if (organizationsBuilder_ == null) {
@@ -57627,14 +57627,14 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder getOrganizationsBuilder(
           int index) {
         return getOrganizationsFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder getOrganizationsOrBuilder(
           int index) {
@@ -57644,7 +57644,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.OrganizationOrBuilder> 
            getOrganizationsOrBuilderList() {
@@ -57655,14 +57655,14 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder addOrganizationsBuilder() {
         return getOrganizationsFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder addOrganizationsBuilder(
           int index) {
@@ -57670,7 +57670,7 @@ public final class UserServiceOuterClass {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.Organization organizations = 1;</code>
+       * <code>repeated .choreo.apis.Organization organizations = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.Organization.Builder> 
            getOrganizationsBuilderList() {
@@ -57703,10 +57703,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateDefaultEnvironmentsForOrgsRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.CreateDefaultEnvironmentsForOrgsRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateDefaultEnvironmentsForOrgsRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.CreateDefaultEnvironmentsForOrgsRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateDefaultEnvironmentsForOrgsRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateDefaultEnvironmentsForOrgsRequest();
@@ -57744,15 +57744,15 @@ public final class UserServiceOuterClass {
   }
 
   public interface CreateDefaultEnvironmentsForOrgsResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.CreateDefaultEnvironmentsForOrgsResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.CreateDefaultEnvironmentsForOrgsResponse)
       com.google.protobuf.MessageOrBuilder {
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateDefaultEnvironmentsForOrgsResponse}
+   * Protobuf type {@code choreo.apis.CreateDefaultEnvironmentsForOrgsResponse}
    */
   public  static final class CreateDefaultEnvironmentsForOrgsResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateDefaultEnvironmentsForOrgsResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.CreateDefaultEnvironmentsForOrgsResponse)
       CreateDefaultEnvironmentsForOrgsResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use CreateDefaultEnvironmentsForOrgsResponse.newBuilder() to construct.
@@ -57813,13 +57813,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateDefaultEnvironmentsForOrgsResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateDefaultEnvironmentsForOrgsResponse.Builder.class);
     }
@@ -57969,21 +57969,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.CreateDefaultEnvironmentsForOrgsResponse}
+     * Protobuf type {@code choreo.apis.CreateDefaultEnvironmentsForOrgsResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.CreateDefaultEnvironmentsForOrgsResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.CreateDefaultEnvironmentsForOrgsResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateDefaultEnvironmentsForOrgsResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateDefaultEnvironmentsForOrgsResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateDefaultEnvironmentsForOrgsResponse.Builder.class);
       }
@@ -58012,7 +58012,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_descriptor;
       }
 
       @java.lang.Override
@@ -58121,10 +58121,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateDefaultEnvironmentsForOrgsResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.CreateDefaultEnvironmentsForOrgsResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.CreateDefaultEnvironmentsForOrgsResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.CreateDefaultEnvironmentsForOrgsResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateDefaultEnvironmentsForOrgsResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.CreateDefaultEnvironmentsForOrgsResponse();
@@ -58162,7 +58162,7 @@ public final class UserServiceOuterClass {
   }
 
   public interface GetPermissionListRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.GetPermissionListRequest)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.GetPermissionListRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -58178,11 +58178,11 @@ public final class UserServiceOuterClass {
         getSearchBytes();
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetPermissionListRequest}
+   * Protobuf type {@code choreo.apis.GetPermissionListRequest}
    */
   public  static final class GetPermissionListRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetPermissionListRequest)
+      // @@protoc_insertion_point(message_implements:choreo.apis.GetPermissionListRequest)
       GetPermissionListRequestOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use GetPermissionListRequest.newBuilder() to construct.
@@ -58250,13 +58250,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListRequest_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetPermissionListRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListRequest_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetPermissionListRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetPermissionListRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetPermissionListRequest.Builder.class);
     }
@@ -58452,21 +58452,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetPermissionListRequest}
+     * Protobuf type {@code choreo.apis.GetPermissionListRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetPermissionListRequest)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.GetPermissionListRequest)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetPermissionListRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetPermissionListRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListRequest_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetPermissionListRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetPermissionListRequest.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetPermissionListRequest.Builder.class);
       }
@@ -58497,7 +58497,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListRequest_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetPermissionListRequest_descriptor;
       }
 
       @java.lang.Override
@@ -58687,10 +58687,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetPermissionListRequest)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.GetPermissionListRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetPermissionListRequest)
+    // @@protoc_insertion_point(class_scope:choreo.apis.GetPermissionListRequest)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetPermissionListRequest DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetPermissionListRequest();
@@ -58728,39 +58728,39 @@ public final class UserServiceOuterClass {
   }
 
   public interface GetPermissionListResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.wso2.carbon.apimgt.impl.choreo.apis.GetPermissionListResponse)
+      // @@protoc_insertion_point(interface_extends:choreo.apis.GetPermissionListResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+     * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
      */
     java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree> 
         getPermissionTreesList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+     * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree getPermissionTrees(int index);
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+     * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
      */
     int getPermissionTreesCount();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+     * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
      */
     java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTreeOrBuilder> 
         getPermissionTreesOrBuilderList();
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+     * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
      */
     org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTreeOrBuilder getPermissionTreesOrBuilder(
         int index);
   }
   /**
-   * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetPermissionListResponse}
+   * Protobuf type {@code choreo.apis.GetPermissionListResponse}
    */
   public  static final class GetPermissionListResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetPermissionListResponse)
+      // @@protoc_insertion_point(message_implements:choreo.apis.GetPermissionListResponse)
       GetPermissionListResponseOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use GetPermissionListResponse.newBuilder() to construct.
@@ -58835,13 +58835,13 @@ public final class UserServiceOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListResponse_descriptor;
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetPermissionListResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListResponse_fieldAccessorTable
+      return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetPermissionListResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetPermissionListResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetPermissionListResponse.Builder.class);
     }
@@ -58849,32 +58849,32 @@ public final class UserServiceOuterClass {
     public static final int PERMISSION_TREES_FIELD_NUMBER = 1;
     private java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree> permissionTrees_;
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+     * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
      */
     public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree> getPermissionTreesList() {
       return permissionTrees_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+     * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
      */
     public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTreeOrBuilder> 
         getPermissionTreesOrBuilderList() {
       return permissionTrees_;
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+     * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
      */
     public int getPermissionTreesCount() {
       return permissionTrees_.size();
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+     * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree getPermissionTrees(int index) {
       return permissionTrees_.get(index);
     }
     /**
-     * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+     * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
      */
     public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTreeOrBuilder getPermissionTreesOrBuilder(
         int index) {
@@ -59039,21 +59039,21 @@ public final class UserServiceOuterClass {
       return builder;
     }
     /**
-     * Protobuf type {@code org.wso2.carbon.apimgt.impl.choreo.apis.GetPermissionListResponse}
+     * Protobuf type {@code choreo.apis.GetPermissionListResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.wso2.carbon.apimgt.impl.choreo.apis.GetPermissionListResponse)
+        // @@protoc_insertion_point(builder_implements:choreo.apis.GetPermissionListResponse)
         org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetPermissionListResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetPermissionListResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListResponse_fieldAccessorTable
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetPermissionListResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetPermissionListResponse.class, org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetPermissionListResponse.Builder.class);
       }
@@ -59089,7 +59089,7 @@ public final class UserServiceOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListResponse_descriptor;
+        return org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.internal_static_choreo_apis_GetPermissionListResponse_descriptor;
       }
 
       @java.lang.Override
@@ -59236,7 +59236,7 @@ public final class UserServiceOuterClass {
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree.Builder, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTreeOrBuilder> permissionTreesBuilder_;
 
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree> getPermissionTreesList() {
         if (permissionTreesBuilder_ == null) {
@@ -59246,7 +59246,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public int getPermissionTreesCount() {
         if (permissionTreesBuilder_ == null) {
@@ -59256,7 +59256,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree getPermissionTrees(int index) {
         if (permissionTreesBuilder_ == null) {
@@ -59266,7 +59266,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public Builder setPermissionTrees(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree value) {
@@ -59283,7 +59283,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public Builder setPermissionTrees(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree.Builder builderForValue) {
@@ -59297,7 +59297,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public Builder addPermissionTrees(org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree value) {
         if (permissionTreesBuilder_ == null) {
@@ -59313,7 +59313,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public Builder addPermissionTrees(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree value) {
@@ -59330,7 +59330,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public Builder addPermissionTrees(
           org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree.Builder builderForValue) {
@@ -59344,7 +59344,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public Builder addPermissionTrees(
           int index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree.Builder builderForValue) {
@@ -59358,7 +59358,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public Builder addAllPermissionTrees(
           java.lang.Iterable<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree> values) {
@@ -59373,7 +59373,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public Builder clearPermissionTrees() {
         if (permissionTreesBuilder_ == null) {
@@ -59386,7 +59386,7 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public Builder removePermissionTrees(int index) {
         if (permissionTreesBuilder_ == null) {
@@ -59399,14 +59399,14 @@ public final class UserServiceOuterClass {
         return this;
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree.Builder getPermissionTreesBuilder(
           int index) {
         return getPermissionTreesFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTreeOrBuilder getPermissionTreesOrBuilder(
           int index) {
@@ -59416,7 +59416,7 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public java.util.List<? extends org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTreeOrBuilder> 
            getPermissionTreesOrBuilderList() {
@@ -59427,14 +59427,14 @@ public final class UserServiceOuterClass {
         }
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree.Builder addPermissionTreesBuilder() {
         return getPermissionTreesFieldBuilder().addBuilder(
             org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree.Builder addPermissionTreesBuilder(
           int index) {
@@ -59442,7 +59442,7 @@ public final class UserServiceOuterClass {
             index, org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.wso2.carbon.apimgt.impl.choreo.apis.PermissionTree permission_trees = 1;</code>
+       * <code>repeated .choreo.apis.PermissionTree permission_trees = 1;</code>
        */
       public java.util.List<org.wso2.carbon.apimgt.impl.choreo.apis.Types.PermissionTree.Builder> 
            getPermissionTreesBuilderList() {
@@ -59475,10 +59475,10 @@ public final class UserServiceOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetPermissionListResponse)
+      // @@protoc_insertion_point(builder_scope:choreo.apis.GetPermissionListResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:org.wso2.carbon.apimgt.impl.choreo.apis.GetPermissionListResponse)
+    // @@protoc_insertion_point(class_scope:choreo.apis.GetPermissionListResponse)
     private static final org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetPermissionListResponse DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new org.wso2.carbon.apimgt.impl.choreo.apis.UserServiceOuterClass.GetPermissionListResponse();
@@ -59516,390 +59516,390 @@ public final class UserServiceOuterClass {
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupRequest_descriptor;
+    internal_static_choreo_apis_CreateGroupRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupRequest_fieldAccessorTable;
+      internal_static_choreo_apis_CreateGroupRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupResponse_descriptor;
+    internal_static_choreo_apis_CreateGroupResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupResponse_fieldAccessorTable;
+      internal_static_choreo_apis_CreateGroupResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupRequest_descriptor;
+    internal_static_choreo_apis_UpdateGroupRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupRequest_fieldAccessorTable;
+      internal_static_choreo_apis_UpdateGroupRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupResponse_descriptor;
+    internal_static_choreo_apis_UpdateGroupResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupResponse_fieldAccessorTable;
+      internal_static_choreo_apis_UpdateGroupResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupRequest_descriptor;
+    internal_static_choreo_apis_RemoveMemberFromGroupRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupRequest_fieldAccessorTable;
+      internal_static_choreo_apis_RemoveMemberFromGroupRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupResponse_descriptor;
+    internal_static_choreo_apis_RemoveMemberFromGroupResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupResponse_fieldAccessorTable;
+      internal_static_choreo_apis_RemoveMemberFromGroupResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsRequest_descriptor;
+    internal_static_choreo_apis_ListGroupsRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsRequest_fieldAccessorTable;
+      internal_static_choreo_apis_ListGroupsRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsResponse_descriptor;
+    internal_static_choreo_apis_ListGroupsResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsResponse_fieldAccessorTable;
+      internal_static_choreo_apis_ListGroupsResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoRequest_descriptor;
+    internal_static_choreo_apis_GetGroupInfoRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoRequest_fieldAccessorTable;
+      internal_static_choreo_apis_GetGroupInfoRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoResponse_descriptor;
+    internal_static_choreo_apis_GetGroupInfoResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoResponse_fieldAccessorTable;
+      internal_static_choreo_apis_GetGroupInfoResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupRequest_descriptor;
+    internal_static_choreo_apis_DeleteGroupRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupRequest_fieldAccessorTable;
+      internal_static_choreo_apis_DeleteGroupRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupResponse_descriptor;
+    internal_static_choreo_apis_DeleteGroupResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupResponse_fieldAccessorTable;
+      internal_static_choreo_apis_DeleteGroupResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleRequest_descriptor;
+    internal_static_choreo_apis_CreateRoleRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleRequest_fieldAccessorTable;
+      internal_static_choreo_apis_CreateRoleRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleResponse_descriptor;
+    internal_static_choreo_apis_CreateRoleResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleResponse_fieldAccessorTable;
+      internal_static_choreo_apis_CreateRoleResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoRequest_descriptor;
+    internal_static_choreo_apis_GetRoleInfoRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoRequest_fieldAccessorTable;
+      internal_static_choreo_apis_GetRoleInfoRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoResponse_descriptor;
+    internal_static_choreo_apis_GetRoleInfoResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoResponse_fieldAccessorTable;
+      internal_static_choreo_apis_GetRoleInfoResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleRequest_descriptor;
+    internal_static_choreo_apis_DeleteRoleRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleRequest_fieldAccessorTable;
+      internal_static_choreo_apis_DeleteRoleRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleResponse_descriptor;
+    internal_static_choreo_apis_DeleteRoleResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleResponse_fieldAccessorTable;
+      internal_static_choreo_apis_DeleteRoleResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleRequest_descriptor;
+    internal_static_choreo_apis_UpdateRoleRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleRequest_fieldAccessorTable;
+      internal_static_choreo_apis_UpdateRoleRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleResponse_descriptor;
+    internal_static_choreo_apis_UpdateRoleResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleResponse_fieldAccessorTable;
+      internal_static_choreo_apis_UpdateRoleResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesRequest_descriptor;
+    internal_static_choreo_apis_ListRolesRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesRequest_fieldAccessorTable;
+      internal_static_choreo_apis_ListRolesRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesResponse_descriptor;
+    internal_static_choreo_apis_ListRolesResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesResponse_fieldAccessorTable;
+      internal_static_choreo_apis_ListRolesResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationRequest_descriptor;
+    internal_static_choreo_apis_SendMemberInvitationRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationRequest_fieldAccessorTable;
+      internal_static_choreo_apis_SendMemberInvitationRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationResponse_descriptor;
+    internal_static_choreo_apis_SendMemberInvitationResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationResponse_fieldAccessorTable;
+      internal_static_choreo_apis_SendMemberInvitationResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationRequest_descriptor;
+    internal_static_choreo_apis_AcceptMemberInvitationRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationRequest_fieldAccessorTable;
+      internal_static_choreo_apis_AcceptMemberInvitationRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationResponse_descriptor;
+    internal_static_choreo_apis_AcceptMemberInvitationResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationResponse_fieldAccessorTable;
+      internal_static_choreo_apis_AcceptMemberInvitationResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationRequest_descriptor;
+    internal_static_choreo_apis_FindMemberInvitationRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationRequest_fieldAccessorTable;
+      internal_static_choreo_apis_FindMemberInvitationRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsRequest_descriptor;
+    internal_static_choreo_apis_ListMemberInvitationsRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsRequest_fieldAccessorTable;
+      internal_static_choreo_apis_ListMemberInvitationsRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationResponse_descriptor;
+    internal_static_choreo_apis_FindMemberInvitationResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationResponse_fieldAccessorTable;
+      internal_static_choreo_apis_FindMemberInvitationResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsResponse_descriptor;
+    internal_static_choreo_apis_ListMemberInvitationsResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsResponse_fieldAccessorTable;
+      internal_static_choreo_apis_ListMemberInvitationsResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationRequest_descriptor;
+    internal_static_choreo_apis_DeleteMemberInvitationRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationRequest_fieldAccessorTable;
+      internal_static_choreo_apis_DeleteMemberInvitationRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationResponse_descriptor;
+    internal_static_choreo_apis_DeleteMemberInvitationResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationResponse_fieldAccessorTable;
+      internal_static_choreo_apis_DeleteMemberInvitationResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserRequest_descriptor;
+    internal_static_choreo_apis_RegisterUserRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserRequest_fieldAccessorTable;
+      internal_static_choreo_apis_RegisterUserRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserResponse_descriptor;
+    internal_static_choreo_apis_RegisterUserResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserResponse_fieldAccessorTable;
+      internal_static_choreo_apis_RegisterUserResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserRequest_descriptor;
+    internal_static_choreo_apis_ValidateUserRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserRequest_fieldAccessorTable;
+      internal_static_choreo_apis_ValidateUserRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserResponse_descriptor;
+    internal_static_choreo_apis_ValidateUserResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserResponse_fieldAccessorTable;
+      internal_static_choreo_apis_ValidateUserResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AddOrganizationUsersRequest_descriptor;
+    internal_static_choreo_apis_AddOrganizationUsersRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AddOrganizationUsersRequest_fieldAccessorTable;
+      internal_static_choreo_apis_AddOrganizationUsersRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationUserRequest_descriptor;
+    internal_static_choreo_apis_DeleteOrganizationUserRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationUserRequest_fieldAccessorTable;
+      internal_static_choreo_apis_DeleteOrganizationUserRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleRequest_descriptor;
+    internal_static_choreo_apis_UpdateMembersOfRoleRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleRequest_fieldAccessorTable;
+      internal_static_choreo_apis_UpdateMembersOfRoleRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleResponse_descriptor;
+    internal_static_choreo_apis_UpdateMembersOfRoleResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleResponse_fieldAccessorTable;
+      internal_static_choreo_apis_UpdateMembersOfRoleResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberRequest_descriptor;
+    internal_static_choreo_apis_UpdateRolesOfMemberRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberRequest_fieldAccessorTable;
+      internal_static_choreo_apis_UpdateRolesOfMemberRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberResponse_descriptor;
+    internal_static_choreo_apis_UpdateRolesOfMemberResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberResponse_fieldAccessorTable;
+      internal_static_choreo_apis_UpdateRolesOfMemberResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsRequest_descriptor;
+    internal_static_choreo_apis_FindUserOrganizationsRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsRequest_fieldAccessorTable;
+      internal_static_choreo_apis_FindUserOrganizationsRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsResponse_descriptor;
+    internal_static_choreo_apis_FindUserOrganizationsResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsResponse_fieldAccessorTable;
+      internal_static_choreo_apis_FindUserOrganizationsResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationRequest_descriptor;
+    internal_static_choreo_apis_FindUsersByOrganizationRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationRequest_fieldAccessorTable;
+      internal_static_choreo_apis_FindUsersByOrganizationRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationResponse_descriptor;
+    internal_static_choreo_apis_FindUsersByOrganizationResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationResponse_fieldAccessorTable;
+      internal_static_choreo_apis_FindUsersByOrganizationResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleRequest_descriptor;
+    internal_static_choreo_apis_FindUsersByOrganizationByRoleRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleRequest_fieldAccessorTable;
+      internal_static_choreo_apis_FindUsersByOrganizationByRoleRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleResponse_descriptor;
+    internal_static_choreo_apis_FindUsersByOrganizationByRoleResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleResponse_fieldAccessorTable;
+      internal_static_choreo_apis_FindUsersByOrganizationByRoleResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdRequest_descriptor;
+    internal_static_choreo_apis_FindUserFromIdpIdRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdRequest_fieldAccessorTable;
+      internal_static_choreo_apis_FindUserFromIdpIdRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdResponse_descriptor;
+    internal_static_choreo_apis_FindUserFromIdpIdResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdResponse_fieldAccessorTable;
+      internal_static_choreo_apis_FindUserFromIdpIdResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackRequest_descriptor;
+    internal_static_choreo_apis_CreateUserFeedbackRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackRequest_fieldAccessorTable;
+      internal_static_choreo_apis_CreateUserFeedbackRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackResponse_descriptor;
+    internal_static_choreo_apis_CreateUserFeedbackResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackResponse_fieldAccessorTable;
+      internal_static_choreo_apis_CreateUserFeedbackResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoRequest_descriptor;
+    internal_static_choreo_apis_GetUserInfoRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoRequest_fieldAccessorTable;
+      internal_static_choreo_apis_GetUserInfoRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoResponse_descriptor;
+    internal_static_choreo_apis_GetUserInfoResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoResponse_fieldAccessorTable;
+      internal_static_choreo_apis_GetUserInfoResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesRequest_descriptor;
+    internal_static_choreo_apis_GetUserRolesRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesRequest_fieldAccessorTable;
+      internal_static_choreo_apis_GetUserRolesRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetEnterpriseUserRolesRequest_descriptor;
+    internal_static_choreo_apis_GetEnterpriseUserRolesRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetEnterpriseUserRolesRequest_fieldAccessorTable;
+      internal_static_choreo_apis_GetEnterpriseUserRolesRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesResponse_descriptor;
+    internal_static_choreo_apis_GetUserRolesResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesResponse_fieldAccessorTable;
+      internal_static_choreo_apis_GetUserRolesResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowRequest_descriptor;
+    internal_static_choreo_apis_StartInvitationFlowRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowRequest_fieldAccessorTable;
+      internal_static_choreo_apis_StartInvitationFlowRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowResponse_descriptor;
+    internal_static_choreo_apis_StartInvitationFlowResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowResponse_fieldAccessorTable;
+      internal_static_choreo_apis_StartInvitationFlowResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationRequest_descriptor;
+    internal_static_choreo_apis_CreateOrganizationRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationRequest_fieldAccessorTable;
+      internal_static_choreo_apis_CreateOrganizationRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationResponse_descriptor;
+    internal_static_choreo_apis_CreateOrganizationResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationResponse_fieldAccessorTable;
+      internal_static_choreo_apis_CreateOrganizationResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationRequest_descriptor;
+    internal_static_choreo_apis_GetOrganizationRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationRequest_fieldAccessorTable;
+      internal_static_choreo_apis_GetOrganizationRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationResponse_descriptor;
+    internal_static_choreo_apis_GetOrganizationResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationResponse_fieldAccessorTable;
+      internal_static_choreo_apis_GetOrganizationResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationRequest_descriptor;
+    internal_static_choreo_apis_UpdateOrganizationRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationRequest_fieldAccessorTable;
+      internal_static_choreo_apis_UpdateOrganizationRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationResponse_descriptor;
+    internal_static_choreo_apis_UpdateOrganizationResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationResponse_fieldAccessorTable;
+      internal_static_choreo_apis_UpdateOrganizationResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationRequest_descriptor;
+    internal_static_choreo_apis_DeleteOrganizationRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationRequest_fieldAccessorTable;
+      internal_static_choreo_apis_DeleteOrganizationRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationResponse_descriptor;
+    internal_static_choreo_apis_DeleteOrganizationResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationResponse_fieldAccessorTable;
+      internal_static_choreo_apis_DeleteOrganizationResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsRequest_descriptor;
+    internal_static_choreo_apis_ListOrganizationsRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsRequest_fieldAccessorTable;
+      internal_static_choreo_apis_ListOrganizationsRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsResponse_descriptor;
+    internal_static_choreo_apis_ListOrganizationsResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsResponse_fieldAccessorTable;
+      internal_static_choreo_apis_ListOrganizationsResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsRequest_descriptor;
+    internal_static_choreo_apis_ListUserGroupsRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsRequest_fieldAccessorTable;
+      internal_static_choreo_apis_ListUserGroupsRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsResponse_descriptor;
+    internal_static_choreo_apis_ListUserGroupsResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsResponse_fieldAccessorTable;
+      internal_static_choreo_apis_ListUserGroupsResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsRequest_descriptor;
+    internal_static_choreo_apis_ListOrganizationEnvIdsRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsRequest_fieldAccessorTable;
+      internal_static_choreo_apis_ListOrganizationEnvIdsRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsResponse_descriptor;
+    internal_static_choreo_apis_ListOrganizationEnvIdsResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsResponse_fieldAccessorTable;
+      internal_static_choreo_apis_ListOrganizationEnvIdsResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_descriptor;
+    internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_fieldAccessorTable;
+      internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_descriptor;
+    internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_fieldAccessorTable;
+      internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListRequest_descriptor;
+    internal_static_choreo_apis_GetPermissionListRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListRequest_fieldAccessorTable;
+      internal_static_choreo_apis_GetPermissionListRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListResponse_descriptor;
+    internal_static_choreo_apis_GetPermissionListResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListResponse_fieldAccessorTable;
+      internal_static_choreo_apis_GetPermissionListResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -59909,405 +59909,319 @@ public final class UserServiceOuterClass {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\022user_service.proto\022\'org.wso2.carbon.ap" +
-      "imgt.impl.choreo.apis\032\013types.proto\032\027vali" +
-      "date/validate.proto\032\033google/protobuf/emp" +
-      "ty.proto\"\241\002\n\022CreateGroupRequest\022=\n\014displ" +
-      "ay_name\030\001 \001(\tB\'\372B\004r\002\030\036\372B\035r\0332\031^[A-Za-z][A" +
-      "-Za-z0-9-_ ]*$\0229\n\021organization_name\030\002 \001(" +
-      "\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,30}$\022\017\n\007def" +
-      "ault\030\003 \001(\010\0228\n\013description\030\004 \001(\tB#\372B\005r\003\030\377" +
-      "\001\372B\030r\0262\024^[A-Za-z0-9-_\'., ]*$\022F\n\013groupTag" +
-      "Arr\030\005 \003(\01321.org.wso2.carbon.apimgt.impl." +
-      "choreo.apis.GroupTag\"^\n\023CreateGroupRespo" +
-      "nse\022G\n\005group\030\001 \001(\0132..org.wso2.carbon.api" +
-      "mgt.impl.choreo.apis.GroupB\010\372B\005\212\001\002\020\001\"\277\002\n" +
-      "\022UpdateGroupRequest\0225\n\014group_handle\030\001 \001(" +
-      "\tB\037\372B\004r\002\030\036\372B\025r\0232\021^[a-z][a-z0-9-]+$\0225\n\014di" +
-      "splay_name\030\002 \001(\tB\037\372B\004r\002\030\036\372B\025r\0232\021^[A-Za-z" +
-      "0-9-_ ]*$\0229\n\021organization_name\030\003 \001(\tB\036\372B" +
-      "\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,30}$\0228\n\013descript" +
-      "ion\030\004 \001(\tB#\372B\005r\003\030\377\001\372B\030r\0262\024^[A-Za-z0-9-_\'" +
-      "., ]*$\022F\n\013groupTagArr\030\005 \003(\01321.org.wso2.c" +
-      "arbon.apimgt.impl.choreo.apis.GroupTag\"^" +
-      "\n\023UpdateGroupResponse\022G\n\005group\030\001 \001(\0132..o" +
-      "rg.wso2.carbon.apimgt.impl.choreo.apis.G" +
-      "roupB\010\372B\005\212\001\002\020\001\"\250\001\n\034RemoveMemberFromGroup" +
-      "Request\0223\n\ngroup_name\030\001 \001(\tB\037\372B\004r\002\030\036\372B\025r" +
-      "\0232\021^[a-z][a-z0-9-]+$\0229\n\021organization_nam" +
-      "e\030\002 \001(\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,30}$\022" +
-      "\030\n\006idp_id\030\003 \001(\tB\010\372B\005r\003\260\001\001\"f\n\035RemoveMembe" +
-      "rFromGroupResponse\022E\n\004user\030\001 \001(\0132-.org.w" +
-      "so2.carbon.apimgt.impl.choreo.apis.UserB" +
-      "\010\372B\005\212\001\002\020\001\"\312\001\n\021ListGroupsRequest\022+\n\004tags\030" +
-      "\001 \003(\tB\035\372B\032\222\001\027\"\025r\0232\021^[A-Za-z0-9-_ ]*$\022!\n\004" +
-      "role\030\002 \001(\tB\023\372B\020r\0162\014^[a-z0-9-]*$\022*\n\010inclu" +
-      "des\030\003 \003(\tB\030\372B\025\222\001\022\"\020r\0162\014^[a-z0-9-]*$\0229\n\021o" +
-      "rganization_name\030\004 \001(\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[" +
-      "a-z0-9]{3,30}$\"T\n\022ListGroupsResponse\022>\n\006" +
-      "groups\030\001 \003(\0132..org.wso2.carbon.apimgt.im" +
-      "pl.choreo.apis.Group\"\250\001\n\023GetGroupInfoReq" +
-      "uest\022*\n\006handle\030\001 \001(\tB\032\372B\004r\002\030\036\372B\020r\0162\014^[a-" +
-      "z0-9-]*$\022*\n\010includes\030\002 \003(\tB\030\372B\025\222\001\022\"\020r\0162\014" +
-      "^[a-z0-9-]*$\0229\n\021organization_name\030\003 \001(\tB" +
-      "\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,30}$\"_\n\024GetGr" +
-      "oupInfoResponse\022G\n\005group\030\001 \001(\0132..org.wso" +
-      "2.carbon.apimgt.impl.choreo.apis.GroupB\010" +
-      "\372B\005\212\001\002\020\001\"{\n\022DeleteGroupRequest\022*\n\006handle" +
-      "\030\001 \001(\tB\032\372B\004r\002\030\036\372B\020r\0162\014^[a-z0-9-]*$\0229\n\021or" +
-      "ganization_name\030\002 \001(\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a" +
-      "-z0-9]{3,30}$\"^\n\023DeleteGroupResponse\022G\n\005" +
-      "group\030\001 \001(\0132..org.wso2.carbon.apimgt.imp" +
-      "l.choreo.apis.GroupB\010\372B\005\212\001\002\020\001\"\223\002\n\021Create" +
-      "RoleRequest\022=\n\014display_name\030\001 \001(\tB\'\372B\004r\002" +
-      "\030\036\372B\035r\0332\031^[A-Za-z][A-Za-z0-9-_ ]*$\0229\n\021or" +
-      "ganization_name\030\002 \001(\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a" +
-      "-z0-9]{3,30}$\0228\n\013description\030\003 \001(\tB#\372B\005r" +
-      "\003\030\377\001\372B\030r\0262\024^[A-Za-z0-9-_\'., ]*$\022J\n\rpermi" +
-      "ssionArr\030\004 \003(\01323.org.wso2.carbon.apimgt." +
-      "impl.choreo.apis.Permission\"[\n\022CreateRol" +
-      "eResponse\022E\n\004role\030\001 \001(\0132-.org.wso2.carbo" +
-      "n.apimgt.impl.choreo.apis.RoleB\010\372B\005\212\001\002\020\001" +
-      "\"\247\001\n\022GetRoleInfoRequest\022*\n\006handle\030\001 \001(\tB" +
-      "\032\372B\004r\002\030\036\372B\020r\0162\014^[a-z0-9-]*$\022*\n\010includes\030" +
-      "\002 \003(\tB\030\372B\025\222\001\022\"\020r\0162\014^[a-z0-9-]*$\0229\n\021organ" +
-      "ization_name\030\003 \001(\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0" +
-      "-9]{3,30}$\"\\\n\023GetRoleInfoResponse\022E\n\004rol" +
-      "e\030\001 \001(\0132-.org.wso2.carbon.apimgt.impl.ch" +
-      "oreo.apis.RoleB\010\372B\005\212\001\002\020\001\"z\n\021DeleteRoleRe" +
-      "quest\022*\n\006handle\030\001 \001(\tB\032\372B\004r\002\030\036\372B\020r\0162\014^[a" +
-      "-z0-9-]*$\0229\n\021organization_name\030\002 \001(\tB\036\372B" +
-      "\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,30}$\"[\n\022DeleteRo" +
-      "leResponse\022E\n\004role\030\001 \001(\0132-.org.wso2.carb" +
-      "on.apimgt.impl.choreo.apis.RoleB\010\372B\005\212\001\002\020" +
-      "\001\"\301\002\n\021UpdateRoleRequest\0224\n\013role_handle\030\001" +
-      " \001(\tB\037\372B\004r\002\030\036\372B\025r\0232\021^[a-z][a-z0-9-]+$\0225\n" +
-      "\014display_name\030\002 \001(\tB\037\372B\004r\002\030\036\372B\025r\0232\021^[A-Z" +
-      "a-z0-9-_ ]*$\0229\n\021organization_name\030\003 \001(\tB" +
-      "\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,30}$\0228\n\013descr" +
-      "iption\030\004 \001(\tB#\372B\005r\003\030\377\001\372B\030r\0262\024^[A-Za-z0-9" +
-      "-_\'., ]*$\022J\n\rpermissionArr\030\005 \003(\01323.org.w" +
-      "so2.carbon.apimgt.impl.choreo.apis.Permi" +
-      "ssion\"[\n\022UpdateRoleResponse\022E\n\004role\030\001 \001(" +
-      "\0132-.org.wso2.carbon.apimgt.impl.choreo.a" +
-      "pis.RoleB\010\372B\005\212\001\002\020\001\"\360\001\n\020ListRolesRequest\022" +
-      "*\n\010includes\030\001 \003(\tB\030\372B\025\222\001\022\"\020r\0162\014^[a-z0-9-" +
-      "]*$\0229\n\021organization_name\030\002 \001(\tB\036\372B\004r\002\030\036\372" +
-      "B\024r\0222\020^[a-z0-9]{3,30}$\022$\n\006offset\030\003 \001(\tB\024" +
-      "\372B\021r\0172\r(^[0-9]+$|^$)\022\"\n\005limit\030\004 \001(\tB\023\372B\020" +
-      "r\0162\014^[a-z0-9-]*$\022+\n\006search\030\005 \001(\tB\033\372B\030r\0262" +
-      "\024^[A-Za-z0-9-_\'., ]*$\"b\n\021ListRolesRespon" +
-      "se\022M\n\rpaginatedRole\030\001 \001(\01326.org.wso2.car" +
-      "bon.apimgt.impl.choreo.apis.PaginatedRol" +
-      "e\"\322\001\n\033SendMemberInvitationRequest\022.\n\006han" +
-      "dle\030\001 \001(\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,30}" +
-      "$\022\037\n\temail_arr\030\002 \003(\tB\014\372B\t\222\001\006\"\004r\002`\001\0227\n\tgr" +
-      "oup_arr\030\003 \003(\tB$\372B\t\222\001\006\"\004r\002\030\036\372B\025\222\001\022\"\020r\0162\014^" +
-      "[a-z0-9-]+$\022)\n\030authenticated_user_email\030" +
-      "\004 \001(\tB\007\372B\004r\002`\001\"n\n\034SendMemberInvitationRe" +
-      "sponse\022%\n\017successful_list\030\001 \003(\tB\014\372B\t\222\001\006\"" +
-      "\004r\002`\001\022\'\n\021unsuccessful_list\030\002 \003(\tB\014\372B\t\222\001\006" +
-      "\"\004r\002`\001\"\236\001\n\035AcceptMemberInvitationRequest" +
-      "\022.\n\006handle\030\001 \001(\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0-9" +
-      "]{3,30}$\022\"\n\020confirmation_key\030\002 \001(\tB\010\372B\005r" +
-      "\003\260\001\001\022)\n\030authenticated_user_email\030\003 \001(\tB\007" +
-      "\372B\004r\002`\001\"A\n\036AcceptMemberInvitationRespons" +
-      "e\022\016\n\006status\030\001 \001(\003\022\017\n\007message\030\002 \001(\t\"q\n\033Fi" +
+      "\n\022user_service.proto\022\013choreo.apis\032\013types" +
+      ".proto\032\027validate/validate.proto\032\033google/" +
+      "protobuf/empty.proto\"\205\002\n\022CreateGroupRequ" +
+      "est\022=\n\014display_name\030\001 \001(\tB\'\372B\004r\002\030\036\372B\035r\0332" +
+      "\031^[A-Za-z][A-Za-z0-9-_ ]*$\0229\n\021organizati" +
+      "on_name\030\002 \001(\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3" +
+      ",30}$\022\017\n\007default\030\003 \001(\010\0228\n\013description\030\004 " +
+      "\001(\tB#\372B\005r\003\030\377\001\372B\030r\0262\024^[A-Za-z0-9-_\'., ]*$" +
+      "\022*\n\013groupTagArr\030\005 \003(\0132\025.choreo.apis.Grou" +
+      "pTag\"B\n\023CreateGroupResponse\022+\n\005group\030\001 \001" +
+      "(\0132\022.choreo.apis.GroupB\010\372B\005\212\001\002\020\001\"\243\002\n\022Upd" +
+      "ateGroupRequest\0225\n\014group_handle\030\001 \001(\tB\037\372" +
+      "B\004r\002\030\036\372B\025r\0232\021^[a-z][a-z0-9-]+$\0225\n\014displa" +
+      "y_name\030\002 \001(\tB\037\372B\004r\002\030\036\372B\025r\0232\021^[A-Za-z0-9-" +
+      "_ ]*$\0229\n\021organization_name\030\003 \001(\tB\036\372B\004r\002\030" +
+      "\036\372B\024r\0222\020^[a-z0-9]{3,30}$\0228\n\013description\030" +
+      "\004 \001(\tB#\372B\005r\003\030\377\001\372B\030r\0262\024^[A-Za-z0-9-_\'., ]" +
+      "*$\022*\n\013groupTagArr\030\005 \003(\0132\025.choreo.apis.Gr" +
+      "oupTag\"B\n\023UpdateGroupResponse\022+\n\005group\030\001" +
+      " \001(\0132\022.choreo.apis.GroupB\010\372B\005\212\001\002\020\001\"\250\001\n\034R" +
+      "emoveMemberFromGroupRequest\0223\n\ngroup_nam" +
+      "e\030\001 \001(\tB\037\372B\004r\002\030\036\372B\025r\0232\021^[a-z][a-z0-9-]+$" +
+      "\0229\n\021organization_name\030\002 \001(\tB\036\372B\004r\002\030\036\372B\024r" +
+      "\0222\020^[a-z0-9]{3,30}$\022\030\n\006idp_id\030\003 \001(\tB\010\372B\005" +
+      "r\003\260\001\001\"J\n\035RemoveMemberFromGroupResponse\022)" +
+      "\n\004user\030\001 \001(\0132\021.choreo.apis.UserB\010\372B\005\212\001\002\020" +
+      "\001\"\312\001\n\021ListGroupsRequest\022+\n\004tags\030\001 \003(\tB\035\372" +
+      "B\032\222\001\027\"\025r\0232\021^[A-Za-z0-9-_ ]*$\022!\n\004role\030\002 \001" +
+      "(\tB\023\372B\020r\0162\014^[a-z0-9-]*$\022*\n\010includes\030\003 \003(" +
+      "\tB\030\372B\025\222\001\022\"\020r\0162\014^[a-z0-9-]*$\0229\n\021organizat" +
+      "ion_name\030\004 \001(\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{" +
+      "3,30}$\"8\n\022ListGroupsResponse\022\"\n\006groups\030\001" +
+      " \003(\0132\022.choreo.apis.Group\"\250\001\n\023GetGroupInf" +
+      "oRequest\022*\n\006handle\030\001 \001(\tB\032\372B\004r\002\030\036\372B\020r\0162\014" +
+      "^[a-z0-9-]*$\022*\n\010includes\030\002 \003(\tB\030\372B\025\222\001\022\"\020" +
+      "r\0162\014^[a-z0-9-]*$\0229\n\021organization_name\030\003 " +
+      "\001(\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,30}$\"C\n\024G" +
+      "etGroupInfoResponse\022+\n\005group\030\001 \001(\0132\022.cho" +
+      "reo.apis.GroupB\010\372B\005\212\001\002\020\001\"{\n\022DeleteGroupR" +
+      "equest\022*\n\006handle\030\001 \001(\tB\032\372B\004r\002\030\036\372B\020r\0162\014^[" +
+      "a-z0-9-]*$\0229\n\021organization_name\030\002 \001(\tB\036\372" +
+      "B\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,30}$\"B\n\023DeleteG" +
+      "roupResponse\022+\n\005group\030\001 \001(\0132\022.choreo.api" +
+      "s.GroupB\010\372B\005\212\001\002\020\001\"\367\001\n\021CreateRoleRequest\022" +
+      "=\n\014display_name\030\001 \001(\tB\'\372B\004r\002\030\036\372B\035r\0332\031^[A" +
+      "-Za-z][A-Za-z0-9-_ ]*$\0229\n\021organization_n" +
+      "ame\030\002 \001(\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,30}" +
+      "$\0228\n\013description\030\003 \001(\tB#\372B\005r\003\030\377\001\372B\030r\0262\024^" +
+      "[A-Za-z0-9-_\'., ]*$\022.\n\rpermissionArr\030\004 \003" +
+      "(\0132\027.choreo.apis.Permission\"?\n\022CreateRol" +
+      "eResponse\022)\n\004role\030\001 \001(\0132\021.choreo.apis.Ro" +
+      "leB\010\372B\005\212\001\002\020\001\"\247\001\n\022GetRoleInfoRequest\022*\n\006h" +
+      "andle\030\001 \001(\tB\032\372B\004r\002\030\036\372B\020r\0162\014^[a-z0-9-]*$\022" +
+      "*\n\010includes\030\002 \003(\tB\030\372B\025\222\001\022\"\020r\0162\014^[a-z0-9-" +
+      "]*$\0229\n\021organization_name\030\003 \001(\tB\036\372B\004r\002\030\036\372" +
+      "B\024r\0222\020^[a-z0-9]{3,30}$\"@\n\023GetRoleInfoRes" +
+      "ponse\022)\n\004role\030\001 \001(\0132\021.choreo.apis.RoleB\010" +
+      "\372B\005\212\001\002\020\001\"z\n\021DeleteRoleRequest\022*\n\006handle\030" +
+      "\001 \001(\tB\032\372B\004r\002\030\036\372B\020r\0162\014^[a-z0-9-]*$\0229\n\021org" +
+      "anization_name\030\002 \001(\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a-" +
+      "z0-9]{3,30}$\"?\n\022DeleteRoleResponse\022)\n\004ro" +
+      "le\030\001 \001(\0132\021.choreo.apis.RoleB\010\372B\005\212\001\002\020\001\"\245\002" +
+      "\n\021UpdateRoleRequest\0224\n\013role_handle\030\001 \001(\t" +
+      "B\037\372B\004r\002\030\036\372B\025r\0232\021^[a-z][a-z0-9-]+$\0225\n\014dis" +
+      "play_name\030\002 \001(\tB\037\372B\004r\002\030\036\372B\025r\0232\021^[A-Za-z0" +
+      "-9-_ ]*$\0229\n\021organization_name\030\003 \001(\tB\036\372B\004" +
+      "r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,30}$\0228\n\013descripti" +
+      "on\030\004 \001(\tB#\372B\005r\003\030\377\001\372B\030r\0262\024^[A-Za-z0-9-_\'." +
+      ", ]*$\022.\n\rpermissionArr\030\005 \003(\0132\027.choreo.ap" +
+      "is.Permission\"?\n\022UpdateRoleResponse\022)\n\004r" +
+      "ole\030\001 \001(\0132\021.choreo.apis.RoleB\010\372B\005\212\001\002\020\001\"\360" +
+      "\001\n\020ListRolesRequest\022*\n\010includes\030\001 \003(\tB\030\372" +
+      "B\025\222\001\022\"\020r\0162\014^[a-z0-9-]*$\0229\n\021organization_" +
+      "name\030\002 \001(\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,30" +
+      "}$\022$\n\006offset\030\003 \001(\tB\024\372B\021r\0172\r(^[0-9]+$|^$)" +
+      "\022\"\n\005limit\030\004 \001(\tB\023\372B\020r\0162\014^[a-z0-9-]*$\022+\n\006" +
+      "search\030\005 \001(\tB\033\372B\030r\0262\024^[A-Za-z0-9-_\'., ]*" +
+      "$\"F\n\021ListRolesResponse\0221\n\rpaginatedRole\030" +
+      "\001 \001(\0132\032.choreo.apis.PaginatedRole\"\322\001\n\033Se" +
       "ndMemberInvitationRequest\022.\n\006handle\030\001 \001(" +
-      "\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,30}$\022\"\n\020con" +
-      "firmation_key\030\002 \001(\tB\010\372B\005r\003\260\001\001\"\215\001\n\034ListMe" +
-      "mberInvitationsRequest\022;\n\023organization_h" +
-      "andle\030\001 \001(\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,3" +
-      "0}$\0220\n\014group_handle\030\002 \001(\tB\032\372B\004r\002\030\036\372B\020r\0162" +
-      "\014^[a-z0-9-]*$\"~\n\034FindMemberInvitationRes" +
-      "ponse\022^\n\021member_invitation\030\001 \001(\01329.org.w" +
-      "so2.carbon.apimgt.impl.choreo.apis.Membe" +
-      "rInvitationB\010\372B\005\212\001\002\020\001\"o\n\035ListMemberInvit" +
-      "ationsResponse\022N\n\013invitations\030\001 \003(\01329.or" +
-      "g.wso2.carbon.apimgt.impl.choreo.apis.Me" +
-      "mberInvitation\"g\n\035DeleteMemberInvitation" +
-      "Request\022.\n\006handle\030\001 \001(\tB\036\372B\004r\002\030\036\372B\024r\0222\020^" +
-      "[a-z0-9]{3,30}$\022\026\n\005email\030\002 \001(\tB\007\372B\004r\002`\001\"" +
-      " \n\036DeleteMemberInvitationResponse\"\257\001\n\023Re" +
-      "gisterUserRequest\022E\n\004user\030\001 \001(\0132-.org.ws" +
-      "o2.carbon.apimgt.impl.choreo.apis.UserB\010" +
-      "\372B\005\212\001\002\020\001\022\025\n\004name\030\002 \001(\tB\007\372B\004r\002\020\001\022\026\n\005email" +
-      "\030\003 \001(\tB\007\372B\004r\002`\001\022\"\n\032invitation_correlatio" +
-      "n_key\030\004 \001(\t\"\264\001\n\024RegisterUserResponse\022E\n\004" +
-      "user\030\001 \001(\0132-.org.wso2.carbon.apimgt.impl" +
-      ".choreo.apis.UserB\010\372B\005\212\001\002\020\001\022U\n\014organizat" +
-      "ion\030\002 \001(\01325.org.wso2.carbon.apimgt.impl." +
-      "choreo.apis.OrganizationB\010\372B\005\212\001\002\020\001\"\205\001\n\023V" +
-      "alidateUserRequest\022\034\n\013user_idp_id\030\001 \001(\tB" +
-      "\007\372B\004r\002\020\001\022\026\n\005email\030\002 \001(\tB\007\372B\004r\002`\001\022\"\n\032invi" +
-      "tation_correlation_key\030\003 \001(\t\022\024\n\014is_anony" +
-      "mous\030\004 \001(\010\"\241\001\n\024ValidateUserResponse\022;\n\004u" +
-      "ser\030\001 \001(\0132-.org.wso2.carbon.apimgt.impl." +
-      "choreo.apis.User\022L\n\rorganizations\030\002 \003(\0132" +
-      "5.org.wso2.carbon.apimgt.impl.choreo.api" +
-      "s.Organization\"\202\001\n\033AddOrganizationUsersR" +
-      "equest\022\'\n\020user_idp_id_list\030\001 \003(\tB\r\372B\n\222\001\007" +
-      "\"\005r\003\260\001\001\022\"\n\021organization_name\030\002 \001(\tB\007\372B\004r" +
-      "\002\020\001\022\026\n\005group\030\003 \001(\tB\007\372B\004r\002\020\001\"a\n\035DeleteOrg" +
-      "anizationUserRequest\022\034\n\013user_idp_id\030\001 \001(" +
-      "\tB\007\372B\004r\002\020\001\022\"\n\021organization_name\030\002 \001(\tB\007\372" +
-      "B\004r\002\020\001\"\200\001\n\032UpdateMembersOfRoleRequest\022\'\n" +
-      "\020user_idp_id_list\030\001 \003(\tB\r\372B\n\222\001\007\"\005r\003\260\001\001\022\"" +
-      "\n\021organization_name\030\002 \001(\tB\007\372B\004r\002\020\001\022\025\n\004ro" +
-      "le\030\003 \001(\tB\007\372B\004r\002\020\001\"d\n\033UpdateMembersOfRole" +
-      "Response\022E\n\004role\030\001 \001(\0132-.org.wso2.carbon" +
-      ".apimgt.impl.choreo.apis.RoleB\010\372B\005\212\001\002\020\001\"" +
-      "\245\001\n\032UpdateRolesOfMemberRequest\022E\n\022role_h" +
-      "andlers_list\030\001 \003(\tB)\372B\t\222\001\006\"\004r\002\030\036\372B\032\222\001\027\"\025" +
-      "r\0232\021^[a-z][a-z0-9-]+$\022\"\n\021organization_na" +
-      "me\030\002 \001(\tB\007\372B\004r\002\020\001\022\034\n\013user_idp_id\030\003 \001(\tB\007" +
-      "\372B\004r\002\020\001\"d\n\033UpdateRolesOfMemberResponse\022E" +
-      "\n\004user\030\001 \001(\0132-.org.wso2.carbon.apimgt.im" +
-      "pl.choreo.apis.UserB\010\372B\005\212\001\002\020\001\"e\n\034FindUse" +
-      "rOrganizationsRequest\022E\n\004user\030\001 \001(\0132-.or" +
-      "g.wso2.carbon.apimgt.impl.choreo.apis.Us" +
-      "erB\010\372B\005\212\001\002\020\001\"\252\001\n\035FindUserOrganizationsRe" +
-      "sponse\022;\n\004user\030\001 \001(\0132-.org.wso2.carbon.a" +
-      "pimgt.impl.choreo.apis.User\022L\n\rorganizat" +
-      "ions\030\002 \003(\01325.org.wso2.carbon.apimgt.impl" +
-      ".choreo.apis.Organization\"}\n\036FindUsersBy" +
-      "OrganizationRequest\022\"\n\021organization_name" +
-      "\030\001 \001(\tB\007\372B\004r\002\020\001\0227\n\020excluding_groups\030\002 \003(" +
-      "\tB\035\372B\032\222\001\027\"\025r\0232\021^[a-z][a-z0-9-]*$\"_\n\037Find" +
-      "UsersByOrganizationResponse\022<\n\005users\030\001 \003" +
-      "(\0132-.org.wso2.carbon.apimgt.impl.choreo." +
-      "apis.User\"\202\001\n$FindUsersByOrganizationByR" +
-      "oleRequest\022\"\n\021organization_name\030\001 \001(\tB\007\372" +
-      "B\004r\002\020\001\0226\n\017excluding_roles\030\002 \003(\tB\035\372B\032\222\001\027\"" +
-      "\025r\0232\021^[a-z][a-z0-9-]*$\"e\n%FindUsersByOrg" +
-      "anizationByRoleResponse\022<\n\005users\030\001 \003(\0132-" +
-      ".org.wso2.carbon.apimgt.impl.choreo.apis" +
-      ".User\"\\\n\030FindUserFromIdpIdRequest\022\034\n\013use" +
-      "r_idp_id\030\001 \001(\tB\007\372B\004r\002\020\001\022\"\n\021organization_" +
-      "name\030\002 \001(\tB\007\372B\004r\002\020\001\"X\n\031FindUserFromIdpId" +
-      "Response\022;\n\004user\030\001 \001(\0132-.org.wso2.carbon" +
-      ".apimgt.impl.choreo.apis.User\"|\n\031CreateU" +
-      "serFeedbackRequest\022\026\n\005title\030\001 \001(\tB\007\372B\004r\002" +
-      "\020\001\022\034\n\013description\030\002 \001(\tB\007\372B\004r\002\020\001\022\025\n\rimag" +
-      "e_content\030\003 \001(\014\022\022\n\nimage_link\030\004 \001(\t\"C\n\032C" +
-      "reateUserFeedbackResponse\022%\n\tissue_url\030\001" +
-      " \001(\tB\007\372B\004r\002\020\001R\tissue_url\"\202\001\n\022GetUserInfo" +
-      "Request\022\034\n\013user_idp_id\030\001 \001(\tB\007\372B\004r\002\020\001\022\"\n" +
-      "\021organization_name\030\002 \001(\tB\007\372B\004r\002\020\001\022*\n\010inc" +
-      "ludes\030\003 \003(\tB\030\372B\025\222\001\022\"\020r\0162\014^[a-z0-9-]*$\"R\n" +
-      "\023GetUserInfoResponse\022;\n\004user\030\001 \001(\0132-.org" +
-      ".wso2.carbon.apimgt.impl.choreo.apis.Use" +
-      "r\"W\n\023GetUserRolesRequest\022\034\n\013user_idp_id\030" +
+      "\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,30}$\022\037\n\tema" +
+      "il_arr\030\002 \003(\tB\014\372B\t\222\001\006\"\004r\002`\001\0227\n\tgroup_arr\030" +
+      "\003 \003(\tB$\372B\t\222\001\006\"\004r\002\030\036\372B\025\222\001\022\"\020r\0162\014^[a-z0-9-" +
+      "]+$\022)\n\030authenticated_user_email\030\004 \001(\tB\007\372" +
+      "B\004r\002`\001\"n\n\034SendMemberInvitationResponse\022%" +
+      "\n\017successful_list\030\001 \003(\tB\014\372B\t\222\001\006\"\004r\002`\001\022\'\n" +
+      "\021unsuccessful_list\030\002 \003(\tB\014\372B\t\222\001\006\"\004r\002`\001\"\236" +
+      "\001\n\035AcceptMemberInvitationRequest\022.\n\006hand" +
+      "le\030\001 \001(\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,30}$" +
+      "\022\"\n\020confirmation_key\030\002 \001(\tB\010\372B\005r\003\260\001\001\022)\n\030" +
+      "authenticated_user_email\030\003 \001(\tB\007\372B\004r\002`\001\"" +
+      "A\n\036AcceptMemberInvitationResponse\022\016\n\006sta" +
+      "tus\030\001 \001(\003\022\017\n\007message\030\002 \001(\t\"q\n\033FindMember" +
+      "InvitationRequest\022.\n\006handle\030\001 \001(\tB\036\372B\004r\002" +
+      "\030\036\372B\024r\0222\020^[a-z0-9]{3,30}$\022\"\n\020confirmatio" +
+      "n_key\030\002 \001(\tB\010\372B\005r\003\260\001\001\"\215\001\n\034ListMemberInvi" +
+      "tationsRequest\022;\n\023organization_handle\030\001 " +
+      "\001(\tB\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,30}$\0220\n\014g" +
+      "roup_handle\030\002 \001(\tB\032\372B\004r\002\030\036\372B\020r\0162\014^[a-z0-" +
+      "9-]*$\"b\n\034FindMemberInvitationResponse\022B\n" +
+      "\021member_invitation\030\001 \001(\0132\035.choreo.apis.M" +
+      "emberInvitationB\010\372B\005\212\001\002\020\001\"S\n\035ListMemberI" +
+      "nvitationsResponse\0222\n\013invitations\030\001 \003(\0132" +
+      "\035.choreo.apis.MemberInvitation\"g\n\035Delete" +
+      "MemberInvitationRequest\022.\n\006handle\030\001 \001(\tB" +
+      "\036\372B\004r\002\030\036\372B\024r\0222\020^[a-z0-9]{3,30}$\022\026\n\005email" +
+      "\030\002 \001(\tB\007\372B\004r\002`\001\" \n\036DeleteMemberInvitatio" +
+      "nResponse\"\223\001\n\023RegisterUserRequest\022)\n\004use" +
+      "r\030\001 \001(\0132\021.choreo.apis.UserB\010\372B\005\212\001\002\020\001\022\025\n\004" +
+      "name\030\002 \001(\tB\007\372B\004r\002\020\001\022\026\n\005email\030\003 \001(\tB\007\372B\004r" +
+      "\002`\001\022\"\n\032invitation_correlation_key\030\004 \001(\t\"" +
+      "|\n\024RegisterUserResponse\022)\n\004user\030\001 \001(\0132\021." +
+      "choreo.apis.UserB\010\372B\005\212\001\002\020\001\0229\n\014organizati" +
+      "on\030\002 \001(\0132\031.choreo.apis.OrganizationB\010\372B\005" +
+      "\212\001\002\020\001\"\205\001\n\023ValidateUserRequest\022\034\n\013user_id" +
+      "p_id\030\001 \001(\tB\007\372B\004r\002\020\001\022\026\n\005email\030\002 \001(\tB\007\372B\004r" +
+      "\002`\001\022\"\n\032invitation_correlation_key\030\003 \001(\t\022" +
+      "\024\n\014is_anonymous\030\004 \001(\010\"i\n\024ValidateUserRes" +
+      "ponse\022\037\n\004user\030\001 \001(\0132\021.choreo.apis.User\0220" +
+      "\n\rorganizations\030\002 \003(\0132\031.choreo.apis.Orga" +
+      "nization\"\202\001\n\033AddOrganizationUsersRequest" +
+      "\022\'\n\020user_idp_id_list\030\001 \003(\tB\r\372B\n\222\001\007\"\005r\003\260\001" +
+      "\001\022\"\n\021organization_name\030\002 \001(\tB\007\372B\004r\002\020\001\022\026\n" +
+      "\005group\030\003 \001(\tB\007\372B\004r\002\020\001\"a\n\035DeleteOrganizat" +
+      "ionUserRequest\022\034\n\013user_idp_id\030\001 \001(\tB\007\372B\004" +
+      "r\002\020\001\022\"\n\021organization_name\030\002 \001(\tB\007\372B\004r\002\020\001" +
+      "\"\200\001\n\032UpdateMembersOfRoleRequest\022\'\n\020user_" +
+      "idp_id_list\030\001 \003(\tB\r\372B\n\222\001\007\"\005r\003\260\001\001\022\"\n\021orga" +
+      "nization_name\030\002 \001(\tB\007\372B\004r\002\020\001\022\025\n\004role\030\003 \001" +
+      "(\tB\007\372B\004r\002\020\001\"H\n\033UpdateMembersOfRoleRespon" +
+      "se\022)\n\004role\030\001 \001(\0132\021.choreo.apis.RoleB\010\372B\005" +
+      "\212\001\002\020\001\"\245\001\n\032UpdateRolesOfMemberRequest\022E\n\022" +
+      "role_handlers_list\030\001 \003(\tB)\372B\t\222\001\006\"\004r\002\030\036\372B" +
+      "\032\222\001\027\"\025r\0232\021^[a-z][a-z0-9-]+$\022\"\n\021organizat" +
+      "ion_name\030\002 \001(\tB\007\372B\004r\002\020\001\022\034\n\013user_idp_id\030\003" +
+      " \001(\tB\007\372B\004r\002\020\001\"H\n\033UpdateRolesOfMemberResp" +
+      "onse\022)\n\004user\030\001 \001(\0132\021.choreo.apis.UserB\010\372" +
+      "B\005\212\001\002\020\001\"I\n\034FindUserOrganizationsRequest\022" +
+      ")\n\004user\030\001 \001(\0132\021.choreo.apis.UserB\010\372B\005\212\001\002" +
+      "\020\001\"r\n\035FindUserOrganizationsResponse\022\037\n\004u" +
+      "ser\030\001 \001(\0132\021.choreo.apis.User\0220\n\rorganiza" +
+      "tions\030\002 \003(\0132\031.choreo.apis.Organization\"}" +
+      "\n\036FindUsersByOrganizationRequest\022\"\n\021orga" +
+      "nization_name\030\001 \001(\tB\007\372B\004r\002\020\001\0227\n\020excludin" +
+      "g_groups\030\002 \003(\tB\035\372B\032\222\001\027\"\025r\0232\021^[a-z][a-z0-" +
+      "9-]*$\"C\n\037FindUsersByOrganizationResponse" +
+      "\022 \n\005users\030\001 \003(\0132\021.choreo.apis.User\"\202\001\n$F" +
+      "indUsersByOrganizationByRoleRequest\022\"\n\021o" +
+      "rganization_name\030\001 \001(\tB\007\372B\004r\002\020\001\0226\n\017exclu" +
+      "ding_roles\030\002 \003(\tB\035\372B\032\222\001\027\"\025r\0232\021^[a-z][a-z" +
+      "0-9-]*$\"I\n%FindUsersByOrganizationByRole" +
+      "Response\022 \n\005users\030\001 \003(\0132\021.choreo.apis.Us" +
+      "er\"\\\n\030FindUserFromIdpIdRequest\022\034\n\013user_i" +
+      "dp_id\030\001 \001(\tB\007\372B\004r\002\020\001\022\"\n\021organization_nam" +
+      "e\030\002 \001(\tB\007\372B\004r\002\020\001\"<\n\031FindUserFromIdpIdRes" +
+      "ponse\022\037\n\004user\030\001 \001(\0132\021.choreo.apis.User\"|" +
+      "\n\031CreateUserFeedbackRequest\022\026\n\005title\030\001 \001" +
+      "(\tB\007\372B\004r\002\020\001\022\034\n\013description\030\002 \001(\tB\007\372B\004r\002\020" +
+      "\001\022\025\n\rimage_content\030\003 \001(\014\022\022\n\nimage_link\030\004" +
+      " \001(\t\"C\n\032CreateUserFeedbackResponse\022%\n\tis" +
+      "sue_url\030\001 \001(\tB\007\372B\004r\002\020\001R\tissue_url\"\202\001\n\022Ge" +
+      "tUserInfoRequest\022\034\n\013user_idp_id\030\001 \001(\tB\007\372" +
+      "B\004r\002\020\001\022\"\n\021organization_name\030\002 \001(\tB\007\372B\004r\002" +
+      "\020\001\022*\n\010includes\030\003 \003(\tB\030\372B\025\222\001\022\"\020r\0162\014^[a-z0" +
+      "-9-]*$\"6\n\023GetUserInfoResponse\022\037\n\004user\030\001 " +
+      "\001(\0132\021.choreo.apis.User\"W\n\023GetUserRolesRe" +
+      "quest\022\034\n\013user_idp_id\030\001 \001(\tB\007\372B\004r\002\020\001\022\"\n\021o" +
+      "rganization_name\030\002 \001(\tB\007\372B\004r\002\020\001\"u\n\035GetEn" +
+      "terpriseUserRolesRequest\022\034\n\013user_idp_id\030" +
       "\001 \001(\tB\007\372B\004r\002\020\001\022\"\n\021organization_name\030\002 \001(" +
-      "\tB\007\372B\004r\002\020\001\"u\n\035GetEnterpriseUserRolesRequ" +
-      "est\022\034\n\013user_idp_id\030\001 \001(\tB\007\372B\004r\002\020\001\022\"\n\021org" +
-      "anization_name\030\002 \001(\tB\007\372B\004r\002\020\001\022\022\n\ngroup_l" +
-      "ist\030\003 \003(\t\"T\n\024GetUserRolesResponse\022<\n\005rol" +
-      "es\030\001 \003(\0132-.org.wso2.carbon.apimgt.impl.c" +
-      "horeo.apis.Role\"L\n\032StartInvitationFlowRe" +
-      "quest\022\026\n\004code\030\001 \001(\tB\010\372B\005r\003\230\001\n\022\026\n\005email\030\002" +
-      " \001(\tB\007\372B\004r\002`\001\"=\n\033StartInvitationFlowResp" +
-      "onse\022\036\n\014redirect_url\030\001 \001(\tB\010\372B\005r\003\210\001\001\"\217\001\n" +
-      "\031CreateOrganizationRequest\022U\n\014organizati" +
-      "on\030\001 \001(\01325.org.wso2.carbon.apimgt.impl.c" +
-      "horeo.apis.OrganizationB\010\372B\005\212\001\002\020\001\022\033\n\nuse" +
-      "r_email\030\002 \001(\tB\007\372B\004r\002\020\001\"s\n\032CreateOrganiza" +
-      "tionResponse\022U\n\014organization\030\001 \001(\01325.org" +
-      ".wso2.carbon.apimgt.impl.choreo.apis.Org" +
-      "anizationB\010\372B\005\212\001\002\020\001\"<\n\026GetOrganizationRe" +
-      "quest\022\"\n\021organization_name\030\001 \001(\tB\007\372B\004r\002\020" +
-      "\001\"\202\001\n\027GetOrganizationResponse\022U\n\014organiz" +
-      "ation\030\001 \001(\01325.org.wso2.carbon.apimgt.imp" +
-      "l.choreo.apis.OrganizationB\010\372B\005\212\001\002\020\001\022\020\n\010" +
-      "is_admin\030\002 \001(\010\"\226\001\n\031UpdateOrganizationReq" +
-      "uest\022\"\n\021organization_name\030\001 \001(\tB\007\372B\004r\002\020\001" +
-      "\022U\n\014organization\030\003 \001(\01325.org.wso2.carbon" +
-      ".apimgt.impl.choreo.apis.OrganizationB\010\372" +
-      "B\005\212\001\002\020\001\"s\n\032UpdateOrganizationResponse\022U\n" +
-      "\014organization\030\001 \001(\01325.org.wso2.carbon.ap" +
-      "imgt.impl.choreo.apis.OrganizationB\010\372B\005\212" +
-      "\001\002\020\001\"S\n\031DeleteOrganizationRequest\022\"\n\021org" +
-      "anization_name\030\001 \001(\tB\007\372B\004r\002\020\001\022\022\n\nuser_em" +
-      "ail\030\002 \001(\t\"s\n\032DeleteOrganizationResponse\022" +
-      "U\n\014organization\030\001 \001(\01325.org.wso2.carbon." +
-      "apimgt.impl.choreo.apis.OrganizationB\010\372B" +
-      "\005\212\001\002\020\001\"\032\n\030ListOrganizationsRequest\"i\n\031Li" +
-      "stOrganizationsResponse\022L\n\rorganizations" +
-      "\030\001 \003(\01325.org.wso2.carbon.apimgt.impl.cho" +
-      "reo.apis.Organization\"6\n\025ListUserGroupsR" +
-      "equest\022\035\n\013user_idp_id\030\001 \001(\tB\010\372B\005r\003\260\001\001\"X\n" +
-      "\026ListUserGroupsResponse\022>\n\006groups\030\001 \003(\0132" +
-      "..org.wso2.carbon.apimgt.impl.choreo.api" +
-      "s.Group\"C\n\035ListOrganizationEnvIdsRequest" +
-      "\022\"\n\021organization_name\030\001 \001(\tB\007\372B\004r\002\020\001\"q\n\036" +
-      "ListOrganizationEnvIdsResponse\022O\n\017enviro" +
-      "nment_ids\030\001 \003(\01326.org.wso2.carbon.apimgt" +
-      ".impl.choreo.apis.EnvironmentId\"w\n\'Creat" +
-      "eDefaultEnvironmentsForOrgsRequest\022L\n\ror" +
-      "ganizations\030\001 \003(\01325.org.wso2.carbon.apim" +
-      "gt.impl.choreo.apis.Organization\"*\n(Crea" +
-      "teDefaultEnvironmentsForOrgsResponse\"3\n\030" +
-      "GetPermissionListRequest\022\027\n\006search\030\001 \001(\t" +
-      "B\007\372B\004r\002\030\036\"n\n\031GetPermissionListResponse\022Q" +
-      "\n\020permission_trees\030\001 \003(\01327.org.wso2.carb" +
-      "on.apimgt.impl.choreo.apis.PermissionTre" +
-      "e2\2430\n\013UserService\022\213\001\n\014RegisterUser\022<.org" +
-      ".wso2.carbon.apimgt.impl.choreo.apis.Reg" +
-      "isterUserRequest\032=.org.wso2.carbon.apimg" +
-      "t.impl.choreo.apis.RegisterUserResponse\022" +
-      "\213\001\n\014ValidateUser\022<.org.wso2.carbon.apimg" +
-      "t.impl.choreo.apis.ValidateUserRequest\032=" +
-      ".org.wso2.carbon.apimgt.impl.choreo.apis" +
-      ".ValidateUserResponse\022\232\001\n\021FindUserFromId" +
-      "pId\022A.org.wso2.carbon.apimgt.impl.choreo" +
-      ".apis.FindUserFromIdpIdRequest\032B.org.wso" +
-      "2.carbon.apimgt.impl.choreo.apis.FindUse" +
-      "rFromIdpIdResponse\022t\n\024AddOrganizationUse" +
-      "rs\022D.org.wso2.carbon.apimgt.impl.choreo." +
-      "apis.AddOrganizationUsersRequest\032\026.googl" +
-      "e.protobuf.Empty\022x\n\026DeleteOrganizationUs" +
-      "er\022F.org.wso2.carbon.apimgt.impl.choreo." +
-      "apis.DeleteOrganizationUserRequest\032\026.goo" +
-      "gle.protobuf.Empty\022\246\001\n\025FindUserOrganizat" +
-      "ions\022E.org.wso2.carbon.apimgt.impl.chore" +
-      "o.apis.FindUserOrganizationsRequest\032F.or" +
-      "g.wso2.carbon.apimgt.impl.choreo.apis.Fi" +
-      "ndUserOrganizationsResponse\022\254\001\n\027FindUser" +
-      "sByOrganization\022G.org.wso2.carbon.apimgt" +
-      ".impl.choreo.apis.FindUsersByOrganizatio" +
-      "nRequest\032H.org.wso2.carbon.apimgt.impl.c" +
-      "horeo.apis.FindUsersByOrganizationRespon" +
-      "se\022\276\001\n\035FindUsersByOrganizationByRole\022M.o" +
-      "rg.wso2.carbon.apimgt.impl.choreo.apis.F" +
-      "indUsersByOrganizationByRoleRequest\032N.or" +
-      "g.wso2.carbon.apimgt.impl.choreo.apis.Fi" +
-      "ndUsersByOrganizationByRoleResponse\022\235\001\n\022" +
-      "CreateUserFeedback\022B.org.wso2.carbon.api" +
-      "mgt.impl.choreo.apis.CreateUserFeedbackR" +
-      "equest\032C.org.wso2.carbon.apimgt.impl.cho" +
-      "reo.apis.CreateUserFeedbackResponse\022\210\001\n\013" +
-      "GetUserInfo\022;.org.wso2.carbon.apimgt.imp" +
-      "l.choreo.apis.GetUserInfoRequest\032<.org.w" +
-      "so2.carbon.apimgt.impl.choreo.apis.GetUs" +
-      "erInfoResponse\022\213\001\n\014GetUserRoles\022<.org.ws" +
-      "o2.carbon.apimgt.impl.choreo.apis.GetUse" +
-      "rRolesRequest\032=.org.wso2.carbon.apimgt.i" +
-      "mpl.choreo.apis.GetUserRolesResponse\022\237\001\n" +
-      "\026GetEnterpriseUserRoles\022F.org.wso2.carbo" +
-      "n.apimgt.impl.choreo.apis.GetEnterpriseU" +
-      "serRolesRequest\032=.org.wso2.carbon.apimgt" +
-      ".impl.choreo.apis.GetUserRolesResponse\022\240" +
-      "\001\n\023UpdateMembersOfRole\022C.org.wso2.carbon" +
-      ".apimgt.impl.choreo.apis.UpdateMembersOf" +
-      "RoleRequest\032D.org.wso2.carbon.apimgt.imp" +
-      "l.choreo.apis.UpdateMembersOfRoleRespons" +
-      "e\022\240\001\n\023UpdateRolesOfMember\022C.org.wso2.car" +
-      "bon.apimgt.impl.choreo.apis.UpdateRolesO" +
-      "fMemberRequest\032D.org.wso2.carbon.apimgt." +
-      "impl.choreo.apis.UpdateRolesOfMemberResp" +
-      "onse\022\240\001\n\023StartInvitationFlow\022C.org.wso2." +
-      "carbon.apimgt.impl.choreo.apis.StartInvi" +
-      "tationFlowRequest\032D.org.wso2.carbon.apim" +
-      "gt.impl.choreo.apis.StartInvitationFlowR" +
-      "esponse\022\235\001\n\022CreateOrganization\022B.org.wso" +
-      "2.carbon.apimgt.impl.choreo.apis.CreateO" +
-      "rganizationRequest\032C.org.wso2.carbon.api" +
-      "mgt.impl.choreo.apis.CreateOrganizationR" +
-      "esponse\022\224\001\n\017GetOrganization\022?.org.wso2.c" +
-      "arbon.apimgt.impl.choreo.apis.GetOrganiz" +
-      "ationRequest\032@.org.wso2.carbon.apimgt.im" +
-      "pl.choreo.apis.GetOrganizationResponse\022\235" +
-      "\001\n\022UpdateOrganization\022B.org.wso2.carbon." +
-      "apimgt.impl.choreo.apis.UpdateOrganizati" +
-      "onRequest\032C.org.wso2.carbon.apimgt.impl." +
-      "choreo.apis.UpdateOrganizationResponse\022\235" +
-      "\001\n\022DeleteOrganization\022B.org.wso2.carbon." +
-      "apimgt.impl.choreo.apis.DeleteOrganizati" +
-      "onRequest\032C.org.wso2.carbon.apimgt.impl." +
-      "choreo.apis.DeleteOrganizationResponse\022\232" +
-      "\001\n\021ListOrganizations\022A.org.wso2.carbon.a" +
-      "pimgt.impl.choreo.apis.ListOrganizations" +
-      "Request\032B.org.wso2.carbon.apimgt.impl.ch" +
-      "oreo.apis.ListOrganizationsResponse\022\251\001\n\026" +
-      "ListOrganizationEnvIds\022F.org.wso2.carbon" +
-      ".apimgt.impl.choreo.apis.ListOrganizatio" +
-      "nEnvIdsRequest\032G.org.wso2.carbon.apimgt." +
-      "impl.choreo.apis.ListOrganizationEnvIdsR" +
-      "esponse\022\307\001\n CreateDefaultEnvironmentsFor" +
-      "Orgs\022P.org.wso2.carbon.apimgt.impl.chore" +
-      "o.apis.CreateDefaultEnvironmentsForOrgsR" +
-      "equest\032Q.org.wso2.carbon.apimgt.impl.cho" +
-      "reo.apis.CreateDefaultEnvironmentsForOrg" +
-      "sResponse\022\210\001\n\013CreateGroup\022;.org.wso2.car" +
-      "bon.apimgt.impl.choreo.apis.CreateGroupR" +
-      "equest\032<.org.wso2.carbon.apimgt.impl.cho" +
-      "reo.apis.CreateGroupResponse\022\210\001\n\013UpdateG" +
-      "roup\022;.org.wso2.carbon.apimgt.impl.chore" +
-      "o.apis.UpdateGroupRequest\032<.org.wso2.car" +
-      "bon.apimgt.impl.choreo.apis.UpdateGroupR" +
-      "esponse\022\205\001\n\nListGroups\022:.org.wso2.carbon" +
-      ".apimgt.impl.choreo.apis.ListGroupsReque" +
-      "st\032;.org.wso2.carbon.apimgt.impl.choreo." +
-      "apis.ListGroupsResponse\022\221\001\n\016ListUserGrou" +
-      "ps\022>.org.wso2.carbon.apimgt.impl.choreo." +
-      "apis.ListUserGroupsRequest\032?.org.wso2.ca" +
-      "rbon.apimgt.impl.choreo.apis.ListUserGro" +
-      "upsResponse\022\213\001\n\014GetGroupInfo\022<.org.wso2." +
-      "carbon.apimgt.impl.choreo.apis.GetGroupI" +
-      "nfoRequest\032=.org.wso2.carbon.apimgt.impl" +
-      ".choreo.apis.GetGroupInfoResponse\022\210\001\n\013De" +
-      "leteGroup\022;.org.wso2.carbon.apimgt.impl." +
-      "choreo.apis.DeleteGroupRequest\032<.org.wso" +
-      "2.carbon.apimgt.impl.choreo.apis.DeleteG" +
-      "roupResponse\022\246\001\n\025RemoveMemberFromGroup\022E" +
-      ".org.wso2.carbon.apimgt.impl.choreo.apis" +
-      ".RemoveMemberFromGroupRequest\032F.org.wso2" +
-      ".carbon.apimgt.impl.choreo.apis.RemoveMe" +
-      "mberFromGroupResponse\022\205\001\n\nCreateRole\022:.o" +
-      "rg.wso2.carbon.apimgt.impl.choreo.apis.C" +
-      "reateRoleRequest\032;.org.wso2.carbon.apimg" +
-      "t.impl.choreo.apis.CreateRoleResponse\022\205\001" +
-      "\n\nUpdateRole\022:.org.wso2.carbon.apimgt.im" +
-      "pl.choreo.apis.UpdateRoleRequest\032;.org.w" +
-      "so2.carbon.apimgt.impl.choreo.apis.Updat" +
-      "eRoleResponse\022\210\001\n\013GetRoleInfo\022;.org.wso2" +
-      ".carbon.apimgt.impl.choreo.apis.GetRoleI" +
-      "nfoRequest\032<.org.wso2.carbon.apimgt.impl" +
-      ".choreo.apis.GetRoleInfoResponse\022\205\001\n\nDel" +
-      "eteRole\022:.org.wso2.carbon.apimgt.impl.ch" +
-      "oreo.apis.DeleteRoleRequest\032;.org.wso2.c" +
-      "arbon.apimgt.impl.choreo.apis.DeleteRole" +
-      "Response\022\202\001\n\tListRoles\0229.org.wso2.carbon" +
-      ".apimgt.impl.choreo.apis.ListRolesReques" +
-      "t\032:.org.wso2.carbon.apimgt.impl.choreo.a" +
-      "pis.ListRolesResponse\022\232\001\n\021GetPermissionL" +
-      "ist\022A.org.wso2.carbon.apimgt.impl.choreo" +
-      ".apis.GetPermissionListRequest\032B.org.wso" +
-      "2.carbon.apimgt.impl.choreo.apis.GetPerm" +
-      "issionListResponse\022\243\001\n\024SendMemberInvitat" +
-      "ion\022D.org.wso2.carbon.apimgt.impl.choreo" +
-      ".apis.SendMemberInvitationRequest\032E.org." +
-      "wso2.carbon.apimgt.impl.choreo.apis.Send" +
-      "MemberInvitationResponse\022\251\001\n\026AcceptMembe" +
-      "rInvitation\022F.org.wso2.carbon.apimgt.imp" +
-      "l.choreo.apis.AcceptMemberInvitationRequ" +
-      "est\032G.org.wso2.carbon.apimgt.impl.choreo" +
-      ".apis.AcceptMemberInvitationResponse\022\243\001\n" +
-      "\024FindMemberInvitation\022D.org.wso2.carbon." +
-      "apimgt.impl.choreo.apis.FindMemberInvita" +
-      "tionRequest\032E.org.wso2.carbon.apimgt.imp" +
-      "l.choreo.apis.FindMemberInvitationRespon" +
-      "se\022\251\001\n\026DeleteMemberInvitation\022F.org.wso2" +
-      ".carbon.apimgt.impl.choreo.apis.DeleteMe" +
-      "mberInvitationRequest\032G.org.wso2.carbon." +
-      "apimgt.impl.choreo.apis.DeleteMemberInvi" +
-      "tationResponse\022\246\001\n\025ListMemberInvitations" +
-      "\022E.org.wso2.carbon.apimgt.impl.choreo.ap" +
-      "is.ListMemberInvitationsRequest\032F.org.ws" +
-      "o2.carbon.apimgt.impl.choreo.apis.ListMe" +
-      "mberInvitationsResponseB4Z2github.com/ws" +
-      "o2-enterprise/choreo-runtime/pkg/apisb\006p" +
-      "roto3"
+      "\tB\007\372B\004r\002\020\001\022\022\n\ngroup_list\030\003 \003(\t\"8\n\024GetUse" +
+      "rRolesResponse\022 \n\005roles\030\001 \003(\0132\021.choreo.a" +
+      "pis.Role\"L\n\032StartInvitationFlowRequest\022\026" +
+      "\n\004code\030\001 \001(\tB\010\372B\005r\003\230\001\n\022\026\n\005email\030\002 \001(\tB\007\372" +
+      "B\004r\002`\001\"=\n\033StartInvitationFlowResponse\022\036\n" +
+      "\014redirect_url\030\001 \001(\tB\010\372B\005r\003\210\001\001\"s\n\031CreateO" +
+      "rganizationRequest\0229\n\014organization\030\001 \001(\013" +
+      "2\031.choreo.apis.OrganizationB\010\372B\005\212\001\002\020\001\022\033\n" +
+      "\nuser_email\030\002 \001(\tB\007\372B\004r\002\020\001\"W\n\032CreateOrga" +
+      "nizationResponse\0229\n\014organization\030\001 \001(\0132\031" +
+      ".choreo.apis.OrganizationB\010\372B\005\212\001\002\020\001\"<\n\026G" +
+      "etOrganizationRequest\022\"\n\021organization_na" +
+      "me\030\001 \001(\tB\007\372B\004r\002\020\001\"f\n\027GetOrganizationResp" +
+      "onse\0229\n\014organization\030\001 \001(\0132\031.choreo.apis" +
+      ".OrganizationB\010\372B\005\212\001\002\020\001\022\020\n\010is_admin\030\002 \001(" +
+      "\010\"z\n\031UpdateOrganizationRequest\022\"\n\021organi" +
+      "zation_name\030\001 \001(\tB\007\372B\004r\002\020\001\0229\n\014organizati" +
+      "on\030\003 \001(\0132\031.choreo.apis.OrganizationB\010\372B\005" +
+      "\212\001\002\020\001\"W\n\032UpdateOrganizationResponse\0229\n\014o" +
+      "rganization\030\001 \001(\0132\031.choreo.apis.Organiza" +
+      "tionB\010\372B\005\212\001\002\020\001\"S\n\031DeleteOrganizationRequ" +
+      "est\022\"\n\021organization_name\030\001 \001(\tB\007\372B\004r\002\020\001\022" +
+      "\022\n\nuser_email\030\002 \001(\t\"W\n\032DeleteOrganizatio" +
+      "nResponse\0229\n\014organization\030\001 \001(\0132\031.choreo" +
+      ".apis.OrganizationB\010\372B\005\212\001\002\020\001\"\032\n\030ListOrga" +
+      "nizationsRequest\"M\n\031ListOrganizationsRes" +
+      "ponse\0220\n\rorganizations\030\001 \003(\0132\031.choreo.ap" +
+      "is.Organization\"6\n\025ListUserGroupsRequest" +
+      "\022\035\n\013user_idp_id\030\001 \001(\tB\010\372B\005r\003\260\001\001\"<\n\026ListU" +
+      "serGroupsResponse\022\"\n\006groups\030\001 \003(\0132\022.chor" +
+      "eo.apis.Group\"C\n\035ListOrganizationEnvIdsR" +
+      "equest\022\"\n\021organization_name\030\001 \001(\tB\007\372B\004r\002" +
+      "\020\001\"U\n\036ListOrganizationEnvIdsResponse\0223\n\017" +
+      "environment_ids\030\001 \003(\0132\032.choreo.apis.Envi" +
+      "ronmentId\"[\n\'CreateDefaultEnvironmentsFo" +
+      "rOrgsRequest\0220\n\rorganizations\030\001 \003(\0132\031.ch" +
+      "oreo.apis.Organization\"*\n(CreateDefaultE" +
+      "nvironmentsForOrgsResponse\"3\n\030GetPermiss" +
+      "ionListRequest\022\027\n\006search\030\001 \001(\tB\007\372B\004r\002\030\036\"" +
+      "R\n\031GetPermissionListResponse\0225\n\020permissi" +
+      "on_trees\030\001 \003(\0132\033.choreo.apis.PermissionT" +
+      "ree2\367\036\n\013UserService\022S\n\014RegisterUser\022 .ch" +
+      "oreo.apis.RegisterUserRequest\032!.choreo.a" +
+      "pis.RegisterUserResponse\022S\n\014ValidateUser" +
+      "\022 .choreo.apis.ValidateUserRequest\032!.cho" +
+      "reo.apis.ValidateUserResponse\022b\n\021FindUse" +
+      "rFromIdpId\022%.choreo.apis.FindUserFromIdp" +
+      "IdRequest\032&.choreo.apis.FindUserFromIdpI" +
+      "dResponse\022X\n\024AddOrganizationUsers\022(.chor" +
+      "eo.apis.AddOrganizationUsersRequest\032\026.go" +
+      "ogle.protobuf.Empty\022\\\n\026DeleteOrganizatio" +
+      "nUser\022*.choreo.apis.DeleteOrganizationUs" +
+      "erRequest\032\026.google.protobuf.Empty\022n\n\025Fin" +
+      "dUserOrganizations\022).choreo.apis.FindUse" +
+      "rOrganizationsRequest\032*.choreo.apis.Find" +
+      "UserOrganizationsResponse\022t\n\027FindUsersBy" +
+      "Organization\022+.choreo.apis.FindUsersByOr" +
+      "ganizationRequest\032,.choreo.apis.FindUser" +
+      "sByOrganizationResponse\022\206\001\n\035FindUsersByO" +
+      "rganizationByRole\0221.choreo.apis.FindUser" +
+      "sByOrganizationByRoleRequest\0322.choreo.ap" +
+      "is.FindUsersByOrganizationByRoleResponse" +
+      "\022e\n\022CreateUserFeedback\022&.choreo.apis.Cre" +
+      "ateUserFeedbackRequest\032\'.choreo.apis.Cre" +
+      "ateUserFeedbackResponse\022P\n\013GetUserInfo\022\037" +
+      ".choreo.apis.GetUserInfoRequest\032 .choreo" +
+      ".apis.GetUserInfoResponse\022S\n\014GetUserRole" +
+      "s\022 .choreo.apis.GetUserRolesRequest\032!.ch" +
+      "oreo.apis.GetUserRolesResponse\022g\n\026GetEnt" +
+      "erpriseUserRoles\022*.choreo.apis.GetEnterp" +
+      "riseUserRolesRequest\032!.choreo.apis.GetUs" +
+      "erRolesResponse\022h\n\023UpdateMembersOfRole\022\'" +
+      ".choreo.apis.UpdateMembersOfRoleRequest\032" +
+      "(.choreo.apis.UpdateMembersOfRoleRespons" +
+      "e\022h\n\023UpdateRolesOfMember\022\'.choreo.apis.U" +
+      "pdateRolesOfMemberRequest\032(.choreo.apis." +
+      "UpdateRolesOfMemberResponse\022h\n\023StartInvi" +
+      "tationFlow\022\'.choreo.apis.StartInvitation" +
+      "FlowRequest\032(.choreo.apis.StartInvitatio" +
+      "nFlowResponse\022e\n\022CreateOrganization\022&.ch" +
+      "oreo.apis.CreateOrganizationRequest\032\'.ch" +
+      "oreo.apis.CreateOrganizationResponse\022\\\n\017" +
+      "GetOrganization\022#.choreo.apis.GetOrganiz" +
+      "ationRequest\032$.choreo.apis.GetOrganizati" +
+      "onResponse\022e\n\022UpdateOrganization\022&.chore" +
+      "o.apis.UpdateOrganizationRequest\032\'.chore" +
+      "o.apis.UpdateOrganizationResponse\022e\n\022Del" +
+      "eteOrganization\022&.choreo.apis.DeleteOrga" +
+      "nizationRequest\032\'.choreo.apis.DeleteOrga" +
+      "nizationResponse\022b\n\021ListOrganizations\022%." +
+      "choreo.apis.ListOrganizationsRequest\032&.c" +
+      "horeo.apis.ListOrganizationsResponse\022q\n\026" +
+      "ListOrganizationEnvIds\022*.choreo.apis.Lis" +
+      "tOrganizationEnvIdsRequest\032+.choreo.apis" +
+      ".ListOrganizationEnvIdsResponse\022\217\001\n Crea" +
+      "teDefaultEnvironmentsForOrgs\0224.choreo.ap" +
+      "is.CreateDefaultEnvironmentsForOrgsReque" +
+      "st\0325.choreo.apis.CreateDefaultEnvironmen" +
+      "tsForOrgsResponse\022P\n\013CreateGroup\022\037.chore" +
+      "o.apis.CreateGroupRequest\032 .choreo.apis." +
+      "CreateGroupResponse\022P\n\013UpdateGroup\022\037.cho" +
+      "reo.apis.UpdateGroupRequest\032 .choreo.api" +
+      "s.UpdateGroupResponse\022M\n\nListGroups\022\036.ch" +
+      "oreo.apis.ListGroupsRequest\032\037.choreo.api" +
+      "s.ListGroupsResponse\022Y\n\016ListUserGroups\022\"" +
+      ".choreo.apis.ListUserGroupsRequest\032#.cho" +
+      "reo.apis.ListUserGroupsResponse\022S\n\014GetGr" +
+      "oupInfo\022 .choreo.apis.GetGroupInfoReques" +
+      "t\032!.choreo.apis.GetGroupInfoResponse\022P\n\013" +
+      "DeleteGroup\022\037.choreo.apis.DeleteGroupReq" +
+      "uest\032 .choreo.apis.DeleteGroupResponse\022n" +
+      "\n\025RemoveMemberFromGroup\022).choreo.apis.Re" +
+      "moveMemberFromGroupRequest\032*.choreo.apis" +
+      ".RemoveMemberFromGroupResponse\022M\n\nCreate" +
+      "Role\022\036.choreo.apis.CreateRoleRequest\032\037.c" +
+      "horeo.apis.CreateRoleResponse\022M\n\nUpdateR" +
+      "ole\022\036.choreo.apis.UpdateRoleRequest\032\037.ch" +
+      "oreo.apis.UpdateRoleResponse\022P\n\013GetRoleI" +
+      "nfo\022\037.choreo.apis.GetRoleInfoRequest\032 .c" +
+      "horeo.apis.GetRoleInfoResponse\022M\n\nDelete" +
+      "Role\022\036.choreo.apis.DeleteRoleRequest\032\037.c" +
+      "horeo.apis.DeleteRoleResponse\022J\n\tListRol" +
+      "es\022\035.choreo.apis.ListRolesRequest\032\036.chor" +
+      "eo.apis.ListRolesResponse\022b\n\021GetPermissi" +
+      "onList\022%.choreo.apis.GetPermissionListRe" +
+      "quest\032&.choreo.apis.GetPermissionListRes" +
+      "ponse\022k\n\024SendMemberInvitation\022(.choreo.a" +
+      "pis.SendMemberInvitationRequest\032).choreo" +
+      ".apis.SendMemberInvitationResponse\022q\n\026Ac" +
+      "ceptMemberInvitation\022*.choreo.apis.Accep" +
+      "tMemberInvitationRequest\032+.choreo.apis.A" +
+      "cceptMemberInvitationResponse\022k\n\024FindMem" +
+      "berInvitation\022(.choreo.apis.FindMemberIn" +
+      "vitationRequest\032).choreo.apis.FindMember" +
+      "InvitationResponse\022q\n\026DeleteMemberInvita" +
+      "tion\022*.choreo.apis.DeleteMemberInvitatio" +
+      "nRequest\032+.choreo.apis.DeleteMemberInvit" +
+      "ationResponse\022n\n\025ListMemberInvitations\022)" +
+      ".choreo.apis.ListMemberInvitationsReques" +
+      "t\032*.choreo.apis.ListMemberInvitationsRes" +
+      "ponseB]\n\'org.wso2.carbon.apimgt.impl.cho" +
+      "reo.apisZ2github.com/wso2-enterprise/cho" +
+      "reo-runtime/pkg/apisb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -60316,467 +60230,467 @@ public final class UserServiceOuterClass {
           io.envoyproxy.pgv.validate.Validate.getDescriptor(),
           com.google.protobuf.EmptyProto.getDescriptor(),
         });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupRequest_descriptor =
+    internal_static_choreo_apis_CreateGroupRequest_descriptor =
       getDescriptor().getMessageTypes().get(0);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_CreateGroupRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupRequest_descriptor,
+        internal_static_choreo_apis_CreateGroupRequest_descriptor,
         new java.lang.String[] { "DisplayName", "OrganizationName", "Default", "Description", "GroupTagArr", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupResponse_descriptor =
+    internal_static_choreo_apis_CreateGroupResponse_descriptor =
       getDescriptor().getMessageTypes().get(1);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_CreateGroupResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateGroupResponse_descriptor,
+        internal_static_choreo_apis_CreateGroupResponse_descriptor,
         new java.lang.String[] { "Group", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupRequest_descriptor =
+    internal_static_choreo_apis_UpdateGroupRequest_descriptor =
       getDescriptor().getMessageTypes().get(2);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_UpdateGroupRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupRequest_descriptor,
+        internal_static_choreo_apis_UpdateGroupRequest_descriptor,
         new java.lang.String[] { "GroupHandle", "DisplayName", "OrganizationName", "Description", "GroupTagArr", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupResponse_descriptor =
+    internal_static_choreo_apis_UpdateGroupResponse_descriptor =
       getDescriptor().getMessageTypes().get(3);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_UpdateGroupResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateGroupResponse_descriptor,
+        internal_static_choreo_apis_UpdateGroupResponse_descriptor,
         new java.lang.String[] { "Group", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupRequest_descriptor =
+    internal_static_choreo_apis_RemoveMemberFromGroupRequest_descriptor =
       getDescriptor().getMessageTypes().get(4);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_RemoveMemberFromGroupRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupRequest_descriptor,
+        internal_static_choreo_apis_RemoveMemberFromGroupRequest_descriptor,
         new java.lang.String[] { "GroupName", "OrganizationName", "IdpId", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupResponse_descriptor =
+    internal_static_choreo_apis_RemoveMemberFromGroupResponse_descriptor =
       getDescriptor().getMessageTypes().get(5);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_RemoveMemberFromGroupResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RemoveMemberFromGroupResponse_descriptor,
+        internal_static_choreo_apis_RemoveMemberFromGroupResponse_descriptor,
         new java.lang.String[] { "User", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsRequest_descriptor =
+    internal_static_choreo_apis_ListGroupsRequest_descriptor =
       getDescriptor().getMessageTypes().get(6);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_ListGroupsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsRequest_descriptor,
+        internal_static_choreo_apis_ListGroupsRequest_descriptor,
         new java.lang.String[] { "Tags", "Role", "Includes", "OrganizationName", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsResponse_descriptor =
+    internal_static_choreo_apis_ListGroupsResponse_descriptor =
       getDescriptor().getMessageTypes().get(7);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_ListGroupsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListGroupsResponse_descriptor,
+        internal_static_choreo_apis_ListGroupsResponse_descriptor,
         new java.lang.String[] { "Groups", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoRequest_descriptor =
+    internal_static_choreo_apis_GetGroupInfoRequest_descriptor =
       getDescriptor().getMessageTypes().get(8);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_GetGroupInfoRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoRequest_descriptor,
+        internal_static_choreo_apis_GetGroupInfoRequest_descriptor,
         new java.lang.String[] { "Handle", "Includes", "OrganizationName", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoResponse_descriptor =
+    internal_static_choreo_apis_GetGroupInfoResponse_descriptor =
       getDescriptor().getMessageTypes().get(9);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_GetGroupInfoResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetGroupInfoResponse_descriptor,
+        internal_static_choreo_apis_GetGroupInfoResponse_descriptor,
         new java.lang.String[] { "Group", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupRequest_descriptor =
+    internal_static_choreo_apis_DeleteGroupRequest_descriptor =
       getDescriptor().getMessageTypes().get(10);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_DeleteGroupRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupRequest_descriptor,
+        internal_static_choreo_apis_DeleteGroupRequest_descriptor,
         new java.lang.String[] { "Handle", "OrganizationName", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupResponse_descriptor =
+    internal_static_choreo_apis_DeleteGroupResponse_descriptor =
       getDescriptor().getMessageTypes().get(11);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_DeleteGroupResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteGroupResponse_descriptor,
+        internal_static_choreo_apis_DeleteGroupResponse_descriptor,
         new java.lang.String[] { "Group", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleRequest_descriptor =
+    internal_static_choreo_apis_CreateRoleRequest_descriptor =
       getDescriptor().getMessageTypes().get(12);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_CreateRoleRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleRequest_descriptor,
+        internal_static_choreo_apis_CreateRoleRequest_descriptor,
         new java.lang.String[] { "DisplayName", "OrganizationName", "Description", "PermissionArr", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleResponse_descriptor =
+    internal_static_choreo_apis_CreateRoleResponse_descriptor =
       getDescriptor().getMessageTypes().get(13);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_CreateRoleResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateRoleResponse_descriptor,
+        internal_static_choreo_apis_CreateRoleResponse_descriptor,
         new java.lang.String[] { "Role", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoRequest_descriptor =
+    internal_static_choreo_apis_GetRoleInfoRequest_descriptor =
       getDescriptor().getMessageTypes().get(14);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_GetRoleInfoRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoRequest_descriptor,
+        internal_static_choreo_apis_GetRoleInfoRequest_descriptor,
         new java.lang.String[] { "Handle", "Includes", "OrganizationName", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoResponse_descriptor =
+    internal_static_choreo_apis_GetRoleInfoResponse_descriptor =
       getDescriptor().getMessageTypes().get(15);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_GetRoleInfoResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetRoleInfoResponse_descriptor,
+        internal_static_choreo_apis_GetRoleInfoResponse_descriptor,
         new java.lang.String[] { "Role", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleRequest_descriptor =
+    internal_static_choreo_apis_DeleteRoleRequest_descriptor =
       getDescriptor().getMessageTypes().get(16);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_DeleteRoleRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleRequest_descriptor,
+        internal_static_choreo_apis_DeleteRoleRequest_descriptor,
         new java.lang.String[] { "Handle", "OrganizationName", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleResponse_descriptor =
+    internal_static_choreo_apis_DeleteRoleResponse_descriptor =
       getDescriptor().getMessageTypes().get(17);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_DeleteRoleResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteRoleResponse_descriptor,
+        internal_static_choreo_apis_DeleteRoleResponse_descriptor,
         new java.lang.String[] { "Role", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleRequest_descriptor =
+    internal_static_choreo_apis_UpdateRoleRequest_descriptor =
       getDescriptor().getMessageTypes().get(18);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_UpdateRoleRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleRequest_descriptor,
+        internal_static_choreo_apis_UpdateRoleRequest_descriptor,
         new java.lang.String[] { "RoleHandle", "DisplayName", "OrganizationName", "Description", "PermissionArr", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleResponse_descriptor =
+    internal_static_choreo_apis_UpdateRoleResponse_descriptor =
       getDescriptor().getMessageTypes().get(19);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_UpdateRoleResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRoleResponse_descriptor,
+        internal_static_choreo_apis_UpdateRoleResponse_descriptor,
         new java.lang.String[] { "Role", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesRequest_descriptor =
+    internal_static_choreo_apis_ListRolesRequest_descriptor =
       getDescriptor().getMessageTypes().get(20);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_ListRolesRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesRequest_descriptor,
+        internal_static_choreo_apis_ListRolesRequest_descriptor,
         new java.lang.String[] { "Includes", "OrganizationName", "Offset", "Limit", "Search", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesResponse_descriptor =
+    internal_static_choreo_apis_ListRolesResponse_descriptor =
       getDescriptor().getMessageTypes().get(21);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_ListRolesResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListRolesResponse_descriptor,
+        internal_static_choreo_apis_ListRolesResponse_descriptor,
         new java.lang.String[] { "PaginatedRole", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationRequest_descriptor =
+    internal_static_choreo_apis_SendMemberInvitationRequest_descriptor =
       getDescriptor().getMessageTypes().get(22);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_SendMemberInvitationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationRequest_descriptor,
+        internal_static_choreo_apis_SendMemberInvitationRequest_descriptor,
         new java.lang.String[] { "Handle", "EmailArr", "GroupArr", "AuthenticatedUserEmail", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationResponse_descriptor =
+    internal_static_choreo_apis_SendMemberInvitationResponse_descriptor =
       getDescriptor().getMessageTypes().get(23);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_SendMemberInvitationResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_SendMemberInvitationResponse_descriptor,
+        internal_static_choreo_apis_SendMemberInvitationResponse_descriptor,
         new java.lang.String[] { "SuccessfulList", "UnsuccessfulList", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationRequest_descriptor =
+    internal_static_choreo_apis_AcceptMemberInvitationRequest_descriptor =
       getDescriptor().getMessageTypes().get(24);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_AcceptMemberInvitationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationRequest_descriptor,
+        internal_static_choreo_apis_AcceptMemberInvitationRequest_descriptor,
         new java.lang.String[] { "Handle", "ConfirmationKey", "AuthenticatedUserEmail", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationResponse_descriptor =
+    internal_static_choreo_apis_AcceptMemberInvitationResponse_descriptor =
       getDescriptor().getMessageTypes().get(25);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_AcceptMemberInvitationResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AcceptMemberInvitationResponse_descriptor,
+        internal_static_choreo_apis_AcceptMemberInvitationResponse_descriptor,
         new java.lang.String[] { "Status", "Message", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationRequest_descriptor =
+    internal_static_choreo_apis_FindMemberInvitationRequest_descriptor =
       getDescriptor().getMessageTypes().get(26);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_FindMemberInvitationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationRequest_descriptor,
+        internal_static_choreo_apis_FindMemberInvitationRequest_descriptor,
         new java.lang.String[] { "Handle", "ConfirmationKey", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsRequest_descriptor =
+    internal_static_choreo_apis_ListMemberInvitationsRequest_descriptor =
       getDescriptor().getMessageTypes().get(27);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_ListMemberInvitationsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsRequest_descriptor,
+        internal_static_choreo_apis_ListMemberInvitationsRequest_descriptor,
         new java.lang.String[] { "OrganizationHandle", "GroupHandle", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationResponse_descriptor =
+    internal_static_choreo_apis_FindMemberInvitationResponse_descriptor =
       getDescriptor().getMessageTypes().get(28);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_FindMemberInvitationResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindMemberInvitationResponse_descriptor,
+        internal_static_choreo_apis_FindMemberInvitationResponse_descriptor,
         new java.lang.String[] { "MemberInvitation", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsResponse_descriptor =
+    internal_static_choreo_apis_ListMemberInvitationsResponse_descriptor =
       getDescriptor().getMessageTypes().get(29);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_ListMemberInvitationsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListMemberInvitationsResponse_descriptor,
+        internal_static_choreo_apis_ListMemberInvitationsResponse_descriptor,
         new java.lang.String[] { "Invitations", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationRequest_descriptor =
+    internal_static_choreo_apis_DeleteMemberInvitationRequest_descriptor =
       getDescriptor().getMessageTypes().get(30);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_DeleteMemberInvitationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationRequest_descriptor,
+        internal_static_choreo_apis_DeleteMemberInvitationRequest_descriptor,
         new java.lang.String[] { "Handle", "Email", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationResponse_descriptor =
+    internal_static_choreo_apis_DeleteMemberInvitationResponse_descriptor =
       getDescriptor().getMessageTypes().get(31);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_DeleteMemberInvitationResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteMemberInvitationResponse_descriptor,
+        internal_static_choreo_apis_DeleteMemberInvitationResponse_descriptor,
         new java.lang.String[] { });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserRequest_descriptor =
+    internal_static_choreo_apis_RegisterUserRequest_descriptor =
       getDescriptor().getMessageTypes().get(32);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_RegisterUserRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserRequest_descriptor,
+        internal_static_choreo_apis_RegisterUserRequest_descriptor,
         new java.lang.String[] { "User", "Name", "Email", "InvitationCorrelationKey", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserResponse_descriptor =
+    internal_static_choreo_apis_RegisterUserResponse_descriptor =
       getDescriptor().getMessageTypes().get(33);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_RegisterUserResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_RegisterUserResponse_descriptor,
+        internal_static_choreo_apis_RegisterUserResponse_descriptor,
         new java.lang.String[] { "User", "Organization", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserRequest_descriptor =
+    internal_static_choreo_apis_ValidateUserRequest_descriptor =
       getDescriptor().getMessageTypes().get(34);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_ValidateUserRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserRequest_descriptor,
+        internal_static_choreo_apis_ValidateUserRequest_descriptor,
         new java.lang.String[] { "UserIdpId", "Email", "InvitationCorrelationKey", "IsAnonymous", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserResponse_descriptor =
+    internal_static_choreo_apis_ValidateUserResponse_descriptor =
       getDescriptor().getMessageTypes().get(35);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_ValidateUserResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ValidateUserResponse_descriptor,
+        internal_static_choreo_apis_ValidateUserResponse_descriptor,
         new java.lang.String[] { "User", "Organizations", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AddOrganizationUsersRequest_descriptor =
+    internal_static_choreo_apis_AddOrganizationUsersRequest_descriptor =
       getDescriptor().getMessageTypes().get(36);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AddOrganizationUsersRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_AddOrganizationUsersRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_AddOrganizationUsersRequest_descriptor,
+        internal_static_choreo_apis_AddOrganizationUsersRequest_descriptor,
         new java.lang.String[] { "UserIdpIdList", "OrganizationName", "Group", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationUserRequest_descriptor =
+    internal_static_choreo_apis_DeleteOrganizationUserRequest_descriptor =
       getDescriptor().getMessageTypes().get(37);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationUserRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_DeleteOrganizationUserRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationUserRequest_descriptor,
+        internal_static_choreo_apis_DeleteOrganizationUserRequest_descriptor,
         new java.lang.String[] { "UserIdpId", "OrganizationName", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleRequest_descriptor =
+    internal_static_choreo_apis_UpdateMembersOfRoleRequest_descriptor =
       getDescriptor().getMessageTypes().get(38);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_UpdateMembersOfRoleRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleRequest_descriptor,
+        internal_static_choreo_apis_UpdateMembersOfRoleRequest_descriptor,
         new java.lang.String[] { "UserIdpIdList", "OrganizationName", "Role", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleResponse_descriptor =
+    internal_static_choreo_apis_UpdateMembersOfRoleResponse_descriptor =
       getDescriptor().getMessageTypes().get(39);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_UpdateMembersOfRoleResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateMembersOfRoleResponse_descriptor,
+        internal_static_choreo_apis_UpdateMembersOfRoleResponse_descriptor,
         new java.lang.String[] { "Role", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberRequest_descriptor =
+    internal_static_choreo_apis_UpdateRolesOfMemberRequest_descriptor =
       getDescriptor().getMessageTypes().get(40);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_UpdateRolesOfMemberRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberRequest_descriptor,
+        internal_static_choreo_apis_UpdateRolesOfMemberRequest_descriptor,
         new java.lang.String[] { "RoleHandlersList", "OrganizationName", "UserIdpId", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberResponse_descriptor =
+    internal_static_choreo_apis_UpdateRolesOfMemberResponse_descriptor =
       getDescriptor().getMessageTypes().get(41);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_UpdateRolesOfMemberResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateRolesOfMemberResponse_descriptor,
+        internal_static_choreo_apis_UpdateRolesOfMemberResponse_descriptor,
         new java.lang.String[] { "User", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsRequest_descriptor =
+    internal_static_choreo_apis_FindUserOrganizationsRequest_descriptor =
       getDescriptor().getMessageTypes().get(42);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_FindUserOrganizationsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsRequest_descriptor,
+        internal_static_choreo_apis_FindUserOrganizationsRequest_descriptor,
         new java.lang.String[] { "User", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsResponse_descriptor =
+    internal_static_choreo_apis_FindUserOrganizationsResponse_descriptor =
       getDescriptor().getMessageTypes().get(43);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_FindUserOrganizationsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserOrganizationsResponse_descriptor,
+        internal_static_choreo_apis_FindUserOrganizationsResponse_descriptor,
         new java.lang.String[] { "User", "Organizations", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationRequest_descriptor =
+    internal_static_choreo_apis_FindUsersByOrganizationRequest_descriptor =
       getDescriptor().getMessageTypes().get(44);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_FindUsersByOrganizationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationRequest_descriptor,
+        internal_static_choreo_apis_FindUsersByOrganizationRequest_descriptor,
         new java.lang.String[] { "OrganizationName", "ExcludingGroups", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationResponse_descriptor =
+    internal_static_choreo_apis_FindUsersByOrganizationResponse_descriptor =
       getDescriptor().getMessageTypes().get(45);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_FindUsersByOrganizationResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationResponse_descriptor,
+        internal_static_choreo_apis_FindUsersByOrganizationResponse_descriptor,
         new java.lang.String[] { "Users", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleRequest_descriptor =
+    internal_static_choreo_apis_FindUsersByOrganizationByRoleRequest_descriptor =
       getDescriptor().getMessageTypes().get(46);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_FindUsersByOrganizationByRoleRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleRequest_descriptor,
+        internal_static_choreo_apis_FindUsersByOrganizationByRoleRequest_descriptor,
         new java.lang.String[] { "OrganizationName", "ExcludingRoles", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleResponse_descriptor =
+    internal_static_choreo_apis_FindUsersByOrganizationByRoleResponse_descriptor =
       getDescriptor().getMessageTypes().get(47);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_FindUsersByOrganizationByRoleResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUsersByOrganizationByRoleResponse_descriptor,
+        internal_static_choreo_apis_FindUsersByOrganizationByRoleResponse_descriptor,
         new java.lang.String[] { "Users", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdRequest_descriptor =
+    internal_static_choreo_apis_FindUserFromIdpIdRequest_descriptor =
       getDescriptor().getMessageTypes().get(48);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_FindUserFromIdpIdRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdRequest_descriptor,
+        internal_static_choreo_apis_FindUserFromIdpIdRequest_descriptor,
         new java.lang.String[] { "UserIdpId", "OrganizationName", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdResponse_descriptor =
+    internal_static_choreo_apis_FindUserFromIdpIdResponse_descriptor =
       getDescriptor().getMessageTypes().get(49);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_FindUserFromIdpIdResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_FindUserFromIdpIdResponse_descriptor,
+        internal_static_choreo_apis_FindUserFromIdpIdResponse_descriptor,
         new java.lang.String[] { "User", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackRequest_descriptor =
+    internal_static_choreo_apis_CreateUserFeedbackRequest_descriptor =
       getDescriptor().getMessageTypes().get(50);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_CreateUserFeedbackRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackRequest_descriptor,
+        internal_static_choreo_apis_CreateUserFeedbackRequest_descriptor,
         new java.lang.String[] { "Title", "Description", "ImageContent", "ImageLink", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackResponse_descriptor =
+    internal_static_choreo_apis_CreateUserFeedbackResponse_descriptor =
       getDescriptor().getMessageTypes().get(51);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_CreateUserFeedbackResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateUserFeedbackResponse_descriptor,
+        internal_static_choreo_apis_CreateUserFeedbackResponse_descriptor,
         new java.lang.String[] { "IssueUrl", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoRequest_descriptor =
+    internal_static_choreo_apis_GetUserInfoRequest_descriptor =
       getDescriptor().getMessageTypes().get(52);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_GetUserInfoRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoRequest_descriptor,
+        internal_static_choreo_apis_GetUserInfoRequest_descriptor,
         new java.lang.String[] { "UserIdpId", "OrganizationName", "Includes", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoResponse_descriptor =
+    internal_static_choreo_apis_GetUserInfoResponse_descriptor =
       getDescriptor().getMessageTypes().get(53);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_GetUserInfoResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserInfoResponse_descriptor,
+        internal_static_choreo_apis_GetUserInfoResponse_descriptor,
         new java.lang.String[] { "User", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesRequest_descriptor =
+    internal_static_choreo_apis_GetUserRolesRequest_descriptor =
       getDescriptor().getMessageTypes().get(54);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_GetUserRolesRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesRequest_descriptor,
+        internal_static_choreo_apis_GetUserRolesRequest_descriptor,
         new java.lang.String[] { "UserIdpId", "OrganizationName", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetEnterpriseUserRolesRequest_descriptor =
+    internal_static_choreo_apis_GetEnterpriseUserRolesRequest_descriptor =
       getDescriptor().getMessageTypes().get(55);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetEnterpriseUserRolesRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_GetEnterpriseUserRolesRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetEnterpriseUserRolesRequest_descriptor,
+        internal_static_choreo_apis_GetEnterpriseUserRolesRequest_descriptor,
         new java.lang.String[] { "UserIdpId", "OrganizationName", "GroupList", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesResponse_descriptor =
+    internal_static_choreo_apis_GetUserRolesResponse_descriptor =
       getDescriptor().getMessageTypes().get(56);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_GetUserRolesResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetUserRolesResponse_descriptor,
+        internal_static_choreo_apis_GetUserRolesResponse_descriptor,
         new java.lang.String[] { "Roles", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowRequest_descriptor =
+    internal_static_choreo_apis_StartInvitationFlowRequest_descriptor =
       getDescriptor().getMessageTypes().get(57);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_StartInvitationFlowRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowRequest_descriptor,
+        internal_static_choreo_apis_StartInvitationFlowRequest_descriptor,
         new java.lang.String[] { "Code", "Email", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowResponse_descriptor =
+    internal_static_choreo_apis_StartInvitationFlowResponse_descriptor =
       getDescriptor().getMessageTypes().get(58);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_StartInvitationFlowResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_StartInvitationFlowResponse_descriptor,
+        internal_static_choreo_apis_StartInvitationFlowResponse_descriptor,
         new java.lang.String[] { "RedirectUrl", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationRequest_descriptor =
+    internal_static_choreo_apis_CreateOrganizationRequest_descriptor =
       getDescriptor().getMessageTypes().get(59);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_CreateOrganizationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationRequest_descriptor,
+        internal_static_choreo_apis_CreateOrganizationRequest_descriptor,
         new java.lang.String[] { "Organization", "UserEmail", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationResponse_descriptor =
+    internal_static_choreo_apis_CreateOrganizationResponse_descriptor =
       getDescriptor().getMessageTypes().get(60);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_CreateOrganizationResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateOrganizationResponse_descriptor,
+        internal_static_choreo_apis_CreateOrganizationResponse_descriptor,
         new java.lang.String[] { "Organization", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationRequest_descriptor =
+    internal_static_choreo_apis_GetOrganizationRequest_descriptor =
       getDescriptor().getMessageTypes().get(61);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_GetOrganizationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationRequest_descriptor,
+        internal_static_choreo_apis_GetOrganizationRequest_descriptor,
         new java.lang.String[] { "OrganizationName", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationResponse_descriptor =
+    internal_static_choreo_apis_GetOrganizationResponse_descriptor =
       getDescriptor().getMessageTypes().get(62);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_GetOrganizationResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetOrganizationResponse_descriptor,
+        internal_static_choreo_apis_GetOrganizationResponse_descriptor,
         new java.lang.String[] { "Organization", "IsAdmin", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationRequest_descriptor =
+    internal_static_choreo_apis_UpdateOrganizationRequest_descriptor =
       getDescriptor().getMessageTypes().get(63);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_UpdateOrganizationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationRequest_descriptor,
+        internal_static_choreo_apis_UpdateOrganizationRequest_descriptor,
         new java.lang.String[] { "OrganizationName", "Organization", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationResponse_descriptor =
+    internal_static_choreo_apis_UpdateOrganizationResponse_descriptor =
       getDescriptor().getMessageTypes().get(64);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_UpdateOrganizationResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_UpdateOrganizationResponse_descriptor,
+        internal_static_choreo_apis_UpdateOrganizationResponse_descriptor,
         new java.lang.String[] { "Organization", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationRequest_descriptor =
+    internal_static_choreo_apis_DeleteOrganizationRequest_descriptor =
       getDescriptor().getMessageTypes().get(65);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_DeleteOrganizationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationRequest_descriptor,
+        internal_static_choreo_apis_DeleteOrganizationRequest_descriptor,
         new java.lang.String[] { "OrganizationName", "UserEmail", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationResponse_descriptor =
+    internal_static_choreo_apis_DeleteOrganizationResponse_descriptor =
       getDescriptor().getMessageTypes().get(66);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_DeleteOrganizationResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_DeleteOrganizationResponse_descriptor,
+        internal_static_choreo_apis_DeleteOrganizationResponse_descriptor,
         new java.lang.String[] { "Organization", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsRequest_descriptor =
+    internal_static_choreo_apis_ListOrganizationsRequest_descriptor =
       getDescriptor().getMessageTypes().get(67);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_ListOrganizationsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsRequest_descriptor,
+        internal_static_choreo_apis_ListOrganizationsRequest_descriptor,
         new java.lang.String[] { });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsResponse_descriptor =
+    internal_static_choreo_apis_ListOrganizationsResponse_descriptor =
       getDescriptor().getMessageTypes().get(68);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_ListOrganizationsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationsResponse_descriptor,
+        internal_static_choreo_apis_ListOrganizationsResponse_descriptor,
         new java.lang.String[] { "Organizations", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsRequest_descriptor =
+    internal_static_choreo_apis_ListUserGroupsRequest_descriptor =
       getDescriptor().getMessageTypes().get(69);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_ListUserGroupsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsRequest_descriptor,
+        internal_static_choreo_apis_ListUserGroupsRequest_descriptor,
         new java.lang.String[] { "UserIdpId", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsResponse_descriptor =
+    internal_static_choreo_apis_ListUserGroupsResponse_descriptor =
       getDescriptor().getMessageTypes().get(70);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_ListUserGroupsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListUserGroupsResponse_descriptor,
+        internal_static_choreo_apis_ListUserGroupsResponse_descriptor,
         new java.lang.String[] { "Groups", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsRequest_descriptor =
+    internal_static_choreo_apis_ListOrganizationEnvIdsRequest_descriptor =
       getDescriptor().getMessageTypes().get(71);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_ListOrganizationEnvIdsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsRequest_descriptor,
+        internal_static_choreo_apis_ListOrganizationEnvIdsRequest_descriptor,
         new java.lang.String[] { "OrganizationName", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsResponse_descriptor =
+    internal_static_choreo_apis_ListOrganizationEnvIdsResponse_descriptor =
       getDescriptor().getMessageTypes().get(72);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_ListOrganizationEnvIdsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_ListOrganizationEnvIdsResponse_descriptor,
+        internal_static_choreo_apis_ListOrganizationEnvIdsResponse_descriptor,
         new java.lang.String[] { "EnvironmentIds", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_descriptor =
+    internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_descriptor =
       getDescriptor().getMessageTypes().get(73);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_descriptor,
+        internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsRequest_descriptor,
         new java.lang.String[] { "Organizations", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_descriptor =
+    internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_descriptor =
       getDescriptor().getMessageTypes().get(74);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_descriptor,
+        internal_static_choreo_apis_CreateDefaultEnvironmentsForOrgsResponse_descriptor,
         new java.lang.String[] { });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListRequest_descriptor =
+    internal_static_choreo_apis_GetPermissionListRequest_descriptor =
       getDescriptor().getMessageTypes().get(75);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListRequest_fieldAccessorTable = new
+    internal_static_choreo_apis_GetPermissionListRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListRequest_descriptor,
+        internal_static_choreo_apis_GetPermissionListRequest_descriptor,
         new java.lang.String[] { "Search", });
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListResponse_descriptor =
+    internal_static_choreo_apis_GetPermissionListResponse_descriptor =
       getDescriptor().getMessageTypes().get(76);
-    internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListResponse_fieldAccessorTable = new
+    internal_static_choreo_apis_GetPermissionListResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_wso2_carbon_apimgt_impl_choreo_apis_GetPermissionListResponse_descriptor,
+        internal_static_choreo_apis_GetPermissionListResponse_descriptor,
         new java.lang.String[] { "PermissionTrees", });
     com.google.protobuf.ExtensionRegistry registry =
         com.google.protobuf.ExtensionRegistry.newInstance();
