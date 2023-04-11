@@ -9,9 +9,9 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GlobalPoliciesDTO;
-import java.util.List;
+import java.util.Map;
 
 import java.util.List;
 
@@ -22,5 +22,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface GlobalPoliciesApiService {
-      public Response addGlobalPolicy(List<GlobalPoliciesDTO> globalPoliciesDTO, MessageContext messageContext) throws APIManagementException;
+      public Response addGlobalPolicy(Map<String, APIOperationPoliciesDTO> requestBody, MessageContext messageContext) throws APIManagementException;
 }
