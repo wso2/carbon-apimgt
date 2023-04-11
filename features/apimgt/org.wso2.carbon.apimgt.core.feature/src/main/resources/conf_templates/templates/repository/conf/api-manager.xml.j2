@@ -1484,4 +1484,14 @@
         </Properties>
       </OperationPolicyConfigs>
       {% endif %}
+
+      {% if choreo.ChoreoTokenHandler is defined %}
+      <GrpcConfig>
+          <AppServiceUrl>{{choreo.ChoreoTokenHandler.appServiceUrl}}</AppServiceUrl>
+          <AuthzServiceUrl>{{choreo.ChoreoTokenHandler.authzServiceUrl}}</AuthzServiceUrl>
+          <AuthzServiceEnabled>{{choreo.ChoreoTokenHandler.authzServiceEnabled}}</AuthzServiceEnabled>
+          <ChoreoControlPlaneOrgUuid>{{choreo.ChoreoTokenHandler.choreoControlPlaneOrgUuid}}</ChoreoControlPlaneOrgUuid>
+          <AllowedClaims>{{choreo.ChoreoTokenHandler.allowed_claims}}</AllowedClaims>
+      </GrpcConfig>
+      {% endif %}
 </APIManager>
