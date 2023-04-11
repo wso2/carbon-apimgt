@@ -370,6 +370,7 @@ public class APIMappingUtil {
         model.setCorsConfiguration(corsConfiguration);
         setMaxTpsFromApiDTOToModel(dto, model);
         model.setAuthorizationHeader(dto.getAuthorizationHeader());
+        model.setApiKeyHeader(dto.getApiKeyHeader());
         model.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
 
         if (dto.getType().toString().equals(APIConstants.API_TYPE_WEBSUB)) {
@@ -1342,6 +1343,7 @@ public class APIMappingUtil {
         setMaxTpsFromModelToApiDTO(model, dto);
 
         dto.setAuthorizationHeader(model.getAuthorizationHeader());
+        dto.setApiKeyHeader(model.getApiKeyHeader());
         if (model.getApiSecurity() != null) {
             dto.setSecurityScheme(Arrays.asList(model.getApiSecurity().split(",")));
         }
