@@ -38,7 +38,9 @@ import java.util.List;
 public class APILoggingImpl {
     private static final String PER_API_LOGGING_PERMISSION_PATH = "/permission/protected/configure/logging";
     private static final String INVALID_LOGGING_PERMISSION = "Invalid logging permission";
-    private static final String INCORRECT_LOGGING_PER_API_RESOURCE_REQUEST = "Resource Method and Resource Path both should included";
+    private static final String INCORRECT_LOGGING_PER_API_RESOURCE_REQUEST = "Resource Method and Resource Path both " +
+            "should included";
+    private static final String REQUIRED_API_RESOURCE_IS_NOT_AVAILABLE = "Requested resource is not available";
     private final ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
     public void addUpdateAPILogger(String tenantId, String apiId, String logLevel, String resourceMethod,
@@ -51,10 +53,16 @@ public class APILoggingImpl {
             throw new APIManagementException(INVALID_LOGGING_PERMISSION,
                     ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION));
         }
-
+        boolean isAPIResourceExists = LoggingMgtDAO.getInstance().checkAPILoggerPerResourceAvailable(tenantId, apiId,
+                resourceMethod.toUpperCase(), resourcePath);
         if (resourceMethod != null && resourcePath != null) {
-            LoggingMgtDAO.getInstance().addAPILoggerPerResource(tenantId, apiId, logLevel, resourceMethod.toUpperCase(),
-                    resourcePath);
+            if (isAPIResourceExists) {
+                LoggingMgtDAO.getInstance().addAPILoggerPerResource(tenantId, apiId, logLevel,
+                        resourceMethod.toUpperCase(), resourcePath);
+            } else {
+                throw new APIManagementException(REQUIRED_API_RESOURCE_IS_NOT_AVAILABLE,
+                        ExceptionCodes.from(ExceptionCodes.LOGGING_API_RESOURCE_NOT_FOUND));
+            }
         } else if (resourceMethod == null && resourcePath == null) {
             LoggingMgtDAO.getInstance().addAPILogger(tenantId, apiId, logLevel);
         } else {

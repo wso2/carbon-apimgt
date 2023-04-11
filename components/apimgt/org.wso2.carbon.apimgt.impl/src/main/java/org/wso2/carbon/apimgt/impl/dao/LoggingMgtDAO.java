@@ -99,6 +99,36 @@ public class LoggingMgtDAO {
         }
     }
 
+    public boolean checkAPILoggerPerResourceAvailable(String organization, String apiId, String resourceMethod,
+                                                      String resourcePath) throws APIManagementException {
+        boolean isAPILoggerPerResourceAvailable = false;
+        try (Connection addLoggingCon = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = addLoggingCon.prepareStatement(
+                    SQLConstants.CHECK_PER_API_RESOURCE_IS_AVAILABLE_LOGGING_SQL)) {
+                preparedStatement.setString(1, apiId);
+                preparedStatement.setString(2, organization);
+                preparedStatement.setString(3, resourceMethod);
+                preparedStatement.setString(4, resourcePath);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        if (resultSet.getString(APIConstants.LOG_LEVEL) != null) {
+                            isAPILoggerPerResourceAvailable = true;
+                        }
+                    }
+                }
+            } catch (SQLException e) {
+                throw new ApiLoggingMgtException("Error while checking resource API logger", e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check the resource is available for " + apiId, e);
+        }
+        if (isAPILoggerPerResourceAvailable) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public List<APILogInfoDTO> retrieveAPILoggerList(String organization, String logLevel) throws
             APIManagementException {
         List<APILogInfoDTO> apiLogInfoDTOList = new ArrayList<>();
