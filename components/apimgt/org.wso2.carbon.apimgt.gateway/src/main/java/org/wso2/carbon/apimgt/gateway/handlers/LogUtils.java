@@ -140,17 +140,14 @@ class LogUtils {
             String logResourcePath = key.get("resourcePath");
             String resourcePathRegexPattern = logResourcePath.replace("/", "\\/");
             resourcePathRegexPattern = resourcePathRegexPattern.replaceAll("\\{.*?\\}", "\\\\d+");
-            if (("/" + apiResourcePath).matches(resourcePathRegexPattern)
-                    && apiHttpMethod.equals(key.get("resourceMethod"))) {
-                if (key.get("context").startsWith(key.get("context") + "/") ||
-                        key.get("context").equals(key.get("context"))) {
+            if (key.get("context").startsWith(key.get("context") + "/") ||
+                    key.get("context").equals(key.get("context"))) {
+                if (("/" + apiResourcePath).matches(resourcePathRegexPattern)
+                        && apiHttpMethod.equals(key.get("resourceMethod"))) {
                     resourceLogLevel = entry.getValue();
                     resourcePath = key.get("resourcePath");
                     resourceMethod = key.get("resourceMethod");
-                }
-            } else if (key.get("resourcePath") == null && key.get("resourceMethod") == null) {
-                if (key.get("context").startsWith(key.get("context") + "/") ||
-                        key.get("context").equals(key.get("context"))) {
+                } else if (key.get("resourcePath") == null && key.get("resourceMethod") == null) {
                     apiLogLevel = entry.getValue();
                 }
             }
