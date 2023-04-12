@@ -53,9 +53,9 @@ public class APILoggingImpl {
             throw new APIManagementException(INVALID_LOGGING_PERMISSION,
                     ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION));
         }
-        boolean isAPIResourceExists = LoggingMgtDAO.getInstance().checkAPILoggerPerResourceAvailable(tenantId, apiId,
-                resourceMethod.toUpperCase(), resourcePath);
         if (resourceMethod != null && resourcePath != null) {
+            boolean isAPIResourceExists = LoggingMgtDAO.getInstance().checkAPILoggerPerResourceAvailable(tenantId,
+                    apiId, resourceMethod.toUpperCase(), resourcePath);
             if (isAPIResourceExists) {
                 LoggingMgtDAO.getInstance().addAPILoggerPerResource(tenantId, apiId, logLevel,
                         resourceMethod.toUpperCase(), resourcePath);

@@ -134,24 +134,25 @@ class LogUtils {
         String resourceLogLevel = null;
         String resourcePath = null;
         String resourceMethod = null;
+        String logResourcePath, resourcePathRegexPattern = null;
         for (Map.Entry<Map<String, String>, String> entry : logProperties.entrySet()) {
             Map<String, String> key = entry.getKey();
             String apiResourcePath = apiCtx.split("/", 3)[2];
-            String logResourcePath = key.get("resourcePath");
-            String resourcePathRegexPattern = logResourcePath.replace("/", "\\/");
-            resourcePathRegexPattern = resourcePathRegexPattern.replaceAll("\\{.*?\\}", "\\\\d+");
-            if (("/" + apiResourcePath).matches(resourcePathRegexPattern)
-                    && apiHttpMethod.equals(key.get("resourceMethod"))) {
-                if (key.get("context").startsWith(key.get("context") + "/") ||
-                        key.get("context").equals(key.get("context"))) {
+            if (key.containsKey("resourcePath") && key.get("resourcePath") != null) {
+                logResourcePath = key.get("resourcePath");
+                resourcePathRegexPattern = logResourcePath.replace("/", "\\/");
+                resourcePathRegexPattern = resourcePathRegexPattern.replaceAll("\\{.*?\\}",
+                        "\\\\w{0,}([-,_]?\\\\w{1,})+");
+            }
+            if (key.get("context").startsWith(key.get("context") + "/") ||
+                    key.get("context").equals(key.get("context"))) {
+                if (key.get("resourcePath") == null && key.get("resourceMethod") == null) {
+                    apiLogLevel = entry.getValue();
+                } else if (("/" + apiResourcePath).matches(resourcePathRegexPattern)
+                        && apiHttpMethod.equals(key.get("resourceMethod"))) {
                     resourceLogLevel = entry.getValue();
                     resourcePath = key.get("resourcePath");
                     resourceMethod = key.get("resourceMethod");
-                }
-            } else if (key.get("resourcePath") == null && key.get("resourceMethod") == null) {
-                if (key.get("context").startsWith(key.get("context") + "/") ||
-                        key.get("context").equals(key.get("context"))) {
-                    apiLogLevel = entry.getValue();
                 }
             }
         }
