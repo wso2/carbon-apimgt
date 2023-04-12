@@ -19817,8 +19817,8 @@ public class ApiMgtDAO {
                         preparedStatement.setString(3, gatewayGlobalPolicy.getGatewayLabel());
                         preparedStatement.setString(4, gatewayGlobalPolicy.getDirection());
                         preparedStatement.setString(5, paramJSON);
-                        preparedStatement.setString(7, "wso2/synapse");
-                        preparedStatement.setString(8, orgId);
+                        preparedStatement.setString(6, "wso2/synapse");
+                        preparedStatement.setString(7, orgId);
                         preparedStatement.addBatch();
                     }
                 }
