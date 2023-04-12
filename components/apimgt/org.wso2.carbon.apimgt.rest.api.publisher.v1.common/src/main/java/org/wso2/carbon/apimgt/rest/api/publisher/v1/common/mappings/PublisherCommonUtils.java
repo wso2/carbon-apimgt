@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.GatewayGlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
@@ -79,6 +80,7 @@ import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
@@ -2101,5 +2103,38 @@ public class PublisherCommonUtils {
             }
         }
         return true;
+    }
+
+    /**
+     * Apply globally added policies to the gateways
+     *
+     * @param gatewayPolicyMap        Applied policies for the directions in gateways map
+     * @param orgId                   organization ID
+     * @throws APIManagementException If an error occurs while retrieving and updating an existing API Product
+     */
+    public static void applyGatewayGlobalPolicies(Map<String, APIOperationPoliciesDTO> gatewayPolicyMap,
+            String orgId) throws APIManagementException {
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        Map<String, List<OperationPolicy>> globalPoliciesToGatewayMap = GlobalPolicyMappingUtil.fromDTOToGlobalPoliciesToGatewayMap(
+                gatewayPolicyMap);
+        List<GatewayGlobalPolicy> gatewayPolicyList = new ArrayList<>();
+
+        for (Map.Entry<String, List<OperationPolicy>> policiesOfGateway : globalPoliciesToGatewayMap.entrySet()) {
+            for (OperationPolicy policy : policiesOfGateway.getValue()) {
+                GatewayGlobalPolicy gatewayGlobalPolicy = new GatewayGlobalPolicy();
+                gatewayGlobalPolicy.setGatewayLabel(policiesOfGateway.getKey());
+                gatewayGlobalPolicy.setPolicyId(policy.getPolicyId());
+                gatewayGlobalPolicy.setPolicyName(policy.getPolicyName());
+                gatewayGlobalPolicy.setPolicyVersion(policy.getPolicyVersion());
+                gatewayGlobalPolicy.setOrder(policy.getOrder());
+                gatewayGlobalPolicy.setDirection(policy.getDirection());
+                gatewayGlobalPolicy.setParameters(policy.getParameters());
+
+                gatewayPolicyList.add(gatewayGlobalPolicy);
+            }
+        }
+
+        apiProvider.applyGatewayGlobalPolicies(gatewayPolicyList, orgId);
     }
 }

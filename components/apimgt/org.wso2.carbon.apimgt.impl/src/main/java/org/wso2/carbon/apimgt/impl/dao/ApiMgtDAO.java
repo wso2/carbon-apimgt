@@ -59,6 +59,7 @@ import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayGlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
@@ -20399,5 +20400,44 @@ public class ApiMgtDAO {
     private List<OperationPolicy> deepCopyPolicyList(List<OperationPolicy> policyList) {
         Gson gson = new Gson();
         return gson.fromJson(gson.toJson(policyList), new TypeToken<ArrayList<OperationPolicy>>() {}.getType());
+    }
+
+    /**
+     * Add new gateway global policy mappings to the database
+     *
+     * @param gatewayGlobalPolicyList      List of applied policies for each direction in the gateways
+     * @param orgId                        organization ID
+     * @throws APIManagementException
+     */
+    public void addGatewayGlobalPolicy(List<GatewayGlobalPolicy> gatewayGlobalPolicyList, String orgId)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    SQLConstants.GlobalPolicyConstants.ADD_GLOBAL_POLICY_MAPPING)) {
+                if (gatewayGlobalPolicyList != null && !gatewayGlobalPolicyList.isEmpty()) {
+                    for (GatewayGlobalPolicy gatewayGlobalPolicy : gatewayGlobalPolicyList) {
+                        Gson gson = new Gson();
+                        String paramJSON = gson.toJson(gatewayGlobalPolicy.getParameters());
+                        preparedStatement.setString(1, gatewayGlobalPolicy.getPolicyId());
+                        preparedStatement.setInt(2, gatewayGlobalPolicy.getOrder());
+                        preparedStatement.setString(3, gatewayGlobalPolicy.getGatewayLabel());
+                        preparedStatement.setString(4, gatewayGlobalPolicy.getDirection());
+                        preparedStatement.setString(5, paramJSON);
+                        preparedStatement.setString(7, "wso2/synapse");
+                        preparedStatement.setString(8, orgId);
+                        preparedStatement.addBatch();
+                    }
+                }
+                preparedStatement.executeBatch();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while updating global Policy mapping for gateway", e);
+        }
     }
 }
