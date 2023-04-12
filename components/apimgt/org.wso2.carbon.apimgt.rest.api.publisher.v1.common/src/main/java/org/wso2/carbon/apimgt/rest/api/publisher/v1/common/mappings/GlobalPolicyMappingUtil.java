@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.Map;
 
 public class GlobalPolicyMappingUtil {
-    public static Map<String, List<OperationPolicy>> fromDTOToGlobalPoliciesList(
+    public static Map<String, List<OperationPolicy>> fromDTOToGlobalPoliciesToGatewayMap(
             Map<String, APIOperationPoliciesDTO> gatewayGlobalPolicyMap) {
 
         Map<String, List<OperationPolicy>> globalPoliciesToGatewayMap = new HashMap<>();
 
-        for (Map.Entry<String, APIOperationPoliciesDTO> policies : gatewayGlobalPolicyMap.entrySet()) {
-            globalPoliciesToGatewayMap.put(policies.getKey(),
-                    OperationPolicyMappingUtil.fromDTOToAPIOperationPoliciesList(policies.getValue()));
+        for (Map.Entry<String, APIOperationPoliciesDTO> policiesOfDirections : gatewayGlobalPolicyMap.entrySet()) {
+            globalPoliciesToGatewayMap.put(policiesOfDirections.getKey(),
+                    OperationPolicyMappingUtil.fromDTOToAPIOperationPoliciesList(policiesOfDirections.getValue()));
         }
 
         return globalPoliciesToGatewayMap;

@@ -59,6 +59,7 @@ import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayGlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
@@ -19793,64 +19794,42 @@ public class ApiMgtDAO {
         return list;
     }
 
-//    /**
-//     * Add a new Global policy to the database
-//     *
-//     * @param gatewayLabel      Unique Identifier of API
-//     * @param isDeployed     Unique Identifier of API revision
-//     * @param policyData   Unique Identifier of API
-//     * @return UUID of the newly created shared policy
-//     * @throws APIManagementException
-//     */
-//    public String addGlobalPolicy(String apiUUID, String revisionUUID,
-//            OperationPolicyData policyData)
-//            throws APIManagementException {
-//
-//        OperationPolicySpecification policySpecification = policyData.getSpecification();
-//        try (Connection connection = APIMgtDBUtil.getConnection()) {
-//            try {
-//                connection.setAutoCommit(false);
-//                String policyID = addAPISpecificOperationPolicy(connection, policyData, apiUUID, revisionUUID,
-//                        null, null);
-//                connection.commit();
-//                return policyID;
-//            } catch (SQLException e) {
-//                connection.rollback();
-//                handleException("Failed to add API specific operation policy " + policySpecification.getName()
-//                        + " for API " + apiUUID, e);
-//            }
-//        } catch (SQLException e) {
-//            handleException("Failed to add API specific operation policy " + policySpecification.getName()
-//                    + " for API " + apiUUID, e);
-//        }
-//        return null;
-//    }
-//
-//    private String addAPISpecificOperationPolicy(Connection connection, OperationPolicyData policyData,
-//            String apiUUID, String revisionUUID, String policyUUID,
-//            String clonedPolicyUUID)
-//            throws SQLException {
-//
-//        policyData.setPolicyId(policyUUID);
-//        policyUUID = addOperationPolicyContent(connection, policyData);
-//
-//        String dbQuery;
-//        if (revisionUUID != null) {
-//            dbQuery = SQLConstants.OperationPolicyConstants.ADD_API_SPECIFIC_OPERATION_POLICY_WITH_REVISION;
-//        } else {
-//            dbQuery = SQLConstants.OperationPolicyConstants.ADD_API_SPECIFIC_OPERATION_POLICY;
-//        }
-//
-//        try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
-//            statement.setString(1, policyUUID);
-//            statement.setString(2, apiUUID);
-//            statement.setString(3, clonedPolicyUUID);
-//            if (revisionUUID != null) {
-//                statement.setString(4, revisionUUID);
-//            }
-//            statement.executeUpdate();
-//        }
-//        return policyUUID;
-//    }
+    /**
+     * Add new gateway global policy mappings to the database
+     *
+     * @param gatewayGlobalPolicyList      List of applied policies for each direction in the gateways
+     * @param orgId                        organization ID
+     * @throws APIManagementException
+     */
+    public void addGatewayGlobalPolicy(List<GatewayGlobalPolicy> gatewayGlobalPolicyList, String orgId)
+            throws APIManagementException {
 
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    SQLConstants.GlobalPolicyConstants.ADD_GLOBAL_POLICY_MAPPING)) {
+                if (gatewayGlobalPolicyList != null && !gatewayGlobalPolicyList.isEmpty()) {
+                    for (GatewayGlobalPolicy gatewayGlobalPolicy : gatewayGlobalPolicyList) {
+                        Gson gson = new Gson();
+                        String paramJSON = gson.toJson(gatewayGlobalPolicy.getParameters());
+                        preparedStatement.setString(1, gatewayGlobalPolicy.getPolicyId());
+                        preparedStatement.setInt(2, gatewayGlobalPolicy.getOrder());
+                        preparedStatement.setString(3, gatewayGlobalPolicy.getGatewayLabel());
+                        preparedStatement.setString(4, gatewayGlobalPolicy.getDirection());
+                        preparedStatement.setString(5, paramJSON);
+                        preparedStatement.setString(7, "wso2/synapse");
+                        preparedStatement.setString(8, orgId);
+                        preparedStatement.addBatch();
+                    }
+                }
+                preparedStatement.executeBatch();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while updating global Policy mapping for gateway", e);
+        }
+    }
 }

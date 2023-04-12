@@ -1694,4 +1694,13 @@ public interface APIProvider extends APIManager {
      */
     boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification, OperationPolicy
             appliedPolicy, String apiType) throws APIManagementException;
+
+    /**
+     * Apply globally added policies to the gateways
+     *
+     * @param gatewayGlobalPolicyList@return Map of APIs as keys and respective APIProductResources as values
+     * @throws APIManagementException
+     */
+    void applyGatewayGlobalPolicies(List<GatewayGlobalPolicy> gatewayGlobalPolicyList, String orgId)
+            throws APIManagementException;
 }
