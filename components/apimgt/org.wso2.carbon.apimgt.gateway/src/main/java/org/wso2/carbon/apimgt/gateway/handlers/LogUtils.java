@@ -141,7 +141,8 @@ class LogUtils {
             if (key.containsKey("resourcePath") && key.get("resourcePath") != null) {
                 logResourcePath = key.get("resourcePath");
                 resourcePathRegexPattern = logResourcePath.replace("/", "\\/");
-                resourcePathRegexPattern = resourcePathRegexPattern.replaceAll("\\{.*?\\}", "\\\\d+");
+                resourcePathRegexPattern = resourcePathRegexPattern.replaceAll("\\{.*?\\}",
+                        "\\\\w{1,}([-]?\\\\w{1,})+");
             }
             if (key.get("context").startsWith(key.get("context") + "/") ||
                     key.get("context").equals(key.get("context"))) {
