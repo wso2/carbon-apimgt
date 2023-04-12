@@ -137,7 +137,12 @@ class LogUtils {
         String logResourcePath, resourcePathRegexPattern = null;
         for (Map.Entry<Map<String, String>, String> entry : logProperties.entrySet()) {
             Map<String, String> key = entry.getKey();
-            String apiResourcePath = apiCtx.split("/", 3)[2];
+            String apiResourcePath;
+            if (apiCtx.split("/", 3).length > 2) {
+                apiResourcePath = apiCtx.split("/", 3)[2];
+            } else {
+                apiResourcePath = "";
+            }
             if (key.containsKey("resourcePath") && key.get("resourcePath") != null) {
                 logResourcePath = key.get("resourcePath");
                 resourcePathRegexPattern = logResourcePath.replace("/", "\\/");
@@ -163,14 +168,15 @@ class LogUtils {
                     isResourceLevelHasHighPriority = true;
                     break;
                 case APIConstants.LOG_LEVEL_STANDARD:
-                    if (apiLogLevel != null && apiLogLevel.equals(APIConstants.LOG_LEVEL_BASIC)) {
+                    if (apiLogLevel != null && (apiLogLevel.equals(APIConstants.LOG_LEVEL_BASIC) ||
+                            apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF))) {
                         isResourceLevelHasHighPriority = true;
                         break;
                     } else {
                         break;
                     }
                 case APIConstants.LOG_LEVEL_BASIC:
-                    if (apiLogLevel == null) {
+                    if (apiLogLevel == null || apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF)) {
                         isResourceLevelHasHighPriority = true;
                     } else {
                         break;
