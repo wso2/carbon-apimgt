@@ -7,6 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class is responsible for mapping Gateway Global Policy Objects into REST API Global Policy related DTOs
+ * and vice versa.
+ */
 public class GlobalPolicyMappingUtil {
     public static Map<String, List<OperationPolicy>> fromDTOToGlobalPoliciesToGatewayMap(
             Map<String, APIOperationPoliciesDTO> gatewayGlobalPolicyMap) {
