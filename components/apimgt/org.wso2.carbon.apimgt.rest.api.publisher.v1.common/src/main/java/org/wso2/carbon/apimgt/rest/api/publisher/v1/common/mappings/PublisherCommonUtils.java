@@ -2116,8 +2116,8 @@ public class PublisherCommonUtils {
             String orgId) throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        Map<String, List<OperationPolicy>> globalPoliciesToGatewayMap = GlobalPolicyMappingUtil.fromDTOToGlobalPoliciesToGatewayMap(
-                gatewayPolicyMap);
+        Map<String, List<OperationPolicy>> globalPoliciesToGatewayMap =
+                GlobalPolicyMappingUtil.fromDTOToGlobalPoliciesToGatewayMap(gatewayPolicyMap);
         List<GatewayGlobalPolicy> gatewayPolicyList = new ArrayList<>();
 
         for (Map.Entry<String, List<OperationPolicy>> policiesOfGateway : globalPoliciesToGatewayMap.entrySet()) {
