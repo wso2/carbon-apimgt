@@ -1650,6 +1650,18 @@ public class OASParserUtil {
     }
 
     /**
+     * This method returns extension of custom API key Header related to micro-gw
+     *
+     * @param extensions Map<String, Object>
+     * @return API key header header value as String
+     * @throws APIManagementException throws if an error occurred
+     */
+    public static String getApiKeyHeaderFromSwagger(Map<String, Object> extensions) throws APIManagementException {
+        Object apiKeyHeader = extensions.get(APIConstants.X_WSO2_API_KEY_HEADER);
+        return apiKeyHeader == null ? null : apiKeyHeader.toString();
+    }
+
+    /**
      * This method returns extension of custom authorization Header related to micro-gw
      *
      * @param extensions Map<String, Object>
