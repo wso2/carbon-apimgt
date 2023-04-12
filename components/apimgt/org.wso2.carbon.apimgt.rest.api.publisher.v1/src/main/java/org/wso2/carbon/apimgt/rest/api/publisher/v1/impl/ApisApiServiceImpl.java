@@ -646,7 +646,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
             CommonUtils.validateAPIExistence(apiId);
-
+            if (!PublisherCommonUtils.validateEndpointConfigs(body)) {
+                throw new APIManagementException("Invalid endpoint configs detected",
+                        ExceptionCodes.INVALID_ENDPOINT_CONFIG);
+            }
             // validate web socket api endpoint configurations
             if (isWSAPI && !PublisherCommonUtils.isValidWSAPI(body)) {
                 throw new APIManagementException("Endpoint URLs should be valid web socket URLs",
