@@ -599,6 +599,29 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /retrieve-runtime-metadata:
+    get:
+      summary: Metadata information for API runtimes for given Data-Plane/s
+      description: |
+        This will provide access to the deployment metadata for a given data-plane ID in json format
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: dataPlaneId
+          in: query
+          description: |
+            **Search condition**.
+              Data-Plane ID/s 
+              To provide multiple Data-Plane IDs provide a "|" seperated list of IDs
+          type: string
+      tags:
+        - Retrieving Runtime artifacts for Data-Planes
+      responses:
+        200:
+          description: Json file of runtime metadata
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /endpoint-certificates:
     get:
       summary: Get all the endpoint certificates for given alias.

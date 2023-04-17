@@ -39,6 +39,7 @@
             <bean class="org.wso2.carbon.apimgt.internal.service.GaConfigApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.ApiLoggingConfigsApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.RetrieveRuntimeArtifactsApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.RetrieveRuntimeMetadataApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

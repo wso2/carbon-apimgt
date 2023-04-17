@@ -172,6 +172,9 @@ public enum ExceptionCodes implements ErrorHandler {
     CANNOT_RETRIEVE_RUNTIME_ARTIFACT_SQL_ERROR(900513, "Failed to retrieve Gateway Artifact of API",
             500, "Failed to retrieve Gateway Artifact of API: %s, gateway environment \"%s\". Reason: %s"),
 
+    CANNOT_RETRIEVE_RUNTIME_METADATA_NO_DATAPLANE_ID_ERROR(900514, "Error resolving dataplane id while retrieving runtime metadata",
+            500, "Error resolving dataplane id while retrieving runtime metadata for organization %s"),
+
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
