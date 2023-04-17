@@ -125,11 +125,11 @@ public class APIHandlerServiceComponent {
         RedisConfig redisConfig =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getRedisConfig();
         if (redisConfig.isRedisEnabled()) {
+            ServiceReferenceHolder.getInstance().setRedisPool(getJedisPool(redisConfig));
             RedisBaseDistributedCountManager redisBaseDistributedCountManager =
                     new RedisBaseDistributedCountManager(ServiceReferenceHolder.getInstance().getRedisPool());
             context.getBundleContext().registerService(DistributedCounterManager.class,
                     redisBaseDistributedCountManager, null);
-            ServiceReferenceHolder.getInstance().setRedisPool(getJedisPool(redisConfig));
         }
 
         // Create caches for the super tenant
