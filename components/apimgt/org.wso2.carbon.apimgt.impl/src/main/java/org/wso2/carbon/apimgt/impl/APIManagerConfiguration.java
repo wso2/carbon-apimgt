@@ -574,17 +574,7 @@ public class APIManagerConfiguration {
             } else if (APIConstants.JWT_AUDIENCES.equals(localName)){
                 setRestApiJWTAuthAudiences(element);
             } else if (APIConstants.API_KEY_CONFIGURATIONS.equals(localName)) {
-                OMElement properties = element.getFirstChildWithName(new QName("Properties"));
-                Iterator analyticsPropertiesIterator = properties.getChildrenWithLocalName("Property");
-                Map<String, String> apiKeyProps = new HashMap<>();
-                while (analyticsPropertiesIterator.hasNext()) {
-                    OMElement propertyElem = (OMElement) analyticsPropertiesIterator.next();
-                    String name = propertyElem.getAttributeValue(new QName("name"));
-                    String value = propertyElem.getText();
-                    apiKeyProps.put(name, value);
-                }
-
-                apiKeyProperties = apiKeyProps;
+                setAPIKeyValidity(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -2017,6 +2007,17 @@ public class APIManagerConfiguration {
             log.debug("Data Source Element is not set. Set to default Data Source");
         }
 
+    }
+
+    private void setAPIKeyValidity(OMElement omElement) {
+        OMElement expElement = omElement
+                .getFirstChildWithName(new QName(APIConstants.API_KEY_VALIDITY_EXP));
+        if (expElement != null) {
+            apiKeyProperties.put(APIConstants.INTERNAL_API_KEY_EXPIRY_TIME,expElement.getText());
+        } else {
+            apiKeyProperties.put(APIConstants.INTERNAL_API_KEY_EXPIRY_TIME,APIConstants.DEFAULT_API_KEY_VALIDITY);
+            log.debug("Test API Key Validity not set. Set to default 10m");
+        }
     }
 
     private void setRuntimeArtifactsSyncGatewayConfig (OMElement omElement){

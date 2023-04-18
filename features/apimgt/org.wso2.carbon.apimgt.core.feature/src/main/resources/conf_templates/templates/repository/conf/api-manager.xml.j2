@@ -1485,13 +1485,9 @@
       </OperationPolicyConfigs>
       {% endif %}
 
-     {% if apim.apikey.properties is defined %}
-      <APIKeyConfigs>
-        <Properties>
-           {% for key,value in apim.apikey.properties.items() %}
-              <Property name="{{key}}">{{value}}</Property>
-           {% endfor %}
-       </Properties>
-      </APIKeyConfigs>
-      {% endif %}}
+     {% if apim.testkey.validity is defined %}
+     <APIKeyConfigs>
+        <Exp>{{apim.testkey.validity.exp}}</Exp>
+     </APIKeyConfigs>
+     {% endif %}}
 </APIManager>
