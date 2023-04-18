@@ -2971,5 +2971,5 @@ public final class APIConstants {
     public static final String INTERNAL_API_KEY_EXPIRY_TIME = "exp";
     public static final String API_KEY_CONFIGURATIONS = "APIKeyConfigs";
     public static final String API_KEY_VALIDITY_EXP = "Exp";
-    public static final String DEFAULT_API_KEY_VALIDITY = "60";
+    public static final String DEFAULT_API_KEY_VALIDITY = "600";
 }
