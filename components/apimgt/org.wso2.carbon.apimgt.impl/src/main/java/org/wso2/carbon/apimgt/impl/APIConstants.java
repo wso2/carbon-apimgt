@@ -2966,4 +2966,5 @@ public final class APIConstants {
 
     // Constants related to basic health check APIs
     public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
+    public static final String INTERNAL_API_KEY_EXPIRY_TIME = "exp";
 }

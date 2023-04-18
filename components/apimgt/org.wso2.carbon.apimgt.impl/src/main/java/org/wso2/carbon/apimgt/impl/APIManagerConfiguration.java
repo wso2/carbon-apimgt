@@ -117,6 +117,7 @@ public class APIManagerConfiguration {
     private static Properties persistentNotifierProperties;
     private static Map<String, String> analyticsProperties;
     private static Map<String, String> persistenceProperties = new HashMap<String, String>();
+    private static Map<String, String> apiKeyProperties = new HashMap<String, String>();
     private static Map<String, String> operationPolicyProperties = new HashMap<>();
     private static String tokenRevocationClassName;
     private static String certificateBoundAccessEnabled;
@@ -572,6 +573,18 @@ public class APIManagerConfiguration {
                 setExtensionListenerConfigurations(element);
             } else if (APIConstants.JWT_AUDIENCES.equals(localName)){
                 setRestApiJWTAuthAudiences(element);
+            } else if ("APIKeyConfigs".equals(localName)) {
+                OMElement properties = element.getFirstChildWithName(new QName("Properties"));
+                Iterator analyticsPropertiesIterator = properties.getChildrenWithLocalName("Property");
+                Map<String, String> apiKeyProps = new HashMap<>();
+                while (analyticsPropertiesIterator.hasNext()) {
+                    OMElement propertyElem = (OMElement) analyticsPropertiesIterator.next();
+                    String name = propertyElem.getAttributeValue(new QName("name"));
+                    String value = propertyElem.getText();
+                    apiKeyProps.put(name, value);
+                }
+
+                apiKeyProperties = apiKeyProps;
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -2082,6 +2095,10 @@ public class APIManagerConfiguration {
     
     public static Map<String, String> getPersistenceProperties() {
         return persistenceProperties;
+    }
+
+    public static Map<String, String> getApiKeyProperties() {
+        return apiKeyProperties;
     }
 
     public static Map<String, String> getOperationalPolicyProperties() {

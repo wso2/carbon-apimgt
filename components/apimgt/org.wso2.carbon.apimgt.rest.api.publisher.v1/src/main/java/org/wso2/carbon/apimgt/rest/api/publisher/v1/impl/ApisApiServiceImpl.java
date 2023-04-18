@@ -69,6 +69,7 @@ import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
@@ -3681,13 +3682,15 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response generateInternalAPIKey(String apiId, MessageContext messageContext) throws APIManagementException {
+        Map<String, String> configs = APIManagerConfiguration.getApiKeyProperties();
+        int exp = Integer.valueOf(configs.get(APIConstants.INTERNAL_API_KEY_EXPIRY_TIME));
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userName);
-        String token = apiProvider.generateApiKey(apiId);
+        String token = apiProvider.generateApiKey(apiId, exp);
         APIKeyDTO apiKeyDTO = new APIKeyDTO();
         apiKeyDTO.setApikey(token);
-        apiKeyDTO.setValidityTime(60 * 1000);
+        apiKeyDTO.setValidityTime(exp);
         return Response.ok().entity(apiKeyDTO).build();
     }
 
