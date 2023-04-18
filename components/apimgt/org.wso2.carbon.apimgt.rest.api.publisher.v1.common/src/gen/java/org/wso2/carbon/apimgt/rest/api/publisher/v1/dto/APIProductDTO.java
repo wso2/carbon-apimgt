@@ -149,6 +149,7 @@ return null;
     private List<String> policies = new ArrayList<String>();
     private String apiThrottlingPolicy = null;
     private String authorizationHeader = null;
+    private String apiKeyHeader = null;
     private List<String> securityScheme = new ArrayList<String>();
 
     @XmlType(name="SubscriptionAvailabilityEnum")
@@ -624,6 +625,24 @@ return null;
   }
 
   /**
+   * Name of the API key header used for invoking the API. If it is not set, API key header name specified in tenant or system level will be used. 
+   **/
+  public APIProductDTO apiKeyHeader(String apiKeyHeader) {
+    this.apiKeyHeader = apiKeyHeader;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "ApiKey", value = "Name of the API key header used for invoking the API. If it is not set, API key header name specified in tenant or system level will be used. ")
+  @JsonProperty("apiKeyHeader")
+  public String getApiKeyHeader() {
+    return apiKeyHeader;
+  }
+  public void setApiKeyHeader(String apiKeyHeader) {
+    this.apiKeyHeader = apiKeyHeader;
+  }
+
+  /**
    * Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. 
    **/
   public APIProductDTO securityScheme(List<String> securityScheme) {
@@ -941,6 +960,7 @@ return null;
         Objects.equals(policies, apIProduct.policies) &&
         Objects.equals(apiThrottlingPolicy, apIProduct.apiThrottlingPolicy) &&
         Objects.equals(authorizationHeader, apIProduct.authorizationHeader) &&
+        Objects.equals(apiKeyHeader, apIProduct.apiKeyHeader) &&
         Objects.equals(securityScheme, apIProduct.securityScheme) &&
         Objects.equals(subscriptionAvailability, apIProduct.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, apIProduct.subscriptionAvailableTenants) &&
@@ -961,7 +981,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, lastUpdatedTimestamp, gatewayVendor, apis, scopes, categories, workflowStatus);
+    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, lastUpdatedTimestamp, gatewayVendor, apis, scopes, categories, workflowStatus);
   }
 
   @Override
@@ -993,6 +1013,7 @@ return null;
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
     sb.append("    apiThrottlingPolicy: ").append(toIndentedString(apiThrottlingPolicy)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
+    sb.append("    apiKeyHeader: ").append(toIndentedString(apiKeyHeader)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");

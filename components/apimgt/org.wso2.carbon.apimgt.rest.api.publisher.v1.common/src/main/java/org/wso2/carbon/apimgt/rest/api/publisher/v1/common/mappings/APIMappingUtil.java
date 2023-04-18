@@ -2291,6 +2291,7 @@ public class APIMappingUtil {
         productDto.setDescription(product.getDescription());
         productDto.setApiType(APIProductDTO.ApiTypeEnum.fromValue(APIConstants.AuditLogConstants.API_PRODUCT));
         productDto.setAuthorizationHeader(product.getAuthorizationHeader());
+        productDto.setApiKeyHeader(product.getApiKeyHeader());
         productDto.setState(product.getState());
         if (product.getGatewayVendor() == null) {
             productDto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
@@ -2669,6 +2670,7 @@ public class APIMappingUtil {
         product.setProductResources(productResources);
         product.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
         product.setAuthorizationHeader(dto.getAuthorizationHeader());
+        product.setApiKeyHeader(dto.getApiKeyHeader());
 
         //attach api categories to API model
         setAPICategoriesToModel(dto, product, provider);

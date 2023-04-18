@@ -89,6 +89,7 @@ public class APIProduct {
      * Custom authorization header specific to the API
      */
     private String authorizationHeader;
+    private String apiKeyHeader;
 
     private CORSConfiguration corsConfiguration;
 
@@ -437,6 +438,14 @@ public class APIProduct {
 
     public void setAuthorizationHeader(String authorizationHeader) {
         this.authorizationHeader = authorizationHeader;
+    }
+
+    public String getApiKeyHeader() {
+        return apiKeyHeader;
+    }
+
+    public void setApiKeyHeader(String authorizationHeader) {
+        this.apiKeyHeader = apiKeyHeader;
     }
 
     public CORSConfiguration getCorsConfiguration() {
