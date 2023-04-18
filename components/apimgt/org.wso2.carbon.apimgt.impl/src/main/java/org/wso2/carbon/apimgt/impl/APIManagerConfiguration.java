@@ -573,7 +573,7 @@ public class APIManagerConfiguration {
                 setExtensionListenerConfigurations(element);
             } else if (APIConstants.JWT_AUDIENCES.equals(localName)){
                 setRestApiJWTAuthAudiences(element);
-            } else if ("APIKeyConfigs".equals(localName)) {
+            } else if (APIConstants.API_KEY_CONFIGURATIONS.equals(localName)) {
                 OMElement properties = element.getFirstChildWithName(new QName("Properties"));
                 Iterator analyticsPropertiesIterator = properties.getChildrenWithLocalName("Property");
                 Map<String, String> apiKeyProps = new HashMap<>();
