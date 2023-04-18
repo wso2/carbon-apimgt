@@ -1771,6 +1771,14 @@ public class PublisherCommonUtils {
             apiProductDTO.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
 
+        if (apiProductDTO.getApiKeyHeader() == null) {
+            apiProductDTO.setApiKeyHeader(
+                    APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.API_KEY_HEADER));
+        }
+        if (apiProductDTO.getApiKeyHeader() == null) {
+            apiProductDTO.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+        }
+
         //Remove the /{version} from the context.
         if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
