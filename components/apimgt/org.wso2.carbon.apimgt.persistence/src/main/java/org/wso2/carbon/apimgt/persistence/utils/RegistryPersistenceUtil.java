@@ -1471,6 +1471,7 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
                     getCorsConfigurationJsonFromDto(apiProduct.getCorsConfiguration()));
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER, apiProduct.getAuthorizationHeader());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_API_KEY_HEADER, apiProduct.getApiKeyHeader());
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, apiProduct.getApiSecurity());
 
             //Validate if the API has an unsupported context before setting it in the artifact
@@ -1570,6 +1571,7 @@ public class RegistryPersistenceUtil {
             apiProduct.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
             apiProduct.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
             apiProduct.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+            apiProduct.setApiKeyHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_API_KEY_HEADER));
             apiProduct.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             apiProduct.setCreatedTime(registry.get(artifactPath).getCreatedTime());
             apiProduct.setLastUpdated(registry.get(artifactPath).getLastModified());

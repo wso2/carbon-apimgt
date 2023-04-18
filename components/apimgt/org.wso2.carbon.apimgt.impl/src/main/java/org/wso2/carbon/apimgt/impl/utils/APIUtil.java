@@ -1091,6 +1091,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
                     APIUtil.getCorsConfigurationJsonFromDto(apiProduct.getCorsConfiguration()));
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER, apiProduct.getAuthorizationHeader());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_API_KEY_HEADER, apiProduct.getApiKeyHeader());
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, apiProduct.getApiSecurity());
 
             //Validate if the API has an unsupported context before setting it in the artifact

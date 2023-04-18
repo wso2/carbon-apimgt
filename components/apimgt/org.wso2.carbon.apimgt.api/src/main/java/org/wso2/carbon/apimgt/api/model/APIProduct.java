@@ -444,7 +444,7 @@ public class APIProduct {
         return apiKeyHeader;
     }
 
-    public void setApiKeyHeader(String authorizationHeader) {
+    public void setApiKeyHeader(String apiKeyHeader) {
         this.apiKeyHeader = apiKeyHeader;
     }
 
