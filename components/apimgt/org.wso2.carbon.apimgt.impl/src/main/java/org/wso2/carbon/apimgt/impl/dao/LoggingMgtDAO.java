@@ -185,7 +185,9 @@ public class LoggingMgtDAO {
                             retrievedLogLevel = resultSet.getString(APIConstants.LOG_LEVEL);
                         }
                         apiLogInfoDTO = new APILogInfoDTO(resultSet.getString(API_UUID),
-                                resultSet.getString(CONTEXT), retrievedLogLevel);
+                                resultSet.getString(CONTEXT), retrievedLogLevel,
+                                resultSet.getString(APIConstants.RESOURCE_METHOD),
+                                resultSet.getString(APIConstants.RESOURCE_PATH));
                         apiLogInfoDTOList.add(apiLogInfoDTO);
                     }
                 }
