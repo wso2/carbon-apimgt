@@ -309,6 +309,16 @@ public class TemplateBuilderUtil {
             corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
         }
 
+        String apiKeyHeader;
+        if (!StringUtils.isBlank(apiProduct.getApiKeyHeader())) {
+            apiKeyHeader = apiProduct.getApiKeyHeader();
+        } else {
+            apiKeyHeader = APIUtil.getOAuthConfiguration(tenantDomain, APIConstants.API_KEY_HEADER);
+        }
+        if (!StringUtils.isBlank(apiKeyHeader)) {
+            corsProperties.put(APIConstants.API_KEY_HEADER, apiKeyHeader);
+        }
+
         if (apiProduct.getCorsConfiguration() != null &&
                 apiProduct.getCorsConfiguration().isCorsConfigurationEnabled()) {
             CORSConfiguration corsConfiguration = apiProduct.getCorsConfiguration();
@@ -368,6 +378,9 @@ public class TemplateBuilderUtil {
         Map<String, String> authProperties = new HashMap<String, String>();
         if (!StringUtils.isBlank(authorizationHeader)) {
             authProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
+        }
+        if (!StringUtils.isBlank(apiKeyHeader)) {
+            authProperties.put(APIConstants.API_KEY_HEADER, apiKeyHeader);
         }
         String apiSecurity = apiProduct.getApiSecurity();
         String apiLevelPolicy = apiProduct.getProductLevelPolicy();
