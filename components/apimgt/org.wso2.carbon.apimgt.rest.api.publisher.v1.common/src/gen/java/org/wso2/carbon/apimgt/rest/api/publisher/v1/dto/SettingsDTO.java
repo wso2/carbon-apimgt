@@ -39,6 +39,7 @@ public class SettingsDTO   {
     private String defaultSubscriptionPolicy = null;
     private String authorizationHeader = null;
     private List<SettingsCustomPropertiesDTO> customProperties = new ArrayList<SettingsCustomPropertiesDTO>();
+    private String apiKeyHeader = null;
 
   /**
    * The Developer Portal URL
@@ -256,13 +257,21 @@ public class SettingsDTO   {
   }
 
   /**
+<<<<<<< HEAD
    **/
   public SettingsDTO customProperties(List<SettingsCustomPropertiesDTO> customProperties) {
     this.customProperties = customProperties;
+=======
+   * Api Key Header
+   **/
+  public SettingsDTO apiKeyHeader(String apiKeyHeader) {
+    this.apiKeyHeader = apiKeyHeader;
+>>>>>>> 96094feb5fb (Add apiKeyHeader to Settings)
     return this;
   }
 
   
+<<<<<<< HEAD
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("customProperties")
@@ -271,6 +280,15 @@ public class SettingsDTO   {
   }
   public void setCustomProperties(List<SettingsCustomPropertiesDTO> customProperties) {
     this.customProperties = customProperties;
+=======
+  @ApiModelProperty(example = "apiKey", value = "Api Key Header")
+  @JsonProperty("apiKeyHeader")
+  public String getApiKeyHeader() {
+    return apiKeyHeader;
+  }
+  public void setApiKeyHeader(String apiKeyHeader) {
+    this.apiKeyHeader = apiKeyHeader;
+>>>>>>> 96094feb5fb (Add apiKeyHeader to Settings)
   }
 
 
@@ -295,12 +313,20 @@ public class SettingsDTO   {
         Objects.equals(defaultAdvancePolicy, settings.defaultAdvancePolicy) &&
         Objects.equals(defaultSubscriptionPolicy, settings.defaultSubscriptionPolicy) &&
         Objects.equals(authorizationHeader, settings.authorizationHeader) &&
+<<<<<<< HEAD
         Objects.equals(customProperties, settings.customProperties);
+=======
+        Objects.equals(apiKeyHeader, settings.apiKeyHeader);
+>>>>>>> 96094feb5fb (Add apiKeyHeader to Settings)
   }
 
   @Override
   public int hashCode() {
+<<<<<<< HEAD
     return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, customProperties);
+=======
+    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, apiKeyHeader);
+>>>>>>> 96094feb5fb (Add apiKeyHeader to Settings)
   }
 
   @Override
@@ -320,7 +346,11 @@ public class SettingsDTO   {
     sb.append("    defaultAdvancePolicy: ").append(toIndentedString(defaultAdvancePolicy)).append("\n");
     sb.append("    defaultSubscriptionPolicy: ").append(toIndentedString(defaultSubscriptionPolicy)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
+<<<<<<< HEAD
     sb.append("    customProperties: ").append(toIndentedString(customProperties)).append("\n");
+=======
+    sb.append("    apiKeyHeader: ").append(toIndentedString(apiKeyHeader)).append("\n");
+>>>>>>> 96094feb5fb (Add apiKeyHeader to Settings)
     sb.append("}");
     return sb.toString();
   }

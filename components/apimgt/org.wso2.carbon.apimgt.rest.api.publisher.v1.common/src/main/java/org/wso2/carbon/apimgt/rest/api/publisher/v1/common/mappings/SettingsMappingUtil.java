@@ -90,11 +90,17 @@ public class SettingsMappingUtil {
             Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
             String authorizationHeader = APIUtil.getOAuthConfiguration(loggedInUserTenantDomain,
                     APIConstants.AUTHORIZATION_HEADER);
+            String apiKeyHeader = APIUtil.getOAuthConfiguration(loggedInUserTenantDomain,
+                    APIConstants.API_KEY_HEADER);
 
             if (authorizationHeader == null) {
                 authorizationHeader = APIConstants.AUTHORIZATION_HEADER_DEFAULT;
             }
+            if (apiKeyHeader == null) {
+                apiKeyHeader = APIConstants.API_KEY_HEADER_DEFAULT;
+            }
             settingsDTO.setAuthorizationHeader(authorizationHeader);
+            settingsDTO.setApiKeyHeader(apiKeyHeader);
         }
         return settingsDTO;
     }

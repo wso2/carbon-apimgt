@@ -11483,6 +11483,10 @@ components:
               required:
                 type: boolean
                 example: false
+        apiKeyHeader:
+          type: string
+          description: Api Key Header
+          example: apiKey
     SecurityAuditAttribute:
       title: SecurityAuditAttributeDTO
       type: object
