@@ -1718,11 +1718,21 @@ public interface APIProvider extends APIManager {
 
 
     /**
-     * Apply globally added policies to the gateways
+     * Apply globally added policies to the flows
      *
-     * @param gatewayGlobalPolicyList@return Map of APIs as keys and respective APIProductResources as values
+     * @param gatewayGlobalPolicyList   List of Gateway Policy objects
+     * @param orgId                     Organization ID
      * @throws APIManagementException
      */
-    void applyGatewayGlobalPolicies(List<GatewayGlobalPolicy> gatewayGlobalPolicyList, String orgId)
+    void applyGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPolicyList, String description, String name,
+            String orgId) throws APIManagementException;
+
+    /**
+     * Engage globally added policies to the gateways
+     *
+     * @param gatewayPolicyDeploymentMap Policy mapping deployment metadata map
+     * @throws APIManagementException
+     */
+    void engageGatewayGlobalPolicies(Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap)
             throws APIManagementException;
 }

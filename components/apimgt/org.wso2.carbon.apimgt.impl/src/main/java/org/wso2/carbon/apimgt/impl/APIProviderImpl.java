@@ -6575,8 +6575,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public void applyGatewayGlobalPolicies(List<GatewayGlobalPolicy> gatewayGlobalPoliciesList, String orgId)
+    public void applyGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPoliciesList, String description,
+            String name, String orgId) throws APIManagementException {
+        apiMgtDAO.addGatewayGlobalPolicy(gatewayGlobalPoliciesList, description, name, orgId);
+    }
+
+    public void engageGatewayGlobalPolicies(Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap)
             throws APIManagementException {
-        apiMgtDAO.addGatewayGlobalPolicy(gatewayGlobalPoliciesList, orgId);
+        apiMgtDAO.addGatewayPolicyDeployment(gatewayPolicyDeploymentMap);
     }
 }

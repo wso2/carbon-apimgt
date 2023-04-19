@@ -39,48 +39,7 @@ import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIInfo;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.CommentList;
-import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
-import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.GatewayGlobalPolicy;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.OperationPolicy;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
-import org.wso2.carbon.apimgt.api.model.OperationPolicySpecAttribute;
-import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
-import org.wso2.carbon.apimgt.api.model.Pagination;
-import org.wso2.carbon.apimgt.api.model.ResourcePath;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.VHost;
-import org.wso2.carbon.apimgt.api.model.Workflow;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -20409,24 +20368,34 @@ public class ApiMgtDAO {
      * @param orgId                        organization ID
      * @throws APIManagementException
      */
-    public void addGatewayGlobalPolicy(List<GatewayGlobalPolicy> gatewayGlobalPolicyList, String orgId)
-            throws APIManagementException {
+    public void addGatewayGlobalPolicy(List<OperationPolicy> gatewayGlobalPolicyList, String description, String name,
+            String orgId) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
+            String mapping_uuid = UUID.randomUUID().toString();
             try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    SQLConstants.GlobalPolicyConstants.ADD_GLOBAL_POLICY_MAPPING)) {
+                    SQLConstants.GatewayPolicyConstants.ADD_GATEWAY_POLICY_METADATA)) {
+                preparedStatement.setString(1, mapping_uuid);
+                preparedStatement.setString(2, orgId);
+                preparedStatement.setString(3, name);
+                preparedStatement.setString(4, description);
+                preparedStatement.execute();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error while adding gateway global policy metadata", e);
+            }
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    SQLConstants.GatewayPolicyConstants.ADD_GATEWAY_POLICY_MAPPING)) {
                 if (gatewayGlobalPolicyList != null && !gatewayGlobalPolicyList.isEmpty()) {
-                    for (GatewayGlobalPolicy gatewayGlobalPolicy : gatewayGlobalPolicyList) {
+                    for (OperationPolicy gatewayGlobalPolicy : gatewayGlobalPolicyList) {
                         Gson gson = new Gson();
                         String paramJSON = gson.toJson(gatewayGlobalPolicy.getParameters());
-                        preparedStatement.setString(1, gatewayGlobalPolicy.getPolicyId());
-                        preparedStatement.setInt(2, gatewayGlobalPolicy.getOrder());
-                        preparedStatement.setString(3, gatewayGlobalPolicy.getGatewayLabel());
+                        preparedStatement.setString(1, mapping_uuid);
+                        preparedStatement.setString(2, gatewayGlobalPolicy.getPolicyId());
+                        preparedStatement.setInt(3, gatewayGlobalPolicy.getOrder());
                         preparedStatement.setString(4, gatewayGlobalPolicy.getDirection());
                         preparedStatement.setString(5, paramJSON);
-                        preparedStatement.setString(6, "wso2/synapse");
-                        preparedStatement.setString(7, orgId);
                         preparedStatement.addBatch();
                     }
                 }
@@ -20434,10 +20403,55 @@ public class ApiMgtDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                throw e;
+                handleException("Error while updating global Policy mappings", e);
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Error while updating global Policy mapping for gateway", e);
+            handleException("Error while updating global Policy information", e);
+        }
+    }
+
+    /**
+     * Add gateway policy deployment mapping records to the database
+     *
+     * @param gatewayPolicyDeploymentMap       content of the policy deployment mapping objects
+     * @throws APIManagementException           if an error occurs when adding a new gateway policy deployment mapping
+     */
+    public void addGatewayPolicyDeployment(Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                for (boolean isDeployment : gatewayPolicyDeploymentMap.keySet()) {
+                    // Check whether the gateway policy is deployed or undeployed
+                    if (isDeployment) {
+                        // Adding to AM_GATEWAY_POLICY_DEPLOYMENT table
+                        PreparedStatement statement = connection
+                                .prepareStatement(SQLConstants.GatewayPolicyConstants.SET_GATEWAY_POLICY_DEPLOYMENT_STATUS);
+                        for (GatewayPolicyDeployment gatewayPolicyDeployment : gatewayPolicyDeploymentMap.get(true)) {
+                            statement.setString(1, gatewayPolicyDeployment.getMappingUuid());
+                            statement.setString(2, gatewayPolicyDeployment.getGatewayLabel());
+                            statement.addBatch();
+                        }
+                        statement.executeBatch();
+                        connection.commit();
+                    } else {
+                        // Removing from AM_GATEWAY_POLICY_DEPLOYMENT table
+                        PreparedStatement statement = connection
+                                .prepareStatement(SQLConstants.GatewayPolicyConstants.DELETE_GATEWAY_POLICY_DEPLOYMENT_STATUS);
+                        for (GatewayPolicyDeployment gatewayPolicyDeployment : gatewayPolicyDeploymentMap.get(false)) {
+                            statement.setString(1, gatewayPolicyDeployment.getMappingUuid());
+                            statement.addBatch();
+                        }
+                        statement.executeBatch();
+                        connection.commit();
+                    }
+                }
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to add Gateway Policy Deployment Mapping", e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to add Gateway Policy Deployment Mapping", e);
         }
     }
 }

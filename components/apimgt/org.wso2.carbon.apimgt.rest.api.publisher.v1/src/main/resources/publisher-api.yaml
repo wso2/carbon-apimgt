@@ -8159,28 +8159,26 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
 
-  /global-policies:
+  /gateway-policies:
     post:
       tags:
-        - Global Policies
-      summary: Engage global policies to the gateways
+        - Gateway Policies
+      summary: Engage gateway policies to the request, response, fault flows
       description: |
-        This operation can be used to add global policies to the gateway/s.
-      operationId: addGlobalPolicy
+        This operation can be used to apply gateway policies to the request, response, fault flows.
+      operationId: addGatewayPoliciesToFlows
       requestBody:
         description: Policy details object that needs to be added.
         content:
           application/json:
             schema:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/APIOperationPolicies'
+              $ref: '#/components/schemas/GatewayPolicyMappings'
         required: true
       responses:
         200:
           description: |
             OK.
-            Global policy engaged successfully.
+            Policy mapping added successfully.
           headers:
             Content-Type:
               description: |
@@ -8190,9 +8188,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties:
-                  $ref: '#/components/schemas/APIOperationPolicies'
+                $ref: '#/components/schemas/APIOperationPolicies'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -8201,11 +8197,57 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:common_operation_policy_manage
+            - apim:api_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-              -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/global-policies"'
+              -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/gateway-policies"'
+
+  /gateway-policies/deploy:
+    post:
+      tags:
+        - Gateway Policies
+      summary: Engage gateway policy mapping to the gateways
+      description: |
+        This operation can be used to engage gateway policy mapping to the gateway/s.
+      operationId: engageGlobalPolicy
+      requestBody:
+        description: Policy details object that needs to be added.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/GatewayPolicyDeployment'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Gateway policy mapping engaged successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayPolicyDeployment'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+              -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/gateway-policies/deploy"'
 
   /api-products/change-lifecycle:
     post:
@@ -11967,6 +12009,33 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OperationPolicy'
+    GatewayPolicyMappings:
+      title: Gateway Policy Mappings
+      type: object
+      properties:
+        policyMapping:
+          $ref: '#/components/schemas/APIOperationPolicies'
+        description:
+          type: string
+          description: A brief description about the policy mapping
+          example: Set header value to the request with item type and response header set with served server name
+        displayName:
+          type: string
+          description: Meaningful name to identify the policy mapping
+          example: item_type_setter
+    GatewayPolicyDeployment:
+      title: Details to map, deploy, undeploy policy mappings to gateways
+      type: object
+      properties:
+        mappingUUID:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        gatewayLabel:
+          type: string
+          example: gatewayLabel_1
+        gatewayDeployment:
+          type: boolean
+          example: true
     GatewayEnvironmentProtocolURI:
       title: Gateway Environment protocols and URIs
       required:
