@@ -20457,8 +20457,8 @@ public class ApiMgtDAO {
                 PreparedStatement statement = connection.prepareStatement(
                         SQLConstants.GatewayPolicyConstants.DELETE_GATEWAY_POLICY_DEPLOYMENT_STATUS);
                 for (GatewayPolicyDeployment gatewayPolicyUnDeployment : gatewayPolicyUnDeploymentList) {
-                    statement.setString(1, gatewayPolicyUnDeployment.getMappingUuid());
-                    statement.setString(2, gatewayPolicyUnDeployment.getGatewayLabel());
+                    statement.setString(1, gatewayPolicyUnDeployment.getGatewayLabel());
+                    statement.setString(2, gatewayPolicyUnDeployment.getMappingUuid());
                     statement.addBatch();
                 }
                 statement.executeBatch();
