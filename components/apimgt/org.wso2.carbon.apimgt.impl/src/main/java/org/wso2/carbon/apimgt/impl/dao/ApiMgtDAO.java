@@ -20413,45 +20413,63 @@ public class ApiMgtDAO {
     /**
      * Add gateway policy deployment mapping records to the database
      *
-     * @param gatewayPolicyDeploymentMap       content of the policy deployment mapping objects
+     * @param gatewayPolicyDeploymentList       content of the policy deployment mapping objects
      * @throws APIManagementException           if an error occurs when adding a new gateway policy deployment mapping
      */
-    public void addGatewayPolicyDeployment(Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap) throws APIManagementException {
+    public void addGatewayPolicyDeployment(List<GatewayPolicyDeployment> gatewayPolicyDeploymentList) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
-                for (boolean isDeployment : gatewayPolicyDeploymentMap.keySet()) {
-                    // Check whether the gateway policy is deployed or undeployed
-                    if (isDeployment) {
-                        // Adding to AM_GATEWAY_POLICY_DEPLOYMENT table
-                        PreparedStatement statement = connection
-                                .prepareStatement(SQLConstants.GatewayPolicyConstants.SET_GATEWAY_POLICY_DEPLOYMENT_STATUS);
-                        for (GatewayPolicyDeployment gatewayPolicyDeployment : gatewayPolicyDeploymentMap.get(true)) {
-                            statement.setString(1, gatewayPolicyDeployment.getMappingUuid());
-                            statement.setString(2, gatewayPolicyDeployment.getGatewayLabel());
-                            statement.addBatch();
-                        }
-                        statement.executeBatch();
-                        connection.commit();
-                    } else {
-                        // Removing from AM_GATEWAY_POLICY_DEPLOYMENT table
-                        PreparedStatement statement = connection
-                                .prepareStatement(SQLConstants.GatewayPolicyConstants.DELETE_GATEWAY_POLICY_DEPLOYMENT_STATUS);
-                        for (GatewayPolicyDeployment gatewayPolicyDeployment : gatewayPolicyDeploymentMap.get(false)) {
-                            statement.setString(1, gatewayPolicyDeployment.getMappingUuid());
-                            statement.addBatch();
-                        }
-                        statement.executeBatch();
-                        connection.commit();
-                    }
+                // Adding to AM_GATEWAY_POLICY_DEPLOYMENT table
+                PreparedStatement statement = connection.prepareStatement(
+                        SQLConstants.GatewayPolicyConstants.SET_GATEWAY_POLICY_DEPLOYMENT_STATUS);
+                for (GatewayPolicyDeployment gatewayPolicyDeployment : gatewayPolicyDeploymentList) {
+                    statement.setString(1, gatewayPolicyDeployment.getMappingUuid());
+                    statement.setString(2, gatewayPolicyDeployment.getGatewayLabel());
+                    statement.addBatch();
                 }
+                statement.executeBatch();
+                connection.commit();
+
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to add Gateway Policy Deployment Mapping", e);
             }
         } catch (SQLException e) {
-            handleException("Failed to add Gateway Policy Deployment Mapping", e);
+            handleException("Failed to add Gateway Policy Deployment Information", e);
+        }
+    }
+
+    /**
+     * Remove gateway policy deployment mapping records from the database
+     *
+     * @param gatewayPolicyUnDeploymentList     content of the policy un-deployment mapping objects
+     * @throws APIManagementException           if an error occurs when adding a new gateway policy deployment mapping
+     */
+    public void removeGatewayPolicyDeployment(List<GatewayPolicyDeployment> gatewayPolicyUnDeploymentList)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Removing from AM_GATEWAY_POLICY_DEPLOYMENT table
+                PreparedStatement statement = connection.prepareStatement(
+                        SQLConstants.GatewayPolicyConstants.DELETE_GATEWAY_POLICY_DEPLOYMENT_STATUS);
+                for (GatewayPolicyDeployment gatewayPolicyUnDeployment : gatewayPolicyUnDeploymentList) {
+                    statement.setString(1, gatewayPolicyUnDeployment.getMappingUuid());
+                    statement.setString(2, gatewayPolicyUnDeployment.getGatewayLabel());
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+                connection.commit();
+
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to remove Gateway Policy Deployment Mapping", e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to remove Gateway Policy Deployment Information", e);
         }
     }
 }

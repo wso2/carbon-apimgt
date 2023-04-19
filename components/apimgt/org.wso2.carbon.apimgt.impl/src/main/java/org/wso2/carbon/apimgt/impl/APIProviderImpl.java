@@ -3985,7 +3985,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         rolesQuery.append(")");
         if(log.isDebugEnabled()) {
-        	log.debug("User role list solr query " + APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString());
+            log.debug("User role list solr query " + APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString());
         }
         return APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString();
     }
@@ -6580,8 +6580,52 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.addGatewayGlobalPolicy(gatewayGlobalPoliciesList, description, name, orgId);
     }
 
-    public void engageGatewayGlobalPolicies(Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap)
-            throws APIManagementException {
-        apiMgtDAO.addGatewayPolicyDeployment(gatewayPolicyDeploymentMap);
+    public void engageGatewayGlobalPolicies(Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap,
+            String orgId) throws APIManagementException {
+
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        List<GatewayPolicyDeployment> gatewayPolicyDeploymentList = new ArrayList<>();
+        List<GatewayPolicyDeployment> gatewayPolicyUndeploymentList = new ArrayList<>();
+        Map<String, Set<String>> gatewaysToAdd = new HashMap<>();
+        Map<String, Set<String>> gatewaysToRemove = new HashMap<>();
+        for (boolean isDeployment : gatewayPolicyDeploymentMap.keySet()) {
+            // Check whether the gateway policy is deployed or undeployed
+            if (isDeployment) {
+                gatewayPolicyDeploymentList = gatewayPolicyDeploymentMap.get(true);
+                gatewaysToAdd = getGatewayPolicyDeploymentMap(gatewayPolicyDeploymentList);
+            } else {
+                gatewayPolicyUndeploymentList = gatewayPolicyDeploymentMap.get(false);
+                gatewaysToRemove = getGatewayPolicyDeploymentMap(gatewayPolicyUndeploymentList);
+            }
+        }
+        if (gatewaysToAdd.size() > 0) {
+            apiMgtDAO.addGatewayPolicyDeployment(gatewayPolicyDeploymentList);
+            for (String gatewayLabel : gatewaysToAdd.keySet()) {
+                gatewayManager.deployPolicyToGateway(gatewayLabel, orgId, gatewaysToAdd.get(gatewayLabel));
+            }
+        }
+        if (gatewaysToRemove.size() > 0) {
+            apiMgtDAO.removeGatewayPolicyDeployment(gatewayPolicyUndeploymentList);
+            for (String gatewayLabel : gatewaysToRemove.keySet()) {
+                gatewayManager.undeployPolicyFromGateway(gatewayLabel, orgId, gatewaysToRemove.get(gatewayLabel));
+            }
+        }
+    }
+
+    //To get the hashmap of what mappingId is deployed or undeployed in which gateway
+    private Map<String, Set<String>> getGatewayPolicyDeploymentMap(List<GatewayPolicyDeployment>
+            gatewayPolicyDeploymentList) {
+        Map<String, Set<String>> gatewayPolicyDeploymentMapForResponse = new HashMap<>();
+        for (GatewayPolicyDeployment gatewayPolicyDeployment : gatewayPolicyDeploymentList) {
+            if (gatewayPolicyDeploymentMapForResponse.containsKey(gatewayPolicyDeployment.getMappingUuid())) {
+                gatewayPolicyDeploymentMapForResponse.get(gatewayPolicyDeployment.getMappingUuid())
+                        .add(gatewayPolicyDeployment.getGatewayLabel());
+            } else {
+                Set<String> gatewayLabels = new HashSet<>();
+                gatewayLabels.add(gatewayPolicyDeployment.getGatewayLabel());
+                gatewayPolicyDeploymentMapForResponse.put(gatewayPolicyDeployment.getMappingUuid(), gatewayLabels);
+            }
+        }
+        return gatewayPolicyDeploymentMapForResponse;
     }
 }
