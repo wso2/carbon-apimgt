@@ -5962,7 +5962,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String generateApiKey(String apiId) throws APIManagementException {
+    public String generateApiKey(String apiId, int expiryTime) throws APIManagementException {
         APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId);
         if (apiInfo == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with ID: "
@@ -5977,7 +5977,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         jwtTokenInfoDTO.setEndUserName(username);
         jwtTokenInfoDTO.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
         jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(subscribedApiInfo));
-        jwtTokenInfoDTO.setExpirationTime(60 * 1000);
+        jwtTokenInfoDTO.setExpirationTime(expiryTime);
         ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
         return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
     }

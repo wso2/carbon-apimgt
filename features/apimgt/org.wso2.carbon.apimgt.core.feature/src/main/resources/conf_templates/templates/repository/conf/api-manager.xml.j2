@@ -1484,4 +1484,10 @@
         </Properties>
       </OperationPolicyConfigs>
       {% endif %}
+
+     {% if apim.testkey.validity is defined %}
+     <APITestKeyConfigs>
+        <Exp>{{apim.testkey.validity.exp}}</Exp>
+     </APITestKeyConfigs>
+     {% endif %}}
 </APIManager>

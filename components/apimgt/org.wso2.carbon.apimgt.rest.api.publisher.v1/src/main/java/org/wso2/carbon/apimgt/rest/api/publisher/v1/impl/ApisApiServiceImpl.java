@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.BasicSessionCredentials;
@@ -69,6 +68,7 @@ import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
@@ -3681,13 +3681,15 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response generateInternalAPIKey(String apiId, MessageContext messageContext) throws APIManagementException {
+        Map<String, String> configs = APIManagerConfiguration.getApiTestKeyProperties();
+        int exp = Integer.valueOf(configs.get(APIConstants.INTERNAL_API_TEST_KEY_EXPIRY_TIME));
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userName);
-        String token = apiProvider.generateApiKey(apiId);
+        String token = apiProvider.generateApiKey(apiId, exp);
         APIKeyDTO apiKeyDTO = new APIKeyDTO();
         apiKeyDTO.setApikey(token);
-        apiKeyDTO.setValidityTime(60 * 1000);
+        apiKeyDTO.setValidityTime(exp);
         return Response.ok().entity(apiKeyDTO).build();
     }
 

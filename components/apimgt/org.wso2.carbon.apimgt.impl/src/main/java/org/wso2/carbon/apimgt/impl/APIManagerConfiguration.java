@@ -117,6 +117,7 @@ public class APIManagerConfiguration {
     private static Properties persistentNotifierProperties;
     private static Map<String, String> analyticsProperties;
     private static Map<String, String> persistenceProperties = new HashMap<String, String>();
+    private static Map<String, String> apiTestKeyProperties = new HashMap<String, String>();
     private static Map<String, String> operationPolicyProperties = new HashMap<>();
     private static String tokenRevocationClassName;
     private static String certificateBoundAccessEnabled;
@@ -572,6 +573,8 @@ public class APIManagerConfiguration {
                 setExtensionListenerConfigurations(element);
             } else if (APIConstants.JWT_AUDIENCES.equals(localName)){
                 setRestApiJWTAuthAudiences(element);
+            } else if (APIConstants.API_TEST_KEY_CONFIGURATIONS.equals(localName)) {
+                setAPITestKeyValidity(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -2006,6 +2009,17 @@ public class APIManagerConfiguration {
 
     }
 
+    private void setAPITestKeyValidity(OMElement omElement) {
+        OMElement expElement = omElement
+                .getFirstChildWithName(new QName(APIConstants.API_TEST_KEY_VALIDITY_EXP));
+        if (expElement != null) {
+            apiTestKeyProperties.put(APIConstants.INTERNAL_API_TEST_KEY_EXPIRY_TIME,expElement.getText());
+        } else {
+            apiTestKeyProperties.put(APIConstants.INTERNAL_API_TEST_KEY_EXPIRY_TIME,APIConstants.DEFAULT_API_TEST_KEY_VALIDITY);
+            log.debug("Test API Key Validity not set. Set to default 10m");
+        }
+    }
+
     private void setRuntimeArtifactsSyncGatewayConfig (OMElement omElement){
 
         OMElement enableElement = omElement
@@ -2082,6 +2096,10 @@ public class APIManagerConfiguration {
     
     public static Map<String, String> getPersistenceProperties() {
         return persistenceProperties;
+    }
+
+    public static Map<String, String> getApiTestKeyProperties() {
+        return apiTestKeyProperties;
     }
 
     public static Map<String, String> getOperationalPolicyProperties() {
