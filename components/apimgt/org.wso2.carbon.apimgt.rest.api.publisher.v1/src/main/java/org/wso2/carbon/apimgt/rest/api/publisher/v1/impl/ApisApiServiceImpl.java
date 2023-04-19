@@ -1471,13 +1471,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
             boolean isAPIExistDB = false;
-            APIManagementException error = null;
+            Exception error = null;
             APIInfo apiInfo = null;
             try {
                 //validate if api exists
                 apiInfo = validateAPIExistence(apiId, organization);
                 isAPIExistDB = true;
-            } catch (APIManagementException e) {
+            } catch (Exception e) { // catching generic exception to continue the execution despite errors
                 log.error("Error while validating API existence for deleting API " + apiId + " on organization "
                         + organization);
                 error = e;
@@ -1494,7 +1494,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     if (apiUsages != null && apiUsages.size() > 0) {
                         RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
                     }
-                } catch (APIManagementException e) {
+                } catch (Exception e) { // catching generic exception to continue the execution despite errors
                     log.error("Error while checking active subscriptions for deleting API " + apiId + " on organization "
                             + organization);
                     error = e;
@@ -1507,7 +1507,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         RestApiUtil.handleConflict("Cannot remove the API because following resource paths " +
                                 usedProductResources.toString() + " are used by one or more API Products", log);
                     }
-                } catch (APIManagementException e) {
+                } catch (Exception e) { // catching generic exception to continue the execution despite errors
                     log.error("Error while checking API products using same resources for deleting API " + apiId +
                             " on organization " + organization);
                     error = e;
@@ -1519,12 +1519,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             try {
                 apiProvider.deleteAPI(apiId, organization);
                 isDeleted = true;
-            } catch (APIManagementException e) {
+            } catch (Exception e) { // catching generic exception to continue the execution despite errors
                 log.error("Error while deleting API " + apiId + "on organization " + organization, e);
             }
 
             if (error != null) {
-                throw error;
+                throw new APIManagementException("Error occurred while deleting API: " + apiId, error);
             } else if (!isDeleted) {
                 RestApiUtil.handleInternalServerError("Error while deleting API : " + apiId + " on organization "
                         + organization, log);
