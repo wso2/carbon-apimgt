@@ -127,6 +127,9 @@ public class TemplateBuilderUtil {
         } else {
             apiKeyHeader = APIUtil.getOAuthConfiguration(tenantDomain, APIConstants.API_KEY_HEADER);
         }
+        if (!StringUtils.isBlank(apiKeyHeader)) {
+            corsProperties.put(APIConstants.API_KEY_HEADER, apiKeyHeader);
+        }
 
         if (!(APIConstants.APITransportType.WS.toString().equals(api.getType()))) {
             if (api.getCorsConfiguration() != null && api.getCorsConfiguration().isCorsConfigurationEnabled()) {
