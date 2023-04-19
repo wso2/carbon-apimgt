@@ -1524,7 +1524,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             if (error != null) {
-                throw new APIManagementException(error);
+                throw new APIManagementException("Error occurred while deleting API: " + apiId, error);
             } else if (!isDeleted) {
                 RestApiUtil.handleInternalServerError("Error while deleting API : " + apiId + " on organization "
                         + organization, log);
