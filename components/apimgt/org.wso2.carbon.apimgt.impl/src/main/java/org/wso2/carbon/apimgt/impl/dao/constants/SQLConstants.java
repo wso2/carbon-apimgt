@@ -4103,7 +4103,7 @@ public class SQLConstants {
                 + " (GLOBAL_POLICY_MAPPING_UUID, GATEWAY_LABEL) " + " VALUES (?,?)";
         // Remove global policy deployment
         public static final String DELETE_GATEWAY_POLICY_DEPLOYMENT_STATUS =
-                "DELETE FROM AM_GATEWAY_POLICY_DEPLOYMENT WHERE GLOBAL_POLICY_MAPPING_UUID = ?";
+                "DELETE FROM AM_GATEWAY_POLICY_DEPLOYMENT WHERE GATEWAY_LABEL = ? AND GLOBAL_POLICY_MAPPING_UUID = ?";
     }
 
     /**
