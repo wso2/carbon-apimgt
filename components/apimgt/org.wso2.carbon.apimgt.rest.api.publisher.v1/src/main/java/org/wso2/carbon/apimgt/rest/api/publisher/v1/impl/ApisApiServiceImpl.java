@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.BasicSessionCredentials;
@@ -3682,8 +3681,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response generateInternalAPIKey(String apiId, MessageContext messageContext) throws APIManagementException {
-        Map<String, String> configs = APIManagerConfiguration.getApiKeyProperties();
-        int exp = Integer.valueOf(configs.get(APIConstants.INTERNAL_API_KEY_EXPIRY_TIME));
+        Map<String, String> configs = APIManagerConfiguration.getApiTestKeyProperties();
+        int exp = Integer.valueOf(configs.get(APIConstants.INTERNAL_API_TEST_KEY_EXPIRY_TIME));
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userName);

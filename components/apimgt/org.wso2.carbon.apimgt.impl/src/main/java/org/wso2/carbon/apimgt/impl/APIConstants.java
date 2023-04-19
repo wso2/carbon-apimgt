@@ -2968,8 +2968,8 @@ public final class APIConstants {
     public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
 
     // Constants related to internal API key configurations
-    public static final String INTERNAL_API_KEY_EXPIRY_TIME = "exp";
-    public static final String API_KEY_CONFIGURATIONS = "APIKeyConfigs";
-    public static final String API_KEY_VALIDITY_EXP = "Exp";
-    public static final String DEFAULT_API_KEY_VALIDITY = "600";
+    public static final String INTERNAL_API_TEST_KEY_EXPIRY_TIME = "exp";
+    public static final String API_TEST_KEY_CONFIGURATIONS = "APITestKeyConfigs";
+    public static final String API_TEST_KEY_VALIDITY_EXP = "Exp";
+    public static final String DEFAULT_API_TEST_KEY_VALIDITY = "600";
 }
