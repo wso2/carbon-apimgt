@@ -2601,7 +2601,8 @@ public final class APIConstants {
         SCOPE,
         CERTIFICATE,
         GA_CONFIG,
-        CORRELATION_CONFIG
+        CORRELATION_CONFIG,
+        GATEWAY_POLICY
     }
 
     // Supported Event Types
@@ -2631,7 +2632,9 @@ public final class APIConstants {
         ENDPOINT_CERTIFICATE_REMOVE,
         GA_CONFIG_UPDATE,
         UDATE_API_LOG_LEVEL,
-        UPDATE_CORRELATION_CONFIGS
+        UPDATE_CORRELATION_CONFIGS,
+        DEPLOY_POLICY_MAPPING_IN_GATEWAY,
+        REMOVE_POLICY_MAPPING_FROM_GATEWAY
     }
 
     public enum EventAction {

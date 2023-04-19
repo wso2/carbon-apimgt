@@ -52,10 +52,11 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
     public Response engageGlobalPolicy(List<GatewayPolicyDeploymentDTO> gatewayPolicyDeploymentDTOList,
             MessageContext messageContext) {
         try {
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap =
                     GatewayPolicyMappingUtil.fromDTOToGatewayPolicyDeploymentMap(gatewayPolicyDeploymentDTOList);
-            apiProvider.engageGatewayGlobalPolicies(gatewayPolicyDeploymentMap);
+            apiProvider.engageGatewayGlobalPolicies(gatewayPolicyDeploymentMap, tenantDomain);
             return Response.ok().build();
         } catch (APIManagementException e) {
             if (isAuthorizationFailure(e)) {

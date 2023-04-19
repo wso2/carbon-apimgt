@@ -1709,8 +1709,9 @@ public interface APIProvider extends APIManager {
      * Engage globally added policies to the gateways
      *
      * @param gatewayPolicyDeploymentMap Policy mapping deployment metadata map
+     * @param orgId                      Organization ID
      * @throws APIManagementException
      */
-    void engageGatewayGlobalPolicies(Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap)
-            throws APIManagementException;
+    void engageGatewayGlobalPolicies(Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap,
+            String orgId) throws APIManagementException;
 }
