@@ -94,6 +94,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private SynapseEnvironment synapseEnvironment;
 
     private String authorizationHeader;
+    private String apiKeyHeader;
     private String apiSecurity;
     private String apiLevelPolicy;
     private String certificateInformation;
@@ -199,6 +200,24 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
      */
     public void setAuthorizationHeader(String authorizationHeader) {
         this.authorizationHeader = authorizationHeader;
+    }
+
+    /**
+     * To get the Api Key Header.
+     *
+     * @return Relevant the Api Key Header of the API request
+     */
+    public String getApiKeyHeader() {
+        return apiKeyHeader;
+    }
+
+    /**
+     * To set the Api Key Header.
+     *
+     * @param apiKeyHeader the Api Key Header of the API request.
+     */
+    public void setApiKeyHeader(String apiKeyHeader) {
+        this.apiKeyHeader = apiKeyHeader;
     }
 
     /**

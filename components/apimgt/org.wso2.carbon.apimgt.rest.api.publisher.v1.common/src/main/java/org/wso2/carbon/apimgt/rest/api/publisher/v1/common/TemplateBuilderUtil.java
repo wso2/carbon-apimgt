@@ -121,6 +121,13 @@ public class TemplateBuilderUtil {
             corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
         }
 
+        String apiKeyHeader;
+        if (!StringUtils.isBlank(api.getApiKeyHeader())) {
+            apiKeyHeader = api.getApiKeyHeader();
+        } else {
+            apiKeyHeader = APIUtil.getOAuthConfiguration(tenantDomain, APIConstants.API_KEY_HEADER);
+        }
+
         if (!(APIConstants.APITransportType.WS.toString().equals(api.getType()))) {
             if (api.getCorsConfiguration() != null && api.getCorsConfiguration().isCorsConfigurationEnabled()) {
                 CORSConfiguration corsConfiguration = api.getCorsConfiguration();
@@ -183,6 +190,9 @@ public class TemplateBuilderUtil {
         Map<String, String> authProperties = new HashMap<>();
         if (!StringUtils.isBlank(authorizationHeader)) {
             authProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
+        }
+        if (!StringUtils.isBlank(apiKeyHeader)) {
+            authProperties.put(APIConstants.API_KEY_HEADER, apiKeyHeader);
         }
         String apiSecurity = api.getApiSecurity();
         String apiLevelPolicy = api.getApiLevelPolicy();
