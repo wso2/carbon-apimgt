@@ -4088,13 +4088,22 @@ public class SQLConstants {
     /**
      * Static class to hold database queries related to AM_Global_POLICY_MAPPING table
      */
-    public static class GlobalPolicyConstants {
+    public static class GatewayPolicyConstants {
         // Global policy mapping
-        public static final String ADD_GLOBAL_POLICY_MAPPING =
-                "INSERT INTO AM_GLOBAL_POLICY_MAPPING " +
-                        " (POLICY_UUID, POLICY_ORDER, GATEWAY_LABEL, DIRECTION, PARAMETERS, GATEWAY_TYPE, ORGANIZATION) " +
-                        " VALUES (?,?,?,?,?,?,?)";
-
+        public static final String ADD_GATEWAY_POLICY_METADATA =
+                "INSERT INTO AM_GATEWAY_POLICY_METADATA " +
+                        " (GLOBAL_POLICY_MAPPING_UUID, ORGANIZATION, DISPLAY_NAME, DESCRIPTION) " +
+                        " VALUES (?,?,?,?)";
+        public static final String ADD_GATEWAY_POLICY_MAPPING =
+                "INSERT INTO AM_GATEWAY_POLICY_MAPPING " +
+                        " (GLOBAL_POLICY_MAPPING_UUID, POLICY_UUID, POLICY_ORDER, DIRECTION, PARAMETERS) " +
+                        " VALUES (?,?,?,?,?)";
+        // Global policy deployment state
+        public static final String SET_GATEWAY_POLICY_DEPLOYMENT_STATUS = "INSERT INTO AM_GATEWAY_POLICY_DEPLOYMENT "
+                + " (GLOBAL_POLICY_MAPPING_UUID, GATEWAY_LABEL) " + " VALUES (?,?)";
+        // Remove global policy deployment
+        public static final String DELETE_GATEWAY_POLICY_DEPLOYMENT_STATUS =
+                "DELETE FROM AM_GATEWAY_POLICY_DEPLOYMENT WHERE GLOBAL_POLICY_MAPPING_UUID = ?";
     }
 
     /**
