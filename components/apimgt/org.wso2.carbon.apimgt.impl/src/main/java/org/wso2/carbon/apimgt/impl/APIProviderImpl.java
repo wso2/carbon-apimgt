@@ -2036,7 +2036,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // get api object by uuid
         try {
             api = getAPIbyUUID(apiUuid, organization);
-        } catch (APIManagementException e) {
+        } catch (Exception e) { // catching generic exception to continue the execution despite errors
             log.error("Error while getting API by uuid for deleting API " + apiUuid + " on organization "
                     + organization);
             log.debug("Following steps will be skipped while deleting API " + apiUuid + "on organization "
@@ -2051,7 +2051,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // get api id from db
         try {
             apiId = apiMgtDAO.getAPIID(apiUuid);
-        } catch (APIManagementException e) {
+        } catch (Exception e) { // catching generic exception to continue the execution despite errors
             log.error("Error while getting API ID from DB for deleting API " + apiUuid + " on organization "
                     + organization, e);
             log.debug("Following steps will be skipped while deleting the API " + apiUuid + " on organization "
@@ -2064,6 +2064,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (!isError && api != null) {
             try {
                 deleteAPIRevisions(apiUuid, organization);
+                if (log.isDebugEnabled()) {
+                    String logMessage =
+                            "API revisions of Name : " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
+                                    + " successfully removed from the database.";
+                    log.debug(logMessage);
+                }
+
+            } catch (Exception e) { // catching generic exception to continue the execution despite errors
+                log.error("Error while executing API delete operations on DB for API " + apiUuid +
+                        " on organization " + organization, e);
+                isError = true;
+            }
+        }
+
+        if (!isError && api != null) {
+            try {
                 deleteAPIFromDB(api);
                 if (log.isDebugEnabled()) {
                     String logMessage =
@@ -2072,7 +2088,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     log.debug(logMessage);
                 }
 
-            } catch (APIManagementException e) {
+            } catch (Exception e) { // catching generic exception to continue the execution despite errors
                 log.error("Error while executing API delete operations on DB for API " + apiUuid +
                         " on organization " + organization, e);
                 isError = true;
@@ -2089,7 +2105,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         keyManager.deleteRegisteredResourceByAPIId(apiUuid, organization);
                         log.debug("API " + apiUuid + " on organization " + organization +
                                 " has successfully removed from the Key Manager " + keyManagerDtoEntry.getKey());
-                    } catch (APIManagementException e) {
+                    } catch (Exception e) { // catching generic exception to continue the execution despite errors
                         log.error("Error while deleting Resource Registration for API " + apiUuid +
                                 " on organization " + organization + " in Key Manager "
                                 + keyManagerDtoEntry.getKey(), e);
@@ -2102,7 +2118,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifacts(apiUuid);
             log.debug("API " + apiUuid + " on organization " + organization +
                     " has successfully removed from the gateway artifacts.");
-        } catch (APIManagementException e) {
+        } catch (Exception e) { // catching generic exception to continue the execution despite errors
             log.error("Error while executing API delete operation on gateway artifacts for API " + apiUuid, e);
             isError = true;
         }
@@ -2111,7 +2127,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiPersistenceInstance.deleteAPI(new Organization(organization), apiUuid);
             log.debug("API " + apiUuid + " on organization " + organization +
                     " has successfully removed from the persistence instance.");
-        } catch (APIPersistenceException e) {
+        } catch (Exception e) { // catching generic exception to continue the execution despite errors
             log.error("Error while executing API delete operation on persistence instance for API "
                     + apiUuid + " on organization " + organization, e);
             isError = true;
@@ -2131,7 +2147,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         wso2APIPublisher.deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
                     }
                 }
-            } catch (APIManagementException e) {
+            } catch (Exception e) { // catching generic exception to continue the execution despite errors
                 log.error("Error while executing API delete operation on external API stores for API "
                         + apiUuid + " on organization " + organization, e);
                 isError = true;
@@ -2141,7 +2157,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (apiId != -1) {
             try {
                 cleanUpPendingAPIStateChangeTask(apiId, false);
-            } catch (WorkflowException | APIManagementException e) {
+            } catch (Exception e) { // catching generic exception to continue the execution despite errors
                 log.error("Error while executing API delete operation on cleanup workflow tasks for API "
                         + apiUuid + " on organization " + organization, e);
                 isError = true;
