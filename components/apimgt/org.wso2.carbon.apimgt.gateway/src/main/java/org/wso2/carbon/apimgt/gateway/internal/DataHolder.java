@@ -164,6 +164,7 @@ public class DataHolder {
                 if (log.isDebugEnabled()) {
                     log.debug("API : " + api.getApiName() + "is deployed successfully");
                 }
+                api.setRevisionId(gatewayAPIDTO.getRevision());
             }
         }
     }
