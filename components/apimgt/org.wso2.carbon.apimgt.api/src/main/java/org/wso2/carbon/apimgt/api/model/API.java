@@ -1437,4 +1437,14 @@ public class API implements Serializable {
     public void setAsyncTransportProtocols(String asyncTransportProtocols) {
         this.asyncTransportProtocols = asyncTransportProtocols;
     }
+
+    public List<OperationPolicy> apiPolicies;
+
+    public List<OperationPolicy> getApiPolicies() {
+        return apiPolicies;
+    }
+
+    public void setApiPolicies(List<OperationPolicy> apiPolicies) {
+        this.apiPolicies = apiPolicies;
+    }
 }

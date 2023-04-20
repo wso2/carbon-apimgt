@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
@@ -56,32 +57,51 @@ public class SynapsePolicyAggregator {
             + "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator
             + "operation_policy_template.j2";
 
-    public static String generatePolicySequenceForUriTemplateSet(Set<URITemplate> uriTemplates, String sequenceName,
-                                                                 String flow, String pathToAchieve)
+    public static String generatePolicySequenceForUriTemplateSet(Set<URITemplate> uriTemplates, API api,
+                                                                 String sequenceName, String flow,
+                                                                 String pathToAchieve)
             throws APIManagementException, IOException {
 
-        List<Object> caseList = new ArrayList<>();
+        List<Object> operationPolicyCaseList = new ArrayList<>();
+        List<String> apiLevelPolicyRenderedList = new ArrayList<>();
         for (URITemplate template : uriTemplates) {
-            populatePolicyCaseList(template, pathToAchieve, flow, caseList);
+            populateOperationPolicyCaseList(template, pathToAchieve, flow, operationPolicyCaseList);
         }
 
-        if (caseList.size() != 0) {
-            Map<String, Object> configMap = new HashMap<>();
-            configMap.put("sequence_name", sequenceName);
-            configMap.put("case_list", caseList);
-            if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(flow)) {
-                configMap.put("fault_sequence", true);
+        if (api != null) {
+            if (api.getApiPolicies() != null && !api.getApiPolicies().isEmpty()) {
+                apiLevelPolicyRenderedList = renderPolicyMapping(api.getApiPolicies(), pathToAchieve, flow);
             }
-            String operationPolicyTemplate = FileUtil.readFileToString(POLICY_SEQUENCE_TEMPLATE_LOCATION)
-                    .replace("\\", ""); //Removing escape characters from the template
+        }
+
+        Map<String, Object> configMap = new HashMap<>();
+        boolean render = false;
+        String operationPolicyTemplate = FileUtil.readFileToString(POLICY_SEQUENCE_TEMPLATE_LOCATION)
+                .replace("\\", ""); //Removing escape characters from the template
+        configMap.put("sequence_name", sequenceName);
+        if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(flow)) {
+            configMap.put("fault_sequence", true);
+        }
+
+        if (!operationPolicyCaseList.isEmpty()) {
+            configMap.put("case_list", operationPolicyCaseList);
+            render = true;
+        }
+
+        if (!apiLevelPolicyRenderedList.isEmpty()) {
+            configMap.put("apiPolicies", apiLevelPolicyRenderedList);
+            render = true;
+        }
+
+        if (render) {
             return renderPolicyTemplate(operationPolicyTemplate, configMap);
         } else {
             return "";
         }
     }
 
-    public static List<Object> populatePolicyCaseList(URITemplate template, String pathToAchieve, String flow,
-                                                      List<Object> caseList) throws APIManagementException {
+    public static List<Object> populateOperationPolicyCaseList(URITemplate template, String pathToAchieve, String flow,
+                                                               List<Object> caseList) throws APIManagementException {
 
         Map<String, Object> caseMap = new HashMap<>();
         String uriTemplateString = template.getUriTemplate();
@@ -91,12 +111,26 @@ public class SynapsePolicyAggregator {
         // This will replace & with &amp; for query params
         key = StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(key));
 
-        List<String> caseBody = new ArrayList<>();
+        List<OperationPolicy> operationPolicies = template.getOperationPolicies();
+        List<String> caseBody = renderPolicyMapping(operationPolicies, pathToAchieve, flow);
+
+        if (caseBody.size() != 0) {
+            caseMap.put("case_regex", key);
+            caseMap.put("policy_sequence", caseBody);
+            caseList.add(caseMap);
+        }
+
+        return caseList;
+    }
+
+    public static List<String> renderPolicyMapping(List<OperationPolicy> policyList, String pathToAchieve,
+                                                      String flow) throws APIManagementException {
+
+        List<String> renderedPolicyMappingList = new ArrayList<>();
         String policyDirectory = pathToAchieve + File.separator + ImportExportConstants.POLICIES_DIRECTORY;
 
-        List<OperationPolicy> operationPolicies = template.getOperationPolicies();
-        Collections.sort(operationPolicies, new OperationPolicyComparator());
-        for (OperationPolicy policy : operationPolicies) {
+        Collections.sort(policyList, new OperationPolicyComparator());
+        for (OperationPolicy policy : policyList) {
             if (flow.equals(policy.getDirection())) {
                 Map<String, Object> policyParameters = policy.getParameters();
                 String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
@@ -127,7 +161,7 @@ public class SynapsePolicyAggregator {
                                     sanitizedPolicy = APIUtil.buildSecuredOMElement(
                                             new ByteArrayInputStream(renderedTemplate.getBytes())).toString();
                                 }
-                                caseBody.add(sanitizedPolicy);
+                                renderedPolicyMappingList.add(sanitizedPolicy);
                             }
                         } catch (Exception e) {
                             log.error("Error parsing the policy definition for " + policy.getPolicyName());
@@ -142,14 +176,7 @@ public class SynapsePolicyAggregator {
                 }
             }
         }
-
-        if (caseBody.size() != 0) {
-            caseMap.put("case_regex", key);
-            caseMap.put("policy_sequence", caseBody);
-            caseList.add(caseMap);
-        }
-
-        return caseList;
+        return renderedPolicyMappingList;
     }
 
     /**

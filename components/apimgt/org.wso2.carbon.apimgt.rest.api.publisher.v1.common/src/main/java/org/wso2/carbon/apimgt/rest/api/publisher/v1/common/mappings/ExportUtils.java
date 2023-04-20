@@ -681,6 +681,23 @@ public class ExportUtils {
                     }
                 }
             }
+
+            if (api.getApiPolicies() != null && !api.getApiPolicies().isEmpty()) {
+                for (OperationPolicy policy : api.getApiPolicies()) {
+                    String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
+                            policy.getPolicyVersion());
+                    if (!exportedPolicies.contains(policyFileName)) {
+                        OperationPolicyData policyData =
+                                apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(),
+                                        currentApiUuid, tenantDomain, true);
+                        if (policyData != null) {
+                            exportPolicyData(policyFileName, policyData, archivePath, exportFormat);
+                            exportedPolicies.add(policy.getPolicyName() + "_" + policy.getPolicyVersion());
+                        }
+                    }
+                }
+            }
+
             if ((APIUtil.isSequenceDefined(api.getInSequence())
                     || APIUtil.isSequenceDefined(api.getOutSequence())
                     || APIUtil.isSequenceDefined(api.getFaultSequence())) && migrationEnabled == null) {

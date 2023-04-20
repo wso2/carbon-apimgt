@@ -1242,7 +1242,7 @@ public class TemplateBuilderUtil {
         String policySequence = null;
         String seqExt = APIUtil.getSequenceExtensionName(api) + SynapsePolicyAggregator.getSequenceExtensionFlow(flow);
         try {
-            policySequence = SynapsePolicyAggregator.generatePolicySequenceForUriTemplateSet(api.getUriTemplates(),
+            policySequence = SynapsePolicyAggregator.generatePolicySequenceForUriTemplateSet(api.getUriTemplates(), api,
                     seqExt, flow, pathToAchieve);
         } catch (IOException e) {
             throw new APIManagementException(e);
@@ -1295,7 +1295,7 @@ public class TemplateBuilderUtil {
                 .concat("--").concat(api.getUuid()).concat(SynapsePolicyAggregator.getSequenceExtensionFlow(flow));
         try {
             policySequence = SynapsePolicyAggregator.generatePolicySequenceForUriTemplateSet(applicableURITemplates,
-                    seqExt, flow, extractedLocation);
+                    null, seqExt, flow, extractedLocation);
         } catch (IOException e) {
             throw new APIManagementException(e);
         }
