@@ -14,6 +14,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropert
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
@@ -185,6 +186,7 @@ return null;
     private List<String> visibleRoles = new ArrayList<String>();
     private List<String> visibleTenants = new ArrayList<String>();
     private List<MediationPolicyDTO> mediationPolicies = new ArrayList<MediationPolicyDTO>();
+    private APIOperationPoliciesDTO apiPolicies = null;
 
     @XmlType(name="SubscriptionAvailabilityEnum")
     @XmlEnum(String.class)
@@ -268,7 +270,6 @@ return null;
     private WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration = null;
     private String workflowStatus = null;
     private String createdTime = null;
-    private String lastUpdatedTimestamp = null;
     @Scope(name = "apim:api_publish", description="", value ="")
     @Scope(name = "apim:api_manage", description="", value ="")
     private String lastUpdatedTime = null;
@@ -418,7 +419,7 @@ return null;
   
   @ApiModelProperty(example = "admin", value = "If the provider value is not given user invoking the api will be used as the provider. ")
   @JsonProperty("provider")
- @Size(max=200)  public String getProvider() {
+ @Size(max=50)  public String getProvider() {
     return provider;
   }
   public void setProvider(String provider) {
@@ -863,6 +864,24 @@ return null;
   }
 
   /**
+   **/
+  public APIDTO apiPolicies(APIOperationPoliciesDTO apiPolicies) {
+    this.apiPolicies = apiPolicies;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("apiPolicies")
+  public APIOperationPoliciesDTO getApiPolicies() {
+    return apiPolicies;
+  }
+  public void setApiPolicies(APIOperationPoliciesDTO apiPolicies) {
+    this.apiPolicies = apiPolicies;
+  }
+
+  /**
    * The subscription availability. Accepts one of the following. CURRENT_TENANT, ALL_TENANTS or SPECIFIC_TENANTS.
    **/
   public APIDTO subscriptionAvailability(SubscriptionAvailabilityEnum subscriptionAvailability) {
@@ -1074,23 +1093,6 @@ return null;
   }
   public void setCreatedTime(String createdTime) {
     this.createdTime = createdTime;
-  }
-
-  /**
-   **/
-  public APIDTO lastUpdatedTimestamp(String lastUpdatedTimestamp) {
-    this.lastUpdatedTimestamp = lastUpdatedTimestamp;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("lastUpdatedTimestamp")
-  public String getLastUpdatedTimestamp() {
-    return lastUpdatedTimestamp;
-  }
-  public void setLastUpdatedTimestamp(String lastUpdatedTimestamp) {
-    this.lastUpdatedTimestamp = lastUpdatedTimestamp;
   }
 
   /**
@@ -1367,6 +1369,7 @@ return null;
         Objects.equals(visibleRoles, API.visibleRoles) &&
         Objects.equals(visibleTenants, API.visibleTenants) &&
         Objects.equals(mediationPolicies, API.mediationPolicies) &&
+        Objects.equals(apiPolicies, API.apiPolicies) &&
         Objects.equals(subscriptionAvailability, API.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, API.subscriptionAvailableTenants) &&
         Objects.equals(additionalProperties, API.additionalProperties) &&
@@ -1379,7 +1382,6 @@ return null;
         Objects.equals(websubSubscriptionConfiguration, API.websubSubscriptionConfiguration) &&
         Objects.equals(workflowStatus, API.workflowStatus) &&
         Objects.equals(createdTime, API.createdTime) &&
-        Objects.equals(lastUpdatedTimestamp, API.lastUpdatedTimestamp) &&
         Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
         Objects.equals(endpointConfig, API.endpointConfig) &&
         Objects.equals(endpointImplementationType, API.endpointImplementationType) &&
@@ -1397,7 +1399,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTimestamp, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, apiPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols);
   }
 
   @Override
@@ -1436,6 +1438,7 @@ return null;
     sb.append("    visibleRoles: ").append(toIndentedString(visibleRoles)).append("\n");
     sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
     sb.append("    mediationPolicies: ").append(toIndentedString(mediationPolicies)).append("\n");
+    sb.append("    apiPolicies: ").append(toIndentedString(apiPolicies)).append("\n");
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
@@ -1448,7 +1451,6 @@ return null;
     sb.append("    websubSubscriptionConfiguration: ").append(toIndentedString(websubSubscriptionConfiguration)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
-    sb.append("    lastUpdatedTimestamp: ").append(toIndentedString(lastUpdatedTimestamp)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
     sb.append("    endpointImplementationType: ").append(toIndentedString(endpointImplementationType)).append("\n");
