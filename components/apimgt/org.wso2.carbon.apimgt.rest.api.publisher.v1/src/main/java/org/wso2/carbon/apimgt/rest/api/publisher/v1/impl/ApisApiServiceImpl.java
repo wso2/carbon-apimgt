@@ -3682,7 +3682,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response generateInternalAPIKey(String apiId, MessageContext messageContext) throws APIManagementException {
         Map<String, String> configs = APIManagerConfiguration.getApiTestKeyProperties();
-        int exp = Integer.valueOf(configs.get(APIConstants.INTERNAL_API_TEST_KEY_EXPIRY_TIME));
+        int exp = Integer.valueOf(
+                !StringUtils.isEmpty(configs.get(APIConstants.INTERNAL_API_TEST_KEY_EXPIRY_TIME)) ?
+                        configs.get(APIConstants.INTERNAL_API_TEST_KEY_EXPIRY_TIME) : APIConstants.DEFAULT_API_TEST_KEY_VALIDITY );
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userName);
