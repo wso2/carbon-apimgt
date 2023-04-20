@@ -29,6 +29,10 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
 
     public Response addGatewayPoliciesToFlows(GatewayPolicyMappingsDTO gatewayPolicyMappingsDTO,
             MessageContext messageContext) {
+
+        if (gatewayPolicyMappingsDTO == null) {
+            RestApiUtil.handleBadRequest("Gateway policy mapping list is empty", log);
+        }
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -51,6 +55,10 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
 
     public Response engageGlobalPolicy(List<GatewayPolicyDeploymentDTO> gatewayPolicyDeploymentDTOList,
             MessageContext messageContext) {
+
+        if (gatewayPolicyDeploymentDTOList == null) {
+            RestApiUtil.handleBadRequest("Gateway policy deployment list is empty", log);
+        }
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
