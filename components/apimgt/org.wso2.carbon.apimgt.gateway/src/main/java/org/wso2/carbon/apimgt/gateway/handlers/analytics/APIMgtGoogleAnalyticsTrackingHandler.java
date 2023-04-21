@@ -43,6 +43,10 @@ import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsConstants;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsDataPublisher;
+import org.wso2.carbon.ganalytics.publisher.ga4.GoogleAnalytics4Constants;
+import org.wso2.carbon.ganalytics.publisher.ga4.GoogleAnalytics4Data;
+import org.wso2.carbon.ganalytics.publisher.ga4.GoogleAnalytics4DataPublisher;
+import org.wso2.carbon.ganalytics.publisher.ga4.event.PageViewEvent;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -63,6 +67,8 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 	private static final String COOKIE_NAME = "__utmmobile";
 
 	private static final String ANONYMOUS_USER_ID = "anonymous";
+
+    private static final String USER_IP = "user_ip";
 	
 	/** The key for getting the google analytics configuration - key refers to a/an [registry] entry    */
     private String configKey = null;
@@ -215,24 +221,40 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
             documentPath = "";
         }
 
-        String account = config.googleAnalyticsTrackingID;
-
         String userAgent = (String) headers.get(HttpHeaders.USER_AGENT);
         if (isEmpty(userAgent)) {
             userAgent = "";
         }
 
-        String visitorId = getVisitorId(account, userAgent, msgCtx);
+        String httpMethod = (String) ((Axis2MessageContext) msgCtx).getAxis2MessageContext()
+                .getProperty(Constants.Configuration.HTTP_METHOD);
 
+        String universalAnalyticsTrackingId = config.googleAnalyticsTrackingID;
+        if (universalAnalyticsTrackingId != null) {
+            trackPageViewWithUniversalAnalytics(universalAnalyticsTrackingId, documentPath, domainName, userIP,
+                    userAgent, httpMethod, msgCtx);
+        }
+
+        String googleAnalytics4MeasurementId = config.googleAnalyticsMeasurementID;
+        String googleAnalytics4ApiSecret = config.apiSecret;
+        if (googleAnalytics4MeasurementId != null && googleAnalytics4ApiSecret != null) {
+            trackPageViewWithGoogleAnalytics4(googleAnalytics4ApiSecret, googleAnalytics4MeasurementId, documentPath,
+                    host, userIP, userAgent, httpMethod, msgCtx);
+        }
+    }
+
+    private void trackPageViewWithUniversalAnalytics(String trackingId, String documentPath, String domainName,
+                                                     String userIP, String userAgent, String httpMethod,
+                                                     MessageContext msgCtx)
+            throws UnsupportedEncodingException, NoSuchAlgorithmException {
+
+        String visitorId = getVisitorId(trackingId, userAgent, msgCtx);
         /* Set the visitorId in MessageContext */
         msgCtx.setProperty(COOKIE_NAME, visitorId);
 
-        String httpMethod =
-                            (String) ((Axis2MessageContext) msgCtx).getAxis2MessageContext()
-                                                                   .getProperty(Constants.Configuration.HTTP_METHOD);
-
-		GoogleAnalyticsData data = new GoogleAnalyticsData
-                .DataBuilder(account, GOOGLE_ANALYTICS_TRACKER_VERSION , visitorId , GoogleAnalyticsConstants.HIT_TYPE_PAGEVIEW)
+        GoogleAnalyticsData data = new GoogleAnalyticsData
+                .DataBuilder(trackingId, GOOGLE_ANALYTICS_TRACKER_VERSION, visitorId,
+                GoogleAnalyticsConstants.HIT_TYPE_PAGEVIEW)
                 .setDocumentPath(documentPath)
                 .setDocumentHostName(domainName)
                 .setDocumentTitle(httpMethod)
@@ -243,57 +265,100 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 
         String payload = GoogleAnalyticsDataPublisher.buildPayloadString(data);
         if (log.isDebugEnabled()) {
-            log.debug("Publishing https GET from gateway to Google analytics" + " with ID: " + msgCtx.getMessageID()
-                    + " started at " + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+            log.debug("Publishing https GET from gateway to Google analytics in UA format with ID: "
+                    + msgCtx.getMessageID() + " started at "
+                    + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
         }
         GoogleAnalyticsDataPublisher.publishGET(payload, userAgent, false);
         if (log.isDebugEnabled()) {
-            log.debug("Publishing https GET from gateway to Google analytics" + " with ID: " + msgCtx.getMessageID()
-                    + " ended at " + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+            log.debug("Publishing https GET from gateway to Google analytics in UA format with ID: "
+                    + msgCtx.getMessageID() + " ended at "
+                    + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
         }
-	}
+    }
 
-	/**
-	 * A string is empty in our terms, if it is null, empty or a dash.
-	 */
-	private static boolean isEmpty(String in) {
-		return in == null || "-".equals(in) || "".equals(in);
-	}
+    private void trackPageViewWithGoogleAnalytics4(String apiSecret, String measurementId, String documentPath,
+                                                   String host, String userIP, String userAgent, String httpMethod,
+                                                   MessageContext msgCtx)
+            throws UnsupportedEncodingException, NoSuchAlgorithmException {
 
-	/**
-	 * 
-	 * Generate a visitor id for this hit. If there is a visitor id in the
-	 * messageContext, use that. Otherwise use a random number.
-	 * 
-	 */
-	private static String getVisitorId(String account, String userAgent, MessageContext msgCtx) 
-			throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        String visitorId = getVisitorId(measurementId, userAgent, msgCtx);
 
-		if (msgCtx.getProperty(COOKIE_NAME) != null) {
-			return (String) msgCtx.getProperty(COOKIE_NAME);
-		}
-		String message;
-		
-		AuthenticationContext authContext  = APISecurityUtils.getAuthenticationContext(msgCtx);
-		if (authContext != null) {
-			message = authContext.getApiKey();
-		} else {
-			message = ANONYMOUS_USER_ID;
-		}
-		
-		MessageDigest m = MessageDigest.getInstance("MD5");
-		m.update(message.getBytes("UTF-8"), 0, message.length());
-		byte[] sum = m.digest();
-		BigInteger messageAsNumber = new BigInteger(1, sum);
-		String md5String = messageAsNumber.toString(16);
+        /* Set the visitorId in MessageContext */
+        msgCtx.setProperty(COOKIE_NAME, visitorId);
 
-		/* Pad to make sure id is 32 characters long. */
-		while (md5String.length() < 32) {
-			md5String = "0" + md5String;
-		}
+        String pageTitle = constructPageTitleForRequestPath(httpMethod, documentPath);
+        String pageLocation = host + documentPath;
 
-		return "0x" + md5String.substring(0, 16);
-	}
+        PageViewEvent pageViewEvent = new PageViewEvent();
+        pageViewEvent.setPageTitle(pageTitle);
+        pageViewEvent.setPageLocation(pageLocation);
+        pageViewEvent.setUserAgent(userAgent);
+        pageViewEvent.putParam(USER_IP, userIP);
+        pageViewEvent.putParam(GoogleAnalytics4Constants.ENGAGEMENT_TIME_MSEC_PARAM, "1");
+
+        GoogleAnalytics4Data data = new GoogleAnalytics4Data(apiSecret, measurementId);
+        data.setClientId(visitorId);
+        data.addEvent(pageViewEvent);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Publishing https POST from gateway to Google analytics in GA4 format with ID: "
+                    + msgCtx.getMessageID() + " started at "
+                    + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+        }
+        boolean status = GoogleAnalytics4DataPublisher.publishData(data, userAgent);
+        if (log.isDebugEnabled()) {
+            log.debug("Publishing https POST from gateway to Google analytics in GA4 format with ID: "
+                    + msgCtx.getMessageID() + " ended " + (status ? "successfully at " : "with failure at ")
+                    + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+        }
+    }
+
+    private static String constructPageTitleForRequestPath(String httpMethod, String requestPath) {
+
+        return httpMethod + " " + requestPath;
+    }
+
+    /**
+     * A string is empty in our terms, if it is null, empty or a dash.
+     */
+    private static boolean isEmpty(String in) {
+
+        return in == null || "-".equals(in) || "".equals(in);
+    }
+
+    /**
+     * Generate a visitor id for this hit. If there is a visitor id in the
+     * messageContext, use that. Otherwise use a random number.
+     */
+    private static String getVisitorId(String account, String userAgent, MessageContext msgCtx)
+            throws NoSuchAlgorithmException, UnsupportedEncodingException {
+
+        if (msgCtx.getProperty(COOKIE_NAME) != null) {
+            return (String) msgCtx.getProperty(COOKIE_NAME);
+        }
+        String message;
+
+        AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(msgCtx);
+        if (authContext != null) {
+            message = authContext.getApiKey();
+        } else {
+            message = ANONYMOUS_USER_ID;
+        }
+
+        MessageDigest m = MessageDigest.getInstance("MD5");
+        m.update(message.getBytes("UTF-8"), 0, message.length());
+        byte[] sum = m.digest();
+        BigInteger messageAsNumber = new BigInteger(1, sum);
+        String md5String = messageAsNumber.toString(16);
+
+        /* Pad to make sure id is 32 characters long. */
+        while (md5String.length() < 32) {
+            md5String = "0" + md5String;
+        }
+
+        return "0x" + md5String.substring(0, 16);
+    }
 
     @MethodStats
 	@Override
@@ -306,19 +371,34 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
         throw new SynapseException(msg);
     }
 	
-	private class GoogleAnalyticsConfig {
-		private boolean enabled;
-		private String googleAnalyticsTrackingID;
-		
-		public GoogleAnalyticsConfig(OMElement config) {
-            googleAnalyticsTrackingID = config.getFirstChildWithName(new QName(
-                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.API_GOOGLE_ANALYTICS_TRACKING_ID))
-                    .getText();
-            String googleAnalyticsEnabledStr = config.getFirstChildWithName(new QName(
-                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.API_GOOGLE_ANALYTICS_TRACKING_ENABLED))
-                    .getText();
-            enabled =  googleAnalyticsEnabledStr != null && JavaUtils.isTrueExplicitly(googleAnalyticsEnabledStr);
-		}
+    private class GoogleAnalyticsConfig {
+
+        private boolean enabled;
+        private String googleAnalyticsTrackingID;
+        private String googleAnalyticsMeasurementID;
+        private String apiSecret;
+
+        public GoogleAnalyticsConfig(OMElement config) {
+
+            googleAnalyticsTrackingID =
+                    getConfigPropertyValue(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.API_GOOGLE_ANALYTICS_TRACKING_ID, config);
+            googleAnalyticsMeasurementID =
+                    getConfigPropertyValue(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.API_GOOGLE_ANALYTICS_MEASUREMENT_ID, config);
+            apiSecret =
+                    getConfigPropertyValue(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.API_GOOGLE_ANALYTICS_API_SECRET, config);
+            String googleAnalyticsEnabledStr =
+                    getConfigPropertyValue(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.API_GOOGLE_ANALYTICS_TRACKING_ENABLED, config);
+            enabled = googleAnalyticsEnabledStr != null && JavaUtils.isTrueExplicitly(googleAnalyticsEnabledStr);
+        }
+
+        private String getConfigPropertyValue(String propertyName, OMElement config) {
+
+            OMElement omElement = config.getFirstChildWithName(new QName(propertyName));
+            if (omElement != null) {
+                return omElement.getText();
+            }
+            return null;
+        }
 
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
