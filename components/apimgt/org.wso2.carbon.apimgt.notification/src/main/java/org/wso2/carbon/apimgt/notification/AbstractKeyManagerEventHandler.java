@@ -21,11 +21,15 @@ package org.wso2.carbon.apimgt.notification;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
+import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.keymgt.ExpiredJWTCleaner;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
 import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.notification.event.ConsumerKeyEvent;
 import org.wso2.carbon.apimgt.notification.event.TokenRevocationEvent;
 
 import java.util.Properties;
@@ -70,6 +74,29 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
         Runnable expiredJWTCleaner = new ExpiredJWTCleaner();
         Thread cleanupThread = new Thread(expiredJWTCleaner);
         cleanupThread.start();
+        return true;
+    }
+
+
+    public boolean handleConsumerKeyEvent(ConsumerKeyEvent consumerKeyEvent) throws APIManagementException {
+
+        Properties properties = new Properties();
+        properties.setProperty(APIConstants.NotificationEvent.EVENT_ID, consumerKeyEvent.getEventId());
+        properties.put(APIConstants.NotificationEvent.CONSUMER_KEY, consumerKeyEvent.getConsumerKey());
+
+        properties.put(consumerKeyEvent, properties);
+
+        // TODO: check whether we need to implement RevocationRequestPublisher based mechanism to send events
+        // realtime or persistent storage as done in revocationRequestPublisher.publishRevocationEvents() method
+        // in handleTokenRevocationEvent()
+        Object[] objects = new Object[] { consumerKeyEvent.getEventId(), consumerKeyEvent
+                .getConsumerKey(), consumerKeyEvent.getTimeStamp(),
+                consumerKeyEvent.getType(), consumerKeyEvent.getTenantId() };
+        EventPublisherEvent tokenRevocationEvent = new EventPublisherEvent(
+                "org.wso2.apimgt.consumerkey.revocation.stream:1.0.0", System.currentTimeMillis(), objects);
+        APIUtil.publishEvent(EventPublisherType.CONSUMER_KEY_REVOKED, tokenRevocationEvent,
+                tokenRevocationEvent.toString());
+
         return true;
     }
 }

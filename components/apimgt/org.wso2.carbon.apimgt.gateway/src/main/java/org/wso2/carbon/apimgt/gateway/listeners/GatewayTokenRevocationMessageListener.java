@@ -46,14 +46,20 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                     JsonNode payloadData =  new ObjectMapper().readTree(textMessage).path(APIConstants.EVENT_PAYLOAD).
                             path(APIConstants.EVENT_PAYLOAD_DATA);
 
+                    if (payloadData.get("type") != null && payloadData.get("type").equals("internal_token_revocation")) {
+                        handleInternallyRevokedConsumerKeyMessage(payloadData.get("consumerKey").asText()
+                                , payloadData.get("timeStamp").asLong(), payloadData.get("type").asText());
+                    }
+
                     if (APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
-                        if (payloadData.get(APIConstants.REVOKED_TOKEN_KEY).asText() != null) {
+                        if (payloadData.get(APIConstants.REVOKED_TOKEN_KEY) != null
+                                && payloadData.get(APIConstants.REVOKED_TOKEN_KEY).asText() != null) {
                             /*
                              * This message contains revoked token data
                              * revokedToken - Revoked Token which should be removed from the cache
                              * expiryTime - ExpiryTime of the token if token is JWT, otherwise expiry is set to 0
                              */
-                            handleRevokedTokenMessage(payloadData.get(APIConstants.REVOKED_TOKEN_KEY).asText(),
+                                handleRevokedTokenMessage(payloadData.get(APIConstants.REVOKED_TOKEN_KEY).asText(),
                                     payloadData.get(APIConstants.REVOKED_TOKEN_EXPIRY_TIME).asLong(),
                                     payloadData.get(APIConstants.REVOKED_TOKEN_TYPE).asText());
                         }
@@ -69,7 +75,7 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
         }
     }
 
-    private void handleRevokedTokenMessage(String revokedToken, long expiryTime,String tokenType) {
+    private void handleRevokedTokenMessage(String revokedToken, long expiryTime, String tokenType) {
 
         boolean isJwtToken = false;
         if (StringUtils.isEmpty(revokedToken)) {
@@ -89,6 +95,13 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
         } else {
             ServiceReferenceHolder.getInstance().getRevokedTokenService()
                     .removeTokenFromGatewayCache(revokedToken, isJwtToken);
+        }
+    }
+
+    private void handleInternallyRevokedConsumerKeyMessage(String consumerKey, long expiryTime, String tokenType) {
+        if("internal_revocation".equals(tokenType)){
+            ServiceReferenceHolder.getInstance().getRevokedConsumerKeyService()
+                    .addConsumerKeyIntoMap(consumerKey,expiryTime);
         }
     }
 }

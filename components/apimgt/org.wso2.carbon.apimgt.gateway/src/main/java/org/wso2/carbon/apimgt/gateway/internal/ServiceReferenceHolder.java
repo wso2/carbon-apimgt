@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
+import org.wso2.carbon.apimgt.impl.consumerkey.*;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
@@ -107,6 +108,7 @@ public class ServiceReferenceHolder {
         return throttleDataHolder;
     }
     private ArtifactRetriever artifactRetriever;
+    private RevokedConsumerKeyService revokedConsumerKeyService;
 
     private ServiceReferenceHolder() {
 
@@ -416,6 +418,14 @@ public class ServiceReferenceHolder {
     public void setRedisPool(JedisPool redisPool) {
 
         this.redisPool = redisPool;
+    }
+
+    public RevokedConsumerKeyService getRevokedConsumerKeyService() {
+        return revokedConsumerKeyService;
+    }
+
+    public void setRevokedConsumerKeyService(RevokedConsumerKeyService revokedConsumerKeyService) {
+        this.revokedConsumerKeyService = revokedConsumerKeyService;
     }
 
     public AnalyticsCustomDataProvider getAnalyticsCustomDataProvider() {
