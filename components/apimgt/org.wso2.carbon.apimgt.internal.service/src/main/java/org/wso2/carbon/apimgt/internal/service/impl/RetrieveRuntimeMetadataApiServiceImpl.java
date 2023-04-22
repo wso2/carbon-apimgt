@@ -24,17 +24,21 @@ import java.nio.file.Files;
 
 public class RetrieveRuntimeMetadataApiServiceImpl implements RetrieveRuntimeMetadataApiService {
 
-    public Response retrieveRuntimeMetadataGet(String xWSO2Tenant, String dataPlaneId,
+    public Response retrieveRuntimeMetadataGet(String dataPlaneId,
                                                MessageContext messageContext) throws APIManagementException {
-        // remove errorObject and add implementation code!
         RuntimeArtifactDto runtimeMetadataDto;
-        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         String organization = RestApiUtil.getOrganization(messageContext);
-        if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
-            xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
-            runtimeMetadataDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeMetadata(xWSO2Tenant, dataPlaneId);
-        } else {
+        if (StringUtils.isEmpty(organization)) {
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(RestApiUtil.getErrorDTO(ExceptionCodes.ORGANIZATION_NOT_FOUND))
+                    .build();
+        }
+        if (organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
             runtimeMetadataDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeMetadata(dataPlaneId);
+        } else {
+            runtimeMetadataDto
+                    = RuntimeArtifactGeneratorUtil.generateAllRuntimeMetadata(organization, dataPlaneId);
         }
         if (runtimeMetadataDto != null) {
             File artifact = (File) runtimeMetadataDto.getArtifact();

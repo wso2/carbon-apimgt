@@ -43,7 +43,7 @@ RetrieveRuntimeMetadataApiService delegate = new RetrieveRuntimeMetadataApiServi
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Json file of runtime metadata", response = Void.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response retrieveRuntimeMetadataGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.   Data-Plane ID/s    To provide multiple Data-Plane IDs provide a \"|\" seperated list of IDs ")  @QueryParam("dataPlaneId") String dataPlaneId) throws APIManagementException{
-        return delegate.retrieveRuntimeMetadataGet(xWSO2Tenant, dataPlaneId, securityContext);
+    public Response retrieveRuntimeMetadataGet( @ApiParam(value = "**Search condition**.   Data-Plane ID/s    To provide multiple Data-Plane IDs provide a \"|\" seperated list of IDs ")  @QueryParam("dataPlaneId") String dataPlaneId) throws APIManagementException{
+        return delegate.retrieveRuntimeMetadataGet(dataPlaneId, securityContext);
     }
 }

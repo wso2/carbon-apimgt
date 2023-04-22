@@ -770,12 +770,6 @@
         "summary" : "Metadata information for API runtimes for given Data-Plane/s",
         "description" : "This will provide access to the deployment metadata for a given data-plane ID in json format\n",
         "parameters" : [ {
-          "name" : "xWSO2Tenant",
-          "in" : "header",
-          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
-          "required" : true,
-          "type" : "string"
-        }, {
           "name" : "dataPlaneId",
           "in" : "query",
           "description" : "**Search condition**.\n  Data-Plane ID/s \n  To provide multiple Data-Plane IDs provide a \"|\" seperated list of IDs\n",

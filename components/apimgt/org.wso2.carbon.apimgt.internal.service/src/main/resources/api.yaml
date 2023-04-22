@@ -605,7 +605,6 @@ paths:
       description: |
         This will provide access to the deployment metadata for a given data-plane ID in json format
       parameters:
-        - $ref: '#/parameters/requestedTenant'
         - name: dataPlaneId
           in: query
           description: |

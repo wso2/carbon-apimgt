@@ -89,110 +89,23 @@ public class RuntimeArtifactGeneratorUtil {
             throws APIManagementException {
 
         List<APIRuntimeArtifactDto> gatewayArtifacts = getRuntimeArtifacts(apiId, gatewayLabel, tenantDomain);
-        if (gatewayArtifacts != null) {
-
-            try {
-                MetadataDescriptorDto metadataDescriptorDto = new MetadataDescriptorDto();
-                Map<String, ApiMetadataProjectDto> deploymentsMap = new HashMap<>();
-
-                // "tempDirectory" is the root artifact directory
-                File tempDirectory = CommonUtil.createTempDirectory(null);
-                for (APIRuntimeArtifactDto apiRuntimeArtifactDto : gatewayArtifacts) {
-                    if (apiRuntimeArtifactDto.isFile()) {
-                        String fileName =
-                                apiRuntimeArtifactDto.getApiId().concat("-")
-                                        .concat(apiRuntimeArtifactDto.getRevision());
-                        ApiMetadataProjectDto apiProjectDto = deploymentsMap.get(fileName);
-                        if (apiProjectDto == null) {
-                            apiProjectDto = new ApiMetadataProjectDto();
-                            deploymentsMap.put(fileName, apiProjectDto);
-                            apiProjectDto.setApiFile(fileName);
-                            apiProjectDto.setEnvironments(new HashSet<>());
-                            apiProjectDto.setOrganizationId(apiRuntimeArtifactDto.getOrganization());
-                            apiProjectDto.setVersion(apiRuntimeArtifactDto.getVersion());
-                            apiProjectDto.setApiContext(apiRuntimeArtifactDto.getContext());
-                        }
-
-                        EnvironmentDto environment = new EnvironmentDto();
-                        environment.setName(apiRuntimeArtifactDto.getLabel());
-                        environment.setVhost(apiRuntimeArtifactDto.getVhost());
-                        environment.setDeployedTimeStamp(apiRuntimeArtifactDto.getDeployedTimeStamp());
-                        apiProjectDto.getEnvironments().add(environment);
-                    }
-                }
-                metadataDescriptorDto.setMetadataDescriptor(new HashSet<>(deploymentsMap.values()));
-                String descriptorFile = Paths.get(tempDirectory.getAbsolutePath(),
-                        APIConstants.GatewayArtifactConstants.DEPLOYMENT_DESCRIPTOR_FILE).toString();
-                CommonUtil.writeDtoToFile(descriptorFile, ExportFormat.JSON,
-                        APIConstants.GatewayArtifactConstants.DEPLOYMENT_DESCRIPTOR_FILE_TYPE, metadataDescriptorDto);
-
-                RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
-                runtimeArtifactDto.setArtifact(new File(descriptorFile.concat(APIConstants.JSON_FILE_EXTENSION)));
-                runtimeArtifactDto.setFile(true);
-                return runtimeArtifactDto;
-            } catch (APIImportExportException | IOException e) {
-                throw new APIManagementException("Error while Generating API artifact", e);
-            }
-        } else {
-            throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
-        }
+        return getRuntimeArtifactDto(gatewayArtifacts);
     }
 
     public static RuntimeArtifactDto generateAllMetadataArtifact(String apiId, String gatewayLabel)
             throws APIManagementException {
 
         List<APIRuntimeArtifactDto> gatewayArtifacts = getAllRuntimeArtifacts(apiId, gatewayLabel);
-        if (gatewayArtifacts != null) {
-
-            try {
-                MetadataDescriptorDto metadataDescriptorDto = new MetadataDescriptorDto();
-                Map<String, ApiMetadataProjectDto> deploymentsMap = new HashMap<>();
-
-                // "tempDirectory" is the root artifact directory
-                File tempDirectory = CommonUtil.createTempDirectory(null);
-                for (APIRuntimeArtifactDto apiRuntimeArtifactDto : gatewayArtifacts) {
-                    if (apiRuntimeArtifactDto.isFile()) {
-                        String fileName =
-                                apiRuntimeArtifactDto.getApiId().concat("-")
-                                        .concat(apiRuntimeArtifactDto.getRevision());
-                        ApiMetadataProjectDto apiProjectDto = deploymentsMap.get(fileName);
-                        if (apiProjectDto == null) {
-                            apiProjectDto = new ApiMetadataProjectDto();
-                            deploymentsMap.put(fileName, apiProjectDto);
-                            apiProjectDto.setApiFile(fileName);
-                            apiProjectDto.setEnvironments(new HashSet<>());
-                            apiProjectDto.setOrganizationId(apiRuntimeArtifactDto.getOrganization());
-                            apiProjectDto.setVersion(apiRuntimeArtifactDto.getVersion());
-                            apiProjectDto.setApiContext(apiRuntimeArtifactDto.getContext());
-                        }
-
-                        EnvironmentDto environment = new EnvironmentDto();
-                        environment.setName(apiRuntimeArtifactDto.getLabel());
-                        environment.setVhost(apiRuntimeArtifactDto.getVhost());
-                        environment.setDeployedTimeStamp(apiRuntimeArtifactDto.getDeployedTimeStamp());
-                        apiProjectDto.getEnvironments().add(environment);
-                    }
-                }
-                metadataDescriptorDto.setMetadataDescriptor(new HashSet<>(deploymentsMap.values()));
-                String descriptorFile = Paths.get(tempDirectory.getAbsolutePath(),
-                        APIConstants.GatewayArtifactConstants.DEPLOYMENT_DESCRIPTOR_FILE).toString();
-                CommonUtil.writeDtoToFile(descriptorFile, ExportFormat.JSON,
-                        APIConstants.GatewayArtifactConstants.DEPLOYMENT_DESCRIPTOR_FILE_TYPE, metadataDescriptorDto);
-
-                RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
-                runtimeArtifactDto.setArtifact(new File(descriptorFile.concat(APIConstants.JSON_FILE_EXTENSION)));
-                runtimeArtifactDto.setFile(true);
-                return runtimeArtifactDto;
-            } catch (APIImportExportException | IOException e) {
-                throw new APIManagementException("Error while Generating API artifact", e);
-            }
-        } else {
-            throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
-        }
+        return getRuntimeArtifactDto(gatewayArtifacts);
     }
 
     public static RuntimeArtifactDto generateAllRuntimeMetadata(String dataPlaneId) throws APIManagementException {
         List<APIRuntimeArtifactDto> gatewayArtifacts = getAllRuntimeArtifactsByDataPlaneId(dataPlaneId);
+        return getRuntimeArtifactDto(gatewayArtifacts);
+    }
+
+    private static RuntimeArtifactDto getRuntimeArtifactDto(List<APIRuntimeArtifactDto> gatewayArtifacts)
+            throws APIManagementException {
         if (gatewayArtifacts != null) {
 
             try {
@@ -245,53 +158,7 @@ public class RuntimeArtifactGeneratorUtil {
     public static RuntimeArtifactDto generateAllRuntimeMetadata(String organization, String dataPlaneId)
         throws APIManagementException {
         List<APIRuntimeArtifactDto> gatewayArtifacts = getAllRuntimeArtifactsByDataPlaneId(organization, dataPlaneId);
-        if (gatewayArtifacts != null) {
-
-            try {
-                MetadataDescriptorDto metadataDescriptorDto = new MetadataDescriptorDto();
-                Map<String, ApiMetadataProjectDto> deploymentsMap = new HashMap<>();
-
-                // "tempDirectory" is the root artifact directory
-                File tempDirectory = CommonUtil.createTempDirectory(null);
-                for (APIRuntimeArtifactDto apiRuntimeArtifactDto : gatewayArtifacts) {
-                    if (apiRuntimeArtifactDto.isFile()) {
-                        String fileName =
-                                apiRuntimeArtifactDto.getApiId().concat("-")
-                                        .concat(apiRuntimeArtifactDto.getRevision());
-                        ApiMetadataProjectDto apiProjectDto = deploymentsMap.get(fileName);
-                        if (apiProjectDto == null) {
-                            apiProjectDto = new ApiMetadataProjectDto();
-                            deploymentsMap.put(fileName, apiProjectDto);
-                            apiProjectDto.setApiFile(fileName);
-                            apiProjectDto.setEnvironments(new HashSet<>());
-                            apiProjectDto.setOrganizationId(apiRuntimeArtifactDto.getOrganization());
-                            apiProjectDto.setVersion(apiRuntimeArtifactDto.getVersion());
-                            apiProjectDto.setApiContext(apiRuntimeArtifactDto.getContext());
-                        }
-
-                        EnvironmentDto environment = new EnvironmentDto();
-                        environment.setName(apiRuntimeArtifactDto.getLabel());
-                        environment.setVhost(apiRuntimeArtifactDto.getVhost());
-                        environment.setDeployedTimeStamp(apiRuntimeArtifactDto.getDeployedTimeStamp());
-                        apiProjectDto.getEnvironments().add(environment);
-                    }
-                }
-                metadataDescriptorDto.setMetadataDescriptor(new HashSet<>(deploymentsMap.values()));
-                String descriptorFile = Paths.get(tempDirectory.getAbsolutePath(),
-                        APIConstants.GatewayArtifactConstants.DEPLOYMENT_DESCRIPTOR_FILE).toString();
-                CommonUtil.writeDtoToFile(descriptorFile, ExportFormat.JSON,
-                        APIConstants.GatewayArtifactConstants.DEPLOYMENT_DESCRIPTOR_FILE_TYPE, metadataDescriptorDto);
-
-                RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
-                runtimeArtifactDto.setArtifact(new File(descriptorFile.concat(APIConstants.JSON_FILE_EXTENSION)));
-                runtimeArtifactDto.setFile(true);
-                return runtimeArtifactDto;
-            } catch (APIImportExportException | IOException e) {
-                throw new APIManagementException("Error while Generating API artifact", e);
-            }
-        } else {
-            throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
-        }
+        return getRuntimeArtifactDto(gatewayArtifacts);
     }
 
     public static RuntimeArtifactDto generateAllRuntimeArtifact(String dataPlaneId, String type)
@@ -419,7 +286,7 @@ public class RuntimeArtifactGeneratorUtil {
         if (StringUtils.isNotEmpty(dataPlaneId)) {
             byte[] decodedValue = Base64.decodeBase64(dataPlaneId.getBytes());
             String[] dataPlaneIds = new String(decodedValue).split("\\|");
-            gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveAllGatewayArtifactsByDataPlaneId(dataPlaneIds);
+            gatewayArtifacts = choreoGatewayArtifactsMgtDAO.retrieveAllGatewayArtifactsByDataPlaneId(dataPlaneIds);
         } else {
             throw new APIManagementException("No Data Plane Id",
                     ExceptionCodes.CANNOT_RETRIEVE_RUNTIME_METADATA_NO_DATAPLANE_ID_ERROR);
@@ -443,7 +310,7 @@ public class RuntimeArtifactGeneratorUtil {
         if (StringUtils.isNotEmpty(dataPlaneId)) {
             byte[] decodedValue = Base64.decodeBase64(dataPlaneId.getBytes());
             String[] dataPlaneIds = new String(decodedValue).split("\\|");
-            gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveAllGatewayArtifactsByDataPlaneId(organization, dataPlaneIds);
+            gatewayArtifacts = choreoGatewayArtifactsMgtDAO.retrieveAllGatewayArtifactsByDataPlaneId(organization, dataPlaneIds);
         } else {
             throw new APIManagementException("No Data Plane Id",
                     ExceptionCodes.CANNOT_RETRIEVE_RUNTIME_METADATA_NO_DATAPLANE_ID_ERROR);
