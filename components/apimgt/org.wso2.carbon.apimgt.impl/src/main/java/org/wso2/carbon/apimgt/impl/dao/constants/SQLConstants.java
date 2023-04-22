@@ -3381,7 +3381,11 @@ public class SQLConstants {
 
         public static final String ADD_JWT_SIGNATURE = "INSERT INTO AM_REVOKED_JWT (UUID, SIGNATURE," +
                 "EXPIRY_TIMESTAMP, TENANT_ID, TOKEN_TYPE) VALUES(?,?,?,?,?)";
+        public static final String ADD_CONSUMER_KEY = "INSERT INTO AM_INTERNAL_TOKEN_REVOCATION (ID, CONSUMER_KEY," +
+                "TOKEN_TYPE, TIME_REVOKED, TENANT_ID) VALUES(?,?,?,?,?)";
         public static final String CHECK_REVOKED_TOKEN_EXIST = "SELECT 1 FROM AM_REVOKED_JWT WHERE UUID = ?";
+        public static final String CHECK_REVOKED_CONSUMER_KEY_EXIST = "SELECT 1 FROM AM_INTERNAL_TOKEN_REVOCATION " +
+                "WHERE CONSUMER_KEY = ?";
         public static final String DELETE_REVOKED_JWT = "DELETE FROM AM_REVOKED_JWT WHERE EXPIRY_TIMESTAMP < ?";
     }
 

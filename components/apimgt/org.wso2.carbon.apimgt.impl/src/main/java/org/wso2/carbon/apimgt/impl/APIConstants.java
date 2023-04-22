@@ -2793,6 +2793,7 @@ public final class APIConstants {
 
         public static final String TOKEN_TYPE = "token_type";
         public static final String TOKEN_REVOCATION_EVENT = "token_revocation";
+        public static final String INTERNAL_TOKEN_REVOCATION_EVENT = "internal_token_revocation";
         public static final String CONSUMER_KEY = "consumer_key";
         public static final String EVENT_ID = "eventId";
         public static final String TENANT_ID = "tenantId";

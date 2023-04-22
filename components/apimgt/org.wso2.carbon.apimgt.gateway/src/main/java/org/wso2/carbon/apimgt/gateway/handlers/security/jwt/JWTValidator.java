@@ -43,7 +43,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
+import org.wso2.carbon.apimgt.gateway.jwt.*;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -171,6 +171,17 @@ public class JWTValidator {
                 if (log.isDebugEnabled()) {
                     log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
                             getMaskedToken(jwtHeader));
+                }
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Invalid JWT token");
+            }
+            if (InternalRevokedJWTDataHolder.getInstance()
+                    .isJWTTokenClientIdExistsInRevokedMap((String) signedJWTInfo.getJwtClaimsSet()
+                            .getClaim("client_id"))) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Consumer key retrieved from the  jwt token map is in revoked consumer key map." +
+                            " Token: " + GatewayUtils.getMaskedToken(jwtHeader));
                 }
                 log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,

@@ -26,10 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.apimgt.internal.service.dto.BlockConditionsDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.IPLevelDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.RevokedJWTDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.RevokedJWTListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -203,5 +200,32 @@ public final class BlockConditionDBUtil {
             log.error("Error while fetching revoked JWTs from database. ", e);
         }
         return revokedJWTListDTO;
+    }
+
+    /**
+     * Fetches all revoked JWTs from DB.
+     *
+     * @return list fo revoked JWTs
+     */
+    public static RevokedJWTConsumerKeyListDTO getRevokedJWTConsumerKeys() {
+
+        RevokedJWTConsumerKeyListDTO revokedJWTConsumerKeyListDTO = new RevokedJWTConsumerKeyListDTO();
+        String sqlQuery = "SELECT CONSUMER_KEY,TOKEN_TYPE,TIME_REVOKED FROM AM_INTERNAL_TOKEN_REVOCATION";
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sqlQuery);) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String consumerKey = rs.getString("CONSUMER_KEY");
+                    Long expiryTimestamp = rs.getLong("TIME_REVOKED");
+                    RevokedJWTConsumerKeyDTO revokedJWTConsumerKeyDTO = new RevokedJWTConsumerKeyDTO();
+                    revokedJWTConsumerKeyDTO.setConsumerKey(consumerKey);
+                    revokedJWTConsumerKeyDTO.setExpiryTime(expiryTimestamp);
+                    revokedJWTConsumerKeyListDTO.add(revokedJWTConsumerKeyDTO);
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error while fetching revoked JWTs from database. ", e);
+        }
+        return revokedJWTConsumerKeyListDTO;
     }
 }
