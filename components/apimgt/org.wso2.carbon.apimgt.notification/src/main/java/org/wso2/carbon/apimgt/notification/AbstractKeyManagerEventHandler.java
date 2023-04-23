@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.notification.event.ConsumerKeyEvent;
 import org.wso2.carbon.apimgt.notification.event.TokenRevocationEvent;
 
 import java.util.Properties;
+import java.util.UUID;
 
 /**
  *  Abstract Implementation of KeyManagerEventHandler.
@@ -77,14 +78,15 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
         return true;
     }
 
-
     public boolean handleConsumerKeyEvent(ConsumerKeyEvent consumerKeyEvent) throws APIManagementException {
 
         Properties properties = new Properties();
         properties.setProperty(APIConstants.NotificationEvent.EVENT_ID, consumerKeyEvent.getEventId());
         properties.put(APIConstants.NotificationEvent.CONSUMER_KEY, consumerKeyEvent.getConsumerKey());
-
         properties.put(consumerKeyEvent, properties);
+
+        ApiMgtDAO.getInstance().addRevokedConsumerKey(UUID.randomUUID().toString(), consumerKeyEvent.getConsumerKey(),
+            consumerKeyEvent.getTimeStamp(), consumerKeyEvent.getTenantId());
 
         // TODO: check whether we need to implement RevocationRequestPublisher based mechanism to send events
         // realtime or persistent storage as done in revocationRequestPublisher.publishRevocationEvents() method

@@ -27,7 +27,7 @@ public class RevokedConsumerKeyServiceImpl implements RevokedConsumerKeyService 
     }
 
     @Override
-    public void removeConsumerKeyFromGatewayCache(String accessToken, boolean isJwtToken) {
+    public void removeConsumerKeyFromGatewayCache(String accessToke) {
 
     }
 }

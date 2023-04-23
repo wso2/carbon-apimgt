@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
+import org.wso2.carbon.apimgt.gateway.jwt.*;
 import org.wso2.carbon.apimgt.gateway.throttling.util.BlockingConditionRetriever;
 import org.wso2.carbon.apimgt.gateway.throttling.util.KeyTemplateRetriever;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -347,6 +347,9 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             // retrieval due to the throttle config dependency for this feature.
             RevokedJWTTokensRetriever webServiceRevokedJWTTokensRetriever = new RevokedJWTTokensRetriever();
             webServiceRevokedJWTTokensRetriever.startRevokedJWTTokensRetriever();
+            InternallyRevokedJWTConsumerKeyRetriever internallyRevokedJWTConsumerKeyRetriever
+                    = new InternallyRevokedJWTConsumerKeyRetriever();
+            internallyRevokedJWTConsumerKeyRetriever.startRevokedJWTConsumerKeyssRetriever();
         }
     }
 

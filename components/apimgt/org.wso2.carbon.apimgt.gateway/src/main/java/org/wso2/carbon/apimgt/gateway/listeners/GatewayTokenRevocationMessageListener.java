@@ -103,6 +103,9 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
         if("internal_token_revocation".equals(tokenType)){
             ServiceReferenceHolder.getInstance().getRevokedConsumerKeyService()
                     .addConsumerKeyIntoMap(consumerKey, expiryTime);
+        } else {
+            ServiceReferenceHolder.getInstance().
+                    getRevokedConsumerKeyService().removeConsumerKeyFromGatewayCache(consumerKey);
         }
     }
 }

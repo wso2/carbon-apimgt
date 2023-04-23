@@ -20,5 +20,5 @@ package org.wso2.carbon.apimgt.impl.consumerkey;
 public interface RevokedConsumerKeyService {
     public void addConsumerKeyIntoMap(String revokedToken, Long expiryTime);
 
-    public void removeConsumerKeyFromGatewayCache(String accessToken, boolean isJwtToken);
+    public void removeConsumerKeyFromGatewayCache(String accessToke);
 }

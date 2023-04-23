@@ -25,7 +25,6 @@ package org.wso2.carbon.apimgt.notification.event;
  */
 public class ConsumerKeyEvent extends Event {
 
-    private static final long serialVersionUID = 1L;
 
     private String consumerKey;
 

@@ -107,6 +107,30 @@
         }
       }
     },
+    "/revokedconsumerkeys" : {
+      "get" : {
+        "summary" : "Consumer keys of revoked jwt",
+        "description" : "This will provide access to Consumer keys of revoked JWT's in database.\n",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of revoke JWTs",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/RevokedJWTConsumerKeyList"
+              }
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/apis" : {
       "get" : {
         "tags" : [ "Subscription Validation" ],
@@ -930,6 +954,33 @@
         }
       }
     },
+    "RevokedJWTConsumerKeyList" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/RevokedJWTConsumerKey"
+      }
+    },
+    "RevokedJWTConsumerKey" : {
+      "properties" : {
+        "consumer_key" : {
+          "type" : "string",
+          "description" : "concumer key of the JWT."
+        },
+        "expiry_time" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "expiry timestamp."
+        },
+        "type" : {
+          "type" : "string",
+          "description" : "revoked consumer key type."
+        },
+        "tenant_id" : {
+          "type" : "string",
+          "description" : "revoked consumer key's respective tenant Id."
+        }
+      }
+    },
     "RevokeAPIKey" : {
       "properties" : {
         "apiKey" : {
@@ -1242,8 +1293,8 @@
           "type" : "string",
           "example" : "EXCHANGED",
           "description" : "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.",
-          "default" : "DIRECT",
-          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ]
+          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ],
+          "default" : "DIRECT"
         }
       }
     },

@@ -15299,7 +15299,7 @@ public class ApiMgtDAO {
                 ps.execute();
                 conn.commit();
             } catch (SQLIntegrityConstraintViolationException e) {
-                boolean isRevokedTokenExist = isRevokedJWTSignatureExist(conn, eventId);
+                boolean isRevokedTokenExist = isRevokedJWTConsumerKeyExist(conn, eventId);
 
                 if (isRevokedTokenExist) {
                     log.warn("Revoked Token already persisted");
@@ -15314,12 +15314,66 @@ public class ApiMgtDAO {
         }
     }
 
+
+    /**
+     * Persist revoked jwt signatures to database.
+     *
+     * @param eventId
+     * @param consumerKey  consumer key of the JWT.
+     * @param expiryTime   expiry time of the token.
+     * @param tenantId     tenant id of the jwt subject.
+     */
+    public void addRevokedConsumerKey(String eventId, String consumerKey,
+                                       Long expiryTime, int tenantId) throws APIManagementException {
+
+        String addConsumerKey = SQLConstants.RevokedJWTConstants.ADD_CONSUMER_KEY;
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(addConsumerKey)) {
+                ps.setString(1, eventId);
+                ps.setString(2, consumerKey);
+                ps.setLong(3, expiryTime);
+                ps.setInt(4, tenantId);
+                ps.execute();
+                conn.commit();
+            } catch (SQLIntegrityConstraintViolationException e) {
+                boolean isRevokedJWTConsumerKeyExist = isRevokedJWTConsumerKeyExist(conn, consumerKey);
+                if (isRevokedJWTConsumerKeyExist) {
+                    log.warn("Revoked Consumer Key already persisted");
+                } else {
+                    handleException("Failed to add Consumer key Token Event.", e);
+                }
+            } catch (SQLException e) {
+                conn.rollback();
+            }
+        } catch (SQLException e) {
+            handleException("Error in adding revoked jwt signature to database : " + e.getMessage(), e);
+        }
+    }
+
+
     /**
      * Check revoked Token Identifier exist
      *
      * @param eventId
      */
-    private boolean isRevokedJWTSignatureExist(Connection conn, String eventId) throws SQLException {
+    private boolean isRevokedJWTConsumerKeyExist(Connection conn, String consumerKey) throws SQLException {
+
+        String checkRevokedConsumerKeyExist = SQLConstants.RevokedJWTConstants.CHECK_REVOKED_CONSUMER_KEY_EXIST;
+        try (PreparedStatement ps = conn.prepareStatement(checkRevokedConsumerKeyExist)) {
+            ps.setString(1, consumerKey);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                return resultSet.next();
+            }
+        }
+    }
+
+    /**
+     * Check revoked Token Identifier exist
+     *
+     * @param eventId
+     */
+    private boolean isConsumerKeyExist(Connection conn, String eventId) throws SQLException {
 
         String checkRevokedTokenExist = SQLConstants.RevokedJWTConstants.CHECK_REVOKED_TOKEN_EXIST;
         try (PreparedStatement ps = conn.prepareStatement(checkRevokedTokenExist)) {
