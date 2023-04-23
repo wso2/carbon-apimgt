@@ -53,26 +53,22 @@ public class InternalRevokedJWTDataHolder {
         }
     }
 
-    public static boolean isJWTTokenClientIdExistsInRevokedMap(String jwtToken) {
-        String[] splitToken = (jwtToken).split("\\.");
-        JSONObject payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
-        String clientId = payload.getString("client_id");
-        String userSub = payload.getString("sub");
-        Long jwtGeneratedTimestamp = payload.getLong("iat");
+    public boolean isJWTTokenClientIdExistsInRevokedMap(String consumerKey) {
 
-        if (internalRevokedJWTMap.containsKey(clientId)) {
-            InternalRevokedJWTDTO internalRevokedJWTDTO = internalRevokedJWTMap.get(clientId);
+        if (internalRevokedJWTMap.containsKey(consumerKey)) {
+            InternalRevokedJWTDTO internalRevokedJWTDTO = internalRevokedJWTMap.get(consumerKey);
             Long jwtRevokedTime = internalRevokedJWTDTO.getRevokedTimestamp();
             String jwtGeneratedUser = internalRevokedJWTDTO.getConsumerKey();
+            return true;
 
-            if (jwtRevokedTime != null & jwtGeneratedUser != null) {
-                Timestamp jwtRevokedTimestamp = new Timestamp(jwtRevokedTime);
-
-                if ((jwtRevokedTimestamp.after(new Timestamp(jwtGeneratedTimestamp))
-                        && jwtGeneratedUser.equals(userSub))) {
-                    return true;
-                }
-            }
+//            if (jwtRevokedTime != null & jwtGeneratedUser != null) {
+//                Timestamp jwtRevokedTimestamp = new Timestamp(jwtRevokedTime);
+//
+//                if ((jwtRevokedTimestamp.after(new Timestamp(jwtGeneratedTimestamp))
+//                        && jwtGeneratedUser.equals(userSub))) {
+//                    return true;
+//                }
+//            }
         }
         return false;
     }

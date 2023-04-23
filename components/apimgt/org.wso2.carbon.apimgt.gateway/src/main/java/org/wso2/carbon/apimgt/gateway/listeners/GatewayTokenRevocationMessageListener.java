@@ -46,7 +46,8 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                     JsonNode payloadData =  new ObjectMapper().readTree(textMessage).path(APIConstants.EVENT_PAYLOAD).
                             path(APIConstants.EVENT_PAYLOAD_DATA);
 
-                    if (payloadData.get("type") != null && payloadData.get("type").equals("internal_token_revocation")) {
+                    if (payloadData.get("type") != null && payloadData.get("type").asText()
+                            .equals("internal_token_revocation")) {
                         handleInternallyRevokedConsumerKeyMessage(payloadData.get("consumerKey").asText()
                                 , payloadData.get("timeStamp").asLong(), payloadData.get("type").asText());
                     }
@@ -99,9 +100,9 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
     }
 
     private void handleInternallyRevokedConsumerKeyMessage(String consumerKey, long expiryTime, String tokenType) {
-        if("internal_revocation".equals(tokenType)){
+        if("internal_token_revocation".equals(tokenType)){
             ServiceReferenceHolder.getInstance().getRevokedConsumerKeyService()
-                    .addConsumerKeyIntoMap(consumerKey,expiryTime);
+                    .addConsumerKeyIntoMap(consumerKey, expiryTime);
         }
     }
 }
