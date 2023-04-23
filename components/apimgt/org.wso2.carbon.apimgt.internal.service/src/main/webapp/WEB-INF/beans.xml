@@ -16,6 +16,7 @@
             <bean class="org.wso2.carbon.apimgt.internal.service.KeyTemplatesApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.BlockApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.RevokedjwtApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.RevokedconsumerkeysApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.ApisApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.ApplicationKeyMappingsApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.ApplicationPoliciesApi"/>
