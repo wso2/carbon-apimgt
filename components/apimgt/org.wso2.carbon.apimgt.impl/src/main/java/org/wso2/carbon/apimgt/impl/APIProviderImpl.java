@@ -6612,6 +6612,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public List<OperationPolicyData> getGatewayPolicyDataListByPolicyId(String policyMappingUUID, String organization,
+            boolean isWithPolicyDefinition) throws APIManagementException {
+        return apiMgtDAO.getAllGatewayPoliciesDataForPolicyMappingUUID(policyMappingUUID, organization,
+                isWithPolicyDefinition);
+    }
+
+    @Override
+    public List<OperationPolicy> getOperationPoliciesOfPolicyMapping(String policyMappingUUID)
+            throws APIManagementException {
+        return apiMgtDAO.getGatewayPoliciesOfPolicyMapping(policyMappingUUID);
+    }
+
     //To get the hashmap of what mappingId is deployed or undeployed in which gateway
     private Map<String, Set<String>> getGatewayPolicyDeploymentMap(List<GatewayPolicyDeployment>
             gatewayPolicyDeploymentList) {

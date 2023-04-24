@@ -18,7 +18,9 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
 
 import com.google.gson.Gson;
+import org.apache.axiom.om.OMElement;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
@@ -26,9 +28,13 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
+import org.wso2.carbon.apimgt.api.gateway.GatewayPolicyDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -44,7 +50,10 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 
+import javax.xml.namespace.QName;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +69,7 @@ import java.util.List;
 public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
 
     private static final Log log = LogFactory.getLog(SynapseArtifactGenerator.class);
+    private static final String EXT_SEQUENCE_PREFIX = "WSO2AM--Ext--";
 
     @Override
     public RuntimeArtifactDto generateGatewayArtifact(List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList)
@@ -151,6 +161,71 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
         runtimeArtifactDto.setFile(false);
         runtimeArtifactDto.setArtifact(synapseArtifacts);
         return runtimeArtifactDto;
+    }
+
+    @Override public RuntimeArtifactDto generateGatewayPolicyArtifact(List<OperationPolicyData> gatewayPolicyDataList,
+            List<OperationPolicy> gatewayPolicyList) throws APIManagementException {
+
+        RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
+        List<String> synapseArtifacts = new ArrayList<>();
+        GatewayPolicyDTO gatewayPolicyDTO = new GatewayPolicyDTO();
+        GatewayContentDTO gatewayInContentDTO = retrieveGatewayPolicySequence(gatewayPolicyDataList, gatewayPolicyList,
+                APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+        if (gatewayInContentDTO != null) {
+            gatewayPolicyDTO.setGatewayPolicySequenceToBeAdd(
+                    TemplateBuilderUtil.addGatewayContentToList(gatewayInContentDTO,
+                            gatewayPolicyDTO.getGatewayPolicySequenceToBeAdd()));
+        }
+        GatewayContentDTO gatewayOutContentDTO = retrieveGatewayPolicySequence(gatewayPolicyDataList, gatewayPolicyList,
+                APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
+        if (gatewayOutContentDTO != null) {
+            gatewayPolicyDTO.setGatewayPolicySequenceToBeAdd(
+                    TemplateBuilderUtil.addGatewayContentToList(gatewayOutContentDTO,
+                            gatewayPolicyDTO.getGatewayPolicySequenceToBeAdd()));
+        }
+        GatewayContentDTO gatewayFaultContentDTO = retrieveGatewayPolicySequence(gatewayPolicyDataList,
+                gatewayPolicyList, APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
+        if (gatewayFaultContentDTO != null) {
+            gatewayPolicyDTO.setGatewayPolicySequenceToBeAdd(
+                    TemplateBuilderUtil.addGatewayContentToList(gatewayFaultContentDTO,
+                            gatewayPolicyDTO.getGatewayPolicySequenceToBeAdd()));
+        }
+        String content = new Gson().toJson(gatewayPolicyDTO);
+        synapseArtifacts.add(content);
+        runtimeArtifactDto.setFile(false);
+        runtimeArtifactDto.setArtifact(synapseArtifacts);
+        return runtimeArtifactDto;
+    }
+
+    private static GatewayContentDTO retrieveGatewayPolicySequence(List<OperationPolicyData> gatewayPolicyDataList,
+            List<OperationPolicy> gatewayPolicyList, String flow) throws APIManagementException {
+        GatewayContentDTO gatewayPolicySequenceContentDto = new GatewayContentDTO();
+
+        String policySequence = null;
+        String seqExt = EXT_SEQUENCE_PREFIX + SynapsePolicyAggregator.getSequenceExtensionFlow(flow);
+        try {
+            policySequence = SynapsePolicyAggregator.generateGatewayPolicySequenceForPolicyMapping(
+                    gatewayPolicyDataList, gatewayPolicyList, flow, seqExt);
+        } catch (IOException e) {
+            throw new APIManagementException(e);
+        }
+
+        if (StringUtils.isNotEmpty(policySequence)) {
+            try {
+                OMElement omElement = APIUtil.buildOMElement(new ByteArrayInputStream(policySequence.getBytes()));
+                if (omElement != null) {
+                    if (omElement.getAttribute(new QName("name")) != null) {
+                        omElement.getAttribute(new QName("name")).setAttributeValue(seqExt);
+                    }
+                    gatewayPolicySequenceContentDto.setName(seqExt);
+                    gatewayPolicySequenceContentDto.setContent(APIUtil.convertOMtoString(omElement));
+                    return gatewayPolicySequenceContentDto;
+                }
+            } catch (Exception e) {
+                throw new APIManagementException(e);
+            }
+        }
+        return null;
     }
 
     @Override
