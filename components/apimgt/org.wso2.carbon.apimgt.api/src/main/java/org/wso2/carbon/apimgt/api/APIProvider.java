@@ -1714,4 +1714,26 @@ public interface APIProvider extends APIManager {
      */
     void engageGatewayGlobalPolicies(Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap,
             String orgId) throws APIManagementException;
+
+    /**
+     * Get gateway policy list for a given Policy Mapping UUID.
+     *
+     * @param policyMappingUUID      Policy mapping UUID
+     * @param organization           Organization name
+     * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
+     *                               is a bit bulky
+     * @return Gateway Policy Data List
+     * @throws APIManagementException
+     */
+    List<OperationPolicyData> getGatewayPolicyDataListByPolicyId(String policyMappingUUID, String organization,
+            boolean isWithPolicyDefinition) throws APIManagementException;
+
+    /**
+     * Get gateway policies attached to the policy mapping
+     *
+     * @param policyMappingUUID Policy mapping UUID
+     * @return List of gateway Policies
+     * @throws APIManagementException
+     */
+    List<OperationPolicy> getOperationPoliciesOfPolicyMapping(String policyMappingUUID) throws APIManagementException;
 }

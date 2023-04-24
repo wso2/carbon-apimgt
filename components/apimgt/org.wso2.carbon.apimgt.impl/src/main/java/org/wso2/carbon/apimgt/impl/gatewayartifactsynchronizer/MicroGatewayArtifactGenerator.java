@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 import org.apache.commons.io.FileUtils;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
@@ -113,6 +115,12 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
         } catch (APIImportExportException | IOException e) {
             throw new APIManagementException("Error while Generating API artifact", e);
         }
+    }
+
+    @Override
+    public RuntimeArtifactDto generateGatewayPolicyArtifact(List<OperationPolicyData> gatewayPolicyDataList,
+            List<OperationPolicy> gatewayPolicyList) {
+        return null;
     }
 
     private Map<String, Map<String, Environment>> getEnvironmentSpecificAPIProperties(
