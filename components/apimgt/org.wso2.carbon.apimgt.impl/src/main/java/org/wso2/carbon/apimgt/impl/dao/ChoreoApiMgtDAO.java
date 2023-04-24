@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -216,6 +217,47 @@ public class ChoreoApiMgtDAO {
                     + environmentsSet + " of Organization: " + organization, e);
         }
         return envToDataPlaneIdMap;
+    }
+
+    /**
+     *
+     * @param environmentsSet
+     * @param organization
+     * @return
+     * @throws APIManagementException
+     */
+    public Map<String, String> getEnvironmentToGatewayAccessibilityTypeMapping(Set<String> environmentsSet,
+                                                                               String organization)
+            throws APIManagementException {
+        Map<String, String> envToGatewayAccessibilityTypeMap = new HashMap<>();
+        if (environmentsSet == null || environmentsSet.size() == 0) {
+            return envToGatewayAccessibilityTypeMap;
+        }
+        Map<String, Environment> readOnlyEnvironments = APIUtil.getReadOnlyEnvironments();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            for (String envName: environmentsSet) {
+                try (PreparedStatement prepStmt =
+                             connection.prepareStatement(
+                                     SQLConstants.GET_ENVIRONMENT_TO_GATEWAY_ACCESSIBILITY_TYPE_MAPPING_SQL)) {
+                    prepStmt.setString(1, envName);
+                    prepStmt.setString(2, organization);
+                    try (ResultSet rs = prepStmt.executeQuery()) {
+                        if (rs.next()) {
+                            envToGatewayAccessibilityTypeMap.put(envName, rs.getString("ACCESSIBILITY_TYPE"));
+                        }
+                    }
+                }
+                // check if the environment is in the read-only environments list
+                if (readOnlyEnvironments.containsKey(envName)) {
+                    envToGatewayAccessibilityTypeMap.put(envName,
+                            readOnlyEnvironments.get(envName).getAccessibilityType());
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException(String.format("Failed to get Environment to gateway accessibility mapping " +
+                    "for EnvironmentsSet: %s of Organization: %s", environmentsSet, organization), e);
+        }
+        return envToGatewayAccessibilityTypeMap;
     }
 
     /**

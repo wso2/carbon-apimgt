@@ -2705,6 +2705,15 @@ public class SQLConstants {
                     "AM_GATEWAY_ENVIRONMENT.ORGANIZATION = ? AND " +
                     "AM_GATEWAY_ENVIRONMENT.UUID = CHOREO_GW_ENV_DATA_PLANE_MAPPING.GATEWAY_ENV_UUID";
 
+    public static final String GET_ENVIRONMENT_TO_GATEWAY_ACCESSIBILITY_TYPE_MAPPING_SQL =
+            "SELECT " +
+                    "   ACCESSIBILITY_TYPE " +
+                    "FROM " +
+                    "   AM_GATEWAY_ENVIRONMENT " +
+                    "WHERE " +
+                    "   AM_GATEWAY_ENVIRONMENT.NAME = ? AND " +
+                    "   AM_GATEWAY_ENVIRONMENT.ORGANIZATION = ? ";
+
     public static final String INSERT_ENVIRONMENT_SQL = "INSERT INTO " +
             "AM_GATEWAY_ENVIRONMENT " +
             "(UUID, NAME, DISPLAY_NAME, DESCRIPTION, PROVIDER, ACCESSIBILITY_TYPE, ORGANIZATION) " +

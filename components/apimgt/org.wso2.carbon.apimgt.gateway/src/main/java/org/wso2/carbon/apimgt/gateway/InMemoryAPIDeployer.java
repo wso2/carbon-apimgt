@@ -376,7 +376,7 @@ public class InMemoryAPIDeployer {
                                 retrievedAPI.getApiId(), retrievedAPI.getUuid(), gatewayLabels, apiName, version,
                                 retrievedAPI.getApiProvider(),
                                 retrievedAPI.getApiType(), retrievedAPI.getContext(),
-                                new HashMap<>());
+                                new HashMap<>(), new HashMap<>());
                 deployAPI(deployAPIInGatewayEvent);
             }
         }
@@ -396,7 +396,7 @@ public class InMemoryAPIDeployer {
                                 APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain,
                                 retrievedAPI.getApiId(), retrievedAPI.getUuid(), gatewayLabels, apiName, version,
                                 retrievedAPI.getApiProvider(), retrievedAPI.getApiType(), retrievedAPI.getContext(),
-                                new HashMap<>());
+                                new HashMap<>(), new HashMap<>());
                 unDeployAPI(deployAPIInGatewayEvent);
             }
         }
