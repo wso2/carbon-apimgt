@@ -24,12 +24,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -706,6 +708,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             body, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
+
+        // check if user has required permissions to generate sandbox/production keys
+        String[] authTokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
+        checkAuthTokenScopesForAppKeyGeneration(authTokenScopes, body.getKeyType().toString());
+
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
@@ -762,6 +771,24 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             RestApiUtil.handleBadRequest(e.getMessage(), log);
         }
         return null;
+    }
+
+    private void checkAuthTokenScopesForAppKeyGeneration(String[] authTokenScopes, String keyType)
+            throws APIManagementException {
+        if (!Boolean.parseBoolean(System.getenv("FEATURE_FLAG_APP_KEY_GEN_RBAC_ENABLED"))) {
+            return;
+        }
+        if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(keyType) &&
+                !ArrayUtils.contains(authTokenScopes, RestApiConstants.APP_PROD_KEY_GEN_SCOPE)) {
+            throw new APIManagementException("Insufficient permission to generate an application key of type: " +
+                    "PRODUCTION", ExceptionCodes.from(ExceptionCodes.OAUTH2_APP_CREATION_FAILED_INSUFFICIENT_PERMISSION,
+                    APIConstants.API_KEY_TYPE_PRODUCTION));
+        } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(keyType) &&
+                !ArrayUtils.contains(authTokenScopes, RestApiConstants.APP_SAND_KEY_GEN_SCOPE)){
+            throw new APIManagementException("Insufficient permission to generate an application key of type: " +
+                    "SANDBOX",ExceptionCodes.from(ExceptionCodes.OAUTH2_APP_CREATION_FAILED_INSUFFICIENT_PERMISSION,
+                    APIConstants.API_KEY_TYPE_SANDBOX));
+        }
     }
 
     /**
@@ -1086,6 +1113,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     public Response applicationsApplicationIdMapKeysPost(String applicationId, ApplicationKeyMappingRequestDTO body,
                                                          String xWSO2Tenant, MessageContext messageContext)
             throws APIManagementException {
+
+        // check if user has required permissions to generate sandbox/production keys
+        String[] authTokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
+        checkAuthTokenScopesForAppKeyGeneration(authTokenScopes, body.getKeyType().toString());
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         JSONObject jsonParamObj = new JSONObject();
