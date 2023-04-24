@@ -3018,6 +3018,69 @@ public class SQLConstants {
                     "AM_API.API_UUID=AM_GW_API_DEPLOYMENTS.API_ID AND " +
                     "AM_GW_API_ARTIFACTS.REVISION_ID=AM_GW_API_DEPLOYMENTS.REVISION_ID";
 
+    public static final String RETRIEVE_ALL_ARTIFACTS_BY_DATA_PLANE_IDS =
+            "SELECT " +
+                    "   AM_GW_API_DEPLOYMENTS.API_ID AS API_ID," +
+                    "   AM_GW_API_DEPLOYMENTS.REVISION_ID AS REVISION_ID," +
+                    "   AM_GW_PUBLISHED_API_DETAILS.API_PROVIDER AS API_PROVIDER," +
+                    "   AM_GW_PUBLISHED_API_DETAILS.API_NAME AS API_NAME," +
+                    "   AM_GW_PUBLISHED_API_DETAILS.API_VERSION AS API_VERSION," +
+                    "   AM_GW_PUBLISHED_API_DETAILS.API_TYPE AS API_TYPE," +
+                    "   AM_GW_API_ARTIFACTS.ARTIFACT AS ARTIFACT," +
+                    "   AM_GW_API_DEPLOYMENTS.LABEL AS LABEL," +
+                    "   AM_GW_API_DEPLOYMENTS.VHOST AS VHOST," +
+                    "   CHOREO_GW_ENV_DATA_PLANE_MAPPING.DATA_PLANE_ID AS DATA_PLANE_ID," +
+                    "   AM_API.CONTEXT AS CONTEXT " +
+                    "FROM" +
+                    "   AM_GW_PUBLISHED_API_DETAILS," +
+                    "   AM_GW_API_ARTIFACTS," +
+                    "   AM_GW_API_DEPLOYMENTS," +
+                    "   AM_API," +
+                    "   CHOREO_GW_ENV_DATA_PLANE_MAPPING," +
+                    "   AM_GW_VHOST," +
+                    "   AM_GATEWAY_ENVIRONMENT " +
+                    "WHERE" +
+                    "   CHOREO_GW_ENV_DATA_PLANE_MAPPING.DATA_PLANE_ID IN (_DATA_PLANE_IDS_) AND" +
+                    "   AM_GW_VHOST.GATEWAY_ENV_ID=AM_GATEWAY_ENVIRONMENT.ID AND" +
+                    "   AM_GATEWAY_ENVIRONMENT.UUID=CHOREO_GW_ENV_DATA_PLANE_MAPPING.GATEWAY_ENV_UUID AND" +
+                    "   AM_GW_VHOST.HOST=AM_GW_API_DEPLOYMENTS.VHOST AND" +
+                    "   AM_GW_PUBLISHED_API_DETAILS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND" +
+                    "   AM_GW_API_ARTIFACTS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND" +
+                    "   AM_API.API_UUID=AM_GW_API_DEPLOYMENTS.API_ID AND" +
+                    "   AM_GW_API_ARTIFACTS.REVISION_ID=AM_GW_API_DEPLOYMENTS.REVISION_ID";
+
+    public static final String RETRIEVE_ALL_ARTIFACTS_BY_ORGANIZATION_AND_DATA_PLANE_IDS =
+            "SELECT " +
+                    "   AM_GW_API_DEPLOYMENTS.API_ID AS API_ID," +
+                    "   AM_GW_API_DEPLOYMENTS.REVISION_ID AS REVISION_ID," +
+                    "   AM_GW_PUBLISHED_API_DETAILS.API_PROVIDER AS API_PROVIDER," +
+                    "   AM_GW_PUBLISHED_API_DETAILS.API_NAME AS API_NAME," +
+                    "   AM_GW_PUBLISHED_API_DETAILS.API_VERSION AS API_VERSION," +
+                    "   AM_GW_PUBLISHED_API_DETAILS.API_TYPE AS API_TYPE," +
+                    "   AM_GW_API_ARTIFACTS.ARTIFACT AS ARTIFACT," +
+                    "   AM_GW_API_DEPLOYMENTS.LABEL AS LABEL," +
+                    "   AM_GW_API_DEPLOYMENTS.VHOST AS VHOST, " +
+                    "   CHOREO_GW_ENV_DATA_PLANE_MAPPING.DATA_PLANE_ID AS DATA_PLANE_ID, " +
+                    "   AM_API.CONTEXT AS CONTEXT " +
+                    "FROM " +
+                    "   AM_GW_PUBLISHED_API_DETAILS," +
+                    "   AM_GW_API_ARTIFACTS," +
+                    "   AM_GW_API_DEPLOYMENTS," +
+                    "   AM_API," +
+                    "   CHOREO_GW_ENV_DATA_PLANE_MAPPING," +
+                    "   AM_GW_VHOST," +
+                    "   AM_GATEWAY_ENVIRONMENT " +
+                    "WHERE " +
+                    "   CHOREO_GW_ENV_DATA_PLANE_MAPPING.DATA_PLANE_ID IN (_DATA_PLANE_IDS_) AND" +
+                    "   AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ? AND" +
+                    "   AM_GW_VHOST.GATEWAY_ENV_ID=AM_GATEWAY_ENVIRONMENT.ID AND" +
+                    "   AM_GATEWAY_ENVIRONMENT.UUID=CHOREO_GW_ENV_DATA_PLANE_MAPPING.GATEWAY_ENV_UUID AND" +
+                    "   AM_GW_VHOST.HOST=AM_GW_API_DEPLOYMENTS.VHOST AND" +
+                    "   AM_GW_PUBLISHED_API_DETAILS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND" +
+                    "   AM_GW_API_ARTIFACTS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND" +
+                    "   AM_API.API_UUID=AM_GW_API_DEPLOYMENTS.API_ID AND" +
+                    "   AM_GW_API_ARTIFACTS.REVISION_ID=AM_GW_API_DEPLOYMENTS.REVISION_ID";
+
     public static final String RETRIEVE_ALL_ARTIFACTS_BY_ORGANIZATION_AND_DATA_PLANE_ID =
             "SELECT AM_GW_API_DEPLOYMENTS.API_ID AS API_ID,AM_GW_API_DEPLOYMENTS.REVISION_ID AS REVISION_ID," +
                     "AM_GW_PUBLISHED_API_DETAILS.API_PROVIDER AS API_PROVIDER," +
@@ -3130,6 +3193,7 @@ public class SQLConstants {
             "SELECT AM_API.API_UUID, AM_API.LOG_LEVEL, AM_API.API_NAME, AM_API.CONTEXT, AM_API.API_VERSION " +
             "FROM AM_API WHERE AM_API.API_UUID = ? AND AM_API.ORGANIZATION=?";
     public static final String GATEWAY_LABEL_REGEX = "_GATEWAY_LABELS_";
+    public static final String DATA_PLANE_IDS_REGEX = "_DATA_PLANE_IDS_";
     public static final String API_ID_REGEX = "_API_IDS_";
     public static final String API_UUID_REGEX = "_API_UUIDS_";
     public static final int API_ID_CHUNK_SIZE = 25;
