@@ -443,7 +443,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 validDoc = true;
             }
         } else if (APIConstants.DOC_SHARED_VISIBILITY.equals(String.valueOf(doc.getVisibility()))) {
-            if (APIConstants.WSO2_ANONYMOUS_USER != username) {
+            if (APIConstants.WSO2_ANONYMOUS_USER != username && !isTenantDomainNotMatching(requestedTenantDomain)) {
                 try {
                     if (validatePrivateScopes(username, loggedInTenantDomain)) {
                         validDoc = true;
