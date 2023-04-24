@@ -15332,8 +15332,9 @@ public class ApiMgtDAO {
             try (PreparedStatement ps = conn.prepareStatement(addConsumerKey)) {
                 ps.setString(1, eventId);
                 ps.setString(2, consumerKey);
-                ps.setLong(3, expiryTime);
-                ps.setInt(4, tenantId);
+                ps.setString(3, "REVOKED");
+                ps.setLong(4, expiryTime);
+                ps.setInt(5, tenantId);
                 ps.execute();
                 conn.commit();
             } catch (SQLIntegrityConstraintViolationException e) {
