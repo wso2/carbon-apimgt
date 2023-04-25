@@ -33,6 +33,9 @@ import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 import zipkin2.reporter.AsyncReporter;
 import zipkin2.reporter.okhttp3.OkHttpSender;
 
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+
 /**
  * Class for getting Zipkin tracer from reading configuration file
  * @deprecated

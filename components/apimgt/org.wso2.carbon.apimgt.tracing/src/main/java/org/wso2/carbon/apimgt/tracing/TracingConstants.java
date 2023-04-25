@@ -24,7 +24,6 @@ package org.wso2.carbon.apimgt.tracing;
 
 @Deprecated
 class TracingConstants {
-
     /**
      * OpenTracer Constants
      * */
