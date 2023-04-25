@@ -48,7 +48,6 @@ import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -779,12 +778,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             return;
         }
         if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(keyType) &&
-                !ArrayUtils.contains(authTokenScopes, RestApiConstants.APP_PROD_KEY_GEN_SCOPE)) {
+                !ArrayUtils.contains(authTokenScopes, RestApiConstants.APP_PROD_KEY_GEN_MANAGE)) {
             throw new APIManagementException("Insufficient permission to generate an application key of type: " +
                     "PRODUCTION", ExceptionCodes.from(ExceptionCodes.OAUTH2_APP_CREATION_FAILED_INSUFFICIENT_PERMISSION,
                     APIConstants.API_KEY_TYPE_PRODUCTION));
         } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(keyType) &&
-                !ArrayUtils.contains(authTokenScopes, RestApiConstants.APP_SAND_KEY_GEN_SCOPE)){
+                !ArrayUtils.contains(authTokenScopes, RestApiConstants.APP_SAND_KEY_GEN_MANAGE)){
             throw new APIManagementException("Insufficient permission to generate an application key of type: " +
                     "SANDBOX",ExceptionCodes.from(ExceptionCodes.OAUTH2_APP_CREATION_FAILED_INSUFFICIENT_PERMISSION,
                     APIConstants.API_KEY_TYPE_SANDBOX));
