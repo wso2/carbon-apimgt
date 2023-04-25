@@ -86,6 +86,7 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                     // environment is unique for a revision in a deployment
                     // create new environment
                     EnvironmentDto environment = new EnvironmentDto();
+                    environment.setId(apiRuntimeArtifactDto.getEnvUUID());
                     environment.setName(apiRuntimeArtifactDto.getLabel());
                     environment.setVhost(apiRuntimeArtifactDto.getVhost());
                     environment.setDeployedTimeStamp(apiRuntimeArtifactDto.getDeployedTimeStamp());

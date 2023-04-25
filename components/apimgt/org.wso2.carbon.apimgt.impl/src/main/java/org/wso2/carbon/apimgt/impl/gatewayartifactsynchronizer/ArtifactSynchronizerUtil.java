@@ -35,11 +35,15 @@ public class ArtifactSynchronizerUtil {
                         apiRuntimeArtifactDto.getLabel(), apiRuntimeArtifactDto.getRevision());
         String organization = apiArtifactPropertyValues.getOrganization();
         Timestamp deployedTime = apiArtifactPropertyValues.getDeployedTime();
+        String envUUID = apiArtifactPropertyValues.getEnvUUID();
         if (organization != null) {
             apiRuntimeArtifactDto.setOrganization(apiArtifactPropertyValues.getOrganization());
         }
         if (deployedTime != null) {
             apiRuntimeArtifactDto.setDeployedTimeStamp(deployedTime.getTime());
+        }
+        if (envUUID != null) {
+            apiRuntimeArtifactDto.setEnvUUID(apiArtifactPropertyValues.getEnvUUID());
         }
     }
 }

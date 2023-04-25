@@ -21,14 +21,24 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * EnvironmentDto represents a gateway environment.
+ * id: UUID of the environment.
  * name: Name of the environment.
  * vhost: Deployed Vhost.
  * deployedTimeStamp: API deployed time.
  */
 public class EnvironmentDto {
+    private String id;
     private String name;
     private String vhost;
     private DeploymentType deploymentType;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public enum DeploymentType {
         PRODUCTION,

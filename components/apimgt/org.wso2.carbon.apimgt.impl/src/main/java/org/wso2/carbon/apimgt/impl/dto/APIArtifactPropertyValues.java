@@ -27,6 +27,7 @@ public class APIArtifactPropertyValues {
 
     private String organization;
     private Timestamp deployedTime;
+    private String envUUID;
 
     public String getOrganization() {
         return organization;
@@ -42,5 +43,13 @@ public class APIArtifactPropertyValues {
 
     public void setDeployedTime(Timestamp deployedTime) {
         this.deployedTime = deployedTime;
+    }
+
+    public String getEnvUUID() {
+        return envUUID;
+    }
+
+    public void setEnvUUID(String envUUID) {
+        this.envUUID = envUUID;
     }
 }
