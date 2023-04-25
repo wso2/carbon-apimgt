@@ -26,6 +26,7 @@ public class APIProductSearchResultAllOfDTO   {
     private String provider = null;
     private String status = null;
     private String thumbnailUri = null;
+    private Boolean hasThumbnail = null;
 
   /**
    * A brief description about the API
@@ -134,6 +135,23 @@ public class APIProductSearchResultAllOfDTO   {
     this.thumbnailUri = thumbnailUri;
   }
 
+  /**
+   **/
+  public APIProductSearchResultAllOfDTO hasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("hasThumbnail")
+  public Boolean isHasThumbnail() {
+    return hasThumbnail;
+  }
+  public void setHasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -149,12 +167,13 @@ public class APIProductSearchResultAllOfDTO   {
         Objects.equals(version, apIProductSearchResultAllOf.version) &&
         Objects.equals(provider, apIProductSearchResultAllOf.provider) &&
         Objects.equals(status, apIProductSearchResultAllOf.status) &&
-        Objects.equals(thumbnailUri, apIProductSearchResultAllOf.thumbnailUri);
+        Objects.equals(thumbnailUri, apIProductSearchResultAllOf.thumbnailUri) &&
+        Objects.equals(hasThumbnail, apIProductSearchResultAllOf.hasThumbnail);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, version, provider, status, thumbnailUri);
+    return Objects.hash(description, context, version, provider, status, thumbnailUri, hasThumbnail);
   }
 
   @Override
@@ -168,6 +187,7 @@ public class APIProductSearchResultAllOfDTO   {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
+    sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("}");
     return sb.toString();
   }
