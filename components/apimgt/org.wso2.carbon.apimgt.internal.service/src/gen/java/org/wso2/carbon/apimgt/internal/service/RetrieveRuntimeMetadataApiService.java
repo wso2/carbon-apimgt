@@ -20,5 +20,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface RetrieveRuntimeMetadataApiService {
-      public Response retrieveRuntimeMetadataGet(String dataPlaneId, MessageContext messageContext) throws APIManagementException;
+      public Response retrieveRuntimeMetadataGet(String dataPlaneId, String gatewayAccessibilityType, MessageContext messageContext) throws APIManagementException;
 }

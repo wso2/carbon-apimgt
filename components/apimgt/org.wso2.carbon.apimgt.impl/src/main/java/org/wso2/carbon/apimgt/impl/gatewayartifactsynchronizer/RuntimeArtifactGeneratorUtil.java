@@ -99,8 +99,10 @@ public class RuntimeArtifactGeneratorUtil {
         return getRuntimeArtifactDto(gatewayArtifacts);
     }
 
-    public static RuntimeArtifactDto generateAllRuntimeMetadata(String dataPlaneId) throws APIManagementException {
-        List<APIRuntimeArtifactDto> gatewayArtifacts = getAllRuntimeArtifactsByDataPlaneId(dataPlaneId);
+    public static RuntimeArtifactDto generateAllRuntimeMetadata(String dataPlaneId, String gatewayAccessibilityType)
+            throws APIManagementException {
+        List<APIRuntimeArtifactDto> gatewayArtifacts = getAllRuntimeArtifactsByDataPlaneId(dataPlaneId,
+                gatewayAccessibilityType);
         return getRuntimeArtifactDto(gatewayArtifacts);
     }
 
@@ -155,20 +157,28 @@ public class RuntimeArtifactGeneratorUtil {
         }
     }
 
-    public static RuntimeArtifactDto generateAllRuntimeMetadata(String organization, String dataPlaneId)
-        throws APIManagementException {
-        List<APIRuntimeArtifactDto> gatewayArtifacts = getAllRuntimeArtifactsByDataPlaneId(organization, dataPlaneId);
+    public static RuntimeArtifactDto generateAllRuntimeMetadata(String organization, String dataPlaneId,
+                                                                String gatewayAccessibilityType)
+            throws APIManagementException {
+        List<APIRuntimeArtifactDto> gatewayArtifacts =
+                getAllRuntimeArtifactsByDataPlaneId(organization, dataPlaneId, gatewayAccessibilityType);
         return getRuntimeArtifactDto(gatewayArtifacts);
     }
 
-    public static RuntimeArtifactDto generateAllRuntimeArtifact(String dataPlaneId, String type)
+    public static RuntimeArtifactDto generateAllRuntimeArtifact(String dataPlaneId, String gatewayAccessibilityType,
+                                                                String type)
             throws APIManagementException {
 
         GatewayArtifactGenerator gatewayArtifactGenerator =
                 ServiceReferenceHolder.getInstance().getGatewayArtifactGenerator(type);
         if (gatewayArtifactGenerator != null) {
-            List<APIRuntimeArtifactDto> gatewayArtifacts
-                    = choreoGatewayArtifactsMgtDAO.retrieveAllGatewayArtifactsByDataPlaneId(dataPlaneId);
+            List<APIRuntimeArtifactDto> gatewayArtifacts;
+            if (gatewayAccessibilityType == null) {
+                gatewayArtifacts = choreoGatewayArtifactsMgtDAO.retrieveAllGatewayArtifactsByDataPlaneId(dataPlaneId);
+            } else {
+                gatewayArtifacts = choreoGatewayArtifactsMgtDAO.retrieveAllGatewayArtifactsByDataPlaneId(dataPlaneId,
+                        gatewayAccessibilityType);
+            }
             if (gatewayArtifacts != null) {
                 if (gatewayArtifacts.isEmpty()) {
                     throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
@@ -190,14 +200,22 @@ public class RuntimeArtifactGeneratorUtil {
         }
     }
 
-    public static RuntimeArtifactDto generateAllRuntimeArtifact(String organization, String dataPlaneId, String type)
+    public static RuntimeArtifactDto generateAllRuntimeArtifact(String organization, String dataPlaneId,
+                                                                String gatewayAccessibilityType, String type)
             throws APIManagementException {
 
         GatewayArtifactGenerator gatewayArtifactGenerator =
                 ServiceReferenceHolder.getInstance().getGatewayArtifactGenerator(type);
         if (gatewayArtifactGenerator != null) {
-            List<APIRuntimeArtifactDto> gatewayArtifacts = choreoGatewayArtifactsMgtDAO
-                    .retrieveAllGatewayArtifactsByOrganizationAndDataPlaneId(organization,dataPlaneId);
+            List<APIRuntimeArtifactDto> gatewayArtifacts;
+            if (gatewayAccessibilityType == null) {
+                gatewayArtifacts = choreoGatewayArtifactsMgtDAO
+                        .retrieveAllGatewayArtifactsByOrganizationAndDataPlaneId(organization, dataPlaneId);
+            } else {
+                gatewayArtifacts = choreoGatewayArtifactsMgtDAO
+                        .retrieveAllGatewayArtifactsByOrganizationAndDataPlaneId(organization, dataPlaneId,
+                                gatewayAccessibilityType);
+            }
             if (gatewayArtifacts != null) {
                 if (gatewayArtifacts.isEmpty()) {
                     throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
@@ -279,14 +297,20 @@ public class RuntimeArtifactGeneratorUtil {
         return gatewayArtifacts;
     }
 
-    private static List<APIRuntimeArtifactDto> getAllRuntimeArtifactsByDataPlaneId(String dataPlaneId)
+    private static List<APIRuntimeArtifactDto> getAllRuntimeArtifactsByDataPlaneId(String dataPlaneId,
+                                                                                   String gatewayAccessibilityType)
             throws APIManagementException {
         List<APIRuntimeArtifactDto> gatewayArtifacts;
 
         if (StringUtils.isNotEmpty(dataPlaneId)) {
             byte[] decodedValue = Base64.decodeBase64(dataPlaneId.getBytes());
             String[] dataPlaneIds = new String(decodedValue).split("\\|");
-            gatewayArtifacts = choreoGatewayArtifactsMgtDAO.retrieveAllGatewayArtifactsByDataPlaneId(dataPlaneIds);
+            if (gatewayAccessibilityType == null) {
+                gatewayArtifacts = choreoGatewayArtifactsMgtDAO.retrieveAllGatewayArtifactsByDataPlaneId(dataPlaneIds);
+            } else {
+                gatewayArtifacts = choreoGatewayArtifactsMgtDAO.retrieveAllGatewayArtifactsByDataPlaneId(dataPlaneIds,
+                        gatewayAccessibilityType);
+            }
         } else {
             throw new APIManagementException("No Data Plane Id",
                     ExceptionCodes.CANNOT_RETRIEVE_RUNTIME_METADATA_NO_DATAPLANE_ID_ERROR);
@@ -303,14 +327,23 @@ public class RuntimeArtifactGeneratorUtil {
         return gatewayArtifacts;
     }
 
-    private static List<APIRuntimeArtifactDto> getAllRuntimeArtifactsByDataPlaneId(String organization, String dataPlaneId)
+    private static List<APIRuntimeArtifactDto> getAllRuntimeArtifactsByDataPlaneId(String organization,
+                                                                                   String dataPlaneId,
+                                                                                   String gatewayAccessibilityType)
             throws APIManagementException {
         List<APIRuntimeArtifactDto> gatewayArtifacts;
 
         if (StringUtils.isNotEmpty(dataPlaneId)) {
             byte[] decodedValue = Base64.decodeBase64(dataPlaneId.getBytes());
             String[] dataPlaneIds = new String(decodedValue).split("\\|");
-            gatewayArtifacts = choreoGatewayArtifactsMgtDAO.retrieveAllGatewayArtifactsByDataPlaneId(organization, dataPlaneIds);
+            if (gatewayAccessibilityType == null) {
+                gatewayArtifacts = choreoGatewayArtifactsMgtDAO
+                        .retrieveAllGatewayArtifactsByDataPlaneId(organization, dataPlaneIds);
+            } else {
+                gatewayArtifacts = choreoGatewayArtifactsMgtDAO.retrieveAllGatewayArtifactsByDataPlaneId(organization,
+                        dataPlaneIds, gatewayAccessibilityType);
+            }
+
         } else {
             throw new APIManagementException("No Data Plane Id",
                     ExceptionCodes.CANNOT_RETRIEVE_RUNTIME_METADATA_NO_DATAPLANE_ID_ERROR);

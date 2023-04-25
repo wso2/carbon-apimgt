@@ -668,6 +668,12 @@
           "description" : "**Search condition**.\n Data-plane ID\n",
           "required" : true,
           "type" : "string"
+        }, {
+          "name" : "gatewayAccessibilityType",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Gateway Accessibility type denotes whether the gateway environment is internal or external\n",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "200" : {
@@ -773,6 +779,12 @@
           "name" : "dataPlaneId",
           "in" : "query",
           "description" : "**Search condition**.\n  Data-Plane ID/s \n  To provide multiple Data-Plane IDs provide a \"|\" seperated list of IDs\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "gatewayAccessibilityType",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Gateway Accessibility type denotes whether the gateway environment is internal or external\n",
           "required" : false,
           "type" : "string"
         } ],
