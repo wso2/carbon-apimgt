@@ -11193,6 +11193,9 @@ components:
             advertiseOnly:
               type: boolean
               example: true
+            hasThumbnail:
+              type: boolean
+              example: true
     APIProductSearchResult:
       title: API Result
       allOf:
@@ -11224,6 +11227,9 @@ components:
             thumbnailUri:
               type: string
               example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+            hasThumbnail:
+              type: boolean
+              example: true
     APIMonetizationInfo:
       title: API monetization object
       required:

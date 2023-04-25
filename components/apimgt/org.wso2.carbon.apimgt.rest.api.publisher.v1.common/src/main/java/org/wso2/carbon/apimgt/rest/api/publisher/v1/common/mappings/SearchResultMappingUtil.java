@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -73,6 +74,7 @@ public class SearchResultMappingUtil {
         apiResultDTO.setStatus(api.getStatus());
         apiResultDTO.setThumbnailUri(api.getThumbnailUrl());
         apiResultDTO.setAdvertiseOnly(api.isAdvertiseOnly());
+        apiResultDTO.setHasThumbnail(!StringUtils.isBlank(api.getThumbnailUrl()));
         return apiResultDTO;
     }
 
@@ -99,6 +101,7 @@ public class SearchResultMappingUtil {
         apiProductResultDTO.setDescription(apiProduct.getDescription());
         apiProductResultDTO.setStatus(apiProduct.getState());
         apiProductResultDTO.setThumbnailUri(apiProduct.getThumbnailUrl());
+        apiProductResultDTO.setHasThumbnail(!StringUtils.isBlank(apiProduct.getThumbnailUrl()));
         return apiProductResultDTO;
     }
 

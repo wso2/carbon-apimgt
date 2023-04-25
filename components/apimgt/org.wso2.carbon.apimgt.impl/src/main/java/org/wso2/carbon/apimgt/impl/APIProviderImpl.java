@@ -5100,6 +5100,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setContext(publiserAPI.getContext());
                         api.setContextTemplate(publiserAPI.getContext());
                         api.setStatus(publiserAPI.getStatus());
+                        api.setThumbnailUrl(publiserAPI.getThumbnailUri());
                         apiSet.add(api);
                     } else if ("APIProduct".equals(item.getType())) {
 
@@ -5109,6 +5110,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setUuid(publiserAPI.getId());
                         api.setContextTemplate(publiserAPI.getContext());
                         api.setState(publiserAPI.getStatus());
+                        api.setThumbnailUrl(publiserAPI.getThumbnailUri());
                         apiProductSet.add(api);
                     } else if (item instanceof DocumentSearchContent) {
                         // doc item
