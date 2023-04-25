@@ -1097,6 +1097,12 @@
                 {% if apim.open_tracer.remote_tracer.properties.sampler_param is defined %}
                 <SamplerParam>{{apim.open_tracer.remote_tracer.properties.sampler_param}}</SamplerParam>
                 {% endif %}
+                {% if apim.open_tracer.remote_tracer.properties.proxy_host is defined %}
+                <ProxyHost>{{apim.open_tracer.remote_tracer.properties.proxy_host}}</ProxyHost>
+                {% endif %}
+                {% if apim.open_tracer.remote_tracer.properties.proxy_port is defined %}
+                <ProxyPort>{{apim.open_tracer.remote_tracer.properties.proxy_port}}</ProxyPort>
+                {% endif %}
             </Properties>
         </RemoteTracer>
         <LogTracer>

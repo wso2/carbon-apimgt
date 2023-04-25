@@ -33,6 +33,9 @@ import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 import zipkin2.reporter.AsyncReporter;
 import zipkin2.reporter.okhttp3.OkHttpSender;
 
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+
 /**
  * Class for getting Zipkin tracer from reading configuration file
  * @deprecated
@@ -62,8 +65,20 @@ public class ZipkinTracer implements OpenTracer {
                         ? configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED)
                         : TracingConstants.DEFAULT_TRACER_LOG_ENABLED);
 
-        OkHttpSender sender =
-                OkHttpSender.create("http://" + hostname + ":" + port + TracingConstants.ZIPKIN_API_CONTEXT);
+        // Read proxy configurations from the configuration file.
+        String proxyHost = configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_PROXY_HOST);
+        String proxyPort = configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_PROXY_PORT);
+        String endpoint = "http://" + hostname + ":" + port + TracingConstants.ZIPKIN_API_CONTEXT;
+        OkHttpSender sender;
+        if (proxyHost != null && !proxyHost.isEmpty() && proxyPort != null && !proxyPort.isEmpty()) {
+            // Configure proxy if the proxy configurations are available.
+            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
+            OkHttpSender.Builder builder = OkHttpSender.newBuilder().endpoint(endpoint);
+            builder.clientBuilder().proxy(proxy);
+            sender = builder.build();
+        } else {
+            sender = OkHttpSender.create(endpoint);
+        }
         Tracer tracer = BraveTracer.create(Tracing.newBuilder()
                 .localServiceName(serviceName)
                 .spanReporter(AsyncReporter.builder(sender).build())
