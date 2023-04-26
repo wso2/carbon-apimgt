@@ -131,6 +131,7 @@ public class RuntimeArtifactGeneratorUtil {
                         }
 
                         EnvironmentDto environment = new EnvironmentDto();
+                        environment.setId(apiRuntimeArtifactDto.getEnvUUID());
                         environment.setName(apiRuntimeArtifactDto.getLabel());
                         environment.setVhost(apiRuntimeArtifactDto.getVhost());
                         environment.setDeployedTimeStamp(apiRuntimeArtifactDto.getDeployedTimeStamp());

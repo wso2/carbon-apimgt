@@ -5,10 +5,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.APIArtifactPropertyValues;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 
@@ -227,10 +229,13 @@ public class GatewayArtifactsMgtDAO {
     public APIArtifactPropertyValues retrieveAPIArtifactPropertyValues(
             String apiUUID, String envName, String revisionUUId) throws APIManagementException {
 
-        String query = SQLConstants.RETRIEVE_API_ARTIFACT_PROPERTY_VALUES;
+        String query = SQLConstants.RETRIEVE_API_ARTIFACT_PROPERTY_VALUES_WITH_ENV_UUID;
         String organization = null;
         Timestamp deployedTime = null;
+        String envUUID = null;
+        boolean emptyResultSet = true;
         APIArtifactPropertyValues propertyValues = new APIArtifactPropertyValues();
+        Map<String, Environment> readOnlyEnvironments = APIUtil.getReadOnlyEnvironments();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, apiUUID);
@@ -238,16 +243,46 @@ public class GatewayArtifactsMgtDAO {
             preparedStatement.setString(3, revisionUUId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
+                    emptyResultSet = false;
                     organization = resultSet.getString("ORGANIZATION");
                     deployedTime = resultSet.getTimestamp("DEPLOYED_TIME");
+                    envUUID = resultSet.getString("ENV_UUID");
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve organization and API revision deployed time", e);
+            handleException("Failed to retrieve organization, API revision deployed time and environment UUID", e);
+        }
+
+        if (emptyResultSet) {
+            /*
+            * If the API revision is deployed in a read-only environment, result set would be empty as read-only
+            * environments are not persisted in the AM_GATEWAY_ENVIRONMENT table.
+            * */
+            if (!readOnlyEnvironments.containsKey(envName)) {
+                throw new APIManagementException
+                        ("Failed to retrieve environment details for environment name: " + envName);
+            }
+            query = SQLConstants.RETRIEVE_API_ARTIFACT_PROPERTY_VALUES;
+            try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
+                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setString(1, apiUUID);
+                preparedStatement.setString(2, envName);
+                preparedStatement.setString(3, revisionUUId);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        organization = resultSet.getString("ORGANIZATION");
+                        deployedTime = resultSet.getTimestamp("DEPLOYED_TIME");
+                        envUUID = readOnlyEnvironments.get(envName).getUuid();
+                    }
+                }
+            } catch (SQLException e) {
+                handleException("Failed to retrieve organization and API revision deployed time", e);
+            }
         }
 
         propertyValues.setOrganization(organization);
         propertyValues.setDeployedTime(deployedTime);
+        propertyValues.setEnvUUID(envUUID);
         return propertyValues;
     }
 

@@ -2907,6 +2907,21 @@ public class SQLConstants {
                     "FROM AM_API, AM_DEPLOYMENT_REVISION_MAPPING " +
                     "WHERE AM_API.API_UUID = ? AND AM_DEPLOYMENT_REVISION_MAPPING.NAME = ? " +
                     "AND AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID = ?";
+    public static final String RETRIEVE_API_ARTIFACT_PROPERTY_VALUES_WITH_ENV_UUID =
+            "SELECT " +
+                    "   AM_API.ORGANIZATION AS ORGANIZATION," +
+                    "   AM_DEPLOYMENT_REVISION_MAPPING.DEPLOYED_TIME AS DEPLOYED_TIME," +
+                    "   AM_GATEWAY_ENVIRONMENT.UUID AS ENV_UUID " +
+                    "FROM" +
+                    "   AM_API," +
+                    "   AM_DEPLOYMENT_REVISION_MAPPING," +
+                    "   AM_GATEWAY_ENVIRONMENT " +
+                    "WHERE" +
+                    "   AM_API.API_UUID = ? AND" +
+                    "   AM_DEPLOYMENT_REVISION_MAPPING.NAME = ? AND" +
+                    "   AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID = ? AND " +
+                    "   AM_API.ORGANIZATION = AM_GATEWAY_ENVIRONMENT.ORGANIZATION AND" +
+                    "   AM_DEPLOYMENT_REVISION_MAPPING.NAME = AM_GATEWAY_ENVIRONMENT.NAME";
     public static final String RETRIEVE_ARTIFACTS_BY_APIID_AND_LABEL =
             "SELECT AM_GW_API_DEPLOYMENTS.REVISION_ID AS REVISION_ID,AM_GW_PUBLISHED_API_DETAILS" +
                     ".TENANT_DOMAIN AS TENANT_DOMAIN," +

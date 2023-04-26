@@ -12,8 +12,8 @@ public class APIRuntimeArtifactDto extends RuntimeArtifactDto {
     private String type;
     private String organization;
     private String context;
-
     private long deployedTimeStamp;
+    private String envUUID;
 
     public String getType() {
 
@@ -130,5 +130,13 @@ public class APIRuntimeArtifactDto extends RuntimeArtifactDto {
 
     public void setDeployedTimeStamp(long deployedTimeStamp) {
         this.deployedTimeStamp = deployedTimeStamp;
+    }
+
+    public String getEnvUUID() {
+        return envUUID;
+    }
+
+    public void setEnvUUID(String envUUID) {
+        this.envUUID = envUUID;
     }
 }
