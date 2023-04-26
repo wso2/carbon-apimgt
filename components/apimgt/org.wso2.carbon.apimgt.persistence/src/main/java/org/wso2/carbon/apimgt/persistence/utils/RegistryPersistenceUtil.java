@@ -1384,6 +1384,7 @@ public class RegistryPersistenceUtil {
             api.setVersion(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
             api.setAdvertiseOnly(Boolean.parseBoolean(apiArtifact
                     .getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+            api.setThumbnail(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
 
         } catch (GovernanceException e) {
             throw new APIPersistenceException("Error while extracting api attributes ", e);

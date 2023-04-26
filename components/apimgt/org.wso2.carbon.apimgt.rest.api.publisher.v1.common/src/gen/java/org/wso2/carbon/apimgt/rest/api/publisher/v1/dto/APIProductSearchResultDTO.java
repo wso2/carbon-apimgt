@@ -28,6 +28,7 @@ public class APIProductSearchResultDTO extends SearchResultDTO  {
     private String provider = null;
     private String status = null;
     private String thumbnailUri = null;
+    private Boolean hasThumbnail = null;
 
   /**
    * A brief description about the API
@@ -136,6 +137,23 @@ public class APIProductSearchResultDTO extends SearchResultDTO  {
     this.thumbnailUri = thumbnailUri;
   }
 
+  /**
+   **/
+  public APIProductSearchResultDTO hasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("hasThumbnail")
+  public Boolean isHasThumbnail() {
+    return hasThumbnail;
+  }
+  public void setHasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -151,12 +169,13 @@ public class APIProductSearchResultDTO extends SearchResultDTO  {
         Objects.equals(version, apIProductSearchResult.version) &&
         Objects.equals(provider, apIProductSearchResult.provider) &&
         Objects.equals(status, apIProductSearchResult.status) &&
-        Objects.equals(thumbnailUri, apIProductSearchResult.thumbnailUri);
+        Objects.equals(thumbnailUri, apIProductSearchResult.thumbnailUri) &&
+        Objects.equals(hasThumbnail, apIProductSearchResult.hasThumbnail);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, version, provider, status, thumbnailUri);
+    return Objects.hash(description, context, version, provider, status, thumbnailUri, hasThumbnail);
   }
 
   @Override
@@ -170,6 +189,7 @@ public class APIProductSearchResultDTO extends SearchResultDTO  {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
+    sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("}");
     return sb.toString();
   }
