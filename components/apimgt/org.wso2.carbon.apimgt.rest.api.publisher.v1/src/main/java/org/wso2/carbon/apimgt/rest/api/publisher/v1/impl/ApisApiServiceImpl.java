@@ -2179,7 +2179,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API api = null;
-        List<String> externalStoreIdList = Arrays.asList(externalStoreIds.split("\\s*,\\s*"));
+        List<String> externalStoreIdList;
+        if(externalStoreIds != null){
+            externalStoreIdList = Arrays.asList(externalStoreIds.split("\\s*,\\s*"));
+        }else{
+            externalStoreIdList = new ArrayList<>();
+        }
         try {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             if (apiIdentifier == null) {
