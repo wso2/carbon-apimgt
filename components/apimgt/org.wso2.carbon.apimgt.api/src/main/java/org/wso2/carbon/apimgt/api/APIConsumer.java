@@ -740,7 +740,7 @@ public interface APIConsumer extends APIManager {
     void cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)
             throws APIManagementException;
 
-    APIKey getApplicationKeyByAppIDAndKeyMapping(int applicationId, String keyMappingId)
+    APIKey getApplicationKeyByAppIDAndKeyMapping(int applicationId, String keyMappingId, boolean lazyLoad)
             throws APIManagementException;
 
     void changeUserPassword(String currentPassword, String newPassword) throws APIManagementException;

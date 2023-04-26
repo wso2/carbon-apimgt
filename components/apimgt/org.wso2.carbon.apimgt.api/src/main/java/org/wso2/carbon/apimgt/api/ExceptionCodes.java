@@ -309,8 +309,10 @@ public enum ExceptionCodes implements ErrorHandler {
     OAUTH2_APP_DELETION_FAILED(900952, "Key Management Error", 500, "Error while deleting the consumer application."),
     OAUTH2_APP_UPDATE_FAILED(900953, "Key Management Error", 500, "Error while updating the consumer application."),
     OAUTH2_APP_RETRIEVAL_FAILED(900954, "Key Management Error", 500, "Error while retrieving the consumer application."),
-    OAUTH2_APP_CREATION_FAILED_INSUFFICIENT_PERMISSION(900955, "Insufficient permission to generate application key", 403,
-            "You do not have required permission to generate an application key of type: %s"),
+    OAUTH2_APP_CREATION_FAILED_INSUFFICIENT_PERMISSION(900955, "Insufficient permission to access application key", 403,
+            "You do not have required permission to access an application key of type: %s"),
+    OAUTH2_APP_INVALID_TYPE(900956, "Invalid Application Key Type", 400,
+            "The provided application key type is invalid. Allowed values: [PRODUCTION, SANDBOX]"),
     APPLICATION_TOKEN_GENERATION_FAILED(900957, "Keymanagement Error", 500, " Error while generating the application" +
             "access token."),
     UNSUPPORTED_THROTTLE_LIMIT_TYPE(900960, "Throttle Policy Error", 400, "Throttle Limit type is not supported"),
