@@ -242,7 +242,7 @@ public class GatewayArtifactsMgtDAO {
             preparedStatement.setString(2, envName);
             preparedStatement.setString(3, revisionUUId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
+                while (resultSet.next()) {
                     emptyResultSet = false;
                     organization = resultSet.getString("ORGANIZATION");
                     deployedTime = resultSet.getTimestamp("DEPLOYED_TIME");
