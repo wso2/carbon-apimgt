@@ -47,7 +47,7 @@ public class RevokedJWTMapCleaner extends TimerTask {
         int count = 0;
         while (it.hasNext()) {
             Map.Entry entry = (Map.Entry) it.next();
-            long expiryTime = (long) (entry.getValue()) * 1000;
+            long expiryTime = (long) (entry.getValue());
             if (currentTimestamp > expiryTime) { // if token is expired, remove from the revoked map
                 it.remove();
                 if (log.isDebugEnabled()) {
