@@ -2972,6 +2972,8 @@ public final class APIConstants {
     public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
 
     public static final String CASE_SENSITIVE_CHECK_PATH =    "caseSensitiveRoleValidation";
+    public static final String SOAP_TO_REST_PRESERVE_ELEMENT_ORDER = "soapToRestPreserveElementOrder";
+
     public static final String MIGRATE = "migrate";
     public static final String SWAGGER_RELAXED_VALIDATION = "swaggerRelaxedValidation";
 }
