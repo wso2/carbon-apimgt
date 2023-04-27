@@ -24,6 +24,7 @@ public class ExtendedAPI extends API {
 
     private String organizationId;
     private String apiContext;
+    private String environmentId;
 
     public String getOrganizationId() {
         return organizationId;
@@ -39,5 +40,13 @@ public class ExtendedAPI extends API {
 
     public void setApiContext(String apiContext) {
         this.apiContext = apiContext;
+    }
+
+    public String getEnvironmentId() {
+        return environmentId;
+    }
+
+    public void setEnvironmentId(String environmentId) {
+        this.environmentId = environmentId;
     }
 }
