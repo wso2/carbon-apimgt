@@ -1672,6 +1672,8 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+            - apim:prod_key_manage
+            - apim:sand_key_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1714,6 +1716,8 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+            - apim:prod_key_manage
+            - apim:sand_key_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1748,6 +1752,8 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+            - apim:prod_key_manage
+            - apim:sand_key_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1785,6 +1791,8 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+            - apim:prod_key_manage
+            - apim:sand_key_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1828,6 +1836,8 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+            - apim:prod_key_manage
+            - apim:sand_key_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1882,6 +1892,8 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+            - apim:prod_key_manage
+            - apim:sand_key_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1915,6 +1927,8 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+            - apim:prod_key_manage
+            - apim:sand_key_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1993,6 +2007,8 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+            - apim:prod_key_manage
+            - apim:sand_key_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2029,6 +2045,8 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+            - apim:prod_key_manage
+            - apim:sand_key_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2071,6 +2089,8 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+            - apim:prod_key_manage
+            - apim:sand_key_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2124,6 +2144,8 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+            - apim:prod_key_manage
+            - apim:sand_key_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2156,6 +2178,8 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+            - apim:prod_key_manage
+            - apim:sand_key_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5963,6 +5987,8 @@ components:
           scopes:
             openid: Authorize access to user details
             apim:subscribe: Subscribe API
+            apim:prod_key_manage: Manage Production Key of an Application
+            apim:sand_key_manage: Manage Sandbox Key of an Application
             apim:api_key: Generate API Keys
             apim:app_manage: Retrieve, Manage and Import, Export applications
             apim:sub_manage: Retrieve, Manage subscriptions

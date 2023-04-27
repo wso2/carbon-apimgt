@@ -140,6 +140,23 @@ public class ApplicationKeyMappingUtil {
         return applicationKeyDTO;
     }
 
+    /**
+     * Insert the application related metadata to a DTO Object using api key. This will not include actual credentials.
+     * This is only a indication that particular key exists in the application.
+     *
+     * @param apiKey Object that contains details needed during token request
+     * @return DTO object with application related metadata (without including actual credentials)
+     */
+    public static ApplicationKeyDTO fromApplicationKeyToMetadataDTO(APIKey apiKey) {
+        ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
+        applicationKeyDTO.setKeyType(ApplicationKeyDTO.KeyTypeEnum.valueOf(apiKey.getType()));
+        applicationKeyDTO.setKeyState(apiKey.getState());
+        applicationKeyDTO.setMode(ApplicationKeyDTO.ModeEnum.valueOf(apiKey.getCreateMode()));
+        applicationKeyDTO.setKeyManager(apiKey.getKeyManager());
+        applicationKeyDTO.setKeyMappingId(apiKey.getMappingId());
+        return applicationKeyDTO;
+    }
+
     public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime){
         APIKeyDTO apiKeyDto = new APIKeyDTO();
         apiKeyDto.setApikey(apiKey);

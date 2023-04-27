@@ -3503,15 +3503,25 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-    @Override public APIKey getApplicationKeyByAppIDAndKeyMapping(int applicationId, String keyMappingId)
+    @Override
+    public APIKey getApplicationKeyByAppIDAndKeyMapping(int applicationId, String keyMappingId, boolean lazyLoad)
             throws APIManagementException {
         APIKey apiKey = apiMgtDAO.getKeyMappingFromApplicationIdAndKeyMappingId(applicationId, keyMappingId);
+        if (apiKey == null) {
+            throw new APIManagementException("Application key mapping " + keyMappingId + " not found.",
+                    ExceptionCodes.APPLICATION_KEY_MAPPING_NOT_FOUND);
+        }
+        // Return the key details if "lazyLoad" is true.
+        // No need to fetch the key details in-depth by calling key managers
+        if (lazyLoad) {
+            return apiKey;
+        }
         String keyManagerId = apiKey.getKeyManager();
         String consumerKey = apiKey.getConsumerKey();
 
         KeyManagerConfigurationDTO keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerId);
-        String keyManagerTenantDomain = keyManagerConfigurationDTO.getOrganization();
         if (keyManagerConfigurationDTO != null) {
+            String keyManagerTenantDomain = keyManagerConfigurationDTO.getOrganization();
             String keyManagerName = keyManagerConfigurationDTO.getName();
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerTenantDomain, keyManagerName);
             if (keyManager != null) {

@@ -117,7 +117,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiOperation(value = "Generate Application Keys", notes = "Generate keys (Consumer key/secret) for application ", response = ApplicationKeyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:prod_key_manage", description = "Manage Production Key of an Application"),
+            @AuthorizationScope(scope = "apim:sand_key_manage", description = "Manage Sandbox Key of an Application")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 
@@ -155,7 +157,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiOperation(value = "Retrieve All Application Keys", notes = "Retrieve keys (Consumer key/secret) of application ", response = ApplicationKeyListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:prod_key_manage", description = "Manage Production Key of an Application"),
+            @AuthorizationScope(scope = "apim:sand_key_manage", description = "Manage Sandbox Key of an Application")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 
@@ -174,7 +178,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiOperation(value = "Clean-Up Application Keys", notes = "Clean up keys after failed key generation of an application ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:prod_key_manage", description = "Manage Production Key of an Application"),
+            @AuthorizationScope(scope = "apim:sand_key_manage", description = "Manage Sandbox Key of an Application")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 
@@ -212,7 +218,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiOperation(value = "Get Key Details of a Given Type ", notes = "This operation can be used to retrieve key details of an individual application specifying the key type in the URI. ", response = ApplicationKeyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:prod_key_manage", description = "Manage Production Key of an Application"),
+            @AuthorizationScope(scope = "apim:sand_key_manage", description = "Manage Sandbox Key of an Application")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 
@@ -231,7 +239,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiOperation(value = "Update Grant Types and Callback Url of an Application ", notes = "This operation can be used to update grant types and callback url of an application. (Consumer Key and Consumer Secret are ignored) Upon succesfull you will retrieve the updated key details as the response. ", response = ApplicationKeyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:prod_key_manage", description = "Manage Production Key of an Application"),
+            @AuthorizationScope(scope = "apim:sand_key_manage", description = "Manage Sandbox Key of an Application")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 
@@ -250,7 +260,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiOperation(value = "Re-Generate Consumer Secret ", notes = "This operation can be used to re generate consumer secret for an application for the give key type ", response = ApplicationKeyReGenerateResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:prod_key_manage", description = "Manage Production Key of an Application"),
+            @AuthorizationScope(scope = "apim:sand_key_manage", description = "Manage Sandbox Key of an Application")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 
@@ -269,7 +281,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiOperation(value = "Map Application Keys", notes = "Map keys (Consumer key/secret) to an application ", response = ApplicationKeyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:prod_key_manage", description = "Manage Production Key of an Application"),
+            @AuthorizationScope(scope = "apim:sand_key_manage", description = "Manage Sandbox Key of an Application")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 
@@ -288,7 +302,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiOperation(value = "Retrieve All Application Keys", notes = "Retrieve keys (Consumer key/secret) of application ", response = ApplicationKeyListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:prod_key_manage", description = "Manage Production Key of an Application"),
+            @AuthorizationScope(scope = "apim:sand_key_manage", description = "Manage Sandbox Key of an Application")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 
@@ -307,7 +323,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiOperation(value = "Clean-Up Application Keys", notes = "Clean up keys after failed key generation of an application ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:prod_key_manage", description = "Manage Production Key of an Application"),
+            @AuthorizationScope(scope = "apim:sand_key_manage", description = "Manage Sandbox Key of an Application")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 
@@ -345,7 +363,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiOperation(value = "Get Key Details of a Given Type ", notes = "This operation can be used to retrieve key details of an individual application specifying the key type in the URI. ", response = ApplicationKeyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:prod_key_manage", description = "Manage Production Key of an Application"),
+            @AuthorizationScope(scope = "apim:sand_key_manage", description = "Manage Sandbox Key of an Application")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 
@@ -364,7 +384,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiOperation(value = "Update Grant Types and Callback URL of an Application ", notes = "This operation can be used to update grant types and callback url of an application. (Consumer Key and Consumer Secret are ignored) Upon succesfull you will retrieve the updated key details as the response. ", response = ApplicationKeyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:prod_key_manage", description = "Manage Production Key of an Application"),
+            @AuthorizationScope(scope = "apim:sand_key_manage", description = "Manage Sandbox Key of an Application")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 
@@ -383,7 +405,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiOperation(value = "Re-Generate Consumer Secret ", notes = "This operation can be used to re generate consumer secret for an application for the give key type ", response = ApplicationKeyReGenerateResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:prod_key_manage", description = "Manage Production Key of an Application"),
+            @AuthorizationScope(scope = "apim:sand_key_manage", description = "Manage Sandbox Key of an Application")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 
