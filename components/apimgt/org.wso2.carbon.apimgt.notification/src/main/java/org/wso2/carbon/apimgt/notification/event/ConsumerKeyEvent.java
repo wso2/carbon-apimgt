@@ -27,6 +27,7 @@ public class ConsumerKeyEvent extends Event {
 
 
     private String consumerKey;
+    private String revocationTime;
 
     public String getConsumerKey() {
         return consumerKey;
@@ -35,4 +36,13 @@ public class ConsumerKeyEvent extends Event {
     public void setConsumerKey(String consumerKey) {
         this.consumerKey = consumerKey;
     }
+
+    public String getRevocationTime() {
+        return revocationTime;
+    }
+
+    public void setRevocationTime(String revocationTime) {
+        this.revocationTime = revocationTime;
+    }
+
 }
