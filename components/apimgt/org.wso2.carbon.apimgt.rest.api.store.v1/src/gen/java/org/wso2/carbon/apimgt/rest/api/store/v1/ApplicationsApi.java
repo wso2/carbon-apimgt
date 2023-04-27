@@ -157,7 +157,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiOperation(value = "Retrieve All Application Keys", notes = "Retrieve keys (Consumer key/secret) of application ", response = ApplicationKeyListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:prod_key_manage", description = "Manage Production Key of an Application"),
+            @AuthorizationScope(scope = "apim:sand_key_manage", description = "Manage Sandbox Key of an Application")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 

@@ -1752,6 +1752,8 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+            - apim:prod_key_manage
+            - apim:sand_key_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"

@@ -812,13 +812,15 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         if (applicationKeys != null) {
             for (APIKey apiKey : applicationKeys) {
+                ApplicationKeyDTO appKeyDTO;
                 if (hasAuthTokenScopesForAppCredentials(apiKey.getType())) {
-                    ApplicationKeyDTO appKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
-                    keyDTOList.add(appKeyDTO);
+                    appKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
                 } else {
+                    appKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToMetadataDTO(apiKey);
                     log.debug("Skipped the application credential: " + apiKey.getType() +
                             " as the user doesn't have enough permissions to view");
                 }
+                keyDTOList.add(appKeyDTO);
             }
             applicationKeyListDTO.setList(keyDTOList);
             applicationKeyListDTO.setCount(keyDTOList.size());
@@ -1161,13 +1163,15 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         if (applicationKeys != null) {
             for (APIKey apiKey : applicationKeys) {
+                ApplicationKeyDTO appKeyDTO;
                 if (hasAuthTokenScopesForAppCredentials(apiKey.getType())) {
-                    ApplicationKeyDTO appKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
-                    keyDTOList.add(appKeyDTO);
+                    appKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
                 } else {
+                    appKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToMetadataDTO(apiKey);
                     log.debug("Skipped the application credential: " + apiKey.getType() +
                             " as the user doesn't have enough permissions to view");
                 }
+                keyDTOList.add(appKeyDTO);
             }
             applicationKeyListDTO.setList(keyDTOList);
             applicationKeyListDTO.setCount(keyDTOList.size());
