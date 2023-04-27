@@ -27,8 +27,8 @@ import java.util.concurrent.*;
 
 public class InternalRevokedJWTDataHolder {
     private static final Log log = LogFactory.getLog(RevokedJWTDataHolder.class);
-    private static Map<String, InternalRevokedJWTDTO> internalRevokedJWTMap = new ConcurrentHashMap<>();
-    private static InternalRevokedJWTDataHolder instance = new InternalRevokedJWTDataHolder();
+    private static final Map<String, InternalRevokedJWTDTO> internalRevokedJWTMap = new ConcurrentHashMap<>();
+    private static final InternalRevokedJWTDataHolder instance = new InternalRevokedJWTDataHolder();
 
     private InternalRevokedJWTDataHolder(){
 
@@ -53,22 +53,16 @@ public class InternalRevokedJWTDataHolder {
         }
     }
 
-    public boolean isJWTTokenClientIdExistsInRevokedMap(String consumerKey) {
+    public boolean isJWTTokenClientIdExistsInRevokedMap(String consumerKey, Long jwtGeneratedTimestamp) {
 
         if (internalRevokedJWTMap.containsKey(consumerKey)) {
             InternalRevokedJWTDTO internalRevokedJWTDTO = internalRevokedJWTMap.get(consumerKey);
             Long jwtRevokedTime = internalRevokedJWTDTO.getRevokedTimestamp();
-            String jwtGeneratedUser = internalRevokedJWTDTO.getConsumerKey();
-            return true;
 
-//            if (jwtRevokedTime != null & jwtGeneratedUser != null) {
-//                Timestamp jwtRevokedTimestamp = new Timestamp(jwtRevokedTime);
-//
-//                if ((jwtRevokedTimestamp.after(new Timestamp(jwtGeneratedTimestamp))
-//                        && jwtGeneratedUser.equals(userSub))) {
-//                    return true;
-//                }
-//            }
+            if (jwtRevokedTime != null) {
+                Timestamp jwtRevokedTimestamp = new Timestamp(jwtRevokedTime);
+                return jwtRevokedTimestamp.after(new Timestamp(jwtGeneratedTimestamp));
+            }
         }
         return false;
     }

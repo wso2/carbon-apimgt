@@ -86,13 +86,13 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
         properties.put(consumerKeyEvent, properties);
 
         ApiMgtDAO.getInstance().addRevokedConsumerKey(UUID.randomUUID().toString(), consumerKeyEvent.getConsumerKey(),
-            consumerKeyEvent.getTimeStamp(), consumerKeyEvent.getTenantId());
+            consumerKeyEvent.getRevocationTime(), consumerKeyEvent.getTenantId());
 
         // TODO: check whether we need to implement RevocationRequestPublisher based mechanism to send events
         // realtime or persistent storage as done in revocationRequestPublisher.publishRevocationEvents() method
         // in handleTokenRevocationEvent()
         Object[] objects = new Object[] { consumerKeyEvent.getEventId(), consumerKeyEvent
-                .getConsumerKey(), consumerKeyEvent.getTimeStamp(),
+                .getConsumerKey(), consumerKeyEvent.getRevocationTime(),
                 consumerKeyEvent.getType(), consumerKeyEvent.getTenantId() };
         EventPublisherEvent tokenRevocationEvent = new EventPublisherEvent(
                 "org.wso2.apimgt.consumerkey.revocation.stream:1.0.0", System.currentTimeMillis(), objects);

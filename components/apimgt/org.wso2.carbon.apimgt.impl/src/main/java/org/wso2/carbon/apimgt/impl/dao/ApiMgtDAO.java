@@ -15274,7 +15274,7 @@ public class ApiMgtDAO {
      * @param tenantId     tenant id of the jwt subject.
      */
     public void addRevokedConsumerKey(String eventId, String consumerKey,
-                                       Long expiryTime, int tenantId) throws APIManagementException {
+                                       String expiryTime, int tenantId) throws APIManagementException {
 
         String addConsumerKey = SQLConstants.RevokedJWTConstants.ADD_CONSUMER_KEY;
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -15283,7 +15283,7 @@ public class ApiMgtDAO {
                 ps.setString(1, eventId);
                 ps.setString(2, consumerKey);
                 ps.setString(3, "REVOKED");
-                ps.setLong(4, expiryTime);
+                ps.setString(4, expiryTime);
                 ps.setInt(5, tenantId);
                 ps.execute();
                 conn.commit();
