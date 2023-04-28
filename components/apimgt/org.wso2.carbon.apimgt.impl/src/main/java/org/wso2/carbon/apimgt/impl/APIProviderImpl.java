@@ -1761,7 +1761,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         Map<String, String> envToDataPlaneIdMap =
                 ChoreoApiMgtDAO.getInstance().getEnvironmentToDataPlaneMapping(environmentsToRemove, organization);
-        gatewayManager.unDeployFromGateway(api, tenantDomain, environmentsToRemove, envToDataPlaneIdMap);
+        Map<String, String> envToGatewayAccessibilityTypeMap =
+                ChoreoApiMgtDAO.getInstance().getEnvironmentToGatewayAccessibilityTypeMapping(environmentsToRemove,
+                        organization);
+        gatewayManager.unDeployFromGateway(api, tenantDomain, environmentsToRemove, envToDataPlaneIdMap,
+                envToGatewayAccessibilityTypeMap);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
                     + " deleted from gateway";
@@ -3867,8 +3871,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         environmentsToRemove.removeAll(gatewaysToAdd);
         Map<String, String> envToDataPlaneIdMap =
                 ChoreoApiMgtDAO.getInstance().getEnvironmentToDataPlaneMapping(environmentsToRemove, organization);
-        gatewayManager.unDeployFromGateway(
-                apiProduct, tenantDomain, associatedAPIs, environmentsToRemove, envToDataPlaneIdMap);
+        Map<String, String> envToGatewayAccessibilityTypeMap =
+                ChoreoApiMgtDAO.getInstance().getEnvironmentToGatewayAccessibilityTypeMapping(environmentsToRemove,
+                        organization);
+        gatewayManager.unDeployFromGateway(apiProduct, tenantDomain, associatedAPIs,
+                environmentsToRemove, envToDataPlaneIdMap, envToGatewayAccessibilityTypeMap);
     }
 
     protected int getTenantId(String tenantDomain) throws UserStoreException {
@@ -5459,8 +5466,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (environmentsToAdd.size() > 0) {
             Map<String, String> envToDataPlaneIdMap =
                     ChoreoApiMgtDAO.getInstance().getEnvironmentToDataPlaneMapping(environmentsToAdd, organization);
+            Map<String, String> envToGatewayAccessibilityTypeMap =
+                    ChoreoApiMgtDAO.getInstance().getEnvironmentToGatewayAccessibilityTypeMapping(environmentsToAdd,
+                            organization);
             // TODO remove this to organization once the microgateway can build gateway based on organization.
-            gatewayManager.deployToGateway(api, organization, environmentsToAdd, envToDataPlaneIdMap);
+            gatewayManager.deployToGateway(api, organization, environmentsToAdd, envToDataPlaneIdMap,
+                    envToGatewayAccessibilityTypeMap);
         }
         String publishedDefaultVersion = getPublishedDefaultVersion(apiIdentifier);
         String defaultVersion = getDefaultVersion(apiIdentifier);
@@ -5839,7 +5850,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // organization parameter
             Map<String, String> envToDataPlaneIdMap =
                     ChoreoApiMgtDAO.getInstance().getEnvironmentToDataPlaneMapping(environmentsToAdd, tenantDomain);
-            gatewayManager.deployToGateway(product, tenantDomain, environmentsToAdd, envToDataPlaneIdMap);
+            Map<String, String> envToGatewayAccessibilityTypeMap =
+                    ChoreoApiMgtDAO.getInstance().getEnvironmentToGatewayAccessibilityTypeMapping(environmentsToAdd,
+                            tenantDomain);
+            gatewayManager.deployToGateway(product, tenantDomain, environmentsToAdd, envToDataPlaneIdMap,
+                    envToGatewayAccessibilityTypeMap);
         }
 
     }

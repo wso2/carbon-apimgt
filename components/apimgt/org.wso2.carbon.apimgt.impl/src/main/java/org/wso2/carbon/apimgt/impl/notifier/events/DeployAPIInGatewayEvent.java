@@ -19,10 +19,12 @@ public class DeployAPIInGatewayEvent extends Event {
 
     private Map<String, String> envToDataPlaneIdMap;
 
+    private Map<String, String> gatewayAccessibilityMap;
+
     public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenantDomain, int apiId,
                                    String uuid, Set<String> gatewayLabels, String name, String version, String provider,
                                    String apiType, String context, Set<APIEvent> associatedApis,
-                                   Map<String, String> envToDataPlaneIdMap) {
+                                   Map<String, String> envToDataPlaneIdMap, Map<String, String> gatewayAccessibilityMap) {
         this.uuid = uuid;
         this.eventId = eventId;
         this.timeStamp = timestamp;
@@ -39,6 +41,7 @@ public class DeployAPIInGatewayEvent extends Event {
         this.apiType = apiType;
         this.associatedApis = associatedApis;
         this.envToDataPlaneIdMap = envToDataPlaneIdMap;
+        this.gatewayAccessibilityMap = gatewayAccessibilityMap;
     }
 
     /**
@@ -57,7 +60,8 @@ public class DeployAPIInGatewayEvent extends Event {
      */
     public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenantDomain, int apiId,
                                    String uuid, Set<String> gatewayLabels, String name, String version, String provider,
-                                   String apiType, String context, Map<String, String> envToDataPlaneIdMap) {
+                                   String apiType, String context, Map<String, String> envToDataPlaneIdMap,
+                                   Map<String, String> gatewayAccessibilityMap) {
         this.uuid = uuid;
         this.eventId = eventId;
         this.timeStamp = timestamp;
@@ -75,6 +79,7 @@ public class DeployAPIInGatewayEvent extends Event {
         this.context = context;
         this.associatedApis = new HashSet<>();
         this.envToDataPlaneIdMap = envToDataPlaneIdMap;
+        this.gatewayAccessibilityMap = gatewayAccessibilityMap;
     }
 
     public Set<String> getGatewayLabels() {
@@ -171,6 +176,14 @@ public class DeployAPIInGatewayEvent extends Event {
         this.envToDataPlaneIdMap = envToDataPlaneIdMap;
     }
 
+    public Map<String, String> getGatewayAccessibilityMap() {
+        return gatewayAccessibilityMap;
+    }
+
+    public void setGatewayAccessibilityMap(Map<String, String> gatewayAccessibilityMap) {
+        this.gatewayAccessibilityMap = gatewayAccessibilityMap;
+    }
+
     @Override
     public String toString() {
         return "DeployAPIInGatewayEvent{" +
@@ -182,6 +195,7 @@ public class DeployAPIInGatewayEvent extends Event {
                 ", apiType='" + apiType + '\'' +
                 ", gatewayLabels=" + gatewayLabels +
                 ", envToDataPlaneIdMap=" + envToDataPlaneIdMap +
+                ", gatewayAccessibilityMap=" + gatewayAccessibilityMap +
                 ", associatedApis=" + associatedApis +
                 ", context='" + context + '\'' +
                 ", eventId='" + eventId + '\'' +
