@@ -530,6 +530,12 @@ paths:
              Data-plane ID
           type: string
           required: true
+        - name: gatewayAccessibilityType
+          in: query
+          description: |
+            **Search condition**.
+              Gateway Accessibility type denotes whether the gateway environment is internal or external
+          type: string
       tags:
         - Retrieving Runtime artifacts
       responses:
@@ -611,6 +617,12 @@ paths:
             **Search condition**.
               Data-Plane ID/s 
               To provide multiple Data-Plane IDs provide a "|" seperated list of IDs
+          type: string
+        - name: gatewayAccessibilityType
+          in: query
+          description: |
+            **Search condition**.
+              Gateway Accessibility type denotes whether the gateway environment is internal or external
           type: string
       tags:
         - Retrieving Runtime artifacts for Data-Planes

@@ -24,7 +24,7 @@ import java.nio.file.Files;
 
 public class RetrieveRuntimeMetadataApiServiceImpl implements RetrieveRuntimeMetadataApiService {
 
-    public Response retrieveRuntimeMetadataGet(String dataPlaneId,
+    public Response retrieveRuntimeMetadataGet(String dataPlaneId, String gatewayAccessibilityType,
                                                MessageContext messageContext) throws APIManagementException {
         RuntimeArtifactDto runtimeMetadataDto;
         String organization = RestApiUtil.getOrganization(messageContext);
@@ -35,10 +35,11 @@ public class RetrieveRuntimeMetadataApiServiceImpl implements RetrieveRuntimeMet
                     .build();
         }
         if (organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
-            runtimeMetadataDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeMetadata(dataPlaneId);
+            runtimeMetadataDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeMetadata(dataPlaneId,
+                    gatewayAccessibilityType);
         } else {
-            runtimeMetadataDto
-                    = RuntimeArtifactGeneratorUtil.generateAllRuntimeMetadata(organization, dataPlaneId);
+            runtimeMetadataDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeMetadata(organization,
+                    dataPlaneId, gatewayAccessibilityType);
         }
         if (runtimeMetadataDto != null) {
             File artifact = (File) runtimeMetadataDto.getArtifact();

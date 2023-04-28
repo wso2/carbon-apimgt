@@ -43,7 +43,7 @@ RetrieveRuntimeMetadataApiService delegate = new RetrieveRuntimeMetadataApiServi
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Json file of runtime metadata", response = Void.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response retrieveRuntimeMetadataGet( @ApiParam(value = "**Search condition**.   Data-Plane ID/s    To provide multiple Data-Plane IDs provide a \"|\" seperated list of IDs ")  @QueryParam("dataPlaneId") String dataPlaneId) throws APIManagementException{
-        return delegate.retrieveRuntimeMetadataGet(dataPlaneId, securityContext);
+    public Response retrieveRuntimeMetadataGet( @ApiParam(value = "**Search condition**.   Data-Plane ID/s    To provide multiple Data-Plane IDs provide a \"|\" seperated list of IDs ")  @QueryParam("dataPlaneId") String dataPlaneId,  @ApiParam(value = "**Search condition**.   Gateway Accessibility type denotes whether the gateway environment is internal or external ")  @QueryParam("gatewayAccessibilityType") String gatewayAccessibilityType) throws APIManagementException{
+        return delegate.retrieveRuntimeMetadataGet(dataPlaneId, gatewayAccessibilityType, securityContext);
     }
 }
