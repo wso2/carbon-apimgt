@@ -1210,16 +1210,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *
      * @param api      API
      */
-    protected void loadMediationPoliciesAsOperationPoliciesToAPI(API api, String organization) throws APIManagementException {
+    protected void loadMediationPoliciesAsAPIPoliciesToAPI(API api, String organization) throws APIManagementException {
+
+        List<OperationPolicy> policesList = (api.getApiPolicies() != null) ? api.getApiPolicies() : new ArrayList<>();
         // This method is used to handle the migration
-        OperationPolicy inFlowPolicy = null;
-        OperationPolicy outFlowPolicy = null;
-        OperationPolicy faultFlowPolicy = null;
+
         // get all policies
         if (APIUtil.isSequenceDefined(api.getInSequence())) {
             OperationPolicyData existingPolicy = getAPISpecificOperationPolicyByPolicyName(api.getInSequence(),
                     APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
-            inFlowPolicy = new OperationPolicy();
+            OperationPolicy inFlowPolicy = new OperationPolicy();
             inFlowPolicy.setPolicyName(api.getInSequence());
             inFlowPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
             inFlowPolicy.setOrder(1);
@@ -1227,11 +1227,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 inFlowPolicy.setPolicyId(existingPolicy.getPolicyId());
                 api.setInSequence(null);
             }
+            policesList.add(inFlowPolicy);
         }
         if (APIUtil.isSequenceDefined(api.getOutSequence())) {
             OperationPolicyData existingPolicy = getAPISpecificOperationPolicyByPolicyName(api.getOutSequence(),
                     APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
-            outFlowPolicy = new OperationPolicy();
+            OperationPolicy outFlowPolicy = new OperationPolicy();
             outFlowPolicy.setPolicyName(api.getOutSequence());
             outFlowPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
             outFlowPolicy.setOrder(1);
@@ -1239,11 +1240,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 outFlowPolicy.setPolicyId(existingPolicy.getPolicyId());
                 api.setOutSequence(null);
             }
+            policesList.add(outFlowPolicy);
         }
         if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
             OperationPolicyData existingPolicy = getAPISpecificOperationPolicyByPolicyName(api.getFaultSequence(),
                     APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
-            faultFlowPolicy = new OperationPolicy();
+            OperationPolicy faultFlowPolicy = new OperationPolicy();
             faultFlowPolicy.setPolicyName(api.getFaultSequence());
             faultFlowPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
             faultFlowPolicy.setOrder(1);
@@ -1251,22 +1253,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 faultFlowPolicy.setPolicyId(existingPolicy.getPolicyId());
                 api.setFaultSequence(null);
             }
-        }
-
-        if (inFlowPolicy != null || outFlowPolicy != null || faultFlowPolicy != null) {
-            Set<URITemplate> uriTemplates = api.getUriTemplates();
-            for (URITemplate uriTemplate : uriTemplates) {
-                List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
-                if (inFlowPolicy != null) {
-                    operationPolicies.add(cloneOperationPolicy(inFlowPolicy));
-                }
-                if (outFlowPolicy != null) {
-                    operationPolicies.add(cloneOperationPolicy(outFlowPolicy));
-                }
-                if (faultFlowPolicy != null) {
-                    operationPolicies.add(cloneOperationPolicy(faultFlowPolicy));
-                }
-            }
+            policesList.add(faultFlowPolicy);
         }
     }
 
@@ -1292,6 +1279,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String apiUUID = api.getUuid();
 
         loadMediationPoliciesToAPI(api, organization);
+        List<OperationPolicy> policesList = (api.getApiPolicies() != null) ? api.getApiPolicies() : new ArrayList<>();
 
         if (APIUtil.isSequenceDefined(api.getInSequence())) {
             Mediation inSequenceMediation = api.getInSequenceMediation();
@@ -1367,19 +1355,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
 
         boolean policyUpdated = false;
-        Set<URITemplate> uriTemplates = api.getUriTemplates();
-        for (URITemplate uriTemplate : uriTemplates) {
-            for (OperationPolicy policy : uriTemplate.getOperationPolicies()) {
-                if (policy.getPolicyId() == null) {
-                    if (clonedPoliciesMap.containsKey(policy.getPolicyName())) {
-                        policy.setPolicyId(clonedPoliciesMap.get(policy.getPolicyName()));
-                        policyUpdated = true;
-                    }
+        for (OperationPolicy policy : api.getApiPolicies()) {
+            if (policy.getPolicyId() == null) {
+                if (clonedPoliciesMap.containsKey(policy.getPolicyName())) {
+                    policy.setPolicyId(clonedPoliciesMap.get(policy.getPolicyName()));
+                    policyUpdated = true;
                 }
             }
         }
         if (policyUpdated && updatePolicyURLMapping) {
-            apiMgtDAO.addOperationPolicyMapping(uriTemplates);
+            apiMgtDAO.addAPILevelPolicies(api.getApiPolicies(), api.getUuid(), null, tenantDomain);
         }
     }
 
@@ -4790,7 +4775,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                         || APIUtil.isSequenceDefined(api.getFaultSequence())) {
                     if (migrationEnabled == null) {
-                        loadMediationPoliciesAsOperationPoliciesToAPI(api, organization);
+                        loadMediationPoliciesAsAPIPoliciesToAPI(api, organization);
                     } else {
                         loadMediationPoliciesToAPI(api, organization);
                     }
