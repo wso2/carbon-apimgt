@@ -1682,6 +1682,8 @@ public final class APIConstants {
     public static final String REST_API_SCOPES_CONFIG = "RESTAPIScopes";
     public static final String REST_API_ROLE_MAPPINGS_CONFIG = "RoleMappings";
     public static final String APIM_SUBSCRIBE_SCOPE = "apim:subscribe";
+    public static final String APIM_CREATOR_SCOPE = "apim:api_create";
+    public static final String APIM_PUBLISHER_SCOPE = "apim:api_publish";
 
     public static final String HTTPS_PROTOCOL = "https";
     public static final String HTTPS_PROTOCOL_URL_PREFIX = "https://";
