@@ -222,6 +222,9 @@ public class ImportUtils {
                     extractValidateAndDropOperationPoliciesFromURITemplate(importedApiDTO.getOperations(),
                             extractedFolderPath, targetAPIUuid, organization, importedApiDTO.getType().toString(),
                             apiProvider);
+            List<OperationPolicy> extractedAPIPolicies = extractValidateAndDropAPIPoliciesFromAPI(importedApiDTO,
+                    extractedFolderPath, targetAPIUuid, organization, importedApiDTO.getType().toString(),
+                    apiProvider);
 
             // If the overwrite is set to true (which means an update), retrieve the existing API
             if (Boolean.TRUE.equals(overwrite) && targetApi != null) {
@@ -263,9 +266,10 @@ public class ImportUtils {
                 }
             }
 
-            if (!extractedPoliciesMap.isEmpty()) {
+            if (!extractedPoliciesMap.isEmpty() || !extractedAPIPolicies.isEmpty()) {
                 importedApi.setUriTemplates(populateUriTemplateWithPolicies(importedApi, apiProvider,
                         extractedFolderPath, extractedPoliciesMap, currentTenantDomain));
+                importedApi.setApiPolicies(extractedAPIPolicies);
                 API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
                 apiProvider.updateAPI(importedApi, oldAPI);
             }
@@ -442,6 +446,24 @@ public class ImportUtils {
             dto.setOperationPolicies(null);
         }
         return operationPoliciesMap;
+    }
+
+    public static List<OperationPolicy> extractValidateAndDropAPIPoliciesFromAPI(APIDTO importedApiDTO,
+             String extractedFolderPath, String apiUUID, String tenantDomain,
+             String apiType, APIProvider provider) throws APIManagementException {
+        List<OperationPolicy> apiPoliciesList = new ArrayList<>();
+        if (importedApiDTO.getApiPolicies() != null) {
+            apiPoliciesList = OperationPolicyMappingUtil
+                    .fromDTOToAPIOperationPoliciesList(importedApiDTO.getApiPolicies());
+            Map<String, OperationPolicySpecification> visitedPoliciesMap = new HashMap<>();
+            for (OperationPolicy policy : apiPoliciesList) {
+                validateAppliedPolicy(policy, visitedPoliciesMap, extractedFolderPath, apiUUID, provider,
+                        tenantDomain, apiType);
+            }
+
+        }
+        importedApiDTO.setApiPolicies(null);
+        return apiPoliciesList;
     }
 
     /**

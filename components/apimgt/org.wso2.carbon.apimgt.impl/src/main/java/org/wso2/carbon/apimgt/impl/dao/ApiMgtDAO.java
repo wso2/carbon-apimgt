@@ -14460,8 +14460,8 @@ public class ApiMgtDAO {
                             uriTemplate.setId(rs.getInt("API_ID"));
                         }
 
-                        populateAPIPoliciesToProductResource(apiProductResource, urlMappingId, apiToAPIPolicyMap,
-                                connection);
+                        populateAPIPoliciesToProductResource(apiProductResource, urlMappingId, uriTemplate,
+                                apiToAPIPolicyMap, connection);
 
                         urlMappingList.add(uriTemplate);
                     }
@@ -14571,7 +14571,7 @@ public class ApiMgtDAO {
                 insertProductResourceMappingStatement.executeBatch();
                 for (ClonePolicyMetadataDTO toBeClonedPolicyData : toBeClonedPolicyDetails) {
                     cloneCommonPolicyToAPI(connection, toBeClonedPolicyData.getCurrentPolicyUUID(),
-                            toBeClonedPolicyData.getClonedPolicyUUID(), toBeClonedPolicyData.getApiUUID());
+                            toBeClonedPolicyData.getClonedPolicyUUID(), uuid);
                 }
                 insertOperationPolicyMappingStatement.executeBatch();
             }
@@ -19847,6 +19847,15 @@ public class ApiMgtDAO {
         String query;
         List<OperationPolicy> policyList = new ArrayList<>();
         boolean isRevision = false;
+
+        if (revisionUUID == null) {
+            APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(apiUUID);
+            if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                apiUUID = apiRevision.getApiUUID();
+                revisionUUID = apiRevision.getRevisionUUID();
+            }
+        }
+
         if (revisionUUID != null) {
             query = SQLConstants.OperationPolicyConstants.GET_API_POLICIES_FOR_API_REVISION_SQL;
             isRevision = true;
@@ -20033,12 +20042,12 @@ public class ApiMgtDAO {
 
 
     public void populateAPIPoliciesToProductResource(APIProductResource productResource, int urlMappingId,
+                                                     URITemplate uriTemplate,
                                                      Map<String, List<OperationPolicy>> apiToAPIPolicyMap,
                                                      Connection connection)
             throws APIManagementException, SQLException {
 
         List<OperationPolicy> apiPolicies = null;
-        URITemplate uriTemplate = productResource.getUriTemplate();
         if (apiToAPIPolicyMap.containsKey(productResource.getApiId())) {
             apiPolicies = apiToAPIPolicyMap.get(productResource.getApiId());
         } else {
@@ -20048,7 +20057,24 @@ public class ApiMgtDAO {
         List<OperationPolicy> operationPolicies = getOperationPoliciesOfURITemplate(connection, urlMappingId);
         List<OperationPolicy> resourcePolicyList = clonePolicyList(apiPolicies);
 
+        int requestPolicyCount = 0;
+        int responsePolicyCount = 0;
+        int faultPolicyCount=0;
+
         resourcePolicyList.addAll(operationPolicies);
+
+        for (OperationPolicy policy: resourcePolicyList) {
+            if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(policy.getDirection())) {
+                requestPolicyCount += 1;
+                policy.setOrder(requestPolicyCount);
+            } else if (APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE.equals(policy.getDirection())) {
+                responsePolicyCount += 1;
+                policy.setOrder(responsePolicyCount);
+            } else if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(policy.getDirection())) {
+                faultPolicyCount += 1;
+                policy.setOrder(faultPolicyCount);
+            }
+        }
         uriTemplate.setOperationPolicies(resourcePolicyList);
     }
 

@@ -54,15 +54,12 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
-import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
@@ -99,14 +96,12 @@ import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
@@ -1402,7 +1397,7 @@ public class APIProviderImplTest {
                 APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, superTenantDomain, false)).thenReturn(null);
 
         PowerMockito.when(APIUtil.isSequenceDefined(Mockito.anyString())).thenReturn(true);
-        apiProvider.loadMediationPoliciesAsOperationPoliciesToAPI(api, superTenantDomain);
+        apiProvider.loadMediationPoliciesAsAPIPoliciesToAPI(api, superTenantDomain);
 
         Assert.assertNotNull(uriTemplate1.getOperationPolicies());
         Assert.assertNotNull(uriTemplate2.getOperationPolicies());
@@ -1454,7 +1449,7 @@ public class APIProviderImplTest {
                 APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, superTenantDomain, false)).thenReturn(policyData);
 
         PowerMockito.when(APIUtil.isSequenceDefined(Mockito.anyString())).thenReturn(true);
-        apiProvider.loadMediationPoliciesAsOperationPoliciesToAPI(api, superTenantDomain);
+        apiProvider.loadMediationPoliciesAsAPIPoliciesToAPI(api, superTenantDomain);
 
         for (URITemplate template : api.getUriTemplates()) {
             for (OperationPolicy policy : template.getOperationPolicies()) {
