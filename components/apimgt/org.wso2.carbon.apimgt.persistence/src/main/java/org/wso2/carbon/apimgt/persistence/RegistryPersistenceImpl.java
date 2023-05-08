@@ -2133,10 +2133,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 // /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
                 // We need to remove the /t/tenanatdoman/registry/resource/_system/governance section to set
                 // permissions.
-                int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
-                String filePath = docFilePath.substring(startIndex, docFilePath.length());
-                RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, authorizedRoles, filePath,
-                        registry);
+                if (docFilePath.contains(APIConstants.GOVERNANCE)) {
+                    int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
+                    String filePath = docFilePath.substring(startIndex, docFilePath.length());
+                    RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, authorizedRoles, filePath,
+                            registry);
+                }
             }
             documentation.setId(docArtifact.getId());
             return documentation;
