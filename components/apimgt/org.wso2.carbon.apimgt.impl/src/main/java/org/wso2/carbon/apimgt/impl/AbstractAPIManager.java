@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
+import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
@@ -1524,5 +1525,21 @@ public abstract class AbstractAPIManager implements APIManager {
             return Boolean.parseBoolean(oauthAppValidation);
         }
         return true;
+    }
+
+    public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
+
+        RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
+        Properties properties = new Properties();
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        String eventID = UUID.randomUUID().toString();
+        properties.put(APIConstants.NotificationEvent.EVENT_ID,eventID);
+        properties.put(APIConstants.NotificationEvent.TOKEN_TYPE, APIConstants.API_KEY_AUTH_TYPE);
+        properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
+        properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
+        ApiMgtDAO.getInstance().addRevokedJWTSignature(eventID,
+                apiKey, APIConstants.API_KEY_AUTH_TYPE,
+                expiryTime, tenantId);
+        revocationRequestPublisher.publishRevocationEvents(apiKey, expiryTime, properties);
     }
 }

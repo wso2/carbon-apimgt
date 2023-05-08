@@ -3915,6 +3915,43 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v3/apis/7a2298c4-c905-403f-8fac-38c73301631f/generate-key"'
 
+  /apis/{apiId}/revoke-key:
+    post:
+      tags:
+        - API Keys
+      summary: Revokes an API Test Token
+      description: |
+        This operation can be used to revoke an internal API key which was used to invoke an API.
+      operationId: revokeInternalAPIKey
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        description: |
+          API Key Revoke Request Object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIKeyRevokeRequest'
+        required: false
+      responses:
+        200:
+          description: |
+            OK.
+            apiKey revoked successfully.
+          content: {}
+        400:
+          $ref: '#/components/responses/BadRequest'
+      security:
+        - OAuth2Security:
+            - apim:api_generate_key
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "-H Content-Type: application/json" -X POST @data.json 
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/7a2298c4-c905-403f-8fac-38c73301631f/revoke-keys"'
+
   /apis/export:
     get:
       tags:
@@ -11651,6 +11688,15 @@ components:
             - MINUTE
             - HOUR
             - DAY
+    APIKeyRevokeRequest:
+      title: API Key revoke request object
+      type: object
+      properties:
+        apiKey:
+          type: string
+          description: API Key to revoke
+          example: eyJoZWxsbyI6IndvcmxkIn0=.eyJ3c28yIjoiYXBpbSJ9.eyJ3c28yIjoic2lnbmF0dXJlIn0=
+
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.

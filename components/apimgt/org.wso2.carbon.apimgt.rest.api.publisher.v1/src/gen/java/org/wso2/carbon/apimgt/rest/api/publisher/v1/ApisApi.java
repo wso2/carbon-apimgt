@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIKeyRevokeRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
@@ -1466,6 +1467,23 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response restoreAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Revision ID of an API ")  @QueryParam("revisionId") String revisionId) throws APIManagementException{
         return delegate.restoreAPIRevision(apiId, revisionId, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/revoke-key")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Revokes an API Test Token", notes = "This operation can be used to revoke an internal API key which was used to invoke an API. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_generate_key", description = "Generate Internal Key"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "API Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. apiKey revoked successfully. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
+    public Response revokeInternalAPIKey(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @ApiParam(value = "API Key Revoke Request Object " ) APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO) throws APIManagementException{
+        return delegate.revokeInternalAPIKey(apiId, ifMatch, apIKeyRevokeRequestDTO, securityContext);
     }
 
     @POST
