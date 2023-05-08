@@ -19731,9 +19731,8 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
             prepStmt.setString(1, apiUUID);
             prepStmt.execute();
-            if (apiLevelPolicies != null && !apiLevelPolicies.isEmpty()) {
-                addAPIPoliciesMapping(apiUUID, uriTemplate, apiLevelPolicies, tenantDomain, connection);
-            }
+
+            addAPIPoliciesMapping(apiUUID, uriTemplate, apiLevelPolicies, tenantDomain, connection);
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while adding api level policies for API : " + apiUUID, e);
