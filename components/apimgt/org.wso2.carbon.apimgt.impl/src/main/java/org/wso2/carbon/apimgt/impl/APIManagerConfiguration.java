@@ -2063,7 +2063,16 @@ public class APIManagerConfiguration {
             long retryDuration = Long.valueOf(retryDurationElement.getText());
             gatewayArtifactSynchronizerProperties.setRetryDuartion(retryDuration);
         } else {
-            log.debug("Retry Duration Element is not set. Set to default duaration");
+            log.debug("Retry Duration Element is not set. Set to default duration");
+        }
+
+        OMElement maxRetryCountElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayArtifactSynchronizer.MAX_RETRY_COUNT));
+        if (maxRetryCountElement != null) {
+            int retryCount = Integer.parseInt(maxRetryCountElement.getText());
+            gatewayArtifactSynchronizerProperties.setMaxRetryCount(retryCount);
+        } else {
+            log.debug("Max Retry Count Element is not set. Set to default count");
         }
 
         OMElement dataRetrievalModeElement = omElement.getFirstChildWithName(

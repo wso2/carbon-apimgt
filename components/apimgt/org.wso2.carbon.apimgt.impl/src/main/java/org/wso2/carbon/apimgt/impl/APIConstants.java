@@ -2651,6 +2651,7 @@ public final class APIConstants {
         public static final String SAVER_CONFIG = "ArtifactSaver";
         public static final String RETRIEVER_CONFIG = "ArtifactRetriever";
         public static final String RETRY_DUARTION = "RetryDuration";
+        public static final String MAX_RETRY_COUNT = "MaxRetryCount";
         public static final String PUBLISH_DIRECTLY_TO_GW_CONFIG = "PublishDirectlyToGW";
         public static final String GATEWAY_LABELS_CONFIG = "GatewayLabels";
         public static final String LABEL_CONFIG = "Label";

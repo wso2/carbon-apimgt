@@ -14,6 +14,7 @@ public class GatewayArtifactSynchronizerProperties {
     private Set<String> gatewayLabels = new HashSet<>();
     private String artifactSynchronizerDataSource = "jdbc/WSO2AM_DB";
     private long retryDuartion = 15000 ;
+    private int maxRetryCount = 5;
     private String gatewayStartup = "sync";
     private long eventWaitingTime = 1;
     private boolean onDemandLoading;
@@ -107,6 +108,16 @@ public class GatewayArtifactSynchronizerProperties {
     public void  setRetryDuartion(long retryDuartion) {
 
         this.retryDuartion = retryDuartion;
+    }
+
+    public int getMaxRetryCount() {
+
+        return maxRetryCount;
+    }
+
+    public void  setMaxRetryCount(int maxRetryCount) {
+
+        this.maxRetryCount = maxRetryCount;
     }
 
     public String getGatewayStartup() {
