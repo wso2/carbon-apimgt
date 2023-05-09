@@ -273,7 +273,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            apiConsumer = RestApiCommonUtil.getConsumer(username);
+            String userOrganization = RestApiUtil.getValidatedSubjectOrganization(messageContext);
+            apiConsumer = RestApiCommonUtil.getConsumer(username, userOrganization);
             String applicationId = body.getApplicationId();
             String currentThrottlingPolicy = body.getThrottlingPolicy();
             String requestedThrottlingPolicy = body.getRequestedThrottlingPolicy();
@@ -320,7 +321,6 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             }
 
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(body.getApiId(), organization);
-
 
             apiTypeWrapper.setTier(body.getThrottlingPolicy());
 
