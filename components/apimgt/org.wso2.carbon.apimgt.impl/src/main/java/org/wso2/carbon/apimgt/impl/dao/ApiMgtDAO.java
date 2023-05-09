@@ -133,7 +133,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -18802,6 +18801,10 @@ public class ApiMgtDAO {
                                           String apiUUID) throws APIManagementException, SQLException {
         OperationPolicyData policyData = getOperationPolicyByPolicyID(connection, commonPolicyId, true);
         if (policyData != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Common policy " + policyData.getSpecification().getName() + ":"
+                        + policyData.getSpecification().getVersion() + " is cloned for API " + apiUUID);
+            }
             // If we are taking a clone from common policy, common policy's Id is used as the CLONED_POLICY_ID.
             return addAPISpecificOperationPolicy(connection, policyData, apiUUID, null, clonedPolicyId, commonPolicyId);
         } else {
@@ -18835,6 +18838,10 @@ public class ApiMgtDAO {
         // Since we import all the policies to API at API update, getting the policy from API specific policy list is enough.
         // Cloned common policy UUID is mandatory if it's a clone as without it restore will be broken.
         if (policyData != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("API specific policy " + policyData.getSpecification().getName() + ":"
+                        + policyData.getSpecification().getVersion() + " is cloned for API revision " + revisionUUID);
+            }
             return addAPISpecificOperationPolicy(connection, policyData, apiUUID, revisionUUID, revisionedPolicyId,
                     policyData.getClonedCommonPolicyId());
         } else {
@@ -18883,6 +18890,11 @@ public class ApiMgtDAO {
         OperationPolicyData policyData = getAPISpecificOperationPolicyByPolicyID(connection, previousPolicyUUID,
                 previousAPIVersionUUID, organization, true);
         if (policyData != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("API specific policy " + policyData.getSpecification().getName() + ":"
+                        + policyData.getSpecification().getVersion() + " is cloned for new API version "
+                        + newAPIVersionUUID);
+            }
             return addAPISpecificOperationPolicy(connection, policyData, newAPIVersionUUID, null, newPolicyUUID,
                     policyData.getClonedCommonPolicyId());
         } else {
@@ -19635,6 +19647,12 @@ public class ApiMgtDAO {
         return list;
     }
 
+
+    /**
+     * This method will add API level and operation level policy mapping
+     *
+     * @throws APIManagementException
+     */
     public void addAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate, List<OperationPolicy> apiPolicies,
                                       String tenantDomain) throws APIManagementException {
 
@@ -19653,7 +19671,7 @@ public class ApiMgtDAO {
 
     }
 
-    public void addAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate, List<OperationPolicy> apiPolicies,
+    private void addAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate, List<OperationPolicy> apiPolicies,
                                       String tenantDomain, Connection connection)
             throws APIManagementException {
 
@@ -19697,6 +19715,11 @@ public class ApiMgtDAO {
                             usedClonedPolicies, toBeClonedPolicyDetails);
                     Gson gson = new Gson();
                     String paramJSON = gson.toJson(policy.getParameters());
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("Adding API level policy " + policy.getPolicyName() + ":"
+                                + policy.getPolicyVersion() + " for API " + apiUUID);
+                    }
 
                     apiLevelPolicyMappingStatement.setString(1, apiUUID);
                     apiLevelPolicyMappingStatement.setString(2, null);
@@ -19755,7 +19778,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public void addAPILevelPolicies(List<OperationPolicy> policies, String apiUUID, String revisionUUID,
+    private void addAPILevelPolicies(List<OperationPolicy> policies, String apiUUID, String revisionUUID,
                                     String tenantDomain, Connection connection) throws APIManagementException {
         Map<String, String> updatedPoliciesMap = new HashMap<>();
         Set<String> usedClonedPolicies = new HashSet<String>();
@@ -19768,6 +19791,11 @@ public class ApiMgtDAO {
 
                 Gson gson = new Gson();
                 String paramJSON = gson.toJson(policy.getParameters());
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Adding API level policy " + policy.getPolicyName() + ":"
+                            + policy.getPolicyVersion() + " for API " + apiUUID);
+                }
 
                 statement.setString(1, apiUUID);
                 statement.setString(2, revisionUUID);
@@ -19831,7 +19859,6 @@ public class ApiMgtDAO {
      *
      * @param apiUUID         UUID of API
      * @param revisionUUID    UUID of API Revision
-     * @throws SQLException
      * @throws APIManagementException
      */
     public List<OperationPolicy> getAPIPolicyMapping(String apiUUID, String revisionUUID) throws APIManagementException {
@@ -19851,7 +19878,16 @@ public class ApiMgtDAO {
         return policyList;
     }
 
-    public List<OperationPolicy> getAPIPolicyMapping(String apiUUID, String revisionUUID, Connection connection) throws APIManagementException {
+    /**
+     * Get API policy mapping by UUID
+     *
+     * @param apiUUID         UUID of API
+     * @param revisionUUID    UUID of API Revision
+     * @param connection      Connection
+     * @throws APIManagementException
+     */
+    private List<OperationPolicy> getAPIPolicyMapping(String apiUUID, String revisionUUID, Connection connection)
+            throws APIManagementException {
 
         String query;
         List<OperationPolicy> policyList = new ArrayList<>();
@@ -19890,7 +19926,16 @@ public class ApiMgtDAO {
     }
 
 
-    public void revisionAPIPolicies(APIRevision apiRevision, String tenantDomain, Map<String, URITemplate> uriTemplates,
+    /**
+     * Create a revision of API policis. This will clone the policy and policy mapping with each revision
+     *
+     * @param apiRevision       API revision
+     * @param tenantDomain      Tenant domain
+     * @param uriTemplates      URI Templates map
+     * @param connection        Connection
+     * @throws APIManagementException
+     */
+    private void revisionAPIPolicies(APIRevision apiRevision, String tenantDomain, Map<String, URITemplate> uriTemplates,
                                     Connection connection) throws SQLException, APIManagementException {
 
         try (PreparedStatement operationPolicyMappingStatement = connection
@@ -19911,6 +19956,11 @@ public class ApiMgtDAO {
                         Gson gson = new Gson();
                         String paramJSON = gson.toJson(policy.getParameters());
 
+                        if (log.isDebugEnabled()) {
+                            log.debug("Adding operation policy " + policy.getPolicyName() + ":"
+                                    + policy.getPolicyVersion() + " for API revision " + apiRevision.getRevisionUUID());
+                        }
+
                         operationPolicyMappingStatement.setInt(1, urlMapping.getId());
                         operationPolicyMappingStatement.setString(2, clonedPolicyMap.get(policy.getPolicyId()));
                         operationPolicyMappingStatement.setString(3, policy.getDirection());
@@ -19928,6 +19978,11 @@ public class ApiMgtDAO {
                         clonedPolicyMap, toBeClonedPolicyDetails);
                 Gson gson = new Gson();
                 String paramJSON = gson.toJson(policy.getParameters());
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Adding API level policy " + policy.getPolicyName() + ":"
+                            + policy.getPolicyVersion() + " for API revision " + apiRevision.getRevisionUUID());
+                }
 
                 apiLevelPolicyMappingStatement.setString(1, apiRevision.getApiUUID());
                 apiLevelPolicyMappingStatement.setString(2, apiRevision.getRevisionUUID());
@@ -19950,7 +20005,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public void handlePolicyCloningWhenRevisioning(OperationPolicy policy, String apiUUID, String revisionUUID,
+    private void handlePolicyCloningWhenRevisioning(OperationPolicy policy, String apiUUID, String revisionUUID,
                                                    Map<String, String> clonedPolicyMap,
                                                    List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails) {
         if (!clonedPolicyMap.keySet().contains(policy.getPolicyId())) {
@@ -19970,7 +20025,16 @@ public class ApiMgtDAO {
         }
     }
 
-    public void restoreAPIPolicies(APIRevision apiRevision, String tenantDomain, Map<String, URITemplate> uriTemplates,
+    /**
+     * Restore a revision of API policis. This will copy the policy and policy mapping to working copy
+     *
+     * @param apiRevision       API revision
+     * @param tenantDomain      Tenant domain
+     * @param uriTemplates      URI Templates map
+     * @param connection        Connection
+     * @throws APIManagementException
+     */
+    private void restoreAPIPolicies(APIRevision apiRevision, String tenantDomain, Map<String, URITemplate> uriTemplates,
                                     Connection connection) throws SQLException, APIManagementException {
 
         try (PreparedStatement operationPolicyMappingStatement = connection
@@ -20000,6 +20064,10 @@ public class ApiMgtDAO {
 
                         Gson gson = new Gson();
                         String paramJSON = gson.toJson(policy.getParameters());
+                        if (log.isDebugEnabled()) {
+                            log.debug("Restored operation policy " + policy.getPolicyName() + ":"
+                                    + policy.getPolicyVersion() + " from API revision " + apiRevision.getRevisionUUID());
+                        }
 
                         operationPolicyMappingStatement.setInt(1, urlMapping.getId());
                         operationPolicyMappingStatement.setString(2, restoredPolicyMap.get(policy.getPolicyName()));
@@ -20031,6 +20099,11 @@ public class ApiMgtDAO {
                 Gson gson = new Gson();
                 String paramJSON = gson.toJson(policy.getParameters());
 
+                if (log.isDebugEnabled()) {
+                    log.debug("Restored API level policy " + policy.getPolicyName() + ":"
+                            + policy.getPolicyVersion() + " from API revision " + apiRevision.getRevisionUUID());
+                }
+
                 apiLevelPolicyMappingStatement.setString(1, apiRevision.getApiUUID());
                 apiLevelPolicyMappingStatement.setString(2, null);
                 apiLevelPolicyMappingStatement.setString(3, restoredPolicyMap.get(policy.getPolicyName()));
@@ -20050,7 +20123,18 @@ public class ApiMgtDAO {
     }
 
 
-    public void populateAPIPoliciesToProductResource(APIProductResource productResource, int urlMappingId,
+    /**
+     * This method will copy api level policies to each product resource individually. API level policies will be
+     * added before the existing operation level policies.
+     *
+     * @param productResource   Product resource
+     * @param urlMappingId      Original URL mapping ID
+     * @param uriTemplate       URI Template of the resource
+     * @param apiToAPIPolicyMap A map that contains the api to api policies
+     * @param connection        Connection
+     * @throws APIManagementException
+     */
+    private void populateAPIPoliciesToProductResource(APIProductResource productResource, int urlMappingId,
                                                      URITemplate uriTemplate,
                                                      Map<String, List<OperationPolicy>> apiToAPIPolicyMap,
                                                      Connection connection)
@@ -20064,7 +20148,7 @@ public class ApiMgtDAO {
             apiToAPIPolicyMap.put(productResource.getApiId(), apiPolicies);
         }
         List<OperationPolicy> operationPolicies = getOperationPoliciesOfURITemplate(connection, urlMappingId);
-        List<OperationPolicy> resourcePolicyList = clonePolicyList(apiPolicies);
+        List<OperationPolicy> resourcePolicyList = deepCopyPolicyList(apiPolicies);
 
         int requestPolicyCount = 0;
         int responsePolicyCount = 0;
@@ -20083,12 +20167,18 @@ public class ApiMgtDAO {
                 faultPolicyCount += 1;
                 policy.setOrder(faultPolicyCount);
             }
+
+            if (log.isDebugEnabled()) {
+                log.debug("Policy " + policy.getPolicyName() + ":"
+                        + policy.getPolicyVersion() + " added in order" + policy.getOrder()  + " policy to the " +
+                        "product resource" + productResource.getUriTemplate().toString());
+            }
         }
         uriTemplate.setOperationPolicies(resourcePolicyList);
     }
 
 
-    public List<OperationPolicy> clonePolicyList(List<OperationPolicy> policyList) {
+    private List<OperationPolicy> deepCopyPolicyList(List<OperationPolicy> policyList) {
 
         Gson gson = new Gson();
         return gson.fromJson(gson.toJson(policyList),

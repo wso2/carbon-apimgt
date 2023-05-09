@@ -89,7 +89,7 @@ public class SynapsePolicyAggregator {
         }
 
         if (!apiLevelPolicyRenderedList.isEmpty()) {
-            configMap.put("apiPolicies", apiLevelPolicyRenderedList);
+            configMap.put("api_level_policies", apiLevelPolicyRenderedList);
             render = true;
         }
 
