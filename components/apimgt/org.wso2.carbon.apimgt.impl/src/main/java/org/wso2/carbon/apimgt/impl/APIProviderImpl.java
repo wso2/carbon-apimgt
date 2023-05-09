@@ -1201,13 +1201,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     /**
      * This method is used to visualize migrated APIs that has mediation policies attached. A dummy policy is added
-     * to all the operations with the mediator's name as the policy name. Here policy Id is not set.
+     * as api level policy with the mediator's name as the policy name. Here policy Id is not set.
      *
      * @param api      API
      */
     protected void loadMediationPoliciesAsAPIPoliciesToAPI(API api, String organization) throws APIManagementException {
 
-        List<OperationPolicy> policesList = (api.getApiPolicies() != null) ? api.getApiPolicies() : new ArrayList<>();
+        List<OperationPolicy> policiesList = (api.getApiPolicies() != null) ? api.getApiPolicies() : new ArrayList<>();
         // This method is used to handle the migration
 
         // get all policies
@@ -1222,7 +1222,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 inFlowPolicy.setPolicyId(existingPolicy.getPolicyId());
                 api.setInSequence(null);
             }
-            policesList.add(inFlowPolicy);
+            policiesList.add(inFlowPolicy);
         }
         if (APIUtil.isSequenceDefined(api.getOutSequence())) {
             OperationPolicyData existingPolicy = getAPISpecificOperationPolicyByPolicyName(api.getOutSequence(),
@@ -1235,7 +1235,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 outFlowPolicy.setPolicyId(existingPolicy.getPolicyId());
                 api.setOutSequence(null);
             }
-            policesList.add(outFlowPolicy);
+            policiesList.add(outFlowPolicy);
         }
         if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
             OperationPolicyData existingPolicy = getAPISpecificOperationPolicyByPolicyName(api.getFaultSequence(),
@@ -1248,7 +1248,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 faultFlowPolicy.setPolicyId(existingPolicy.getPolicyId());
                 api.setFaultSequence(null);
             }
-            policesList.add(faultFlowPolicy);
+            policiesList.add(faultFlowPolicy);
+        }
+        if (!policiesList.isEmpty()) {
+            api.setApiPolicies(policiesList);
         }
     }
 
@@ -1267,14 +1270,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param organization Organization Name
      * @throws APIManagementException
      */
-    protected void migrateMediationPoliciesOfAPI(API api, String organization, boolean updatePolicyURLMapping)
+    protected void migrateMediationPoliciesOfAPI(API api, String organization, boolean updatePolicyMapping)
             throws APIManagementException {
 
         Map<String, String> clonedPoliciesMap = new HashMap<>();
         String apiUUID = api.getUuid();
 
         loadMediationPoliciesToAPI(api, organization);
-        List<OperationPolicy> policesList = (api.getApiPolicies() != null) ? api.getApiPolicies() : new ArrayList<>();
 
         if (APIUtil.isSequenceDefined(api.getInSequence())) {
             Mediation inSequenceMediation = api.getInSequenceMediation();
@@ -1334,19 +1336,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setFaultSequenceMediation(null);
         }
 
-        setMigratedPolicyIdsToPolicies(api, clonedPoliciesMap, updatePolicyURLMapping);
+        setMigratedPolicyIdsToPolicies(api, clonedPoliciesMap, updatePolicyMapping);
     }
 
     /**
-     * This method will update the policy Id of the selected operations policy from the given cloned policies map.
+     * This method will update the policy Id of the selected api policy from the given cloned policies map.
      *
      * @param api                    API
      * @param clonedPoliciesMap      Cloned policies map
-     * @param updatePolicyURLMapping whether to update policy url mapping table or not
+     * @param updatePolicyMapping whether to update policy mapping
      * @throws APIManagementException
      */
     private void setMigratedPolicyIdsToPolicies(API api, Map<String, String> clonedPoliciesMap,
-                                                boolean updatePolicyURLMapping)
+                                                boolean updatePolicyMapping)
             throws APIManagementException {
 
         boolean policyUpdated = false;
@@ -1358,7 +1360,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         }
-        if (policyUpdated && updatePolicyURLMapping) {
+        if (policyUpdated && updatePolicyMapping) {
             apiMgtDAO.addAPILevelPolicies(api.getApiPolicies(), api.getUuid(), null, tenantDomain);
         }
     }
@@ -1468,6 +1470,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     * This method used to validate API level and operation level policies and it's parameters
+     * @param api
+     * @param tenantDomain
+     * @throws APIManagementException
+     */
     private void validateAPIPolicyParameters(API api, String tenantDomain) throws APIManagementException {
 
         if (APIConstants.API_TYPE_WS.equals(api.getType()) || APIConstants.API_TYPE_SSE.equals(api.getType())
@@ -1496,11 +1504,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public List<OperationPolicy> validatePolicies(List<OperationPolicy> operationPolicies, API api,
+
+    /**
+     * This method will validate a list of policies and throw error if validation fails
+     * @param apiPoliciesList   Policy list
+     * @param api               API object
+     * @param tenantDomain      Tenant domain
+     * @throws APIManagementException
+     */
+    public List<OperationPolicy> validatePolicies(List<OperationPolicy> apiPoliciesList, API api,
                                                   String tenantDomain) throws APIManagementException {
 
         List<OperationPolicy> validatedPolicies = new ArrayList<>();
-        for (OperationPolicy policy : operationPolicies) {
+        for (OperationPolicy policy : apiPoliciesList) {
             String policyId = policy.getPolicyId();
             if (policyId != null) {
                 // First check the API specific operation policy list
