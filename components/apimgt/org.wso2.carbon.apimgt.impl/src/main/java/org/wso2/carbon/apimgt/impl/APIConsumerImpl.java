@@ -4250,6 +4250,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         //Tenant based validation for subscription
         boolean subscriptionAllowed = false;
         if (!organization.equals(apiOrganization)) {
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Org belong to context %s and org belong to API %s is different", organization, apiOrganization));
+            }
             if (APIConstants.SUBSCRIPTION_TO_ALL_TENANTS.equals(subscriptionAvailability)) {
                 subscriptionAllowed = true;
             } else if (APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS.equals(subscriptionAvailability)) {
