@@ -4313,21 +4313,21 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         if (!StringUtils.isEmpty(apiKey) && APIUtil.isValidJWT(apiKey)) {
             try {
-                String[] splitToken = apiKey.split("\\.");
-                String signatureAlgorithm = APIUtil.getSignatureAlgorithm(splitToken);
-                String certAlias = APIUtil.getSigningAlias(splitToken);
+                String[] tokenParts = apiKey.split("\\.");
+                String signatureAlgorithm = APIUtil.getSignatureAlgorithm(tokenParts);
+                String certAlias = APIUtil.getSigningAlias(tokenParts);
                 Certificate certificate = APIUtil.getCertificateFromParentTrustStore(certAlias);
-                if(APIUtil.verifyTokenSignature(splitToken, certificate, signatureAlgorithm)) {
+                if(APIUtil.verifyTokenSignature(tokenParts, certificate, signatureAlgorithm)) {
                     APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
                     APIInfo apiInfo = validateAPIExistence(apiId, organization);
 
                     org.json.JSONObject decodedBody = new org.json.JSONObject(
-                            new String(Base64.getUrlDecoder().decode(splitToken[1])));
+                            new String(Base64.getUrlDecoder().decode(tokenParts[1])));
                     org.json.JSONObject appInfo = decodedBody.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION);
                     if (apiInfo != null) {
                         long expiryTime = Long.MAX_VALUE;
                         org.json.JSONObject payload = new org.json.JSONObject(
-                                new String(Base64.getUrlDecoder().decode(splitToken[1])));
+                                new String(Base64.getUrlDecoder().decode(tokenParts[1])));
                         if (payload.has(APIConstants.JwtTokenConstants.EXPIRY_TIME)) {
                             expiryTime = APIUtil.getExpiryifJWT(apiKey);
                         }
@@ -4336,31 +4336,21 @@ public class ApisApiServiceImpl implements ApisApiService {
                         apiProvider.revokeAPIKey(tokenIdentifier, expiryTime, tenantDomain);
                         return Response.ok().build();
                     } else {
-                        if(log.isDebugEnabled()) {
-                            if (apiInfo == null) {
-                                log.debug("API with given id " + apiId + " doesn't not exist ");
-                            }
-                        }
                         RestApiUtil.handleBadRequest("Validation failed for the given key ", log);
                     }
                 } else {
-                    if(log.isDebugEnabled()) {
-                        log.debug("Signature verification of given token " + APIUtil.getMaskedToken(apiKey) +
+                    log.error("Signature verification of given token " + APIUtil.getMaskedToken(apiKey) +
                                 " is failed");
-                    }
                     RestApiUtil.handleInternalServerError("Validation failed for the given token", log);
                 }
             } catch (APIManagementException e) {
                 String msg = "Error while revoking API Test Key of API " + apiId;
-                if(log.isDebugEnabled()) {
-                    log.debug("Error while revoking API Test Key of API " +
-                            apiId+ " and token " + APIUtil.getMaskedToken(apiKey));
-                }
+                log.error(msg + " and token " + APIUtil.getMaskedToken(apiKey));
                 log.error(msg, e);
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
         } else {
-            log.debug("Provided API Key " + APIUtil.getMaskedToken(apiKey) + " is not valid");
+            log.error("Provided API Key " + APIUtil.getMaskedToken(apiKey) + " is not valid");
             RestApiUtil.handleBadRequest("Provided API Key isn't valid ", log);
         }
         return null;
