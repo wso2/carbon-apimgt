@@ -676,8 +676,6 @@ public interface APIConsumer extends APIManager {
 
     Set<APIKey> getApplicationKeysOfApplication(int applicationId, String xWso2Tenant) throws APIManagementException;
 
-    void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException;
-
     /**
      * Updates the details of the specified user application.
      *

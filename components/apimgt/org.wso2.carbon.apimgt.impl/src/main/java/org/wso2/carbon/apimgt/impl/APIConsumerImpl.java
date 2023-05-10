@@ -3239,22 +3239,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return getOpenAPIDefinitionForDeployment(api, environmentName);
     }
 
-    public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
-
-        RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
-        Properties properties = new Properties();
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        String eventID = UUID.randomUUID().toString();
-        properties.put(APIConstants.NotificationEvent.EVENT_ID,eventID);
-        properties.put(APIConstants.NotificationEvent.TOKEN_TYPE, APIConstants.API_KEY_AUTH_TYPE);
-        properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
-        properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
-        ApiMgtDAO.getInstance().addRevokedJWTSignature(eventID,
-                apiKey, APIConstants.API_KEY_AUTH_TYPE,
-                expiryTime, tenantId);
-        revocationRequestPublisher.publishRevocationEvents(apiKey, expiryTime, properties);
-    }
-
     /**
      * Get server URL updated Open API definition for given synapse gateway environment
      * @param environmentName Name of the synapse gateway environment

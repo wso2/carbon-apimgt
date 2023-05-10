@@ -514,4 +514,6 @@ public interface APIManager {
      */
     Map<String, Object> searchPaginatedContent(String searchQuery, String orgId, int start, int end)
             throws APIManagementException;
+
+    void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException;
 }

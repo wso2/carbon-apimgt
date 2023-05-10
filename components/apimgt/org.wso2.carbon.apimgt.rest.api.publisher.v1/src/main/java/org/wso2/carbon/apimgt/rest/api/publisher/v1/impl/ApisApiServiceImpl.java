@@ -95,6 +95,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.CryptoException;
@@ -106,6 +107,7 @@ import javax.ws.rs.core.Response;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.security.cert.Certificate;
 import java.util.*;
 
 import static org.wso2.carbon.apimgt.api.ExceptionCodes.API_VERSION_ALREADY_EXISTS;
@@ -4299,6 +4301,59 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO apiToReturn = getAPIByID(apiId, apiProvider, organization);
         Response.Status status = Response.Status.CREATED;
         return Response.status(status).entity(apiToReturn).build();
+    }
+
+    @Override
+    public Response revokeInternalAPIKey(String apiId, String ifMatch,
+            APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO, MessageContext messageContext)
+            throws APIManagementException {
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        String apiKey = apIKeyRevokeRequestDTO.getApiKey();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+        if (!StringUtils.isEmpty(apiKey) && APIUtil.isValidJWT(apiKey)) {
+            try {
+                String[] tokenParts = apiKey.split("\\.");
+                String signatureAlgorithm = APIUtil.getSignatureAlgorithm(tokenParts);
+                String certAlias = APIUtil.getSigningAlias(tokenParts);
+                Certificate certificate = APIUtil.getCertificateFromParentTrustStore(certAlias);
+                if(APIUtil.verifyTokenSignature(tokenParts, certificate, signatureAlgorithm)) {
+                    APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+                    APIInfo apiInfo = validateAPIExistence(apiId, organization);
+
+                    org.json.JSONObject decodedBody = new org.json.JSONObject(
+                            new String(Base64.getUrlDecoder().decode(tokenParts[1])));
+                    org.json.JSONObject appInfo = decodedBody.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION);
+                    if (apiInfo != null) {
+                        long expiryTime = Long.MAX_VALUE;
+                        org.json.JSONObject payload = new org.json.JSONObject(
+                                new String(Base64.getUrlDecoder().decode(tokenParts[1])));
+                        if (payload.has(APIConstants.JwtTokenConstants.EXPIRY_TIME)) {
+                            expiryTime = APIUtil.getExpiryifJWT(apiKey);
+                        }
+                        String tokenIdentifier = payload.getString(APIConstants.JwtTokenConstants.JWT_ID);
+                        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+                        apiProvider.revokeAPIKey(tokenIdentifier, expiryTime, tenantDomain);
+                        return Response.ok().build();
+                    } else {
+                        RestApiUtil.handleBadRequest("Validation failed for the given key ", log);
+                    }
+                } else {
+                    log.error("Signature verification of given token " + APIUtil.getMaskedToken(apiKey) +
+                                " is failed");
+                    RestApiUtil.handleInternalServerError("Validation failed for the given token", log);
+                }
+            } catch (APIManagementException e) {
+                String msg = "Error while revoking API Test Key of API " + apiId;
+                log.error(msg + " and token " + APIUtil.getMaskedToken(apiKey));
+                log.error(msg, e);
+                RestApiUtil.handleInternalServerError(msg, e, log);
+            }
+        } else {
+            log.error("Provided API Key " + APIUtil.getMaskedToken(apiKey) + " is not valid");
+            RestApiUtil.handleBadRequest("Provided API Key isn't valid ", log);
+        }
+        return null;
     }
 
     /**
