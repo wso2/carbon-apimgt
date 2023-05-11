@@ -1185,9 +1185,10 @@ public class PublisherCommonUtils {
             }
         }
 
-        if (!apiProvider.isValidContext(body.getProvider(), body.getName(),
-                                        body.getContext() + "/" + APIConstants.VERSION_PLACEHOLDER, username,
-                                        organization)) {
+        String contextTemplate = body.getContext().contains(APIConstants.VERSION_PLACEHOLDER) ?
+                body.getContext() :
+                body.getContext() + "/" + APIConstants.VERSION_PLACEHOLDER;
+        if (!apiProvider.isValidContext(body.getProvider(), body.getName(), contextTemplate, username, organization)) {
             throw new APIManagementException(
                     ExceptionCodes.from(ExceptionCodes.BLOCK_CONDITION_UNSUPPORTED_API_CONTEXT));
         }
