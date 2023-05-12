@@ -327,7 +327,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                     throw new ArtifactSynchronizerException("Unable to deploy synapse artifacts at gateway");
                 }
             } catch (ArtifactSynchronizerException e) {
-                if (!e.getErrorHandler().equals(ExceptionCodes.ARTIFACT_SYNC_HTTP_REQUEST_FAILED)) {
+                if (!ExceptionCodes.ARTIFACT_SYNC_HTTP_REQUEST_FAILED.equals(e.getErrorHandler())) {
                     retryCount++;
                     if (retryCount <= maxRetryCount) {
                         log.error("Unable to deploy synapse artifacts at gateway. Retry Attempt " + retryCount + " in "
