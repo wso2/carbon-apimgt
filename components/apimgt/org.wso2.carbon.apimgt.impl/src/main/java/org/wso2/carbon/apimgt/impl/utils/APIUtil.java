@@ -9768,10 +9768,14 @@ public final class APIUtil {
             throws APIManagementException {
 
         Schema schema = APIUtil.retrieveOperationPolicySpecificationJsonSchema();
+        org.json.JSONObject policySpecJson = null;
         if (schema != null) {
             try {
-                org.json.JSONObject uploadedConfig = new org.json.JSONObject(policySpecAsString);
-                schema.validate(uploadedConfig);
+                policySpecJson = new org.json.JSONObject(policySpecAsString);
+                if (policySpecJson.has(APIConstants.DATA)) {
+                    policySpecJson = policySpecJson.getJSONObject(APIConstants.DATA);
+                }
+                schema.validate(policySpecJson);
             } catch (ValidationException e) {
                 List<String> errors = e.getAllMessages();
                 String errorMessage = errors.size() + " validation error(s) found. Error(s) :" + errors.toString();
@@ -9779,9 +9783,9 @@ public final class APIUtil {
                         ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_POLICY_SPECIFICATION,
                                 errorMessage));
             }
-            return new Gson().fromJson(policySpecAsString, OperationPolicySpecification.class);
+            return new Gson().fromJson(policySpecJson.toString(), OperationPolicySpecification.class);
         }
-        return null;
+        throw new APIManagementException("API policy schema not found");
     }
 
     /**
