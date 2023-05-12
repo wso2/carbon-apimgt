@@ -84,6 +84,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -1022,6 +1023,12 @@ public class GatewayUtils {
                 Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
                 if (claims.get(JWTConstants.SUB) != null) {
                     String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get(JWTConstants.SUB);
+
+                    // A system property is used to enable/disable getting the tenant aware username as sub claim.
+                    String tenantAwareSubClaim = System.getProperty(APIConstants.ENABLE_TENANT_AWARE_SUB_CLAIM);
+                    if (StringUtils.isNotEmpty(tenantAwareSubClaim) && Boolean.parseBoolean(tenantAwareSubClaim)) {
+                        sub = MultitenantUtils.getTenantAwareUsername(sub);
+                    }
                     jwtInfoDto.setSub(sub);
                 }
                 if (claims.get(JWTConstants.ORGANIZATIONS) != null) {
