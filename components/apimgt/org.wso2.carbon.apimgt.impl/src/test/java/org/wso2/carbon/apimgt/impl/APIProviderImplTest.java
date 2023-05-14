@@ -1401,7 +1401,7 @@ public class APIProviderImplTest {
 
         Assert.assertNotNull(api.getApiPolicies());
         Assert.assertEquals(api.getApiPolicies().size(), 3);
-        Assert.assertEquals(uriTemplate1.getOperationPolicies().get(0).getPolicyName(), "test-sequence");
+        Assert.assertEquals(api.getApiPolicies().get(0).getPolicyName(), "test-sequence");
     }
 
     @Test
@@ -1501,12 +1501,14 @@ public class APIProviderImplTest {
         appliedPolicy.setOrder(1);
         appliedPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
 
+        List<OperationPolicy> policyList = new ArrayList<>();
+        policyList.add(APIProviderImpl.cloneOperationPolicy(appliedPolicy));
+
         URITemplate uriTemplate1 = new URITemplate();
         uriTemplate1.setHTTPVerb("POST");
         uriTemplate1.setAuthType("Application");
         uriTemplate1.setUriTemplate("/add");
         uriTemplate1.setThrottlingTier("Gold");
-        uriTemplate1.addOperationPolicy(APIProviderImpl.cloneOperationPolicy(appliedPolicy));
         uriTemplates.add(uriTemplate1);
 
         URITemplate uriTemplate2 = new URITemplate();
@@ -1514,11 +1516,11 @@ public class APIProviderImplTest {
         uriTemplate2.setAuthType("Application");
         uriTemplate2.setUriTemplate("/update");
         uriTemplate2.setThrottlingTier("Gold");
-        uriTemplate2.addOperationPolicy(APIProviderImpl.cloneOperationPolicy(appliedPolicy));
         uriTemplates.add(uriTemplate2);
 
         api.setUriTemplates(uriTemplates);
         api.setInSequence("in-policy");
+        api.setApiPolicies(policyList);
 
         PowerMockito.when(APIUtil.isSequenceDefined(api.getInSequence())).thenReturn(true);
 
@@ -1580,12 +1582,14 @@ public class APIProviderImplTest {
         appliedPolicy.setOrder(1);
         appliedPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
 
+        List<OperationPolicy> policyList = new ArrayList<>();
+        policyList.add(APIProviderImpl.cloneOperationPolicy(appliedPolicy));
+
         URITemplate uriTemplate1 = new URITemplate();
         uriTemplate1.setHTTPVerb("POST");
         uriTemplate1.setAuthType("Application");
         uriTemplate1.setUriTemplate("/add");
         uriTemplate1.setThrottlingTier("Gold");
-        uriTemplate1.addOperationPolicy(APIProviderImpl.cloneOperationPolicy(appliedPolicy));
         uriTemplates.add(uriTemplate1);
 
         URITemplate uriTemplate2 = new URITemplate();
@@ -1593,11 +1597,11 @@ public class APIProviderImplTest {
         uriTemplate2.setAuthType("Application");
         uriTemplate2.setUriTemplate("/update");
         uriTemplate2.setThrottlingTier("Gold");
-        uriTemplate2.addOperationPolicy(APIProviderImpl.cloneOperationPolicy(appliedPolicy));
         uriTemplates.add(uriTemplate2);
 
         api.setUriTemplates(uriTemplates);
         api.setInSequence("in-policy");
+        api.setApiPolicies(policyList);
 
         PowerMockito.when(APIUtil.isSequenceDefined(api.getInSequence())).thenReturn(true);
 
