@@ -134,26 +134,11 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
                 ServiceReferenceHolder.getInstance()
                         .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
-
         boolean flag = false;
-        long waitTime = System.currentTimeMillis() + 60 * 1000;
-        long retryDuration = 5000;
-
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             InMemoryAPIDeployer inMemoryAPIDeployer = new InMemoryAPIDeployer();
-
-            while (waitTime > System.currentTimeMillis() && !flag) {
-                flag = inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(
+            flag = inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(
                         gatewayArtifactSynchronizerProperties.getGatewayLabels(), tenantDomain);
-                if (!flag) {
-                    log.error("Unable to deploy synapse artifacts at gateway. Next retry in " + (retryDuration / 1000)
-                            + " seconds");
-                    try {
-                        Thread.sleep(retryDuration);
-                    } catch (InterruptedException ignore) {
-                    }
-                }
-            }
         }
         return flag;
     }
@@ -330,8 +315,8 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 if (!ExceptionCodes.ARTIFACT_SYNC_HTTP_REQUEST_FAILED.equals(e.getErrorHandler())) {
                     retryCount++;
                     if (retryCount <= maxRetryCount) {
-                        log.error("Unable to deploy synapse artifacts at gateway. Retry Attempt " + retryCount + " in "
-                                + (retryDuration / 1000) + " seconds");
+                        log.error("Unable to deploy synapse artifacts at gateway. Retry Attempt " + retryCount
+                                + " in " + (retryDuration / 1000) + " seconds");
                         try {
                             Thread.sleep(retryDuration);
                             retryDuration = (long) (retryDuration * reconnectionProgressionFactor);

@@ -141,7 +141,7 @@ public class DBRetriever implements ArtifactRetriever {
         } catch (IOException e) {
             String msg = "Error while executing the http client";
             log.error(msg, e);
-            throw new ArtifactSynchronizerException(msg, e);
+            throw new ArtifactSynchronizerException(msg, e, ExceptionCodes.ARTIFACT_SYNC_HTTP_REQUEST_FAILED);
         } catch (ArtifactSynchronizerException e) {
             String msg = "Error while retrieving artifacts";
             log.error(msg, e);
