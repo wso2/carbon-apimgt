@@ -372,7 +372,7 @@ public final class APIUtil {
     private static final int retries = 2;
     private static long retrievalTimeout;
     private static final long maxRetrievalTimeout = 1000 * 60 * 60;
-    private static final double retryProgressionFactor = 2.0;
+    private static double retryProgressionFactor;
     private static int maxRetryCount;
 
     //constants for getting masked token
@@ -398,6 +398,8 @@ public final class APIUtil {
                 .parseBoolean(isPublisherRoleCacheEnabledConfiguration);
         retrievalTimeout = apiManagerConfiguration.getGatewayArtifactSynchronizerProperties().getRetryDuartion();
         maxRetryCount = apiManagerConfiguration.getGatewayArtifactSynchronizerProperties().getMaxRetryCount();
+        retryProgressionFactor = apiManagerConfiguration.getGatewayArtifactSynchronizerProperties()
+                .getRetryProgressionFactor();
         try {
             eventPublisherFactory = ServiceReferenceHolder.getInstance().getEventPublisherFactory();
             eventPublishers.putIfAbsent(EventPublisherType.ASYNC_WEBHOOKS,

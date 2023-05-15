@@ -297,7 +297,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
 
         long retryDuration = gatewayArtifactSynchronizerProperties.getRetryDuartion();
         int maxRetryCount = gatewayArtifactSynchronizerProperties.getMaxRetryCount();
-        double reconnectionProgressionFactor = 2.0;
+        double reconnectionProgressionFactor = gatewayArtifactSynchronizerProperties.getRetryProgressionFactor();
         long maxReconnectDuration = 1000 * 60 * 60; // 1 hour
         int retryCount = 0;
         boolean retry = true;
