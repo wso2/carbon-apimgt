@@ -64,6 +64,10 @@ public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
         //If Authorization headers are present anonymous URI check will be skipped
         if (((TreeMap) (message.get(Message.PROTOCOL_HEADERS))).get(RestApiConstants.AUTH_HEADER_NAME) != null
                 || ((TreeMap) (message.get(Message.PROTOCOL_HEADERS))).get(RestApiConstants.BACKEND_JWT_HEADER_NAME) != null) {
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Authorization headers are present. Skipping anonymous URI check.");
+            }
             return;
         }
 
