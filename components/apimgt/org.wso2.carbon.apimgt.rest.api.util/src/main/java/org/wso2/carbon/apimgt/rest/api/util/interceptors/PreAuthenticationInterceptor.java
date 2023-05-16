@@ -62,9 +62,8 @@ public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
         Dictionary<URITemplate,List<String>> allowedResourcePathsMap;
 
         //If Authorization headers are present anonymous URI check will be skipped
-        ArrayList authHeaders = (ArrayList) ((TreeMap) (message.get(Message.PROTOCOL_HEADERS)))
-                .get(RestApiConstants.AUTH_HEADER_NAME);
-        if (authHeaders != null) {
+        if (((TreeMap) (message.get(Message.PROTOCOL_HEADERS))).get(RestApiConstants.AUTH_HEADER_NAME) != null
+                || ((TreeMap) (message.get(Message.PROTOCOL_HEADERS))).get(RestApiConstants.BACKEND_JWT_HEADER_NAME) != null) {
             return;
         }
 
