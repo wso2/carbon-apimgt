@@ -88,6 +88,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityIn
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -95,6 +96,7 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -1432,8 +1434,17 @@ public class ImportUtils {
 
         try {
             byte[] wsdlDefinition = loadWsdlFile(pathToArchive, apiDto);
-            WSDLValidationResponse wsdlValidationResponse = APIMWSDLReader.
-                    getWsdlValidationResponse(APIMWSDLReader.getWSDLProcessor(wsdlDefinition));
+            WSDLInfoDTO wsdlInfo = apiDto.getWsdlInfo();
+            WSDLValidationResponse wsdlValidationResponse;
+            if (wsdlInfo != null && WSDLInfoDTO.TypeEnum.ZIP.equals(wsdlInfo.getType())) {
+                // If the WSDL is a ZIP file, we need to extract it and validate the WSDL inside
+                wsdlValidationResponse = APIMWSDLReader.extractAndValidateWSDLArchive(
+                        new ByteArrayInputStream(wsdlDefinition));
+            } else {
+                wsdlValidationResponse = APIMWSDLReader.
+                        getWsdlValidationResponse(APIMWSDLReader.getWSDLProcessor(wsdlDefinition));
+            }
+
             if (!wsdlValidationResponse.isValid()) {
                 throw new APIManagementException(
                         "Error occurred while importing the API. Invalid WSDL definition found. "
@@ -1496,12 +1507,25 @@ public class ImportUtils {
     private static byte[] loadWsdlFile(String pathToArchive, APIDTO apiDto) throws IOException {
 
         String wsdlFileName = apiDto.getName() + "-" + apiDto.getVersion() + APIConstants.WSDL_FILE_EXTENSION;
-        String pathToFile = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlFileName;
-        if (CommonUtil.checkFileExistence(pathToFile)) {
+        String wsdlArchiveName = apiDto.getName() + "-" + apiDto.getVersion() + APIConstants.ZIP_FILE_EXTENSION;
+        String pathToWsdlFile = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlFileName;
+        String pathToWsdlArchive = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlArchiveName;
+        String pathToWsdl = null;
+
+        if (CommonUtil.checkFileExistence(pathToWsdlFile)) {
             if (log.isDebugEnabled()) {
-                log.debug("Found WSDL file " + pathToFile);
+                log.debug("Found WSDL file " + pathToWsdlFile);
             }
-            return FileUtils.readFileToByteArray(new File(pathToFile));
+            pathToWsdl = pathToWsdlFile;
+        } else if (CommonUtil.checkFileExistence(pathToWsdlArchive)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Found WSDL archive " + pathToWsdlArchive);
+            }
+            pathToWsdl = pathToWsdlArchive;
+        }
+
+        if (!StringUtils.isEmpty(pathToWsdl)) {
+            return FileUtils.readFileToByteArray(new File(pathToWsdl));
         }
         throw new IOException("Missing WSDL file. It should be present.");
     }
@@ -1823,20 +1847,32 @@ public class ImportUtils {
 
         String wsdlFileName = importedApi.getId().getApiName() + "-" + importedApi.getId().getVersion()
                 + APIConstants.WSDL_FILE_EXTENSION;
-        String wsdlPath = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlFileName;
+        String wsdlArchiveName = importedApi.getId().getApiName() + "-" + importedApi.getId().getVersion()
+                + APIConstants.ZIP_FILE_EXTENSION;
+        String wsdlFilePath = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlFileName;
+        String wsdlArchivePath = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlArchiveName;
 
-        if (CommonUtil.checkFileExistence(wsdlPath)) {
+        String wsdlPath = null;
+        String fileExtension = null;
+        if (CommonUtil.checkFileExistence(wsdlFilePath)) {
+            wsdlPath = wsdlFilePath;
+            fileExtension = FilenameUtils.getExtension(wsdlPath);
+        } else if (CommonUtil.checkFileExistence(wsdlArchivePath)) {
+            wsdlPath = wsdlArchivePath;
+            fileExtension = APIConstants.APPLICATION_ZIP;
+        }
+
+        if (!StringUtils.isEmpty(wsdlPath) && !StringUtils.isEmpty(fileExtension)) {
             try (FileInputStream inputStream = new FileInputStream(wsdlPath)) {
                 String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                String fileExtension = FilenameUtils.getExtension(wsdlPath);
                 PublisherCommonUtils.addWsdl(fileExtension, inputStream, importedApi, apiProvider, tenantDomain);
             } catch (FileNotFoundException e) {
                 throw new APIManagementException(
-                        "WSDL file of the API: " + importedApi.getId().getName() + " is not found.", e,
+                        "WSDL file/archive of the API: " + importedApi.getId().getName() + " is not found.", e,
                         ExceptionCodes.NO_WSDL_FOUND_IN_WSDL_ARCHIVE);
             } catch (IOException e) {
                 throw new APIManagementException(
-                        "Error reading the WSDL file of the API: " + importedApi.getId().getName(), e,
+                        "Error reading the WSDL file/archive of the API: " + importedApi.getId().getName(), e,
                         ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
             }
         }
