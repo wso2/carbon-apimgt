@@ -658,8 +658,7 @@ public class JWTValidator {
                     }
                     jwtValidationInfo = tempJWTValidationInfo;
                 }
-            } else if (SignedJWTInfo.ValidationStatus.INVALID.equals(signedJWTInfo.getValidationStatus())
-                    && getInvalidTokenCache().get(jti) != null) {
+            } else if (getInvalidTokenCache().get(jti) != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token retrieved from the invalid token cache. Token: " + GatewayUtils
                             .getMaskedToken(jwtHeader));
