@@ -33,7 +33,7 @@ public class JWTAuthenticationUtils {
      */
     public static Message addToMessageContext(Message inMessage, HashMap<String,Object> authContext) {
         for (String key : authContext.keySet()) {
-            inMessage.put(key, authContext.get(key));
+            inMessage.getExchange().put(key, authContext.get(key));
         }
         return inMessage;
     }
