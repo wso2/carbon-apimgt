@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.security.AuthenticationException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.utils.UserTokenUtil;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -164,6 +165,12 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
                                     errorHandler.getHttpStatusCode() < selectedErrorHandler.getHttpStatusCode()
                                             && errorHandler.getHttpStatusCode() > 0 ?
                                             errorHandler : selectedErrorHandler;
+                            if (selectedErrorHandler.getHttpStatusCode() ==
+                                    ExceptionCodes.INTERNAL_ERROR.getHttpStatusCode()) {
+                                selectedErrorHandler =
+                                        errorHandler.getErrorCode() != ExceptionCodes.INTERNAL_ERROR
+                                                .getErrorCode() ? errorHandler : selectedErrorHandler;
+                            }
                         }
                     }
                 }

@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -39,6 +41,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +51,7 @@ public class RuntimeArtifactGeneratorUtil {
     private static final GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
     private static final ChoreoGatewayArtifactsMgtDAO choreoGatewayArtifactsMgtDAO
             = ChoreoGatewayArtifactsMgtDAO.getInstance();
+    private static final Log log = LogFactory.getLog(RuntimeArtifactGeneratorUtil.class);
 
     public static RuntimeArtifactDto generateRuntimeArtifact(String apiId, String name, String version,
                                                              String gatewayLabel, String type, String tenantDomain)
@@ -184,8 +188,16 @@ public class RuntimeArtifactGeneratorUtil {
                 if (gatewayArtifacts.isEmpty()) {
                     throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
                 }
-                for (APIRuntimeArtifactDto apiRuntimeArtifactDto: gatewayArtifacts) {
-                    ArtifactSynchronizerUtil.setArtifactProperties(apiRuntimeArtifactDto);
+                Iterator<APIRuntimeArtifactDto> iterator = gatewayArtifacts.iterator();
+                while (iterator.hasNext()) {
+                    APIRuntimeArtifactDto apiRuntimeArtifactDto = iterator.next();
+                    try {
+                        ArtifactSynchronizerUtil.setArtifactProperties(apiRuntimeArtifactDto);
+                    } catch (APIManagementException e) {
+                        log.warn("Error while setting artifact properties in api: "
+                                + apiRuntimeArtifactDto.getApiId() + ". The API will not be deployed.", e);
+                        iterator.remove();
+                    }
                 }
             }
             if (gatewayArtifacts == null || gatewayArtifacts.isEmpty()) {
@@ -221,8 +233,16 @@ public class RuntimeArtifactGeneratorUtil {
                 if (gatewayArtifacts.isEmpty()) {
                     throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
                 }
-                for (APIRuntimeArtifactDto apiRuntimeArtifactDto: gatewayArtifacts) {
-                    ArtifactSynchronizerUtil.setArtifactProperties(apiRuntimeArtifactDto);
+                Iterator<APIRuntimeArtifactDto> iterator = gatewayArtifacts.iterator();
+                while (iterator.hasNext()) {
+                    APIRuntimeArtifactDto apiRuntimeArtifactDto = iterator.next();
+                    try {
+                        ArtifactSynchronizerUtil.setArtifactProperties(apiRuntimeArtifactDto);
+                    } catch (APIManagementException e) {
+                        log.warn("Error while setting artifact properties in api: "
+                                + apiRuntimeArtifactDto.getApiId() + ". The API will not be deployed.", e);
+                        iterator.remove();
+                    }
                 }
             }
             if (gatewayArtifacts == null || gatewayArtifacts.isEmpty()) {
