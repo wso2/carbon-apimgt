@@ -6013,7 +6013,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         subscribedApiInfo.setVersion(apiInfo.getVersion());
         JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
         jwtTokenInfoDTO.setEndUserName(username);
-        jwtTokenInfoDTO.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        jwtTokenInfoDTO.setKeyType(keyType.equals(APIConstants.PRODUCTION_ENV) ?
+                APIConstants.API_KEY_TYPE_PRODUCTION : APIConstants.API_KEY_TYPE_SANDBOX);
         jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(subscribedApiInfo));
         jwtTokenInfoDTO.setExpirationTime(expiryTime);
 
