@@ -2975,6 +2975,9 @@ public final class APIConstants {
     public static final String API_TEST_KEY_VALIDITY_EXP = "Exp";
     public static final String DEFAULT_API_TEST_KEY_VALIDITY = "600";
 
-    public static final String DEVELOPMENT_ENV = "choreo:deployment:sandbox";
-    public static final String PRODUCTION_ENV = "choreo:deployment:production";
+    public static final String DEVELOPMENT_ENV = "development";
+    public static final String PRODUCTION_ENV = "production";
+
+    public static final String PRODUCTION_ENV_AUD_CLAIM = "choreo:deployment:production";
+    public static final String DEVELOPMENT_ENV_AUD_CLAIM = "choreo:deployment:sandbox";
 }

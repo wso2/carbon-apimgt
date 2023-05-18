@@ -6019,7 +6019,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         jwtTokenInfoDTO.setExpirationTime(expiryTime);
 
         List<String> audience = new ArrayList<>();
-        audience.add(keyType);
+        audience.add(keyType.equals(APIConstants.PRODUCTION_ENV) ?
+                APIConstants.PRODUCTION_ENV_AUD_CLAIM : APIConstants.DEVELOPMENT_ENV_AUD_CLAIM);
         jwtTokenInfoDTO.setAudience(audience);
 
         ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
