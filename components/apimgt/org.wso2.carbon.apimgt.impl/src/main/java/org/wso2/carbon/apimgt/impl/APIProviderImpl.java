@@ -5993,12 +5993,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String generateApiKey(String apiId, int expiryTime) throws APIManagementException {
+    public String generateApiKey(String apiId, String keyType, int expiryTime) throws APIManagementException {
         APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId);
         if (apiInfo == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with ID: "
                     + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
         }
+
+        if (!keyType.equals(APIConstants.PRODUCTION_ENV) && !keyType.equals(APIConstants.DEVELOPMENT_ENV)) {
+            String errorMessage = "Invalid environment type specified.";
+            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
+                    INVALID_ENVIRONMENT,keyType));
+        }
+
         SubscribedApiDTO subscribedApiInfo = new SubscribedApiDTO();
         subscribedApiInfo.setName(apiInfo.getName());
         subscribedApiInfo.setContext(apiInfo.getContext());
@@ -6009,6 +6016,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         jwtTokenInfoDTO.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
         jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(subscribedApiInfo));
         jwtTokenInfoDTO.setExpirationTime(expiryTime);
+
+        List<String> audience = new ArrayList<>();
+        audience.add(keyType);
+        jwtTokenInfoDTO.setAudience(audience);
+
         ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
         return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
     }

@@ -529,7 +529,8 @@ public enum ExceptionCodes implements ErrorHandler {
     REVISION_ALREADY_DEPLOYED(902005, "Revision deployment state conflicted", 409,
             "Revision deployment request conflicted with the current deployment state of the revision %s. Please try again later", false),
     INVALID_TENANT_CONFIG(9020001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
-    INVALID_API_ID(9020002, "Invalid API ID", 404, "The provided API ID is not found %s", false);
+    INVALID_API_ID(9020002, "Invalid API ID", 404, "The provided API ID is not found %s", false),
+    INVALID_ENVIRONMENT(9020003, "Invalid Environment", 404, "The provided Environment, %s,  is not valid.", false);
 
     private final long errorCode;
     private final String errorMessage;

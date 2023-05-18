@@ -562,7 +562,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @POST
-    @Path("/{apiId}/generate-key")
+    @Path("/{apiId}/{keyType}/generate-key")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Generate internal API Key to invoke APIS.", notes = "This operation can be used to generate internal API key which used to invoke API. ", response = APIKeyDTO.class, authorizations = {
@@ -575,8 +575,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. apikey generated. ", response = APIKeyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response generateInternalAPIKey(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
-        return delegate.generateInternalAPIKey(apiId, securityContext);
+    public Response generateInternalAPIKey(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Describes to which environment the api key belongs ",required=true) @PathParam("keyType") String keyType) throws APIManagementException{
+        return delegate.generateInternalAPIKey(apiId, keyType, securityContext);
     }
 
     @POST
