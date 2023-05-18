@@ -2564,6 +2564,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail,
             String ifMatch, MessageContext messageContext) {
+        ByteArrayInputStream inputStream = null;
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
@@ -2577,19 +2578,17 @@ public class ApisApiServiceImpl implements ApisApiService {
             String extension = FilenameUtils.getExtension(fileName);
             if (!RestApiConstants.ALLOWED_THUMBNAIL_EXTENSIONS.contains(extension.toLowerCase())) {
                 RestApiUtil.handleBadRequest(
-                        "Unsupported Thumbnail File Extension. Supported extensions are .jpg, .png, .jpeg .svg "
+                        "Unsupported Thumbnail File Extension. Supported extensions are .jpg, .png, .jpeg, .svg "
                                 + "and .gif", log);
             }
-            String fileContentType = URLConnection.guessContentTypeFromName(fileName);
-            if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
-                fileContentType = fileDetail.getContentType().toString();
-            }
-            PublisherCommonUtils.updateThumbnail(fileInputStream, fileContentType, apiProvider, apiId, organization);
+            inputStream = (ByteArrayInputStream) RestApiPublisherUtils.validateThumbnailContent(fileInputStream);
+            String fileMediaType = RestApiPublisherUtils.getMediaType(inputStream, fileDetail);
+            PublisherCommonUtils.updateThumbnail(inputStream, fileMediaType, apiProvider, apiId, organization);
             String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL.replace(RestApiConstants.APIID_PARAM, apiId);
             URI uri = new URI(uriString);
             FileInfoDTO infoDTO = new FileInfoDTO();
             infoDTO.setRelativePath(uriString);
-            infoDTO.setMediaType(fileContentType);
+            infoDTO.setMediaType(fileMediaType);
             return Response.created(uri).entity(infoDTO).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
@@ -2601,14 +2600,15 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .handleAuthorizationFailure("Authorization failure while adding thumbnail for API : " + apiId,
                                 e, log);
             } else {
-                String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
+                String errorMessage = "Error while updating thumbnail of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | IOException e) {
             String errorMessage = "Error while updating thumbnail of API: " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } finally {
             IOUtils.closeQuietly(fileInputStream);
+            IOUtils.closeQuietly(inputStream);
         }
         return null;
     }
