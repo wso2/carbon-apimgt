@@ -199,6 +199,7 @@ public class ChoreoApiMgtDAO {
         if (environmentsSet == null || environmentsSet.size() == 0) {
             return envToDataPlaneIdMap;
         }
+        Map<String, Environment> readOnlyEnvironments = APIUtil.getReadOnlyEnvironments();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             for (String envName: environmentsSet) {
                 try (PreparedStatement prepStmt =
@@ -210,6 +211,11 @@ public class ChoreoApiMgtDAO {
                             envToDataPlaneIdMap.put(envName, rs.getString("DATA_PLANE_ID"));
                         }
                     }
+                }
+                // check if the environment is in the read-only environments list
+                if (readOnlyEnvironments.containsKey(envName)) {
+                    envToDataPlaneIdMap.put(envName,
+                            readOnlyEnvironments.get(envName).getDataPlaneId());
                 }
             }
         } catch (SQLException e) {
