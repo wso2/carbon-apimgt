@@ -41,6 +41,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -81,14 +82,14 @@ public final class JWTUtil {
     /**
      * Utility method to generate JWT header with public certificate thumbprint for signature verification.
      *
-     * @param publicCert         - The public certificate which needs to include in the header as thumbprint
-     * @param signatureAlgorithm signature algorithm which needs to include in the header
-     * @param useKid - Specifies whether this function should use kid as a thumbprint or x5t
+     * @param publicCert         The public certificate which needs to include in the header as thumbprint
+     * @param signatureAlgorithm Signature algorithm which needs to include in the header
+     * @param useKid             Specifies whether the header should include the kid property
      * @throws JWTGeneratorException
      */
 
-    public static String generateHeader(Certificate publicCert, String signatureAlgorithm, boolean useKid) throws
-            JWTGeneratorException {
+    public static String generateHeader(Certificate publicCert, String signatureAlgorithm, boolean useKid)
+            throws JWTGeneratorException {
 
         /*
          * Sample header
@@ -97,21 +98,34 @@ public final class JWTUtil {
          * {"typ":"JWT", "alg":"[2]", "x5t":"[1]", "x5t":"[1]"}
          * */
         try {
+            X509Certificate x509Certificate = (X509Certificate) publicCert;
+
+            //generate the SHA-1 thumbprint of the certificate
+            MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
+            byte[] der = publicCert.getEncoded();
+            digestValue.update(der);
+            byte[] digestInBytes = digestValue.digest();
+            String publicCertThumbprint = hexify(digestInBytes);
+            String base64UrlEncodedThumbPrint;
+            base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
+                    .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
+
             StringBuilder jwtHeader = new StringBuilder();
             jwtHeader.append("{\"typ\":\"JWT\",");
             jwtHeader.append("\"alg\":\"");
             jwtHeader.append(getJWSCompliantAlgorithmCode(signatureAlgorithm));
             jwtHeader.append("\",");
+            jwtHeader.append("\"x5t\":\"");
+            jwtHeader.append(base64UrlEncodedThumbPrint);
+            jwtHeader.append("\"");
+
             if (useKid) {
-                jwtHeader.append("\"kid\":\"");
-                // No padding
-                jwtHeader.append(generateThumbprint("SHA-256", publicCert, false));
-            } else {
-                jwtHeader.append("\"x5t\":\"");
-                // Has padding for legacy support
-                jwtHeader.append(generateThumbprint("SHA-1", publicCert, true));
+                jwtHeader.append(",\"kid\":\"");
+                jwtHeader.append(getKID(x509Certificate));
+                jwtHeader.append("\"");
             }
-            jwtHeader.append("\"}");
+
+            jwtHeader.append("}");
             return jwtHeader.toString();
         } catch (NoSuchAlgorithmException | CertificateEncodingException | UnsupportedEncodingException e) {
             throw new JWTGeneratorException("Error in generating public certificate thumbprint", e);
@@ -155,6 +169,19 @@ public final class JWTUtil {
             buf.append(hexDigits[aByte & 0x0f]);
         }
         return buf.toString();
+    }
+
+    /**
+     * Helper method to add kid claim into to JWT_HEADER.
+     *
+     * @param cert X509 certificate
+     * @return KID
+     */
+    public static String getKID(X509Certificate cert) {
+        String serialNumber = cert.getSerialNumber().toString();
+        String issuerName = cert.getIssuerDN().getName();
+        String kid = issuerName + "#" + serialNumber;
+        return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(kid.getBytes(StandardCharsets.UTF_8));
     }
 
     /**

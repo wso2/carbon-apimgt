@@ -1598,6 +1598,11 @@ public class APIManagerConfiguration {
             if (claimRetrieverImplElement != null) {
                 jwtConfigurationDto.setClaimRetrieverImplClass(claimRetrieverImplElement.getText());
             }
+            OMElement useKidElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.USE_KID));
+            if (useKidElement != null) {
+                jwtConfigurationDto.setUseKid(Boolean.parseBoolean(useKidElement.getText()));
+            }
             OMElement jwtHeaderElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.JWT_HEADER));
             if (jwtHeaderElement != null) {

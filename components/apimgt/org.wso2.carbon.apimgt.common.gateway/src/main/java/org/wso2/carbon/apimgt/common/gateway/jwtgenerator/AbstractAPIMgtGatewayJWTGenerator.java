@@ -33,6 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -104,6 +105,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
 
     public String buildHeader() throws JWTGeneratorException {
         String jwtHeader = null;
+        X509Certificate x509Certificate = (X509Certificate) jwtConfigurationDto.getPublicCert();
 
         if (NONE.equals(signatureAlgorithm)) {
             StringBuilder jwtHeaderBuilder = new StringBuilder();
@@ -111,6 +113,11 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
             jwtHeaderBuilder.append("\"alg\":\"");
             jwtHeaderBuilder.append(JWTUtil.getJWSCompliantAlgorithmCode(NONE));
             jwtHeaderBuilder.append('\"');
+            if (jwtConfigurationDto.useKid()) {
+                jwtHeaderBuilder.append(",\"kid\":\"");
+                jwtHeaderBuilder.append(JWTUtil.getKID(x509Certificate));
+                jwtHeaderBuilder.append("\"");
+            }
             jwtHeaderBuilder.append('}');
 
             jwtHeader = jwtHeaderBuilder.toString();

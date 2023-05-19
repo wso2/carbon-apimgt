@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
@@ -46,6 +47,8 @@ import org.wso2.carbon.user.core.service.RealmService;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
@@ -85,6 +88,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
     private String userAttributeSeparator = APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT;
     private boolean tenantBasedSigningEnabled;
+    private boolean useKid;
 
     public AbstractJWTGenerator() {
 
@@ -119,6 +123,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             }
         }
         tenantBasedSigningEnabled = jwtConfigurationDto.isTenantBasedSigningEnabled();
+        useKid = jwtConfigurationDto.useKid();
     }
 
     public String getDialectURI() {
@@ -170,11 +175,13 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         }
     }
 
+    @Deprecated
     public String buildHeader() throws APIManagementException {
 
         return buildHeader(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
     }
-        public String buildHeader(String tenantDomain) throws APIManagementException {
+
+    public String buildHeader(String tenantDomain) throws APIManagementException {
         String jwtHeader = null;
 
         //if signature algo==NONE, header without cert
@@ -340,7 +347,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                 KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
                 publicCert = keyStoreManager.getDefaultPrimaryCertificate();
             }
-            return APIUtil.generateHeader(publicCert, signatureAlgorithm);
+            return generateHeader(publicCert, signatureAlgorithm, useKid);
         } catch (Exception e) {
             String error = "Error in obtaining keystore";
             throw new APIManagementException(error, e);
@@ -376,5 +383,53 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
         SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         return datastore.getApplicationById(applicationId);
+    }
+
+    /**
+     * Utility method to generate JWT header with public certificate thumbprint for signature verification.
+     *
+     * @param publicCert         The public certificate which needs to include in the header as thumbprint
+     * @param signatureAlgorithm Signature algorithm which needs to include in the header
+     * @param useKid             Boolean to indicate whether to include kid property in the header
+     */
+    public static String generateHeader(Certificate publicCert, String signatureAlgorithm, boolean useKid)
+            throws APIManagementException {
+        try {
+            //generate the SHA-1 thumbprint of the certificate
+            MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
+            byte[] der = publicCert.getEncoded();
+            digestValue.update(der);
+            byte[] digestInBytes = digestValue.digest();
+            String publicCertThumbprint = APIUtil.hexify(digestInBytes);
+            String base64UrlEncodedThumbPrint;
+            base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
+                    .encodeToString(publicCertThumbprint.getBytes(StandardCharsets.UTF_8));
+            java.security.cert.X509Certificate x509Certificate = (java.security.cert.X509Certificate) publicCert;
+            StringBuilder jwtHeader = new StringBuilder();
+            /*
+             * Sample header
+             * {"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10",
+             * "kid":"a_jhNus21KVuoFx65LmkW2O_l10_RS256"}
+             * {"typ":"JWT", "alg":"[2]", "x5t":"[1]", "x5t":"[1]"}
+             * */
+            jwtHeader.append("{\"typ\":\"JWT\",");
+            jwtHeader.append("\"alg\":\"");
+            jwtHeader.append(APIUtil.getJWSCompliantAlgorithmCode(signatureAlgorithm));
+            jwtHeader.append("\",");
+
+            jwtHeader.append("\"x5t\":\"");
+            jwtHeader.append(base64UrlEncodedThumbPrint);
+            jwtHeader.append("\"");
+            if (useKid) {
+                jwtHeader.append(",\"kid\":\"");
+                jwtHeader.append(JWTUtil.getKID(x509Certificate));
+                jwtHeader.append("\"");
+            }
+            jwtHeader.append("}");
+            return jwtHeader.toString();
+
+        } catch (Exception e) {
+            throw new APIManagementException("Error in generating public certificate thumbprint", e);
+        }
     }
 }
