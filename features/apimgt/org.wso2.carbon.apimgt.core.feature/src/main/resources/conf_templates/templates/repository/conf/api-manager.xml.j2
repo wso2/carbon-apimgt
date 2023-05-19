@@ -1390,6 +1390,12 @@
         {% if apim.sync_runtime_artifacts.gateway.deployment_retry_duration is defined %}
         <RetryDuration>{{apim.sync_runtime_artifacts.gateway.deployment_retry_duration}}</RetryDuration>
         {% endif %}
+        {% if apim.sync_runtime_artifacts.gateway.max_retry_count is defined %}
+        <MaxRetryCount>{{apim.sync_runtime_artifacts.gateway.max_retry_count}}</MaxRetryCount>
+        {% endif %}
+        {% if apim.sync_runtime_artifacts.gateway.retry_progression_factor is defined %}
+        <RetryProgressionFactor>{{apim.sync_runtime_artifacts.gateway.retry_progression_factor}}</RetryProgressionFactor>
+        {% endif %}
         {% if apim.sync_runtime_artifacts.gateway.data_retrieval_mode is defined %}
         <DataRetrievalMode>{{apim.sync_runtime_artifacts.gateway.data_retrieval_mode}}</DataRetrievalMode>
         {% endif %}

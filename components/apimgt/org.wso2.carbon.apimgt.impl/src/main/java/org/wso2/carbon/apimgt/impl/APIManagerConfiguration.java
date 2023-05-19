@@ -2063,7 +2063,25 @@ public class APIManagerConfiguration {
             long retryDuration = Long.valueOf(retryDurationElement.getText());
             gatewayArtifactSynchronizerProperties.setRetryDuartion(retryDuration);
         } else {
-            log.debug("Retry Duration Element is not set. Set to default duaration");
+            log.debug("Retry Duration Element is not set. Set to default duration");
+        }
+
+        OMElement maxRetryCountElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayArtifactSynchronizer.MAX_RETRY_COUNT));
+        if (maxRetryCountElement != null) {
+            int retryCount = Integer.parseInt(maxRetryCountElement.getText());
+            gatewayArtifactSynchronizerProperties.setMaxRetryCount(retryCount);
+        } else {
+            log.debug("Max Retry Count Element is not set. Set to default count");
+        }
+
+        OMElement retryProgressionFactorElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayArtifactSynchronizer.RETRY_PROGRESSION_FACTOR));
+        if (retryProgressionFactorElement != null) {
+            double retryProgressionFactor = Double.parseDouble(retryProgressionFactorElement.getText());
+            gatewayArtifactSynchronizerProperties.setRetryProgressionFactor(retryProgressionFactor);
+        } else {
+            log.debug("Retry Progression Factor Element is not set. Set to default value");
         }
 
         OMElement dataRetrievalModeElement = omElement.getFirstChildWithName(

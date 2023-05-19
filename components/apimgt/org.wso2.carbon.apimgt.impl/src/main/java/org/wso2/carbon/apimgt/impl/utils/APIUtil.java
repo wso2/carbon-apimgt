@@ -166,6 +166,7 @@ import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
@@ -369,6 +370,10 @@ public final class APIUtil {
     private static String hostAddress = null;
     private static final int timeoutInSeconds = 15;
     private static final int retries = 2;
+    private static long retrievalTimeout;
+    private static final long maxRetrievalTimeout = 1000 * 60 * 60;
+    private static double retryProgressionFactor;
+    private static int maxRetryCount;
 
     //constants for getting masked token
     private static final int MAX_LEN = 36;
@@ -391,6 +396,10 @@ public final class APIUtil {
                 .getFirstProperty(APIConstants.PUBLISHER_ROLE_CACHE_ENABLED);
         isPublisherRoleCacheEnabled = isPublisherRoleCacheEnabledConfiguration == null || Boolean
                 .parseBoolean(isPublisherRoleCacheEnabledConfiguration);
+        retrievalTimeout = apiManagerConfiguration.getGatewayArtifactSynchronizerProperties().getRetryDuartion();
+        maxRetryCount = apiManagerConfiguration.getGatewayArtifactSynchronizerProperties().getMaxRetryCount();
+        retryProgressionFactor = apiManagerConfiguration.getGatewayArtifactSynchronizerProperties()
+                .getRetryProgressionFactor();
         try {
             eventPublisherFactory = ServiceReferenceHolder.getInstance().getEventPublisherFactory();
             eventPublishers.putIfAbsent(EventPublisherType.ASYNC_WEBHOOKS,
@@ -463,6 +472,54 @@ public final class APIUtil {
                         // Ignore
                     }
                 } else {
+                    throw ex;
+                }
+            }
+        } while (retry);
+        return httpResponse;
+    }
+
+    /**
+     * This method is used to execute an HTTP request with retry parameters obtained from configuration parameters.
+     *
+     * @param method       HttpRequest Type
+     * @param httpClient   HttpClient
+     * @return CloseableHttpResponse
+     */
+    public static CloseableHttpResponse executeHTTPRequestWithRetries(HttpRequestBase method, HttpClient httpClient)
+            throws IOException, APIManagementException {
+
+        CloseableHttpResponse httpResponse = null;
+        long retryDuration = retrievalTimeout;
+        int retryCount = 0;
+        boolean retry;
+        do {
+            try {
+                httpResponse = (CloseableHttpResponse) httpClient.execute(method);
+                if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
+                    throw new DataLoadingException("Error while retrieving artifacts. "
+                            + "Received response with status code "+ httpResponse.getStatusLine().getStatusCode());
+                }
+                retry = false;
+            } catch (IOException | DataLoadingException ex) {
+                retryCount++;
+                if (retryCount <= maxRetryCount) {
+                    retry = true;
+                    log.error("Failed to retrieve from remote endpoint: " + ex.getMessage()
+                            + ". Retry attempt " + retryCount + " in " + (retryDuration / 1000) +
+                            " seconds.");
+                    try {
+                        Thread.sleep(retryDuration);
+                        retryDuration = (long) (retryDuration * retryProgressionFactor);
+                        if (retryDuration > maxRetrievalTimeout) {
+                            retryDuration = maxRetrievalTimeout;
+                        }
+                    } catch (InterruptedException e) {
+                        // Ignore
+                    }
+                } else {
+                    log.error("Failed to retrieve from remote endpoint. Maximum retry count exceeded."
+                            + ex.getMessage());
                     throw ex;
                 }
             }
