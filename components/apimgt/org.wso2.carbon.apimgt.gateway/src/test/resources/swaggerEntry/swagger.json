@@ -888,6 +888,94 @@
         "x-auth-type":"Application & Application User",
         "x-throttling-tier":"Unlimited"
       }
+    },
+    "/":{
+      "post":{
+        "tags":[
+          "pet"
+        ],
+        "summary":"Test / path functionality",
+        "description":"",
+        "operationId":"basePet",
+        "consumes":[
+          "application/json",
+          "application/xml"
+        ],
+        "produces":[
+          "application/xml",
+          "application/json"
+        ],
+        "parameters":[
+          {
+            "in":"body",
+            "name":"body",
+            "description":"Test object that needs to be sent to the backend",
+            "required":true,
+            "schema":{
+              "$ref":"#/definitions/Sample"
+            }
+          }
+        ],
+        "responses":{
+          "405":{
+            "description":"Invalid input"
+          }
+        },
+        "security":[
+          {
+            "petstore_auth":[
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ],
+        "x-auth-type":"Application & Application User",
+        "x-throttling-tier":"Unlimited"
+      }
+    },
+    "/pet/sample/":{
+      "post":{
+        "tags":[
+          "pet"
+        ],
+        "summary":"Test trailing slash functionality",
+        "description":"",
+        "operationId":"slashPet",
+        "consumes":[
+          "application/json",
+          "application/xml"
+        ],
+        "produces":[
+          "application/xml",
+          "application/json"
+        ],
+        "parameters":[
+          {
+            "in":"body",
+            "name":"body",
+            "description":"Test object that needs to be sent to the backend",
+            "required":true,
+            "schema":{
+              "$ref":"#/definitions/Sample"
+            }
+          }
+        ],
+        "responses":{
+          "405":{
+            "description":"Invalid input"
+          }
+        },
+        "security":[
+          {
+            "petstore_auth":[
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ],
+        "x-auth-type":"Application & Application User",
+        "x-throttling-tier":"Unlimited"
+      }
     }
   },
   "securityDefinitions":{
@@ -1073,6 +1161,18 @@
         },
         "message":{
           "type":"string"
+        }
+      }
+    },
+    "Sample": {
+      "type": "object",
+      "required": [
+        "pet"
+      ],
+      "properties": {
+        "pet": {
+          "type": "string",
+          "example": "dog"
         }
       }
     }
