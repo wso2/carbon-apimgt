@@ -428,6 +428,323 @@ public class ChoreoGatewayArtifactsMgtDAO {
         return apiRuntimeArtifactDtoList;
     }
 
+    public List<APIRuntimeArtifactDto> retrieveAllGatewayArtifactsByDataPlaneAndAPIIDs(String dataPlaneId,
+                                                                                       String gatewayAccessibilityType,
+                                                                                       List<String> apiUuids)
+            throws APIManagementException {
+
+        Map<String, Environment> readOnlyEnvironments = APIUtil.getReadOnlyEnvironments();
+        List<String> gatewayLabelsForReadOnlyEnvironments = new ArrayList<>();
+        for (Map.Entry<String, Environment> entry : readOnlyEnvironments.entrySet()) {
+            Environment environment = entry.getValue();
+            if (environment.getDataPlaneId().equalsIgnoreCase(dataPlaneId) &&
+                    environment.getAccessibilityType().equalsIgnoreCase(gatewayAccessibilityType)) {
+                gatewayLabelsForReadOnlyEnvironments.add(environment.getName());
+            }
+        }
+
+        // Logging the API ID List
+        log.debug("Getting runtime artifacts for the API ID List: " + apiUuids.toString());
+        // Split apiId list into smaller list of size 25
+        List<List<String>> apiIdsChunks = new ArrayList<>();
+        int apiIdListSize = apiUuids.size();
+        int apiIdArrayIndex = 0;
+        int apiIdsChunkSize = SQLConstants.API_ID_CHUNK_SIZE;
+        while (apiIdArrayIndex < apiIdListSize) {
+            apiIdsChunks.add(apiUuids.subList(apiIdArrayIndex, Math.min(apiIdArrayIndex + apiIdsChunkSize, apiIdListSize)));
+            apiIdArrayIndex += apiIdsChunkSize;
+        }
+
+        List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
+
+        // Retrieving artifacts for dynamic environments
+        for (List<String> apiIdList: apiIdsChunks) {
+            String query = SQLConstants.RETRIEVE_ALL_ARTIFACTS_BY_DATA_PLANE_ID_AND_API_UUIDS;
+            query = query.replaceAll(SQLConstants.API_ID_REGEX, String.join(",",Collections.nCopies(apiIdList.size(), "?")));
+            try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
+                 PreparedStatement preparedStatementForDynamicEnvs = connection.prepareStatement(query)) {
+                preparedStatementForDynamicEnvs.setString(1, dataPlaneId);
+                preparedStatementForDynamicEnvs.setString(2, gatewayAccessibilityType);
+                int index = 3;
+                for (String apiId: apiIdList) {
+                    preparedStatementForDynamicEnvs.setString(index, apiId);
+                    index++;
+                }
+                try (ResultSet resultSet = preparedStatementForDynamicEnvs.executeQuery()) {
+                    while (resultSet.next()) {
+                        String apiId = resultSet.getString("API_ID");
+                        String label = resultSet.getString("LABEL");
+                        try {
+                            APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
+                            apiRuntimeArtifactDto.setApiId(apiId);
+                            String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                                    resultSet.getString("VHOST"));
+                            apiRuntimeArtifactDto.setLabel(label);
+                            apiRuntimeArtifactDto.setVhost(resolvedVhost);
+                            apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
+                            apiRuntimeArtifactDto.setVersion(resultSet.getString("API_VERSION"));
+                            apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
+                            apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
+                            apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
+                            apiRuntimeArtifactDto.setContext(resultSet.getString("CONTEXT"));
+                            InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
+                            if (artifact != null) {
+                                byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
+                                try (InputStream newArtifact = new ByteArrayInputStream(artifactByte)) {
+                                    apiRuntimeArtifactDto.setArtifact(newArtifact);
+                                }
+                            }
+                            apiRuntimeArtifactDto.setFile(true);
+                            apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
+                        } catch (APIManagementException e) {
+                            // handle exception inside the loop and continue with other API artifacts
+                            log.error(ExceptionCodes.from(ExceptionCodes.CANNOT_RETRIEVE_RUNTIME_ARTIFACT_APIM_ERROR,
+                                    apiId, label, e.getMessage()).toString());
+                        } catch (IOException e) {
+                            // handle exception inside the loop and continue with other API artifacts
+                            log.error(ExceptionCodes.from(ExceptionCodes.CANNOT_RETRIEVE_RUNTIME_ARTIFACT_IO_ERROR,
+                                    apiId, label, e.getMessage()).toString());
+                        } catch (SQLException e) {
+                            // handle exception inside the loop and continue with other API artifacts
+                            log.error(ExceptionCodes.from(ExceptionCodes.CANNOT_RETRIEVE_RUNTIME_ARTIFACT_SQL_ERROR,
+                                    apiId, label, e.getMessage()).toString());
+                        }
+                    }
+                }
+                // Retrieving artifacts for read-only environments
+                if (gatewayLabelsForReadOnlyEnvironments.size() == 0) {
+                    continue;
+                }
+                PreparedStatement preparedStatementForReadOnlyEnvironments = connection.prepareStatement(
+                        SQLConstants.RETRIEVE_ALL_ARTIFACTS_BY_MULTIPLE_APIIDs_AND_LABEL
+                                .replaceAll(SQLConstants.API_ID_REGEX,
+                                        String.join(",",
+                                                Collections.nCopies(apiIdList.size(), "?")
+                                        )
+                                )
+                                .replaceAll(SQLConstants.GATEWAY_LABEL_REGEX,
+                                        String.join(",",
+                                                Collections.nCopies(gatewayLabelsForReadOnlyEnvironments.size(), "?")
+                                        )
+                                )
+                );
+                index = 1;
+                for (String apiId: apiIdList) {
+                    preparedStatementForReadOnlyEnvironments.setString(index, apiId);
+                    index++;
+                }
+                for (String gatewayLabel : gatewayLabelsForReadOnlyEnvironments) {
+                    preparedStatementForReadOnlyEnvironments.setString(index, gatewayLabel);
+                    index++;
+                }
+                ResultSet resultSetForReadOnlyEnvironments = preparedStatementForReadOnlyEnvironments.executeQuery();
+                while (resultSetForReadOnlyEnvironments.next()) {
+                    String apiId = resultSetForReadOnlyEnvironments.getString("API_ID");
+                    String label = resultSetForReadOnlyEnvironments.getString("LABEL");
+                    try {
+                        APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
+                        apiRuntimeArtifactDto.setApiId(apiId);
+                        String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                                resultSetForReadOnlyEnvironments.getString("VHOST"));
+                        apiRuntimeArtifactDto.setLabel(label);
+                        apiRuntimeArtifactDto.setVhost(resolvedVhost);
+                        apiRuntimeArtifactDto.setName(resultSetForReadOnlyEnvironments.getString("API_NAME"));
+                        apiRuntimeArtifactDto.setVersion(resultSetForReadOnlyEnvironments.getString("API_VERSION"));
+                        apiRuntimeArtifactDto.setProvider(resultSetForReadOnlyEnvironments.getString("API_PROVIDER"));
+                        apiRuntimeArtifactDto.setRevision(resultSetForReadOnlyEnvironments.getString("REVISION_ID"));
+                        apiRuntimeArtifactDto.setType(resultSetForReadOnlyEnvironments.getString("API_TYPE"));
+                        apiRuntimeArtifactDto.setContext(resultSetForReadOnlyEnvironments.getString("CONTEXT"));
+                        InputStream artifact = resultSetForReadOnlyEnvironments.getBinaryStream("ARTIFACT");
+                        if (artifact != null) {
+                            byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
+                            try (InputStream newArtifact = new ByteArrayInputStream(artifactByte)) {
+                                apiRuntimeArtifactDto.setArtifact(newArtifact);
+                            }
+                        }
+                        apiRuntimeArtifactDto.setFile(true);
+                        apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
+                    } catch (APIManagementException e) {
+                        // handle exception inside the loop and continue with other API artifacts
+                        log.error(String.format("Error resolving vhost while retrieving runtime artifact for API %s, "
+                                + "gateway environment \"%s\". Skipping runtime artifact for the API.", apiId, label), e);
+                    } catch (IOException e) {
+                        // handle exception inside the loop and continue with other API artifacts
+                        log.error(String.format("Error occurred retrieving input stream from byte array of " +
+                                "API: %s, gateway environment \"%s\".", apiId, label), e);
+                    } catch (SQLException e) {
+                        // handle exception inside the loop and continue with other API artifacts
+                        log.error(String.format("Failed to retrieve Gateway Artifact of API: %s, " +
+                                "gateway environment \"%s\".", apiId, label), e);
+                    }
+                }
+            } catch (SQLException e) {
+                throw new APIManagementException("Failed to retrieve Gateway Artifact for DataPlaneId : "
+                        + StringUtils.join(",", dataPlaneId), e);
+            }
+        }
+
+        return apiRuntimeArtifactDtoList;
+    }
+
+    public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsByDataPlaneAndAPIIDs(String organization,
+                                                                                    String dataPlaneId,
+                                                                                    String gatewayAccessibilityType,
+                                                                                    List<String> apiUuids)
+            throws APIManagementException {
+        Map<String, Environment> readOnlyEnvironments = APIUtil.getReadOnlyEnvironments();
+        List<String> gatewayLabelsForReadOnlyEnvironments = new ArrayList<>();
+        for (Map.Entry<String, Environment> entry : readOnlyEnvironments.entrySet()) {
+            Environment environment = entry.getValue();
+            if (environment.getDataPlaneId().equalsIgnoreCase(dataPlaneId) &&
+                    environment.getAccessibilityType().equalsIgnoreCase(gatewayAccessibilityType)) {
+                gatewayLabelsForReadOnlyEnvironments.add(environment.getName());
+            }
+        }
+
+        // Logging the API ID List
+        log.debug("Getting runtime artifacts for the API ID List: " + apiUuids.toString());
+        // Split apiId list into smaller list of size 25
+        List<List<String>> apiIdsChunks = new ArrayList<>();
+        int apiIdListSize = apiUuids.size();
+        int apiIdArrayIndex = 0;
+        int apiIdsChunkSize = SQLConstants.API_ID_CHUNK_SIZE;
+        while (apiIdArrayIndex < apiIdListSize) {
+            apiIdsChunks.add(apiUuids.subList(apiIdArrayIndex, Math.min(apiIdArrayIndex + apiIdsChunkSize, apiIdListSize)));
+            apiIdArrayIndex += apiIdsChunkSize;
+        }
+
+        List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
+
+        // Retrieving artifacts for dynamic environments
+        for (List<String> apiIdList: apiIdsChunks) {
+            String query = SQLConstants.RETRIEVE_ARTIFACTS_BY_DATA_PLANE_ID_AND_API_UUIDS;
+            query = query.replaceAll(SQLConstants.API_ID_REGEX, String.join(",",Collections.nCopies(apiIdList.size(), "?")));
+            try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
+                 PreparedStatement preparedStatementForDynamicEnvs = connection.prepareStatement(query)) {
+                preparedStatementForDynamicEnvs.setString(1, organization);
+                preparedStatementForDynamicEnvs.setString(2, dataPlaneId);
+                preparedStatementForDynamicEnvs.setString(3, gatewayAccessibilityType);
+                int index = 4;
+                for (String apiId: apiIdList) {
+                    preparedStatementForDynamicEnvs.setString(index, apiId);
+                    index++;
+                }
+                try (ResultSet resultSetForDynamicEnvs = preparedStatementForDynamicEnvs.executeQuery()) {
+                    while (resultSetForDynamicEnvs.next()) {
+                        String apiId = resultSetForDynamicEnvs.getString("API_ID");
+                        String label = resultSetForDynamicEnvs.getString("LABEL");
+                        try {
+                            APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
+                            apiRuntimeArtifactDto.setApiId(apiId);
+                            String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                                    resultSetForDynamicEnvs.getString("VHOST"));
+                            apiRuntimeArtifactDto.setLabel(label);
+                            apiRuntimeArtifactDto.setVhost(resolvedVhost);
+                            apiRuntimeArtifactDto.setName(resultSetForDynamicEnvs.getString("API_NAME"));
+                            apiRuntimeArtifactDto.setVersion(resultSetForDynamicEnvs.getString("API_VERSION"));
+                            apiRuntimeArtifactDto.setProvider(resultSetForDynamicEnvs.getString("API_PROVIDER"));
+                            apiRuntimeArtifactDto.setRevision(resultSetForDynamicEnvs.getString("REVISION_ID"));
+                            apiRuntimeArtifactDto.setType(resultSetForDynamicEnvs.getString("API_TYPE"));
+                            apiRuntimeArtifactDto.setContext(resultSetForDynamicEnvs.getString("CONTEXT"));
+                            InputStream artifact = resultSetForDynamicEnvs.getBinaryStream("ARTIFACT");
+                            if (artifact != null) {
+                                byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
+                                try (InputStream newArtifact = new ByteArrayInputStream(artifactByte)) {
+                                    apiRuntimeArtifactDto.setArtifact(newArtifact);
+                                }
+                            }
+                            apiRuntimeArtifactDto.setFile(true);
+                            apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
+                        } catch (APIManagementException e) {
+                            // handle exception inside the loop and continue with other API artifacts
+                            log.error(ExceptionCodes.from(ExceptionCodes.CANNOT_RETRIEVE_RUNTIME_ARTIFACT_APIM_ERROR,
+                                    apiId, label, e.getMessage()).toString());
+                        } catch (IOException e) {
+                            // handle exception inside the loop and continue with other API artifacts
+                            log.error(ExceptionCodes.from(ExceptionCodes.CANNOT_RETRIEVE_RUNTIME_ARTIFACT_IO_ERROR,
+                                    apiId, label, e.getMessage()).toString());
+                        } catch (SQLException e) {
+                            // handle exception inside the loop and continue with other API artifacts
+                            log.error(ExceptionCodes.from(ExceptionCodes.CANNOT_RETRIEVE_RUNTIME_ARTIFACT_SQL_ERROR,
+                                    apiId, label, e.getMessage()).toString());
+                        }
+                    }
+                }
+                // Retrieving artifacts for read-only environments
+                if (gatewayLabelsForReadOnlyEnvironments.size() == 0) {
+                    continue;
+                }
+                PreparedStatement preparedStatementForReadOnlyEnvironments = connection.prepareStatement(
+                        SQLConstants.RETRIEVE_ARTIFACTS_BY_MULTIPLE_APIIDs_AND_LABEL
+                                .replaceAll(SQLConstants.API_ID_REGEX,
+                                        String.join(",",
+                                                Collections.nCopies(apiIdList.size(), "?")
+                                        )
+                                )
+                                .replaceAll(SQLConstants.GATEWAY_LABEL_REGEX,
+                                        String.join(",",
+                                                Collections.nCopies(gatewayLabelsForReadOnlyEnvironments.size(), "?")
+                                        )
+                                )
+                );
+                index = 1;
+                for (String apiId: apiIdList) {
+                    preparedStatementForReadOnlyEnvironments.setString(index, apiId);
+                    index++;
+                }
+                for (String gatewayLabel : gatewayLabelsForReadOnlyEnvironments) {
+                    preparedStatementForReadOnlyEnvironments.setString(index, gatewayLabel);
+                    index++;
+                }
+                preparedStatementForReadOnlyEnvironments.setString(index, organization);
+                ResultSet resultSetForReadOnlyEnvironments = preparedStatementForReadOnlyEnvironments.executeQuery();
+                while (resultSetForReadOnlyEnvironments.next()) {
+                    String apiId = resultSetForReadOnlyEnvironments.getString("API_ID");
+                    String label = resultSetForReadOnlyEnvironments.getString("LABEL");
+                    try {
+                        APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
+                        apiRuntimeArtifactDto.setApiId(apiId);
+                        String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                                resultSetForReadOnlyEnvironments.getString("VHOST"));
+                        apiRuntimeArtifactDto.setLabel(label);
+                        apiRuntimeArtifactDto.setVhost(resolvedVhost);
+                        apiRuntimeArtifactDto.setName(resultSetForReadOnlyEnvironments.getString("API_NAME"));
+                        apiRuntimeArtifactDto.setVersion(resultSetForReadOnlyEnvironments.getString("API_VERSION"));
+                        apiRuntimeArtifactDto.setProvider(resultSetForReadOnlyEnvironments.getString("API_PROVIDER"));
+                        apiRuntimeArtifactDto.setRevision(resultSetForReadOnlyEnvironments.getString("REVISION_ID"));
+                        apiRuntimeArtifactDto.setType(resultSetForReadOnlyEnvironments.getString("API_TYPE"));
+                        apiRuntimeArtifactDto.setContext(resultSetForReadOnlyEnvironments.getString("CONTEXT"));
+                        InputStream artifact = resultSetForReadOnlyEnvironments.getBinaryStream("ARTIFACT");
+                        if (artifact != null) {
+                            byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
+                            try (InputStream newArtifact = new ByteArrayInputStream(artifactByte)) {
+                                apiRuntimeArtifactDto.setArtifact(newArtifact);
+                            }
+                        }
+                        apiRuntimeArtifactDto.setFile(true);
+                        apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
+                    } catch (APIManagementException e) {
+                        // handle exception inside the loop and continue with other API artifacts
+                        log.error(String.format("Error resolving vhost while retrieving runtime artifact for API %s, "
+                                + "gateway environment \"%s\". Skipping runtime artifact for the API.", apiId, label), e);
+                    } catch (IOException e) {
+                        // handle exception inside the loop and continue with other API artifacts
+                        log.error(String.format("Error occurred retrieving input stream from byte array of " +
+                                "API: %s, gateway environment \"%s\".", apiId, label), e);
+                    } catch (SQLException e) {
+                        // handle exception inside the loop and continue with other API artifacts
+                        log.error(String.format("Failed to retrieve Gateway Artifact of API: %s, " +
+                                "gateway environment \"%s\".", apiId, label), e);
+                    }
+                }
+            } catch (SQLException e) {
+                throw new APIManagementException("Failed to retrieve Gateway Artifact for DataPlaneId : "
+                        + StringUtils.join(",", dataPlaneId), e);
+            }
+        }
+
+        return apiRuntimeArtifactDtoList;
+    }
     public List<APIRuntimeArtifactDto> retrieveAllGatewayArtifactsByDataPlaneId(String[] dataPlaneIds,
                                                                                 String gatewayAccessibilityType)
             throws APIManagementException {

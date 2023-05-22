@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.RuntimeArtifactGeneratorUtil;
 import org.wso2.carbon.apimgt.internal.service.RetrieveRuntimeArtifactsApiService;
 import org.wso2.carbon.apimgt.internal.service.dto.SynapseArtifactListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.UUIDListDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -61,6 +62,54 @@ public class RetrieveRuntimeArtifactsApiServiceImpl implements RetrieveRuntimeAr
             runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(organization, dataPlaneId,
                     gatewayAccessibilityType, type);
         }
+        if (runtimeArtifactDto != null) {
+            if (runtimeArtifactDto.isFile()) {
+                File artifact = (File) runtimeArtifactDto.getArtifact();
+                StreamingOutput streamingOutput = (outputStream) -> {
+                    try {
+                        Files.copy(artifact.toPath(), outputStream);
+                    } finally {
+                        Files.delete(artifact.toPath());
+                    }
+                };
+                return Response.ok(streamingOutput).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                        "attachment; filename=apis.zip").header(RestApiConstants.HEADER_CONTENT_TYPE,
+                        APIConstants.APPLICATION_ZIP).build();
+            } else {
+                SynapseArtifactListDTO synapseArtifactListDTO = new SynapseArtifactListDTO();
+                if (runtimeArtifactDto.getArtifact() instanceof List) {
+                    synapseArtifactListDTO.setList((List<String>) runtimeArtifactDto.getArtifact());
+                    synapseArtifactListDTO.setCount(((List<String>) runtimeArtifactDto.getArtifact()).size());
+                }
+                return Response.ok().entity(synapseArtifactListDTO)
+                        .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_JSON).build();
+            }
+        } else {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity(RestApiUtil.getErrorDTO(ExceptionCodes.NO_API_ARTIFACT_FOUND))
+                    .build();
+        }
+    }
+
+    @Override
+    public Response retrieveRuntimeArtifactsPost(String type, String dataPlaneId, String gatewayAccessibilityType, UUIDListDTO uuidList, MessageContext messageContext) throws APIManagementException {
+        RuntimeArtifactDto runtimeArtifactDto;
+        String organization = RestApiUtil.getOrganization(messageContext);
+        if (StringUtils.isEmpty(organization)) {
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(RestApiUtil.getErrorDTO(ExceptionCodes.ORGANIZATION_NOT_FOUND))
+                    .build();
+        }
+        if (organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
+            runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(type, dataPlaneId,
+                    gatewayAccessibilityType, uuidList.getUuids());
+        } else {
+            runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(organization, type, dataPlaneId,
+                    gatewayAccessibilityType, uuidList.getUuids());
+        }
+
         if (runtimeArtifactDto != null) {
             if (runtimeArtifactDto.isFile()) {
                 File artifact = (File) runtimeArtifactDto.getArtifact();

@@ -545,6 +545,46 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+    post:
+      summary: Get all the runtime artifacts for a given data-planeId
+      description: |
+        This will provide access to runtime artifacts in database.
+      parameters:
+        - name: type
+          in: query
+          description: |
+            **Search condition**.
+             type of gateway
+          type: string
+          required: true
+        - name: dataPlaneId
+          in: query
+          description: |
+            **Search condition**.
+             Data-plane ID
+          type: string
+          required: true
+        - name: gatewayAccessibilityType
+          in: query
+          description: |
+            **Search condition**.
+              Gateway Accessibility type denotes whether the gateway environment is internal or external
+          type: string
+          required: true
+        - name: uuidList
+          in: body
+          description: 'API UUID list payload'
+          schema:
+            $ref: "#/definitions/UUIDList"
+      tags:
+        - Retrieving Runtime artifacts
+      responses:
+        200:
+          description: List of runtime Artifacts
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /retrieve-api-artifacts:
     post:
       summary: Get API runtime artifacts from ID list
