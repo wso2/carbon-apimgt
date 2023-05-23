@@ -27,12 +27,15 @@ import java.net.URL;
  * This class represent an Virtual Host
  */
 public class VHost {
+    // host name from the http endpoint
     private String host;
     private String httpContext = "";
     private Integer httpPort = -1;
     private Integer httpsPort = -1;
     private Integer wsPort = DEFAULT_WS_PORT;
+    private String wsHost;
     private Integer wssPort = DEFAULT_WSS_PORT;
+    private String wssHost;
     private Integer websubHttpPort = DEFAULT_WEBSUB_HTTP_PORT;
     private Integer websubHttpsPort = DEFAULT_WEBSUB_HTTPS_PORT;
 
@@ -95,12 +98,28 @@ public class VHost {
         this.wsPort = wsPort;
     }
 
+    public String getWsHost() {
+        return wsHost;
+    }
+
+    public void setWsHost(String wsHost) {
+        this.wsHost = wsHost;
+    }
+
     public Integer getWssPort() {
         return wssPort;
     }
 
     public void setWssPort(Integer wssPort) {
         this.wssPort = wssPort;
+    }
+
+    public String getWssHost() {
+        return wssHost;
+    }
+
+    public void setWssHost(String wssHost) {
+        this.wssHost = wssHost;
     }
 
     public Integer getWebsubHttpPort() {
@@ -120,27 +139,27 @@ public class VHost {
     }
 
     public String getHttpUrl() {
-        return getUrl("http", httpPort == DEFAULT_HTTP_PORT ? "" : ":" + httpPort, httpContext);
+        return getUrl("http", host, httpPort == DEFAULT_HTTP_PORT ? "" : ":" + httpPort, httpContext);
     }
 
     public String getHttpsUrl() {
-        return getUrl("https", httpsPort == DEFAULT_HTTPS_PORT ? "" : ":" + httpsPort, httpContext);
+        return getUrl("https", host, httpsPort == DEFAULT_HTTPS_PORT ? "" : ":" + httpsPort, httpContext);
     }
 
     public String getWsUrl() {
-        return getUrl("ws", wsPort == DEFAULT_HTTP_PORT ? ""  : ":" + wsPort, "");
+        return getUrl("ws", wsHost, wsPort == DEFAULT_HTTP_PORT ? ""  : ":" + wsPort, "");
     }
 
     public String getWssUrl() {
-        return getUrl("wss", wssPort == DEFAULT_HTTPS_PORT ? "" : ":" + wssPort, "");
+        return getUrl("wss", wssHost, wssPort == DEFAULT_HTTPS_PORT ? "" : ":" + wssPort, "");
     }
 
-    private String getUrl(String protocol, String port, String context) {
+    private String getUrl(String protocol, String hostName, String port, String context) {
         // {protocol}://{host}{port}{context}
         if (StringUtils.isNotEmpty(context) && !context.startsWith("/")) {
             context = "/" + context;
         }
-        return String.format("%s://%s%s%s", protocol, host, port, context);
+        return String.format("%s://%s%s%s", protocol, hostName, port, context);
     }
 
     public static VHost fromEndpointUrls(String[] endpoints) throws APIManagementException {
@@ -178,11 +197,13 @@ public class VHost {
                         // URL is not parsing for wss protocols, hence change to https
                         url = new URL(HTTPS_PROTOCOL + PROTOCOL_SEPARATOR + elem[1]);
                         vhost.setWssPort(url.getPort() < 0 ? DEFAULT_WSS_PORT : url.getPort());
+                        vhost.setWssHost(url.getHost());
                         break;
                     case WS_PROTOCOL:
                         // URL is not parsing for ws protocols, hence change to http
                         url = new URL(HTTP_PROTOCOL + PROTOCOL_SEPARATOR + elem[1]);
                         vhost.setWsPort(url.getPort() < 0 ? DEFAULT_WS_PORT : url.getPort());
+                        vhost.setWsHost(url.getHost());
                         break;
                     case WEBSUB_HTTP_PROTOCOL:
                         url = new URL(HTTP_PROTOCOL + PROTOCOL_SEPARATOR + elem[1]);
