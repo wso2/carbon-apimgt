@@ -6803,6 +6803,16 @@ public class ApiMgtDAO {
 
         String previousDefaultVersion = getDefaultVersion(api.getId());
 
+        boolean isServiceInfoAvailable = false;
+        int apiId = 0;
+        int tenantID = -1234;
+        String serviceKey = api.getServiceInfo("key");
+        if (StringUtils.isNotEmpty(serviceKey)) {
+            apiId = getAPIID(api.getUuid());
+            tenantID = APIUtil.getTenantId(username);
+            isServiceInfoAvailable = true;
+        }
+
         String query = SQLConstants.UPDATE_API_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -6848,10 +6858,7 @@ public class ApiMgtDAO {
                     removeAPIFromDefaultVersion(apiIdList, connection);
                 }
             }
-            String serviceKey = api.getServiceInfo("key");
-            if (StringUtils.isNotEmpty(serviceKey)) {
-                int apiId = getAPIID(api.getUuid());
-                int tenantID = APIUtil.getTenantId(username);
+            if (isServiceInfoAvailable) {
                 updateAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), tenantID, connection);
             }
             connection.commit();
