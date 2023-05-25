@@ -3883,7 +3883,7 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/publish-to-external-stores?externalStoreId=Store123#"'
 
-  /apis/{apiId}/{keyType}/generate-key:
+  /apis/{apiId}/generate-key:
     post:
       tags:
         - APIs
@@ -11863,7 +11863,7 @@ components:
         type: string
     keyType:
       name: keyType
-      in: path
+      in: query
       required: true
       schema:
         type: string
