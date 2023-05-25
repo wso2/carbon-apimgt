@@ -6000,12 +6000,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
         }
 
-        if (!keyType.equals(APIConstants.PRODUCTION_ENV) && !keyType.equals(APIConstants.DEVELOPMENT_ENV)) {
-            String errorMessage = "Invalid environment type specified.";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                    INVALID_ENVIRONMENT,keyType));
-        }
-
         SubscribedApiDTO subscribedApiInfo = new SubscribedApiDTO();
         subscribedApiInfo.setName(apiInfo.getName());
         subscribedApiInfo.setContext(apiInfo.getContext());
@@ -6013,15 +6007,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         subscribedApiInfo.setVersion(apiInfo.getVersion());
         JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
         jwtTokenInfoDTO.setEndUserName(username);
-        jwtTokenInfoDTO.setKeyType(keyType.equals(APIConstants.PRODUCTION_ENV) ?
-                APIConstants.API_KEY_TYPE_PRODUCTION : APIConstants.API_KEY_TYPE_SANDBOX);
+        jwtTokenInfoDTO.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
         jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(subscribedApiInfo));
         jwtTokenInfoDTO.setExpirationTime(expiryTime);
 
-        List<String> audience = new ArrayList<>();
-        audience.add(keyType.equals(APIConstants.PRODUCTION_ENV) ?
-                APIConstants.PRODUCTION_ENV_AUD_CLAIM : APIConstants.DEVELOPMENT_ENV_AUD_CLAIM);
-        jwtTokenInfoDTO.setAudience(audience);
+
+        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_TEST_TOKENS_AUD"))) {
+            if (!keyType.equalsIgnoreCase(APIConstants.PRODUCTION_ENV)
+                    && !keyType.equalsIgnoreCase(APIConstants.DEVELOPMENT_ENV)) {
+                String errorMessage = "Invalid environment type specified.";
+                throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
+                        INVALID_ENVIRONMENT,keyType));
+            }
+            jwtTokenInfoDTO.setKeyType(keyType.equalsIgnoreCase(APIConstants.PRODUCTION_ENV) ?
+                    APIConstants.API_KEY_TYPE_PRODUCTION : APIConstants.API_KEY_TYPE_SANDBOX);
+
+            List<String> audience = new ArrayList<>();
+            audience.add(keyType.equalsIgnoreCase(APIConstants.PRODUCTION_ENV) ?
+                    APIConstants.PRODUCTION_ENV_AUD_CLAIM : APIConstants.DEVELOPMENT_ENV_AUD_CLAIM);
+            jwtTokenInfoDTO.setAudience(audience);
+        }
 
         ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
         return apiKeyGenerator.generateToken(jwtTokenInfoDTO);

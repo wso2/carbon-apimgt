@@ -11864,7 +11864,7 @@ components:
     keyType:
       name: keyType
       in: query
-      required: true
+      required: false
       schema:
         type: string
       description: |
