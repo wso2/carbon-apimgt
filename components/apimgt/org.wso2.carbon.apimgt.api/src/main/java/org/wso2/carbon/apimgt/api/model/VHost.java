@@ -224,6 +224,14 @@ public class VHost {
             throw new APIManagementException("Error while building VHost, missing required HTTP or HTTPS endpoint");
         }
 
+        // If WebSocket host name of Vhost is empty, use HTTP/HTTPS endpoint hostname
+        if ((vhost.getWsHost() == null) || (StringUtils.isEmpty(vhost.getWsHost()))) {
+            vhost.setWsHost(vhost.getHost());
+        }
+        if ((vhost.getWssHost() == null) || (StringUtils.isEmpty(vhost.getWssHost()))) {
+            vhost.setWssHost(vhost.getHost());
+        }
+
         return vhost;
     }
 
