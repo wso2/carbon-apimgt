@@ -64,6 +64,7 @@ public class InternalAPIKeyGenerator implements ApiKeyGenerator {
         jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.KEY_TYPE, jwtTokenInfoDTO.getKeyType());
         jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.TOKEN_TYPE,
                 APIConstants.JwtTokenConstants.INTERNAL_KEY_TOKEN_TYPE);
+        jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.AUDIENCE, jwtTokenInfoDTO.getAudience());
         return jwtClaimsSetBuilder.build();
     }
 

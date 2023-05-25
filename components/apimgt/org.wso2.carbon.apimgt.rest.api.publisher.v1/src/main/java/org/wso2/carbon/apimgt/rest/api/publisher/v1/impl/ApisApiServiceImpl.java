@@ -3682,7 +3682,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response generateInternalAPIKey(String apiId, MessageContext messageContext) throws APIManagementException {
+    public Response generateInternalAPIKey(String apiId, String keyType, MessageContext messageContext) throws APIManagementException {
         Map<String, String> configs = APIManagerConfiguration.getApiTestKeyProperties();
         int exp = Integer.valueOf(
                 !StringUtils.isEmpty(configs.get(APIConstants.INTERNAL_API_TEST_KEY_EXPIRY_TIME)) ?
@@ -3690,7 +3690,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userName);
-        String token = apiProvider.generateApiKey(apiId, exp);
+        String token = apiProvider.generateApiKey(apiId,keyType, exp);
         APIKeyDTO apiKeyDTO = new APIKeyDTO();
         apiKeyDTO.setApikey(token);
         apiKeyDTO.setValidityTime(exp);
