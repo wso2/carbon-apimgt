@@ -641,6 +641,7 @@ public class APIControllerUtil {
 
             //get load balanced configs from params
             JsonElement loadBalancedConfigElement = envParams.get(ImportExportConstants.LOAD_BALANCE_ENDPOINTS_FIELD);
+            JsonElement failOverConfigElement = envParams.get(ImportExportConstants.FAILOVER_TYPE_ENDPOINT);
             JsonObject loadBalancedConfigs;
             if (loadBalancedConfigElement == null) {
                 throw new APIManagementException(
@@ -648,6 +649,10 @@ public class APIControllerUtil {
                         ExceptionCodes.ERROR_READING_PARAMS_FILE);
             } else {
                 loadBalancedConfigs = loadBalancedConfigElement.getAsJsonObject();
+            }
+            if (failOverConfigElement != null) {
+                updatedRESTEndpointParams.addProperty(ImportExportConstants.FAILOVER_TYPE_ENDPOINT,
+                        failOverConfigElement.getAsBoolean());
             }
             updatedRESTEndpointParams.addProperty(ImportExportConstants.ENDPOINT_TYPE_PROPERTY,
                     ImportExportConstants.LOAD_BALANCE_TYPE_ENDPOINT);
