@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public abstract class AbstractApplicationRegistrationWorkflowExecutor extends WorkflowExecutor{
@@ -144,6 +145,11 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             }
             workflowDTO.getAppInfoDTO().getOAuthApplicationInfo()
                        .setClientName(application.getName());
+            if (km.getAdditionalProperties().get(APIConstants.KeyManager.KM_ADMIN_AS_APP_OWNER) != null) {
+                workflowDTO.getAppInfoDTO().getOAuthApplicationInfo()
+                        .addParameter(APIConstants.KeyManager.KM_ADMIN_AS_APP_OWNER,
+                                km.getAdditionalProperties().get(APIConstants.KeyManager.KM_ADMIN_AS_APP_OWNER));
+            }
 
             // set applications attributes to the oAuthApplicationInfo
             workflowDTO.getAppInfoDTO().getOAuthApplicationInfo()
