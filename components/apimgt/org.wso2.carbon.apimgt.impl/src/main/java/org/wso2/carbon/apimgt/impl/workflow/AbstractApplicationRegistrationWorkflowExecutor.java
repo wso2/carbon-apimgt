@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public abstract class AbstractApplicationRegistrationWorkflowExecutor extends WorkflowExecutor{
