@@ -144,7 +144,8 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             }
             workflowDTO.getAppInfoDTO().getOAuthApplicationInfo()
                        .setClientName(application.getName());
-            if (km.getAdditionalProperties().get(APIConstants.KeyManager.KM_ADMIN_AS_APP_OWNER) != null) {
+            if (km.getAdditionalProperties() != null &&
+                    km.getAdditionalProperties().get(APIConstants.KeyManager.KM_ADMIN_AS_APP_OWNER) != null) {
                 workflowDTO.getAppInfoDTO().getOAuthApplicationInfo()
                         .addParameter(APIConstants.KeyManager.KM_ADMIN_AS_APP_OWNER,
                                 km.getAdditionalProperties().get(APIConstants.KeyManager.KM_ADMIN_AS_APP_OWNER));
