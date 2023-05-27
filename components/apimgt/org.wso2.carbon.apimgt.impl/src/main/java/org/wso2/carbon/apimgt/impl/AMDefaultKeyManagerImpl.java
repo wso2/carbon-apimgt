@@ -200,8 +200,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             clientInfo.setTokenType(APIConstants.TOKEN_TYPE_DEFAULT);
         }
 
-        Object userStoreShared = info.getParameter(APIConstants.KeyManager.KM_ADMIN_AS_APP_OWNER);
-        if (userStoreShared != null && (boolean) userStoreShared) {
+        Object kmAdminAsAppOwner = info.getParameter(APIConstants.KeyManager.KM_ADMIN_AS_APP_OWNER);
+        if (kmAdminAsAppOwner != null && (boolean) kmAdminAsAppOwner) {
             clientInfo.setApplication_owner(null);
         } else {
             // Use a generated user as the app owner for cross tenant subscription scenarios, to avoid the tenant admin
