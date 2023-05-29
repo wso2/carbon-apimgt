@@ -21,9 +21,8 @@ package org.wso2.carbon.apimgt.gateway;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
@@ -49,8 +48,6 @@ public class APILoggerManager {
     private static final Map<String, String> logProperties = new HashMap<>();
     private static final APILoggerManager apiLoggerManager = new APILoggerManager();
     private final EventHubConfigurationDto eventHubConfigurationDto;
-    public static final int RETRIEVAL_RETRIES = 15;
-    public static final int RETRIEVAL_TIMEOUT_IN_SECONDS = 15;
     public static final String UTF8 = "UTF-8";
 
     public void initializeAPILoggerList() {
@@ -110,35 +107,13 @@ public class APILoggerManager {
             method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
         }
         HttpClient httpClient = APIUtil.getHttpClient(servicePort, serviceProtocol);
-
-        HttpResponse httpResponse = null;
-        int retryCount = 0;
-        boolean retry;
-        do {
-            try {
-                httpResponse = httpClient.execute(method);
-                retry = false;
-            } catch (IOException ex) {
-                retryCount++;
-                if (retryCount < RETRIEVAL_RETRIES) {
-                    retry = true;
-                    log.warn("Failed retrieving " + path + " from remote endpoint: " + ex.getMessage()
-                             + ". Retrying after " + RETRIEVAL_TIMEOUT_IN_SECONDS +
-                             " seconds.");
-                    try {
-                        Thread.sleep(RETRIEVAL_TIMEOUT_IN_SECONDS * 1000L);
-                    } catch (InterruptedException e) {
-                        // Ignore
-                    }
-                } else {
-                    throw new APIManagementException("Error while calling internal service", ex);
-                }
-            }
-        } while (retry);
-        if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
-            log.error("Could not retrieve subscriptions for tenantDomain : " + tenantDomain);
-            throw new APIManagementException("Error while retrieving subscription from " + path);
+        try (CloseableHttpResponse httpResponse = APIUtil.executeHTTPRequestWithRetries(method, httpClient)){
+            return EntityUtils.toString(httpResponse.getEntity(), UTF8);
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error while calling internal service", e);
         }
-        return EntityUtils.toString(httpResponse.getEntity(), UTF8);
+
+
+
     }
 }

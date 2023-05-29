@@ -237,7 +237,7 @@ public class PolicyRetriever {
                 + new String(credentials, APIConstants.DigestAuthConstants.CHARSET));
         HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
         try {
-            return APIUtil.executeHTTPRequest(method, httpClient);
+            return APIUtil.executeHTTPRequestWithRetries(method, httpClient);
         } catch (APIManagementException e) {
             throw new ThrottlePolicyDeployerException(e);
         }
