@@ -127,16 +127,20 @@ class LogUtils {
 
         String path = ApiUtils.getFullRequestPath(ctx);
         String tenantDomain = GatewayUtils.getTenantDomain();
-        TreeMap selectedAPIS = Utils.getSelectedAPIList(path, tenantDomain);
-        String selectedPath = (String) selectedAPIS.firstKey();
-        API api = (API) selectedAPIS.get(selectedPath);
-        String apiCtx = api.getContext();
-        for (Map.Entry<String, String> entry : logProperties.entrySet()) {
-            String key = entry.getKey().substring(1);
-            if (apiCtx.startsWith("/" + key) || apiCtx.equals(key)) {
-                ctx.setProperty(LogsHandler.LOG_LEVEL, entry.getValue());
-                ctx.setProperty("API_TO", apiCtx);
-                return entry.getValue();
+        TreeMap<String, API> selectedAPIS = Utils.getSelectedAPIList(path, tenantDomain);
+        if (selectedAPIS.size() > 0) {
+            String selectedPath = (String) selectedAPIS.firstKey();
+            API searchedAPI = (API) selectedAPIS.get(selectedPath);
+            if (searchedAPI != null) {
+                String apiCtx = searchedAPI.getContext();
+                for (Map.Entry<String, String> entry : logProperties.entrySet()) {
+                    String key = entry.getKey().substring(1);
+                    if (apiCtx.startsWith("/" + key) || apiCtx.equals(key)) {
+                        ctx.setProperty(LogsHandler.LOG_LEVEL, entry.getValue());
+                        ctx.setProperty("API_TO", apiCtx);
+                        return entry.getValue();
+                    }
+                }
             }
         }
         return null;
