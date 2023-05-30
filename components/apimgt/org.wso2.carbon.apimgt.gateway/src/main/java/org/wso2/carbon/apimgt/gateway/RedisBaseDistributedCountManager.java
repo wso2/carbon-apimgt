@@ -145,7 +145,7 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
 
                 Response<Long> incrementedValue = transaction.incrBy(key, value);
                 transaction.exec();
-                if (currentValue != null) {
+                if (currentValue != null && currentValue.get() != null) {
                     current = Long.parseLong(currentValue.get());
                 }
                 if (log.isDebugEnabled()) {
@@ -177,7 +177,7 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                 Response<Long> incrementedValue = transaction.incrBy(key, value);
                 transaction.exec();
 
-                if (currentValue != null) {
+                if (currentValue != null && currentValue.get() != null) {
                     current = Long.parseLong(currentValue.get());
                 }
                 if (log.isDebugEnabled()) {
