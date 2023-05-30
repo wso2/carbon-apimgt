@@ -2183,7 +2183,7 @@
         <analytics.event.publisher.client.version.range>[1.0.0,2.0.0)</analytics.event.publisher.client.version.range>
         <org.wso2.orbit.atlassian.oai.version>2.12.1.wso2v2</org.wso2.orbit.atlassian.oai.version>
         <maven.spotbugsplugin.exclude.file>spotbugs-exclude.xml</maven.spotbugsplugin.exclude.file>
-        <skip.aspectj>false</skip.aspectj>
+        <skip.aspectj>true</skip.aspectj>
         <javax.jms.version>2.0.1</javax.jms.version>
         <com.damnhandy.version>2.1.6</com.damnhandy.version>
         <damnhandy.version>${com.damnhandy.version}.wso2v2</damnhandy.version>
