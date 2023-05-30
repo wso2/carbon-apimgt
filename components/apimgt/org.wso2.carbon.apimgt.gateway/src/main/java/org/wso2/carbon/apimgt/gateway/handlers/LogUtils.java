@@ -27,7 +27,8 @@ import org.wso2.carbon.apimgt.gateway.utils.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.keymgt.model.entity.*;
 
-import java.util.*;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Provides util methods for the LogsHandler
