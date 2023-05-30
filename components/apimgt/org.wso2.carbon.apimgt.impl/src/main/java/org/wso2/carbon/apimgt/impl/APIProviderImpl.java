@@ -6014,12 +6014,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_TEST_TOKENS_AUD"))) {
             if (!APIConstants.PRODUCTION_ENV.equalsIgnoreCase(keyType)
-                    && !keyType.equalsIgnoreCase(APIConstants.DEVELOPMENT_ENV)) {
+                    && !APIConstants.DEVELOPMENT_ENV.equalsIgnoreCase(keyType)) {
                 String errorMessage = "Invalid environment type specified.";
                 throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
                         INVALID_ENVIRONMENT,keyType));
             }
-            jwtTokenInfoDTO.setKeyType(keyType.equalsIgnoreCase(APIConstants.PRODUCTION_ENV) ?
+            jwtTokenInfoDTO.setKeyType(APIConstants.PRODUCTION_ENV.equalsIgnoreCase(keyType) ?
                     APIConstants.API_KEY_TYPE_PRODUCTION : APIConstants.API_KEY_TYPE_SANDBOX);
 
             List<String> audience = new ArrayList<>();
