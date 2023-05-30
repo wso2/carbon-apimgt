@@ -38,6 +38,7 @@ import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
 import com.amazonaws.services.securitytoken.model.Credentials;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.apache.axis2.AxisFault;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -87,74 +88,80 @@ public class AWSLambdaMediator extends AbstractMediator {
      * @return true
      */
     public boolean mediate(MessageContext messageContext) {
-        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
-                .getAxis2MessageContext();
-        JsonObject payload = new JsonObject();
+        try {
+            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
+                    .getAxis2MessageContext();
+            JsonObject payload = new JsonObject();
 
-        // set headers
-        JsonObject headers = new JsonObject();
-        TreeMap transportHeaders =
-                (TreeMap) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        for (Object keyObj : transportHeaders.keySet()) {
-            String key = (String) keyObj;
-            String value = (String) transportHeaders.get(keyObj);
-            headers.addProperty(key, value);
-        }
-        payload.add(APIConstants.PROPERTY_HEADERS_KEY, headers);
+            // set headers
+            JsonObject headers = new JsonObject();
+            TreeMap transportHeaders =
+                    (TreeMap) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            for (Object keyObj : transportHeaders.keySet()) {
+                String key = (String) keyObj;
+                String value = (String) transportHeaders.get(keyObj);
+                headers.addProperty(key, value);
+            }
+            payload.add(APIConstants.PROPERTY_HEADERS_KEY, headers);
 
-        // set path/query parameters
-        JsonObject pathParameters = new JsonObject();
-        JsonObject queryStringParameters = new JsonObject();
-        Set propertySet = messageContext.getPropertyKeySet();
-        for (Object key : propertySet) {
-            if (key != null) {
-                String propertyKey = key.toString();
-                if (propertyKey.startsWith(RESTConstants.REST_URI_VARIABLE_PREFIX)) {
-                    pathParameters.addProperty(propertyKey.substring(RESTConstants.REST_URI_VARIABLE_PREFIX.length()),
-                            (String) messageContext.getProperty(propertyKey));
-                } else if (propertyKey.startsWith(RESTConstants.REST_QUERY_PARAM_PREFIX)) {
-                    queryStringParameters.addProperty(propertyKey.substring(RESTConstants.REST_QUERY_PARAM_PREFIX.length()),
-                            (String) messageContext.getProperty(propertyKey));
+            // set path/query parameters
+            JsonObject pathParameters = new JsonObject();
+            JsonObject queryStringParameters = new JsonObject();
+            Set propertySet = messageContext.getPropertyKeySet();
+            for (Object key : propertySet) {
+                if (key != null) {
+                    String propertyKey = key.toString();
+                    if (propertyKey.startsWith(RESTConstants.REST_URI_VARIABLE_PREFIX)) {
+                        pathParameters.addProperty(propertyKey.substring(RESTConstants.REST_URI_VARIABLE_PREFIX.length()),
+                                (String) messageContext.getProperty(propertyKey));
+                    } else if (propertyKey.startsWith(RESTConstants.REST_QUERY_PARAM_PREFIX)) {
+                        queryStringParameters.addProperty(propertyKey.substring(RESTConstants.REST_QUERY_PARAM_PREFIX.length()),
+                                (String) messageContext.getProperty(propertyKey));
+                    }
                 }
             }
-        }
-        payload.add(PATH_PARAMETERS, pathParameters);
-        payload.add(QUERY_STRING_PARAMETERS, queryStringParameters);
-        payload.addProperty(HTTP_METHOD, (String) messageContext.getProperty(APIConstants.REST_METHOD));
-        payload.addProperty(PATH, (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE));
+            payload.add(PATH_PARAMETERS, pathParameters);
+            payload.add(QUERY_STRING_PARAMETERS, queryStringParameters);
+            payload.addProperty(HTTP_METHOD, (String) messageContext.getProperty(APIConstants.REST_METHOD));
+            payload.addProperty(PATH, (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE));
 
-        // Set lambda backend invocation start time for analytics
-        messageContext.setProperty(Constants.BACKEND_START_TIME_PROPERTY, System.currentTimeMillis());
+            // Set lambda backend invocation start time for analytics
+            messageContext.setProperty(Constants.BACKEND_START_TIME_PROPERTY, System.currentTimeMillis());
 
-        String body;
-        if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
-            body = JsonUtil.jsonPayloadToString(axis2MessageContext);
-        } else {
-            body = "{}";
-        }
-        payload.add(BODY_PARAMETER, new JsonParser().parse(body).getAsJsonObject());
-
-        if (log.isDebugEnabled()) {
-            log.debug("Passing the payload " + payload.toString() + " to AWS Lambda function with resource name "
-                    + resourceName);
-        }
-        InvokeResult invokeResult = invokeLambda(payload.toString());
-
-        if (invokeResult != null) {
-            if (log.isDebugEnabled()) {
-                log.debug("AWS Lambda function: " + resourceName + " is invoked successfully.");
+            String body;
+            if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
+                body = JsonUtil.jsonPayloadToString(axis2MessageContext);
+            } else {
+                body = "{}";
             }
-            JsonUtil.setJsonStream(axis2MessageContext, new ByteArrayInputStream(invokeResult.getPayload().array()));
-            axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, invokeResult.getStatusCode());
-            axis2MessageContext.setProperty(APIMgtGatewayConstants.REST_MESSAGE_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            axis2MessageContext.setProperty(APIMgtGatewayConstants.REST_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            axis2MessageContext.removeProperty(APIConstants.NO_ENTITY_BODY);
-        } else {
+            payload.add(BODY_PARAMETER, new JsonParser().parse(body).getAsJsonObject());
+
             if (log.isDebugEnabled()) {
-                log.debug("Failed to invoke AWS Lambda function: " + resourceName);
+                log.debug("Passing the payload " + payload.toString() + " to AWS Lambda function with resource name "
+                        + resourceName);
             }
-            axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, APIMgtGatewayConstants.HTTP_SC_CODE);
-            axis2MessageContext.setProperty(APIConstants.NO_ENTITY_BODY, true);
+            InvokeResult invokeResult = invokeLambda(payload.toString());
+
+            if (invokeResult != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("AWS Lambda function: " + resourceName + " is invoked successfully.");
+                }
+                JsonUtil.getNewJsonPayload(axis2MessageContext, new String(invokeResult.getPayload().array()),
+                        true, true);
+                axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, invokeResult.getStatusCode());
+                axis2MessageContext.setProperty(APIMgtGatewayConstants.REST_MESSAGE_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                axis2MessageContext.setProperty(APIMgtGatewayConstants.REST_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                axis2MessageContext.removeProperty(APIConstants.NO_ENTITY_BODY);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Failed to invoke AWS Lambda function: " + resourceName);
+                }
+                axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, APIMgtGatewayConstants.HTTP_SC_CODE);
+                axis2MessageContext.setProperty(APIConstants.NO_ENTITY_BODY, true);
+            }
+        } catch (AxisFault e) {
+            log.error("Exception has occurred while performing AWS Lambda mediation : " + e.getMessage(), e);
+            return false;
         }
 
         return true;
