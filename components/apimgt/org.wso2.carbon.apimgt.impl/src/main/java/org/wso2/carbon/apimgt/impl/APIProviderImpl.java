@@ -6013,7 +6013,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
         if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_TEST_TOKENS_AUD"))) {
-            if (!keyType.equalsIgnoreCase(APIConstants.PRODUCTION_ENV)
+            if (!APIConstants.PRODUCTION_ENV.equalsIgnoreCase(keyType)
                     && !keyType.equalsIgnoreCase(APIConstants.DEVELOPMENT_ENV)) {
                 String errorMessage = "Invalid environment type specified.";
                 throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
