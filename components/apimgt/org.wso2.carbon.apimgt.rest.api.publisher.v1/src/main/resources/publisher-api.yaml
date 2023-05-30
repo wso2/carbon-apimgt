@@ -10700,6 +10700,8 @@ components:
           example: ""
         amznResourceTimeout:
           type: integer
+        amznResourceContentEncode:
+          type: boolean
         payloadSchema:
           type: string
           example: ""

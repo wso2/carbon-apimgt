@@ -499,6 +499,10 @@ public class OAS3Parser extends APIDefinition {
                             template.setAmznResourceTimeout(((Number)
                                     extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
                         }
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED)) {
+                            template.setAmznResourceContentEncoded((Boolean)
+                                    extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED));
+                        }
                     }
                     urlTemplates.add(template);
                 }

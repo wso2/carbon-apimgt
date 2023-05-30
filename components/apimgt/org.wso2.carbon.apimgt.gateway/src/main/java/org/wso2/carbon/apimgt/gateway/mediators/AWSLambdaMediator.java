@@ -450,4 +450,8 @@ public class AWSLambdaMediator extends AbstractMediator {
     public void setResourceTimeout(int resourceTimeout) {
         this.resourceTimeout = resourceTimeout;
     }
+
+    public void setIsContentEncodingEnabled(boolean isContentEncodingEnabled) {
+        this.isContentEncodingEnabled = isContentEncodingEnabled;
+    }
 }
