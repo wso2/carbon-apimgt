@@ -20,11 +20,14 @@ package org.wso2.carbon.apimgt.gateway.handlers;
 
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.utils.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.keymgt.model.entity.*;
 
-import java.util.Map;
+import java.util.*;
 
 /**
  * Provides util methods for the LogsHandler
@@ -120,10 +123,16 @@ class LogUtils {
     }
 
     protected static String getMatchingLogLevel(MessageContext ctx, Map<String, String> logProperties) {
-        String apiCtx = LogUtils.getTransportInURL(ctx);
+
+        String path = ApiUtils.getFullRequestPath(ctx);
+        String tenantDomain = GatewayUtils.getTenantDomain();
+        TreeMap selectedAPIS = Utils.getSelectedAPIList(path, tenantDomain);
+        String selectedPath = (String) selectedAPIS.firstKey();
+        API api = (API) selectedAPIS.get(selectedPath);
+        String apiCtx = api.getContext();
         for (Map.Entry<String, String> entry : logProperties.entrySet()) {
             String key = entry.getKey().substring(1);
-            if (apiCtx.startsWith(key + "/") || apiCtx.equals(key)) {
+            if (apiCtx.startsWith("/" + key) || apiCtx.equals(key)) {
                 ctx.setProperty(LogsHandler.LOG_LEVEL, entry.getValue());
                 ctx.setProperty("API_TO", apiCtx);
                 return entry.getValue();
