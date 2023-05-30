@@ -6023,7 +6023,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     APIConstants.API_KEY_TYPE_PRODUCTION : APIConstants.API_KEY_TYPE_SANDBOX);
 
             List<String> audience = new ArrayList<>();
-            audience.add(keyType.equalsIgnoreCase(APIConstants.PRODUCTION_ENV) ?
+            audience.add(APIConstants.PRODUCTION_ENV.equalsIgnoreCase(keyType) ?
                     APIConstants.PRODUCTION_ENV_AUD_CLAIM : APIConstants.DEVELOPMENT_ENV_AUD_CLAIM);
             jwtTokenInfoDTO.setAudience(audience);
         }
