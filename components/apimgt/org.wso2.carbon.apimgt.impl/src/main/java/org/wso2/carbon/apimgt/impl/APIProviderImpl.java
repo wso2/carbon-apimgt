@@ -6011,22 +6011,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(subscribedApiInfo));
         jwtTokenInfoDTO.setExpirationTime(expiryTime);
 
-
-        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_TEST_TOKENS_AUD"))) {
-            if (!APIConstants.PRODUCTION_ENV.equalsIgnoreCase(keyType)
-                    && !APIConstants.DEVELOPMENT_ENV.equalsIgnoreCase(keyType)) {
-                String errorMessage = "Invalid environment type specified.";
-                throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                        INVALID_ENVIRONMENT,keyType));
-            }
-            jwtTokenInfoDTO.setKeyType(APIConstants.PRODUCTION_ENV.equalsIgnoreCase(keyType) ?
-                    APIConstants.API_KEY_TYPE_PRODUCTION : APIConstants.API_KEY_TYPE_SANDBOX);
-
-            List<String> audience = new ArrayList<>();
-            audience.add(APIConstants.PRODUCTION_ENV.equalsIgnoreCase(keyType) ?
-                    APIConstants.PRODUCTION_ENV_AUD_CLAIM : APIConstants.DEVELOPMENT_ENV_AUD_CLAIM);
-            jwtTokenInfoDTO.setAudience(audience);
+        if (!APIConstants.PRODUCTION_ENV.equalsIgnoreCase(keyType)
+                && !APIConstants.DEVELOPMENT_ENV.equalsIgnoreCase(keyType)) {
+            String errorMessage = "Invalid environment type specified.";
+            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
+                    INVALID_ENVIRONMENT,keyType));
         }
+        jwtTokenInfoDTO.setKeyType(APIConstants.PRODUCTION_ENV.equalsIgnoreCase(keyType) ?
+                APIConstants.API_KEY_TYPE_PRODUCTION : APIConstants.API_KEY_TYPE_SANDBOX);
+
+        List<String> audience = new ArrayList<>();
+        audience.add(APIConstants.PRODUCTION_ENV.equalsIgnoreCase(keyType) ?
+                APIConstants.PRODUCTION_ENV_AUD_CLAIM : APIConstants.DEVELOPMENT_ENV_AUD_CLAIM);
+        jwtTokenInfoDTO.setAudience(audience);
 
         ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
         return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
