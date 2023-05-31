@@ -264,7 +264,7 @@ public class BasicAuthAuthenticator implements Authenticator {
                     String basicAuthKey = new String(Base64.decode(
                             basicAuthHeader.substring(basicAuthKeyHeaderSegment.length() + 1).trim()));
                     if (basicAuthKey.contains(":")) {
-                        return basicAuthKey.split(":");
+                        return basicAuthKey.split(":", 2);
                     } else {
                         log.error("Basic Authentication: Invalid Basic Auth token");
                         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
