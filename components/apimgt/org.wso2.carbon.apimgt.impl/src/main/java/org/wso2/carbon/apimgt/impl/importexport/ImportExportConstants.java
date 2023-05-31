@@ -229,6 +229,7 @@ public final class ImportExportConstants {
     public static final String LOAD_BALANCE_ENDPOINTS_FIELD = "loadBalanceEndpoints";
     public static final String FAILOVER_ENDPOINTS_FIELD = "failoverEndpoints";
     public static final String DEPENDENT_APIS_FIELD = "dependentAPIs";
+    public static final String ADDITIONAL_PROPERTIES_FIELD = "additionalProperties";
 
     //Security config related constants
     public static final String ENDPOINT_NONE_SECURITY_TYPE = "NONE";
