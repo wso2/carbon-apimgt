@@ -78,6 +78,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
+import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -93,7 +94,9 @@ import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.ByteArrayInputStream;
@@ -1866,6 +1869,40 @@ public class ImportUtils {
             try (FileInputStream inputStream = new FileInputStream(wsdlPath)) {
                 String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
                 PublisherCommonUtils.addWsdl(fileExtension, inputStream, importedApi, apiProvider, tenantDomain);
+
+                //Update wsdl URL in importedAPI
+                APIIdentifier apiIdentifier = importedApi.getId();
+                if (apiIdentifier != null) {
+                    String apiProviderName = apiIdentifier.getProviderName();
+                    String apiName = apiIdentifier.getApiName();
+                    String apiVersion = apiIdentifier.getVersion();
+                    String apiSourcePath = RegistryPersistenceUtil.getAPIBasePath(apiProviderName, apiName, apiVersion);
+
+                    String wsdlUrl;
+                    if (APIConstants.APPLICATION_ZIP.equals(fileExtension)) {
+                        wsdlUrl = apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                            + org.wso2.carbon.apimgt.persistence.APIConstants.API_WSDL_ARCHIVE_LOCATION
+                            + apiProviderName + org.wso2.carbon.apimgt.persistence.APIConstants.WSDL_PROVIDER_SEPERATOR
+                            + apiName + apiVersion + org.wso2.carbon.apimgt.persistence.APIConstants.ZIP_FILE_EXTENSION;
+                    } else {
+                        wsdlUrl = apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                                + RegistryPersistenceUtil.createWsdlFileName(apiProviderName, apiName, apiVersion);
+                    }
+                    String absoluteWSDLResourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + wsdlUrl;
+
+                    String wsdlRegistryPath;
+                    if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                            .equalsIgnoreCase(tenantDomain)) {
+                        wsdlRegistryPath =
+                                RegistryConstants.PATH_SEPARATOR + "registry" + RegistryConstants.PATH_SEPARATOR +
+                                        "resource" + absoluteWSDLResourcePath;
+                    } else {
+                        wsdlRegistryPath = "/t/" + tenantDomain + RegistryConstants.PATH_SEPARATOR + "registry"
+                                + RegistryConstants.PATH_SEPARATOR + "resource" + absoluteWSDLResourcePath;
+                    }
+                    importedApi.setWsdlUrl(wsdlRegistryPath);
+                }
             } catch (FileNotFoundException e) {
                 throw new APIManagementException(
                         "WSDL file/archive of the API: " + importedApi.getId().getName() + " is not found.", e,
