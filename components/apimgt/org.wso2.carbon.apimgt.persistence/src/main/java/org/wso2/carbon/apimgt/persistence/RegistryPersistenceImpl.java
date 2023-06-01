@@ -350,6 +350,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiUUID);
             String lcState = ((GenericArtifactImpl) apiArtifact).getLcState();
             if (apiArtifact != null) {
+                String existingVersionComparable = apiArtifact.getAttribute(APIConstants
+                        .API_OVERVIEW_VERSION_COMPARABLE);
                 API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
                 String visibleRolesList = api.getVisibleRoles();
                 String[] visibleRoles = new String[0];
@@ -370,6 +372,18 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         ((UserRegistry) registry).getTenantId());
                 RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                         visibleRoles, apiPath);
+                GenericArtifact newArtifact = artifactManager.getGenericArtifact(apiUUID);
+                if (newArtifact != null && newArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE)
+                        == null) {
+                    if (existingVersionComparable != null) {
+                        newArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE
+                                , existingVersionComparable);
+                    } else {
+                        newArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE
+                                , String.valueOf(System.currentTimeMillis()));
+                    }
+                    artifactManager.updateGenericArtifact(newArtifact);
+                }
             }
             registry.commitTransaction();
             transactionCommitted = true;
