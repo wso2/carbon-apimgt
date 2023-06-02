@@ -373,14 +373,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                         visibleRoles, apiPath);
                 GenericArtifact newArtifact = artifactManager.getGenericArtifact(apiUUID);
-                if (newArtifact != null && newArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE)
-                        == null) {
+                if (newArtifact != null && newArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE) == null) {
                     if (existingVersionComparable != null) {
-                        newArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE
-                                , existingVersionComparable);
+                        newArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE, existingVersionComparable);
                     } else {
-                        newArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE
-                                , String.valueOf(System.currentTimeMillis()));
+                        newArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE,
+                                String.valueOf(System.currentTimeMillis()));
                     }
                     artifactManager.updateGenericArtifact(newArtifact);
                 }
