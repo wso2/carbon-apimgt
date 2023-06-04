@@ -16,6 +16,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.base.MultitenantConstants;
 
 import java.io.IOException;
 import java.net.URL;
@@ -43,13 +44,20 @@ public class KeyManagerConfigurationDataRetriever extends TimerTask {
                     apiManagerConfiguration.getEventHubConfigurationDto();
             if (eventHubConfigurationDto != null && eventHubConfigurationDto.isEnabled()) {
                 try {
-                    String url = eventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP)
-                            .concat("/keymanagers?organizationId=ALL");
+                    String url;
+                    if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                        log.warn("Excessive retrieval of all key managers through km-retriever should be minimized");
+                        url = eventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP)
+                                .concat("/keymanagers?organizationId=ALL");
+                    } else {
+                        url = eventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP)
+                                .concat("/keymanagers?organizationId=" + tenantDomain);
+                    }
                     byte[] credentials = Base64.encodeBase64((eventHubConfigurationDto.getUsername() + ":" +
                             eventHubConfigurationDto.getPassword()).getBytes());
                     HttpGet method = new HttpGet(url);
                     method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
-                    method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
+                    method.setHeader(APIConstants.HEADER_TENANT, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                     URL configUrl = new URL(url);
                     int port = configUrl.getPort();
                     String protocol = configUrl.getProtocol();

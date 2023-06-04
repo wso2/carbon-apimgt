@@ -3505,9 +3505,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         KeyManagerConfigurationDTO keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerId);
         if (keyManagerConfigurationDTO != null) {
-            String keyManagerTenantDomain = keyManagerConfigurationDTO.getOrganization();
+            String keyManagerOrganization = keyManagerConfigurationDTO.getOrganization();
             String keyManagerName = keyManagerConfigurationDTO.getName();
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerTenantDomain, keyManagerName);
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerOrganization, keyManagerName);
             if (keyManager != null) {
                 OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
                 if (oAuthApplicationInfo != null) {

@@ -255,9 +255,10 @@ public final class APIConstants {
     public static final String MULTIPART_LINE_FEED = "\r\n";
     public static final String BASE_AUDIT_URL = "https://platform.42crunch.com/api/v1/apis";
     public static final String MULTIPART_CONTENT_TYPE = "multipart/form-data; boundary=";
-    public static final String USER_AGENT_APIM = "WSO2-APIM";
+    public static final String USER_AGENT_APIM = "APIM/Apache-HttpClient";
     public static final String DATA = "data";
     public static final String ATTR = "attr";
+    public static final String HEX_CHARS = "0123456789abcdef";
     public static final String GRADE = "grade";
     public static final String NUM_ERRORS = "numErrors";
     public static final String DESC = "desc";

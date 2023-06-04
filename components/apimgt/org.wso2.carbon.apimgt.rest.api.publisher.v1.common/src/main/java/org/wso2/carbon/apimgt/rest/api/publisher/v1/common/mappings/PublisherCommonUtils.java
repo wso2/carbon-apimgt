@@ -713,7 +713,6 @@ public class PublisherCommonUtils {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getInternalOrganizationId(api.getOrganization());
-        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
         Set<org.wso2.carbon.apimgt.api.model.Scope> sharedAPIScopes = new HashSet<>();
 
@@ -758,7 +757,7 @@ public class PublisherCommonUtils {
             }
         }
 
-        apiProvider.validateSharedScopes(sharedAPIScopes, tenantDomain);
+        apiProvider.validateSharedScopes(sharedAPIScopes, api.getOrganization());
     }
 
     /**

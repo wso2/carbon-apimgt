@@ -494,7 +494,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         int tenantId = APIUtil.getInternalOrganizationId(organization);
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-        Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
+        Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(organization);
         //Get the local scopes set to register for the API from URI templates
         Set<Scope> scopesToRegister = getScopesToRegisterFromURITemplates(apiName, organization, uriTemplates);
         //Register scopes
@@ -584,7 +584,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         apiMgtDAO.addURITemplates(apiId, api, tenantId);
-        Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
+        Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(api.getOrganization());
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
             if (keyManager != null) {
@@ -955,7 +955,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // using the updated URI templates of the API.
         deleteScopes(oldLocalScopeKeys, tenantId);
         addScopes(newLocalScopes, tenantId);
-        Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
+        Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(api.getOrganization());
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
             if (keyManager != null) {
@@ -2217,14 +2217,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         APIIdentifier apiIdentifier = api.getId();
         int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
-        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         // Get local scopes for the given API which are not already assigned for different versions of the same API
         Set<String> localScopeKeysToDelete = apiMgtDAO.getUnversionedLocalScopeKeysForAPI(api.getUuid(), tenantId);
         // Get the URI Templates for the given API to detach the resources scopes from
         Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesOfAPI(api.getUuid());
         // Detach all the resource scopes from the API resources in KM
-        Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
-        for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
+        Map<String, KeyManagerDto> orgKeyManagers = KeyManagerHolder.getTenantKeyManagers(api.getOrganization());
+        for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : orgKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
             if (keyManager != null) {
                 try {

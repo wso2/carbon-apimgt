@@ -46,12 +46,14 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.RegexValidator;
 import org.apache.commons.validator.routines.UrlValidator;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
@@ -79,7 +81,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.ThreadContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.DeprecatedRuntimeConstants;
 import org.apache.velocity.runtime.RuntimeConstants;
@@ -5178,14 +5182,23 @@ public final class APIUtil {
             } else {
                 routePlanner = new DefaultProxyRoutePlanner(host);
             }
-            clientBuilder = clientBuilder.setRoutePlanner(routePlanner);
+            clientBuilder.setRoutePlanner(routePlanner);
             if (!StringUtils.isBlank(proxyUsername) && !StringUtils.isBlank(proxyPassword)) {
                 CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
                 credentialsProvider.setCredentials(new AuthScope(proxyHost, Integer.parseInt(proxyPort)),
                         new UsernamePasswordCredentials(proxyUsername, proxyPassword));
-                clientBuilder = clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+                clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
             }
         }
+        String correlationIdHeader = ThreadContext.get(APIConstants.CORRELATION_ID);
+        if (correlationIdHeader != null) {
+            correlationIdHeader = correlationIdHeader + "_" +
+                    RandomStringUtils.random(4, APIConstants.HEX_CHARS); ;
+            List<Header> defaultHeaders = new ArrayList<>();
+            defaultHeaders.add(new BasicHeader(APIConstants.ACTIVITY_ID, correlationIdHeader));
+            clientBuilder.setDefaultHeaders(defaultHeaders);
+        }
+        clientBuilder.setUserAgent(APIConstants.USER_AGENT_APIM);
         return clientBuilder.build();
     }
 
