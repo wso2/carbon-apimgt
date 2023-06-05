@@ -34,6 +34,10 @@ public class JWTAuthenticationUtils {
     public static Message addToMessageContext(Message inMessage, HashMap<String,Object> authContext) {
         for (String key : authContext.keySet()) {
             inMessage.put(key, authContext.get(key));
+            // Exchanging the scopes to message context
+            if (key.equals("user_rest_api_scopes")) {
+                inMessage.getExchange().put(key, authContext.get(key));
+            }
         }
         return inMessage;
     }
