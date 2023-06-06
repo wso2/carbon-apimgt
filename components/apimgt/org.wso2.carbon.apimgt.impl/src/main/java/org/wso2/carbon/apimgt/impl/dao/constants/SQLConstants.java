@@ -3347,6 +3347,9 @@ public class SQLConstants {
 
         public static final String CHECK_CLIENT_CREDENTIALS_EXISTS = "SELECT CONSUMER_KEY,CONSUMER_SECRET " +
                 "FROM AM_SYSTEM_APPS WHERE NAME = ? AND TENANT_DOMAIN = ?";
+
+        public static final String GET_BYPASS_CLIENT_CREDENTIALS_ENABLED =
+                "SELECT PROPERTY_VALUE FROM IDN_OIDC_PROPERTY WHERE CONSUMER_KEY = ? AND PROPERTY_KEY = ? ";
     }
 
     public static class BotDataConstants {
