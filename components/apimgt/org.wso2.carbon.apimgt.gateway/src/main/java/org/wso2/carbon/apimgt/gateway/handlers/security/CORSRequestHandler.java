@@ -334,7 +334,8 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
         messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
         //If the request origin is not allowed, set the HTTP status code to 403
-        if (allowedOrigin == null) {
+        if (Boolean.parseBoolean(System.getProperty(APIMgtGatewayConstants.CORS_FORBID_BLOCKED_REQUESTS))
+                && allowedOrigin == null) {
             messageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, HttpStatus.SC_FORBIDDEN);
         }
         String allowedMethods;
