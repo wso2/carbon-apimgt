@@ -5449,7 +5449,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             List<APIRevisionDeployment> apiRevisionDeployments, String organization)
             throws APIManagementException {
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
-        if (organization ==  null) {
+        if (organization == null) {
             String tenantDomain = getTenantDomain(apiIdentifier);
             if (tenantDomain != null) {
                 organization = tenantDomain;
