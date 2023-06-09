@@ -133,6 +133,7 @@ public class APIMgtGatewayConstants {
     public static final String API_THROTTLE_HANDLER_ERROR = "Error in API Throttle Handler";
     public static final String CORS_REQUEST_HANDLER_ERROR = "Error in CORS_Request Handler";
     public static final String CORS_FORBID_BLOCKED_REQUESTS = "corsForbidBlockedRequests";
+    public static final String CORS_SET_STATUS_CODE_FROM_MSG_CONTEXT = "corsSetStatusCodeFromMsgContext";
     public static final String GOOGLE_ANALYTICS_ERROR = "Error in Google Analytics Handler";
     public static final String CUSTOM_ANALYTICS_REQUEST_PROPERTIES = "apim.analytics.request.properties";
     public static final String CUSTOM_ANALYTICS_RESPONSE_PROPERTIES = "apim.analytics.response.properties";

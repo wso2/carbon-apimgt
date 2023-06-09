@@ -227,9 +227,11 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                 if (corsSequence != null) {
                     corsSequence.mediate(messageContext);
                 }
-                if (messageContext.getProperty(APIMgtGatewayConstants.HTTP_SC) != null) {
-                    Utils.send(messageContext, Integer.parseInt(
-                            messageContext.getProperty(APIMgtGatewayConstants.HTTP_SC).toString()));
+                if (Boolean.parseBoolean(
+                        System.getProperty(APIMgtGatewayConstants.CORS_SET_STATUS_CODE_FROM_MSG_CONTEXT))
+                        && messageContext.getProperty(APIMgtGatewayConstants.HTTP_SC) != null) {
+                    Utils.send(messageContext,
+                               Integer.parseInt(messageContext.getProperty(APIMgtGatewayConstants.HTTP_SC).toString()));
                 } else {
                     Utils.send(messageContext, HttpStatus.SC_OK);
                 }
