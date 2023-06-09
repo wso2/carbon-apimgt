@@ -200,11 +200,22 @@ public class RegistrationServiceImpl implements RegistrationService {
                             (RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 500L, errorMsg);
                     response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
                             entity(errorDTO).build();
-                } else {
+                } else if ((authUserName.equals(returnedAPP.getAppOwner())) ||
+                        (isUserSuperAdmin(authUserName) && owner != null && owner.equals(returnedAPP.getAppOwner()))) {
+                    // Permitting only the owner of the application to create/get the OAuth app and admin user to
+                    // create/get the app info if the created app owner equals the payload app owner.
                     if (log.isDebugEnabled()) {
                         log.debug("OAuth app " + profile.getClientName() + " creation successful.");
                     }
                     response = Response.status(Response.Status.OK).entity(returnedAPP).build();
+                } else {
+                    String errMsg = "Access is forbidden to the application";
+                    if (log.isDebugEnabled()) {
+                        log.debug("OAuth app owner: " + returnedAPP.getAppOwner() + " is different from payload " +
+                                "owner: " + owner + " and " + errMsg);
+                    }
+                    errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403L, errMsg);
+                    response = Response.status(Response.Status.FORBIDDEN).entity(errorDTO).build();
                 }
             } else {
                 String errorMsg = "Logged in user '" + authUserName + "' and application owner '" +
@@ -262,8 +273,9 @@ public class RegistrationServiceImpl implements RegistrationService {
 
             appToReturn = this.fromAppDTOToApplicationInfo(consumerAppDTO.getOauthConsumerKey(),
                     consumerAppDTO.getApplicationName(), consumerAppDTO.getCallbackUrl(),
-                    consumerAppDTO.getOauthConsumerSecret(), saasApp, null, consumerAppDTO.getTokenType(), valueMap);
-
+                    consumerAppDTO.getOauthConsumerSecret(), saasApp, MultitenantUtils
+                            .getTenantAwareUsername(consumerAppDTO.getUsername()), consumerAppDTO.getTokenType(),
+                    valueMap);
         } catch (IdentityOAuthAdminException e) {
             log.error("error occurred while trying to get OAuth Application data", e);
         }
