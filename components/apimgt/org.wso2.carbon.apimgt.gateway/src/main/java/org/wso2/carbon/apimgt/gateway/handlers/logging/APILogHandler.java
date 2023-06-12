@@ -109,7 +109,7 @@ public class APILogHandler {
 
     private static void addBasicProperties(JSONObject logMessage, MessageContext messageContext, String flow) {
         logMessage.put("apiTo", messageContext.getProperty(API_TO));
-        logMessage.put("correlationId", messageContext.getProperty(APIConstants.CORRELATION_ID));
+        logMessage.put("correlationId", messageContext.getProperty("correlation_id"));
         logMessage.put("flow", flow);
         String verb = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                 .getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD);
