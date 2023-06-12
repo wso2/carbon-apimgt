@@ -56,6 +56,7 @@ public class LogsHandler extends AbstractSynapseHandler {
     protected static final String LOG_LEVEL = "LOG_LEVEL";
     protected static final String RESOURCE_PATH = "RESOURCE_PATH";
     protected static final String RESOURCE_METHOD = "RESOURCE_METHOD";
+    public static final String SELECTED_RESOURCE = "SELECTED_RESOURCE";
 
     private static final String REQUEST_BODY_SIZE_ERROR = "Error occurred while building the message to calculate" +
             " the response body size";
@@ -304,7 +305,8 @@ public class LogsHandler extends AbstractSynapseHandler {
         Map<Map<String, String>, String> logProperties = APILoggerManager.getInstance().getPerAPILoggerList();
         // if the logging API data holder is empty or null return null
         if (!logProperties.isEmpty()) {
-            return LogUtils.getMatchingLogLevel(ctx, logProperties);
+            return LogUtils.fetchLogLevel(ctx, logProperties);
+            //return LogUtils.getMatchingLogLevel(ctx, logProperties);
         }
         return null;
     }

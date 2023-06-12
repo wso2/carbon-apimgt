@@ -33,6 +33,7 @@ import org.apache.synapse.api.Resource;
 import org.apache.synapse.api.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
+import org.wso2.carbon.apimgt.gateway.handlers.LogsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -179,11 +180,20 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                 }
 
                 if (!acceptableResources.isEmpty()) {
-                    for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
-                        Resource resource = dispatcher.findResource(messageContext, acceptableResources);
-                        if (resource != null) {
+                    if ((messageContext.getProperty(LogsHandler.SELECTED_RESOURCE) != null) && httpMethod.equals(corsRequestMethod)){
+                        Resource resource = (Resource) messageContext.getProperty(LogsHandler.SELECTED_RESOURCE);
+                        String [] resourceMethods = resource.getMethods();
+                        if (Arrays.asList(resourceMethods).contains(httpMethod)) {
                             selectedResource = resource;
-                            break;
+                        }
+                    }
+                    else {
+                        for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
+                            Resource resource = dispatcher.findResource(messageContext, acceptableResources);
+                            if (resource != null) {
+                                selectedResource = resource;
+                                break;
+                            }
                         }
                     }
                     if (selectedResource == null) {
