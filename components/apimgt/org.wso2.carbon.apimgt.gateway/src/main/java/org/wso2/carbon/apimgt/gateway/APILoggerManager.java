@@ -46,7 +46,7 @@ import java.util.Map;
  */
 public class APILoggerManager {
     private static final Log log = LogFactory.getLog(APILoggerManager.class);
-    private static final Map<String, String> logProperties = new HashMap<>();
+    private Map<Map<String, String>, String> logProperties = new HashMap<>();
     private static final APILoggerManager apiLoggerManager = new APILoggerManager();
     private final EventHubConfigurationDto eventHubConfigurationDto;
     public static final int RETRIEVAL_RETRIES = 15;
@@ -61,7 +61,17 @@ public class APILoggerManager {
             JSONArray apiLogArray = responseJson.getJSONArray("apis");
             for (int i = 0; i < apiLogArray.length(); i++) {
                 JSONObject apiLoggerObject = apiLogArray.getJSONObject(i);
-                logProperties.put(apiLoggerObject.getString("context"), apiLoggerObject.getString("logLevel"));
+                String resourceMethod = null;
+                String resourcePath = null;
+                if(!apiLoggerObject.isNull("resourceMethod") && !apiLoggerObject.isNull("resourcePath") ){
+                    resourceMethod = apiLoggerObject.getString("resourceMethod");
+                    resourcePath = apiLoggerObject.getString("resourcePath");
+                }
+                Map<String, String> properties = new HashMap<>();
+                properties.put("context", apiLoggerObject.getString("context"));
+                properties.put("resourceMethod", resourceMethod);
+                properties.put("resourcePath", resourcePath);
+                logProperties.put(properties, apiLoggerObject.getString("logLevel"));
             }
             if (log.isDebugEnabled()) {
                 log.debug("Response : " + responseString);
@@ -71,11 +81,15 @@ public class APILoggerManager {
         }
     }
 
-    public void updateLoggerMap(String apiContext, String logLevel) {
-        logProperties.put(apiContext, logLevel);
+    public void updateLoggerMap(String apiContext, String logLevel, String resourceMethod, String resourcePath) {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("context", apiContext);
+        properties.put("resourcePath", resourcePath);
+        properties.put("resourceMethod", resourceMethod);
+        logProperties.put(properties, logLevel);
     }
 
-    public Map<String, String> getPerAPILoggerList() {
+    public Map<Map<String, String>, String> getPerAPILoggerList() {
         return logProperties;
     }
 

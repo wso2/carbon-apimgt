@@ -2208,7 +2208,8 @@ public final class APIConstants {
     public static final String LOG_LEVEL_BASIC = "BASIC";
     public static final String LOG_LEVEL_STANDARD = "STANDARD";
     public static final String LOG_LEVEL_FULL = "FULL";
-
+    public static final String RESOURCE_METHOD = "HTTP_METHOD";
+    public static final String RESOURCE_PATH = "URL_PATTERN";
     public static final String PDF_EXTENSION = "pdf";
     public static final String XLS_EXTENSION = "xls";
     public static final String XLSX_EXTENSION = "xlsx";

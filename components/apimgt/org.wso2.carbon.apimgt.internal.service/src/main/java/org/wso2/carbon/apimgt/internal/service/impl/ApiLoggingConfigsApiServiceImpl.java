@@ -56,6 +56,8 @@ public class ApiLoggingConfigsApiServiceImpl implements ApiLoggingConfigsApiServ
                 APILoggingConfigDTO apiLoggingConfigDTO = new APILoggingConfigDTO();
                 apiLoggingConfigDTO.setContext(apiLogInfo.getContext());
                 apiLoggingConfigDTO.setLogLevel(apiLogInfo.getLogLevel());
+                apiLoggingConfigDTO.setResourceMethod(apiLogInfo.getResourceMethod());
+                apiLoggingConfigDTO.setResourcePath(apiLogInfo.getResourcePath());
                 loggingAPIDTOList.add(apiLoggingConfigDTO);
             }
         } catch (APIManagementException e) {

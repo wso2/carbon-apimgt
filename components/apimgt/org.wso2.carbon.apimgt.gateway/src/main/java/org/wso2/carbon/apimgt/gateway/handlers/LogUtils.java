@@ -119,16 +119,86 @@ class LogUtils {
         return transportInURL.substring(1);
     }
 
-    protected static String getMatchingLogLevel(MessageContext ctx, Map<String, String> logProperties) {
+    protected static String getHTTPMethod(org.apache.synapse.MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MsgContext = ((Axis2MessageContext) messageContext)
+                .getAxis2MessageContext();
+        String httpMethod = (String) axis2MsgContext.getProperty("HTTP_METHOD");
+        return httpMethod;
+    }
+
+    protected static String getMatchingLogLevel(MessageContext ctx,
+                                                Map<Map<String, String>, String> logProperties) {
         String apiCtx = LogUtils.getTransportInURL(ctx);
-        for (Map.Entry<String, String> entry : logProperties.entrySet()) {
-            String key = entry.getKey().substring(1);
-            if (apiCtx.startsWith(key + "/") || apiCtx.equals(key)) {
-                ctx.setProperty(LogsHandler.LOG_LEVEL, entry.getValue());
-                ctx.setProperty("API_TO", apiCtx);
-                return entry.getValue();
+        String apiHttpMethod = LogUtils.getHTTPMethod(ctx);
+        String apiLogLevel = null;
+        String resourceLogLevel = null;
+        String resourcePath = null;
+        String resourceMethod = null;
+        String logResourcePath, resourcePathRegexPattern = null;
+        for (Map.Entry<Map<String, String>, String> entry : logProperties.entrySet()) {
+            Map<String, String> key = entry.getKey();
+            String apiResourcePath;
+            if (apiCtx.split("/", 3).length > 2) {
+                apiResourcePath = apiCtx.split("/", 3)[2];
+            } else {
+                apiResourcePath = "";
+            }
+            if (key.containsKey("resourcePath") && key.get("resourcePath") != null) {
+                logResourcePath = key.get("resourcePath");
+                resourcePathRegexPattern = logResourcePath.replace("/", "\\/");
+                resourcePathRegexPattern = resourcePathRegexPattern.replaceAll("\\{.*?\\}",
+                        "\\\\w{0,}([-,_]?\\\\w{1,})+");
+            }
+            if (key.get("context").startsWith(key.get("context") + "/") ||
+                    key.get("context").equals(key.get("context"))) {
+                if (key.get("resourcePath") == null && key.get("resourceMethod") == null) {
+                    apiLogLevel = entry.getValue();
+                } else if (("/" + apiResourcePath).matches(resourcePathRegexPattern)
+                        && apiHttpMethod.equals(key.get("resourceMethod"))) {
+                    resourceLogLevel = entry.getValue();
+                    resourcePath = key.get("resourcePath");
+                    resourceMethod = key.get("resourceMethod");
+                }
             }
         }
-        return null;
+        boolean isResourceLevelHasHighPriority = false;
+        if (resourceLogLevel != null) {
+            switch (resourceLogLevel) {
+                case APIConstants.LOG_LEVEL_FULL:
+                    isResourceLevelHasHighPriority = true;
+                    break;
+                case APIConstants.LOG_LEVEL_STANDARD:
+                    if (apiLogLevel != null && (apiLogLevel.equals(APIConstants.LOG_LEVEL_BASIC) ||
+                            apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF))) {
+                        isResourceLevelHasHighPriority = true;
+                        break;
+                    } else {
+                        break;
+                    }
+                case APIConstants.LOG_LEVEL_BASIC:
+                    if (apiLogLevel == null || apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF)) {
+                        isResourceLevelHasHighPriority = true;
+                    } else {
+                        break;
+                    }
+            }
+            if (isResourceLevelHasHighPriority || apiLogLevel == null) {
+                ctx.setProperty(LogsHandler.LOG_LEVEL, resourceLogLevel);
+                ctx.setProperty(LogsHandler.RESOURCE_PATH, resourcePath);
+                ctx.setProperty(LogsHandler.RESOURCE_METHOD, resourceMethod);
+                ctx.setProperty("API_TO", apiCtx);
+                return resourceLogLevel;
+            } else {
+                ctx.setProperty(LogsHandler.LOG_LEVEL, apiLogLevel);
+                ctx.setProperty("API_TO", apiCtx);
+                return apiLogLevel;
+            }
+        } else if (apiLogLevel != null) {
+            ctx.setProperty(LogsHandler.LOG_LEVEL, apiLogLevel);
+            ctx.setProperty("API_TO", apiCtx);
+            return apiLogLevel;
+        } else {
+            return null;
+        }
     }
 }
