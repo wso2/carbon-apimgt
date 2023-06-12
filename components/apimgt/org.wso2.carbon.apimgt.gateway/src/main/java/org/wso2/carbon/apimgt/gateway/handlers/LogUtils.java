@@ -138,11 +138,15 @@ class LogUtils {
         return httpMethod;
     }
 
-    protected static void fetchLogLevel(MessageContext messageContext,
+    protected static String fetchLogLevel(MessageContext messageContext,
                                         Map<Map<String, String>, String> logProperties) {
         Collection<API> apiSet = messageContext.getEnvironment().getSynapseConfiguration().getAPIs();
         List<API> duplicateApiSet = new ArrayList<API>(apiSet);
         API selectedApi = null;
+        String apiLogLevel = null;
+        String resourceLogLevel = null;
+        String resourcePath = null;
+        String resourceMethod = null;
         String apiContext = ((Axis2MessageContext)messageContext).getAxis2MessageContext().
                 getProperty("TransportInURL").toString();
         for (API api : duplicateApiSet) {
@@ -196,10 +200,9 @@ class LogUtils {
                                     Map<String, String> key = entry.getKey();
                                     if (httpMethod.equals(key.get("resourceMethod"))) {
                                         boolean flag = templateHelper.getString().equals(key.get("resourcePath"));
-                                        System.out.println(flag);
-                                        String resourceLogLevel = entry.getValue();
-                                        String resourcePath = key.get("resourcePath");
-                                        String resourceMethod = key.get("resourceMethod");
+                                        resourceLogLevel = entry.getValue();
+                                        resourcePath = key.get("resourcePath");
+                                        resourceMethod = key.get("resourceMethod");
                                     }
                                 }
                             }
@@ -207,6 +210,45 @@ class LogUtils {
                     }
                 }
             }
+        }
+        boolean isResourceLevelHasHighPriority = false;
+        if (resourceLogLevel != null) {
+            switch (resourceLogLevel) {
+                case APIConstants.LOG_LEVEL_FULL:
+                    isResourceLevelHasHighPriority = true;
+                    break;
+                case APIConstants.LOG_LEVEL_STANDARD:
+                    if (apiLogLevel != null && (apiLogLevel.equals(APIConstants.LOG_LEVEL_BASIC) ||
+                            apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF))) {
+                        isResourceLevelHasHighPriority = true;
+                        break;
+                    } else {
+                        break;
+                    }
+                case APIConstants.LOG_LEVEL_BASIC:
+                    if (apiLogLevel == null || apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF)) {
+                        isResourceLevelHasHighPriority = true;
+                    } else {
+                        break;
+                    }
+            }
+            if (isResourceLevelHasHighPriority || apiLogLevel == null) {
+                messageContext.setProperty(LogsHandler.LOG_LEVEL, resourceLogLevel);
+                messageContext.setProperty(LogsHandler.RESOURCE_PATH, resourcePath);
+                messageContext.setProperty(LogsHandler.RESOURCE_METHOD, resourceMethod);
+                messageContext.setProperty("API_TO", apiContext);
+                return resourceLogLevel;
+            } else {
+                messageContext.setProperty(LogsHandler.LOG_LEVEL, apiLogLevel);
+                messageContext.setProperty("API_TO", apiContext);
+                return apiLogLevel;
+            }
+        } else if (apiLogLevel != null) {
+            messageContext.setProperty(LogsHandler.LOG_LEVEL, apiLogLevel);
+            messageContext.setProperty("API_TO", apiContext);
+            return apiLogLevel;
+        } else {
+            return null;
         }
     }
 

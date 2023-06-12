@@ -180,7 +180,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                 }
 
                 if (!acceptableResources.isEmpty()) {
-                    if (messageContext.getProperty(LogsHandler.SELECTED_RESOURCE) != null){
+                    if ((messageContext.getProperty(LogsHandler.SELECTED_RESOURCE) != null) && httpMethod.equals(corsRequestMethod)){
                         Resource resource = (Resource) messageContext.getProperty(LogsHandler.SELECTED_RESOURCE);
                         String [] resourceMethods = resource.getMethods();
                         if (Arrays.asList(resourceMethods).contains(httpMethod)) {
