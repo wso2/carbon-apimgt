@@ -5457,7 +5457,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         if (environmentsToRemove.size() > 0) {
             apiMgtDAO.removeAPIRevisionDeployment(apiId, environmentsToRemove);
-            removeFromGateway(api, environmentsToRemove, environmentsToAdd, organization);
+            if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_UNDEPLOY_VIA_DEPLOY_EVENT"))) {
+                removeFromGateway(api, environmentsToRemove, environmentsToAdd, organization);
+            }
         }
         GatewayArtifactsMgtDAO.getInstance()
                 .addAndRemovePublishedGatewayLabels(apiId, apiRevisionId, environmentsToAdd, gatewayVhosts,
