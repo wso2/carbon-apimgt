@@ -18,13 +18,25 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers;
 
+import org.apache.axis2.Constants;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.api.API;
+import org.apache.synapse.api.ApiUtils;
+import org.apache.synapse.api.Resource;
+import org.apache.synapse.api.dispatch.DispatcherHelper;
+import org.apache.synapse.api.dispatch.RESTDispatcher;
+import org.apache.synapse.api.dispatch.URITemplateBasedDispatcher;
+import org.apache.synapse.api.dispatch.URITemplateHelper;
+import org.apache.synapse.api.version.DefaultStrategy;
+import org.apache.synapse.api.version.VersionStrategy;
+import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-import java.util.Map;
+import java.util.*;
 
 /**
  * Provides util methods for the LogsHandler
@@ -124,6 +136,120 @@ class LogUtils {
                 .getAxis2MessageContext();
         String httpMethod = (String) axis2MsgContext.getProperty("HTTP_METHOD");
         return httpMethod;
+    }
+
+    protected static String fetchLogLevel(MessageContext messageContext,
+                                        Map<Map<String, String>, String> logProperties) {
+        Collection<API> apiSet = messageContext.getEnvironment().getSynapseConfiguration().getAPIs();
+        List<API> duplicateApiSet = new ArrayList<API>(apiSet);
+        API selectedApi = null;
+        String apiLogLevel = null;
+        String resourceLogLevel = null;
+        String resourcePath = null;
+        String resourceMethod = null;
+        String apiContext = ((Axis2MessageContext)messageContext).getAxis2MessageContext().
+                getProperty("TransportInURL").toString();
+        for (API api : duplicateApiSet) {
+            if (apiContext.contains(api.getContext())) {
+                selectedApi = api;
+                //break;
+            }
+        }
+        String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                getProperty(Constants.Configuration.HTTP_METHOD);
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
+                .getAxis2MessageContext();
+        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        String corsRequestMethod = (String) headers.get(APIConstants.CORSHeaders.ACCESS_CONTROL_REQUEST_METHOD);
+        if (selectedApi != null) {
+            String path = ApiUtils.getFullRequestPath(messageContext);
+            String subPath;
+            VersionStrategy versionStrategy = new DefaultStrategy(selectedApi);
+            if (versionStrategy.getVersionType().equals(VersionStrategyFactory.TYPE_URL)) {
+                //for URL based
+                //request --> http://{host:port}/context/version/path/to/resource
+                subPath = path.substring(selectedApi.getContext().length() + versionStrategy.getVersion().length() + 1);
+            } else {
+                subPath = path.substring(selectedApi.getContext().length());
+            }
+            if ("".equals(subPath)) {
+                subPath = "/";
+            }
+            messageContext.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, subPath);
+            Resource[] allAPIResources = selectedApi.getResources();
+            Set<Resource> acceptableResources = new LinkedHashSet<>();
+            for (Resource resource : allAPIResources) {
+                //If the requesting method is OPTIONS or if the Resource contains the requesting method
+                if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resource.getMethods() != null &&
+                        Arrays.asList(resource.getMethods()).contains(corsRequestMethod)) ||
+                        (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
+                    acceptableResources.add(resource);
+                }
+            }
+
+            if (!acceptableResources.isEmpty()) {
+                for (RESTDispatcher dispatcher : ApiUtils.getDispatchers()) {
+                    if (dispatcher instanceof URITemplateBasedDispatcher){
+                        Resource selectedResource = dispatcher.findResource(messageContext, acceptableResources);
+                        if (selectedResource != null) {
+                            messageContext.setProperty(LogsHandler.SELECTED_RESOURCE, selectedResource);
+                            DispatcherHelper helper = selectedResource.getDispatcherHelper();
+                            if (helper instanceof URITemplateHelper) {
+                                URITemplateHelper templateHelper = (URITemplateHelper) helper;
+                                for (Map.Entry<Map<String, String>, String> entry : logProperties.entrySet()) {
+                                    Map<String, String> key = entry.getKey();
+                                    if (httpMethod.equals(key.get("resourceMethod"))) {
+                                        boolean flag = templateHelper.getString().equals(key.get("resourcePath"));
+                                        resourceLogLevel = entry.getValue();
+                                        resourcePath = key.get("resourcePath");
+                                        resourceMethod = key.get("resourceMethod");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        boolean isResourceLevelHasHighPriority = false;
+        if (resourceLogLevel != null) {
+            switch (resourceLogLevel) {
+                case APIConstants.LOG_LEVEL_FULL:
+                    isResourceLevelHasHighPriority = true;
+                    break;
+                case APIConstants.LOG_LEVEL_STANDARD:
+                    if (apiLogLevel != null && (apiLogLevel.equals(APIConstants.LOG_LEVEL_BASIC) ||
+                            apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF))) {
+                        isResourceLevelHasHighPriority = true;
+                        break;
+                    } else {
+                        break;
+                    }
+                case APIConstants.LOG_LEVEL_BASIC:
+                    if (apiLogLevel == null || apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF)) {
+                        isResourceLevelHasHighPriority = true;
+                    } else {
+                        break;
+                    }
+            }
+            if (isResourceLevelHasHighPriority || apiLogLevel == null) {
+                messageContext.setProperty(LogsHandler.LOG_LEVEL, resourceLogLevel);
+                messageContext.setProperty(LogsHandler.RESOURCE_PATH, resourcePath);
+                messageContext.setProperty(LogsHandler.RESOURCE_METHOD, resourceMethod);
+                messageContext.setProperty("API_TO", apiContext);
+                return resourceLogLevel;
+            } else {
+                messageContext.setProperty(LogsHandler.LOG_LEVEL, apiLogLevel);
+                messageContext.setProperty("API_TO", apiContext);
+                return apiLogLevel;
+            }
+        } else if (apiLogLevel != null) {
+            messageContext.setProperty(LogsHandler.LOG_LEVEL, apiLogLevel);
+            messageContext.setProperty("API_TO", apiContext);
+            return apiLogLevel;
+        } else {
+            return null;
+        }
     }
 
     protected static String getMatchingLogLevel(MessageContext ctx,
