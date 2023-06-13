@@ -198,11 +198,14 @@ class LogUtils {
                                 URITemplateHelper templateHelper = (URITemplateHelper) helper;
                                 for (Map.Entry<Map<String, String>, String> entry : logProperties.entrySet()) {
                                     Map<String, String> key = entry.getKey();
-                                    if (httpMethod.equals(key.get("resourceMethod"))) {
-                                        boolean flag = templateHelper.getString().equals(key.get("resourcePath"));
-                                        resourceLogLevel = entry.getValue();
-                                        resourcePath = key.get("resourcePath");
-                                        resourceMethod = key.get("resourceMethod");
+                                    if (key.get("resourcePath") == null && key.get("resourceMethod") == null) {
+                                        apiLogLevel = entry.getValue();
+                                    } else if (httpMethod.equals(key.get("resourceMethod"))) {
+                                        if(templateHelper.getString().equals(key.get("resourcePath"))) {
+                                            resourceLogLevel = entry.getValue();
+                                            resourcePath = key.get("resourcePath");
+                                            resourceMethod = key.get("resourceMethod");
+                                        }
                                     }
                                 }
                             }
