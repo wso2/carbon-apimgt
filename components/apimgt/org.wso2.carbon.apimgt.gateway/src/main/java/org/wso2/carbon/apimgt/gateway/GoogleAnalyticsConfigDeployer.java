@@ -118,7 +118,7 @@ public class GoogleAnalyticsConfigDeployer {
 
         HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
         try {
-            return APIUtil.executeHTTPRequest(method, httpClient);
+            return APIUtil.executeHTTPRequestWithRetries(method, httpClient);
         } catch (APIManagementException e) {
             throw new ArtifactSynchronizerException(e);
         }
