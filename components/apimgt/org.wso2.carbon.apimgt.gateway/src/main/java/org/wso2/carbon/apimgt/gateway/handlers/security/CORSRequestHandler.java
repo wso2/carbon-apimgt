@@ -171,27 +171,27 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             Utils.setSubRequestPath(selectedApi, messageContext);
 
             if (selectedApi != null) {
-                Resource[] allAPIResources = selectedApi.getResources();
-                Set<Resource> acceptableResources = new LinkedHashSet<>();
-
-                for (Resource resource : allAPIResources) {
-                    //If the requesting method is OPTIONS or if the Resource contains the requesting method
-                    if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resource.getMethods() != null &&
-                            Arrays.asList(resource.getMethods()).contains(corsRequestMethod)) ||
-                            (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
-                        acceptableResources.add(resource);
+                if ((messageContext.getProperty(LogsHandler.SELECTED_RESOURCE) != null) && httpMethod.equals(corsRequestMethod)){
+                    Resource resource = (Resource) messageContext.getProperty(LogsHandler.SELECTED_RESOURCE);
+                    String [] resourceMethods = resource.getMethods();
+                    if (Arrays.asList(resourceMethods).contains(httpMethod)) {
+                        selectedResource = resource;
                     }
                 }
+                else {
+                    Resource[] allAPIResources = selectedApi.getResources();
+                    Set<Resource> acceptableResources = new LinkedHashSet<>();
 
-                if (!acceptableResources.isEmpty()) {
-                    if ((messageContext.getProperty(LogsHandler.SELECTED_RESOURCE) != null) && httpMethod.equals(corsRequestMethod)){
-                        Resource resource = (Resource) messageContext.getProperty(LogsHandler.SELECTED_RESOURCE);
-                        String [] resourceMethods = resource.getMethods();
-                        if (Arrays.asList(resourceMethods).contains(httpMethod)) {
-                            selectedResource = resource;
+                    for (Resource resource : allAPIResources) {
+                        //If the requesting method is OPTIONS or if the Resource contains the requesting method
+                        if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resource.getMethods() != null &&
+                                Arrays.asList(resource.getMethods()).contains(corsRequestMethod)) ||
+                                (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
+                            acceptableResources.add(resource);
                         }
                     }
-                    else {
+
+                    if (!acceptableResources.isEmpty()) {
                         for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
                             Resource resource = dispatcher.findResource(messageContext, acceptableResources);
                             if (resource != null) {
@@ -199,19 +199,19 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                                 break;
                             }
                         }
+                        if (selectedResource == null) {
+                            handleResourceNotFound(messageContext, Arrays.asList(allAPIResources));
+                            return false;
+                        }
                     }
-                    if (selectedResource == null) {
+                    //If no acceptable resources are found
+                    else {
+                        //We're going to send a 405 or a 404. Run the following logic to determine which.
                         handleResourceNotFound(messageContext, Arrays.asList(allAPIResources));
                         return false;
                     }
-                }
-                //If no acceptable resources are found
-                else {
-                    //We're going to send a 405 or a 404. Run the following logic to determine which.
-                    handleResourceNotFound(messageContext, Arrays.asList(allAPIResources));
-                    return false;
-                }
 
+                }
                 //No matching resource found
                 if (selectedResource == null) {
                     //Respond with a 404
