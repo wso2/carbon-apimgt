@@ -5647,9 +5647,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
         }
-        removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet(), organization);
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, apiRevisionId, environmentsToRemove);
+        removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet(), organization);
 
         JSONObject apiDeploymentLogObj = new JSONObject();
         JSONArray deploymentLogObjects = new JSONArray();
