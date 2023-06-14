@@ -8837,6 +8837,8 @@ components:
           example: APPROVED
         createdTime:
           type: string
+        lastUpdatedTimestamp:
+          type: string
         lastUpdatedTime:
           type: string
           x-otherScopes:
@@ -9434,6 +9436,8 @@ components:
         createdTime:
           type: string
         lastUpdatedTime:
+          type: string
+        lastUpdatedTimestamp:
           type: string
         gatewayVendor:
           title: field to identify gateway vendor
