@@ -364,7 +364,7 @@ public final class APIUtil {
 
     private static Schema tenantConfigJsonSchema;
     private static Schema operationPolicySpecSchema;
-
+    private static final HashSet<String> allowedEventTypesToPublish;
 
     private APIUtil() {
 
@@ -390,6 +390,21 @@ public final class APIUtil {
         } catch (IOException e) {
             log.error("Error occurred while reading operation-policy-specification-schema.json", e);
         }
+        allowedEventTypesToPublish = new HashSet<>(
+                Arrays.asList(APIConstants.EventType.API_LIFECYCLE_CHANGE.name(),
+                        APIConstants.EventType.APPLICATION_CREATE.name(),
+                        APIConstants.EventType.APPLICATION_DELETE.name(),
+                        APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(),
+                        APIConstants.EventType.POLICY_CREATE.name(),
+                        APIConstants.EventType.POLICY_UPDATE.name(),
+                        APIConstants.EventType.POLICY_DELETE.name(),
+                        APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
+                        APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(),
+                        APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(),
+                        APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(),
+                        APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(),
+                        APIConstants.EventType.REMOVE_APPLICATION_KEYMAPPING.name(),
+                        APIConstants.EventType.KEY_MANAGER_CONFIGURATION.name()));
     }
 
     private static String hostAddress = null;
@@ -503,8 +518,8 @@ public final class APIUtil {
      * @param notifierType eventType
      */
     public static void sendNotification(org.wso2.carbon.apimgt.impl.notifier.events.Event event, String notifierType) {
-
-        if (ServiceReferenceHolder.getInstance().getNotifiersMap().containsKey(notifierType)) {
+        if (ServiceReferenceHolder.getInstance().getNotifiersMap().containsKey(notifierType)
+                && allowedEventTypesToPublish.contains(notifierType)) {
             List<Notifier> notifierList = ServiceReferenceHolder.getInstance().getNotifiersMap().get(notifierType);
             notifierList.forEach((notifier) -> {
                 try {
