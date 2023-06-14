@@ -131,43 +131,40 @@ class LogUtils {
         return transportInURL.substring(1);
     }
 
-    protected static String getHTTPMethod(org.apache.synapse.MessageContext messageContext) {
-        org.apache.axis2.context.MessageContext axis2MsgContext = ((Axis2MessageContext) messageContext)
-                .getAxis2MessageContext();
-        String httpMethod = (String) axis2MsgContext.getProperty("HTTP_METHOD");
-        return httpMethod;
-    }
-
     protected static String fetchLogLevel(MessageContext messageContext,
                                         Map<Map<String, String>, String> logProperties) {
-        Collection<API> apiSet = messageContext.getEnvironment().getSynapseConfiguration().getAPIs();
-        List<API> duplicateApiSet = new ArrayList<API>(apiSet);
+        //initializing variables to store resource level logging
+        String subPath;
         API selectedApi = null;
         String apiLogLevel = null;
         String resourceLogLevel = null;
         String resourcePath = null;
         String resourceMethod = null;
+        //getting the API collection from the synapse configuration to find the invoked API
+        Collection<API> apiSet = messageContext.getEnvironment().getSynapseConfiguration().getAPIs();
+        List<API> duplicateApiSet = new ArrayList<API>(apiSet);
+        //obtaining required parameters to execute findResource method
         String apiContext = ((Axis2MessageContext)messageContext).getAxis2MessageContext().
                 getProperty("TransportInURL").toString();
-        for (API api : duplicateApiSet) {
-            if (apiContext.contains(api.getContext())) {
-                selectedApi = api;
-                //break;
-            }
-        }
         String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
         Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         String corsRequestMethod = (String) headers.get(APIConstants.CORSHeaders.ACCESS_CONTROL_REQUEST_METHOD);
+
+        for (API api : duplicateApiSet) {
+            if (apiContext.contains(api.getContext())) {
+                selectedApi = api;
+                break;
+            }
+        }
+
         if (selectedApi != null) {
+            //obtaining the subpath vua full request path (ex:{resource}/{id}) to invoke the findResource method
             String path = ApiUtils.getFullRequestPath(messageContext);
-            String subPath;
             VersionStrategy versionStrategy = new DefaultStrategy(selectedApi);
             if (versionStrategy.getVersionType().equals(VersionStrategyFactory.TYPE_URL)) {
-                //for URL based
-                //request --> http://{host:port}/context/version/path/to/resource
                 subPath = path.substring(selectedApi.getContext().length() + versionStrategy.getVersion().length() + 1);
             } else {
                 subPath = path.substring(selectedApi.getContext().length());
@@ -176,6 +173,7 @@ class LogUtils {
                 subPath = "/";
             }
             messageContext.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, subPath);
+            //iterating through all the existing resources to match with the requesting method
             Resource[] allAPIResources = selectedApi.getResources();
             Set<Resource> acceptableResources = new LinkedHashSet<>();
             for (Resource resource : allAPIResources) {
@@ -186,10 +184,10 @@ class LogUtils {
                     acceptableResources.add(resource);
                 }
             }
-
             if (!acceptableResources.isEmpty()) {
                 for (RESTDispatcher dispatcher : ApiUtils.getDispatchers()) {
                     if (dispatcher instanceof URITemplateBasedDispatcher){
+                        //matching the available resources with the message context
                         Resource selectedResource = dispatcher.findResource(messageContext, acceptableResources);
                         if (selectedResource != null) {
                             messageContext.setProperty(LogsHandler.SELECTED_RESOURCE, selectedResource);
@@ -198,8 +196,10 @@ class LogUtils {
                                 URITemplateHelper templateHelper = (URITemplateHelper) helper;
                                 for (Map.Entry<Map<String, String>, String> entry : logProperties.entrySet()) {
                                     Map<String, String> key = entry.getKey();
+                                    //if resource path is empty, proceeding with API level logs
                                     if (key.get("resourcePath") == null && key.get("resourceMethod") == null) {
                                         apiLogLevel = entry.getValue();
+                                    //matching the methods first and then the resource path
                                     } else if (httpMethod.equals(key.get("resourceMethod"))) {
                                         if(templateHelper.getString().equals(key.get("resourcePath"))) {
                                             resourceLogLevel = entry.getValue();
@@ -258,7 +258,8 @@ class LogUtils {
     protected static String getMatchingLogLevel(MessageContext ctx,
                                                 Map<Map<String, String>, String> logProperties) {
         String apiCtx = LogUtils.getTransportInURL(ctx);
-        String apiHttpMethod = LogUtils.getHTTPMethod(ctx);
+        String apiHttpMethod = (String) ((Axis2MessageContext) ctx).getAxis2MessageContext().
+                getProperty(Constants.Configuration.HTTP_METHOD);
         String apiLogLevel = null;
         String resourceLogLevel = null;
         String resourcePath = null;
