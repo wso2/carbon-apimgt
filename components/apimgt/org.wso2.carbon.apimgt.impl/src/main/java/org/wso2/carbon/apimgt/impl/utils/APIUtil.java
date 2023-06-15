@@ -519,7 +519,7 @@ public final class APIUtil {
      */
     public static void sendNotification(org.wso2.carbon.apimgt.impl.notifier.events.Event event, String notifierType) {
         if (ServiceReferenceHolder.getInstance().getNotifiersMap().containsKey(notifierType)
-                && allowedEventTypesToPublish.contains(notifierType)) {
+                && allowedEventTypesToPublish.contains(event.getType())) {
             List<Notifier> notifierList = ServiceReferenceHolder.getInstance().getNotifiersMap().get(notifierType);
             notifierList.forEach((notifier) -> {
                 try {
