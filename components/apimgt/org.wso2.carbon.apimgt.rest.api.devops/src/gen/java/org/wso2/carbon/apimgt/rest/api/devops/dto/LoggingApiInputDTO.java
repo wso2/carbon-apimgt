@@ -21,6 +21,8 @@ import javax.validation.Valid;
 public class LoggingApiInputDTO   {
   
     private String logLevel = null;
+    private String resourceMethod = null;
+    private String resourcePath = null;
 
   /**
    **/
@@ -30,13 +32,48 @@ public class LoggingApiInputDTO   {
   }
 
   
-  @ApiModelProperty(example = "FULL", value = "")
+  @ApiModelProperty(example = "FULL", required = true, value = "")
   @JsonProperty("logLevel")
+  @NotNull
   public String getLogLevel() {
     return logLevel;
   }
   public void setLogLevel(String logLevel) {
     this.logLevel = logLevel;
+  }
+
+  /**
+   **/
+  public LoggingApiInputDTO resourceMethod(String resourceMethod) {
+    this.resourceMethod = resourceMethod;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "GET", value = "")
+  @JsonProperty("resourceMethod")
+  public String getResourceMethod() {
+    return resourceMethod;
+  }
+  public void setResourceMethod(String resourceMethod) {
+    this.resourceMethod = resourceMethod;
+  }
+
+  /**
+   **/
+  public LoggingApiInputDTO resourcePath(String resourcePath) {
+    this.resourcePath = resourcePath;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "/v1.0.0/pizza", value = "")
+  @JsonProperty("resourcePath")
+  public String getResourcePath() {
+    return resourcePath;
+  }
+  public void setResourcePath(String resourcePath) {
+    this.resourcePath = resourcePath;
   }
 
 
@@ -49,12 +86,14 @@ public class LoggingApiInputDTO   {
       return false;
     }
     LoggingApiInputDTO loggingApiInput = (LoggingApiInputDTO) o;
-    return Objects.equals(logLevel, loggingApiInput.logLevel);
+    return Objects.equals(logLevel, loggingApiInput.logLevel) &&
+        Objects.equals(resourceMethod, loggingApiInput.resourceMethod) &&
+        Objects.equals(resourcePath, loggingApiInput.resourcePath);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(logLevel);
+    return Objects.hash(logLevel, resourceMethod, resourcePath);
   }
 
   @Override
@@ -63,6 +102,8 @@ public class LoggingApiInputDTO   {
     sb.append("class LoggingApiInputDTO {\n");
     
     sb.append("    logLevel: ").append(toIndentedString(logLevel)).append("\n");
+    sb.append("    resourceMethod: ").append(toIndentedString(resourceMethod)).append("\n");
+    sb.append("    resourcePath: ").append(toIndentedString(resourcePath)).append("\n");
     sb.append("}");
     return sb.toString();
   }
