@@ -140,9 +140,10 @@ class LogUtils {
         String resourceLogLevel = null;
         String resourcePath = null;
         String resourceMethod = null;
+        Resource selectedResource = null;
         //getting the API collection from the synapse configuration to find the invoked API
         Collection<API> apiSet = messageContext.getEnvironment().getSynapseConfiguration().getAPIs();
-        List<API> duplicateApiSet = new ArrayList<API>(apiSet);
+        List<API> duplicateApiSet = new ArrayList<>(apiSet);
         //obtaining required parameters to execute findResource method
         String apiContext = ((Axis2MessageContext)messageContext).getAxis2MessageContext().
                 getProperty("TransportInURL").toString();
@@ -188,7 +189,7 @@ class LogUtils {
                 for (RESTDispatcher dispatcher : ApiUtils.getDispatchers()) {
                     if (dispatcher instanceof URITemplateBasedDispatcher){
                         //matching the available resources with the message context
-                        Resource selectedResource = dispatcher.findResource(messageContext, acceptableResources);
+                        selectedResource = dispatcher.findResource(messageContext, acceptableResources);
                         if (selectedResource != null) {
                             messageContext.setProperty(LogsHandler.SELECTED_RESOURCE, selectedResource);
                             DispatcherHelper helper = selectedResource.getDispatcherHelper();
