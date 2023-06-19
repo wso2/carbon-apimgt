@@ -57,6 +57,7 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
         String offsetDateTime = getTimeInISO(requestInTime);
 
         Event event = new Event();
+        event.setProperties(provider.getProperties());
         API api = provider.getApi();
         Operation operation = provider.getOperation();
         Target target = provider.getTarget();
