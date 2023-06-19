@@ -17,7 +17,10 @@
 package org.wso2.carbon.apimgt.rest.api.util.utils;
 
 import org.apache.cxf.message.*;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+
 import java.util.HashMap;
+
 
 /**
  *  JWTAuthenticationContext is for conversion purposes. Convert the cxf message context to HashMap and vise versa.
@@ -34,6 +37,10 @@ public class JWTAuthenticationUtils {
     public static Message addToMessageContext(Message inMessage, HashMap<String,Object> authContext) {
         for (String key : authContext.keySet()) {
             inMessage.put(key, authContext.get(key));
+            // Exchanging the scopes to message context
+            if (key.equals(RestApiConstants.USER_REST_API_SCOPES) || key.equals(RestApiConstants.SUB_ORGANIZATION)) {
+                inMessage.getExchange().put(key, authContext.get(key));
+            }
         }
         return inMessage;
     }
