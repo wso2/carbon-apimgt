@@ -100,8 +100,18 @@ public class SynapsePolicyAggregator {
         }
     }
 
-    public static List<Object> populateOperationPolicyCaseList(URITemplate template, String pathToAchieve, String flow,
-                                                               List<Object> caseList) throws APIManagementException {
+    /**
+     * This method will populate the operation policy case list.
+     *
+     * @param template      URI Template
+     * @param pathToAchieve Path to the directory where the policies are located
+     * @param flow          Flow (i.e. specifies whether request, response or fault flow)
+     * @param caseList      List of cases
+     * @return Returns the populated case list
+     * @throws APIManagementException If an error occurs while populating the case list
+     */
+    private static List<Object> populateOperationPolicyCaseList(URITemplate template, String pathToAchieve, String flow,
+            List<Object> caseList) throws APIManagementException {
 
         Map<String, Object> caseMap = new HashMap<>();
         String uriTemplateString = template.getUriTemplate();
@@ -123,8 +133,17 @@ public class SynapsePolicyAggregator {
         return caseList;
     }
 
-    public static List<String> renderPolicyMapping(List<OperationPolicy> policyList, String pathToAchieve,
-                                                      String flow) throws APIManagementException {
+    /**
+     * This method will render the policy template with the given parameters.
+     *
+     * @param policyList    List of policies to be rendered
+     * @param pathToAchieve Path to the directory where the policies are located
+     * @param flow          Flow (i.e. specifies whether request, response or fault flow)
+     * @return List of rendered policies
+     * @throws APIManagementException If an error occurs while rendering the policy template
+     */
+    private static List<String> renderPolicyMapping(List<OperationPolicy> policyList, String pathToAchieve, String flow)
+            throws APIManagementException {
 
         List<String> renderedPolicyMappingList = new ArrayList<>();
         String policyDirectory = pathToAchieve + File.separator + ImportExportConstants.POLICIES_DIRECTORY;

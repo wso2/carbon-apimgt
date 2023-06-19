@@ -452,9 +452,22 @@ public class ImportUtils {
         return operationPoliciesMap;
     }
 
+    /**
+     * This method is used to extract, validate and drop the policies from the API object as to record policy mapping,
+     * we need API UUID. API will be created without policies and after that API will be updated.
+     *
+     * @param importedApiDTO      API DTO of the importing API
+     * @param extractedFolderPath Location of the extracted folder of the API
+     * @param apiUUID             UUID of the API
+     * @param tenantDomain        Tenant domain
+     * @param apiType             Type of the API
+     * @param provider            API Provider
+     * @return List of policies
+     * @throws APIManagementException If an error occurs while extracting, validating or dropping the policies
+     */
     public static List<OperationPolicy> extractValidateAndDropAPIPoliciesFromAPI(APIDTO importedApiDTO,
-             String extractedFolderPath, String apiUUID, String tenantDomain,
-             String apiType, APIProvider provider) throws APIManagementException {
+            String extractedFolderPath, String apiUUID, String tenantDomain, String apiType, APIProvider provider)
+            throws APIManagementException {
         List<OperationPolicy> apiPoliciesList = new ArrayList<>();
         if (importedApiDTO.getApiPolicies() != null) {
             apiPoliciesList = OperationPolicyMappingUtil
@@ -540,21 +553,19 @@ public class ImportUtils {
     }
 
     /**
-     * This method is used populate uri template and apiPolicies parameters of the API with API Policies
+     * This method is used to populate uri template of the API with API Level Policies and Operation Level Policies.
      *
      * @param api                       The API object
      * @param provider                  Provider
      * @param extractedFolderPath       Folder path of the API project
      * @param operationLevelPoliciesMap Map of enforced operation level policies
-     * @param apiLevelPoliciesList      Map of enforced api level policies
+     * @param apiLevelPoliciesList      Map of enforced API level policies
      * @param tenantDomain              Tenant domain
      * @throws APIManagementException If there is an error in validating applied policy
      */
-    public static void populateAPIWithPolicies(API api, APIProvider provider,
-                                               String extractedFolderPath,
-                                               Map<String, List<OperationPolicy>> operationLevelPoliciesMap,
-                                               List<OperationPolicy> apiLevelPoliciesList,
-                                               String tenantDomain) throws APIManagementException {
+    public static void populateAPIWithPolicies(API api, APIProvider provider, String extractedFolderPath,
+            Map<String, List<OperationPolicy>> operationLevelPoliciesMap, List<OperationPolicy> apiLevelPoliciesList,
+            String tenantDomain) throws APIManagementException {
 
         String policyDirectory = extractedFolderPath + File.separator + ImportExportConstants.POLICIES_DIRECTORY;
         Map<String, String> importedPolicies = new HashMap<>();
@@ -579,10 +590,21 @@ public class ImportUtils {
         }
     }
 
+    /**
+     * This method is used to validate the provided policy list and return the validated list.
+     *
+     * @param policiesList     List of policies
+     * @param importedPolicies Imported policies
+     * @param policyDirectory  Path of the policy directory
+     * @param tenantDomain     Tenant domain
+     * @param api              API object
+     * @param provider         API provider
+     * @return List of validated policies
+     * @throws APIManagementException If an error occurs while validating the policies
+     */
     public static List<OperationPolicy> findOrImportPolicy(List<OperationPolicy> policiesList,
-                                                           Map<String, String> importedPolicies,
-                                                           String policyDirectory, String tenantDomain, API api,
-                                                           APIProvider provider) throws APIManagementException {
+            Map<String, String> importedPolicies, String policyDirectory, String tenantDomain, API api,
+            APIProvider provider) throws APIManagementException {
 
         List<OperationPolicy> validatedOperationPolicies = new ArrayList<>();
         for (OperationPolicy policy : policiesList) {

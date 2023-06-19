@@ -267,8 +267,8 @@ public class APIMappingUtil {
         model.setUriTemplates(uriTemplates);
 
         if (dto.getApiPolicies() != null) {
-            List<OperationPolicy> policyList = OperationPolicyMappingUtil
-                    .fromDTOToAPIOperationPoliciesList(dto.getApiPolicies());
+            List<OperationPolicy> policyList = OperationPolicyMappingUtil.fromDTOToAPIOperationPoliciesList(
+                    dto.getApiPolicies());
             model.setApiPolicies(policyList);
         }
 
