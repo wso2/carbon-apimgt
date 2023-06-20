@@ -26,13 +26,7 @@ import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.api.Resource;
 import org.apache.synapse.api.dispatch.DispatcherHelper;
 import org.apache.synapse.api.dispatch.RESTDispatcher;
-import org.apache.synapse.api.dispatch.URITemplateBasedDispatcher;
-import org.apache.synapse.api.dispatch.URITemplateHelper;
-import org.apache.synapse.api.version.DefaultStrategy;
-import org.apache.synapse.api.version.VersionStrategy;
-import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -103,7 +97,7 @@ class LogUtils {
         return (String) messageContext.getProperty("API_ELECTED_RESOURCE");
     }
 
-    protected static String getResourceCacheKey(org.apache.synapse.MessageContext messageContext){
+    protected static String getResourceCacheKey(org.apache.synapse.MessageContext messageContext) {
         return (String) messageContext.getProperty("API_RESOURCE_CACHE_KEY");
     }
 
@@ -131,83 +125,44 @@ class LogUtils {
         return transportInURL.substring(1);
     }
 
-    protected static String fetchLogLevel(MessageContext messageContext,
-                                        Map<Map<String, String>, String> logProperties) {
+    protected static String getMatchingLogLevel(MessageContext messageContext,
+                                          Map<Map<String, String>, String> logProperties) {
         //initializing variables to store resource level logging
-        String subPath;
-        API selectedApi = null;
         String apiLogLevel = null;
         String resourceLogLevel = null;
         String resourcePath = null;
         String resourceMethod = null;
         Resource selectedResource = null;
-        //getting the API collection from the synapse configuration to find the invoked API
-        Collection<API> apiSet = messageContext.getEnvironment().getSynapseConfiguration().getAPIs();
-        List<API> duplicateApiSet = new ArrayList<>(apiSet);
+        //obtain the selected API by context and path
+        API selectedApi = Utils.getAPIByContext(messageContext);
         //obtaining required parameters to execute findResource method
-        String apiContext = ((Axis2MessageContext)messageContext).getAxis2MessageContext().
-                getProperty("TransportInURL").toString();
-        String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
-                getProperty(Constants.Configuration.HTTP_METHOD);
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
-                .getAxis2MessageContext();
-        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        String corsRequestMethod = (String) headers.get(APIConstants.CORSHeaders.ACCESS_CONTROL_REQUEST_METHOD);
-
-        for (API api : duplicateApiSet) {
-            if (apiContext.contains(api.getContext())) {
-                selectedApi = api;
-                break;
-            }
-        }
+        String apiContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .getProperty("TransportInURL").toString();
+        String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .getProperty(Constants.Configuration.HTTP_METHOD);
 
         if (selectedApi != null) {
-            //obtaining the subpath vua full request path (ex:{resource}/{id}) to invoke the findResource method
-            String path = ApiUtils.getFullRequestPath(messageContext);
-            VersionStrategy versionStrategy = new DefaultStrategy(selectedApi);
-            if (versionStrategy.getVersionType().equals(VersionStrategyFactory.TYPE_URL)) {
-                subPath = path.substring(selectedApi.getContext().length() + versionStrategy.getVersion().length() + 1);
-            } else {
-                subPath = path.substring(selectedApi.getContext().length());
-            }
-            if ("".equals(subPath)) {
-                subPath = "/";
-            }
-            messageContext.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, subPath);
+            Utils.setSubRequestPath(selectedApi, messageContext);
             //iterating through all the existing resources to match with the requesting method
-            Resource[] allAPIResources = selectedApi.getResources();
-            Set<Resource> acceptableResources = new LinkedHashSet<>();
-            for (Resource resource : allAPIResources) {
-                //If the requesting method is OPTIONS or if the Resource contains the requesting method
-                if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resource.getMethods() != null &&
-                        Arrays.asList(resource.getMethods()).contains(corsRequestMethod)) ||
-                        (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
-                    acceptableResources.add(resource);
-                }
-            }
+            Map<String, Resource> resourcesMap = selectedApi.getResourcesMap();
+            Set<Resource> acceptableResources = ApiUtils
+                    .getAcceptableResources(resourcesMap, messageContext);
             if (!acceptableResources.isEmpty()) {
                 for (RESTDispatcher dispatcher : ApiUtils.getDispatchers()) {
-                    if (dispatcher instanceof URITemplateBasedDispatcher){
-                        //matching the available resources with the message context
-                        selectedResource = dispatcher.findResource(messageContext, acceptableResources);
-                        if (selectedResource != null) {
-                            messageContext.setProperty(LogsHandler.SELECTED_RESOURCE, selectedResource);
-                            DispatcherHelper helper = selectedResource.getDispatcherHelper();
-                            if (helper instanceof URITemplateHelper) {
-                                URITemplateHelper templateHelper = (URITemplateHelper) helper;
-                                for (Map.Entry<Map<String, String>, String> entry : logProperties.entrySet()) {
-                                    Map<String, String> key = entry.getKey();
-                                    //if resource path is empty, proceeding with API level logs
-                                    if (key.get("resourcePath") == null && key.get("resourceMethod") == null) {
-                                        apiLogLevel = entry.getValue();
-                                    //matching the methods first and then the resource path
-                                    } else if (httpMethod.equals(key.get("resourceMethod"))) {
-                                        if(templateHelper.getString().equals(key.get("resourcePath"))) {
-                                            resourceLogLevel = entry.getValue();
-                                            resourcePath = key.get("resourcePath");
-                                            resourceMethod = key.get("resourceMethod");
-                                        }
-                                    }
+                    selectedResource = dispatcher.findResource(messageContext, acceptableResources);
+                    if (selectedResource != null) {
+                        DispatcherHelper helper = selectedResource.getDispatcherHelper();
+                        for (Map.Entry<Map<String, String>, String> entry : logProperties.entrySet()) {
+                            Map<String, String> key = entry.getKey();
+                            //if resource path is empty, proceeding with API level logs
+                            if (key.get("resourcePath") == null && key.get("resourceMethod") == null) {
+                                apiLogLevel = entry.getValue();
+                                //matching the methods first and then the resource path
+                            } else if (httpMethod.equals(key.get("resourceMethod"))) {
+                                if (helper.getString().equals(key.get("resourcePath"))) {
+                                    resourceLogLevel = entry.getValue();
+                                    resourcePath = key.get("resourcePath");
+                                    resourceMethod = key.get("resourceMethod");
                                 }
                             }
                         }
@@ -222,8 +177,8 @@ class LogUtils {
                     isResourceLevelHasHighPriority = true;
                     break;
                 case APIConstants.LOG_LEVEL_STANDARD:
-                    if (apiLogLevel != null && (apiLogLevel.equals(APIConstants.LOG_LEVEL_BASIC) ||
-                            apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF))) {
+                    if (apiLogLevel != null && (apiLogLevel.equals(APIConstants.LOG_LEVEL_BASIC)
+                            || apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF))) {
                         isResourceLevelHasHighPriority = true;
                         break;
                     } else {
@@ -256,80 +211,4 @@ class LogUtils {
         }
     }
 
-    protected static String getMatchingLogLevel(MessageContext ctx,
-                                                Map<Map<String, String>, String> logProperties) {
-        String apiCtx = LogUtils.getTransportInURL(ctx);
-        String apiHttpMethod = (String) ((Axis2MessageContext) ctx).getAxis2MessageContext().
-                getProperty(Constants.Configuration.HTTP_METHOD);
-        String apiLogLevel = null;
-        String resourceLogLevel = null;
-        String resourcePath = null;
-        String resourceMethod = null;
-        String logResourcePath, resourcePathRegexPattern = null;
-        for (Map.Entry<Map<String, String>, String> entry : logProperties.entrySet()) {
-            Map<String, String> key = entry.getKey();
-            String apiResourcePath;
-            if (apiCtx.split("/", 3).length > 2) {
-                apiResourcePath = apiCtx.split("/", 3)[2];
-            } else {
-                apiResourcePath = "";
-            }
-            if (key.containsKey("resourcePath") && key.get("resourcePath") != null) {
-                logResourcePath = key.get("resourcePath");
-                resourcePathRegexPattern = logResourcePath.replace("/", "\\/");
-                resourcePathRegexPattern = resourcePathRegexPattern.replaceAll("\\{.*?\\}",
-                        "\\\\w{0,}([-,_]?\\\\w{1,})+");
-            }
-            if (key.get("context").startsWith(key.get("context") + "/") ||
-                    key.get("context").equals(key.get("context"))) {
-                if (key.get("resourcePath") == null && key.get("resourceMethod") == null) {
-                    apiLogLevel = entry.getValue();
-                } else if (("/" + apiResourcePath).matches(resourcePathRegexPattern)
-                        && apiHttpMethod.equals(key.get("resourceMethod"))) {
-                    resourceLogLevel = entry.getValue();
-                    resourcePath = key.get("resourcePath");
-                    resourceMethod = key.get("resourceMethod");
-                }
-            }
-        }
-        boolean isResourceLevelHasHighPriority = false;
-        if (resourceLogLevel != null) {
-            switch (resourceLogLevel) {
-                case APIConstants.LOG_LEVEL_FULL:
-                    isResourceLevelHasHighPriority = true;
-                    break;
-                case APIConstants.LOG_LEVEL_STANDARD:
-                    if (apiLogLevel != null && (apiLogLevel.equals(APIConstants.LOG_LEVEL_BASIC) ||
-                            apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF))) {
-                        isResourceLevelHasHighPriority = true;
-                        break;
-                    } else {
-                        break;
-                    }
-                case APIConstants.LOG_LEVEL_BASIC:
-                    if (apiLogLevel == null || apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF)) {
-                        isResourceLevelHasHighPriority = true;
-                    } else {
-                        break;
-                    }
-            }
-            if (isResourceLevelHasHighPriority || apiLogLevel == null) {
-                ctx.setProperty(LogsHandler.LOG_LEVEL, resourceLogLevel);
-                ctx.setProperty(LogsHandler.RESOURCE_PATH, resourcePath);
-                ctx.setProperty(LogsHandler.RESOURCE_METHOD, resourceMethod);
-                ctx.setProperty("API_TO", apiCtx);
-                return resourceLogLevel;
-            } else {
-                ctx.setProperty(LogsHandler.LOG_LEVEL, apiLogLevel);
-                ctx.setProperty("API_TO", apiCtx);
-                return apiLogLevel;
-            }
-        } else if (apiLogLevel != null) {
-            ctx.setProperty(LogsHandler.LOG_LEVEL, apiLogLevel);
-            ctx.setProperty("API_TO", apiCtx);
-            return apiLogLevel;
-        } else {
-            return null;
-        }
-    }
 }
