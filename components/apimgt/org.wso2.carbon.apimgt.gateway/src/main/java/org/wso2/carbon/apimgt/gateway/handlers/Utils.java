@@ -679,7 +679,7 @@ public class Utils {
     }
 
     /**
-     * Using the api context to match API path to get the invoked API from an API Collection
+     * Using the api context to match API path to get the invoked API from an API Collection.
      *
      * @param messageContext MessageContext
      * @return selected API based on the API path
@@ -701,7 +701,7 @@ public class Utils {
     }
 
     /**
-     * Select acceptable resources from the set of all resources based on requesting methods
+     * Select acceptable resources from the set of all resources based on requesting methods.
      *
      * @return set of acceptable resources
      */
@@ -711,9 +711,9 @@ public class Utils {
         for (Resource resource : allAPIResources) {
             //If the requesting method is OPTIONS or if the Resource contains the requesting method
             String [] resourceMethods = resource.getMethods();
-            if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resourceMethods != null &&
-                    Arrays.asList(resourceMethods).contains(corsRequestMethod)) ||
-                    (resourceMethods != null && Arrays.asList(resourceMethods).contains(httpMethod))) {
+            if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resourceMethods != null
+                    && Arrays.asList(resourceMethods).contains(corsRequestMethod))
+                    || (resourceMethods != null && Arrays.asList(resourceMethods).contains(httpMethod))) {
                 acceptableResources.add(resource);
             }
         }
@@ -721,7 +721,7 @@ public class Utils {
     }
 
     /**
-     * Obtain the selected resource from the message context for CORSRequestHandler
+     * Obtain the selected resource from the message context for CORSRequestHandler.
      *
      * @return selected resource
      */
@@ -730,9 +730,9 @@ public class Utils {
         Resource selectedResource = null;
         Resource resource = (Resource) messageContext.getProperty(LogsHandler.SELECTED_RESOURCE);
         String [] resourceMethods = resource.getMethods();
-        if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resourceMethods != null &&
-                Arrays.asList(resourceMethods).contains(corsRequestMethod)) ||
-                (resourceMethods != null && Arrays.asList(resourceMethods).contains(httpMethod))) {
+        if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resourceMethods != null
+                && Arrays.asList(resourceMethods).contains(corsRequestMethod))
+                || (resourceMethods != null && Arrays.asList(resourceMethods).contains(httpMethod))) {
             selectedResource = resource;
         }
         return selectedResource;

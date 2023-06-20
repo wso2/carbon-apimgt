@@ -155,8 +155,8 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             }
             String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
             String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-            String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
-                    getProperty(Constants.Configuration.HTTP_METHOD);
+            String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                    .getProperty(Constants.Configuration.HTTP_METHOD);
             API selectedApi = Utils.getSelectedAPI(messageContext);
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
                     .getAxis2MessageContext();
@@ -167,8 +167,8 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             Utils.setSubRequestPath(selectedApi, messageContext);
 
             if (selectedApi != null) {
-                if ((messageContext.getProperty(LogsHandler.SELECTED_RESOURCE) != null)){
-                    selectedResource = Utils.getSelectedResource(messageContext,httpMethod, corsRequestMethod);
+                if ((messageContext.getProperty(LogsHandler.SELECTED_RESOURCE) != null)) {
+                    selectedResource = Utils.getSelectedResource(messageContext, httpMethod, corsRequestMethod);
                 } else {
                     Resource[] allAPIResources = selectedApi.getResources();
                     Set<Resource> acceptableResources
