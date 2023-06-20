@@ -97,7 +97,7 @@ class LogUtils {
         return (String) messageContext.getProperty("API_ELECTED_RESOURCE");
     }
 
-    protected static String getResourceCacheKey(org.apache.synapse.MessageContext messageContext){
+    protected static String getResourceCacheKey(org.apache.synapse.MessageContext messageContext) {
         return (String) messageContext.getProperty("API_RESOURCE_CACHE_KEY");
     }
 
@@ -136,17 +136,17 @@ class LogUtils {
         //obtain the selected API by context and path
         API selectedApi = Utils.getAPIByContext(messageContext);
         //obtaining required parameters to execute findResource method
-        String apiContext = ((Axis2MessageContext)messageContext).getAxis2MessageContext().
-                getProperty("TransportInURL").toString();
-        String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
-                getProperty(Constants.Configuration.HTTP_METHOD);
+        String apiContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .getProperty("TransportInURL").toString();
+        String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .getProperty(Constants.Configuration.HTTP_METHOD);
 
         if (selectedApi != null) {
             Utils.setSubRequestPath(selectedApi, messageContext);
             //iterating through all the existing resources to match with the requesting method
-            Map<String,Resource> resourcesMap = selectedApi.getResourcesMap();
-            Set<Resource> acceptableResources = ApiUtils.
-                    getAcceptableResources(resourcesMap, messageContext);
+            Map<String, Resource> resourcesMap = selectedApi.getResourcesMap();
+            Set<Resource> acceptableResources = ApiUtils
+                    .getAcceptableResources(resourcesMap, messageContext);
             if (!acceptableResources.isEmpty()) {
                 for (RESTDispatcher dispatcher : ApiUtils.getDispatchers()) {
                     selectedResource = dispatcher.findResource(messageContext, acceptableResources);
@@ -159,7 +159,7 @@ class LogUtils {
                                 apiLogLevel = entry.getValue();
                                 //matching the methods first and then the resource path
                             } else if (httpMethod.equals(key.get("resourceMethod"))) {
-                                if(helper.getString().equals(key.get("resourcePath"))) {
+                                if (helper.getString().equals(key.get("resourcePath"))) {
                                     resourceLogLevel = entry.getValue();
                                     resourcePath = key.get("resourcePath");
                                     resourceMethod = key.get("resourceMethod");
@@ -177,8 +177,8 @@ class LogUtils {
                     isResourceLevelHasHighPriority = true;
                     break;
                 case APIConstants.LOG_LEVEL_STANDARD:
-                    if (apiLogLevel != null && (apiLogLevel.equals(APIConstants.LOG_LEVEL_BASIC) ||
-                            apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF))) {
+                    if (apiLogLevel != null && (apiLogLevel.equals(APIConstants.LOG_LEVEL_BASIC)
+                            || apiLogLevel.equals(APIConstants.LOG_LEVEL_OFF))) {
                         isResourceLevelHasHighPriority = true;
                         break;
                     } else {
