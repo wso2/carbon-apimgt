@@ -41,6 +41,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.api.API;
 import org.apache.synapse.api.ApiUtils;
+import org.apache.synapse.api.Resource;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -676,4 +677,65 @@ public class Utils {
         }
         return null;
     }
+
+    /**
+     * Using the api context to match API path to get the invoked API from an API Collection
+     *
+     * @param messageContext MessageContext
+     * @return selected API based on the API path
+     */
+    public static API getAPIByContext(MessageContext messageContext) {
+        API selectedApi = null;
+        //getting the API collection from the synapse configuration to find the invoked API
+        Collection<API> apiSet = messageContext.getEnvironment().getSynapseConfiguration().getAPIs();
+        List<API> duplicateApiSet = new ArrayList<>(apiSet);
+        //obtaining required parameters to execute findResource method
+        String requestPath = ApiUtils.getFullRequestPath(messageContext);
+        for (API api : duplicateApiSet) {
+            if (ApiUtils.matchApiPath(requestPath, api.getContext())) {
+                selectedApi = api;
+                break;
+            }
+        }
+        return selectedApi;
+    }
+
+    /**
+     * Select acceptable resources from the set of all resources based on requesting methods
+     *
+     * @return set of acceptable resources
+     */
+    public static Set<Resource> getAcceptableResources(Resource[] allAPIResources,
+                                                       String httpMethod, String corsRequestMethod) {
+        Set<Resource> acceptableResources = new LinkedHashSet<>();
+        for (Resource resource : allAPIResources) {
+            //If the requesting method is OPTIONS or if the Resource contains the requesting method
+            String [] resourceMethods = resource.getMethods();
+            if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resourceMethods != null &&
+                    Arrays.asList(resourceMethods).contains(corsRequestMethod)) ||
+                    (resourceMethods != null && Arrays.asList(resourceMethods).contains(httpMethod))) {
+                acceptableResources.add(resource);
+            }
+        }
+        return acceptableResources;
+    }
+
+    /**
+     * Obtain the selected resource from the message context for CORSRequestHandler
+     *
+     * @return selected resource
+     */
+    public static Resource getSelectedResource(MessageContext messageContext,
+                                               String httpMethod, String corsRequestMethod) {
+        Resource selectedResource = null;
+        Resource resource = (Resource) messageContext.getProperty(LogsHandler.SELECTED_RESOURCE);
+        String [] resourceMethods = resource.getMethods();
+        if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resourceMethods != null &&
+                Arrays.asList(resourceMethods).contains(corsRequestMethod)) ||
+                (resourceMethods != null && Arrays.asList(resourceMethods).contains(httpMethod))) {
+            selectedResource = resource;
+        }
+        return selectedResource;
+    }
+
 }
