@@ -305,7 +305,7 @@ public class LogsHandler extends AbstractSynapseHandler {
         Map<Map<String, String>, String> logProperties = APILoggerManager.getInstance().getPerAPILoggerList();
         // if the logging API data holder is empty or null return null
         if (!logProperties.isEmpty()) {
-            return LogUtils.fetchLogLevel(ctx, logProperties);
+            return LogUtils.getMatchingLogLevel(ctx, logProperties);
             //return LogUtils.getMatchingLogLevel(ctx, logProperties);
         }
         return null;

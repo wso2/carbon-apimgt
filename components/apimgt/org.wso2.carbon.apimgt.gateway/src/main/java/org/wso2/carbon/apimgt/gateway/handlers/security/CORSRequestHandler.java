@@ -159,8 +159,8 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             }
             String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
             String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-            String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
-                    getProperty(Constants.Configuration.HTTP_METHOD);
+            String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                    .getProperty(Constants.Configuration.HTTP_METHOD);
             API selectedApi = Utils.getSelectedAPI(messageContext);
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
                     .getAxis2MessageContext();
@@ -171,25 +171,12 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             Utils.setSubRequestPath(selectedApi, messageContext);
 
             if (selectedApi != null) {
-                if ((messageContext.getProperty(LogsHandler.SELECTED_RESOURCE) != null) && httpMethod.equals(corsRequestMethod)){
-                    Resource resource = (Resource) messageContext.getProperty(LogsHandler.SELECTED_RESOURCE);
-                    String [] resourceMethods = resource.getMethods();
-                    if (Arrays.asList(resourceMethods).contains(httpMethod)) {
-                        selectedResource = resource;
-                    }
-                }
-                else {
+                if ((messageContext.getProperty(LogsHandler.SELECTED_RESOURCE) != null)) {
+                    selectedResource = Utils.getSelectedResource(messageContext, httpMethod, corsRequestMethod);
+                } else {
                     Resource[] allAPIResources = selectedApi.getResources();
-                    Set<Resource> acceptableResources = new LinkedHashSet<>();
-
-                    for (Resource resource : allAPIResources) {
-                        //If the requesting method is OPTIONS or if the Resource contains the requesting method
-                        if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resource.getMethods() != null &&
-                                Arrays.asList(resource.getMethods()).contains(corsRequestMethod)) ||
-                                (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
-                            acceptableResources.add(resource);
-                        }
-                    }
+                    Set<Resource> acceptableResources
+                            = Utils.getAcceptableResources(allAPIResources, httpMethod, corsRequestMethod);
 
                     if (!acceptableResources.isEmpty()) {
                         for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
