@@ -754,7 +754,7 @@ public class Utils {
     public static Resource getSelectedResource(MessageContext messageContext,
                                                String httpMethod, String corsRequestMethod) {
         Resource selectedResource = null;
-        Resource resource = (Resource) messageContext.getProperty(LogsHandler.SELECTED_RESOURCE);
+        Resource resource = (Resource) messageContext.getProperty(RESTConstants.SELECTED_RESOURCE);
         String [] resourceMethods = resource.getMethods();
         if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resourceMethods != null
                 && Arrays.asList(resourceMethods).contains(corsRequestMethod))

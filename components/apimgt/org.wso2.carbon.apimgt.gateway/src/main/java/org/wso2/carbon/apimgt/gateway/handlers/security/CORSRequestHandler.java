@@ -171,7 +171,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             Utils.setSubRequestPath(selectedApi, messageContext);
 
             if (selectedApi != null) {
-                if ((messageContext.getProperty(LogsHandler.SELECTED_RESOURCE) != null)) {
+                if ((messageContext.getProperty(RESTConstants.SELECTED_RESOURCE) != null)) {
                     selectedResource = Utils.getSelectedResource(messageContext, httpMethod, corsRequestMethod);
                 } else {
                     Resource[] allAPIResources = selectedApi.getResources();
