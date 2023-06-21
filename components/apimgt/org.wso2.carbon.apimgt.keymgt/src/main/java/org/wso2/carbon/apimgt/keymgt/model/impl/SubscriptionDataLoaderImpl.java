@@ -21,11 +21,11 @@ import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
@@ -64,8 +64,6 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     private static final Log log = LogFactory.getLog(SubscriptionDataLoaderImpl.class);
     private EventHubConfigurationDto getEventHubConfigurationDto;
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
-    public static final int retrievalTimeoutInSeconds = 15;
-    public static final int retrievalRetries = 15;
     public static final String UTF8 = "UTF-8";
 
     public SubscriptionDataLoaderImpl() {
@@ -468,47 +466,17 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
                 method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
             }
             HttpClient httpClient = APIUtil.getHttpClient(servicePort, serviceProtocol);
-
-            HttpResponse httpResponse = null;
-            int retryCount = 0;
-            boolean retry = false;
-            do {
-                try {
-                    httpResponse = httpClient.execute(method);
-                    if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
-                        log.error("Could not retrieve subscriptions for tenantDomain: " + tenantDomain
-                                + ". Received response with status code "
-                                + httpResponse.getStatusLine().getStatusCode());
-                        throw new DataLoadingException("Error while retrieving subscription");
-                    }
-                    retry = false;
-                } catch (IOException | DataLoadingException ex) {
-                    retryCount++;
-                    if (retryCount < retrievalRetries) {
-                        retry = true;
-                        log.warn("Failed retrieving " + path + " from remote endpoint: " + ex.getMessage()
-                                + ". Retrying after " + retrievalTimeoutInSeconds +
-                                " seconds.");
-                        try {
-                            Thread.sleep(retrievalTimeoutInSeconds * 1000);
-                        } catch (InterruptedException e) {
-                            // Ignore
-                        }
-                    } else {
-                        throw ex;
-                    }
-                }
-            } while (retry);
-            if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
-                log.error("Could not retrieve subscriptions for tenantDomain : " + tenantDomain);
-                throw new DataLoadingException("Error while retrieving subscription from " + path);
+            String responseString;
+            try (CloseableHttpResponse httpResponse = APIUtil.executeHTTPRequestWithRetries(method, httpClient)) {
+                responseString = EntityUtils.toString(httpResponse.getEntity(), UTF8);
+            } catch (APIManagementException e) {
+                throw new DataLoadingException("Error while retrieving subscriptions", e);
             }
-            String responseString = EntityUtils.toString(httpResponse.getEntity(), UTF8);
+
             if (log.isDebugEnabled()) {
                 log.debug("Response : " + responseString);
             }
             return responseString;
-
     }
 
     private byte[] getServiceCredentials(EventHubConfigurationDto eventHubConfigurationDto) {

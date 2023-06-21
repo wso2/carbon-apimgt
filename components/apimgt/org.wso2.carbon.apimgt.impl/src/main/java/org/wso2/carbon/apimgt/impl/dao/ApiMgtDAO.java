@@ -14060,6 +14060,9 @@ public class ApiMgtDAO {
                     vhost.setHttpsPort(httpsPort);
                     vhost.setWsPort(wsPort);
                     vhost.setWssPort(wssPort);
+                    // Since DB does not contain columns for wsHost and wssHost, host is used
+                    vhost.setWsHost(host);
+                    vhost.setWssHost(host);
                     vhosts.add(vhost);
                 }
             }
