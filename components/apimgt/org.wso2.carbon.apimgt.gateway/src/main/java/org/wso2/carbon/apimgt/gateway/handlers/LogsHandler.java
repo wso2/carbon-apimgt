@@ -56,8 +56,6 @@ public class LogsHandler extends AbstractSynapseHandler {
     protected static final String LOG_LEVEL = "LOG_LEVEL";
     protected static final String RESOURCE_PATH = "RESOURCE_PATH";
     protected static final String RESOURCE_METHOD = "RESOURCE_METHOD";
-    public static final String SELECTED_RESOURCE = "SELECTED_RESOURCE";
-
     private static final String REQUEST_BODY_SIZE_ERROR = "Error occurred while building the message to calculate" +
             " the response body size";
     private static final String REQUEST_EVENT_PUBLICATION_ERROR = "Cannot publish request event. ";
