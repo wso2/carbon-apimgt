@@ -386,12 +386,19 @@ public class APIManagerConfiguration {
                 redisConfig.setRedisEnabled(true);
                 redisConfig.setHost(redisHost.getText());
                 redisConfig.setPort(Integer.parseInt(redisPort.getText()));
-                if (redisUser != null && redisPassword != null && redisDatabaseId != null
-                        && redisConnectionTimeout != null && redisIsSslEnabled != null) {
+                if (redisUser != null) {
                     redisConfig.setUser(redisUser.getText());
+                }
+                if (redisPassword != null) {
                     redisConfig.setPassword(MiscellaneousUtil.resolve(redisPassword, secretResolver).toCharArray());
+                }
+                if (redisDatabaseId != null) {
                     redisConfig.setDatabaseId(Integer.parseInt(redisDatabaseId.getText()));
+                }
+                if (redisConnectionTimeout != null) {
                     redisConfig.setConnectionTimeout(Integer.parseInt(redisConnectionTimeout.getText()));
+                }
+                if (redisIsSslEnabled != null) {
                     redisConfig.setSslEnabled(Boolean.parseBoolean(redisIsSslEnabled.getText()));
                 }
                 if (propertiesElement !=null){
