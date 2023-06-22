@@ -697,6 +697,15 @@ public class Utils {
                 break;
             }
         }
+        //previous approach to find the selected api without using other utils
+        /*String apiContext = ((Axis2MessageContext)messageContext).getAxis2MessageContext().
+                getProperty("TransportInURL").toString();
+        for (API api : duplicateApiSet) {
+            if (apiContext.contains(api.getContext())) {
+                selectedApi = api;
+                break;
+            }
+        }*/
         return selectedApi;
     }
 
