@@ -18,9 +18,9 @@
 
 package org.wso2.carbon.apimgt.gateway.throttling.util;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.BasicHttpEntity;
 import org.junit.Assert;
@@ -33,7 +33,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
-import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.ByteArrayInputStream;
@@ -52,11 +51,13 @@ public class KeyTemplateRetrieverTest {
         String content = "[\"$userId\",\"$apiContext\",\"$apiVersion\"]";
         PowerMockito.mockStatic(APIUtil.class);
         HttpClient httpClient = Mockito.mock(HttpClient.class);
-        HttpResponse httpResponse = Mockito.mock(HttpResponse.class);
+        CloseableHttpResponse httpResponse = Mockito.mock(CloseableHttpResponse.class);
         BasicHttpEntity httpEntity = new BasicHttpEntity();
         httpEntity.setContent(new ByteArrayInputStream(content.getBytes()));
         Mockito.when(httpResponse.getEntity()).thenReturn(httpEntity);
         Mockito.when(httpClient.execute(Mockito.any(HttpGet.class))).thenReturn(httpResponse);
+        Mockito.when(APIUtil.executeHTTPRequestWithRetries(Mockito.any(HttpGet.class), Mockito.any(HttpClient.class)))
+                .thenReturn(httpResponse);
         StatusLine status = Mockito.mock(StatusLine.class);
         Mockito.when(status.getStatusCode()).thenReturn(200);
         Mockito.when(httpResponse.getStatusLine()).thenReturn(status);

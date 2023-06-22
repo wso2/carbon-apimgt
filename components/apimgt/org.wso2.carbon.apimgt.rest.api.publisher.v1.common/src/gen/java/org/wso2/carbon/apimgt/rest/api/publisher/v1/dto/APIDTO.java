@@ -268,6 +268,7 @@ return null;
     private WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration = null;
     private String workflowStatus = null;
     private String createdTime = null;
+    private String lastUpdatedTimestamp = null;
     @Scope(name = "apim:api_publish", description="", value ="")
     @Scope(name = "apim:api_manage", description="", value ="")
     private String lastUpdatedTime = null;
@@ -1077,6 +1078,23 @@ return null;
 
   /**
    **/
+  public APIDTO lastUpdatedTimestamp(String lastUpdatedTimestamp) {
+    this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("lastUpdatedTimestamp")
+  public String getLastUpdatedTimestamp() {
+    return lastUpdatedTimestamp;
+  }
+  public void setLastUpdatedTimestamp(String lastUpdatedTimestamp) {
+    this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+  }
+
+  /**
+   **/
   public APIDTO lastUpdatedTime(String lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
     return this;
@@ -1361,6 +1379,7 @@ return null;
         Objects.equals(websubSubscriptionConfiguration, API.websubSubscriptionConfiguration) &&
         Objects.equals(workflowStatus, API.workflowStatus) &&
         Objects.equals(createdTime, API.createdTime) &&
+        Objects.equals(lastUpdatedTimestamp, API.lastUpdatedTimestamp) &&
         Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
         Objects.equals(endpointConfig, API.endpointConfig) &&
         Objects.equals(endpointImplementationType, API.endpointImplementationType) &&
@@ -1378,7 +1397,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTimestamp, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols);
   }
 
   @Override
@@ -1429,6 +1448,7 @@ return null;
     sb.append("    websubSubscriptionConfiguration: ").append(toIndentedString(websubSubscriptionConfiguration)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    lastUpdatedTimestamp: ").append(toIndentedString(lastUpdatedTimestamp)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
     sb.append("    endpointImplementationType: ").append(toIndentedString(endpointImplementationType)).append("\n");

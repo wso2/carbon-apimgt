@@ -490,6 +490,7 @@ public final class APIUtil {
             throws IOException, APIManagementException {
 
         CloseableHttpResponse httpResponse = null;
+        String path = method.getURI().getPath();
         long retryDuration = retrievalTimeout;
         int retryCount = 0;
         boolean retry;
@@ -497,15 +498,16 @@ public final class APIUtil {
             try {
                 httpResponse = (CloseableHttpResponse) httpClient.execute(method);
                 if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
-                    throw new DataLoadingException("Error while retrieving artifacts. "
-                            + "Received response with status code "+ httpResponse.getStatusLine().getStatusCode());
+                    throw new DataLoadingException("Error while retrieving "
+                            + path + ". Received response with status code "
+                            + httpResponse.getStatusLine().getStatusCode());
                 }
                 retry = false;
             } catch (IOException | DataLoadingException ex) {
                 retryCount++;
                 if (retryCount <= maxRetryCount) {
                     retry = true;
-                    log.error("Failed to retrieve from remote endpoint: " + ex.getMessage()
+                    log.error("Failed to retrieve " + path + " from remote endpoint: " + ex.getMessage()
                             + ". Retry attempt " + retryCount + " in " + (retryDuration / 1000) +
                             " seconds.");
                     try {
@@ -518,7 +520,7 @@ public final class APIUtil {
                         // Ignore
                     }
                 } else {
-                    log.error("Failed to retrieve from remote endpoint. Maximum retry count exceeded."
+                    log.error("Failed to retrieve " + path + " from remote endpoint. Maximum retry count exceeded."
                             + ex.getMessage());
                     throw ex;
                 }

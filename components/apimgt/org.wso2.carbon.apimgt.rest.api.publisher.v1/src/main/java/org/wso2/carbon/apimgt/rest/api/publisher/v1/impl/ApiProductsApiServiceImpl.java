@@ -141,7 +141,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             //documentation = apiProvider.getProductDocumentation(documentId, tenantDomain);
             DocumentationContent docContent = apiProvider.getDocumentationContent(apiProductId, documentId, organization);
             if (docContent == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PRODUCT_DOCUMENTATION, documentId, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PRODUCT_DOCUMENTATION, documentId);
                 return null;
             }
 
