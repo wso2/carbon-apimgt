@@ -134,8 +134,15 @@ class LogUtils {
         String resourceMethod = null;
         Resource selectedResource = null;
         //obtain the selected API by context and path
-        API selectedApi = Utils.getAPIByContext(messageContext);
-        //obtaining required parameters to execute findResource method
+        API selectedApi = null;
+        Collection<API> apiSet = messageContext.getEnvironment().getSynapseConfiguration().getAPIs();
+        //identify the api
+        for (API api : apiSet) {
+            if (ApiUtils.identifyApi(api, messageContext)) {
+                selectedApi = api;
+                break;
+            }
+        }
         String apiContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                 .getProperty("TransportInURL").toString();
         String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
