@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.ssl.SSLContexts;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -1059,7 +1060,8 @@ public class APIManagerComponent {
                     final String[] localhosts = { "::1", "127.0.0.1", "localhost", "localhost.localdomain" };
                     @Override
                     public boolean verify(String urlHostName, SSLSession session) {
-                        return Arrays.asList(localhosts).contains(urlHostName);
+                        return SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER.verify(urlHostName, session)
+                                || Arrays.asList(localhosts).contains(urlHostName);
                     }
                 };
                 break;
