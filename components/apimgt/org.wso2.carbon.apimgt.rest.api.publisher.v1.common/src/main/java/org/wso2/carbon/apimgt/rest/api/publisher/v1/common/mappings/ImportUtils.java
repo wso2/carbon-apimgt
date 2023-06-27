@@ -78,6 +78,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
+import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -88,13 +89,17 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityIn
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -1182,11 +1187,14 @@ public class ImportUtils {
             JsonObject config = endpointConfigObject.get(APIConstants.ENDPOINT_SPECIFIC_CONFIG).
                     getAsJsonObject();
             if (config.has(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION)) {
-                Double actionDuration = config.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).
-                        getAsDouble();
-                Integer value = (int) Math.round(actionDuration);
-                config.remove(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
-                config.addProperty(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION, value.toString());
+                if (config.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).getAsString().isEmpty()) {
+                    config.remove(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
+                } else {
+                    Double actionDuration = config.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).getAsDouble();
+                    Integer value = (int) Math.round(actionDuration);
+                    config.remove(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
+                    config.addProperty(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION, value.toString());
+                }
             }
         }
         return endpointConfigObject;
@@ -1429,8 +1437,17 @@ public class ImportUtils {
 
         try {
             byte[] wsdlDefinition = loadWsdlFile(pathToArchive, apiDto);
-            WSDLValidationResponse wsdlValidationResponse = APIMWSDLReader.
-                    getWsdlValidationResponse(APIMWSDLReader.getWSDLProcessor(wsdlDefinition));
+            WSDLInfoDTO wsdlInfo = apiDto.getWsdlInfo();
+            WSDLValidationResponse wsdlValidationResponse;
+            if (wsdlInfo != null && WSDLInfoDTO.TypeEnum.ZIP.equals(wsdlInfo.getType())) {
+                // If the WSDL is a ZIP file, we need to extract it and validate the WSDL inside
+                wsdlValidationResponse = APIMWSDLReader.extractAndValidateWSDLArchive(
+                        new ByteArrayInputStream(wsdlDefinition));
+            } else {
+                wsdlValidationResponse = APIMWSDLReader.
+                        getWsdlValidationResponse(APIMWSDLReader.getWSDLProcessor(wsdlDefinition));
+            }
+
             if (!wsdlValidationResponse.isValid()) {
                 throw new APIManagementException(
                         "Error occurred while importing the API. Invalid WSDL definition found. "
@@ -1493,12 +1510,25 @@ public class ImportUtils {
     private static byte[] loadWsdlFile(String pathToArchive, APIDTO apiDto) throws IOException {
 
         String wsdlFileName = apiDto.getName() + "-" + apiDto.getVersion() + APIConstants.WSDL_FILE_EXTENSION;
-        String pathToFile = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlFileName;
-        if (CommonUtil.checkFileExistence(pathToFile)) {
+        String wsdlArchiveName = apiDto.getName() + "-" + apiDto.getVersion() + APIConstants.ZIP_FILE_EXTENSION;
+        String pathToWsdlFile = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlFileName;
+        String pathToWsdlArchive = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlArchiveName;
+        String pathToWsdl = null;
+
+        if (CommonUtil.checkFileExistence(pathToWsdlFile)) {
             if (log.isDebugEnabled()) {
-                log.debug("Found WSDL file " + pathToFile);
+                log.debug("Found WSDL file " + pathToWsdlFile);
             }
-            return FileUtils.readFileToByteArray(new File(pathToFile));
+            pathToWsdl = pathToWsdlFile;
+        } else if (CommonUtil.checkFileExistence(pathToWsdlArchive)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Found WSDL archive " + pathToWsdlArchive);
+            }
+            pathToWsdl = pathToWsdlArchive;
+        }
+
+        if (!StringUtils.isEmpty(pathToWsdl)) {
+            return FileUtils.readFileToByteArray(new File(pathToWsdl));
         }
         throw new IOException("Missing WSDL file. It should be present.");
     }
@@ -1661,9 +1691,6 @@ public class ImportUtils {
 
         File documentsFolder = new File(docDirectoryPath);
         File[] fileArray = documentsFolder.listFiles();
-        String provider = (apiTypeWrapper.isAPIProduct()) ? apiTypeWrapper.getApiProduct().getId().getProviderName() :
-                apiTypeWrapper.getApi().getId().getProviderName();
-        String tenantDomain = MultitenantUtils.getTenantDomain(provider);
 
         try {
             // Remove all documents associated with the API before update
@@ -1672,7 +1699,7 @@ public class ImportUtils {
             List<Documentation> documents = apiProvider.getAllDocumentation(uuidFromIdentifier, organization);
             if (documents != null) {
                 for (Documentation documentation : documents) {
-                    apiProvider.removeDocumentation(uuidFromIdentifier, documentation.getId(), tenantDomain);
+                    apiProvider.removeDocumentation(uuidFromIdentifier, documentation.getId(), organization);
                 }
             }
 
@@ -1733,7 +1760,7 @@ public class ImportUtils {
                                 individualDocumentFilePath + File.separator + folderName)) {
                             String inlineContent = IOUtils.toString(inputStream, ImportExportConstants.CHARSET);
                             PublisherCommonUtils.addDocumentationContent(documentation, apiProvider, apiOrApiProductId,
-                                    documentation.getId(), tenantDomain, inlineContent);
+                                    documentation.getId(), organization, inlineContent);
                         }
                     } else if (ImportExportConstants.FILE_DOC_TYPE.equalsIgnoreCase(docSourceType)) {
                         String filePath = documentation.getFilePath();
@@ -1744,7 +1771,7 @@ public class ImportUtils {
                                             + File.separator + filePath);
                             PublisherCommonUtils.addDocumentationContentForFile(inputStream, docExtension,
                                     documentation.getFilePath(), apiProvider, apiOrApiProductId, documentation.getId(),
-                                    tenantDomain);
+                                    organization);
                         } catch (FileNotFoundException e) {
                             //this error is logged and ignored because documents are optional in an API
                             log.error("Failed to locate the document files of the API/API Product: " + apiTypeWrapper
@@ -1823,20 +1850,66 @@ public class ImportUtils {
 
         String wsdlFileName = importedApi.getId().getApiName() + "-" + importedApi.getId().getVersion()
                 + APIConstants.WSDL_FILE_EXTENSION;
-        String wsdlPath = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlFileName;
+        String wsdlArchiveName = importedApi.getId().getApiName() + "-" + importedApi.getId().getVersion()
+                + APIConstants.ZIP_FILE_EXTENSION;
+        String wsdlFilePath = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlFileName;
+        String wsdlArchivePath = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlArchiveName;
 
-        if (CommonUtil.checkFileExistence(wsdlPath)) {
+        String wsdlPath = null;
+        String fileExtension = null;
+        if (CommonUtil.checkFileExistence(wsdlFilePath)) {
+            wsdlPath = wsdlFilePath;
+            fileExtension = FilenameUtils.getExtension(wsdlPath);
+        } else if (CommonUtil.checkFileExistence(wsdlArchivePath)) {
+            wsdlPath = wsdlArchivePath;
+            fileExtension = APIConstants.APPLICATION_ZIP;
+        }
+
+        if (!StringUtils.isEmpty(wsdlPath) && !StringUtils.isEmpty(fileExtension)) {
             try (FileInputStream inputStream = new FileInputStream(wsdlPath)) {
                 String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                String fileExtension = FilenameUtils.getExtension(wsdlPath);
                 PublisherCommonUtils.addWsdl(fileExtension, inputStream, importedApi, apiProvider, tenantDomain);
+
+                //Update wsdl URL in importedAPI
+                APIIdentifier apiIdentifier = importedApi.getId();
+                if (apiIdentifier != null) {
+                    String apiProviderName = apiIdentifier.getProviderName();
+                    String apiName = apiIdentifier.getApiName();
+                    String apiVersion = apiIdentifier.getVersion();
+                    String apiSourcePath = RegistryPersistenceUtil.getAPIBasePath(apiProviderName, apiName, apiVersion);
+
+                    String wsdlUrl;
+                    if (APIConstants.APPLICATION_ZIP.equals(fileExtension)) {
+                        wsdlUrl = apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                            + org.wso2.carbon.apimgt.persistence.APIConstants.API_WSDL_ARCHIVE_LOCATION
+                            + apiProviderName + org.wso2.carbon.apimgt.persistence.APIConstants.WSDL_PROVIDER_SEPERATOR
+                            + apiName + apiVersion + org.wso2.carbon.apimgt.persistence.APIConstants.ZIP_FILE_EXTENSION;
+                    } else {
+                        wsdlUrl = apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                                + RegistryPersistenceUtil.createWsdlFileName(apiProviderName, apiName, apiVersion);
+                    }
+                    String absoluteWSDLResourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + wsdlUrl;
+
+                    String wsdlRegistryPath;
+                    if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                            .equalsIgnoreCase(tenantDomain)) {
+                        wsdlRegistryPath =
+                                RegistryConstants.PATH_SEPARATOR + "registry" + RegistryConstants.PATH_SEPARATOR +
+                                        "resource" + absoluteWSDLResourcePath;
+                    } else {
+                        wsdlRegistryPath = "/t/" + tenantDomain + RegistryConstants.PATH_SEPARATOR + "registry"
+                                + RegistryConstants.PATH_SEPARATOR + "resource" + absoluteWSDLResourcePath;
+                    }
+                    importedApi.setWsdlUrl(wsdlRegistryPath);
+                }
             } catch (FileNotFoundException e) {
                 throw new APIManagementException(
-                        "WSDL file of the API: " + importedApi.getId().getName() + " is not found.", e,
+                        "WSDL file/archive of the API: " + importedApi.getId().getName() + " is not found.", e,
                         ExceptionCodes.NO_WSDL_FOUND_IN_WSDL_ARCHIVE);
             } catch (IOException e) {
                 throw new APIManagementException(
-                        "Error reading the WSDL file of the API: " + importedApi.getId().getName(), e,
+                        "Error reading the WSDL file/archive of the API: " + importedApi.getId().getName(), e,
                         ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
             }
         }

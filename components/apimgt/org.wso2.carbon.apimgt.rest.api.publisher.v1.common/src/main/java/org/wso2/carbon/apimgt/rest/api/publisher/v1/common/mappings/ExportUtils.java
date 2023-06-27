@@ -515,10 +515,12 @@ public class ExportUtils {
             ResourceFile wsdlResource = apiProvider.getWSDL(apiIdentifier.getUUID(), tenantDomain);
             if (wsdlResource != null) {
                 CommonUtil.createDirectory(archivePath + File.separator + "WSDL");
+                String wsdlResourceExtension = APIConstants.APPLICATION_ZIP.equals(wsdlResource.getContentType()) ?
+                        APIConstants.ZIP_FILE_EXTENSION : APIConstants.WSDL_FILE_EXTENSION;
                 try (InputStream wsdlStream = wsdlResource.getContent();
                      OutputStream outputStream = new FileOutputStream(
                              archivePath + File.separator + "WSDL" + File.separator + apiIdentifier.getApiName()
-                                     + "-" + apiIdentifier.getVersion() + APIConstants.WSDL_FILE_EXTENSION)) {
+                                     + "-" + apiIdentifier.getVersion() + wsdlResourceExtension)) {
                     IOUtils.copy(wsdlStream, outputStream);
                     if (log.isDebugEnabled()) {
                         log.debug("WSDL file: " + wsdlPath + " retrieved successfully");

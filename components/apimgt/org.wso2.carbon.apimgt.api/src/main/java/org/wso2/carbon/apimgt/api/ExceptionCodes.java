@@ -163,6 +163,8 @@ public enum ExceptionCodes implements ErrorHandler {
             400, "Name of the gateway is read only"),
     GATEWAY_ENVIRONMENT_VHOST_NOT_PROVIDED(900511, "Gateway Environment virtual hosts name not provided",
             400, "Gateway Environment VHOST name not provided"),
+    INVALID_VHOST(900512, "Invalid virtual host name provided",
+            400, "Virtual host with provided vhost name does not exist"),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
@@ -534,7 +536,9 @@ public enum ExceptionCodes implements ErrorHandler {
     INTERNAL_SERVER_ERROR_FROM_KEY_MANAGER(902004, "Internal Server Error from Key Manager", 500, "Internal Server Error from Key Manager.Error from Backend : %s", true),
     REVISION_ALREADY_DEPLOYED(902005, "Revision deployment state conflicted", 409,
             "Revision deployment request conflicted with the current deployment state of the revision %s. Please try again later", false),
-    INVALID_API_ID(902006, "Invalid API ID", 404, "The provided API ID is not found %s", false);
+    INVALID_API_ID(902006, "Invalid API ID", 404, "The provided API ID is not found %s", false),
+    INVALID_ENDPOINT_CONFIG(902012, "Endpoint config value(s) is(are) not valid", 400, "Endpoint config value(s) is(are) not valid"),
+    ARTIFACT_SYNC_HTTP_REQUEST_FAILED(903009, "Error while retrieving from remote endpoint", 500, "Error while executing HTTP request to retrieve from remote endpoint");
 
     private final long errorCode;
     private final String errorMessage;

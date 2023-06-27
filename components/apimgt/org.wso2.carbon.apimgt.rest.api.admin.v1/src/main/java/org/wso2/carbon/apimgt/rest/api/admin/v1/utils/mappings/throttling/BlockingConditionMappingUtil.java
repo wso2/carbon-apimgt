@@ -44,6 +44,11 @@ public class BlockingConditionMappingUtil {
         List<BlockingConditionDTO> blockingConditionDTOList = new ArrayList<>();
         if (blockConditionList != null) {
             for (BlockConditionsDTO blockCondition : blockConditionList) {
+                // Added to skip SUBSCRIPTION type blocking conditions left after migrations since subscription blocks
+                // are no longer added to the AM_BLOCK_CONDITIONS table
+                if (APIConstants.BLOCKING_CONDITIONS_SUBSCRIPTION.equals(blockCondition.getConditionType())) {
+                    continue;
+                }
                 BlockingConditionDTO dto = fromBlockingConditionToDTO(blockCondition);
                 blockingConditionDTOList.add(dto);
             }

@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
+import org.w3c.dom.Document;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
@@ -36,9 +37,12 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManageme
 import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoaderUtil;
 import org.wso2.carbon.apimgt.impl.dto.TrustStoreDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
@@ -51,6 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -65,7 +70,16 @@ import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.Optional;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * This class holds the utility methods for certificate management.
@@ -830,8 +844,22 @@ public class CertificateMgtUtils {
                         }
                     }
                 }
-                try (OutputStreamWriter fileWriter = new FileWriter(fullPath)) {
-                    customSSLProfilesOmElement.serializeAndConsume(fileWriter);
+                try {
+                    String xml = customSSLProfilesOmElement.toString();
+                    DocumentBuilderFactory factory = APIUtil.getSecuredDocumentBuilder();
+                    DocumentBuilder builder = factory.newDocumentBuilder();
+                    Document doc = builder.parse(new InputSource(new StringReader(xml)));
+                    DOMSource source = new DOMSource(doc);
+                    StreamResult result = new StreamResult(new File(fullPath));
+                    TransformerFactory transformerFactory = TransformerFactory.newInstance();
+                    Transformer transformer = transformerFactory.newTransformer();
+                    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                    transformer.setOutputProperty(SOAPToRESTConstants.SequenceGen.INDENT_PROPERTY,
+                            SOAPToRESTConstants.SequenceGen.INDENT_VALUE);
+                    transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+                    transformer.transform(source, result);
+                } catch (ParserConfigurationException | TransformerException | SAXException e) {
+                    log.error("Error in updating sender profile truststore location.", e);
                 }
             }
         }

@@ -172,7 +172,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
                 if (log.isDebugEnabled()) {
                     log.debug("Processing WSDL file: " + absWSDLPath);
                 }
-                Definition definition = wsdlReader.readWSDL(path, getSecuredParsedDocumentFromPath(absWSDLPath));
+                Definition definition = wsdlReader.readWSDL(absWSDLPath, getSecuredParsedDocumentFromPath(absWSDLPath));
                 pathToDefinitionMap.put(absWSDLPath, definition);
 
                 // set the first found WSDL as wsdlDefinition variable assuming that it is the root WSDL

@@ -1057,7 +1057,15 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             if (StringUtils.isNotBlank(scope.getRoles()) && scope.getRoles().trim().split(",").length > 0) {
                 scopeDTO.setBindings(Arrays.asList(scope.getRoles().trim().split(",")));
             }
-            scopeClient.updateScope(scopeDTO, scope.getKey());
+            try (Response response = scopeClient.updateScope(scopeDTO, scope.getKey())) {
+                if (response.status() != HttpStatus.SC_OK) {
+                    String responseString = readHttpResponseAsString(response.body());
+                    String errorMessage =
+                            "Error occurred while updating scope: " + scope.getName() + ". Error Status: " +
+                                    response.status() + " . Error Response: " + responseString;
+                    throw new APIManagementException(errorMessage);
+                }
+            }
         } catch (KeyManagerClientException e) {
             String errorMessage = "Error occurred while updating scope: " + scopeKey;
             handleException(errorMessage, e);

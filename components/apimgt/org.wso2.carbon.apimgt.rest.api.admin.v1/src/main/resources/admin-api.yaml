@@ -4084,9 +4084,15 @@ components:
         wsPort:
           type: integer
           example: 9099
+        wsHost:
+          type: string
+          example: mg.wso2.com
         wssPort:
           type: integer
           example: 8099
+        wssHost:
+          type: string
+          example: mg.wso2.com
     AdditionalProperty:
       title: Additional Gateway Properties
       type: object

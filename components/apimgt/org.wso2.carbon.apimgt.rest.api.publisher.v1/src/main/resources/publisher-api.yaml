@@ -8592,7 +8592,7 @@ components:
           pattern: '^[^~!@#;:%^*()+={}|\\<>"'',&/$\[\]\s+\/]+$'
           example: 1.0.0
         provider:
-          maxLength: 50
+          maxLength: 200
           type: string
           description: |
             If the provider value is not given user invoking the api will be used as the provider.
@@ -8836,6 +8836,8 @@ components:
           type: string
           example: APPROVED
         createdTime:
+          type: string
+        lastUpdatedTimestamp:
           type: string
         lastUpdatedTime:
           type: string
@@ -9434,6 +9436,8 @@ components:
         createdTime:
           type: string
         lastUpdatedTime:
+          type: string
+        lastUpdatedTimestamp:
           type: string
         gatewayVendor:
           title: field to identify gateway vendor
@@ -10363,9 +10367,15 @@ components:
         wsPort:
           type: integer
           example: 9099
+        wsHost:
+          type: string
+          example: mg.wso2.com
         wssPort:
           type: integer
           example: 8099
+        wssHost:
+          type: string
+          example: mg.wso2.com
         websubHttpPort:
           type: integer
           example: 9021
@@ -11193,6 +11203,9 @@ components:
             advertiseOnly:
               type: boolean
               example: true
+            hasThumbnail:
+              type: boolean
+              example: true
     APIProductSearchResult:
       title: API Result
       allOf:
@@ -11224,6 +11237,9 @@ components:
             thumbnailUri:
               type: string
               example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+            hasThumbnail:
+              type: boolean
+              example: true
     APIMonetizationInfo:
       title: API monetization object
       required:

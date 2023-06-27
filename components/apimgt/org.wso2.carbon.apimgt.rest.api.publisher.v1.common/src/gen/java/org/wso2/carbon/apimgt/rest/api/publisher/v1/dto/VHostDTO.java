@@ -25,7 +25,9 @@ public class VHostDTO   {
     private Integer httpPort = null;
     private Integer httpsPort = null;
     private Integer wsPort = null;
+    private String wsHost = null;
     private Integer wssPort = null;
+    private String wssHost = null;
     private Integer websubHttpPort = null;
     private Integer websubHttpsPort = null;
 
@@ -116,6 +118,23 @@ public class VHostDTO   {
 
   /**
    **/
+  public VHostDTO wsHost(String wsHost) {
+    this.wsHost = wsHost;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "mg.wso2.com", value = "")
+  @JsonProperty("wsHost")
+  public String getWsHost() {
+    return wsHost;
+  }
+  public void setWsHost(String wsHost) {
+    this.wsHost = wsHost;
+  }
+
+  /**
+   **/
   public VHostDTO wssPort(Integer wssPort) {
     this.wssPort = wssPort;
     return this;
@@ -129,6 +148,23 @@ public class VHostDTO   {
   }
   public void setWssPort(Integer wssPort) {
     this.wssPort = wssPort;
+  }
+
+  /**
+   **/
+  public VHostDTO wssHost(String wssHost) {
+    this.wssHost = wssHost;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "mg.wso2.com", value = "")
+  @JsonProperty("wssHost")
+  public String getWssHost() {
+    return wssHost;
+  }
+  public void setWssHost(String wssHost) {
+    this.wssHost = wssHost;
   }
 
   /**
@@ -180,14 +216,16 @@ public class VHostDTO   {
         Objects.equals(httpPort, vhost.httpPort) &&
         Objects.equals(httpsPort, vhost.httpsPort) &&
         Objects.equals(wsPort, vhost.wsPort) &&
+        Objects.equals(wsHost, vhost.wsHost) &&
         Objects.equals(wssPort, vhost.wssPort) &&
+        Objects.equals(wssHost, vhost.wssHost) &&
         Objects.equals(websubHttpPort, vhost.websubHttpPort) &&
         Objects.equals(websubHttpsPort, vhost.websubHttpsPort);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(host, httpContext, httpPort, httpsPort, wsPort, wssPort, websubHttpPort, websubHttpsPort);
+    return Objects.hash(host, httpContext, httpPort, httpsPort, wsPort, wsHost, wssPort, wssHost, websubHttpPort, websubHttpsPort);
   }
 
   @Override
@@ -200,7 +238,9 @@ public class VHostDTO   {
     sb.append("    httpPort: ").append(toIndentedString(httpPort)).append("\n");
     sb.append("    httpsPort: ").append(toIndentedString(httpsPort)).append("\n");
     sb.append("    wsPort: ").append(toIndentedString(wsPort)).append("\n");
+    sb.append("    wsHost: ").append(toIndentedString(wsHost)).append("\n");
     sb.append("    wssPort: ").append(toIndentedString(wssPort)).append("\n");
+    sb.append("    wssHost: ").append(toIndentedString(wssHost)).append("\n");
     sb.append("    websubHttpPort: ").append(toIndentedString(websubHttpPort)).append("\n");
     sb.append("    websubHttpsPort: ").append(toIndentedString(websubHttpsPort)).append("\n");
     sb.append("}");

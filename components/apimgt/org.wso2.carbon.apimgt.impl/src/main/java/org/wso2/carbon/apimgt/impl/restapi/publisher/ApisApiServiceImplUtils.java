@@ -846,14 +846,33 @@ public class ApisApiServiceImplUtils {
             final String errorMessage = "Gateway environment not found: " + environment;
             throw new APIManagementException(errorMessage, ExceptionCodes.from(
                     ExceptionCodes.INVALID_GATEWAY_ENVIRONMENT, String.format("name '%s'", environment)));
-
         }
+
         if (mandatoryVHOST && StringUtils.isEmpty(vhost)) {
             // vhost is only required when deploying a revision, not required when un-deploying a revision
             // since the same scheme 'APIRevisionDeployment' is used for deploy and undeploy, handle it here.
             throw new APIManagementException("Required field 'vhost' not found in deployment",
                     ExceptionCodes.GATEWAY_ENVIRONMENT_VHOST_NOT_PROVIDED);
         }
+
+        List<VHost> vhosts = environments.get(environment).getVhosts();
+        boolean isVhostValidated = false;
+        for (VHost vhostItem : vhosts) {
+            //Checking the vhost is included in the available vhost list
+            if (vhostItem.getHost().equals(vhost)) {
+                isVhostValidated = true;
+            } else if (vhostItem.getWsHost().equals(vhost)) {
+                // This was added to preserve the functionality in case of Deploying a WebSocket API revision.
+                // For WebSocket APIs apiRevisionDeploymentDTO.getVhost() returns the wsHost
+                isVhostValidated = true;
+                vhost = vhostItem.getHost();
+            }
+        }
+
+        if (mandatoryVHOST && !isVhostValidated) {
+            throw new APIManagementException("Invalid Vhost: " + vhost, ExceptionCodes.INVALID_VHOST);
+        }
+
         return mapApiRevisionDeployment(revisionId, vhost, displayOnDevportal, environment);
     }
 

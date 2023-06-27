@@ -20,18 +20,20 @@ package org.wso2.carbon.apimgt.gateway.throttling.util;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
@@ -42,10 +44,10 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.DigestAuthConstants.CHARSET;
+
 public class KeyTemplateRetriever extends TimerTask {
     private static final Log log = LogFactory.getLog(KeyTemplateRetriever.class);
-    private static final int keyTemplateRetrievalTimeoutInSeconds = 15;
-    private static final int keyTemplateRetrievalRetries = 15;
 
     @Override
     public void run() {
@@ -75,36 +77,13 @@ public class KeyTemplateRetriever extends TimerTask {
             int keyMgtPort = keyMgtURL.getPort();
             String keyMgtProtocol = keyMgtURL.getProtocol();
             HttpClient httpClient = APIUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
-            HttpResponse httpResponse = null;
-            int retryCount = 0;
-            boolean retry = true;
-            do {
-                try {
-                    httpResponse = httpClient.execute(method);
-                    if (httpResponse.getStatusLine().getStatusCode() == 200) {
-                        retry = false;
-                    }
-                } catch (IOException ex) {
-                    if (retryCount >= keyTemplateRetrievalRetries) {
-                        throw ex;
-                    }else{
-                        log.warn("Failed retrieving throttling data from remote endpoint: " + ex.getMessage()
-                                + ". Retrying after " + keyTemplateRetrievalTimeoutInSeconds + " seconds...");
-                    }
-                }
-                if (retry) {
-                    if (retryCount < keyTemplateRetrievalRetries) {
-                        log.warn("Failed retrieving throttling data from remote endpoint. Retrying after "
-                                + keyTemplateRetrievalTimeoutInSeconds + " seconds...");
-                        Thread.sleep(keyTemplateRetrievalTimeoutInSeconds * 1000);
-                    } else {
-                        retry = false;
-                    }
-                    retryCount++;
-                }
-            } while (retry);
+            String responseString;
+            try (CloseableHttpResponse httpResponse = APIUtil.executeHTTPRequestWithRetries(method, httpClient)) {
+                responseString = EntityUtils.toString(httpResponse.getEntity(), CHARSET);
+            } catch (APIManagementException e) {
+                throw new DataLoadingException("Error while retrieving throttling data", e);
+            }
 
-            String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
             if (responseString != null && !responseString.isEmpty()) {
                 Object jsonObject = new JSONParser().parse(responseString);
                 if (jsonObject instanceof JSONArray) {
@@ -114,7 +93,7 @@ public class KeyTemplateRetriever extends TimerTask {
                     log.error("Invalid throttling data response: " + responseString);
                 }
             }
-        } catch (IOException | InterruptedException | ParseException e) {
+        } catch (IOException | ParseException | DataLoadingException e) {
             log.error("Exception when retrieving throttling data from remote endpoint ", e);
         }
         return null;

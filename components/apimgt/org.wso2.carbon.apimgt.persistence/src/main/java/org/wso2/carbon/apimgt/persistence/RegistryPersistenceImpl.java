@@ -350,6 +350,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiUUID);
             String lcState = ((GenericArtifactImpl) apiArtifact).getLcState();
             if (apiArtifact != null) {
+                String existingVersionComparable = apiArtifact.getAttribute(APIConstants
+                        .API_OVERVIEW_VERSION_COMPARABLE);
                 API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
                 String visibleRolesList = api.getVisibleRoles();
                 String[] visibleRoles = new String[0];
@@ -370,6 +372,16 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         ((UserRegistry) registry).getTenantId());
                 RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                         visibleRoles, apiPath);
+                GenericArtifact newArtifact = artifactManager.getGenericArtifact(apiUUID);
+                if (newArtifact != null && newArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE) == null) {
+                    if (existingVersionComparable != null) {
+                        newArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE, existingVersionComparable);
+                    } else {
+                        newArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE,
+                                String.valueOf(System.currentTimeMillis()));
+                    }
+                    artifactManager.updateGenericArtifact(newArtifact);
+                }
             }
             registry.commitTransaction();
             transactionCommitted = true;
@@ -1495,6 +1507,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 content.setVersion(pubAPI.getVersion());
                                 content.setStatus(pubAPI.getStatus());
                                 content.setAdvertiseOnly(pubAPI.isAdvertiseOnly());
+                                content.setThumbnailUri(pubAPI.getThumbnail());
                                 contentData.add(content);
                             } else {
                                 throw new GovernanceException("artifact id is null for " + resourcePath);
@@ -2132,10 +2145,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 // /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
                 // We need to remove the /t/tenanatdoman/registry/resource/_system/governance section to set
                 // permissions.
-                int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
-                String filePath = docFilePath.substring(startIndex, docFilePath.length());
-                RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, authorizedRoles, filePath,
-                        registry);
+                if (docFilePath.contains(APIConstants.GOVERNANCE)) {
+                    int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
+                    String filePath = docFilePath.substring(startIndex, docFilePath.length());
+                    RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, authorizedRoles, filePath,
+                            registry);
+                }
             }
             documentation.setId(docArtifact.getId());
             return documentation;

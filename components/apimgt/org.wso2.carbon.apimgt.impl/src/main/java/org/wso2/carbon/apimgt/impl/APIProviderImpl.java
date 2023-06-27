@@ -68,7 +68,12 @@ import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
+import org.wso2.carbon.apimgt.impl.notifier.events.KeyTemplateEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.*;
+import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.CertificateEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
@@ -766,7 +771,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateKeyManagers(api);
         String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
         String prevDefaultVersion = getDefaultVersion(api.getId());
-
+        api.setMonetizationEnabled(existingAPI.isMonetizationEnabled());
         Gson gson = new Gson();
         String organization = api.getOrganization();
         Map<String, String> oldMonetizationProperties =
@@ -3024,7 +3029,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             apiMgtDAO.addGlobalPolicy(globalPolicy);
 
-            publishKeyTemplateEvent(globalPolicy.getKeyTemplate(), "add");
+            KeyTemplateEvent keyTemplateEvent = new KeyTemplateEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                    APIConstants.EventType.CUSTOM_POLICY_ADD.name(), tenantId, tenantDomain,
+                    "add", globalPolicy.getKeyTemplate());
+            APIUtil.sendNotification(keyTemplateEvent, APIConstants.NotifierType.KEY_TEMPLATE.name());
 
             GlobalPolicy retrievedPolicy = apiMgtDAO.getGlobalPolicy(globalPolicy.getPolicyName());
             GlobalPolicyEvent globalPolicyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
@@ -3243,8 +3251,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         //publishing keytemplate after update
         if (oldKeyTemplate != null && newKeyTemplate != null) {
-            publishKeyTemplateEvent(oldKeyTemplate, "remove");
-            publishKeyTemplateEvent(newKeyTemplate, "add");
+            KeyTemplateEvent keyTemplateEvent = new KeyTemplateEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                    tenantId, tenantDomain, APIConstants.EventType.CUSTOM_POLICY_UPDATE.name(),
+                    "update", oldKeyTemplate, newKeyTemplate );
+            APIUtil.sendNotification(keyTemplateEvent, APIConstants.NotifierType.KEY_TEMPLATE.name());
         }
     }
 
@@ -3316,7 +3326,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.removeThrottlePolicy(policyLevel, policyName, tenantID);
 
         if (globalPolicy != null) {
-            publishKeyTemplateEvent(globalPolicy.getKeyTemplate(), "remove");
+            KeyTemplateEvent keyTemplateEvent = new KeyTemplateEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                    APIConstants.EventType.CUSTOM_POLICY_DELETE.name(), tenantId, tenantDomain,
+                    "remove", globalPolicy.getKeyTemplate());
+            APIUtil.sendNotification(keyTemplateEvent, APIConstants.NotifierType.KEY_TEMPLATE.name());
         }
     }
 
@@ -3560,18 +3573,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         EventPublisherEvent blockingEvent = new EventPublisherEvent(APIConstants.BLOCKING_CONDITIONS_STREAM_ID,
                 System.currentTimeMillis(), objects, blockingMessage.toString());
         APIUtil.publishEvent(EventPublisherType.BLOCKING_EVENT, blockingEvent, blockingMessage.toString());
-    }
-
-    private void publishKeyTemplateEvent(String templateValue, String state) {
-        Object[] objects = new Object[]{templateValue, state};
-        Event keyTemplateMessage = new Event(APIConstants.KEY_TEMPLATE_STREM_ID, System.currentTimeMillis(),
-                null, null, objects);
-
-        ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();
-
-        EventPublisherEvent keyTemplateEvent = new EventPublisherEvent(APIConstants.KEY_TEMPLATE_STREM_ID,
-                System.currentTimeMillis(), objects, keyTemplateMessage.toString());
-        APIUtil.publishEvent(EventPublisherType.KEY_TEMPLATE, keyTemplateEvent, keyTemplateMessage.toString());
     }
 
     public String getExternalWorkflowReferenceId(int subscriptionId) throws APIManagementException {
@@ -5099,6 +5100,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setContext(publiserAPI.getContext());
                         api.setContextTemplate(publiserAPI.getContext());
                         api.setStatus(publiserAPI.getStatus());
+                        api.setThumbnailUrl(publiserAPI.getThumbnailUri());
                         apiSet.add(api);
                     } else if ("APIProduct".equals(item.getType())) {
 
@@ -5108,6 +5110,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setUuid(publiserAPI.getId());
                         api.setContextTemplate(publiserAPI.getContext());
                         api.setState(publiserAPI.getStatus());
+                        api.setThumbnailUrl(publiserAPI.getThumbnailUri());
                         apiProductSet.add(api);
                     } else if (item instanceof DocumentSearchContent) {
                         // doc item
@@ -5446,7 +5449,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             List<APIRevisionDeployment> apiRevisionDeployments, String organization)
             throws APIManagementException {
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
-        if (organization ==  null) {
+        if (organization == null) {
             String tenantDomain = getTenantDomain(apiIdentifier);
             if (tenantDomain != null) {
                 organization = tenantDomain;

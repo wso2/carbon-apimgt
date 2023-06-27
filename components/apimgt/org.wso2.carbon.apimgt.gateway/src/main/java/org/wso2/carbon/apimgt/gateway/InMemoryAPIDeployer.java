@@ -239,7 +239,7 @@ public class InMemoryAPIDeployer {
                     if (gatewayRuntimeArtifacts.size() == errorCount) {
                         return false;
                     }
-                } catch (ArtifactSynchronizerException | AxisFault e) {
+                } catch (AxisFault e) {
                     String msg = "Error deploying APIs to the Gateway ";
                     log.error(msg, e);
                     return false;

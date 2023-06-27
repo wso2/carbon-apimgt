@@ -48,6 +48,7 @@ import javax.net.ssl.SSLContext;
 public class CommonAPIUtil {
     public static final String STRICT = "Strict";
     public static final String ALLOW_ALL = "AllowAll";
+    public static final String DEFAULT_AND_LOCALHOST = "DefaultAndLocalhost";
     public static final String HOST_NAME_VERIFIER = "httpclient.hostnameVerifier";
     public static final String HTTPS_PROTOCOL = "https";
     public static final String HTTP_PROTOCOL = "http";
