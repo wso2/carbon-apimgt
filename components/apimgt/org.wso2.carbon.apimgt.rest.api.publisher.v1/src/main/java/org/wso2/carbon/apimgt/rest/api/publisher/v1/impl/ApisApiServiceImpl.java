@@ -2186,7 +2186,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         List<String> externalStoreIdList;
         if(externalStoreIds != null){
             externalStoreIdList = Arrays.asList(externalStoreIds.split("\\s*,\\s*"));
-        }else
+        }else{
             externalStoreIdList = new ArrayList<>();
         }
         try {
