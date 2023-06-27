@@ -78,10 +78,6 @@ public class LifeCycleUtils {
             changeLifecycle(apiProvider, apiProduct, currentStatus, targetStatus);
         }
         addLCStateChangeInDatabase(user, apiTypeWrapper, currentStatus, targetStatus, uuid);
-        // Event need to be sent after database status update.
-        sendLCStateChangeNotification(apiName, apiType, apiContext, apiTypeWrapper.getId().getVersion(), targetStatus, apiTypeWrapper.getId().getProviderName(),
-                apiTypeWrapper.getId().getId(), uuid, orgId);
-
         // Remove revisions and subscriptions after API retire
         if (!apiTypeWrapper.isAPIProduct()) {
             String newStatus = (targetStatus != null) ? targetStatus.toUpperCase() : targetStatus;
@@ -98,6 +94,9 @@ public class LifeCycleUtils {
                     + ", version " + apiTypeWrapper.getId().getVersion() + ", New Status : " + targetStatus;
             log.debug(logMessage);
         }
+        // Event need to be sent after database status update.
+        sendLCStateChangeNotification(apiName, apiType, apiContext, apiTypeWrapper.getId().getVersion(), targetStatus, apiTypeWrapper.getId().getProviderName(),
+                apiTypeWrapper.getId().getId(), uuid, orgId);
         extractRecommendationDetails(apiTypeWrapper);
     }
 

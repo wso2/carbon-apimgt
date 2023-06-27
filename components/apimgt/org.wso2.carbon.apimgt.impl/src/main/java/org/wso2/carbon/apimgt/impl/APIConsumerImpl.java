@@ -930,26 +930,26 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             if (wfDTO != null) {
                 if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
+                    // inform key managers about the api subscription addition
+                    if (!isApiProduct) {
+                        updateKeyManagersWithSubscriptionAddition(subscriptionUUID, application, (APIIdentifier) identifier, apiOrgId);
+                    } // api products are not supported here
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                             System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId,
                             apiOrgId, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
                             application.getId(), application.getUUID(), identifier.getTier(), subscriptionStatus);
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-                    // inform key managers about the api subscription addition
-                    if (!isApiProduct) {
-                        updateKeyManagersWithSubscriptionAddition(subscriptionUUID, application, (APIIdentifier) identifier, apiOrgId);
-                    } // api products are not supported here
                 }
             } else {
+                // inform key managers about the api subscription addition
+                if (!isApiProduct) {
+                    updateKeyManagersWithSubscriptionAddition(subscriptionUUID, application, (APIIdentifier) identifier, apiOrgId);
+                } // api products are not supported here
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId,
                         apiOrgId, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
                         application.getId(), application.getUUID(), identifier.getTier(), subscriptionStatus);
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-                // inform key managers about the api subscription addition
-                if (!isApiProduct) {
-                    updateKeyManagersWithSubscriptionAddition(subscriptionUUID, application, (APIIdentifier) identifier, apiOrgId);
-                } // api products are not supported here
             }
 
             if (log.isDebugEnabled()) {
@@ -1431,30 +1431,30 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
             if (wfDTO != null) {
                 if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
+                    // inform key managers about the api subscription removal
+                    if (subscription.getApiId() != null) {
+                        updateKeyManagersWithSubscriptionRemoval(subscription.getUUID(), subscription.getApiId(),
+                                application, organization);
+                    } // api products are not supported here
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                             System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId,
                             organization, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
                             identifier.getUUID(), application.getId(), application.getUUID(), identifier.getTier(),
                             subscription.getSubStatus());
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-                    // inform key managers about the api subscription removal
-                    if (subscription.getApiId() != null) {
-                        updateKeyManagersWithSubscriptionRemoval(subscription.getUUID(), subscription.getApiId(),
-                                application, organization);
-                    } // api products are not supported here
                 }
             } else {
+                // inform key managers about the api subscription removal
+                if (subscription.getApiId() != null) {
+                    updateKeyManagersWithSubscriptionRemoval(subscription.getUUID(), subscription.getApiId(),
+                            application, organization);
+                } // api products are not supported here
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId,
                         organization, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
                         identifier.getUUID(), application.getId(), application.getUUID(), identifier.getTier(),
                         subscription.getSubStatus());
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-                // inform key managers about the api subscription removal
-                if (subscription.getApiId() != null) {
-                    updateKeyManagersWithSubscriptionRemoval(subscription.getUUID(), subscription.getApiId(),
-                            application, organization);
-                } // api products are not supported here
             }
         } else {
             throw new APIManagementException(String.format("Subscription for UUID:%s does not exist.",
