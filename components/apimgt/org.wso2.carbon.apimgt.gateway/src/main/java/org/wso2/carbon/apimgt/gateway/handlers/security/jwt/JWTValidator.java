@@ -80,6 +80,9 @@ public class JWTValidator {
     private APIKeyValidator apiKeyValidator;
     private boolean jwtGenerationEnabled;
     private AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator;
+    private String apiContext;
+    private String apiVersion;
+    private String applicationName;
     ExtendedJWTConfigurationDto jwtConfigurationDto;
     JWTValidationService jwtValidationService;
     private static volatile long ttl = -1L;
@@ -143,9 +146,8 @@ public class JWTValidator {
     public AuthenticationContext authenticate(SignedJWTInfo signedJWTInfo, MessageContext synCtx)
             throws APISecurityException {
 
-        String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
-        String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-
+        apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
+        apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
 
         org.apache.axis2.context.MessageContext axis2MsgContext =
                 ((Axis2MessageContext) synCtx).getAxis2MessageContext();
@@ -172,7 +174,8 @@ public class JWTValidator {
                     log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
                             getMaskedToken(jwtHeader));
                 }
-                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader) + " API Context: " +
+                        apiContext + " API Version: " + apiVersion + " Application Name: " + applicationName);
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
@@ -192,7 +195,7 @@ public class JWTValidator {
                         APIMgtGatewayConstants.APPLICATION_NAME, apiKeyValidationInfoDTO.getApplicationName()
                 );
                 synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, apiKeyValidationInfoDTO.getEndUserName());
-
+                applicationName = apiKeyValidationInfoDTO.getApplicationName();
                 if (log.isDebugEnabled()) {
                     log.debug("Subscription validation via Key Manager. Status: "
                             + apiKeyValidationInfoDTO.isAuthorized());
@@ -375,7 +378,8 @@ public class JWTValidator {
                 log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
                         getMaskedToken(jwtHeader));
             }
-            log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
+            log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader) + " API Context: " +
+                    apiContext + " API Version: " + apiVersion + " Application Name: " + applicationName);
             jwtValidationInfo.setValidationCode(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
             jwtValidationInfo.setValid(false);
         }
@@ -663,7 +667,8 @@ public class JWTValidator {
                     log.debug("Token retrieved from the invalid token cache. Token: " + GatewayUtils
                             .getMaskedToken(jwtHeader));
                 }
-                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader) + " API Context: " +
+                        apiContext + " API Version: " + apiVersion + " Application Name: " + applicationName);
 
                 jwtValidationInfo = new JWTValidationInfo();
                 jwtValidationInfo.setValidationCode(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
