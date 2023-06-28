@@ -162,7 +162,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_CATEGORY_THUMBNAIL = RESOURCE_PATH_API_CATEGORIES + "/" + APICATEGORYID_PARAM + "/thumbnail";
     public static final String REST_API_DEVELOPER_PORTAL_VERSION ="v2";
     public static final String REST_API_STORE_CONTEXT="/api/am/store/";
-    public static final String REST_API_DEVELOPER_PORTAL_CONTEXT = "api/am/devportal";
+    public static final String REST_API_DEVELOPER_PORTAL_CONTEXT = "/api/am/devportal/";
     public static final String REST_API_DEVELOPER_PORTAL_RESOURCE_PATH_SETTINGS = "/settings";
     public static final String REST_API_DEVELOPER_PORTAL_RESOURCE_PATH_TENANTS = "/tenants";
     public static final String REST_API_STORE_CONTEXT_FULL_0 = REST_API_STORE_CONTEXT + REST_API_STORE_VERSION_0;
