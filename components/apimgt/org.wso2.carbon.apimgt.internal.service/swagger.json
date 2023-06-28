@@ -674,6 +674,12 @@
           "description" : "**Search condition**.\n  Gateway Accessibility type denotes whether the gateway environment is internal or external\n",
           "required" : false,
           "type" : "string"
+        }, {
+          "name" : "systemOrganizationId",
+          "in" : "query",
+          "description" : "**Search condition**.\n  System Organization Id\n",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "200" : {
@@ -1502,8 +1508,8 @@
           "type" : "string",
           "example" : "EXCHANGED",
           "description" : "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.",
-          "default" : "DIRECT",
-          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ]
+          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ],
+          "default" : "DIRECT"
         }
       }
     },

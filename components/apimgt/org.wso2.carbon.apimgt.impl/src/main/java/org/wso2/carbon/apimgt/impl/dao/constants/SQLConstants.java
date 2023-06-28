@@ -3180,7 +3180,7 @@ public class SQLConstants {
                     "AM_GW_PUBLISHED_API_DETAILS,AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS,AM_API," +
                     "CHOREO_GW_ENV_DATA_PLANE_MAPPING,AM_GW_VHOST,AM_GATEWAY_ENVIRONMENT WHERE " +
                     "CHOREO_GW_ENV_DATA_PLANE_MAPPING.DATA_PLANE_ID = ? AND " +
-                    "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ? AND " +
+                    "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN IN (_ORGANIZATION_IDS_) AND " +
                     "AM_GW_VHOST.GATEWAY_ENV_ID=AM_GATEWAY_ENVIRONMENT.ID AND " +
                     "AM_GATEWAY_ENVIRONMENT.UUID=CHOREO_GW_ENV_DATA_PLANE_MAPPING.GATEWAY_ENV_UUID AND " +
                     "AM_GW_VHOST.HOST=AM_GW_API_DEPLOYMENTS.VHOST AND " +
@@ -3210,7 +3210,7 @@ public class SQLConstants {
                     "   AM_GATEWAY_ENVIRONMENT " +
                     "WHERE" +
                     "   CHOREO_GW_ENV_DATA_PLANE_MAPPING.DATA_PLANE_ID = ? AND" +
-                    "   AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ? AND" +
+                    "   AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN IN (_ORGANIZATION_IDS_) AND" +
                     "   AM_GATEWAY_ENVIRONMENT.ACCESSIBILITY_TYPE = ? AND" +
                     "   AM_GW_VHOST.GATEWAY_ENV_ID=AM_GATEWAY_ENVIRONMENT.ID AND" +
                     "   AM_GATEWAY_ENVIRONMENT.UUID=CHOREO_GW_ENV_DATA_PLANE_MAPPING.GATEWAY_ENV_UUID AND" +
@@ -3410,6 +3410,7 @@ public class SQLConstants {
             "FROM AM_API WHERE AM_API.API_UUID = ? AND AM_API.ORGANIZATION=?";
     public static final String GATEWAY_LABEL_REGEX = "_GATEWAY_LABELS_";
     public static final String DATA_PLANE_IDS_REGEX = "_DATA_PLANE_IDS_";
+    public static final String ORGANIZATION_IDS_REGEX = "_ORGANIZATION_IDS_";
     public static final String API_ID_REGEX = "_API_IDS_";
     public static final String API_UUID_REGEX = "_API_UUIDS_";
     public static final int API_ID_CHUNK_SIZE = 25;

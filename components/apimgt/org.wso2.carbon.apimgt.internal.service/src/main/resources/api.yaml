@@ -536,6 +536,13 @@ paths:
             **Search condition**.
               Gateway Accessibility type denotes whether the gateway environment is internal or external
           type: string
+        - name: systemOrganizationId
+          in: query
+          description: |
+            **Search condition**.
+              System Organization Id
+          type: string
+          required: false
       tags:
         - Retrieving Runtime artifacts
       responses:

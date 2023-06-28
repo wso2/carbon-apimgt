@@ -36,6 +36,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.File;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,9 +45,8 @@ import java.util.List;
 public class RetrieveRuntimeArtifactsApiServiceImpl implements RetrieveRuntimeArtifactsApiService {
 
     @Override
-    public Response retrieveRuntimeArtifactsGet(String type, String dataPlaneId, String gatewayAccessibilityType,
-                                                MessageContext messageContext)
-            throws APIManagementException {
+    public Response retrieveRuntimeArtifactsGet(String type, String dataPlaneId, String gatewayAccessibilityType, String
+            systemOrganizationId, MessageContext messageContext) throws APIManagementException {
         RuntimeArtifactDto runtimeArtifactDto;
         String organization = RestApiUtil.getOrganization(messageContext);
         if (StringUtils.isEmpty(organization)) {
@@ -59,7 +59,12 @@ public class RetrieveRuntimeArtifactsApiServiceImpl implements RetrieveRuntimeAr
             runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(dataPlaneId,
                     gatewayAccessibilityType, type);
         } else {
-            runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(organization, dataPlaneId,
+            ArrayList<String> organizations = new ArrayList<>();
+            organizations.add(organization);
+            if (systemOrganizationId != null) {
+                organizations.add(systemOrganizationId);
+            }
+            runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(organizations, dataPlaneId,
                     gatewayAccessibilityType, type);
         }
         if (runtimeArtifactDto != null) {

@@ -45,6 +45,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.ArrayList;
 
 public class RuntimeArtifactGeneratorUtil {
 
@@ -243,8 +244,7 @@ public class RuntimeArtifactGeneratorUtil {
         }
     }
 
-    public static RuntimeArtifactDto generateAllRuntimeArtifact(String organization, String dataPlaneId,
-                                                                String gatewayAccessibilityType, String type)
+    public static RuntimeArtifactDto generateAllRuntimeArtifact(ArrayList<String> organizations, String dataPlaneId, String gatewayAccessibilityType, String type)
             throws APIManagementException {
 
         GatewayArtifactGenerator gatewayArtifactGenerator =
@@ -253,10 +253,10 @@ public class RuntimeArtifactGeneratorUtil {
             List<APIRuntimeArtifactDto> gatewayArtifacts;
             if (gatewayAccessibilityType == null) {
                 gatewayArtifacts = choreoGatewayArtifactsMgtDAO
-                        .retrieveAllGatewayArtifactsByOrganizationAndDataPlaneId(organization, dataPlaneId);
+                        .retrieveAllGatewayArtifactsByOrganizationAndDataPlaneId(organizations, dataPlaneId);
             } else {
                 gatewayArtifacts = choreoGatewayArtifactsMgtDAO
-                        .retrieveAllGatewayArtifactsByOrganizationAndDataPlaneId(organization, dataPlaneId,
+                        .retrieveAllGatewayArtifactsByOrganizationAndDataPlaneId(organizations, dataPlaneId,
                                 gatewayAccessibilityType);
             }
             if (gatewayArtifacts != null) {
