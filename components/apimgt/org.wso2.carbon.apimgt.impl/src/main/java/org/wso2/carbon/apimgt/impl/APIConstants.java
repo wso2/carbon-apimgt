@@ -1966,6 +1966,18 @@ public final class APIConstants {
         public static final String TYPE = "Type";
     }
 
+    public static class CustomPropertyAttributes {
+        public static final String PROPERTY_CONFIGURATIONS = "PropertyConfigurations";
+        public static final String CUSTOM_PROPERTIES = "CustomProperties";
+        public static final String PROPERTIES = "Properties";
+        public static final String PROPERTY = "Property";
+        public static final String REQUIRED = "Required";
+        public static final String HIDDEN = "Hidden";
+        public static final String DESCRIPTION = "Description";
+        public static final String DEFAULT = "Default";
+        public static final String NAME = "Name";
+    }
+
     public static final String REGISTRY_ARTIFACT_SEARCH_DESC_ORDER = "DES";
     public static final String REGISTRY_ARTIFACT_SORT_BY_CREATED_TIME = "meta_created_date";
 
