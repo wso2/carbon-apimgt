@@ -2975,6 +2975,10 @@ public final class APIConstants {
     public static final String API_TEST_KEY_VALIDITY_EXP = "Exp";
     public static final String DEFAULT_API_TEST_KEY_VALIDITY = "600";
 
+    // Constants related to choreo system organization
+    public static final String CHOREO_SYSTEM_ORGANIZATION = "ChoreoSystemOrganization";
+    public static final String ORGANIZATION_UUID = "Uuid";
+
     public static final String DEVELOPMENT_ENV = "development";
     public static final String PRODUCTION_ENV = "production";
 

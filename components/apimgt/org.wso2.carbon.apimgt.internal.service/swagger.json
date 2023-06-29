@@ -675,11 +675,11 @@
           "required" : false,
           "type" : "string"
         }, {
-          "name" : "systemOrganizationId",
+          "name" : "isIncludeSystemOrganizationArtifacts",
           "in" : "query",
-          "description" : "**Search condition**.\n  System Organization Id\n",
+          "description" : "Whether to include system org API artifacts\n",
           "required" : false,
-          "type" : "string"
+          "type" : "boolean"
         } ],
         "responses" : {
           "200" : {

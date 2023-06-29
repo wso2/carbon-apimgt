@@ -24,6 +24,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.RuntimeArtifactGeneratorUtil;
 import org.wso2.carbon.apimgt.internal.service.RetrieveRuntimeArtifactsApiService;
@@ -45,8 +46,8 @@ import java.util.List;
 public class RetrieveRuntimeArtifactsApiServiceImpl implements RetrieveRuntimeArtifactsApiService {
 
     @Override
-    public Response retrieveRuntimeArtifactsGet(String type, String dataPlaneId, String gatewayAccessibilityType, String
-            systemOrganizationId, MessageContext messageContext) throws APIManagementException {
+    public Response retrieveRuntimeArtifactsGet(String type, String dataPlaneId, String gatewayAccessibilityType, Boolean
+            isIncludeSystemOrganizationArtifacts, MessageContext messageContext) throws APIManagementException {
         RuntimeArtifactDto runtimeArtifactDto;
         String organization = RestApiUtil.getOrganization(messageContext);
         if (StringUtils.isEmpty(organization)) {
@@ -61,8 +62,8 @@ public class RetrieveRuntimeArtifactsApiServiceImpl implements RetrieveRuntimeAr
         } else {
             ArrayList<String> organizations = new ArrayList<>();
             organizations.add(organization);
-            if (systemOrganizationId != null) {
-                organizations.add(systemOrganizationId);
+            if (isIncludeSystemOrganizationArtifacts != null && isIncludeSystemOrganizationArtifacts) {
+                organizations.add(APIManagerConfiguration.getChoreoSystemOrganization());
             }
             runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(organizations, dataPlaneId,
                     gatewayAccessibilityType, type);

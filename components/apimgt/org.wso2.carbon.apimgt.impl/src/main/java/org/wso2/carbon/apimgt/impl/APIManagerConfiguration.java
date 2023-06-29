@@ -172,6 +172,18 @@ public class APIManagerConfiguration {
 
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = new GatewayArtifactSynchronizerProperties();;
 
+    public static String getChoreoSystemOrganization() {
+        return choreoSystemOrganization;
+    }
+
+    public static void setChoreoSystemOrganization(String choreoSystemOrganization) {
+        APIManagerConfiguration.choreoSystemOrganization = choreoSystemOrganization;
+    }
+
+    private static String choreoSystemOrganization;
+
+
+
     /**
      * Returns the configuration of the Identity Provider.
      *
@@ -575,7 +587,15 @@ public class APIManagerConfiguration {
                 setRestApiJWTAuthAudiences(element);
             } else if (APIConstants.API_TEST_KEY_CONFIGURATIONS.equals(localName)) {
                 setAPITestKeyValidity(element);
-            }
+            } else if (APIConstants.CHOREO_SYSTEM_ORGANIZATION.equals(localName)) {
+                OMElement organizationUuid = element.getFirstChildWithName(new QName(APIConstants.ORGANIZATION_UUID));
+                if (organizationUuid != null) {
+                    String uuid = organizationUuid.getText();
+                    setChoreoSystemOrganization(uuid);
+                } else {
+                    log.warn("Choreo System Organization UUID is not defined.");
+                }
+            } 
             readChildElements(element, nameStack);
             nameStack.pop();
         }
