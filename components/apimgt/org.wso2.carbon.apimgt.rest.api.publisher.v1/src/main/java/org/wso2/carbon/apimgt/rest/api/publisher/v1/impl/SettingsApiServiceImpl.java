@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import org.wso2.carbon.apimgt.impl.restapi.publisher.SettingsApiServiceImplUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.SettingsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
@@ -54,6 +55,7 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO(isUserAvailable, organization);
             settingsDTO.setScopes(getScopeList());
+            settingsDTO.setCustomProperties(APIUtil.getCustomProperties(username));
             return Response.ok().entity(settingsDTO).build();
         } catch (APIManagementException | IOException e) {
             String errorMessage = "Error while retrieving Publisher Settings";

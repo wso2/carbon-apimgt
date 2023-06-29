@@ -175,6 +175,8 @@ public class APIManagerConfiguration {
 
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = new GatewayArtifactSynchronizerProperties();;
 
+    private JSONArray customProperties = new JSONArray();
+
     /**
      * Returns the configuration of the Identity Provider.
      *
@@ -571,6 +573,35 @@ public class APIManagerConfiguration {
                 setExtensionListenerConfigurations(element);
             } else if (APIConstants.JWT_AUDIENCES.equals(localName)){
                 setRestApiJWTAuthAudiences(element);
+            } else if (APIConstants.CustomPropertyAttributes.CUSTOM_PROPERTIES.equals(localName)) {
+                Iterator iterator = element.getChildrenWithLocalName(APIConstants.CustomPropertyAttributes.PROPERTY);
+                while (iterator.hasNext()) {
+                    OMElement omElement = (OMElement) iterator.next();
+                    Iterator attributes = omElement.getChildElements();
+                    JSONObject jsonObject = new JSONObject();
+                    boolean isHidden = Boolean.parseBoolean(
+                            omElement.getAttributeValue(new QName(APIConstants.CustomPropertyAttributes.HIDDEN)));
+                    boolean isRequired =
+                            Boolean.parseBoolean(omElement
+                                    .getAttributeValue(new QName(APIConstants.CustomPropertyAttributes.REQUIRED)));
+                    jsonObject.put(APIConstants.CustomPropertyAttributes.HIDDEN, isHidden);
+                    while (attributes.hasNext()) {
+                        OMElement attribute = (OMElement) attributes.next();
+                        if (attribute.getLocalName().equals(APIConstants.CustomPropertyAttributes.NAME)) {
+                            jsonObject.put(APIConstants.CustomPropertyAttributes.NAME, attribute.getText());
+                        } else if (attribute.getLocalName().equals(APIConstants.CustomPropertyAttributes.DESCRIPTION)) {
+                            jsonObject.put(APIConstants.CustomPropertyAttributes.DESCRIPTION, attribute.getText());
+                        } else if (attribute.getLocalName().equals(APIConstants.CustomPropertyAttributes.DEFAULT) &&
+                                isRequired) {
+                            jsonObject.put(APIConstants.CustomPropertyAttributes.DEFAULT, attribute.getText());
+                        }
+                    }
+                    if (isHidden && isRequired && !jsonObject.containsKey(APIConstants.CustomPropertyAttributes.DEFAULT)) {
+                        log.error("A default value needs to be given for required, hidden custom property attributes.");
+                    }
+                    jsonObject.put(APIConstants.CustomPropertyAttributes.REQUIRED, isRequired);
+                    customProperties.add(jsonObject);
+                }
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -857,6 +888,11 @@ public class APIManagerConfiguration {
     public JSONArray getApplicationAttributes() {
 
         return applicationAttributes;
+    }
+
+    public JSONArray getCustomProperties() {
+
+        return customProperties;
     }
 
     /**
