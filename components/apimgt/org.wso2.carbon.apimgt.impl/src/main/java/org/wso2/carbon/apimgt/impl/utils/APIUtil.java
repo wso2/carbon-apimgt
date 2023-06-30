@@ -9378,6 +9378,33 @@ public final class APIUtil {
         return defaultReservedUsername;
     }
 
+    public static JSONArray getCustomProperties(String userId) throws APIManagementException {
+
+        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
+
+        JSONArray customPropertyAttributes = null;
+        JSONObject propertyConfig = getMandatoryPropertyKeysFromRegistry(tenantDomain);
+        if (propertyConfig != null) {
+            customPropertyAttributes = (JSONArray) propertyConfig.get(APIConstants.CustomPropertyAttributes.PROPERTIES);
+        } else {
+            APIManagerConfiguration apiManagerConfiguration =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            customPropertyAttributes = apiManagerConfiguration.getCustomProperties();
+        }
+        return customPropertyAttributes;
+    }
+
+    public static JSONObject getMandatoryPropertyKeysFromRegistry(String organization) throws APIManagementException {
+
+        JSONObject tenantConfigs = getTenantConfig(organization);
+        String property = APIConstants.CustomPropertyAttributes.PROPERTY_CONFIGURATIONS;
+        if (tenantConfigs.keySet().contains(property)) {
+            return (JSONObject) tenantConfigs.get(
+                    APIConstants.CustomPropertyAttributes.PROPERTY_CONFIGURATIONS);
+        }
+        return null;
+    }
+
     public static boolean isDefaultApplicationCreationEnabled() {
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();

@@ -1504,4 +1504,18 @@
           <CorrelationLogComponent>{{component}}</CorrelationLogComponent>
       {% endfor %}
       </CorrelationLogComponents>
+
+      {% if apim.publisher.custom_properties is defined %}
+        <PropertyConfigurations>
+            <CustomProperties>
+                {% for property in apim.publisher.custom_properties %}
+                <Property Required="{{property.required}}" Hidden="{{property.hidden}}">
+                    <Name>{{property.name}}</Name>
+                    <Description>{{property.description}}</Description>
+                    <Default>{{property.default}}</Default>
+                </Property>
+                {% endfor %}
+            </CustomProperties>
+        </PropertyConfigurations>
+      {% endif %}
 </APIManager>
