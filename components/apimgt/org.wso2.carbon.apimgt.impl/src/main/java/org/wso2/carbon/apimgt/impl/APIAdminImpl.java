@@ -93,8 +93,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -115,6 +117,20 @@ public class APIAdminImpl implements APIAdmin {
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
     protected ApiMgtDAO apiMgtDAO;
     protected ChoreoApiMgtDAO choreoApiMgtDAO;
+
+    private static final String[] requiredConfigurationsForExternalKeyManagers = {
+            APIConstants.KeyManager.ISSUER,
+            APIConstants.KeyManager.CONSUMER_KEY_CLAIM,
+            APIConstants.KeyManager.SCOPES_CLAIM,
+            APIConstants.KeyManager.CERTIFICATE_TYPE,
+            APIConstants.KeyManager.CERTIFICATE_VALUE
+    };
+
+    private static final String[] requiredEndpointConfigurationsForExternalKeyManagers = {
+            APIConstants.KeyManager.AUTHORIZE_ENDPOINT,
+            APIConstants.KeyManager.TOKEN_ENDPOINT,
+            APIConstants.KeyManager.REVOKE_ENDPOINT
+    };
 
     public APIAdminImpl() {
         apiMgtDAO = ApiMgtDAO.getInstance();
@@ -555,10 +571,20 @@ public class APIAdminImpl implements APIAdmin {
                     "Key manager Already Exist by Name " + keyManagerConfigurationDTO.getName() + " in tenant " +
                             keyManagerConfigurationDTO.getOrganization(), ExceptionCodes.KEY_MANAGER_ALREADY_EXIST);
         }
-        if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
+        if (KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
+                .equals(KeyManagerConfiguration.TokenType.EXTERNAL)) {
+            validateExternalKeyManagerConfiguration(keyManagerConfigurationDTO);
+            validateExternalKeyManagerEndpointConfiguration(keyManagerConfigurationDTO);
+        } else if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
                 .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
             validateKeyManagerConfiguration(keyManagerConfigurationDTO);
             validateKeyManagerEndpointConfiguration(keyManagerConfigurationDTO);
+        }
+        if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
+                .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
+            validateKeyManagerIssuerUniqueness(keyManagerConfigurationDTO.getOrganization(),
+                    String.valueOf(keyManagerConfigurationDTO.getAdditionalProperties()
+                            .get(APIConstants.KeyManager.ISSUER)));
         }
         if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
                 keyManagerConfigurationDTO.getTokenType()) ||
@@ -627,6 +653,31 @@ public class APIAdminImpl implements APIAdmin {
                             + " is/are required",
                             ExceptionCodes.from(ExceptionCodes.REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING, missingConfigs));
                 }
+            }
+        }
+    }
+
+    private void validateExternalKeyManagerEndpointConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException {
+        List<String> missingRequiredConfigurations = new ArrayList<>();
+        for (String configuration : requiredEndpointConfigurationsForExternalKeyManagers) {
+            if (!keyManagerConfigurationDTO.getEndpoints().containsKey(configuration)) {
+                missingRequiredConfigurations.add(configuration);
+                continue;
+            }
+        }
+        if (!missingRequiredConfigurations.isEmpty()) {
+            String missingConfigs = String.join(",", missingRequiredConfigurations);
+            throw new APIManagementException("Key Manager Endpoint Configuration value for " + missingConfigs
+                    + " is/are required",
+                    ExceptionCodes.from(ExceptionCodes.REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING, missingConfigs));
+        }
+        for (String configuration: requiredEndpointConfigurationsForExternalKeyManagers) {
+            // if the endpoint is not a valid URL,then throw an APIManagementException
+            if (!APIUtil.isValidURL(keyManagerConfigurationDTO.getEndpoints().get(configuration))) {
+                throw new APIManagementException("Key Manager Endpoint Configuration value for " + configuration
+                        + " is not a valid URL",
+                        ExceptionCodes.from(ExceptionCodes.INVALID_KEY_MANAGER_ENDPOINTS, configuration));
             }
         }
     }
@@ -725,14 +776,39 @@ public class APIAdminImpl implements APIAdmin {
     public KeyManagerConfigurationDTO updateKeyManagerConfiguration(
             KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
-        if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
-                .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
+        KeyManagerConfiguration.TokenType keyManagerTokenType =
+                KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase());
+        if (keyManagerTokenType.equals(KeyManagerConfiguration.TokenType.EXTERNAL)) {
+            validateExternalKeyManagerConfiguration(keyManagerConfigurationDTO);
+            validateExternalKeyManagerEndpointConfiguration(keyManagerConfigurationDTO);
+        }else if (!keyManagerTokenType.equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
             validateKeyManagerConfiguration(keyManagerConfigurationDTO);
             validateKeyManagerEndpointConfiguration(keyManagerConfigurationDTO);
         }
+
         KeyManagerConfigurationDTO oldKeyManagerConfiguration =
                 apiMgtDAO.getKeyManagerConfigurationByID(keyManagerConfigurationDTO.getOrganization(),
                         keyManagerConfigurationDTO.getUuid());
+        if (oldKeyManagerConfiguration == null) {
+            throw new APIManagementException("Key Manager Configuration not found for ID: "
+                    + keyManagerConfigurationDTO.getUuid(), ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+        }
+        if (KeyManagerConfiguration.TokenType.EXTERNAL.equals(keyManagerTokenType)
+                ^ KeyManagerConfiguration.TokenType.EXTERNAL.equals(
+                        KeyManagerConfiguration.TokenType.valueOf(oldKeyManagerConfiguration.getTokenType()
+                                .toUpperCase()))) {
+            throw new APIManagementException("Cannot switch between tokenType when " +
+                    "the Key Manager's Token Type is External", ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+        }
+        if (!keyManagerTokenType.equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
+            // If the issuer is changed compared to old Key manager's configuration.
+            if (!Objects.equals(oldKeyManagerConfiguration.getAdditionalProperties().get(APIConstants.KeyManager.ISSUER),
+                    keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.KeyManager.ISSUER))) {
+                validateKeyManagerIssuerUniqueness(keyManagerConfigurationDTO.getOrganization(),
+                        String.valueOf(oldKeyManagerConfiguration.getAdditionalProperties()
+                                .get(APIConstants.KeyManager.ISSUER)));
+            }
+        }
         if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
                 keyManagerConfigurationDTO.getTokenType()) ||
                 StringUtils.equals(KeyManagerConfiguration.TokenType.BOTH.toString(),
@@ -1069,6 +1145,40 @@ public class APIAdminImpl implements APIAdmin {
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         Map<String, Object> result = apiProvider.searchPaginatedAPIs(searchQuery, tenantDomain, 0, Integer.MAX_VALUE, null, null);
         return (int) (Integer) result.get("length");
+    }
+
+    private void validateExternalKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException {
+
+        if (StringUtils.isEmpty(keyManagerConfigurationDTO.getName())) {
+            throw new APIManagementException("Key Manager Name can't be empty", ExceptionCodes.KEY_MANAGER_NAME_EMPTY);
+        }
+        List<String> missingRequiredConfigurations = new ArrayList<>();
+        for (String property : requiredConfigurationsForExternalKeyManagers) {
+            if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                    .containsKey(property)) {
+                missingRequiredConfigurations.add(property);
+            }
+        }
+        if (!missingRequiredConfigurations.isEmpty()) {
+            throw new APIManagementException("Key Manager Configuration value for " + String.join(",",
+                    missingRequiredConfigurations) + " is/are required",
+                    ExceptionCodes.from(ExceptionCodes.REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING,
+                            String.join(",", missingRequiredConfigurations)));
+        }
+        // if the certificate type is not JWKS return API Management Exception
+        if (!APIConstants.KeyManager.CERTIFICATE_TYPE_JWKS_ENDPOINT
+                .equals(keyManagerConfigurationDTO.getAdditionalProperties()
+                        .get(APIConstants.KeyManager.CERTIFICATE_TYPE))) {
+            throw new APIManagementException("Invalid certificate type. Only JWKS is supported",
+                    ExceptionCodes.from(ExceptionCodes.INVALID_KEY_MANAGER_PROPERTIES, "certificates.type"));
+        }
+        // if the certificate value is not a valid URL return API Management Exception
+        if (!APIUtil.isValidURL(String.valueOf(keyManagerConfigurationDTO.getAdditionalProperties()
+                .get(APIConstants.KeyManager.CERTIFICATE_VALUE)))) {
+            throw new APIManagementException("Invalid JWKS URL is provided. Only valid URLs are supported",
+                    ExceptionCodes.from(ExceptionCodes.INVALID_KEY_MANAGER_PROPERTIES, "certificates.value"));
+        }
     }
 
     private void validateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
@@ -1565,5 +1675,18 @@ public class APIAdminImpl implements APIAdmin {
 
         Gson gson = new Gson();
         return gson.fromJson(gson.toJson(identityProvider), IdentityProvider.class);
+    }
+
+    private void validateKeyManagerIssuerUniqueness(String organization, String issuer)
+            throws APIManagementException {
+        List<KeyManagerConfigurationDTO> keyManagerList =
+                apiMgtDAO.getKeyManagerConfigurationsByOrganization(organization);
+        for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerList) {
+            if (StringUtils.equals(issuer,
+                    keyManagerConfigurationDTO.getProperty(APIConstants.KeyManager.ISSUER).toString())) {
+                throw new APIManagementException("Issuer already exists for the organization " + organization,
+                        ExceptionCodes.from(ExceptionCodes.ISSUER_ALREADY_EXISTS, issuer));
+            }
+        }
     }
 }

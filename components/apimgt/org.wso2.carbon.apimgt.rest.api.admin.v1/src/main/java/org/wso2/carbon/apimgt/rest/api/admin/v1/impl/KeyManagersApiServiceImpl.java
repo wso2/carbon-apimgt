@@ -145,7 +145,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
     public Response keyManagersPost(KeyManagerDTO body, MessageContext messageContext) throws APIManagementException {
 
-        String organization = RestApiUtil.getOrganization(messageContext);
+        // TODO: (VirajSalaka) with asgardeo we already have a keymanager per org.
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =

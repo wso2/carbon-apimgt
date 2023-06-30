@@ -1212,6 +1212,7 @@ definitions:
           - EXCHANGED
           - DIRECT
           - BOTH
+          - EXTERNAL
 
   #-----------------------------------------------------
   # The Subscription List resource

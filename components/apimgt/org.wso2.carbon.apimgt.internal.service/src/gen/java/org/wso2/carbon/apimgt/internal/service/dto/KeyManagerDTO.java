@@ -28,7 +28,8 @@ public class KeyManagerDTO   {
     public enum TokenTypeEnum {
         EXCHANGED("EXCHANGED"),
         DIRECT("DIRECT"),
-        BOTH("BOTH");
+        BOTH("BOTH"),
+        EXTERNAL("EXTERNAL");
         private String value;
 
         TokenTypeEnum (String v) {

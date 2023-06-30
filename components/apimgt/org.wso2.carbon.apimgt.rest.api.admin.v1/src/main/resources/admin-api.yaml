@@ -4615,6 +4615,7 @@ components:
             - EXCHANGED
             - DIRECT
             - BOTH
+            - EXTERNAL
 
     KeyManagerEndpoint:
       title: Key Manager Endpoint.

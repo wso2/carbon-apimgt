@@ -417,7 +417,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "required configurations: %s"),
     KEY_MANAGER_ALREADY_EXIST(901402, "Key Manager Already Exists", 409, "Key Manager Already Exists"),
     KEY_MANAGER_NOT_REGISTERED(901403, "Key Manager not Registered", 400, "Key Manager not Registered"),
-    KEY_MANAGER_NOT_FOUND(901411, "Key Manager not Found", 404, "Key Manager not found"),
+    KEY_MANAGER_NOT_FOUND(901411, "Key Manager not Found", 400, "Key Manager not found"),
     KEY_MANAGER_NAME_EMPTY(901404,
             "Key Manager name cannot be empty", 400,"Key Manager name cannot be empty"),
     KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION(901405, "Key Manager doesn't support generating OAuth applications", 400,
@@ -433,6 +433,12 @@ public enum ExceptionCodes implements ErrorHandler {
     TENANT_MISMATCH(901409,"Tenant mismatch", 400, "Tenant mismatch"),
     INVALID_APPLICATION_PROPERTIES(901410, "Invalid additional properties", 400,
             "Invalid additional properties given for application"),
+    ISSUER_ALREADY_EXISTS(901411, "Key Manager issuer already exists", 400,
+            "Key Manager issuer %s already exists under the organization"),
+    INVALID_KEY_MANAGER_ENDPOINTS(901412, "Invalid Endpoints provided", 400,
+            "Malformed URLs are provide under endpoint: %s"),
+    INVALID_KEY_MANAGER_PROPERTIES(901413, "Invalid properties provided", 400,
+            "Invalid value is provided for the property: %s"),
 
     //Scope related
     SCOPE_NOT_FOUND_FOR_USER(901500, "Scope does not belong to this user", 404, "Scope not found"),
