@@ -31,7 +31,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -264,6 +266,51 @@ public class ChoreoApiMgtDAO {
                     "for EnvironmentsSet: %s of Organization: %s", environmentsSet, organization), e);
         }
         return envToGatewayAccessibilityTypeMap;
+    }
+
+    /**
+     * Retrieves dataPlaneID & GatewayAccessibilityType for a given environment(name)
+     *
+     * @param environment  name of the environment
+     * @param organization organization ID of the environment
+     * @return a map containing dataPlaneID & GatewayAccessibilityType for a given environment
+     * @throws APIManagementException
+     */
+    public Map<String, String> getEnvDetailsForDeployEvent(String environment, String organization)
+        throws APIManagementException {
+        Map<String, String> envDetailsMap = new HashMap<>();
+        if (environment == null || environment.equals("")) {
+            return envDetailsMap;
+        }
+        Map<String, Environment> readOnlyEnvironments = APIUtil.getReadOnlyEnvironments();
+
+        // check if the environment is in the read-only environments list
+        if (readOnlyEnvironments.containsKey(environment)) {
+            Environment readOnlyEnv = readOnlyEnvironments.get(environment);
+            envDetailsMap.put("dataPlaneID", readOnlyEnv.getDataPlaneId());
+            envDetailsMap.put("gatewayAccessibilityType", readOnlyEnv.getAccessibilityType());
+            return envDetailsMap;
+        }
+
+        // check if the environment is in the DB
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement prepStmt =
+                         connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_DETAILS_MAPPING_SQL)) {
+                prepStmt.setString(1, environment);
+                prepStmt.setString(2, organization);
+                try (ResultSet rs = prepStmt.executeQuery()) {
+                    if (rs.next()) {
+                        envDetailsMap.put("dataPlaneID", rs.getString("DATA_PLANE_ID"));
+                        envDetailsMap.put("gatewayAccessibilityType", rs.getString("ACCESSIBILITY_TYPE"));
+                        return envDetailsMap;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Failed to get Environment details for Environment: "
+                    + environment + " of Organization: " + organization, e);
+        }
+        return envDetailsMap;
     }
 
     /**

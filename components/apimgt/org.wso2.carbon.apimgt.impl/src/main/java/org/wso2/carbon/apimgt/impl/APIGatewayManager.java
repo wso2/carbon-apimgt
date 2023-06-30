@@ -66,7 +66,8 @@ public class APIGatewayManager {
 
     private void sendDeploymentEvent(API api, String tenantDomain, Set<String> publishedGateways,
                                      Map<String, String> envToDataPlaneIdMap,
-                                     Map<String, String> envToGatewayAccessibilityTypeMap) {
+                                     Map<String, String> envToGatewayAccessibilityTypeMap,
+                                     Map<String, Map<String,String>> envDetails) {
 
         APIIdentifier apiIdentifier = api.getId();
         DeployAPIInGatewayEvent deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(
@@ -83,7 +84,8 @@ public class APIGatewayManager {
                 api.getType(),
                 api.getContext(),
                 envToDataPlaneIdMap,
-                envToGatewayAccessibilityTypeMap
+                envToGatewayAccessibilityTypeMap,
+                envDetails
         );
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
         if (debugEnabled) {
@@ -94,7 +96,8 @@ public class APIGatewayManager {
 
     private void sendDeploymentEvent(APIProduct api, String tenantDomain, Set<String> publishedGateways,
                                      Map<String, String> envToDataPlaneIdMap,
-                                     Map<String, String> envToGatewayAccessibilityTypeMap) {
+                                     Map<String, String> envToGatewayAccessibilityTypeMap,
+                                     Map<String, Map<String,String>> envDetails) {
 
         APIProductIdentifier apiIdentifier = api.getId();
         DeployAPIInGatewayEvent deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(
@@ -111,7 +114,8 @@ public class APIGatewayManager {
                 api.getType(),
                 api.getContext(),
                 envToDataPlaneIdMap,
-                envToGatewayAccessibilityTypeMap
+                envToGatewayAccessibilityTypeMap,
+                envDetails
         );
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
         if (debugEnabled) {
@@ -122,7 +126,8 @@ public class APIGatewayManager {
 
     private void sendUnDeploymentEvent(API api, String tenantDomain, Set<String> removedGateways,
                                        Map<String, String> envToDataPlaneIdMap,
-                                       Map<String, String> envToGatewayAccessibilityTypeMap) {
+                                       Map<String, String> envToGatewayAccessibilityTypeMap,
+                                       Map<String, Map<String,String>> envDetails) {
         APIIdentifier apiIdentifier = api.getId();
 
         DeployAPIInGatewayEvent deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(
@@ -139,7 +144,8 @@ public class APIGatewayManager {
                 api.getType(),
                 api.getContext(),
                 envToDataPlaneIdMap,
-                envToGatewayAccessibilityTypeMap
+                envToGatewayAccessibilityTypeMap,
+                envDetails
         );
         APIUtil.sendNotification(deployAPIInGatewayEvent,
                 APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
@@ -148,7 +154,8 @@ public class APIGatewayManager {
 
     private void sendUnDeploymentEvent(APIProduct apiProduct, String tenantDomain, Set<String> removedGateways,
                                        Set<API> associatedAPIs, Map<String, String> envToDataPlaneIdMap,
-                                       Map<String, String> envToGatewayAccessibilityTypeMap) {
+                                       Map<String, String> envToGatewayAccessibilityTypeMap,
+                                       Map<String, Map<String,String>> envDetails) {
 
         APIProductIdentifier apiProductIdentifier = apiProduct.getId();
         Set<APIEvent> apiEvents = transformAPIToAPIEvent(associatedAPIs);
@@ -167,43 +174,51 @@ public class APIGatewayManager {
                 apiProduct.getContext(),
                 apiEvents,
                 envToDataPlaneIdMap,
-                envToGatewayAccessibilityTypeMap
+                envToGatewayAccessibilityTypeMap,
+                envDetails
         );
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
     }
 
     public void deployToGateway(API api, String tenantDomain, Set<String> gatewaysToPublish,
                                 Map<String, String> envToDataPlaneIdMap,
-                                Map<String, String> envToGatewayAccessibilityTypeMap) {
+                                Map<String, String> envToGatewayAccessibilityTypeMap,
+                                Map<String, Map<String,String>> envDetails) {
 
         if (debugEnabled) {
             log.debug("Status of " + api.getId() + " has been updated to DB");
         }
-        sendDeploymentEvent(api, tenantDomain, gatewaysToPublish, envToDataPlaneIdMap, envToGatewayAccessibilityTypeMap);
+        sendDeploymentEvent(api, tenantDomain, gatewaysToPublish, envToDataPlaneIdMap, envToGatewayAccessibilityTypeMap,
+                envDetails);
     }
 
     public void deployToGateway(APIProduct api, String tenantDomain, Set<String> gatewaysToPublish,
                                 Map<String, String> envToDataPlaneIdMap,
-                                Map<String, String> envToGatewayAccessibilityTypeMap) {
+                                Map<String, String> envToGatewayAccessibilityTypeMap,
+                                Map<String, Map<String,String>> envDetails) {
         if (debugEnabled) {
             log.debug("Status of " + api.getId() + " has been updated to DB");
         }
-        sendDeploymentEvent(api, tenantDomain, gatewaysToPublish, envToDataPlaneIdMap, envToGatewayAccessibilityTypeMap);
+        sendDeploymentEvent(api, tenantDomain, gatewaysToPublish, envToDataPlaneIdMap, envToGatewayAccessibilityTypeMap,
+                envDetails);
     }
 
     public void unDeployFromGateway(API api, String tenantDomain, Set<String> gatewaysToRemove,
                                     Map<String, String> envToDataPlaneIdMap,
-                                    Map<String, String> envToGatewayAccessibilityTypeMap) {
+                                    Map<String, String> envToGatewayAccessibilityTypeMap,
+                                    Map<String, Map<String,String>> envDetails) {
 
         if (debugEnabled) {
             log.debug("Status of " + api.getId() + " has been updated to DB");
         }
-        sendUnDeploymentEvent(api, tenantDomain, gatewaysToRemove, envToDataPlaneIdMap, envToGatewayAccessibilityTypeMap);
+        sendUnDeploymentEvent(api, tenantDomain, gatewaysToRemove, envToDataPlaneIdMap, envToGatewayAccessibilityTypeMap,
+                envDetails);
     }
 
     public void unDeployFromGateway(APIProduct apiProduct, String tenantDomain, Set<API> associatedAPIs,
                                     Set<String> gatewaysToRemove, Map<String, String> envToDataPlaneIdMap,
-                                    Map<String, String> envToGatewayAccessibilityTypeMap)
+                                    Map<String, String> envToGatewayAccessibilityTypeMap,
+                                    Map<String, Map<String,String>> envDetails)
             throws APIManagementException {
         String apiProductUuid = apiProduct.getUuid();
         APIProductIdentifier apiProductIdentifier = apiProduct.getId();
@@ -223,7 +238,7 @@ public class APIGatewayManager {
             log.debug("Status of " + apiProductIdentifier + " has been updated to DB");
         }
         sendUnDeploymentEvent(apiProduct, tenantDomain, gatewaysToRemove, associatedAPIs,
-                envToDataPlaneIdMap, envToGatewayAccessibilityTypeMap);
+                envToDataPlaneIdMap, envToGatewayAccessibilityTypeMap, envDetails);
 
     }
 

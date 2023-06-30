@@ -2714,6 +2714,18 @@ public class SQLConstants {
                     "   AM_GATEWAY_ENVIRONMENT.NAME = ? AND " +
                     "   AM_GATEWAY_ENVIRONMENT.ORGANIZATION = ? ";
 
+    public static final String GET_ENVIRONMENT_DETAILS_MAPPING_SQL =
+            "SELECT " +
+                    "   CHOREO_GW_ENV_DATA_PLANE_MAPPING.DATA_PLANE_ID, " +
+                    "   AM_GATEWAY_ENVIRONMENT.ACCESSIBILITY_TYPE " +
+                    "FROM " +
+                    "   AM_GATEWAY_ENVIRONMENT, " +
+                    "   CHOREO_GW_ENV_DATA_PLANE_MAPPING " +
+                    "WHERE " +
+                    "   AM_GATEWAY_ENVIRONMENT.UUID = CHOREO_GW_ENV_DATA_PLANE_MAPPING.GATEWAY_ENV_UUID AND"+
+                    "   AM_GATEWAY_ENVIRONMENT.NAME = ? AND " +
+                    "   AM_GATEWAY_ENVIRONMENT.ORGANIZATION = ? ";
+
     public static final String INSERT_ENVIRONMENT_SQL = "INSERT INTO " +
             "AM_GATEWAY_ENVIRONMENT " +
             "(UUID, NAME, DISPLAY_NAME, DESCRIPTION, PROVIDER, ACCESSIBILITY_TYPE, ORGANIZATION) " +
