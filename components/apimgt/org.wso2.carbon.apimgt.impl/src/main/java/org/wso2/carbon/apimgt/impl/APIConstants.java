@@ -39,6 +39,8 @@ public final class APIConstants {
     //key value of the APIImpl rxt
     public static final String API_KEY = "api";
 
+    public static final String VERSION_PLACEHOLDER = "{version}";
+
     //governance registry apimgt root location
     public static final String APIMGT_REGISTRY_LOCATION = "/apimgt";
 
@@ -1467,8 +1469,6 @@ public final class APIConstants {
 
     public static final String API_MANAGER_HOSTNAME = "HostName";
     public static final String API_MANAGER_HOSTNAME_UNKNOWN = "UNKNOWN_HOST";
-
-    public static final String VERSION_PLACEHOLDER = "{version}";
 
     public enum SupportedHTTPVerbs {
         GET,

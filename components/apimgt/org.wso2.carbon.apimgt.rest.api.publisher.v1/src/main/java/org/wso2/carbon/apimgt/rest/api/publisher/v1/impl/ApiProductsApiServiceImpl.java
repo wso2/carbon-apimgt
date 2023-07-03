@@ -778,6 +778,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             return Response.created(createdApiProductUri).entity(createdApiProductDTO).build();
 
         } catch (APIManagementException | FaultGatewaysException e) {
+            if (e.getMessage().contains(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION.getErrorMessage())) {
+                RestApiUtil.handleBadRequest("Error while adding new API Product. "
+                    + e.getMessage().replace("API", "API Product"), e, log);
+            }
             String errorMessage = "Error while adding new API Product : " + provider + "-" + body.getName()
                     + " - " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
