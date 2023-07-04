@@ -65,11 +65,17 @@ class TracingConstants {
     static final String ZIPKIN = "ZIPKIN";
     static final String ZIPKIN_CONFIG_PORT = "OpenTracer.RemoteTracer.Properties.Port";
     static final String ZIPKIN_CONFIG_HOST = "OpenTracer.RemoteTracer.Properties.HostName";
+    static final String ZIPKIN_CONFIG_PROXY_HOST = "OpenTracer.RemoteTracer.Properties.ProxyHost";
+    static final String ZIPKIN_CONFIG_PROXY_PORT = "OpenTracer.RemoteTracer.Properties.ProxyPort";
+    static final String ZIPKIN_CONFIG_CONFIGURABLE_ENDPOINT_URL
+            = "OpenTracer.RemoteTracer.Properties.ConfigurableEndpointUrl";
+
     static final String REQUEST_ID = "request-id";
 
     static final int ZIPKIN_DEFAULT_PORT = 9411;
     static final String ZIPKIN_DEFAULT_HOST = "localhost";
     static final String ZIPKIN_API_CONTEXT = "/api/v2/spans";
+    static final String ZIPKIN_DEFAULT_ENDPOINT = null;
 
     /**
      * Log Constants
