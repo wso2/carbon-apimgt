@@ -469,7 +469,22 @@ public class Utils {
         byte[] bytes;
         if (certificate != null) {
             if (!isClientCertificateEncoded()) {
-                certificate = APIUtil.getX509certificateContent(certificate);
+                // Remove invalid characters, restructure line separators, and reconstruct the certificate
+                certificate = certificate
+                        .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING.concat(System.lineSeparator()), "")
+                        .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING.concat("\n"), "")
+                        .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
+                        .replaceAll(System.lineSeparator().concat(APIConstants.END_CERTIFICATE_STRING), "")
+                        .replaceAll("\n".concat(APIConstants.END_CERTIFICATE_STRING), "")
+                        .replaceAll(APIConstants.END_CERTIFICATE_STRING, "")
+                        .trim()
+                        .replaceAll(" ", System.lineSeparator())
+                        .trim();
+                certificate = APIConstants.BEGIN_CERTIFICATE_STRING
+                        .concat(System.lineSeparator())
+                        .concat(certificate)
+                        .concat(System.lineSeparator())
+                        .concat(APIConstants.END_CERTIFICATE_STRING);
                 bytes = certificate.getBytes();
             } else {
                 try {
@@ -478,8 +493,6 @@ public class Utils {
                     String msg = "Error while URL decoding certificate";
                     throw new APIManagementException(msg, e);
                 }
-
-                certificate = APIUtil.getX509certificateContent(certificate);
                 bytes = Base64.decodeBase64(certificate);
             }
 
