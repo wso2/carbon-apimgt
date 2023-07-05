@@ -164,6 +164,7 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
             }
             if (body == null) {
                 RestApiUtil.handleBadRequest("Request payload is missing", log);
