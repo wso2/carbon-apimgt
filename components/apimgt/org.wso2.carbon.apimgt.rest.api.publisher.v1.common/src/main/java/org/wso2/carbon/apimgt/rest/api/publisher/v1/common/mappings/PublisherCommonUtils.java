@@ -806,6 +806,14 @@ public class PublisherCommonUtils {
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
+        // validate context before proceeding
+        try {
+            APIUtil.validateAPIContext(apiDto.getContext(), apiDto.getName());
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error while importing API: " + e.getMessage(),
+                    ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
+        }
+
         // validate web socket api endpoint configurations
         if (isWSAPI && !PublisherCommonUtils.isValidWSAPI(apiDto)) {
             throw new APIManagementException("Endpoint URLs should be valid web socket URLs",
@@ -1710,6 +1718,10 @@ public class PublisherCommonUtils {
         // if not add product
         String provider = apiProductDTO.getProvider();
         String context = apiProductDTO.getContext();
+
+        // Validate the API context
+        APIUtil.validateAPIContext(context, apiProductDTO.getName());
+
         if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
             if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
                 if (log.isDebugEnabled()) {
