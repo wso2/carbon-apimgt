@@ -675,7 +675,7 @@
           "required" : false,
           "type" : "string"
         }, {
-          "name" : "isIncludeSystemOrganizationArtifacts",
+          "name" : "includeSystemOrgArtifacts",
           "in" : "query",
           "description" : "Whether to include system org API artifacts\n",
           "required" : false,

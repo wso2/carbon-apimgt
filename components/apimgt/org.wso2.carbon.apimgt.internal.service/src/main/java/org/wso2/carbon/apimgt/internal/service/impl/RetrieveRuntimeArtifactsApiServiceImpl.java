@@ -47,7 +47,7 @@ public class RetrieveRuntimeArtifactsApiServiceImpl implements RetrieveRuntimeAr
 
     @Override
     public Response retrieveRuntimeArtifactsGet(String type, String dataPlaneId, String gatewayAccessibilityType, Boolean
-            isIncludeSystemOrganizationArtifacts, MessageContext messageContext) throws APIManagementException {
+            includeSystemOrgArtifacts, MessageContext messageContext) throws APIManagementException {
         RuntimeArtifactDto runtimeArtifactDto;
         String organization = RestApiUtil.getOrganization(messageContext);
         if (StringUtils.isEmpty(organization)) {
@@ -62,7 +62,7 @@ public class RetrieveRuntimeArtifactsApiServiceImpl implements RetrieveRuntimeAr
         } else {
             ArrayList<String> organizations = new ArrayList<>();
             organizations.add(organization);
-            if (isIncludeSystemOrganizationArtifacts != null && isIncludeSystemOrganizationArtifacts) {
+            if (includeSystemOrgArtifacts != null && includeSystemOrgArtifacts) {
                 organizations.add(APIManagerConfiguration.getChoreoSystemOrganization());
             }
             runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(organizations, dataPlaneId,

@@ -536,7 +536,7 @@ paths:
             **Search condition**.
               Gateway Accessibility type denotes whether the gateway environment is internal or external
           type: string
-        - name: isIncludeSystemOrganizationArtifacts
+        - name: includeSystemOrgArtifacts
           in: query
           description: |
             Whether to include system org API artifacts
