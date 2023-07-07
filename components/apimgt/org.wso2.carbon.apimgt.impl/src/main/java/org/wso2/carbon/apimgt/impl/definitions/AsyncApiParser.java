@@ -1906,7 +1906,7 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     @Override
-    public API setExtensionsToAPI(String swaggerContent, API api) throws APIManagementException {
+    public API setExtensionsToAPI(String swaggerContent, API api, boolean isExistingApi) throws APIManagementException {
         return null;
     }
 

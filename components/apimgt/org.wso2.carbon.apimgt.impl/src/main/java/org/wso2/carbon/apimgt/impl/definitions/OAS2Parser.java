@@ -1708,7 +1708,7 @@ public class OAS2Parser extends APIDefinition {
      * @return API
      */
     @Override
-    public API setExtensionsToAPI(String apiDefinition, API api) throws APIManagementException {
+    public API setExtensionsToAPI(String apiDefinition, API api, boolean isExistingApi) throws APIManagementException {
         Swagger swagger = getSwagger(apiDefinition);
         Map<String, Object> extensions = swagger.getVendorExtensions();
         if (extensions == null) {
@@ -1719,6 +1719,20 @@ public class OAS2Parser extends APIDefinition {
         String authHeader = OASParserUtil.getAuthorizationHeaderFromSwagger(extensions);
         if (StringUtils.isNotBlank(authHeader)) {
             api.setAuthorizationHeader(authHeader);
+        }
+
+        // handles x-wso2-security extension with the API object
+        if (extensions.containsKey(APIConstants.X_WSO2_DISABLE_SECURITY)) {
+            if (Boolean.valueOf(extensions.get(APIConstants.X_WSO2_DISABLE_SECURITY).toString())) {
+                api.setApiSecurity("");
+            } else {
+                api.setApiSecurity(new StringBuilder()
+                        .append(APIConstants.DEFAULT_API_SECURITY_OAUTH2).append(",")
+                        .append(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY).toString());
+            }
+            if (isExistingApi){
+                return api;
+            }
         }
         //Setup application Security
         List<String> applicationSecurity = OASParserUtil.getApplicationSecurityTypes(extensions);

@@ -1231,6 +1231,9 @@ public class PublisherCommonUtils {
         } else {
             apiDefinition = OASParserUtil.preProcess(apiDefinition);
         }
+
+        OASParserUtil.setExtensionsToAPI(apiDefinition, existingAPI, true);
+
         if (APIConstants.API_TYPE_SOAPTOREST.equals(existingAPI.getType())) {
             List<SOAPToRestSequence> sequenceList = SequenceGenerator.generateSequencesFromSwagger(apiDefinition);
             existingAPI.setSoapToRestSequences(sequenceList);

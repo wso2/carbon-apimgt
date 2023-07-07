@@ -1910,7 +1910,7 @@ public class OAS3Parser extends APIDefinition {
      * @return API
      */
     @Override
-    public API setExtensionsToAPI(String apiDefinition, API api) throws APIManagementException {
+    public API setExtensionsToAPI(String apiDefinition, API api, boolean isExistingApi) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(apiDefinition);
         Map<String, Object> extensions = openAPI.getExtensions();
         if (extensions == null) {
@@ -1922,6 +1922,21 @@ public class OAS3Parser extends APIDefinition {
         if (StringUtils.isNotBlank(authHeader)) {
             api.setAuthorizationHeader(authHeader);
         }
+
+        // handle x-wso2-disable-security extension with the API object
+        if (extensions.containsKey(APIConstants.X_WSO2_DISABLE_SECURITY)) {
+            if (Boolean.valueOf(extensions.get(APIConstants.X_WSO2_DISABLE_SECURITY).toString())) {
+                api.setApiSecurity("");
+            } else {
+                api.setApiSecurity(new StringBuilder()
+                        .append(APIConstants.DEFAULT_API_SECURITY_OAUTH2).append(",")
+                        .append(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY).toString());
+            }
+            if (isExistingApi){
+                return api;
+            }
+        }
+
         //Setup application Security
         List<String> applicationSecurity = OASParserUtil.getApplicationSecurityTypes(extensions);
         Boolean isOptional = OASParserUtil.getAppSecurityStateFromSwagger(extensions);
