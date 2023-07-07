@@ -493,6 +493,7 @@ public class Utils {
                     String msg = "Error while URL decoding certificate";
                     throw new APIManagementException(msg, e);
                 }
+                certificate = APIUtil.getX509certificateContent(certificate);
                 bytes = Base64.decodeBase64(certificate);
             }
 
