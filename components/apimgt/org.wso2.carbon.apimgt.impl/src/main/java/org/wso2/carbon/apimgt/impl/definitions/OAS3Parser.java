@@ -674,6 +674,15 @@ public class OAS3Parser extends APIDefinition {
         if (!APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
             preserveResourcePathOrderFromAPI(swaggerData, openAPI);
         }
+
+        // sets x-wso2-disable-security extension
+        if (swaggerData.getExtensionsList() != null && !swaggerData.getExtensionsList().isEmpty()) {
+            if (openAPI.getExtensions() == null) {
+                openAPI.setExtensions(new HashMap<>());
+            }
+            openAPI.getExtensions().put(APIConstants.X_WSO2_DISABLE_SECURITY,
+                    swaggerData.getExtensionsList().get(APIConstants.X_WSO2_DISABLE_SECURITY));
+        }
         return Json.pretty(openAPI);
     }
 
@@ -917,6 +926,13 @@ public class OAS3Parser extends APIDefinition {
             oAuthFlow.setScopes(new Scopes());
         }
         oAuthFlow.setAuthorizationUrl(OPENAPI_DEFAULT_AUTHORIZATION_URL);
+
+        // sets x-wso2-disable-security extension
+        if( StringUtils.isNotEmpty(api.getApiSecurity())) {
+            openAPI.addExtension(APIConstants.X_WSO2_DISABLE_SECURITY, false);
+        } else {
+            openAPI.addExtension(APIConstants.X_WSO2_DISABLE_SECURITY, true);
+        }
 
         if (api.getAuthorizationHeader() != null) {
             openAPI.addExtension(APIConstants.X_WSO2_AUTH_HEADER, api.getAuthorizationHeader());

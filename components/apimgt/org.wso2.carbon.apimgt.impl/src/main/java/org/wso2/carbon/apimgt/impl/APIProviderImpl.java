@@ -1683,10 +1683,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
-        // If no security schema found, set OAuth2 as default
+        // If no security schema found, empty array list will be returned.
         if (!securitySchemeFound) {
-            isOauth2 = true;
-            securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+            return securityLevels;
         }
         // If Only OAuth2/Basic-Auth specified, set it as mandatory
         if (!isMutualSSL && !isOauthBasicAuthMandatory) {

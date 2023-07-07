@@ -634,6 +634,16 @@ public class OAS2Parser extends APIDefinition {
             swaggerObj.getInfo().setVersion(swaggerData.getVersion());
         }
         preserveResourcePathOrderFromAPI(swaggerData, swaggerObj);
+
+        // sets x-wso2-disable-security extension
+        if (swaggerData.getExtensionsList() != null && !swaggerData.getExtensionsList().isEmpty()) {
+            if (swaggerData.getExtensionsList() == null) {
+                swaggerData.setExtensionsList(new HashMap<>());
+            }
+            swaggerObj.getVendorExtensions().put(APIConstants.X_WSO2_DISABLE_SECURITY,
+                    swaggerData.getExtensionsList().get(APIConstants.X_WSO2_DISABLE_SECURITY));
+        }
+
         return getSwaggerJsonString(swaggerObj);
     }
 
@@ -834,6 +844,12 @@ public class OAS2Parser extends APIDefinition {
         Swagger swagger = getSwagger(oasDefinition);
         if (api.getAuthorizationHeader() != null) {
             swagger.setVendorExtension(APIConstants.X_WSO2_AUTH_HEADER, api.getAuthorizationHeader());
+        }
+        // sets x-wso2-disable-security vendor extension
+        if (StringUtils.isNotEmpty(api.getApiSecurity())){
+            swagger.setVendorExtension(APIConstants.X_WSO2_DISABLE_SECURITY, false);
+        } else {
+            swagger.setVendorExtension(APIConstants.X_WSO2_DISABLE_SECURITY, true);
         }
         if (api.getApiLevelPolicy() != null) {
             swagger.setVendorExtension(APIConstants.X_THROTTLING_TIER, api.getApiLevelPolicy());
