@@ -677,11 +677,10 @@ public class OAS3Parser extends APIDefinition {
 
         // sets x-wso2-disable-security extension
         if (swaggerData.getExtensionsList() != null && !swaggerData.getExtensionsList().isEmpty()) {
-            if (openAPI.getExtensions() == null) {
-                openAPI.setExtensions(new HashMap<>());
-            }
             openAPI.getExtensions().put(APIConstants.X_WSO2_DISABLE_SECURITY,
                     swaggerData.getExtensionsList().get(APIConstants.X_WSO2_DISABLE_SECURITY));
+        } else {
+            openAPI.setExtensions(new HashMap<>());
         }
         return Json.pretty(openAPI);
     }

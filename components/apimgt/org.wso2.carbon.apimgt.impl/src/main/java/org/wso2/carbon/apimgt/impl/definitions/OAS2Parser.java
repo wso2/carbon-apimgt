@@ -637,11 +637,10 @@ public class OAS2Parser extends APIDefinition {
 
         // sets x-wso2-disable-security extension
         if (swaggerData.getExtensionsList() != null && !swaggerData.getExtensionsList().isEmpty()) {
-            if (swaggerData.getExtensionsList() == null) {
-                swaggerData.setExtensionsList(new HashMap<>());
-            }
             swaggerObj.getVendorExtensions().put(APIConstants.X_WSO2_DISABLE_SECURITY,
                     swaggerData.getExtensionsList().get(APIConstants.X_WSO2_DISABLE_SECURITY));
+        } else {
+            swaggerData.setExtensionsList(new HashMap<>());
         }
 
         return getSwaggerJsonString(swaggerObj);
