@@ -195,6 +195,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO createdApiDTO;
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            // enables OAuth2 by default
+            if (body.getSecurityScheme() != null && body.getSecurityScheme().isEmpty()) {
+                body.setSecurityScheme( new ArrayList<>(Arrays.asList(APIConstants.DEFAULT_API_SECURITY_OAUTH2,
+                        APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)));
+            }
+
             API createdApi = PublisherCommonUtils
                     .addAPIWithGeneratedSwaggerDefinition(body, oasVersion, RestApiCommonUtil.getLoggedInUsername(),
                             organization);
@@ -4805,7 +4811,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         apiToAdd.setScopePrefix(apiDTOFromProperties.getScopePrefix());
         APIUtil.updateAPIScopesWithPrefix(apiToAdd);
         //Set extensions from API definition to API object
-        apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd);
+        apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd, false);
         if (!syncOperations) {
             PublisherCommonUtils.validateScopes(apiToAdd);
             swaggerData = new SwaggerData(apiToAdd);
