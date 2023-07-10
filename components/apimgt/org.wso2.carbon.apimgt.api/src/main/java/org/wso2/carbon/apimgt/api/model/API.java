@@ -1114,8 +1114,10 @@ public class API implements Serializable {
      * @param apiSecurity Relevant type of gateway security for the API.
      */
     public void setApiSecurity(String apiSecurity) {
-        if (apiSecurity != null) {
+        if (StringUtils.isNotEmpty(apiSecurity)) {
             this.apiSecurity = apiSecurity;
+        } else {
+            this.apiSecurity = null;
         }
     }
 
@@ -1125,6 +1127,9 @@ public class API implements Serializable {
      * @return Relevant type of gateway security.
      */
     public String getApiSecurity() {
+        if (apiSecurity == null) {
+            return null;
+        }
         return apiSecurity;
     }
 

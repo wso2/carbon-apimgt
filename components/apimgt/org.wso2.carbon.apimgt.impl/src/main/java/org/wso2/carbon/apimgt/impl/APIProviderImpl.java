@@ -1709,7 +1709,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param api Relevant API that need to be validated.
      */
     private void validateAndSetAPISecurity(API api) {
-        String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+        String apiSecurity = StringUtils.EMPTY;
         String security = api.getApiSecurity();
         if (security!= null) {
             apiSecurity = security;
