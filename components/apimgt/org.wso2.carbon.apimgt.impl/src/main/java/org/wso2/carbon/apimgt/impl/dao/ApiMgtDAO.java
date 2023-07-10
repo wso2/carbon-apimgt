@@ -18181,35 +18181,61 @@ public class ApiMgtDAO {
 
     }
 
-    public void addOperationPolicyMapping(Set<URITemplate> uriTemplates) throws APIManagementException {
+    /**
+     * Add API level and Operation level policy mappings to the new API version.
+     *
+     * @param uriTemplates              URITemplate Set with attached operation level policies
+     * @param extractedAPILevelPolicies List with attached API level policies
+     * @param newAPI                    API object of newly created API version
+     * @throws APIManagementException If failed to add policy mapping for new API version
+     */
+    public void addPolicyMappingsForNewAPIVersion(Set<URITemplate> uriTemplates,
+            List<OperationPolicy> extractedAPILevelPolicies, API newAPI) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+
+            // Handle operation level policy mapping addition for new API version
+            if (uriTemplates != null) {
+                addOperationPolicyMapping(uriTemplates, connection);
+            }
+
+            // Handle API level policy mapping addition for new API version
+            if (extractedAPILevelPolicies != null && extractedAPILevelPolicies.size() != 0) {
+                addAPILevelPolicies(extractedAPILevelPolicies, newAPI.getUuid(), null,
+                        newAPI.getOrganization(), connection);
+            }
+
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while adding Policy mapping(s) for new API version", e);
+        }
+    }
+
+    public void addOperationPolicyMapping(Set<URITemplate> uriTemplates, Connection connection)
+            throws APIManagementException, SQLException {
         if (uriTemplates != null && !uriTemplates.isEmpty()) {
-            try (Connection connection = APIMgtDBUtil.getConnection()) {
-                connection.setAutoCommit(false);
-                try (PreparedStatement preparedStatement =
-                             connection.prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING)) {
-                    for (URITemplate uriTemplate : uriTemplates){
-                        List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
-                        if (operationPolicies != null && !operationPolicies.isEmpty()){
-                            for (OperationPolicy operationPolicy : operationPolicies){
-                                Gson gson = new Gson();
-                                String paramJSON = gson.toJson(operationPolicy.getParameters());
-                                preparedStatement.setInt(1, uriTemplate.getId());
-                                preparedStatement.setString(2,operationPolicy.getPolicyId());
-                                preparedStatement.setString(3, operationPolicy.getDirection());
-                                preparedStatement.setString(4, paramJSON);
-                                preparedStatement.setInt(5, operationPolicy.getOrder());
-                                preparedStatement.addBatch();
-                            }
+            try (PreparedStatement preparedStatement =
+                         connection.prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING)) {
+                for (URITemplate uriTemplate : uriTemplates){
+                    List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
+                    if (operationPolicies != null && !operationPolicies.isEmpty()){
+                        for (OperationPolicy operationPolicy : operationPolicies){
+                            Gson gson = new Gson();
+                            String paramJSON = gson.toJson(operationPolicy.getParameters());
+                            preparedStatement.setInt(1, uriTemplate.getId());
+                            preparedStatement.setString(2,operationPolicy.getPolicyId());
+                            preparedStatement.setString(3, operationPolicy.getDirection());
+                            preparedStatement.setString(4, paramJSON);
+                            preparedStatement.setInt(5, operationPolicy.getOrder());
+                            preparedStatement.addBatch();
                         }
                     }
-                    preparedStatement.executeBatch();
-                    connection.commit();
-                }catch(SQLException e){
-                    connection.rollback();
-                    throw e;
                 }
-            } catch (SQLException e) {
-                throw new APIManagementException("Error while updating operation Policy mapping for API", e);
+                preparedStatement.executeBatch();
+                connection.commit();
+            } catch(SQLException e){
+                connection.rollback();
+                throw e;
             }
         }
     }
@@ -19809,9 +19835,10 @@ public class ApiMgtDAO {
      * @param tenantDomain  Tenant domain
      * @param connection    Database connection
      * @throws APIManagementException if failed to add policy mapping
+     * @throws SQLException if an SQL error occurs while adding policy mapping
      */
     private void addAPILevelPolicies(List<OperationPolicy> policies, String apiUUID, String revisionUUID,
-            String tenantDomain, Connection connection) throws APIManagementException {
+            String tenantDomain, Connection connection) throws APIManagementException, SQLException {
         Map<String, String> updatedPoliciesMap = new HashMap<>();
         Set<String> usedClonedPolicies = new HashSet<String>();
         List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails = new ArrayList<>();
@@ -19842,8 +19869,9 @@ public class ApiMgtDAO {
                         toBeClonedPolicyData.getClonedPolicyUUID(), apiUUID);
             }
             statement.executeBatch();
-            cleanUnusedClonedOperationPolicies(connection, usedClonedPolicies, apiUUID);
+            connection.commit();
         } catch (SQLException | APIManagementException e) {
+            connection.rollback();
             handleException("Error while getting API level policy mapping of API " + apiUUID, e);
         }
     }
