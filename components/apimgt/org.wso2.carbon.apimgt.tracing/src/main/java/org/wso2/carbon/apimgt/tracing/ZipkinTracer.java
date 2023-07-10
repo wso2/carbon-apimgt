@@ -62,16 +62,11 @@ public class ZipkinTracer implements OpenTracer {
                 ? Integer.parseInt(configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_PORT))
                 : TracingConstants.ZIPKIN_DEFAULT_PORT;
 
-        // Read the configurable endpoint if available
+        // Read the configurable endpoint and format the endpoint based on whether is configurable or not
         String endpoint = configuration
-                .getFirstProperty(TracingConstants.ZIPKIN_CONFIG_CONFIGURABLE_ENDPOINT_URL) != null
-                ? configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_CONFIGURABLE_ENDPOINT_URL)
-                : TracingConstants.ZIPKIN_DEFAULT_ENDPOINT;
-
-        // Format the endpoint url based on whether is configurable or not
-        if (endpoint == null) {
-            endpoint = "http://" + hostname + ":" + port + TracingConstants.ZIPKIN_API_CONTEXT;
-        }
+                .getFirstProperty(TracingConstants.ZIPKIN_CONFIG_ENDPOINT_URL) != null
+                ? configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_ENDPOINT_URL)
+                : "http://" + hostname + ":" + port + TracingConstants.ZIPKIN_API_CONTEXT;
 
         // Read proxy configurations from the configuration file.
         String proxyHost = configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_PROXY_HOST);

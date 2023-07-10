@@ -1102,8 +1102,8 @@
                 {% if apim.open_tracer.remote_tracer.properties.proxy_port is defined %}
                 <ProxyPort>{{apim.open_tracer.remote_tracer.properties.proxy_port}}</ProxyPort>
                 {% endif %}
-                {% if apim.open_tracer.remote_tracer.properties.configurable_endpoint_url is defined %}
-                <ConfigurableEndpointUrl>{{apim.open_tracer.remote_tracer.properties.configurable_endpoint_url}}</ConfigurableEndpointUrl>
+                {% if apim.open_tracer.remote_tracer.properties.endpoint_url is defined %}
+                <EndpointUrl>{{apim.open_tracer.remote_tracer.properties.endpoint_url}}</EndpointUrl>
                 {% endif %}
             </Properties>
         </RemoteTracer>

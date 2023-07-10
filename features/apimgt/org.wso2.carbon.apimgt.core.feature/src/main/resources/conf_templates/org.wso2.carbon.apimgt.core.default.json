@@ -135,7 +135,7 @@
   "apim.open_tracer.remote_tracer.properties.port": "9411",
   "apim.open_tracer.remote_tracer.properties.proxy_host": "",
   "apim.open_tracer.remote_tracer.properties.proxy_port": "",
-  "apim.open_tracer.remote_tracer.properties.configurable_endpoint_url": "",
+  "apim.open_tracer.remote_tracer.properties.endpoint_url": "",
   "apim.open_tracer.log_tracer.enable": false,
   "apim.sdk.group_id": "org.wso2",
   "apim.sdk.artifact_id": "org.wso2.client.",
