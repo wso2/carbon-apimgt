@@ -172,7 +172,7 @@ public class SwaggerData {
 
         transportType = api.getType();
         security = api.getApiSecurity();
-        if (security != null && StringUtils.isNotEmpty(security)) {
+        if (StringUtils.isNotEmpty(security)) {
             extensionsList.put(APIConstants.X_WSO2_DISABLE_SECURITY, "false");
         } else {
             extensionsList.put(APIConstants.X_WSO2_DISABLE_SECURITY, "true");

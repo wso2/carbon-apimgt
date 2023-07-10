@@ -1127,9 +1127,6 @@ public class API implements Serializable {
      * @return Relevant type of gateway security.
      */
     public String getApiSecurity() {
-        if (apiSecurity == null) {
-            return null;
-        }
         return apiSecurity;
     }
 
