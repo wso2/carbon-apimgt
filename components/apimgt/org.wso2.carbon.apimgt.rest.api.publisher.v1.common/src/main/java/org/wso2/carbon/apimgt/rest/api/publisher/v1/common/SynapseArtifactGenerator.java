@@ -50,13 +50,13 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 
-import javax.xml.namespace.QName;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.namespace.QName;
 
 /**
  * This class used to generate Synapse Artifact.
@@ -163,12 +163,14 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
         return runtimeArtifactDto;
     }
 
-    @Override public RuntimeArtifactDto generateGatewayPolicyArtifact(List<OperationPolicyData> gatewayPolicyDataList,
-            List<OperationPolicy> gatewayPolicyList) throws APIManagementException {
+    @Override
+    public RuntimeArtifactDto generateGatewayPolicyArtifact(List<OperationPolicyData> gatewayPolicyDataList,
+            List<OperationPolicy> gatewayPolicyList, String tenantDomain) throws APIManagementException {
 
         RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
         List<String> synapseArtifacts = new ArrayList<>();
         GatewayPolicyDTO gatewayPolicyDTO = new GatewayPolicyDTO();
+        gatewayPolicyDTO.setTenantDomain(tenantDomain);
         GatewayContentDTO gatewayInContentDTO = retrieveGatewayPolicySequence(gatewayPolicyDataList, gatewayPolicyList,
                 APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
         if (gatewayInContentDTO != null) {
