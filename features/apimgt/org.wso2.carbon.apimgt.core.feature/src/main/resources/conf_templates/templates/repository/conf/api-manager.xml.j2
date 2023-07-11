@@ -1445,7 +1445,7 @@
       change his/her password via devportal. By default this feature is enabled.-->
      <EnableChangePassword>{{apim.enable_change_password}}</EnableChangePassword>
 
-    {% if apim.testkey.validity is defined %}
+    {% if choreo.ChoreoTokenHandler is defined %}
     <ChoreoSystemOrganization>
         <Uuid>{{choreo.ChoreoTokenHandler.choreoControlPlaneOrgUuid}}</Uuid>
     </ChoreoSystemOrganization>
