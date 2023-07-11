@@ -674,6 +674,12 @@
           "description" : "**Search condition**.\n  Gateway Accessibility type denotes whether the gateway environment is internal or external\n",
           "required" : false,
           "type" : "string"
+        }, {
+          "name" : "includeSystemOrgArtifacts",
+          "in" : "query",
+          "description" : "Whether to include system org API artifacts\n",
+          "required" : false,
+          "type" : "boolean"
         } ],
         "responses" : {
           "200" : {

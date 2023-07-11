@@ -37,4 +37,5 @@ public class APIConstants {
     public static final String DEFAULT_KEY_MANAGER_HOST = "https://localhost:9443";
 
     public static final String UNLIMITED_TIER = "Unlimited";
+    public static final String X_WSO2_DISABLE_SECURITY = "x-wso2-disable-security";
 }

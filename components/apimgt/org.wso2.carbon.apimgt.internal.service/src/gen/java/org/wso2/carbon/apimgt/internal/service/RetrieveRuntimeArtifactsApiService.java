@@ -21,6 +21,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface RetrieveRuntimeArtifactsApiService {
-      public Response retrieveRuntimeArtifactsGet(String type, String dataPlaneId, String gatewayAccessibilityType, MessageContext messageContext) throws APIManagementException;
+      public Response retrieveRuntimeArtifactsGet(String type, String dataPlaneId, String gatewayAccessibilityType, Boolean includeSystemOrgArtifacts, MessageContext messageContext) throws APIManagementException;
       public Response retrieveRuntimeArtifactsPost(String type, String dataPlaneId, String gatewayAccessibilityType, UUIDListDTO uuidList, MessageContext messageContext) throws APIManagementException;
 }

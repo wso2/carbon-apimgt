@@ -71,16 +71,21 @@ public class ChoreoGatewayArtifactsMgtDAO {
         return choreoGatewayArtifactsMgtDAO;
     }
 
-    public List<APIRuntimeArtifactDto> retrieveAllGatewayArtifactsByOrganizationAndDataPlaneId(String organization,
-                                                                                               String dataPlaneId)
-            throws APIManagementException {
+    public List<APIRuntimeArtifactDto> retrieveAllGatewayArtifactsByOrganizationAndDataPlaneId(
+            ArrayList<String> organizations, String dataPlaneId) throws APIManagementException {
 
         String query = SQLConstants.RETRIEVE_ALL_ARTIFACTS_BY_ORGANIZATION_AND_DATA_PLANE_ID;
+        query = query.replaceAll(SQLConstants.ORGANIZATION_IDS_REGEX, String.join(",",
+                Collections.nCopies(organizations.size(), "?")));
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, dataPlaneId);
-            preparedStatement.setString(2, organization);
+            int index = 2;
+            for (String organization: organizations) {
+                preparedStatement.setString(index, organization);
+                index++;
+            }
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     String apiId = resultSet.getString("API_ID");
@@ -130,15 +135,21 @@ public class ChoreoGatewayArtifactsMgtDAO {
     }
 
     public List<APIRuntimeArtifactDto> retrieveAllGatewayArtifactsByOrganizationAndDataPlaneId(
-            String organization, String dataPlaneId, String gatewayAccessibilityType) throws APIManagementException {
+            ArrayList<String> organizations, String dataPlaneId, String gatewayAccessibilityType) throws APIManagementException {
 
         String query = SQLConstants.RETRIEVE_ALL_ARTIFACTS_BY_ORGANIZATION_GATEWAY_ACCESSIBILITY_TYPE_AND_DATA_PLANE_ID;
+        query = query.replaceAll(SQLConstants.ORGANIZATION_IDS_REGEX, String.join(",",
+                Collections.nCopies(organizations.size(), "?")));
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, dataPlaneId);
-            preparedStatement.setString(2, organization);
-            preparedStatement.setString(3, gatewayAccessibilityType);
+            int index = 2;
+            for (String organization: organizations) {
+                preparedStatement.setString(index, organization);
+                index++;
+            }
+            preparedStatement.setString(index, gatewayAccessibilityType);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     String apiId = resultSet.getString("API_ID");

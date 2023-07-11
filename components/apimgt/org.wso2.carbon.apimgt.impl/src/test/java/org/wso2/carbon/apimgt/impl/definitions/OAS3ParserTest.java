@@ -74,12 +74,14 @@ public class OAS3ParserTest extends OASTestBase {
         String oas3Resources = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
 
-        // check remove vendor extensions
+        // check vendor extensions
         String definition = testGenerateAPIDefinitionWithExtension(oas3Parser, oas3Resources);
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(definition, null, null);
         OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
-        boolean isExtensionNotFound = openAPI.getExtensions() == null || !openAPI.getExtensions()
-                .containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY);
+        boolean isXWso2DisableSecExtFound = openAPI.getExtensions() != null && openAPI.getExtensions()
+                .containsKey(APIConstants.X_WSO2_DISABLE_SECURITY);
+        Assert.assertTrue(isXWso2DisableSecExtFound);
+        boolean isExtensionNotFound = !openAPI.getExtensions().containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY);
         Assert.assertTrue(isExtensionNotFound);
         Assert.assertEquals(2, openAPI.getPaths().size());
 

@@ -634,6 +634,19 @@ public class OAS2Parser extends APIDefinition {
             swaggerObj.getInfo().setVersion(swaggerData.getVersion());
         }
         preserveResourcePathOrderFromAPI(swaggerData, swaggerObj);
+
+        // sets x-wso2-disable-security extension
+        if (swaggerData.getExtensionsList() != null && swaggerData.getExtensionsList()
+                .containsKey(APIConstants.X_WSO2_DISABLE_SECURITY)) {
+            if (swaggerObj.getVendorExtensions() == null) {
+                swaggerObj.setVendorExtensions(new HashMap<>());
+            }
+            swaggerObj.getVendorExtensions().put(APIConstants.X_WSO2_DISABLE_SECURITY,
+                    swaggerData.getExtensionsList().get(APIConstants.X_WSO2_DISABLE_SECURITY));
+        } else {
+            swaggerData.setExtensionsList(new HashMap<>());
+        }
+
         return getSwaggerJsonString(swaggerObj);
     }
 
@@ -834,6 +847,12 @@ public class OAS2Parser extends APIDefinition {
         Swagger swagger = getSwagger(oasDefinition);
         if (api.getAuthorizationHeader() != null) {
             swagger.setVendorExtension(APIConstants.X_WSO2_AUTH_HEADER, api.getAuthorizationHeader());
+        }
+        // sets x-wso2-disable-security vendor extension
+        if (StringUtils.isNotEmpty(api.getApiSecurity())){
+            swagger.setVendorExtension(APIConstants.X_WSO2_DISABLE_SECURITY, false);
+        } else {
+            swagger.setVendorExtension(APIConstants.X_WSO2_DISABLE_SECURITY, true);
         }
         if (api.getApiLevelPolicy() != null) {
             swagger.setVendorExtension(APIConstants.X_THROTTLING_TIER, api.getApiLevelPolicy());
@@ -1692,13 +1711,27 @@ public class OAS2Parser extends APIDefinition {
      * @return API
      */
     @Override
-    public API setExtensionsToAPI(String apiDefinition, API api) throws APIManagementException {
+    public API setExtensionsToAPI(String apiDefinition, API api, boolean isExistingApi) throws APIManagementException {
         Swagger swagger = getSwagger(apiDefinition);
         Map<String, Object> extensions = swagger.getVendorExtensions();
         if (extensions == null) {
             return api;
         }
 
+        // handles x-wso2-security extension with the API object
+        if (extensions.containsKey(APIConstants.X_WSO2_DISABLE_SECURITY) &&
+                Boolean.valueOf(extensions.get(APIConstants.X_WSO2_DISABLE_SECURITY).toString())) {
+            api.setApiSecurity(new StringBuilder().toString());
+        } else {
+            api.setApiSecurity(new StringBuilder()
+                    .append(APIConstants.DEFAULT_API_SECURITY_OAUTH2).append(",")
+                    .append(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY).toString());
+        }
+        // returning existing APIs from here since no need to execute the remaining logic
+        // for an existing API.
+        if (isExistingApi) {
+            return api;
+        }
         //Setup Custom auth header for API
         String authHeader = OASParserUtil.getAuthorizationHeaderFromSwagger(extensions);
         if (StringUtils.isNotBlank(authHeader)) {

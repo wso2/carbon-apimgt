@@ -44,8 +44,8 @@ RetrieveRuntimeArtifactsApiService delegate = new RetrieveRuntimeArtifactsApiSer
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "List of runtime Artifacts", response = Void.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response retrieveRuntimeArtifactsGet( @NotNull @ApiParam(value = "**Search condition**.  type of gateway ",required=true)  @QueryParam("type") String type,  @NotNull @ApiParam(value = "**Search condition**.  Data-plane ID ",required=true)  @QueryParam("dataPlaneId") String dataPlaneId,  @ApiParam(value = "**Search condition**.   Gateway Accessibility type denotes whether the gateway environment is internal or external ")  @QueryParam("gatewayAccessibilityType") String gatewayAccessibilityType) throws APIManagementException{
-        return delegate.retrieveRuntimeArtifactsGet(type, dataPlaneId, gatewayAccessibilityType, securityContext);
+    public Response retrieveRuntimeArtifactsGet( @NotNull @ApiParam(value = "**Search condition**.  type of gateway ",required=true)  @QueryParam("type") String type,  @NotNull @ApiParam(value = "**Search condition**.  Data-plane ID ",required=true)  @QueryParam("dataPlaneId") String dataPlaneId,  @ApiParam(value = "**Search condition**.   Gateway Accessibility type denotes whether the gateway environment is internal or external ")  @QueryParam("gatewayAccessibilityType") String gatewayAccessibilityType,  @ApiParam(value = "Whether to include system org API artifacts ")  @QueryParam("includeSystemOrgArtifacts") Boolean includeSystemOrgArtifacts) throws APIManagementException{
+        return delegate.retrieveRuntimeArtifactsGet(type, dataPlaneId, gatewayAccessibilityType, includeSystemOrgArtifacts, securityContext);
     }
 
     @POST
