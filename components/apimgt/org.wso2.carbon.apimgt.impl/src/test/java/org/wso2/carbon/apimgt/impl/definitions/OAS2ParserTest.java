@@ -89,12 +89,14 @@ public class OAS2ParserTest extends OASTestBase {
         String oas2Resources = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
         SwaggerParser swaggerParser = new SwaggerParser();
 
-        // check remove vendor extensions
+        // check vendor extensions
         String definition = testGenerateAPIDefinitionWithExtension(oas2Parser, oas2Resources);
         Swagger swaggerObj = swaggerParser.parse(definition);
-        boolean isExtensionNotFound =
-                swaggerObj.getVendorExtensions() == null || swaggerObj.getVendorExtensions().isEmpty();
-        Assert.assertTrue(isExtensionNotFound);
+        // x-wso2-disable-security extension will be there after parsing the API definition
+        boolean isXWso2DisableSecExtFound =
+                swaggerObj.getVendorExtensions() != null && swaggerObj.getVendorExtensions()
+                        .containsKey(APIConstants.X_WSO2_DISABLE_SECURITY);
+        Assert.assertTrue(isXWso2DisableSecExtFound);
         Assert.assertEquals(2, swaggerObj.getPaths().size());
 
         Iterator<Map.Entry<String, Path>> itr = swaggerObj.getPaths().entrySet().iterator();
