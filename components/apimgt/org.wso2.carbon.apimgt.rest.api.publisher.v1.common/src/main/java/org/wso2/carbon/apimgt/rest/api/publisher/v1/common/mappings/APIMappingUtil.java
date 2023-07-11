@@ -266,6 +266,12 @@ public class APIMappingUtil {
         Set<URITemplate> uriTemplates = getURITemplates(model, dto.getOperations());
         model.setUriTemplates(uriTemplates);
 
+        if (dto.getApiPolicies() != null) {
+            List<OperationPolicy> policyList = OperationPolicyMappingUtil.fromDTOToAPIOperationPoliciesList(
+                    dto.getApiPolicies());
+            model.setApiPolicies(policyList);
+        }
+
         // wsUriMapping
         if (dto.getType().toString().equals(APIConstants.API_TYPE_WS)) {
             Map<String, String> wsUriMapping = new HashMap<>();
@@ -1139,6 +1145,10 @@ public class APIMappingUtil {
 
         dto.setMediationPolicies(mediationPolicies);
         dto.setLifeCycleStatus(model.getStatus());
+
+        if (model.getApiPolicies() != null) {
+            dto.setApiPolicies(OperationPolicyMappingUtil.fromOperationPolicyListToDTO(model.getApiPolicies()));
+        }
 
         String subscriptionAvailability = model.getSubscriptionAvailability();
         if (subscriptionAvailability != null) {
