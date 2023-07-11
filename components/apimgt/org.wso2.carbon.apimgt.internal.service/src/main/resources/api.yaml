@@ -453,6 +453,34 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /gateway-policy-artifacts:
+    get:
+      summary: Get all the runtime artifacts for a given API UUID and gateway label
+      description: |
+        This will provide access to runtime artifacts in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: policyMappingUuid
+          in: query
+          description: |
+            **Search condition**.
+              Gateway policy mapping UUID
+          type: string
+        - name: type
+          in: query
+          description: |
+            **Search condition**.
+             type of gateway
+          type: string
+      tags:
+        - Retrieving Runtime artifacts for gateway policies
+      responses:
+        200:
+          description: List of runtime Artifacts
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /endpoint-certificates:
     get:
       summary: Get all the endpoint certificates for given alias.
