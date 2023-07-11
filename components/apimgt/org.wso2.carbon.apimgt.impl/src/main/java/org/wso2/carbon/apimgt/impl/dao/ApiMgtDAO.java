@@ -5103,7 +5103,7 @@ public class ApiMgtDAO {
         Identifier identifier;
         String tier;
         String apiVersion;
-        String majorVersionRegex;
+        String majorVersionRange;
 
         //Query to check if this subscription already exists
         String checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_API_SQL;
@@ -5129,9 +5129,9 @@ public class ApiMgtDAO {
         if (apiVersion.startsWith("v")) {
             SemVersion apiSemVersion = SemanticVersionUtil.validateAndGetVersionComponents(apiVersion, apiUUID);
             int apiMajorVersion = apiSemVersion.getMajor();
-            majorVersionRegex = "^(" + apiMajorVersion + "|v" + apiMajorVersion + ").*$";
+            majorVersionRange = "v" + apiMajorVersion;
         } else {
-            majorVersionRegex = null;
+            majorVersionRange = null;
         }
 
         try (PreparedStatement ps = connection.prepareStatement(checkDuplicateQuery)) {
@@ -5204,7 +5204,7 @@ public class ApiMgtDAO {
                 preparedStForInsert.setTimestamp(7, timestamp);
                 preparedStForInsert.setTimestamp(8, timestamp);
                 preparedStForInsert.setString(9, subscriptionUUID);
-                preparedStForInsert.setString(11, majorVersionRegex);
+                preparedStForInsert.setString(11, majorVersionRange);
 
                 preparedStForInsert.executeUpdate();
                 try (ResultSet rs = preparedStForInsert.getGeneratedKeys()) {
