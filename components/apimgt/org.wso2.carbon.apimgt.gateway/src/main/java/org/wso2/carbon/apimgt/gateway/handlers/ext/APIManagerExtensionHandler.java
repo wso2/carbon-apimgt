@@ -72,6 +72,8 @@ public class APIManagerExtensionHandler extends AbstractHandler {
             }
         }
 
+        // org level
+
         String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
         sequence = localRegistry.get(apiName + "--" + direction);
         if (sequence instanceof Mediator) {

@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.gateway.CredentialDto;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.api.gateway.GatewayPolicyDTO;
 import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
@@ -899,5 +900,28 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
                 endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
         return true;
+    }
+
+    public void deployGatewayPolicy(GatewayPolicyDTO gatewayPolicyDTO) throws AxisFault {
+
+        SequenceAdminServiceProxy sequenceAdminServiceProxy =
+                getSequenceAdminServiceClient(gatewayPolicyDTO.getTenantDomain());
+        if (gatewayPolicyDTO.getGatewayPolicySequenceToBeAdd() != null) {
+            for (GatewayContentDTO sequence : gatewayPolicyDTO.getGatewayPolicySequenceToBeAdd()) {
+                OMElement element;
+                try {
+                    element = AXIOMUtil.stringToOM(sequence.getContent());
+                } catch (XMLStreamException e) {
+                    log.error("Exception occurred while converting String to an OM.", e);
+                    throw new AxisFault(e.getMessage());
+                }
+                if (sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
+                    sequenceAdminServiceProxy.deleteSequence(sequence.getName());
+                    sequenceAdminServiceProxy.addSequence(element);
+                } else {
+                    sequenceAdminServiceProxy.addSequence(element);
+                }
+            }
+        }
     }
 }
