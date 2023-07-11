@@ -24,11 +24,17 @@ public class SemVersion {
     private int minor;
     private Integer patch;
 
-    public SemVersion(String version, int major, int minor, Integer patch) {
+    public SemVersion(String version, int major, int minor, int patch) {
         this.version = version;
         this.major = major;
         this.minor = minor;
         this.patch = patch;
+    }
+
+    public SemVersion(String version, int major, int minor) {
+        this.version = version;
+        this.major = major;
+        this.minor = minor;
     }
 
     public String getVersion() {

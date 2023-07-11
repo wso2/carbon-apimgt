@@ -68,7 +68,7 @@ public class SemanticVersionUtil {
         }
 
         if (versionComponents.length == 2) {
-            return new SemVersion(version, majorVersion, minorVersion, null);
+            return new SemVersion(version, majorVersion, minorVersion);
         }
 
         int patchVersion;
