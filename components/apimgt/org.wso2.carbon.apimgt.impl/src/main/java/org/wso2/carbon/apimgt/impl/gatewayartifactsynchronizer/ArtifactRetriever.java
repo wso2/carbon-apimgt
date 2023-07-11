@@ -80,4 +80,13 @@ public interface ArtifactRetriever {
      */
     String getName();
 
+    /**
+     * This method is used to retrieve gateway policy data from the storage
+     *
+     * @param mappingUUID - UUID of the Gateway Policy Mapping
+     * @return A String contains all the information about the gateway policy artifacts
+     * @throws ArtifactSynchronizerException if there are any errors when retrieving the Artifacts
+     */
+    String retrieveGatewayPolicyArtifact(String mappingUUID) throws ArtifactSynchronizerException;
+
 }

@@ -30,7 +30,7 @@ public interface GatewayArtifactGenerator {
             throws APIManagementException;
 
     RuntimeArtifactDto generateGatewayPolicyArtifact(List<OperationPolicyData> gatewayPolicyDataList,
-            List<OperationPolicy> gatewayPolicyList) throws APIManagementException;
+            List<OperationPolicy> gatewayPolicyList, String tenantDomain) throws APIManagementException;
 
     String getType();
 

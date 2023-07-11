@@ -119,7 +119,7 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
 
     @Override
     public RuntimeArtifactDto generateGatewayPolicyArtifact(List<OperationPolicyData> gatewayPolicyDataList,
-            List<OperationPolicy> gatewayPolicyList) {
+            List<OperationPolicy> gatewayPolicyList, String org) {
         return null;
     }
 
