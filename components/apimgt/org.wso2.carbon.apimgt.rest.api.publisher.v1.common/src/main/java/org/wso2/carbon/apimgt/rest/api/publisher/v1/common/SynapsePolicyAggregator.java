@@ -247,7 +247,8 @@ public class SynapsePolicyAggregator {
     public static String generateGatewayPolicySequenceForPolicyMapping(List<OperationPolicyData> gatewayPolicyDataList,
             List<OperationPolicy> gatewayPolicies, String flow, String sequenceName) throws IOException {
 
-        List<String> gatewayLevelPolicyRenderedList = renderGatewayPolicyMapping(gatewayPolicyDataList, gatewayPolicies, flow);
+        List<String> gatewayLevelPolicyRenderedList = renderGatewayPolicyMapping(gatewayPolicyDataList, gatewayPolicies,
+                flow);
         Map<String, Object> configMap = new HashMap<>();
 
         String gatewayPolicyTemplate = FileUtil.readFileToString(GATEWAY_POLICY_SEQUENCE_TEMPLATE_LOCATION)
@@ -295,8 +296,8 @@ public class SynapsePolicyAggregator {
                                                     + " with a super parent. Trying without wrapping.");
                                         }
                                         // As we can't wrap the policy definition with a super parent, trying the build
-                                        // OM element with the provided policy definition. This will select first child node
-                                        // and drop the other child nodes if a parent node is not configured.
+                                        // OM element with the provided policy definition. This will select first child
+                                        // node and drop the other child nodes if a parent node is not configured.
                                         sanitizedPolicy = APIUtil.buildSecuredOMElement(
                                                 new ByteArrayInputStream(renderedTemplate.getBytes())).toString();
                                     }
@@ -309,7 +310,7 @@ public class SynapsePolicyAggregator {
                             log.error("Policy definition for " + policy.getPolicyName()
                                     + " is not found in the artifact");
                         }
-                    } else{
+                    } else {
                         log.error("Policy " + policy.getPolicyName() + " does not support Synapse gateway. "
                                 + "Hence skipped");
                     }
