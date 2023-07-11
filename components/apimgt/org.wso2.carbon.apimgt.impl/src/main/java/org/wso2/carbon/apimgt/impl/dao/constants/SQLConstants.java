@@ -265,8 +265,8 @@ public class SQLConstants {
     public static final String ADD_SUBSCRIPTION_SQL =
             " INSERT INTO " +
             "   AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS,SUBS_CREATE_STATE,CREATED_BY,CREATED_TIME, " +
-            "   UPDATED_TIME, UUID, TIER_ID_PENDING) " +
-            " VALUES (?,?,?,?,?,?,?,?,?,?)";
+            "   UPDATED_TIME, UUID, TIER_ID_PENDING, VERSION_RANGE) " +
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String UPDATE_SINGLE_SUBSCRIPTION_SQL =
             " UPDATE AM_SUBSCRIPTION " +

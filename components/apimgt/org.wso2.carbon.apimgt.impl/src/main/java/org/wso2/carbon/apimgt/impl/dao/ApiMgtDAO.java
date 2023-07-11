@@ -115,6 +115,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.RemoteUserManagerClient;
+import org.wso2.carbon.apimgt.impl.utils.SemanticVersionUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
@@ -5101,12 +5102,16 @@ public class ApiMgtDAO {
         String apiUUID;
         Identifier identifier;
         String tier;
+        String apiVersion;
+        String majorVersionRegex;
 
         //Query to check if this subscription already exists
         String checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_API_SQL;
         if (!isProduct) {
             identifier = apiTypeWrapper.getApi().getId();
             apiUUID = apiTypeWrapper.getApi().getUuid();
+            String[] contextParts = apiTypeWrapper.getApi().getContext().split("/");
+            apiVersion = contextParts[contextParts.length - 1];
             if (apiUUID != null) {
                 id = getAPIID(apiUUID);
             }
@@ -5117,8 +5122,17 @@ public class ApiMgtDAO {
             identifier = apiTypeWrapper.getApiProduct().getId();
             id = apiTypeWrapper.getApiProduct().getProductId();
             apiUUID = apiTypeWrapper.getApiProduct().getUuid();
+            String[] contextParts = apiTypeWrapper.getApiProduct().getContext().split("/");
+            apiVersion = contextParts[contextParts.length - 1];
         }
         int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+        if (apiVersion.startsWith("v")) {
+            SemVersion apiSemVersion = SemanticVersionUtil.validateAndGetVersionComponents(apiVersion, apiUUID);
+            int apiMajorVersion = apiSemVersion.getMajor();
+            majorVersionRegex = "^(" + apiMajorVersion + "|v" + apiMajorVersion + ").*$";
+        } else {
+            majorVersionRegex = null;
+        }
 
         try (PreparedStatement ps = connection.prepareStatement(checkDuplicateQuery)) {
             ps.setInt(1, id);
@@ -5190,6 +5204,7 @@ public class ApiMgtDAO {
                 preparedStForInsert.setTimestamp(7, timestamp);
                 preparedStForInsert.setTimestamp(8, timestamp);
                 preparedStForInsert.setString(9, subscriptionUUID);
+                preparedStForInsert.setString(11, majorVersionRegex);
 
                 preparedStForInsert.executeUpdate();
                 try (ResultSet rs = preparedStForInsert.getGeneratedKeys()) {
