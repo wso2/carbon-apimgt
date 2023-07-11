@@ -57,6 +57,7 @@ public class DBRetriever implements ArtifactRetriever {
     protected GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
             ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                     .getGatewayArtifactSynchronizerProperties();
+    String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
     private String baseURL = eventHubConfigurationDto.getServiceUrl() + APIConstants.INTERNAL_WEB_APP_EP;
 
     @Override
@@ -68,7 +69,6 @@ public class DBRetriever implements ArtifactRetriever {
     public String retrieveArtifact(String apiId, String gatewayLabel)
             throws ArtifactSynchronizerException {
 
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         if (gatewayArtifactSynchronizerProperties.hasEventWaitingTime()) {
             try {
                 Thread.sleep(gatewayArtifactSynchronizerProperties.getEventWaitingTime());
@@ -234,5 +234,32 @@ public class DBRetriever implements ArtifactRetriever {
     public String getName() {
 
         return APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME;
+    }
+
+    @Override
+    public String retrieveGatewayPolicyArtifact(String mappingUUID) throws ArtifactSynchronizerException {
+        if (gatewayArtifactSynchronizerProperties.hasEventWaitingTime()) {
+            try {
+                Thread.sleep(gatewayArtifactSynchronizerProperties.getEventWaitingTime());
+            } catch (InterruptedException e) {
+                log.error("Error occurred while waiting to retrieve artifacts from event hub");
+            }
+        }
+        try {
+            String path = APIConstants.GatewayArtifactSynchronizer.GATEWAY_POLICY_SYNAPSE_ARTIFACTS +
+                    "?policyMappingUuid=" + mappingUUID + "&type=Synapse";
+            String endpoint = baseURL + path;
+            try (CloseableHttpResponse httpResponse = invokeService(endpoint, tenantDomain)) {
+                JSONArray jsonArray = retrieveArtifact(httpResponse);
+                if (jsonArray != null && jsonArray.length() > 0) {
+                    return jsonArray.getString(0);
+                }
+            }
+        } catch (IOException e) {
+            String msg = "Error while executing the http client";
+            log.error(msg, e);
+            throw new ArtifactSynchronizerException(msg, e);
+        }
+        return null;
     }
 }

@@ -27,7 +27,8 @@ public class GatewayPolicyArtifactGeneratorUtil {
                     policyMappingUuid, tenantDomain, true);
             List<OperationPolicy> gatewayPolicyList = apiProvider.getOperationPoliciesOfPolicyMapping(
                     policyMappingUuid);
-            return gatewayArtifactGenerator.generateGatewayPolicyArtifact(gatewayPolicyDataList, gatewayPolicyList);
+            return gatewayArtifactGenerator.generateGatewayPolicyArtifact(gatewayPolicyDataList, gatewayPolicyList,
+                    tenantDomain);
         } else {
             Set<String> gatewayArtifactGeneratorTypes =
                     ServiceReferenceHolder.getInstance().getGatewayArtifactGeneratorTypes();
