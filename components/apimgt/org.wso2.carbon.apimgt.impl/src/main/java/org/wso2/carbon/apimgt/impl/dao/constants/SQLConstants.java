@@ -326,6 +326,7 @@ public class SQLConstants {
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
             "   SUBS.UUID AS UUID, " +
+            "   SUBS.VERSION_RANGE AS VERSION_RANGE, " +
              "   API.API_ID AS API_ID," +
              "   API.API_UUID AS API_UUID " +
             " FROM " +
@@ -351,6 +352,7 @@ public class SQLConstants {
             "   SUBS.UUID AS UUID, " +
             "   SUBS.CREATED_TIME AS CREATED_TIME, " +
             "   SUBS.UPDATED_TIME AS UPDATED_TIME, " +
+            "   SUBS.VERSION_RANGE AS VERSION_RANGE, " +
             "   API.API_UUID AS API_UUID, " +
             "   API.API_ID AS API_ID " +
             " FROM " +
@@ -528,6 +530,7 @@ public class SQLConstants {
                     "   SUBS.SUB_STATUS AS SUB_STATUS, " +
                     "   SUBS.UUID AS SUB_UUID, " +
                     "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+                    "   SUBS.VERSION_RANGE AS VERSION_RANGE, " +
                     "   APP.NAME AS APP_NAME " +
                     " FROM " +
                     "   AM_APPLICATION APP, " +

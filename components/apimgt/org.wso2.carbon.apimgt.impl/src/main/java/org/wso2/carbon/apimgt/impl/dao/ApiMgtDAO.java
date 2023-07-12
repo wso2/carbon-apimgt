@@ -936,6 +936,7 @@ public class ApiMgtDAO {
                 subscribedAPI.setRequestedTier(new Tier(resultSet.getString("TIER_ID_PENDING")));
                 subscribedAPI.setUUID(resultSet.getString("UUID"));
                 subscribedAPI.setApplication(application);
+                subscribedAPI.setVersionRange(resultSet.getString("VERSION_RANGE"));
             }
             return subscribedAPI;
         } catch (SQLException e) {
@@ -1007,6 +1008,7 @@ public class ApiMgtDAO {
                 }
                 subscribedAPI.setApplication(application);
                 subscribedAPI.setOrganization(resultSet.getString("ORGANIZATION"));
+                subscribedAPI.setVersionRange(resultSet.getString("VERSION_RANGE"));
             }
             return subscribedAPI;
         } catch (SQLException e) {
@@ -18335,6 +18337,7 @@ public class ApiMgtDAO {
                             identifier.setUUID(result.getString("API_UUID"));
                             SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
                             subscribedAPI.setApplication(application);
+                            subscribedAPI.setVersionRange(result.getString("VERSION_RANGE"));
                             initSubscribedAPI(subscribedAPI, result);
                             subscribedAPIs.add(subscribedAPI);
                         } else {
@@ -18344,6 +18347,7 @@ public class ApiMgtDAO {
                             identifier.setUuid(result.getString("API_UUID"));
                             SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
                             subscribedAPI.setApplication(application);
+                            subscribedAPI.setVersionRange(result.getString("VERSION_RANGE"));
                             initSubscribedAPI(subscribedAPI, result);
                             subscribedAPIs.add(subscribedAPI);
                         }
