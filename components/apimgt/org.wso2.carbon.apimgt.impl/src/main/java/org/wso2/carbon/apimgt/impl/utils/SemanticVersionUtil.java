@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.wso2.carbon.apimgt.api.APIVersionValidationFailureException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.dto.SemVersion;
 
 public class SemanticVersionUtil {
@@ -31,7 +32,7 @@ public class SemanticVersionUtil {
             String errMessage = String.format("Invalid version: %s for API: %s. " +
                     "API version should be in the format x.y.z or vx.y.z where x,y,z are non-negative integers" +
                     "and v is version prefix", version, apiUUID);
-            throw new APIVersionValidationFailureException(errMessage);
+            throw new APIVersionValidationFailureException(errMessage, ExceptionCodes.from(ExceptionCodes.INVALID_API_SEMANTIC_VERSION, version));
         }
 
         int majorVersion, minorVersion;
@@ -44,7 +45,7 @@ public class SemanticVersionUtil {
         } catch (NumberFormatException e) {
             String errMessage = String.format("Invalid version: %s for API: %s. Version is not starting with v or " +
                     "Major version is not a number", version, apiUUID);
-            throw new APIVersionValidationFailureException(errMessage);
+            throw new APIVersionValidationFailureException(errMessage, ExceptionCodes.from(ExceptionCodes.INVALID_API_SEMANTIC_VERSION, version));
         }
 
         try {
@@ -52,19 +53,19 @@ public class SemanticVersionUtil {
         } catch (NumberFormatException e) {
             String errMessage = String.format("Invalid version: %s for API: %s. Minor version is not a number",
                     version, apiUUID);
-            throw new APIVersionValidationFailureException(errMessage);
+            throw new APIVersionValidationFailureException(errMessage, ExceptionCodes.from(ExceptionCodes.INVALID_API_SEMANTIC_VERSION, version));
         }
 
         if (majorVersion < 0) {
             String errMessage = String.format("Invalid version: %s for API: %s. Major version should be " +
                             "a non-negative integer", version, apiUUID);
-            throw new APIVersionValidationFailureException(errMessage);
+            throw new APIVersionValidationFailureException(errMessage, ExceptionCodes.from(ExceptionCodes.INVALID_API_SEMANTIC_VERSION, version));
         }
 
         if (minorVersion < 0) {
             String errMessage = String.format("Invalid version: %s for API: %s. Minor version should be " +
                     "a non-negative integer", version, apiUUID);
-            throw new APIVersionValidationFailureException(errMessage);
+            throw new APIVersionValidationFailureException(errMessage, ExceptionCodes.from(ExceptionCodes.INVALID_API_SEMANTIC_VERSION, version));
         }
 
         if (versionComponents.length == 2) {
@@ -77,13 +78,13 @@ public class SemanticVersionUtil {
         } catch (NumberFormatException e) {
             String errMessage = String.format("Invalid version: %s for API: %s. Patch version is not a number",
                     version, apiUUID);
-            throw new APIVersionValidationFailureException(errMessage);
+            throw new APIVersionValidationFailureException(errMessage, ExceptionCodes.from(ExceptionCodes.INVALID_API_SEMANTIC_VERSION, version));
         }
 
         if (patchVersion < 0) {
             String errMessage = String.format("Invalid version: %s for API: %s. Patch version should be " +
                     "a non-negative integer", version, apiUUID);
-            throw new APIVersionValidationFailureException(errMessage);
+            throw new APIVersionValidationFailureException(errMessage, ExceptionCodes.from(ExceptionCodes.INVALID_API_SEMANTIC_VERSION, version));
         }
 
         return new SemVersion(version, majorVersion, minorVersion, patchVersion);

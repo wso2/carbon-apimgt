@@ -22,4 +22,8 @@ public class APIVersionValidationFailureException extends APIManagementException
     public APIVersionValidationFailureException(String msg) {
         super(msg);
     }
+
+    public APIVersionValidationFailureException(String msg, ErrorHandler errorHandler) {
+        super(msg, errorHandler);
+    }
 }
