@@ -2184,9 +2184,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API api = null;
         List<String> externalStoreIdList;
-        if(externalStoreIds != null){
+        if (externalStoreIds != null) {
             externalStoreIdList = Arrays.asList(externalStoreIds.split("\\s*,\\s*"));
-        }else{
+        } else {
             externalStoreIdList = new ArrayList<>();
         }
         try {
