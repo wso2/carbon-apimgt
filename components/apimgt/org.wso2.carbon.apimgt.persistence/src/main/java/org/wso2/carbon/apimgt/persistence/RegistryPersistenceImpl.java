@@ -3545,9 +3545,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     resourceName = ((ResourceImpl) resource).getName();
                 }
                 resourceName = resourceName.replaceAll("\\.xml", "");
-                resourceName = resourceName.split("_")[0];
                 String httpMethod = resource.getProperty("method");
-
+                resourceName = resourceName.split("_" + httpMethod)[0];
                 SOAPToRestSequence seq = new SOAPToRestSequence(httpMethod, resourceName, content, direction);
                 seq.setUuid(resource.getUUID());
                 sequences.add(seq);
