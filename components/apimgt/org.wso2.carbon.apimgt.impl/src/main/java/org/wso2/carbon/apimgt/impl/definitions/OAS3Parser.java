@@ -674,6 +674,16 @@ public class OAS3Parser extends APIDefinition {
         if (!APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
             preserveResourcePathOrderFromAPI(swaggerData, openAPI);
         }
+
+        // sets x-wso2-disable-security extension
+        if (swaggerData.getExtensionsList() != null && swaggerData.getExtensionsList()
+                .containsKey(APIConstants.X_WSO2_DISABLE_SECURITY)) {
+            if (openAPI.getExtensions() == null) {
+                openAPI.setExtensions(new HashMap<>());
+            }
+            openAPI.getExtensions().put(APIConstants.X_WSO2_DISABLE_SECURITY,
+                    swaggerData.getExtensionsList().get(APIConstants.X_WSO2_DISABLE_SECURITY));
+        }
         return Json.pretty(openAPI);
     }
 
@@ -917,6 +927,13 @@ public class OAS3Parser extends APIDefinition {
             oAuthFlow.setScopes(new Scopes());
         }
         oAuthFlow.setAuthorizationUrl(OPENAPI_DEFAULT_AUTHORIZATION_URL);
+
+        // sets x-wso2-disable-security extension
+        if( StringUtils.isNotEmpty(api.getApiSecurity())) {
+            openAPI.addExtension(APIConstants.X_WSO2_DISABLE_SECURITY, false);
+        } else {
+            openAPI.addExtension(APIConstants.X_WSO2_DISABLE_SECURITY, true);
+        }
 
         if (api.getAuthorizationHeader() != null) {
             openAPI.addExtension(APIConstants.X_WSO2_AUTH_HEADER, api.getAuthorizationHeader());
@@ -1894,13 +1911,26 @@ public class OAS3Parser extends APIDefinition {
      * @return API
      */
     @Override
-    public API setExtensionsToAPI(String apiDefinition, API api) throws APIManagementException {
+    public API setExtensionsToAPI(String apiDefinition, API api, boolean isExistingApi) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(apiDefinition);
         Map<String, Object> extensions = openAPI.getExtensions();
         if (extensions == null) {
             return api;
         }
-
+        // handle x-wso2-disable-security extension with the API object
+        if (extensions.containsKey(APIConstants.X_WSO2_DISABLE_SECURITY) &&
+                Boolean.valueOf(extensions.get(APIConstants.X_WSO2_DISABLE_SECURITY).toString())) {
+            api.setApiSecurity(new StringBuilder().toString());
+        } else {
+            api.setApiSecurity(new StringBuilder()
+                    .append(APIConstants.DEFAULT_API_SECURITY_OAUTH2).append(",")
+                    .append(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY).toString());
+        }
+        // returning existing APIs from here since no need to execute the remaining logic
+        // for an existing API.
+        if (isExistingApi) {
+            return api;
+        }
         //Setup Custom auth header for API
         String authHeader = OASParserUtil.getAuthorizationHeaderFromSwagger(extensions);
         if (StringUtils.isNotBlank(authHeader)) {

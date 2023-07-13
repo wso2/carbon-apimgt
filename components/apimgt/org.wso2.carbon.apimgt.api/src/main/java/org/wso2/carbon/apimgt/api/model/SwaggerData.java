@@ -18,10 +18,15 @@
 package org.wso2.carbon.apimgt.api.model;
 
 
+import org.apache.commons.lang.StringUtils;
+import org.wso2.carbon.apimgt.api.APIConstants;
+
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -135,6 +140,7 @@ public class SwaggerData {
     private Set<Resource> resources = new LinkedHashSet<>();
     private Set<Scope> scopes = new HashSet<>();
     private ThrottlingLimit throttlingLimit;
+    private Map<String, String> extensionsList = new HashMap<>();
 
     public SwaggerData(API api) {
         title = api.getId().getName();
@@ -166,6 +172,11 @@ public class SwaggerData {
 
         transportType = api.getType();
         security = api.getApiSecurity();
+        if (StringUtils.isNotEmpty(security)) {
+            extensionsList.put(APIConstants.X_WSO2_DISABLE_SECURITY, "false");
+        } else {
+            extensionsList.put(APIConstants.X_WSO2_DISABLE_SECURITY, "true");
+        }
         apiLevelPolicy = api.getApiLevelPolicy();
         setThrottlingLimit(api.getThrottleLimit());
         Set<Scope> scopes = api.getScopes();
@@ -247,5 +258,13 @@ public class SwaggerData {
 
     public String getApiLevelPolicy() {
         return apiLevelPolicy;
+    }
+
+    public void setExtensionsList(Map<String, String> extensionsList) {
+        this.extensionsList = extensionsList;
+    }
+
+    public Map<String, String> getExtensionsList() {
+        return extensionsList;
     }
 }

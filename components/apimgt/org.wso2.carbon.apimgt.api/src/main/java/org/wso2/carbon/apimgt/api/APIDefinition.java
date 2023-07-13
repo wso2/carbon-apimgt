@@ -228,7 +228,7 @@ public abstract class APIDefinition {
      * @param api            API
      * @return API
      */
-    public abstract API setExtensionsToAPI(String swaggerContent, API api)
+    public abstract API setExtensionsToAPI(String swaggerContent, API api, boolean isExistingApi)
             throws APIManagementException;
 
     /**

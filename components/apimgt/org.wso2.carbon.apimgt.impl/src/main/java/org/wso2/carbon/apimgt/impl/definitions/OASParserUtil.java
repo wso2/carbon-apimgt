@@ -1479,9 +1479,9 @@ public class OASParserUtil {
      * @param api            API
      * @return API
      */
-    public static API setExtensionsToAPI(String swaggerContent, API api) throws APIManagementException {
+    public static API setExtensionsToAPI(String swaggerContent, API api, boolean isExistingApi) throws APIManagementException {
         APIDefinition apiDefinition = getOASParser(swaggerContent);
-        return apiDefinition.setExtensionsToAPI(swaggerContent, api);
+        return apiDefinition.setExtensionsToAPI(swaggerContent, api, isExistingApi);
     }
 
     /**
