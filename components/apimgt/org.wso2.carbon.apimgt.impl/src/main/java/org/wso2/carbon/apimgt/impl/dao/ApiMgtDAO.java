@@ -5134,6 +5134,9 @@ public class ApiMgtDAO {
             int apiMajorVersion = apiSemVersion.getMajor();
             if (versionRange.equals("v" + apiMajorVersion)) {
                 majorVersionRange = versionRange;
+            } else {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_SUBSCRIPTION_VERSION_RANGE,
+                        "v" + apiMajorVersion, apiVersion));
             }
         }
 

@@ -531,7 +531,8 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_TENANT_CONFIG(9020001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
     INVALID_API_ID(9020002, "Invalid API ID", 404, "The provided API ID is not found %s", false),
     INVALID_ENVIRONMENT(9020003, "Invalid Environment", 400, "The provided Environment, %s,  is not valid.", false),
-    INVALID_API_SEMANTIC_VERSION(9020004, "Invalid API semantic version", 400, "The provided API version %s is not a valid semantic version.", false);
+    INVALID_API_SEMANTIC_VERSION(9020004, "Invalid API version", 400, "The provided API version %s is not a valid semantic version.", false),
+    INVALID_SUBSCRIPTION_VERSION_RANGE(9020005, "Invalid version range", 400, "The provided version range %s is invalid for the API with version %s", false);
 
     private final long errorCode;
     private final String errorMessage;
