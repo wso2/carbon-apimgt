@@ -622,14 +622,14 @@ public class ApiMgtDAO {
         return null;
     }
 
-    public int addSubscription(ApiTypeWrapper apiTypeWrapper, Application application, String status, String subscriber)
-            throws APIManagementException {
+    public int addSubscription(ApiTypeWrapper apiTypeWrapper, Application application, String status,
+                               String subscriber, String versionRange) throws APIManagementException {
         int subscriptionId = -1;
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             try {
                 conn.setAutoCommit(false);
-                subscriptionId = addSubscription(conn, apiTypeWrapper, application, status, subscriber);
+                subscriptionId = addSubscription(conn, apiTypeWrapper, application, status, subscriber, versionRange);
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -5090,13 +5090,14 @@ public class ApiMgtDAO {
     }
 
     private int addSubscription(Connection connection, ApiTypeWrapper apiTypeWrapper, Application application,
-                                String subscriptionStatus, String subscriber) throws APIManagementException,
-            SQLException {
-        return addSubscription(connection, apiTypeWrapper, application, subscriptionStatus, subscriber, UUID.randomUUID().toString());
+                                String subscriptionStatus, String subscriber, String versionRange)
+            throws APIManagementException, SQLException {
+        return addSubscription(connection, apiTypeWrapper, application, subscriptionStatus, subscriber,
+                UUID.randomUUID().toString(), versionRange);
     }
     private int addSubscription(Connection connection, ApiTypeWrapper apiTypeWrapper, Application application,
-                                String subscriptionStatus, String subscriber, String subscriptionUUID)
-            throws APIManagementException, SQLException {
+                                String subscriptionStatus, String subscriber, String subscriptionUUID,
+                                String versionRange) throws APIManagementException, SQLException {
 
         final boolean isProduct = apiTypeWrapper.isAPIProduct();
         int subscriptionId = -1;
@@ -5105,7 +5106,7 @@ public class ApiMgtDAO {
         Identifier identifier;
         String tier;
         String apiVersion;
-        String majorVersionRange;
+        String majorVersionRange = null;
 
         //Query to check if this subscription already exists
         String checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_API_SQL;
@@ -5128,12 +5129,12 @@ public class ApiMgtDAO {
             apiVersion = contextParts[contextParts.length - 1];
         }
         int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-        if (apiVersion.startsWith("v")) {
+        if (apiVersion.startsWith("v") && versionRange != null) {
             SemVersion apiSemVersion = SemanticVersionUtil.validateAndGetVersionComponents(apiVersion, apiUUID);
             int apiMajorVersion = apiSemVersion.getMajor();
-            majorVersionRange = "v" + apiMajorVersion;
-        } else {
-            majorVersionRange = null;
+            if (versionRange.equals("v" + apiMajorVersion)) {
+                majorVersionRange = versionRange;
+            }
         }
 
         try (PreparedStatement ps = connection.prepareStatement(checkDuplicateQuery)) {

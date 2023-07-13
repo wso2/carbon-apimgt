@@ -766,8 +766,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application application)
-            throws APIManagementException {
+    public SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application application,
+                                                String versionRange) throws APIManagementException {
 
         API api = null;
         APIProduct product = null;
@@ -807,7 +807,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state)) {
             subscriptionId = apiMgtDAO.addSubscription(apiTypeWrapper, application,
-                    APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername);
+                    APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername, versionRange);
 
             boolean isTenantFlowStarted = false;
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {

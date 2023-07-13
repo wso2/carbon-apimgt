@@ -201,7 +201,8 @@ public interface APIConsumer extends APIManager {
      * @return SubscriptionResponse subscription response object
      * @throws APIManagementException if failed to add subscription details to database
      */
-    SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application application)
+    SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application application,
+                                         String versionRange)
             throws APIManagementException;
 
     /**

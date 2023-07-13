@@ -128,6 +128,7 @@ public class APIConsumerImplTest {
     private static final String SAMPLE_API_NAME = "test";
     private static final String API_PROVIDER = "admin";
     private static final String SAMPLE_API_VERSION = "1.0.0";
+    private static final String SAMPLE_API_SUBSCRIPTION_VERSION_RANGE = "v1";
     private RegistryService registryService;
     public static final String SAMPLE_TENANT_DOMAIN_1 = "abc.com";
     private APIPersistence apiPersistenceInstance;
@@ -840,15 +841,15 @@ public class APIConsumerImplTest {
         String tenantAwareUsername = "user1@"+SAMPLE_TENANT_DOMAIN_1;
         Mockito.when(MultitenantUtils.getTenantAwareUsername(Mockito.eq("user1"))).thenReturn(tenantAwareUsername);
         Mockito.when(apiMgtDAO.addSubscription(apiTypeWrapper, application, APIConstants.SubscriptionStatus.ON_HOLD,
-                tenantAwareUsername)).thenReturn(1);
+                tenantAwareUsername, SAMPLE_API_SUBSCRIPTION_VERSION_RANGE)).thenReturn(1);
         SubscribedAPI subscribedAPI = new SubscribedAPI(UUID.randomUUID().toString());
         Mockito.when(apiMgtDAO.getSubscriptionById(1)).thenReturn(subscribedAPI);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1);
-        SubscriptionResponse subscriptionResponse = apiConsumer.addSubscription(apiTypeWrapper, "user1",application);
+        SubscriptionResponse subscriptionResponse = apiConsumer.addSubscription(apiTypeWrapper, "user1",application, SAMPLE_API_SUBSCRIPTION_VERSION_RANGE);
         Assert.assertEquals(subscriptionResponse.getSubscriptionUUID(), subscribedAPI.getUUID());
         try {
             api.setStatus(APIConstants.CREATED);
-            apiConsumer.addSubscription(apiTypeWrapper, "sub1", application);
+            apiConsumer.addSubscription(apiTypeWrapper, "sub1", application, SAMPLE_API_SUBSCRIPTION_VERSION_RANGE);
             Assert.fail("Resource not found exception not thrown for wrong api state");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Subscriptions not allowed on APIs/API Products in the state"));
@@ -867,12 +868,12 @@ public class APIConsumerImplTest {
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         apiTypeWrapper.setTier("tier2");
         Mockito.when(apiMgtDAO.addSubscription(Mockito.eq(apiTypeWrapper), Mockito.eq(application), Mockito.anyString(),
-                Mockito.anyString())).thenReturn(1);
+                Mockito.anyString(), Mockito.anyString())).thenReturn(1);
         SubscribedAPI subscribedAPI = new SubscribedAPI(UUID.randomUUID().toString());
         Mockito.when(apiMgtDAO.getSubscriptionById(1)).thenReturn(subscribedAPI);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1);
         try {
-            apiConsumer.addSubscription(apiTypeWrapper, "sub1", application);
+            apiConsumer.addSubscription(apiTypeWrapper, "sub1", application, SAMPLE_API_SUBSCRIPTION_VERSION_RANGE);
             Assert.fail("Invalid Tier error not thrown.");
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getErrorHandler().getErrorCode(),
