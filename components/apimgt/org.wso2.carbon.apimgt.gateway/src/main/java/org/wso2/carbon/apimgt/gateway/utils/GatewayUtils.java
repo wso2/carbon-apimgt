@@ -75,6 +75,7 @@ import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetrySpan;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -1533,6 +1534,10 @@ public class GatewayUtils {
 
     public static TracingTracer getTracingTracer() {
         return ServiceReferenceHolder.getInstance().getTracer();
+    }
+
+    public static TelemetryTracer getTelemetryTracer() {
+        return ServiceReferenceHolder.getInstance().getTelemetryTracer();
     }
 
     public static boolean isAllApisDeployed () {

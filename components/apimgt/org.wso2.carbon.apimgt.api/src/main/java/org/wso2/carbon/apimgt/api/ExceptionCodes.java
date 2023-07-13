@@ -35,6 +35,7 @@ public enum ExceptionCodes implements ErrorHandler {
 
     API_PRODUCT_CONTEXT_ALREADY_EXISTS(900275, "The API Product context already exists.", 409, "An API Product with context '%s' already exists"),
 
+    API_CONTEXT_MALFORMED_EXCEPTION(900253, "The API context is malformed.", 400, "'%s'"),
     API_ALREADY_EXISTS(900300, "The API already exists.", 409, "The API already exists"),
     APPLICATION_ALREADY_EXISTS(900301, "The application already exists.", 409, "The application already exists"),
     APIMGT_DAO_EXCEPTION(900302, "Internal server error.", 500, "Error occurred while persisting/retrieving data"),
@@ -115,6 +116,7 @@ public enum ExceptionCodes implements ErrorHandler {
     API_OR_API_PRODUCT_NOT_FOUND(900359, "API or API Product Not Found", 404, "Requested API or API Product with id '%s' not found"),
     API_PRODUCT_NOT_FOUND(900360, "API Product Not Found", 404, "Requested API Product with id '%s' not found"),
     SUB_ORGANIZATION_NOT_IDENTIFIED(900361, "User's Organization Not Identified", 403, "User's Organization is not identified"),
+    ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES(903010, "Error while updating required properties", 400, "Error while updating required properties."),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
@@ -506,28 +508,28 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_TENANT_CONFIG(902001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
 
     //Operation Policies related error codes
-    INVALID_OPERATION_POLICY(902005, "Cannot find the selected operation policy", 400,
-            "Selected operation policy is not found"),
-    INVALID_OPERATION_POLICY_SPECIFICATION(902006, "Invalid operation policy specification found", 400,
-            "Invalid operation policy specification. %s", false),
+    INVALID_OPERATION_POLICY(902005, "Cannot find the selected api policy", 400,
+            "Selected api policy is not found"),
+    INVALID_OPERATION_POLICY_SPECIFICATION(902006, "Invalid api policy specification found", 400,
+            "Invalid api policy specification. %s", false),
 
-    INVALID_OPERATION_POLICY_PARAMETERS(902007, "Missing required parameters for operation policy specification", 400,
-            "Required parameter(s) %s for operation policy specification %s are either missing or empty"),
-    OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW(902008, "Operation policy is not allowed in the applied flow", 400,
+    INVALID_OPERATION_POLICY_PARAMETERS(902007, "Missing required parameters for api policy specification", 400,
+            "Required parameter(s) %s for api policy specification %s are either missing or empty"),
+    OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW(902008, "API policy is not allowed in the applied flow", 400,
             "%s policy is not allowed in response flow"),
-    MISSING_MANDATORY_POLICY_ATTRIBUTES(902009, "Missing mandatory operation policy attribute", 400,
-            "Required attributes(s) %s for operation policy specification %s are either missing or empty"),
-    OPERATION_POLICY_NOT_FOUND(902010, "Operation Policy Not Found", 404,
-            "Requested operation policy with id '%s' not found"),
+    MISSING_MANDATORY_POLICY_ATTRIBUTES(902009, "Missing mandatory api policy attribute", 400,
+            "Required attributes(s) %s for api policy specification %s are either missing or empty"),
+    OPERATION_POLICY_NOT_FOUND(902010, "API Policy Not Found", 404,
+            "Requested api policy with id '%s' not found"),
 
-    OPERATION_POLICY_ALREADY_EXISTS(903001, "The Operation Policy already exists.", 409, "An Operation Policy with name '%s' and version '%s' already exists"),
+    OPERATION_POLICY_ALREADY_EXISTS(903001, "The API Policy already exists.", 409, "An Operation Policy with name '%s' and version '%s' already exists"),
 
-    OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION(903004, "Operation Policy Not Found with given name and version", 404,
-            "Requested operation policy with name '%s' and version '%s not found"),
+    OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION(903004, "API Policy Not Found with given name and version", 404,
+            "Requested api policy with name '%s' and version '%s not found"),
 
     OPERATION_POLICY_GATEWAY_ERROR(903008,
             "Either Synapse or Choreo Gateway Definition files or both should be present", 400,
-            "Operation Policy cannot be imported due to the missing Gateway files."),
+            "API Policy cannot be imported due to the missing Gateway files."),
     ERROR_VALIDATING_API_POLICY(902011, "Error while validating API policies enforced for the API", 400,
             "Error while validating the API policies enforced for the API"),
 

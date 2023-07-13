@@ -484,13 +484,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         addLocalScopes(api.getId().getApiName(), api.getUriTemplates(), api.getOrganization());
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        validateOperationPolicyParameters(api, tenantDomain);
         addURITemplates(apiId, api, tenantId);
+        addAPIPolicies(api, tenantDomain);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
                 apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+    }
+
+    /**
+     * This method is used to validate and add API level and Operation level policy mappings.
+     *
+     * @param api          API object
+     * @param tenantDomain Tenant domain
+     * @throws APIManagementException if an error occurs while adding the policies
+     */
+    private void addAPIPolicies(API api, String tenantDomain) throws APIManagementException {
+        // Validate API level and operation level policies
+        validateAPIPolicyParameters(api, tenantDomain);
+        // Add API level and operation level policies
+        apiMgtDAO.addAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain);
     }
 
     /**
@@ -809,14 +823,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {
             migrateMediationPoliciesOfAPI(api, tenantDomain, false);
         }
-        //Validate Operation Policies
-        validateOperationPolicyParameters(api, tenantDomain);
 
         //get product resource mappings on API before updating the API. Update uri templates on api will remove all
         //product mappings as well.
         List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
         updateAPI(api, tenantId, userNameWithoutChange);
         updateProductResourceMappings(api, organization, productResources);
+
+        updateAPIPolicies(api, tenantDomain);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " in the database");
@@ -879,6 +893,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         return api;
+    }
+
+    /**
+     * This method is used to validate and update API level and Operation level policy mappings.
+     *
+     * @param api          API object
+     * @param tenantDomain Tenant domain
+     * @throws APIManagementException if an error occurs while updating the policy mappings
+     */
+    private void updateAPIPolicies(API api, String tenantDomain) throws APIManagementException {
+        // Validate API level and operation level policies
+        validateAPIPolicyParameters(api, tenantDomain);
+        // Update API level and operation level policies
+        apiMgtDAO.updateAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain);
     }
 
     private void validateKeyManagers(API api) throws APIManagementException {
@@ -1194,21 +1222,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * This method is used to visualize migrated APIs that has mediation policies attached. A dummy policy is added
-     * to all the operations with the mediator's name as the policy name. Here policy Id is not set.
+     * This method is used to visualize migrated APIs that has mediation policies attached. A dummy policy with policy
+     * ID as null is added either to all operations or as an API level policy depending on whether the API level policy
+     * support feature is enabled If enabled, policy is added as an API level policy with the mediator's name as the
+     * policy name. If not enabled, policy is added to all the operations with the mediator's name as the policy name.
      *
-     * @param api      API
+     * @param api          API object
+     * @param organization Organization
      */
-    protected void loadMediationPoliciesAsOperationPoliciesToAPI(API api, String organization) throws APIManagementException {
+    protected void loadMediationPoliciesFromMigratedAPIToAPI(API api, String organization)
+            throws APIManagementException {
+
+        List<OperationPolicy> policiesList = (api.getApiPolicies() != null) ? api.getApiPolicies() : new ArrayList<>();
         // This method is used to handle the migration
-        OperationPolicy inFlowPolicy = null;
-        OperationPolicy outFlowPolicy = null;
-        OperationPolicy faultFlowPolicy = null;
-        // get all policies
+
+        // Get all policies
         if (APIUtil.isSequenceDefined(api.getInSequence())) {
             OperationPolicyData existingPolicy = getAPISpecificOperationPolicyByPolicyName(api.getInSequence(),
                     APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
-            inFlowPolicy = new OperationPolicy();
+            OperationPolicy inFlowPolicy = new OperationPolicy();
             inFlowPolicy.setPolicyName(api.getInSequence());
             inFlowPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
             inFlowPolicy.setOrder(1);
@@ -1216,11 +1248,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 inFlowPolicy.setPolicyId(existingPolicy.getPolicyId());
                 api.setInSequence(null);
             }
+            policiesList.add(inFlowPolicy);
         }
         if (APIUtil.isSequenceDefined(api.getOutSequence())) {
             OperationPolicyData existingPolicy = getAPISpecificOperationPolicyByPolicyName(api.getOutSequence(),
                     APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
-            outFlowPolicy = new OperationPolicy();
+            OperationPolicy outFlowPolicy = new OperationPolicy();
             outFlowPolicy.setPolicyName(api.getOutSequence());
             outFlowPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
             outFlowPolicy.setOrder(1);
@@ -1228,11 +1261,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 outFlowPolicy.setPolicyId(existingPolicy.getPolicyId());
                 api.setOutSequence(null);
             }
+            policiesList.add(outFlowPolicy);
         }
         if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
             OperationPolicyData existingPolicy = getAPISpecificOperationPolicyByPolicyName(api.getFaultSequence(),
                     APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
-            faultFlowPolicy = new OperationPolicy();
+            OperationPolicy faultFlowPolicy = new OperationPolicy();
             faultFlowPolicy.setPolicyName(api.getFaultSequence());
             faultFlowPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
             faultFlowPolicy.setOrder(1);
@@ -1240,22 +1274,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 faultFlowPolicy.setPolicyId(existingPolicy.getPolicyId());
                 api.setFaultSequence(null);
             }
+            policiesList.add(faultFlowPolicy);
         }
 
-        if (inFlowPolicy != null || outFlowPolicy != null || faultFlowPolicy != null) {
-            Set<URITemplate> uriTemplates = api.getUriTemplates();
-            for (URITemplate uriTemplate : uriTemplates) {
-                List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
-                if (inFlowPolicy != null) {
-                    operationPolicies.add(cloneOperationPolicy(inFlowPolicy));
-                }
-                if (outFlowPolicy != null) {
-                    operationPolicies.add(cloneOperationPolicy(outFlowPolicy));
-                }
-                if (faultFlowPolicy != null) {
-                    operationPolicies.add(cloneOperationPolicy(faultFlowPolicy));
-                }
-            }
+        // Add as API level policies
+        if (!policiesList.isEmpty()) {
+            api.setApiPolicies(policiesList);
         }
     }
 
@@ -1267,14 +1291,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * This method is used to migrate mediation policies of already migrated APIs. If a mediation policies are found
-     * for three sequences, they will be imported as an API specific policy and that policy Id will be used.
+     * This method is used to migrate mediation policies of already migrated APIs. If mediation policies are found for
+     * the three sequences, they will be imported as API specific policies and that policy ID will be used.
      *
-     * @param api          API
-     * @param organization Organization Name
+     * @param api                 API
+     * @param organization        Organization Name
+     * @param updatePolicyMapping Whether to update the policy mapping
      * @throws APIManagementException
      */
-    protected void migrateMediationPoliciesOfAPI(API api, String organization, boolean updatePolicyURLMapping)
+    protected void migrateMediationPoliciesOfAPI(API api, String organization, boolean updatePolicyMapping)
             throws APIManagementException {
 
         Map<String, String> clonedPoliciesMap = new HashMap<>();
@@ -1284,9 +1309,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (APIUtil.isSequenceDefined(api.getInSequence())) {
             Mediation inSequenceMediation = api.getInSequenceMediation();
-            OperationPolicyData existingPolicy =
-                    getAPISpecificOperationPolicyByPolicyName(inSequenceMediation.getName(),
-                            APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
+            OperationPolicyData existingPolicy = getAPISpecificOperationPolicyByPolicyName(
+                    inSequenceMediation.getName(), APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null,
+                    organization, false);
             String inFlowPolicyId;
             if (existingPolicy == null) {
                 OperationPolicyData inSeqPolicyData =
@@ -1303,9 +1328,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (APIUtil.isSequenceDefined(api.getOutSequence())) {
             Mediation outSequenceMediation = api.getOutSequenceMediation();
-            OperationPolicyData existingPolicy =
-                    getAPISpecificOperationPolicyByPolicyName(outSequenceMediation.getName(),
-                            APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
+            OperationPolicyData existingPolicy = getAPISpecificOperationPolicyByPolicyName(
+                    outSequenceMediation.getName(), APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null,
+                    organization, false);
             String outFlowPolicyId;
             if (existingPolicy == null) {
                 OperationPolicyData outSeqPolicyData =
@@ -1322,9 +1347,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
             Mediation faultSequenceMediation = api.getFaultSequenceMediation();
-            OperationPolicyData existingPolicy =
-                    getAPISpecificOperationPolicyByPolicyName(faultSequenceMediation.getName(),
-                            APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
+            OperationPolicyData existingPolicy = getAPISpecificOperationPolicyByPolicyName(
+                    faultSequenceMediation.getName(), APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null,
+                    organization, false);
             String faultFlowPolicyId;
             if (existingPolicy == null) {
                 OperationPolicyData faultSeqPolicyData =
@@ -1340,35 +1365,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setFaultSequenceMediation(null);
         }
 
-        setMigratedPolicyIdsToPolicies(api, clonedPoliciesMap, updatePolicyURLMapping);
+        setMigratedPolicyIdsToPolicies(api, clonedPoliciesMap, updatePolicyMapping);
     }
 
     /**
-     * This method will update the policy Id of the selected operations policy from the given cloned policies map.
+     * This method will update the policy ID of the selected operation policies or api policy from the given cloned
+     * policies map.
      *
-     * @param api                    API
-     * @param clonedPoliciesMap      Cloned policies map
-     * @param updatePolicyURLMapping whether to update policy url mapping table or not
-     * @throws APIManagementException
+     * @param api                 API
+     * @param clonedPoliciesMap   Cloned policies map
+     * @param updatePolicyMapping Whether to update policy mapping
+     * @throws APIManagementException If failed to set the policy IDs
      */
     private void setMigratedPolicyIdsToPolicies(API api, Map<String, String> clonedPoliciesMap,
-                                                boolean updatePolicyURLMapping)
-            throws APIManagementException {
+            boolean updatePolicyMapping) throws APIManagementException {
 
         boolean policyUpdated = false;
-        Set<URITemplate> uriTemplates = api.getUriTemplates();
-        for (URITemplate uriTemplate : uriTemplates) {
-            for (OperationPolicy policy : uriTemplate.getOperationPolicies()) {
-                if (policy.getPolicyId() == null) {
-                    if (clonedPoliciesMap.containsKey(policy.getPolicyName())) {
-                        policy.setPolicyId(clonedPoliciesMap.get(policy.getPolicyName()));
-                        policyUpdated = true;
-                    }
+        for (OperationPolicy policy : api.getApiPolicies()) {
+            if (policy.getPolicyId() == null) {
+                if (clonedPoliciesMap.containsKey(policy.getPolicyName())) {
+                    policy.setPolicyId(clonedPoliciesMap.get(policy.getPolicyName()));
+                    policyUpdated = true;
                 }
             }
         }
-        if (policyUpdated && updatePolicyURLMapping) {
-            apiMgtDAO.addOperationPolicyMapping(uriTemplates);
+        if (policyUpdated && updatePolicyMapping) {
+            apiMgtDAO.addAPILevelPolicies(api.getApiPolicies(), api.getUuid(), null, tenantDomain);
         }
     }
 
@@ -1477,122 +1499,151 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void validateOperationPolicyParameters(API api, String tenantDomain) throws APIManagementException {
-
-        boolean isOperationPoliciesAllowedForAPIType = true;
-        Set<URITemplate> uriTemplates = api.getUriTemplates();
+    /**
+     * This method is used to validate API level and operation level policies and it's parameters
+     *
+     * @param api          API object
+     * @param tenantDomain Tenant domain
+     * @throws APIManagementException if an error occurs while validating policies
+     */
+    private void validateAPIPolicyParameters(API api, String tenantDomain) throws APIManagementException {
 
         if (APIConstants.API_TYPE_WS.equals(api.getType()) || APIConstants.API_TYPE_SSE.equals(api.getType())
                 || APIConstants.API_TYPE_WEBSUB.equals(api.getType())) {
             if (log.isDebugEnabled()) {
                 log.debug("Operation policies are not allowed for " + api.getType() + " APIs");
             }
-            isOperationPoliciesAllowedForAPIType = false;
+            for (URITemplate uriTemplate : api.getUriTemplates()) {
+                uriTemplate.setOperationPolicies(null);
+            }
+            return;
         }
 
-        for (URITemplate uriTemplate : uriTemplates) {
+        // Validate API level policies
+        if (api.getApiPolicies() != null && !api.getApiPolicies().isEmpty()) {
+            List<OperationPolicy> validatedPolicies = validatePolicies(api.getApiPolicies(), api, tenantDomain);
+            api.setApiPolicies(validatedPolicies);
+        }
+
+        // Validate operation level policies
+        for (URITemplate uriTemplate : api.getUriTemplates()) {
             List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
             List<OperationPolicy> validatedPolicies = new ArrayList<>();
-            if (operationPolicies != null && !operationPolicies.isEmpty() && isOperationPoliciesAllowedForAPIType) {
-                for (OperationPolicy policy : operationPolicies) {
-                    String policyId = policy.getPolicyId();
-                    if (policyId != null) {
-                        // First check the API specific operation policy list
-                        OperationPolicyData policyData =
-                                getAPISpecificOperationPolicyByPolicyId(policyId, api.getUuid(), tenantDomain, false);
-                        if (policyData != null) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("A policy is found for " + policyId + " as " +
-                                        policyData.getSpecification().getName()
-                                        + ". Validating the policy");
-                            }
-                            if (policyData.isRevision()) {
-                                throw new APIManagementException("Invalid policy selected. " + policyId
-                                        + " policy is not found.", ExceptionCodes.INVALID_OPERATION_POLICY);
-                            }
-
-                            if (!policyData.getSpecification().getName().equals(policy.getPolicyName()) ||
-                                    !policyData.getSpecification().getVersion().equals(policy.getPolicyVersion()) ) {
-                                throw new APIManagementException("Applied policy for uriTemplate "
-                                        + uriTemplate.getUriTemplate() + " : " + policy.getPolicyName()
-                                        + "_" + policy.getPolicyVersion() + " does not match the specification");
-                            }
-
-                            OperationPolicySpecification policySpecification = policyData.getSpecification();
-                            if (validateAppliedPolicyWithSpecification(policySpecification, policy, api.getType())) {
-                                validatedPolicies.add(policy);
-                            }
-                        } else {
-                            OperationPolicyData commonPolicyData =
-                                    getCommonOperationPolicyByPolicyId(policyId, tenantDomain, false);
-                            if (commonPolicyData != null) {
-                                // A common policy is found for specified policy. This will be validated according to the provided
-                                // attributes and added to API policy list
-                                if (log.isDebugEnabled()) {
-                                    log.debug(
-                                            "A common policy is found for " + policyId + ". Validating the policy");
-                                }
-
-                                if (!commonPolicyData.getSpecification().getName().equals(policy.getPolicyName()) ||
-                                        !commonPolicyData.getSpecification().getVersion().equals(policy.getPolicyVersion()) ) {
-                                    throw new APIManagementException("Applied policy for uriTemplate "
-                                            + uriTemplate.getUriTemplate() + " : " + policy.getPolicyName()
-                                            + "_" + policy.getPolicyVersion() + " does not match the specification");
-                                }
-
-                                OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
-                                if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, api.getType())) {
-                                    validatedPolicies.add(policy);
-                                }
-                            } else {
-                                throw new APIManagementException("Selected policy " + policyId + " is not found.",
-                                        ExceptionCodes.INVALID_OPERATION_POLICY);
-                            }
-                        }
-                    } else {
-                        // check the API specific operation policy list
-                        OperationPolicyData policyData =
-                                getAPISpecificOperationPolicyByPolicyName(policy.getPolicyName(),
-                                policy.getPolicyVersion(), api.getUuid(), null, tenantDomain, false);
-                        if (policyData != null) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Policy Id is not defined and an API specific policy is found for "
-                                        + policy.getPolicyName() + ". Validating the policy");
-                            }
-                            OperationPolicySpecification policySpecification = policyData.getSpecification();
-                            if (validateAppliedPolicyWithSpecification(policySpecification, policy, api.getType())) {
-                                policy.setPolicyId(policyData.getPolicyId());
-                                validatedPolicies.add(policy);
-                            }
-                        } else {
-                            OperationPolicyData commonPolicyData =
-                                    getCommonOperationPolicyByPolicyName(policy.getPolicyName(),
-                                            policy.getPolicyVersion(), tenantDomain, false);
-                            if (commonPolicyData != null) {
-                                log.info(commonPolicyData.getPolicyId());
-                                // A common policy is found for specified policy. This will be validated according to the provided
-                                // attributes and added to API policy list
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Policy Id is not defined and a common policy is found for "
-                                            + policy.getPolicyName() + ". Validating the policy");
-                                }
-                                OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
-                                if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, api.getType())) {
-                                    policy.setPolicyId(commonPolicyData.getPolicyId());
-                                    validatedPolicies.add(policy);
-                                }
-                            } else {
-                                log.error("Selected policy " + policy.getPolicyName() + " is not found");
-                                throw new APIManagementException("Selected policy " + policy.getPolicyName() + " is not found.",
-                                        ExceptionCodes.INVALID_OPERATION_POLICY);
-                            }
-                        }
-                    }
-                }
+            if (operationPolicies != null && !operationPolicies.isEmpty()) {
+                validatedPolicies = validatePolicies(operationPolicies, api, tenantDomain);
             }
             uriTemplate.setOperationPolicies(validatedPolicies);
         }
     }
+
+    /**
+     * This method will validate a list of policies and throw error if validation fails
+     *
+     * @param apiPoliciesList   Policy list
+     * @param api               API object
+     * @param tenantDomain      Tenant domain
+     * @throws APIManagementException if an error occurs while validating policies
+     */
+    private List<OperationPolicy> validatePolicies(List<OperationPolicy> apiPoliciesList, API api, String tenantDomain)
+            throws APIManagementException {
+
+        List<OperationPolicy> validatedPolicies = new ArrayList<>();
+        for (OperationPolicy policy : apiPoliciesList) {
+            String policyId = policy.getPolicyId();
+            if (policyId != null) {
+                // First check the API specific operation policy list
+                OperationPolicyData policyData =
+                        getAPISpecificOperationPolicyByPolicyId(policyId, api.getUuid(), tenantDomain, false);
+                if (policyData != null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("A policy is found for " + policyId + " as " +
+                                policyData.getSpecification().getName()
+                                + ". Validating the policy");
+                    }
+                    if (policyData.isRevision()) {
+                        throw new APIManagementException("Invalid policy selected. " + policyId
+                                + " policy is not found.", ExceptionCodes.INVALID_OPERATION_POLICY);
+                    }
+
+                    if (!policyData.getSpecification().getName().equals(policy.getPolicyName()) ||
+                            !policyData.getSpecification().getVersion().equals(policy.getPolicyVersion())) {
+                        throw new APIManagementException("Applied policy " + policy.getPolicyName()
+                                + "_" + policy.getPolicyVersion() + " does not match the specification");
+                    }
+
+                    OperationPolicySpecification policySpecification = policyData.getSpecification();
+                    if (validateAppliedPolicyWithSpecification(policySpecification, policy, api.getType())) {
+                        validatedPolicies.add(policy);
+                    }
+                } else {
+                    OperationPolicyData commonPolicyData =
+                            getCommonOperationPolicyByPolicyId(policyId, tenantDomain, false);
+                    if (commonPolicyData != null) {
+                        // A common policy is found for specified policy. This will be validated according to the provided
+                        // attributes and added to API policy list
+                        if (log.isDebugEnabled()) {
+                            log.debug(
+                                    "A common policy is found for " + policyId + ". Validating the policy");
+                        }
+
+                        if (!commonPolicyData.getSpecification().getName().equals(policy.getPolicyName()) ||
+                                !commonPolicyData.getSpecification().getVersion().equals(policy.getPolicyVersion())) {
+                            throw new APIManagementException("Applied policy for uriTemplate " + policy.getPolicyName()
+                                    + "_" + policy.getPolicyVersion() + " does not match the specification");
+                        }
+
+                        OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
+                        if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, api.getType())) {
+                            validatedPolicies.add(policy);
+                        }
+                    } else {
+                        throw new APIManagementException("Selected policy " + policyId + " is not found.",
+                                ExceptionCodes.INVALID_OPERATION_POLICY);
+                    }
+                }
+            } else {
+                // check the API specific operation policy list
+                OperationPolicyData policyData =
+                        getAPISpecificOperationPolicyByPolicyName(policy.getPolicyName(),
+                                policy.getPolicyVersion(), api.getUuid(), null, tenantDomain, false);
+                if (policyData != null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Policy Id is not defined and an API specific policy is found for "
+                                + policy.getPolicyName() + ". Validating the policy");
+                    }
+                    OperationPolicySpecification policySpecification = policyData.getSpecification();
+                    if (validateAppliedPolicyWithSpecification(policySpecification, policy, api.getType())) {
+                        policy.setPolicyId(policyData.getPolicyId());
+                        validatedPolicies.add(policy);
+                    }
+                } else {
+                    OperationPolicyData commonPolicyData =
+                            getCommonOperationPolicyByPolicyName(policy.getPolicyName(),
+                                    policy.getPolicyVersion(), tenantDomain, false);
+                    if (commonPolicyData != null) {
+                        log.info(commonPolicyData.getPolicyId());
+                        // A common policy is found for specified policy. This will be validated according to the provided
+                        // attributes and added to API policy list
+                        if (log.isDebugEnabled()) {
+                            log.debug("Policy Id is not defined and a common policy is found for "
+                                    + policy.getPolicyName() + ". Validating the policy");
+                        }
+                        OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
+                        if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, api.getType())) {
+                            policy.setPolicyId(commonPolicyData.getPolicyId());
+                            validatedPolicies.add(policy);
+                        }
+                    } else {
+                        log.error("Selected policy " + policy.getPolicyName() + " is not found");
+                        throw new APIManagementException("Selected policy " + policy.getPolicyName() + " is not found.",
+                                ExceptionCodes.INVALID_OPERATION_POLICY);
+                    }
+                }
+            }
+        }
+        return validatedPolicies;
+    }
+
 
     @Override
     public boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification,
@@ -1807,13 +1858,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // This is a change that is coming with the context version strategy
         String existingAPIContextTemplate = existingAPI.getContextTemplate();
         existingAPI.setContext(existingAPIContextTemplate.replace("{version}", newVersion));
-        Map<String, List<OperationPolicy>> operationPoliciesMap = extractAndDropOperationPoliciesFromURITemplate(existingAPI.getUriTemplates());
+        Map<String, List<OperationPolicy>> operationPoliciesMap = extractAndDropOperationPoliciesFromURITemplate(
+                existingAPI.getUriTemplates());
+        List<OperationPolicy> apiLevelPolicies = extractAndDropAPILevelPoliciesFromAPI(existingAPI);
         API newAPI = addAPI(existingAPI);
         String newAPIId = newAPI.getUuid();
-        if (!operationPoliciesMap.isEmpty()){
-            // clone common or API specific operation policy.
-            cloneOperationPoliciesToAPI(existingApiId, newAPI, operationPoliciesMap);
-        }
+        cloneAPIPoliciesForNewAPIVersion(existingApiId, newAPI, operationPoliciesMap, apiLevelPolicies);
         // copy docs
         List<Documentation> existingDocs = getAllDocumentation(existingApiId, organization);
 
@@ -1872,41 +1922,62 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return getAPIbyUUID(newAPIId, organization);
     }
 
-    private void cloneOperationPoliciesToAPI(String oldAPIUuid, API newAPI,
-                                             Map<String, List<OperationPolicy>> extractedPoliciesMap)
-            throws APIManagementException {
+    private void cloneAPIPoliciesForNewAPIVersion(String oldAPIUuid, API newAPI,
+            Map<String, List<OperationPolicy>> extractedOperationPoliciesMap,
+            List<OperationPolicy> extractedAPILevelPolicies) throws APIManagementException {
+
         Map<String, String> clonedPolicies = new HashMap<>();
-        Set<URITemplate> uriTemplates = newAPI.getUriTemplates();
         List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails = new ArrayList<>();
-        for (URITemplate uriTemplate : uriTemplates) {
-            String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
-            if (extractedPoliciesMap.containsKey(key)) {
-                List<OperationPolicy> operationPolicies = extractedPoliciesMap.get(key);
-                for (OperationPolicy operationPolicy : operationPolicies) {
-                    String clonedPolicyId;
-                    if (!clonedPolicies.containsKey(operationPolicy.getPolicyId())) {
-                        clonedPolicyId = UUID.randomUUID().toString();
 
-                        ClonePolicyMetadataDTO toBeClonedSinglePolicyData = new ClonePolicyMetadataDTO();
-                        toBeClonedSinglePolicyData.setClonedPolicyUUID(clonedPolicyId);
-                        toBeClonedSinglePolicyData.setCurrentPolicyUUID(operationPolicy.getPolicyId());
-                        toBeClonedPolicyDetails.add(toBeClonedSinglePolicyData);
+        Set<URITemplate> uriTemplates = newAPI.getUriTemplates();
+        if (!extractedOperationPoliciesMap.isEmpty()) {
+            for (URITemplate uriTemplate : uriTemplates) {
+                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                if (extractedOperationPoliciesMap.containsKey(key)) {
+                    List<OperationPolicy> operationPolicies = extractedOperationPoliciesMap.get(key);
+                    for (OperationPolicy operationPolicy : operationPolicies) {
+                        String clonedPolicyId;
+                        if (!clonedPolicies.containsKey(operationPolicy.getPolicyId())) {
+                            clonedPolicyId = UUID.randomUUID().toString();
 
-                        clonedPolicies.put(operationPolicy.getPolicyId(), clonedPolicyId);
-                    } else {
-                        clonedPolicyId = clonedPolicies.get(operationPolicy.getPolicyId());
+                            ClonePolicyMetadataDTO toBeClonedSinglePolicyData = new ClonePolicyMetadataDTO();
+                            toBeClonedSinglePolicyData.setClonedPolicyUUID(clonedPolicyId);
+                            toBeClonedSinglePolicyData.setCurrentPolicyUUID(operationPolicy.getPolicyId());
+                            toBeClonedPolicyDetails.add(toBeClonedSinglePolicyData);
+
+                            clonedPolicies.put(operationPolicy.getPolicyId(), clonedPolicyId);
+                        } else {
+                            clonedPolicyId = clonedPolicies.get(operationPolicy.getPolicyId());
+                        }
+                        operationPolicy.setPolicyId(clonedPolicyId);
                     }
-                    operationPolicy.setPolicyId(clonedPolicyId);
+                    uriTemplate.setOperationPolicies(operationPolicies);
                 }
-                uriTemplate.setOperationPolicies(operationPolicies);
             }
         }
 
-        if (uriTemplates != null) {
-            apiMgtDAO.cloneAPISpecificPoliciesForVersioning(oldAPIUuid, newAPI.getUuid(), newAPI.getOrganization(),
-                    toBeClonedPolicyDetails);
-            apiMgtDAO.addOperationPolicyMapping(uriTemplates);
+        if (!extractedAPILevelPolicies.isEmpty()) {
+            for (OperationPolicy apiLevelPolicy : extractedAPILevelPolicies) {
+                String clonedPolicyId;
+                if (!clonedPolicies.containsKey(apiLevelPolicy.getPolicyId())) {
+                    clonedPolicyId = UUID.randomUUID().toString();
+                    ClonePolicyMetadataDTO toBeClonedSinglePolicyData = new ClonePolicyMetadataDTO();
+                    toBeClonedSinglePolicyData.setClonedPolicyUUID(clonedPolicyId);
+                    toBeClonedSinglePolicyData.setCurrentPolicyUUID(apiLevelPolicy.getPolicyId());
+                    toBeClonedPolicyDetails.add(toBeClonedSinglePolicyData);
+
+                    clonedPolicies.put(apiLevelPolicy.getPolicyId(), clonedPolicyId);
+                } else {
+                    clonedPolicyId = clonedPolicies.get(apiLevelPolicy.getPolicyId());
+                }
+                apiLevelPolicy.setPolicyId(clonedPolicyId);
+            }
         }
+
+        apiMgtDAO.cloneAPISpecificPoliciesForVersioning(oldAPIUuid, newAPI.getUuid(), newAPI.getOrganization(),
+                toBeClonedPolicyDetails);
+
+        apiMgtDAO.addPolicyMappingsForNewAPIVersion(uriTemplates, extractedAPILevelPolicies, newAPI);
     }
 
     public String retrieveServiceKeyByApiId(int apiId, int tenantId) throws APIManagementException {
@@ -4738,10 +4809,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 /////////////////// Do processing on the data object//////////
                 populateRevisionInformation(api, uuid);
                 populateAPIInformation(uuid, organization, api);
+                populateAPILevelPolicies(api);
                 if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                         || APIUtil.isSequenceDefined(api.getFaultSequence())) {
                     if (migrationEnabled == null) {
-                        loadMediationPoliciesAsOperationPoliciesToAPI(api, organization);
+                        loadMediationPoliciesFromMigratedAPIToAPI(api, organization);
                     } else {
                         loadMediationPoliciesToAPI(api, organization);
                     }
@@ -4761,6 +4833,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while parsing the OAS definition", e);
         } catch (AsyncSpecPersistenceException e) {
             throw new APIManagementException("Error while retrieving the Async API definition", e);
+        }
+    }
+
+    /**
+     * This method will populate API level policies to the given API object
+     *
+     * @param api API object
+     * @throws APIManagementException if failed to populate API policies
+     */
+    private void populateAPILevelPolicies(API api) throws APIManagementException {
+        List<OperationPolicy> apiPolicyMapping = apiMgtDAO.getAPIPolicyMapping(api.getUuid(), null);
+        if (!apiPolicyMapping.isEmpty()) {
+            api.setApiPolicies(apiPolicyMapping);
         }
     }
 
@@ -6237,6 +6322,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             uriTemplate.setOperationPolicies(null);
         }
         return operationPoliciesMap;
+    }
+
+    /**
+     * Extracts and drops API level policies from the API object.
+     *
+     * @param api API object
+     * @return List of API level policies
+     */
+    private static List<OperationPolicy> extractAndDropAPILevelPoliciesFromAPI(API api) {
+        List<OperationPolicy> policies = new ArrayList<>();
+        if (api.getApiPolicies() != null && !api.getApiPolicies().isEmpty()) {
+            policies = api.getApiPolicies();
+            api.setApiPolicies(null);
+        }
+        return policies;
     }
 
     public  APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException {

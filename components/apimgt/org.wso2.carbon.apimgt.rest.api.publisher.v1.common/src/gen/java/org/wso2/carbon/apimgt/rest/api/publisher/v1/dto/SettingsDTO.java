@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsCustomPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberContactAttributeDTO;
 import javax.validation.constraints.*;
 
@@ -37,6 +38,7 @@ public class SettingsDTO   {
     private String defaultAdvancePolicy = null;
     private String defaultSubscriptionPolicy = null;
     private String authorizationHeader = null;
+    private List<SettingsCustomPropertiesDTO> customProperties = new ArrayList<SettingsCustomPropertiesDTO>();
 
   /**
    * The Developer Portal URL
@@ -253,6 +255,24 @@ public class SettingsDTO   {
     this.authorizationHeader = authorizationHeader;
   }
 
+  /**
+   **/
+  public SettingsDTO customProperties(List<SettingsCustomPropertiesDTO> customProperties) {
+    this.customProperties = customProperties;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("customProperties")
+  public List<SettingsCustomPropertiesDTO> getCustomProperties() {
+    return customProperties;
+  }
+  public void setCustomProperties(List<SettingsCustomPropertiesDTO> customProperties) {
+    this.customProperties = customProperties;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -274,12 +294,13 @@ public class SettingsDTO   {
         Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled) &&
         Objects.equals(defaultAdvancePolicy, settings.defaultAdvancePolicy) &&
         Objects.equals(defaultSubscriptionPolicy, settings.defaultSubscriptionPolicy) &&
-        Objects.equals(authorizationHeader, settings.authorizationHeader);
+        Objects.equals(authorizationHeader, settings.authorizationHeader) &&
+        Objects.equals(customProperties, settings.customProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader);
+    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, customProperties);
   }
 
   @Override
@@ -299,6 +320,7 @@ public class SettingsDTO   {
     sb.append("    defaultAdvancePolicy: ").append(toIndentedString(defaultAdvancePolicy)).append("\n");
     sb.append("    defaultSubscriptionPolicy: ").append(toIndentedString(defaultSubscriptionPolicy)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
+    sb.append("    customProperties: ").append(toIndentedString(customProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }

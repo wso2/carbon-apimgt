@@ -8754,6 +8754,8 @@ components:
               type: fault
           items:
             $ref: '#/components/schemas/MediationPolicy'
+        apiPolicies:
+          $ref: '#/components/schemas/APIOperationPolicies'
         subscriptionAvailability:
           type: string
           description: The subscription availability. Accepts one of the following.
@@ -11451,6 +11453,23 @@ components:
           type: string
           description: Authorization Header
           example: authorization
+        customProperties:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: |
+                  Custom property name
+                example: Department
+              description:
+                type: string
+                description: Description of custom property
+                example: Relevant Department
+              required:
+                type: boolean
+                example: false
     SecurityAuditAttribute:
       title: SecurityAuditAttributeDTO
       type: object

@@ -78,6 +78,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
@@ -804,6 +805,14 @@ public class PublisherCommonUtils {
                         APIDTO.TypeEnum.SSE.equals(apiDto.getType()) || APIDTO.TypeEnum.ASYNC.equals(apiDto.getType());
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+
+        // validate context before proceeding
+        try {
+            APIUtil.validateAPIContext(apiDto.getContext(), apiDto.getName());
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error while importing API: " + e.getMessage(),
+                    ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
+        }
 
         // validate web socket api endpoint configurations
         if (isWSAPI && !PublisherCommonUtils.isValidWSAPI(apiDto)) {
@@ -1709,6 +1718,10 @@ public class PublisherCommonUtils {
         // if not add product
         String provider = apiProductDTO.getProvider();
         String context = apiProductDTO.getContext();
+
+        // Validate the API context
+        APIUtil.validateAPIContext(context, apiProductDTO.getName());
+
         if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
             if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
                 if (log.isDebugEnabled()) {
@@ -1979,5 +1992,28 @@ public class PublisherCommonUtils {
 
         apiProvider.addAPI(apiToAdd);
         return apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization);
+    }
+
+    public static boolean validateMandatoryProperties(org.json.simple.JSONArray customProperties, APIDTO apiDto) {
+
+        Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = apiDto.getAdditionalPropertiesMap();
+
+        for (int i = 0; i < customProperties.size(); i++) {
+            JSONObject property = (JSONObject) customProperties.get(i);
+            String propertyName = (String) property.get(APIConstants.CustomPropertyAttributes.NAME);
+            boolean isRequired = (boolean) property.get(APIConstants.CustomPropertyAttributes.REQUIRED);
+
+            if (isRequired) {
+                APIInfoAdditionalPropertiesMapDTO mapProperty = additionalPropertiesMap.get(propertyName);
+                if (mapProperty == null) {
+                    return false;
+                }
+                String propertyValue = mapProperty.getValue();
+                if (propertyValue == null || propertyValue.isEmpty()) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

@@ -152,8 +152,6 @@ public class PolicyUtil {
      * Deploy all the throttle policies retrieved from the database in the Traffic Manager.
      */
     public static void deployAllPolicies() {
-        // Undeploy all existing policies
-        undeployAllPolicies();
         PolicyRetriever policyRetriever = new PolicyRetriever();
         try {
             // Deploy all the policies retrieved from the database
@@ -161,6 +159,11 @@ public class PolicyUtil {
             if (migrationEnabled == null) {
                 subscriptionPolicies = policyRetriever.getAllSubscriptionPolicies();
             }
+            ApplicationPolicyList applicationPolicies = policyRetriever.getAllApplicationPolicies();
+            ApiPolicyList apiPolicies = policyRetriever.getAllApiPolicies();
+            GlobalPolicyList globalPolicies = policyRetriever.getAllGlobalPolicies();
+            // Undeploy all existing policies
+            undeployAllPolicies();
             for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies.getList()) {
                 if (!(APIConstants.UNLIMITED_TIER.equalsIgnoreCase(subscriptionPolicy.getName())
                         || APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED.
@@ -170,19 +173,16 @@ public class PolicyUtil {
                     deployPolicy(subscriptionPolicy, null);
                 }
             }
-            ApplicationPolicyList applicationPolicies = policyRetriever.getAllApplicationPolicies();
             for (ApplicationPolicy applicationPolicy : applicationPolicies.getList()) {
                 if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(applicationPolicy.getName())) {
                     deployPolicy(applicationPolicy, null);
                 }
             }
-            ApiPolicyList apiPolicies = policyRetriever.getAllApiPolicies();
             for (ApiPolicy apiPolicy : apiPolicies.getList()) {
                 if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(apiPolicy.getName())) {
                     deployPolicy(apiPolicy, null);
                 }
             }
-            GlobalPolicyList globalPolicies = policyRetriever.getAllGlobalPolicies();
             for (GlobalPolicy globalPolicy : globalPolicies.getList()) {
                 deployPolicy(globalPolicy, null);
             }
