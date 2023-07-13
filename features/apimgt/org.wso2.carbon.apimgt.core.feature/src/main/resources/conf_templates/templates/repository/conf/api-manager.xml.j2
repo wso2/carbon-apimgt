@@ -75,6 +75,14 @@
         <!-- This parameter specifies which implementation should be used for generating the Token. For URL safe JWT
              Token generation the implementation is provided in URLSafeJWTGenerator -->
         <!--<JWTGeneratorImpl>org.wso2.carbon.apimgt.keymgt.token.URLSafeJWTGenerator</JWTGeneratorImpl>-->
+
+        <!-- Set the JWT decoding method. Options are "base64url" or "base64". The default value is "base64". -->
+        {% if apim.jwt.decoding %}
+        <JWTDecoding>{{apim.jwt.decoding}}</JWTDecoding>
+        {% elif apim.jwt.encoding %}
+        <JWTDecoding>{{apim.jwt.encoding}}</JWTDecoding>
+        {% endif %}
+
        {% if apim.jwt.enable_tenant_based_signing is defined %}
         <EnableTenantBasedSigning>{{apim.jwt.enable_tenant_based_signing}}</EnableTenantBasedSigning>
         {% endif %}

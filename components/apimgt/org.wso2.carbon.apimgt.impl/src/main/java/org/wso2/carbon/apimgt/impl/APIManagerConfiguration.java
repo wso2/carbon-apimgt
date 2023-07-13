@@ -1603,6 +1603,11 @@ public class APIManagerConfiguration {
             if (jwtHeaderElement != null) {
                 jwtConfigurationDto.setJwtHeader(jwtHeaderElement.getText());
             }
+            OMElement jwtDecoding =
+                    omElement.getFirstChildWithName(new QName(APIConstants.JWT_DECODING));
+            if (jwtDecoding != null) {
+                jwtConfigurationDto.setJwtDecoding(jwtDecoding.getText());
+            }
             OMElement jwtUserClaimsElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS));
             if (jwtUserClaimsElement != null) {
