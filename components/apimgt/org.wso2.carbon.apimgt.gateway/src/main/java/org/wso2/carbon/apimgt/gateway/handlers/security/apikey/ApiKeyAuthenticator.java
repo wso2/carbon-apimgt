@@ -515,7 +515,12 @@ public class ApiKeyAuthenticator implements Authenticator {
             if (token != null) {
                 endUserToken = (String) token;
                 String[] splitToken = ((String) token).split("\\.");
-                JSONObject payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
+                JSONObject payload;
+                if (jwtConfigurationDto.getJwtDecoding().equals("base64url")) {
+                    payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
+                } else {
+                    payload = new JSONObject(new String(Base64.getDecoder().decode(splitToken[1])));
+                }
                 long exp = payload.getLong("exp");
                 long timestampSkew = OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds() * 1000;
                 valid = (exp - System.currentTimeMillis() > timestampSkew);
