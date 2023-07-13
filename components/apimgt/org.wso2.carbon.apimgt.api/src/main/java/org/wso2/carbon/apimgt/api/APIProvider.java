@@ -1719,13 +1719,12 @@ public interface APIProvider extends APIManager {
      * Get gateway policy list for a given Policy Mapping UUID.
      *
      * @param policyMappingUUID      Policy mapping UUID
-     * @param organization           Organization name
      * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
      *                               is a bit bulky
      * @return Gateway Policy Data List
      * @throws APIManagementException
      */
-    List<OperationPolicyData> getGatewayPolicyDataListByPolicyId(String policyMappingUUID, String organization,
+    List<OperationPolicyData> getGatewayPolicyDataListByPolicyId(String policyMappingUUID,
             boolean isWithPolicyDefinition) throws APIManagementException;
 
     /**

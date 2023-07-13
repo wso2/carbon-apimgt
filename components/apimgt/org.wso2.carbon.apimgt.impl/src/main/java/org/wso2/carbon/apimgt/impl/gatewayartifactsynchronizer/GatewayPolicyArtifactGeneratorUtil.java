@@ -21,10 +21,10 @@ public class GatewayPolicyArtifactGeneratorUtil {
         GatewayArtifactGenerator gatewayArtifactGenerator =
                 ServiceReferenceHolder.getInstance().getGatewayArtifactGenerator(type);
         if (gatewayArtifactGenerator != null) {
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.getThreadLocalCarbonContext()
+                    .getUsername());
             List<OperationPolicyData> gatewayPolicyDataList = apiProvider.getGatewayPolicyDataListByPolicyId(
-                    policyMappingUuid, tenantDomain, true);
+                    policyMappingUuid, true);
             List<OperationPolicy> gatewayPolicyList = apiProvider.getOperationPoliciesOfPolicyMapping(
                     policyMappingUuid);
             return gatewayArtifactGenerator.generateGatewayPolicyArtifact(gatewayPolicyDataList, gatewayPolicyList,

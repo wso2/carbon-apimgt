@@ -20,6 +20,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
 
+
 public class GatewayPolicyArtifactsApiServiceImpl implements GatewayPolicyArtifactsApiService {
 
     public Response gatewayPolicyArtifactsGet(String xWSO2Tenant, String policyMappingUuid, String type, MessageContext messageContext)
@@ -27,11 +28,15 @@ public class GatewayPolicyArtifactsApiServiceImpl implements GatewayPolicyArtifa
         RuntimeArtifactDto runtimeArtifactDto = null;
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         String organization = RestApiUtil.getOrganization(messageContext);
+        // Need to further discuss on this
+//        if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
+//            xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
+//        }
+//        if (StringUtils.isNotEmpty(organization) && organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) &&
+//                xWSO2Tenant.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+//            runtimeArtifactDto = GatewayPolicyArtifactGeneratorUtil.generateRuntimeArtifact(policyMappingUuid, type, xWSO2Tenant);
+//        }
         if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
-            xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
-        }
-        if (StringUtils.isNotEmpty(organization) && organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) &&
-                xWSO2Tenant.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
             runtimeArtifactDto = GatewayPolicyArtifactGeneratorUtil.generateRuntimeArtifact(policyMappingUuid, type, xWSO2Tenant);
         }
         if (runtimeArtifactDto != null) {
