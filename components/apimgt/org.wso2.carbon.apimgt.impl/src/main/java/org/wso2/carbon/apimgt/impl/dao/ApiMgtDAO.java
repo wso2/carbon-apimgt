@@ -20520,20 +20520,24 @@ public class ApiMgtDAO {
      * This list will include policy specification and policy definition of each policy and policy ID.
      *
      * @param policyMappingUUID UUID of the policy mapping
-     * @param organization      Organization name
      * @return List of Gateway Policies
      * @throws APIManagementException
      */
     public List<OperationPolicyData> getAllGatewayPoliciesDataForPolicyMappingUUID(String policyMappingUUID,
-            String organization, boolean isWithPolicyDefinition) throws APIManagementException {
+            boolean isWithPolicyDefinition) throws APIManagementException {
 
-        List<String> apiUUIDList = getPolicyUUIDsByPolicyMappingUUID(policyMappingUUID);
+        List<String> policyUUIDList = getPolicyUUIDsByPolicyMappingUUID(policyMappingUUID);
         List<OperationPolicyData> policyDataList = new ArrayList<>();
 
-        for (String apiUUID : apiUUIDList) {
-            OperationPolicyData gatewayPolicyData = getCommonOperationPolicyByPolicyID(apiUUID,
-                    organization, isWithPolicyDefinition);
-            policyDataList.add(gatewayPolicyData);
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            for (String policyUUID : policyUUIDList) {
+                OperationPolicyData gatewayPolicyData = getOperationPolicyByPolicyID(connection, policyUUID,
+                        isWithPolicyDefinition);
+                policyDataList.add(gatewayPolicyData);
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the policies under policy mapping UUID : " + policyMappingUUID, e);
         }
         return policyDataList;
     }

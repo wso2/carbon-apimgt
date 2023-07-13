@@ -58,7 +58,7 @@ public class SynapsePolicyAggregator {
             + "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator
             + "operation_policy_template.j2";
     private static final String GATEWAY_POLICY_SEQUENCE_TEMPLATE_LOCATION = CarbonUtils.getCarbonHome() + File.separator
-            + "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator
+            + "repository" + File.separator + "resources" + File.separator + "templates" + File.separator
             + "gateway_policy_template.j2";
 
     public static String generatePolicySequenceForUriTemplateSet(Set<URITemplate> uriTemplates, API api,
