@@ -355,12 +355,21 @@ public class GatewayJMSMessageListener implements MessageListener {
             systemConfiguredGatewayLabels.retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
             if (!systemConfiguredGatewayLabels.isEmpty()) {
                 if (EventType.DEPLOY_POLICY_MAPPING_IN_GATEWAY.toString().equals(eventType)) {
+                    boolean tenantFlowStarted = false;
                     try {
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                .setTenantDomain(gatewayPolicyEvent.getTenantDomain(), true);
+                        tenantFlowStarted = true;
                         new GatewayPolicyDeployer(
                                 gatewayPolicyEvent.getGatewayPolicyMappingUuid()).deployGatewayPolicyMapping();
                     } catch (ArtifactSynchronizerException e) {
                         log.error("Error in deploying artifacts for " + gatewayPolicyEvent.getGatewayPolicyMappingUuid()
                                 + "in the Gateway");
+                    } finally {
+                        if (tenantFlowStarted) {
+                            PrivilegedCarbonContext.endTenantFlow();
+                        }
                     }
                 } else if (EventType.REMOVE_POLICY_MAPPING_FROM_GATEWAY.toString().equals(eventType)) {
                     new GatewayPolicyDeployer(

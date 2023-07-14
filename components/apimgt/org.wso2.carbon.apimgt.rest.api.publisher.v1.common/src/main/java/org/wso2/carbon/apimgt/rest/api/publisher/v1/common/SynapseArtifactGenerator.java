@@ -69,7 +69,7 @@ import javax.xml.namespace.QName;
 public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
 
     private static final Log log = LogFactory.getLog(SynapseArtifactGenerator.class);
-    private static final String EXT_SEQUENCE_PREFIX = "WSO2AM--Ext--";
+    private static final String EXT_SEQUENCE_PREFIX = "WSO2AM--Ext";
 
     @Override
     public RuntimeArtifactDto generateGatewayArtifact(List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList)
