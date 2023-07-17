@@ -854,6 +854,18 @@ public class APIConsumerImplTest {
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Subscriptions not allowed on APIs/API Products in the state"));
         }
+        try {
+            apiConsumer.addSubscription(apiTypeWrapper, "sub1", application, "1");
+            Assert.fail("Version range not allowed");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("API version should start with v to subscribe with a version range"));
+        }
+        try {
+            apiConsumer.addSubscription(apiTypeWrapper, "sub1", application, "v2");
+            Assert.fail("Invalid version range");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("The provided version range v1 is invalid for the API with version " + SAMPLE_API_VERSION));
+        }
     }
 
     @Test
