@@ -187,5 +187,8 @@ public class APIMgtGatewayConstants {
 
     //This will be a reserved name for the synapse message context properties.
     public static final String ADDITIONAL_ANALYTICS_PROPS = "ADDITIONAL_ANALYTICS_PROPS_TO_PUBLISH";
+    public static final String IS_THERE_ASSOCIATED_INCOMING_REQUEST = "is_there_incoming_request";
+    public static final String TRANSPORT_WS = "ws";
+    public static final String TRANSPORT_WSS = "wss";
 }
 
