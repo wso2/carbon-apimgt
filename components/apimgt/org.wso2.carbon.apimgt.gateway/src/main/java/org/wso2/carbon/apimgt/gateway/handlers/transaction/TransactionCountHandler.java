@@ -47,7 +47,7 @@ public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
         }
 
         // Start the transaction count record scheduler
-        transactionCountScheduledExecutor.scheduleAtFixedRate(this::handleTransactionCount,
+        transactionCountScheduledExecutor.scheduleAtFixedRate(this::handleScheduledTransactionCountCommit,
                 0, TRANSACTION_COUNT_COMMIT_INTERVAL, TimeUnit.SECONDS);
     }
 
@@ -63,7 +63,7 @@ public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
             // Counting message received via an open WebSocket
             String transport = axis2MessageContext.getIncomingTransportName();
             if (transport.equals(APIMgtGatewayConstants.TRANSPORT_WS) || transport.equals(APIMgtGatewayConstants.TRANSPORT_WSS)){
-                transactionCountExecutor.execute(this::handleScheduledTransactionCountCommit);
+                transactionCountExecutor.execute(this::handleTransactionCountCommit);
             }
         } catch (RejectedExecutionException e) {
             LOG.error("Transaction could not be counted.", e);
@@ -81,7 +81,7 @@ public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
 
             // Counting outgoing messages that are not related to any request-response pair
             if (isThereAnAssociatedIncomingRequest == null) {
-                transactionCountExecutor.execute(this::handleTransactionCount);
+                transactionCountExecutor.execute(this::handleTransactionCountCommit);
             }
         } catch (RejectedExecutionException e) {
             LOG.error("Transaction could not be counted.", e);
@@ -103,12 +103,12 @@ public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
 
         // Counting request-response pairs
         if (isThereAnAssociatedIncomingRequest instanceof Boolean) {
-            transactionCountExecutor.execute(this::handleTransactionCount);
+            transactionCountExecutor.execute(this::handleTransactionCountCommit);
         }
         return true;
     }
 
-    private void handleTransactionCount() {
+    private void handleTransactionCountCommit() {
         lock.lock();
         try {
             if (transactionCount.incrementAndGet() >= MAX_TRANSACTION_COUNT) {
@@ -127,9 +127,12 @@ public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
     private void handleScheduledTransactionCountCommit() {
         lock.lock();
         try {
-            TransactionCountRecord transactionCountRecord = new TransactionCountRecord(transactionCount.get());
-            transactionCountRecordQueue.add(transactionCountRecord);
-            transactionCount.set(0);
+            int transactionCountValue = transactionCount.get();
+            if (transactionCountValue != 0) {
+                TransactionCountRecord transactionCountRecord = new TransactionCountRecord(transactionCountValue);
+                transactionCountRecordQueue.add(transactionCountRecord);
+                transactionCount.set(0);
+            }
         } catch (Exception e) {
             LOG.error("Error while handling transaction count.", e);
         } finally {
