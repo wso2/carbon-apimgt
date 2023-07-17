@@ -1,27 +1,19 @@
 package org.wso2.carbon.apimgt.gateway.handlers.transaction.store;
 
-import org.wso2.carbon.apimgt.gateway.handlers.transaction.TransactionCount;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.TransactionCountRecord;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.ArrayList;
 
 public class TransactionCountStoreImpl implements TransactionCountStore {
 
-    private BlockingQueue<TransactionCount> transactionCountQueue;
-
-    public TransactionCountStoreImpl() {
-        this.transactionCountQueue = new LinkedBlockingDeque<TransactionCount>();
-    }
-
     @Override
-    public boolean add(TransactionCount transactionCount) {
-        transactionCountQueue.add(transactionCount);
-        return true;
-    }
-
-    @Override
-    public boolean commit() {
+    public boolean commit(ArrayList<TransactionCountRecord> transactionCountRecordList) {
         // To be implemented
         return true;
+    }
+
+    @Override
+    public void clenUp() {
+        // To be implemented
     }
 }

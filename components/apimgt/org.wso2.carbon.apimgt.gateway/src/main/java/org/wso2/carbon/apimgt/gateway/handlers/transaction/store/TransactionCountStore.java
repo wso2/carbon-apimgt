@@ -1,8 +1,10 @@
 package org.wso2.carbon.apimgt.gateway.handlers.transaction.store;
 
-import org.wso2.carbon.apimgt.gateway.handlers.transaction.TransactionCount;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.TransactionCountRecord;
+
+import java.util.ArrayList;
 
 public interface TransactionCountStore {
-    public boolean add(TransactionCount transactionCount);
-    public boolean commit();
+    boolean commit(ArrayList<TransactionCountRecord> transactionCountRecordList);
+    void clenUp();
 }
