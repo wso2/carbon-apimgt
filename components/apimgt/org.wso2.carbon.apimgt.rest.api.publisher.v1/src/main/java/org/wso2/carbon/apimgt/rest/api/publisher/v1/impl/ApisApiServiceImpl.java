@@ -4810,13 +4810,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         // update the API's scopes with scope prefix (if it is available)
         apiToAdd.setScopePrefix(apiDTOFromProperties.getScopePrefix());
         APIUtil.updateAPIScopesWithPrefix(apiToAdd);
-        //Set extensions from API definition to API object
-        apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd, false);
         if (StringUtils.isEmpty(apiToAdd.getApiSecurity())) {
             apiToAdd.setApiSecurity(new StringBuilder()
                     .append(APIConstants.DEFAULT_API_SECURITY_OAUTH2).append(",")
                     .append(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY).toString());
         }
+        //Set extensions from API definition to API object
+        apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd, false);
         if (!syncOperations) {
             PublisherCommonUtils.validateScopes(apiToAdd);
             swaggerData = new SwaggerData(apiToAdd);
