@@ -9,6 +9,7 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.store.TransactionCountStore;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
@@ -21,8 +22,11 @@ public class TransactionCountHandler extends AbstractSynapseHandler {
     private ExecutorService transactionCountExecutor;
 
     private TransactionCountStore trasactionCountStore;
+    private BlockingQueue<TransactionCountRecord> transactionCountRecordQueue;
+    private int MAX_RETRY_COUNT = 3;
 
     public TransactionCountHandler() {
+        this.transactionCountRecordQueue = new LinkedBlockingDeque<>();
         this.transactionCountExecutor = Executors.newFixedThreadPool(5);
 
         // Load the transaction count store
@@ -105,7 +109,28 @@ public class TransactionCountHandler extends AbstractSynapseHandler {
         } finally {
             lock.unlock();
         }
-        trasactionCountStore.commit(transactionCountRecordQueue);
+        this.commitWithRetries();
     }
 
+    private void commitWithRetries() {
+        // Arraylist of transaction count records will be committed to the store
+        ArrayList<TransactionCountRecord> transactionCountRecordList = new ArrayList<>();
+        transactionCountRecordQueue.drainTo(transactionCountRecordList);
+
+        if (transactionCountRecordList.isEmpty()) {
+            return;
+        }
+
+        // Committing the transaction count records to the store with retries
+        // If failed to commit after MAX_RETRY_COUNT, the transaction count records will be added to the queue again
+        boolean commited = false;
+        int retryCount = 0;
+        while (!commited && retryCount < MAX_RETRY_COUNT) {
+            commited = trasactionCountStore.commit(transactionCountRecordList);
+            retryCount++;
+        }
+        if (!commited) {
+            transactionCountRecordQueue.addAll(transactionCountRecordList);
+        }
+    }
 }
