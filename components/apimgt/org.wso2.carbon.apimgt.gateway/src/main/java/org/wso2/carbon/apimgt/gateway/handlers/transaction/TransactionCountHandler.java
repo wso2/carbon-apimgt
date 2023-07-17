@@ -2,19 +2,18 @@ package org.wso2.carbon.apimgt.gateway.handlers.transaction;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.AbstractSynapseHandler;
+import org.apache.synapse.AbstractExtendedSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.store.TransactionCountStore;
-
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class TransactionCountHandler extends AbstractSynapseHandler {
+public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
 
     // Todo: Make these parameters configurable via deployment.toml
     private static final double MAX_TRANSACTION_COUNT = Integer.MAX_VALUE * 0.9;
@@ -159,5 +158,38 @@ public class TransactionCountHandler extends AbstractSynapseHandler {
         if (!commited) {
             transactionCountRecordQueue.addAll(transactionCountRecordList);
         }
+    }
+
+    @Override
+    public boolean handleServerInit() {
+        // Nothing to implement
+        return true;
+    }
+
+    @Override
+    public boolean handleServerShutDown() {
+        // Clen up resources
+        transactionCountExecutor.shutdown();
+        transactionCountScheduledExecutor.shutdown();
+        trasactionCountStore.clenUp();
+        return true;
+    }
+
+    @Override
+    public boolean handleArtifactDeployment(String s, String s1, String s2) {
+        // Nothing to implement
+        return true;
+    }
+
+    @Override
+    public boolean handleArtifactUnDeployment(String s, String s1, String s2) {
+        // Nothing to implement
+        return true;
+    }
+
+    @Override
+    public boolean handleError(MessageContext messageContext) {
+        // Nothing to implement
+        return true;
     }
 }
