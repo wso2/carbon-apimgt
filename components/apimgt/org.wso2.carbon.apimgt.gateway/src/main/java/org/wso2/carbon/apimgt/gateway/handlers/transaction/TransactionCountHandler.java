@@ -93,19 +93,19 @@ public class TransactionCountHandler extends AbstractSynapseHandler {
     }
 
     private void handleTransactionCount() {
-        transactionCount.incrementAndGet();
-        if (transactionCount.get() >= MAX_TRANSACTION_COUNT) {
-            lock.lock();
-            try {
-                if (transactionCount.get() >= MAX_TRANSACTION_COUNT) {
-                    trasactionCountStore.add(new TransactionCount(transactionCount.get()));
-                    transactionCount.set(0);
-                    trasactionCountStore.commit();
-                }
-            } finally {
-                lock.unlock();
+        lock.lock();
+        try {
+            if (transactionCount.incrementAndGet() >= MAX_TRANSACTION_COUNT) {
+                TransactionCountRecord transactionCountRecord = new TransactionCountRecord(transactionCount.get());
+                transactionCountRecordQueue.add(transactionCountRecord);
+                transactionCount.set(0);
             }
+        } catch (Exception e) {
+            LOG.error("Error while handling transaction count.", e);
+        } finally {
+            lock.unlock();
         }
+        trasactionCountStore.commit(transactionCountRecordQueue);
     }
 
 }
