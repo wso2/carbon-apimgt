@@ -16,20 +16,26 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class TransactionCountHandler extends AbstractSynapseHandler {
 
-    private static final Log LOG = LogFactory.getLog(TransactionCountHandler.class);
+    // Todo: Make these parameters configurable via deployment.toml
     private static final double MAX_TRANSACTION_COUNT = Integer.MAX_VALUE * 0.9;
+    private int MAX_RETRY_COUNT = 3;
+    private int TRANSACTION_COUNT_COMMIT_INTERVAL = 10;
+    private int THREAD_POOL_SIZE = 5;
+    private int TRANSACTION_COUNT_QUEUE_SIZE = 1000;
+
+    private static final Log LOG = LogFactory.getLog(TransactionCountHandler.class);
     private static ReentrantLock lock = new ReentrantLock();
     private static AtomicInteger transactionCount = new AtomicInteger(0);
+
+    private BlockingQueue<TransactionCountRecord> transactionCountRecordQueue;
     private ExecutorService transactionCountExecutor;
     private ScheduledExecutorService transactionCountScheduledExecutor;
     private TransactionCountStore trasactionCountStore;
-    private BlockingQueue<TransactionCountRecord> transactionCountRecordQueue;
-    private int MAX_RETRY_COUNT = 3;
-    private int TRANSACTION_COUNT_COMMIT_INTERVAL = 10;
+
 
     public TransactionCountHandler() {
-        this.transactionCountRecordQueue = new LinkedBlockingDeque<>();
-        this.transactionCountExecutor = Executors.newFixedThreadPool(5);
+        this.transactionCountRecordQueue = new LinkedBlockingDeque<>(TRANSACTION_COUNT_QUEUE_SIZE);
+        this.transactionCountExecutor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
         this.transactionCountScheduledExecutor = Executors.newScheduledThreadPool(1);
 
         // Load the transaction count store
@@ -41,7 +47,7 @@ public class TransactionCountHandler extends AbstractSynapseHandler {
             LOG.error("Error while loading the transaction count store.", e);
         }
 
-        // Start the transaction count scheduler
+        // Start the transaction count record scheduler
         transactionCountScheduledExecutor.scheduleAtFixedRate(this::handleTransactionCount,
                 0, TRANSACTION_COUNT_COMMIT_INTERVAL, TimeUnit.SECONDS);
     }
