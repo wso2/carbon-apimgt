@@ -5014,14 +5014,18 @@ public class ApiMgtDAO {
                         List<SubscriptionInfo> subscriptionData = new ArrayList<SubscriptionInfo>();
                         while (rs.next() && !(APIConstants.SubscriptionStatus.ON_HOLD.equals(rs.getString("SUB_STATUS"
                         )))) {
-                            int subscriptionId = rs.getInt("SUBSCRIPTION_ID");
-                            String tierId = rs.getString("TIER_ID");
-                            int applicationId = rs.getInt("APPLICATION_ID");
-                            String apiVersion = rs.getString("VERSION");
-                            String subscriptionStatus = rs.getString("SUB_STATUS");
-                            SubscriptionInfo info = new SubscriptionInfo(subscriptionId, tierId, applicationId,
-                                    apiVersion, subscriptionStatus);
-                            subscriptionData.add(info);
+                            String versionRange = rs.getString("VERSION_RANGE");
+                            // Mark the subscription to copy if the subscription isn't made for a version range
+                            if (versionRange == null) {
+                                int subscriptionId = rs.getInt("SUBSCRIPTION_ID");
+                                String tierId = rs.getString("TIER_ID");
+                                int applicationId = rs.getInt("APPLICATION_ID");
+                                String apiVersion = rs.getString("VERSION");
+                                String subscriptionStatus = rs.getString("SUB_STATUS");
+                                SubscriptionInfo info = new SubscriptionInfo(subscriptionId, tierId, applicationId,
+                                        apiVersion, subscriptionStatus);
+                                subscriptionData.add(info);
+                            }
                         }
                         // To keep track of already added subscriptions (apps)
                         List<Integer> addedApplications = new ArrayList<>();
@@ -5105,16 +5109,13 @@ public class ApiMgtDAO {
         String apiUUID;
         Identifier identifier;
         String tier;
-        String apiVersion;
-        String majorVersionRange = null;
+        String contextTemplate;
 
         //Query to check if this subscription already exists
         String checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_API_SQL;
         if (!isProduct) {
             identifier = apiTypeWrapper.getApi().getId();
             apiUUID = apiTypeWrapper.getApi().getUuid();
-            String[] contextParts = apiTypeWrapper.getApi().getContext().split("/");
-            apiVersion = contextParts[contextParts.length - 1];
             if (apiUUID != null) {
                 id = getAPIID(apiUUID);
             }
@@ -5125,20 +5126,8 @@ public class ApiMgtDAO {
             identifier = apiTypeWrapper.getApiProduct().getId();
             id = apiTypeWrapper.getApiProduct().getProductId();
             apiUUID = apiTypeWrapper.getApiProduct().getUuid();
-            String[] contextParts = apiTypeWrapper.getApiProduct().getContext().split("/");
-            apiVersion = contextParts[contextParts.length - 1];
         }
         int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-        if (apiVersion.startsWith("v") && versionRange != null) {
-            SemVersion apiSemVersion = SemanticVersionUtil.validateAndGetVersionComponents(apiVersion, apiUUID);
-            int apiMajorVersion = apiSemVersion.getMajor();
-            if (versionRange.equals("v" + apiMajorVersion)) {
-                majorVersionRange = versionRange;
-            } else {
-                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_SUBSCRIPTION_VERSION_RANGE,
-                        "v" + apiMajorVersion, apiVersion));
-            }
-        }
 
         try (PreparedStatement ps = connection.prepareStatement(checkDuplicateQuery)) {
             ps.setInt(1, id);
@@ -5179,6 +5168,61 @@ public class ApiMgtDAO {
             }
         }
 
+        // Check a subscription is available for the API version range
+        if (versionRange != null) {
+            checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_API_VERSION_RANGE_SQL;
+            if (isProduct) {
+                contextTemplate = apiTypeWrapper.getApiProduct().getContextTemplate();
+            } else {
+                contextTemplate = apiTypeWrapper.getApi().getContextTemplate();
+            }
+
+            contextTemplate = contextTemplate.replace("/" + APIConstants.VERSION_PLACEHOLDER, "");
+
+            try (PreparedStatement ps = connection.prepareStatement(checkDuplicateQuery)) {
+                ps.setInt(1, application.getId());
+                ps.setString(2, contextTemplate);
+                ps.setString(3, versionRange);
+
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    // If the subscription already exists
+                    if (resultSet.next()) {
+                        String subStatus = resultSet.getString("SUB_STATUS");
+                        String subCreationStatus = resultSet.getString("SUBS_CREATE_STATE");
+                        int apiId = resultSet.getInt("API_ID");
+
+                        if ((APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus) ||
+                                APIConstants.SubscriptionStatus.ON_HOLD.equals(subStatus) ||
+                                APIConstants.SubscriptionStatus.REJECTED.equals(subStatus)) &&
+                                APIConstants.SubscriptionCreatedStatus.SUBSCRIBE.equals(subCreationStatus)) {
+
+                            // Throw error saying subscription for the api version range already exists.
+                            log.error(String.format("Subscription already exists for API/API Product %s version " +
+                                            "range %s in Application %s", apiTypeWrapper.getName(), versionRange,
+                                    application.getName()));
+                            throw new APIManagementException(ExceptionCodes.from(
+                                    ExceptionCodes.SUBSCRIPTION_EXISTS_FOR_VERSION_RANGE, apiTypeWrapper.getName(),
+                                versionRange, application.getName()));
+
+                        } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus) && APIConstants
+                                .SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subCreationStatus)) {
+                            deleteSubscriptionByApiIDAndAppID(apiId, application.getId(), connection);
+                        } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus) || APIConstants
+                                .SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
+                            log.error(String.format(String.format("Subscription to API/API Prouct %%s through application" +
+                                    " %%s was blocked"), apiTypeWrapper.getName(), application.getName()));
+                            throw new SubscriptionBlockedException(String.format("Subscription to API/API Product %s " +
+                                    "through application %s was blocked", apiTypeWrapper.getName(), application.getName()));
+                        } else if (APIConstants.SubscriptionStatus.REJECTED.equals(subStatus)) {
+                            throw new SubscriptionBlockedException("Subscription to API " + apiTypeWrapper.getName()
+                                    + " through application " + application.getName() + " was rejected");
+                        }
+                    }
+
+                }
+            }
+        }
+
         //This query to update the AM_SUBSCRIPTION table
         String sqlQuery = SQLConstants.ADD_SUBSCRIPTION_SQL;
 
@@ -5210,7 +5254,7 @@ public class ApiMgtDAO {
                 preparedStForInsert.setTimestamp(7, timestamp);
                 preparedStForInsert.setTimestamp(8, timestamp);
                 preparedStForInsert.setString(9, subscriptionUUID);
-                preparedStForInsert.setString(11, majorVersionRange);
+                preparedStForInsert.setString(11, versionRange);
 
                 preparedStForInsert.executeUpdate();
                 try (ResultSet rs = preparedStForInsert.getGeneratedKeys()) {

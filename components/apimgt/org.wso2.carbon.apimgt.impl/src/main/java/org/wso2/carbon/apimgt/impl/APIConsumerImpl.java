@@ -80,13 +80,13 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
+import org.wso2.carbon.apimgt.impl.dto.SemVersion;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -96,7 +96,6 @@ import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
-import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
@@ -108,6 +107,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
+import org.wso2.carbon.apimgt.impl.utils.SemanticVersionUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionApprovalWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
@@ -153,7 +153,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -765,6 +764,26 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return monetizationImpl;
     }
 
+    private String getSubscriptionVersionRange(String versionRange, String apiVersion, String apiUUID) throws APIManagementException {
+        String subscriptionVersionRange = null;
+        if (versionRange != null) {
+            if(apiVersion.startsWith("v")) {
+                SemVersion apiSemVersion = SemanticVersionUtil.validateAndGetVersionComponents(apiVersion, apiUUID);
+                int apiMajorVersion = apiSemVersion.getMajor();
+                if (versionRange.equals("v" + apiMajorVersion)) {
+                    subscriptionVersionRange = versionRange;
+                } else {
+                    throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_SUBSCRIPTION_VERSION_RANGE,
+                            "v" + apiMajorVersion, apiVersion));
+                }
+            } else {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.VERSION_RANGE_NOT_ALLOWED));
+                // TODO: 2023-07-14 add a test case for the above case
+            }
+        }
+        return subscriptionVersionRange;
+    }
+
     @Override
     public SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application application,
                                                 String versionRange) throws APIManagementException {
@@ -778,6 +797,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String state;
         String apiContext;
         String apiOrgId;
+        String apiVersion;
 
         if (isApiProduct) {
             product = apiTypeWrapper.getApiProduct();
@@ -789,6 +809,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiUUID = product.getUuid();
             apiContext = product.getContext();
             apiOrgId = product.getOrganization();
+            apiVersion = identifier.getVersion();
         } else {
             api = apiTypeWrapper.getApi();
             state = api.getStatus();
@@ -799,6 +820,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiUUID = api.getUuid();
             apiContext = api.getContext();
             apiOrgId = api.getOrganization();
+            apiVersion = identifier.getVersion();
         }
 
         WorkflowResponse workflowResponse = null;
@@ -806,8 +828,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         checkSubscriptionAllowed(apiTypeWrapper);
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state)) {
+            String subscriptionVersionRange = getSubscriptionVersionRange(versionRange, apiVersion, apiUUID);
             subscriptionId = apiMgtDAO.addSubscription(apiTypeWrapper, application,
-                    APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername, versionRange);
+                    APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername, subscriptionVersionRange);
 
             boolean isTenantFlowStarted = false;
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {

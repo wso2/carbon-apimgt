@@ -532,7 +532,9 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_API_ID(9020002, "Invalid API ID", 404, "The provided API ID is not found %s", false),
     INVALID_ENVIRONMENT(9020003, "Invalid Environment", 400, "The provided Environment, %s,  is not valid.", false),
     INVALID_API_SEMANTIC_VERSION(9020004, "Invalid API version", 400, "The provided API version %s is not a valid semantic version.", false),
-    INVALID_SUBSCRIPTION_VERSION_RANGE(9020005, "Invalid version range", 400, "The provided version range %s is invalid for the API with version %s", false);
+    INVALID_SUBSCRIPTION_VERSION_RANGE(9020005, "Invalid version range", 400, "The provided version range %s is invalid for the API with version %s", false),
+    VERSION_RANGE_NOT_ALLOWED(9020006, "Version range not allowed", 403, "API version should start with v to subscribe with a version range"),
+    SUBSCRIPTION_EXISTS_FOR_VERSION_RANGE(9020007, "Subscription already exists", 409, "Subscription already exists for API/API Product %s version range %s in Application %s", false);
 
     private final long errorCode;
     private final String errorMessage;

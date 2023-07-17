@@ -254,6 +254,13 @@ public class SQLConstants {
             "   API_ID = ? " +
             "   AND APPLICATION_ID = ?";
 
+    public static final String CHECK_EXISTING_SUBSCRIPTION_API_VERSION_RANGE_SQL =
+            "SELECT API.API_ID, SUB_STATUS, SUBS_CREATE_STATE" +
+            " FROM AM_SUBSCRIPTION AS SUBSCRIPTION" +
+            " JOIN AM_API AS API ON API.API_ID = SUBSCRIPTION.API_ID" +
+            " WHERE SUBSCRIPTION.APPLICATION_ID = ?" +
+            " AND API.CONTEXT_TEMPLATE = ? AND SUBSCRIPTION.VERSION_RANGE = ?";
+
     public static final String RETRIEVE_SUBSCRIPTION_ID_SQL =
             " SELECT " +
             "   SUBSCRIPTION_ID " +
@@ -1431,6 +1438,7 @@ public class SQLConstants {
             "   SUB.TIER_ID AS TIER_ID," +
             "   SUB.APPLICATION_ID AS APPLICATION_ID," +
             "   SUB.SUB_STATUS AS SUB_STATUS," +
+            "   SUB.VERSION_RANGE AS VERSION_RANGE" +
             "   API.CONTEXT AS CONTEXT," +
             "   API.API_VERSION AS VERSION" +
             " FROM" +
