@@ -128,6 +128,7 @@ public class APIConsumerImplTest {
     private static final String SAMPLE_API_NAME = "test";
     private static final String API_PROVIDER = "admin";
     private static final String SAMPLE_API_VERSION = "1.0.0";
+    private static final String SAMPLE_API_VERSION_WITH_VERSION_PREFIX = "v1.0.0";
     private static final String SAMPLE_API_SUBSCRIPTION_VERSION_RANGE = "v1";
     private RegistryService registryService;
     public static final String SAMPLE_TENANT_DOMAIN_1 = "abc.com";
@@ -841,6 +842,41 @@ public class APIConsumerImplTest {
         String tenantAwareUsername = "user1@"+SAMPLE_TENANT_DOMAIN_1;
         Mockito.when(MultitenantUtils.getTenantAwareUsername(Mockito.eq("user1"))).thenReturn(tenantAwareUsername);
         Mockito.when(apiMgtDAO.addSubscription(apiTypeWrapper, application, APIConstants.SubscriptionStatus.ON_HOLD,
+                tenantAwareUsername, null)).thenReturn(1);
+        SubscribedAPI subscribedAPI = new SubscribedAPI(UUID.randomUUID().toString());
+        Mockito.when(apiMgtDAO.getSubscriptionById(1)).thenReturn(subscribedAPI);
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1);
+        SubscriptionResponse subscriptionResponse = apiConsumer.addSubscription(apiTypeWrapper, "user1",application, null);
+        Assert.assertEquals(subscriptionResponse.getSubscriptionUUID(), subscribedAPI.getUUID());
+        try {
+            apiConsumer.addSubscription(apiTypeWrapper, "sub1", application, "1");
+            Assert.fail("Version range not allowed exception is not thrown for wrong api version range when adding subscription");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("API version should start with v to subscribe with a version range"));
+        }
+        try {
+            api.setStatus(APIConstants.CREATED);
+            apiConsumer.addSubscription(apiTypeWrapper, "sub1", application, null);
+            Assert.fail("Resource not found exception not thrown for wrong api state");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Subscriptions not allowed on APIs/API Products in the state"));
+        }
+    }
+
+    @Test
+    public void testAddSubscriptionWithVersionRange() throws APIManagementException {
+        API api  = new API(new APIIdentifier(API_PROVIDER, "published_api", SAMPLE_API_VERSION_WITH_VERSION_PREFIX));
+        api.setSubscriptionAvailability(APIConstants.SUBSCRIPTION_TO_ALL_TENANTS);
+        Application application = new Application(1);
+        api.setStatus(APIConstants.PUBLISHED);
+        Set<Tier> tiers = new HashSet<>();
+        tiers.add(new Tier("tier1"));
+        api.setAvailableTiers(tiers);
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+        apiTypeWrapper.setTier("tier1");
+        String tenantAwareUsername = "user1@"+SAMPLE_TENANT_DOMAIN_1;
+        Mockito.when(MultitenantUtils.getTenantAwareUsername(Mockito.eq("user1"))).thenReturn(tenantAwareUsername);
+        Mockito.when(apiMgtDAO.addSubscription(apiTypeWrapper, application, APIConstants.SubscriptionStatus.ON_HOLD,
                 tenantAwareUsername, SAMPLE_API_SUBSCRIPTION_VERSION_RANGE)).thenReturn(1);
         SubscribedAPI subscribedAPI = new SubscribedAPI(UUID.randomUUID().toString());
         Mockito.when(apiMgtDAO.getSubscriptionById(1)).thenReturn(subscribedAPI);
@@ -848,23 +884,10 @@ public class APIConsumerImplTest {
         SubscriptionResponse subscriptionResponse = apiConsumer.addSubscription(apiTypeWrapper, "user1",application, SAMPLE_API_SUBSCRIPTION_VERSION_RANGE);
         Assert.assertEquals(subscriptionResponse.getSubscriptionUUID(), subscribedAPI.getUUID());
         try {
-            api.setStatus(APIConstants.CREATED);
-            apiConsumer.addSubscription(apiTypeWrapper, "sub1", application, SAMPLE_API_SUBSCRIPTION_VERSION_RANGE);
-            Assert.fail("Resource not found exception not thrown for wrong api state");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Subscriptions not allowed on APIs/API Products in the state"));
-        }
-        try {
-            apiConsumer.addSubscription(apiTypeWrapper, "sub1", application, "1");
-            Assert.fail("Version range not allowed");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("API version should start with v to subscribe with a version range"));
-        }
-        try {
             apiConsumer.addSubscription(apiTypeWrapper, "sub1", application, "v2");
-            Assert.fail("Invalid version range");
+            Assert.fail("Invalid version range exception is not thrown for wrong api version range when adding subscription");
         } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("The provided version range v1 is invalid for the API with version " + SAMPLE_API_VERSION));
+            Assert.assertTrue(e.getMessage().contains("The provided version range v2 is invalid for the API with version " + SAMPLE_API_VERSION_WITH_VERSION_PREFIX));
         }
     }
 

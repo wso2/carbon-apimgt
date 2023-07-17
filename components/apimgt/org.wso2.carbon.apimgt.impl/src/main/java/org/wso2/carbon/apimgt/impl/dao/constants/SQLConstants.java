@@ -952,7 +952,8 @@ public class SQLConstants {
                     "   SUBS.CREATED_TIME AS SUB_CREATED_TIME, " +
                     "   SUBS.TIER_ID AS SUB_TIER_ID, " +
                     "   APP.UUID AS APP_UUID, " +
-                    "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE " +
+                    "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+                    "   SUBS.VERSION_RANGE AS VERSION_RANGE " +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUBS, " +
                     "   AM_APPLICATION APP, " +
@@ -1438,7 +1439,7 @@ public class SQLConstants {
             "   SUB.TIER_ID AS TIER_ID," +
             "   SUB.APPLICATION_ID AS APPLICATION_ID," +
             "   SUB.SUB_STATUS AS SUB_STATUS," +
-            "   SUB.VERSION_RANGE AS VERSION_RANGE" +
+            "   SUB.VERSION_RANGE AS VERSION_RANGE," +
             "   API.CONTEXT AS CONTEXT," +
             "   API.API_VERSION AS VERSION" +
             " FROM" +

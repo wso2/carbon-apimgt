@@ -774,7 +774,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     subscriptionVersionRange = versionRange;
                 } else {
                     throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_SUBSCRIPTION_VERSION_RANGE,
-                            "v" + apiMajorVersion, apiVersion));
+                            versionRange, apiVersion));
                 }
             } else {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.VERSION_RANGE_NOT_ALLOWED));

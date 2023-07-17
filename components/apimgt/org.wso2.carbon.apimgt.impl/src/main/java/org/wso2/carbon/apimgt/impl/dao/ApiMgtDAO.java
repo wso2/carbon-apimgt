@@ -2727,6 +2727,7 @@ public class ApiMgtDAO {
                 Application application = new Application(result.getInt("APPLICATION_ID"));
                 application.setName(result.getString("APPNAME"));
                 subscription.setApplication(application);
+                subscription.setVersionRange(result.getString("VERSION_RANGE"));
 
                 subscriptions.add(subscription);
             }
@@ -5052,7 +5053,7 @@ public class ApiMgtDAO {
                                                 info.getApplicationId());
                                         String subscriptionUUID = UUID.randomUUID().toString();
                                         int subscriptionId = addSubscription(connection, apiTypeWrapper, application,
-                                                subscriptionStatus, apiIdentifier.getProviderName(), subscriptionUUID);
+                                                subscriptionStatus, apiIdentifier.getProviderName(), subscriptionUUID, null);
                                         if (subscriptionId == -1) {
                                             String msg =
                                                     "Unable to add a new subscription for the API: " + apiIdentifier.getName() +
