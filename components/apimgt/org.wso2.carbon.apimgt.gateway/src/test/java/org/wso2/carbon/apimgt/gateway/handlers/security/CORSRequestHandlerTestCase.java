@@ -47,7 +47,9 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -124,6 +126,10 @@ public class CORSRequestHandlerTestCase {
         TreeMap transportHeaders = new TreeMap();
         transportHeaders.put("Origin", "");
 
+        Set<Resource> acceptableResources = new LinkedHashSet<>();
+        acceptableResources.add(resource);
+        String httpMethod = "GET";
+        Mockito.when(Utils.getAcceptableResources(resources, httpMethod, null)).thenReturn(acceptableResources);
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
         Assert.assertTrue(corsRequestHandler.handleRequest(messageContext));
 
@@ -136,12 +142,13 @@ public class CORSRequestHandlerTestCase {
         };
         Mockito.when(resource.getDispatcherHelper()).thenReturn(dispatcherHelper1);
 
-
-        Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("OPTIONS");
+        httpMethod = "OPTIONS";
+        Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn(httpMethod);
         //test for OPTIONS request when OPTIONS is not supported by SupportedHTTPVerbs
         Assert.assertFalse(corsRequestHandler.handleRequest(messageContext));
         //test for OPTIONS request when OPTIONS is supported by SupportedHTTPVerbs
         String[] methodsWithOptions = {"GET", "POST", "OPTIONS"};
+        Mockito.when(Utils.getAcceptableResources(resources, httpMethod, null)).thenReturn(acceptableResources);
         Mockito.when(resource.getMethods()).thenReturn(methodsWithOptions);
         Assert.assertTrue(corsRequestHandler.handleRequest(messageContext));
 
