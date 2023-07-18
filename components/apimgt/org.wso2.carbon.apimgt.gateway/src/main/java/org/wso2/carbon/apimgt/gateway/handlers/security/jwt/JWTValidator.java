@@ -291,7 +291,7 @@ public class JWTValidator {
                 endUserToken = (String) token;
                 String[] splitToken = ((String) token).split("\\.");
                 JSONObject payload;
-                if (jwtConfigurationDto.getJwtDecoding().equals("base64url")) {
+                if (APIConstants.JwtTokenConstants.DECODING_ALGORITHM_BASE64URL.equals(jwtConfigurationDto.getJwtDecoding())) {
                     payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
                 } else {
                     payload = new JSONObject(new String(Base64.getDecoder().decode(splitToken[1])));
