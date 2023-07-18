@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.GoogleAnalyticsConfigEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ScopesEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.KeyTemplateEvent;
@@ -242,6 +243,11 @@ public class GatewayJMSMessageListener implements MessageListener {
         } else if (EventType.REMOVE_APPLICATION_KEYMAPPING.toString().equals(eventType)) {
             ApplicationRegistrationEvent event = new Gson().fromJson(eventJson, ApplicationRegistrationEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeApplicationKeyMapping(event);
+        } else if (EventType.SCOPES_UPDATE.toString().equals(eventType)) {
+            ScopesEvent event = new Gson().fromJson(eventJson, ScopesEvent.class);
+            for (ScopeEvent scopeEvent : event.getScopes()) {
+                ServiceReferenceHolder.getInstance().getKeyManagerDataService().addScope(scopeEvent);
+            }
         } else if (EventType.SCOPE_CREATE.toString().equals(eventType)) {
             ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().addScope(event);

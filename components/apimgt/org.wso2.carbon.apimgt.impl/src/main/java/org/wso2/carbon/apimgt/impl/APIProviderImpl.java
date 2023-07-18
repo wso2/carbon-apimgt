@@ -995,8 +995,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Update the resource scopes of the API in KM.
         // Need to remove the old local scopes and register new local scopes and, update the resource scope mappings
         // using the updated URI templates of the API.
-        deleteScopes(oldLocalScopeKeys, tenantId);
-        addScopes(newLocalScopes, tenantId);
+        updateScopes(newLocalScopes, oldLocalScopeKeys, tenantId);
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
@@ -4756,6 +4755,34 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
+    }
+
+    private void updateScopes(Set<Scope> addedScopes, Set<String> deletedScopes, int tenantId) throws APIManagementException {
+
+        if (deletedScopes != null) {
+            for (String scopeKey : deletedScopes) {
+                if (StringUtils.isNotEmpty(scopeKey)) {
+                    scopesDAO.deleteScope(scopeKey, tenantId);
+                }
+            }
+        }
+
+        if (addedScopes != null) {
+            scopesDAO.addScopes(addedScopes, tenantId);
+            ScopesEvent scopesEvent = new ScopesEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.SCOPES_UPDATE.name(), tenantId,
+                    tenantDomain);
+            for (Scope scope : addedScopes) {
+                ScopeEvent scopeEvent = new ScopeEvent(null,
+                        null, null, tenantId,
+                        tenantDomain, scope.getKey(), scope.getName(), scope.getDescription());
+                if (StringUtils.isNotEmpty(scope.getRoles()) && scope.getRoles().trim().length() > 0) {
+                    scopeEvent.setRoles(Arrays.asList(scope.getRoles().split(",")));
+                }
+                scopesEvent.addScope(scopeEvent);
+            }
+            APIUtil.sendNotification(scopesEvent, APIConstants.NotifierType.SCOPES.name());
+        }
     }
 
     private void updateScope(Scope scope, int tenantId) throws APIManagementException {
