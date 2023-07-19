@@ -883,15 +883,11 @@ public class OAS2Parser extends APIDefinition {
                 swagger.setVendorExtension(APIConstants.X_WSO2_MUTUAL_SSL, mutualSSLOptional);
             }
         }
-        // This app security should be given in resource level,
-        // otherwise the default oauth2 scheme defined at each resource level will override application securities
-        JsonNode appSecurityExtension = OASParserUtil.getAppSecurity(apiSecurity);
         for (String pathKey : swagger.getPaths().keySet()) {
             Path path = swagger.getPath(pathKey);
             Map<HttpMethod, Operation> operationMap = path.getOperationMap();
             for (Map.Entry<HttpMethod, Operation> entry : operationMap.entrySet()) {
                 Operation operation = entry.getValue();
-                operation.setVendorExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
                 // If throttling limit remains unassigned in the swagger definition, the throttling-tier property
                 // will be used to generate the limit. If throttling-tier is also not defined, the default tier would
                 // be unlimited tier.
@@ -904,7 +900,6 @@ public class OAS2Parser extends APIDefinition {
                 }
             }
         }
-        swagger.setVendorExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
         swagger.setVendorExtension(APIConstants.X_WSO2_RESPONSE_CACHE,
                 OASParserUtil.getResponseCacheConfig(api.getResponseCache(), api.getCacheTimeout()));
 
@@ -1836,7 +1831,6 @@ public class OAS2Parser extends APIDefinition {
                         resourceExtensions = new HashMap<>();
                         extensionsAreEmpty = true;
                     }
-                    resourceExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, "None");
                     if (extensionsAreEmpty) {
                         operation.setVendorExtensions(resourceExtensions);
                     }
