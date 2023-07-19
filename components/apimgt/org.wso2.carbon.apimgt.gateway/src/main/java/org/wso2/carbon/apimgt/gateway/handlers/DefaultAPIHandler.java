@@ -52,7 +52,18 @@ public class DefaultAPIHandler extends AbstractSynapseHandler {
         String tenantDomain = GatewayUtils.getTenantDomain();
 
         // Handle JWKS API calls
-        if (path.contains(JWTConstants.GATEWAY_JWKS_API_CONTEXT)) {
+        boolean isJWKSEndpoint = false;
+        if (APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenantDomain)) {
+            if (path.equals(JWTConstants.GATEWAY_JWKS_API_CONTEXT)) {
+                isJWKSEndpoint = true;
+            }
+        } else {
+            if (path.equals(APIConstants.TENANT_PREFIX + tenantDomain + JWTConstants.GATEWAY_JWKS_API_CONTEXT)) {
+                isJWKSEndpoint = true;
+            }
+        }
+
+        if (isJWKSEndpoint) {
             try {
                 InMemoryAPIDeployer.deployJWKSSynapseAPI(tenantDomain);
             } catch(APIManagementException e){
