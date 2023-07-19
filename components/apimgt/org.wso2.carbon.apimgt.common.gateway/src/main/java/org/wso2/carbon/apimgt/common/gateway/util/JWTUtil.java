@@ -132,26 +132,6 @@ public final class JWTUtil {
         }
     }
 
-    public static String generateThumbprint(String hashType, Certificate publicCert, boolean usePadding)
-            throws CertificateEncodingException,
-            UnsupportedEncodingException, NoSuchAlgorithmException {
-        MessageDigest digestValue;
-        byte[] der = publicCert.getEncoded();
-        digestValue = MessageDigest.getInstance(hashType);
-        digestValue.update(der);
-        byte[] digestInBytes = digestValue.digest();
-        String publicCertThumbprint = hexify(digestInBytes);
-        String base64UrlEncodedThumbPrint;
-        if (usePadding) {
-            base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
-                    .encodeToString(publicCertThumbprint.getBytes(StandardCharsets.UTF_8));
-        } else {
-            base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder().withoutPadding()
-                    .encodeToString(publicCertThumbprint.getBytes(StandardCharsets.UTF_8));
-        }
-        return base64UrlEncodedThumbPrint;
-    }
-
     /**
      * Helper method to hexify a byte array.
      *

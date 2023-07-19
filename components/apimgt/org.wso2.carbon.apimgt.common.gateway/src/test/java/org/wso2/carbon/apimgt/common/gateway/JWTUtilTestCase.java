@@ -20,11 +20,12 @@ package org.wso2.carbon.apimgt.common.gateway;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
 
-import java.nio.charset.StandardCharsets;
-import java.security.cert.Certificate;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 /**
  * Test cases for {@link JWTUtil}
@@ -54,15 +55,17 @@ public class JWTUtilTestCase {
 
     @Test
     public void testJWTHeader() throws Exception {
-        // Characters are arbitrary
-        String certEncoded = "asdasndlaskjdlaskdjald1321k3jladksj1i3";
-        Certificate cert = Mockito.mock(Certificate.class);
-        Mockito.when(cert.getEncoded()).thenReturn(certEncoded.getBytes(StandardCharsets.UTF_8));
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+        X509Certificate cert = (X509Certificate) certificateFactory.generateCertificate(
+                Files.newInputStream(Paths.get("src/test/resources/cnf/certificate.pem"))
+        );
+
         String jwt = JWTUtil.generateHeader(cert, "SHA256withRSA", true);
         Assert.assertNotNull(jwt);
         Assert.assertTrue(jwt.contains("kid"));
+
         jwt = JWTUtil.generateHeader(cert, "SHA256withRSA", false);
         Assert.assertNotNull(jwt);
-        Assert.assertTrue(jwt.contains("x5t"));
+        Assert.assertFalse(jwt.contains("kid"));
     }
 }
