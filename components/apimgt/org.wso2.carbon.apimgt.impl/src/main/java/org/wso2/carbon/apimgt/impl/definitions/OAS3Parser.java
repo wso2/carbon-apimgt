@@ -977,12 +977,15 @@ public class OAS3Parser extends APIDefinition {
                 // If throttling limit remains unassigned in the swagger definition, the throttling-tier property
                 // will be used to generate the limit. If throttling-tier is also not defined, the default tier would
                 // be unlimited tier.
-                if (!operation.getExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
-                    String tier = operation.getExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER) ?
-                            (String) operation.getExtensions().get(APIConstants.SWAGGER_X_THROTTLING_TIER) :
-                            APIConstants.UNLIMITED_TIER;
+                if (operation.getExtensions() != null &&
+                        !operation.getExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT) &&
+                        operation.getExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER)) {
+                    String tier = (String) operation.getExtensions().get(APIConstants.SWAGGER_X_THROTTLING_TIER);
                     operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
                             ModelUtil.generateThrottlingLimitFromThrottlingTier(tier));
+                } else {
+                    operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
+                            ModelUtil.generateThrottlingLimitFromThrottlingTier(APIConstants.UNLIMITED_TIER));
                 }
             }
         }
