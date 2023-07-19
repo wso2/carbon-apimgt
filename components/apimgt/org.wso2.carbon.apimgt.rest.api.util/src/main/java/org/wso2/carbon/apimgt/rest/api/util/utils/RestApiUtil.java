@@ -780,6 +780,18 @@ public class RestApiUtil {
     }
 
     /**
+     * Builds a NotFoundException with specified details and throws it
+     *
+     * @param resource requested resource
+     * @param id id of resource
+     * @throws NotFoundException
+     */
+    public static void handleResourceNotFoundError(String resource, String id) {
+        NotFoundException notFoundException = buildNotFoundException(resource, id);
+        throw notFoundException;
+    }
+
+    /**
      * Logs the error, builds a NotFoundException with specified details and throws it
      *
      * @param description description of the error

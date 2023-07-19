@@ -65,6 +65,8 @@ public class Constants {
 
     public static final String API_GOOGLE_ANALYTICS_TRACKING_ENABLED = "Enabled";
     public static final String API_GOOGLE_ANALYTICS_TRACKING_ID = "TrackingID";
+    public static final String API_GOOGLE_ANALYTICS_MEASUREMENT_ID = "MeasurementID";
+    public static final String API_GOOGLE_ANALYTICS_API_SECRET = "APISecret";
     public static final String X_FORWARDED_FOR_HEADER = "X-Forwarded-For";
 
     public static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";

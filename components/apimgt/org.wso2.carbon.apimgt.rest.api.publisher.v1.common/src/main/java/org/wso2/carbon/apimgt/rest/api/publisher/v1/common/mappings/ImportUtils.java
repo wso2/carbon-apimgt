@@ -78,6 +78,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
+import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -88,13 +89,17 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityIn
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -211,6 +216,9 @@ public class ImportUtils {
             // The status of the importing API should be stored separately to do the lifecycle change at the end
             targetStatus = importedApiDTO.getLifeCycleStatus();
 
+            // validate the API context
+            APIUtil.validateAPIContext(importedApiDTO.getContext(), importedApiDTO.getName());
+
             API targetApi = retrieveApiToOverwrite(importedApiDTO.getName(), importedApiDTO.getVersion(),
                     currentTenantDomain, apiProvider, Boolean.TRUE, organization);
 
@@ -222,6 +230,9 @@ public class ImportUtils {
                     extractValidateAndDropOperationPoliciesFromURITemplate(importedApiDTO.getOperations(),
                             extractedFolderPath, targetAPIUuid, organization, importedApiDTO.getType().toString(),
                             apiProvider);
+            List<OperationPolicy> extractedAPIPolicies = extractValidateAndDropAPIPoliciesFromAPI(importedApiDTO,
+                    extractedFolderPath, targetAPIUuid, organization, importedApiDTO.getType().toString(),
+                    apiProvider);
 
             // If the overwrite is set to true (which means an update), retrieve the existing API
             if (Boolean.TRUE.equals(overwrite) && targetApi != null) {
@@ -263,9 +274,9 @@ public class ImportUtils {
                 }
             }
 
-            if (!extractedPoliciesMap.isEmpty()) {
-                importedApi.setUriTemplates(populateUriTemplateWithPolicies(importedApi, apiProvider,
-                        extractedFolderPath, extractedPoliciesMap, currentTenantDomain));
+            if (!extractedPoliciesMap.isEmpty() || !extractedAPIPolicies.isEmpty()) {
+                populateAPIWithPolicies(importedApi, apiProvider, extractedFolderPath, extractedPoliciesMap,
+                        extractedAPIPolicies, currentTenantDomain);
                 API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
                 apiProvider.updateAPI(importedApi, oldAPI);
             }
@@ -407,6 +418,9 @@ public class ImportUtils {
                 errorMessage +=
                         importedApi.getId().getApiName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
                                 + importedApi.getId().getVersion();
+            } else if (e.getMessage().contains(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION.getErrorMessage())) {
+                throw new APIManagementException("Error while importing API: " + e.getMessage(),
+                        ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
             }
             throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
         }
@@ -442,6 +456,37 @@ public class ImportUtils {
             dto.setOperationPolicies(null);
         }
         return operationPoliciesMap;
+    }
+
+    /**
+     * This method is used to extract, validate and drop the policies from the API object as to record policy mapping,
+     * we need API UUID. API will be created without policies and after that API will be updated.
+     *
+     * @param importedApiDTO      API DTO of the importing API
+     * @param extractedFolderPath Location of the extracted folder of the API
+     * @param apiUUID             UUID of the API
+     * @param tenantDomain        Tenant domain
+     * @param apiType             Type of the API
+     * @param provider            API Provider
+     * @return List of policies
+     * @throws APIManagementException If an error occurs while extracting, validating or dropping the policies
+     */
+    public static List<OperationPolicy> extractValidateAndDropAPIPoliciesFromAPI(APIDTO importedApiDTO,
+            String extractedFolderPath, String apiUUID, String tenantDomain, String apiType, APIProvider provider)
+            throws APIManagementException {
+        List<OperationPolicy> apiPoliciesList = new ArrayList<>();
+        if (importedApiDTO.getApiPolicies() != null) {
+            apiPoliciesList = OperationPolicyMappingUtil
+                    .fromDTOToAPIOperationPoliciesList(importedApiDTO.getApiPolicies());
+            Map<String, OperationPolicySpecification> visitedPoliciesMap = new HashMap<>();
+            for (OperationPolicy policy : apiPoliciesList) {
+                validateAppliedPolicy(policy, visitedPoliciesMap, extractedFolderPath, apiUUID, provider,
+                        tenantDomain, apiType);
+            }
+
+        }
+        importedApiDTO.setApiPolicies(null);
+        return apiPoliciesList;
     }
 
     /**
@@ -514,131 +559,156 @@ public class ImportUtils {
     }
 
     /**
-     * This method is used populate uri template of the API with API Policies
+     * This method is used to populate uri template of the API with API Level Policies and Operation Level Policies.
      *
-     * @param api                 The API object
-     * @param provider            Provider
-     * @param extractedFolderPath Folder path of the API project
-     * @param policiesMap         Map of enforced policies
-     * @param tenantDomain        Tenant domain
-     * @return URI Templates set
+     * @param api                       The API object
+     * @param provider                  Provider
+     * @param extractedFolderPath       Folder path of the API project
+     * @param operationLevelPoliciesMap Map of enforced operation level policies
+     * @param apiLevelPoliciesList      Map of enforced API level policies
+     * @param tenantDomain              Tenant domain
      * @throws APIManagementException If there is an error in validating applied policy
      */
-    public static Set<URITemplate> populateUriTemplateWithPolicies(API api, APIProvider provider,
-                                                                   String extractedFolderPath,
-                                                                   Map<String, List<OperationPolicy>> policiesMap,
-                                                                   String tenantDomain) throws APIManagementException {
+    public static void populateAPIWithPolicies(API api, APIProvider provider, String extractedFolderPath,
+            Map<String, List<OperationPolicy>> operationLevelPoliciesMap, List<OperationPolicy> apiLevelPoliciesList,
+            String tenantDomain) throws APIManagementException {
 
         String policyDirectory = extractedFolderPath + File.separator + ImportExportConstants.POLICIES_DIRECTORY;
         Map<String, String> importedPolicies = new HashMap<>();
-        Set<URITemplate> uriTemplates = api.getUriTemplates();
-        for (URITemplate uriTemplate : uriTemplates) {
-            String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
-            if (policiesMap.containsKey(key)) {
-                List<OperationPolicy> operationPolicies = policiesMap.get(key);
-                List<OperationPolicy> validatedOperationPolicies = new ArrayList<>();
-                if (operationPolicies != null && !operationPolicies.isEmpty()) {
-                    for (OperationPolicy policy : operationPolicies) {
-                        boolean policyImported = false;
-                        try {
-                            String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
-                                    policy.getPolicyVersion());
-                            String policyID = null;
-                            if (!importedPolicies.containsKey(policyFileName)) {
-                                OperationPolicySpecification policySpec =
-                                        getOperationPolicySpecificationFromFile(policyDirectory, policyFileName);
-                                if (policySpec != null) {
-                                    OperationPolicyData operationPolicyData = new OperationPolicyData();
-                                    operationPolicyData.setSpecification(policySpec);
-                                    operationPolicyData.setOrganization(tenantDomain);
-                                    operationPolicyData.setApiUUID(api.getUuid());
-
-                                    OperationPolicyDefinition synapseDefinition =
-                                            APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
-                                                    policyFileName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
-                                    if (synapseDefinition != null) {
-                                        synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
-                                        operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
-                                    }
-                                    OperationPolicyDefinition ccDefinition =
-                                            APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
-                                                    policyFileName, APIConstants.CC_POLICY_DEFINITION_EXTENSION);
-                                    if (ccDefinition != null) {
-                                        ccDefinition
-                                                .setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
-                                        operationPolicyData.setCcPolicyDefinition(ccDefinition);
-                                    }
-                                    operationPolicyData.setMd5Hash(
-                                            APIUtil.getMd5OfOperationPolicy(operationPolicyData));
-                                    policyID = provider.importOperationPolicy(operationPolicyData, tenantDomain);
-                                    importedPolicies.put(policyFileName, policyID);
-                                    policyImported = true;
-                                } else {
-                                    // Check whether the policy has been referenced
-                                    OperationPolicyData policyData =
-                                            provider.getAPISpecificOperationPolicyByPolicyName(policy.getPolicyName(),
-                                                    policy.getPolicyVersion(), api.getUuid(), null,
-                                                    tenantDomain, false);
-                                    if (policyData != null) {
-                                        OperationPolicySpecification policySpecification = policyData.
-                                                getSpecification();
-                                        if (provider.validateAppliedPolicyWithSpecification(policySpecification,
-                                                policy, api.getType())) {
-                                            policy.setPolicyId(policyData.getPolicyId());
-                                            validatedOperationPolicies.add(policy);
-                                            if (log.isDebugEnabled()) {
-                                                log.debug("Policy was referenced and an API specific policy is" +
-                                                        " found for " + policy.getPolicyName() + "_"
-                                                        + policy.getPolicyName());
-                                            }
-                                        }
-                                    } else {
-                                        OperationPolicyData commonPolicyData =
-                                                provider.getCommonOperationPolicyByPolicyName(policy.getPolicyName(),
-                                                        policy.getPolicyVersion(), tenantDomain,
-                                                        false);
-                                        if (commonPolicyData != null) {
-                                            log.info(commonPolicyData.getPolicyId());
-                                            // A common policy is found for specified policy. This will be validated
-                                            // according to the provided attributes and added to API policy list
-                                            OperationPolicySpecification commonPolicySpec = commonPolicyData.
-                                                    getSpecification();
-                                            if (provider.validateAppliedPolicyWithSpecification(commonPolicySpec,
-                                                    policy, api.getType())) {
-                                                policy.setPolicyId(commonPolicyData.getPolicyId());
-                                                validatedOperationPolicies.add(policy);
-                                                if (log.isDebugEnabled()) {
-                                                    log.debug("Policy was referenced and a common policy is found " +
-                                                            "for " + policy.getPolicyName() + "_"
-                                                            + policy.getPolicyName());
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                policyID = importedPolicies.get(policyFileName);
-                                policyImported = true;
-                            }
-                            if (policyImported && policyID != null) {
-                                policy.setPolicyId(policyID);
-                                validatedOperationPolicies.add(policy);
-                            }
-                        } catch (APIManagementException e) {
-                            log.error("An error occurred when validating the operation policy "
-                                    + policy.getPolicyName() + "_" + policy.getPolicyVersion() + " for url template "
-                                    + uriTemplate.getUriTemplate(), e);
-
-                            throw new APIManagementException("An error occurred when validating the operation policy"
-                                    + policy.getPolicyName() + "_" + policy.getPolicyVersion(),
-                                    ExceptionCodes.ERROR_VALIDATING_API_POLICY);
-                        }
+        if (!operationLevelPoliciesMap.isEmpty()) {
+            Set<URITemplate> uriTemplates = api.getUriTemplates();
+            for (URITemplate uriTemplate : uriTemplates) {
+                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                if (operationLevelPoliciesMap.containsKey(key)) {
+                    List<OperationPolicy> operationPolicies = operationLevelPoliciesMap.get(key);
+                    if (operationPolicies != null && !operationPolicies.isEmpty()) {
+                        uriTemplate.setOperationPolicies(findOrImportPolicy(operationPolicies, importedPolicies,
+                                policyDirectory, tenantDomain, api, provider));
                     }
                 }
-                uriTemplate.setOperationPolicies(validatedOperationPolicies);
+            }
+            api.setUriTemplates(uriTemplates);
+        }
+
+        if (!apiLevelPoliciesList.isEmpty()) {
+            api.setApiPolicies(findOrImportPolicy(apiLevelPoliciesList, importedPolicies, policyDirectory,
+                    tenantDomain, api, provider));
+        }
+    }
+
+    /**
+     * This method is used to validate the provided policy list and return the validated list.
+     *
+     * @param policiesList     List of policies
+     * @param importedPolicies Imported policies
+     * @param policyDirectory  Path of the policy directory
+     * @param tenantDomain     Tenant domain
+     * @param api              API object
+     * @param provider         API provider
+     * @return List of validated policies
+     * @throws APIManagementException If an error occurs while validating the policies
+     */
+    public static List<OperationPolicy> findOrImportPolicy(List<OperationPolicy> policiesList,
+            Map<String, String> importedPolicies, String policyDirectory, String tenantDomain, API api,
+            APIProvider provider) throws APIManagementException {
+
+        List<OperationPolicy> validatedOperationPolicies = new ArrayList<>();
+        for (OperationPolicy policy : policiesList) {
+            boolean policyImported = false;
+            try {
+                String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
+                        policy.getPolicyVersion());
+                String policyID = null;
+                if (!importedPolicies.containsKey(policyFileName)) {
+                    OperationPolicySpecification policySpec =
+                            getOperationPolicySpecificationFromFile(policyDirectory, policyFileName);
+                    if (policySpec != null) {
+                        OperationPolicyData operationPolicyData = new OperationPolicyData();
+                        operationPolicyData.setSpecification(policySpec);
+                        operationPolicyData.setOrganization(tenantDomain);
+                        operationPolicyData.setApiUUID(api.getUuid());
+
+                        OperationPolicyDefinition synapseDefinition =
+                                APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                        policyFileName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                        if (synapseDefinition != null) {
+                            synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
+                            operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
+                        }
+                        OperationPolicyDefinition ccDefinition =
+                                APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                        policyFileName, APIConstants.CC_POLICY_DEFINITION_EXTENSION);
+                        if (ccDefinition != null) {
+                            ccDefinition
+                                    .setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
+                            operationPolicyData.setCcPolicyDefinition(ccDefinition);
+                        }
+                        operationPolicyData.setMd5Hash(
+                                APIUtil.getMd5OfOperationPolicy(operationPolicyData));
+                        policyID = provider.importOperationPolicy(operationPolicyData, tenantDomain);
+                        importedPolicies.put(policyFileName, policyID);
+                        policyImported = true;
+                    } else {
+                        // Check whether the policy has been referenced
+                        OperationPolicyData policyData =
+                                provider.getAPISpecificOperationPolicyByPolicyName(policy.getPolicyName(),
+                                        policy.getPolicyVersion(), api.getUuid(), null,
+                                        tenantDomain, false);
+                        if (policyData != null) {
+                            OperationPolicySpecification policySpecification = policyData.
+                                    getSpecification();
+                            if (provider.validateAppliedPolicyWithSpecification(policySpecification,
+                                    policy, api.getType())) {
+                                policy.setPolicyId(policyData.getPolicyId());
+                                validatedOperationPolicies.add(policy);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Policy was referenced and an API specific policy is" +
+                                            " found for " + policy.getPolicyName() + "_"
+                                            + policy.getPolicyName());
+                                }
+                            }
+                        } else {
+                            OperationPolicyData commonPolicyData =
+                                    provider.getCommonOperationPolicyByPolicyName(policy.getPolicyName(),
+                                            policy.getPolicyVersion(), tenantDomain,
+                                            false);
+                            if (commonPolicyData != null) {
+                                log.info(commonPolicyData.getPolicyId());
+                                // A common policy is found for specified policy. This will be validated
+                                // according to the provided attributes and added to API policy list
+                                OperationPolicySpecification commonPolicySpec = commonPolicyData.
+                                        getSpecification();
+                                if (provider.validateAppliedPolicyWithSpecification(commonPolicySpec,
+                                        policy, api.getType())) {
+                                    policy.setPolicyId(commonPolicyData.getPolicyId());
+                                    validatedOperationPolicies.add(policy);
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Policy was referenced and a common policy is found " +
+                                                "for " + policy.getPolicyName() + "_"
+                                                + policy.getPolicyName());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    policyID = importedPolicies.get(policyFileName);
+                    policyImported = true;
+                }
+                if (policyImported && policyID != null) {
+                    policy.setPolicyId(policyID);
+                    validatedOperationPolicies.add(policy);
+                }
+            } catch (APIManagementException e) {
+                log.error("An error occurred when validating the policy "
+                        + policy.getPolicyName() + "_" + policy.getPolicyVersion(), e);
+
+                throw new APIManagementException("An error occurred when validating the policy"
+                        + policy.getPolicyName() + "_" + policy.getPolicyVersion(),
+                        ExceptionCodes.ERROR_VALIDATING_API_POLICY);
             }
         }
-        return uriTemplates;
+        return validatedOperationPolicies;
     }
 
     public static OperationPolicySpecification getOperationPolicySpecificationFromFile(String extractedFolderPath,
@@ -1432,8 +1502,17 @@ public class ImportUtils {
 
         try {
             byte[] wsdlDefinition = loadWsdlFile(pathToArchive, apiDto);
-            WSDLValidationResponse wsdlValidationResponse = APIMWSDLReader.
-                    getWsdlValidationResponse(APIMWSDLReader.getWSDLProcessor(wsdlDefinition));
+            WSDLInfoDTO wsdlInfo = apiDto.getWsdlInfo();
+            WSDLValidationResponse wsdlValidationResponse;
+            if (wsdlInfo != null && WSDLInfoDTO.TypeEnum.ZIP.equals(wsdlInfo.getType())) {
+                // If the WSDL is a ZIP file, we need to extract it and validate the WSDL inside
+                wsdlValidationResponse = APIMWSDLReader.extractAndValidateWSDLArchive(
+                        new ByteArrayInputStream(wsdlDefinition));
+            } else {
+                wsdlValidationResponse = APIMWSDLReader.
+                        getWsdlValidationResponse(APIMWSDLReader.getWSDLProcessor(wsdlDefinition));
+            }
+
             if (!wsdlValidationResponse.isValid()) {
                 throw new APIManagementException(
                         "Error occurred while importing the API. Invalid WSDL definition found. "
@@ -1496,12 +1575,25 @@ public class ImportUtils {
     private static byte[] loadWsdlFile(String pathToArchive, APIDTO apiDto) throws IOException {
 
         String wsdlFileName = apiDto.getName() + "-" + apiDto.getVersion() + APIConstants.WSDL_FILE_EXTENSION;
-        String pathToFile = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlFileName;
-        if (CommonUtil.checkFileExistence(pathToFile)) {
+        String wsdlArchiveName = apiDto.getName() + "-" + apiDto.getVersion() + APIConstants.ZIP_FILE_EXTENSION;
+        String pathToWsdlFile = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlFileName;
+        String pathToWsdlArchive = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlArchiveName;
+        String pathToWsdl = null;
+
+        if (CommonUtil.checkFileExistence(pathToWsdlFile)) {
             if (log.isDebugEnabled()) {
-                log.debug("Found WSDL file " + pathToFile);
+                log.debug("Found WSDL file " + pathToWsdlFile);
             }
-            return FileUtils.readFileToByteArray(new File(pathToFile));
+            pathToWsdl = pathToWsdlFile;
+        } else if (CommonUtil.checkFileExistence(pathToWsdlArchive)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Found WSDL archive " + pathToWsdlArchive);
+            }
+            pathToWsdl = pathToWsdlArchive;
+        }
+
+        if (!StringUtils.isEmpty(pathToWsdl)) {
+            return FileUtils.readFileToByteArray(new File(pathToWsdl));
         }
         throw new IOException("Missing WSDL file. It should be present.");
     }
@@ -1664,9 +1756,6 @@ public class ImportUtils {
 
         File documentsFolder = new File(docDirectoryPath);
         File[] fileArray = documentsFolder.listFiles();
-        String provider = (apiTypeWrapper.isAPIProduct()) ? apiTypeWrapper.getApiProduct().getId().getProviderName() :
-                apiTypeWrapper.getApi().getId().getProviderName();
-        String tenantDomain = MultitenantUtils.getTenantDomain(provider);
 
         try {
             // Remove all documents associated with the API before update
@@ -1675,7 +1764,7 @@ public class ImportUtils {
             List<Documentation> documents = apiProvider.getAllDocumentation(uuidFromIdentifier, organization);
             if (documents != null) {
                 for (Documentation documentation : documents) {
-                    apiProvider.removeDocumentation(uuidFromIdentifier, documentation.getId(), tenantDomain);
+                    apiProvider.removeDocumentation(uuidFromIdentifier, documentation.getId(), organization);
                 }
             }
 
@@ -1736,7 +1825,7 @@ public class ImportUtils {
                                 individualDocumentFilePath + File.separator + folderName)) {
                             String inlineContent = IOUtils.toString(inputStream, ImportExportConstants.CHARSET);
                             PublisherCommonUtils.addDocumentationContent(documentation, apiProvider, apiOrApiProductId,
-                                    documentation.getId(), tenantDomain, inlineContent);
+                                    documentation.getId(), organization, inlineContent);
                         }
                     } else if (ImportExportConstants.FILE_DOC_TYPE.equalsIgnoreCase(docSourceType)) {
                         String filePath = documentation.getFilePath();
@@ -1747,7 +1836,7 @@ public class ImportUtils {
                                             + File.separator + filePath);
                             PublisherCommonUtils.addDocumentationContentForFile(inputStream, docExtension,
                                     documentation.getFilePath(), apiProvider, apiOrApiProductId, documentation.getId(),
-                                    tenantDomain);
+                                    organization);
                         } catch (FileNotFoundException e) {
                             //this error is logged and ignored because documents are optional in an API
                             log.error("Failed to locate the document files of the API/API Product: " + apiTypeWrapper
@@ -1826,20 +1915,66 @@ public class ImportUtils {
 
         String wsdlFileName = importedApi.getId().getApiName() + "-" + importedApi.getId().getVersion()
                 + APIConstants.WSDL_FILE_EXTENSION;
-        String wsdlPath = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlFileName;
+        String wsdlArchiveName = importedApi.getId().getApiName() + "-" + importedApi.getId().getVersion()
+                + APIConstants.ZIP_FILE_EXTENSION;
+        String wsdlFilePath = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlFileName;
+        String wsdlArchivePath = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlArchiveName;
 
-        if (CommonUtil.checkFileExistence(wsdlPath)) {
+        String wsdlPath = null;
+        String fileExtension = null;
+        if (CommonUtil.checkFileExistence(wsdlFilePath)) {
+            wsdlPath = wsdlFilePath;
+            fileExtension = FilenameUtils.getExtension(wsdlPath);
+        } else if (CommonUtil.checkFileExistence(wsdlArchivePath)) {
+            wsdlPath = wsdlArchivePath;
+            fileExtension = APIConstants.APPLICATION_ZIP;
+        }
+
+        if (!StringUtils.isEmpty(wsdlPath) && !StringUtils.isEmpty(fileExtension)) {
             try (FileInputStream inputStream = new FileInputStream(wsdlPath)) {
                 String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                String fileExtension = FilenameUtils.getExtension(wsdlPath);
                 PublisherCommonUtils.addWsdl(fileExtension, inputStream, importedApi, apiProvider, tenantDomain);
+
+                //Update wsdl URL in importedAPI
+                APIIdentifier apiIdentifier = importedApi.getId();
+                if (apiIdentifier != null) {
+                    String apiProviderName = apiIdentifier.getProviderName();
+                    String apiName = apiIdentifier.getApiName();
+                    String apiVersion = apiIdentifier.getVersion();
+                    String apiSourcePath = RegistryPersistenceUtil.getAPIBasePath(apiProviderName, apiName, apiVersion);
+
+                    String wsdlUrl;
+                    if (APIConstants.APPLICATION_ZIP.equals(fileExtension)) {
+                        wsdlUrl = apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                            + org.wso2.carbon.apimgt.persistence.APIConstants.API_WSDL_ARCHIVE_LOCATION
+                            + apiProviderName + org.wso2.carbon.apimgt.persistence.APIConstants.WSDL_PROVIDER_SEPERATOR
+                            + apiName + apiVersion + org.wso2.carbon.apimgt.persistence.APIConstants.ZIP_FILE_EXTENSION;
+                    } else {
+                        wsdlUrl = apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                                + RegistryPersistenceUtil.createWsdlFileName(apiProviderName, apiName, apiVersion);
+                    }
+                    String absoluteWSDLResourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + wsdlUrl;
+
+                    String wsdlRegistryPath;
+                    if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                            .equalsIgnoreCase(tenantDomain)) {
+                        wsdlRegistryPath =
+                                RegistryConstants.PATH_SEPARATOR + "registry" + RegistryConstants.PATH_SEPARATOR +
+                                        "resource" + absoluteWSDLResourcePath;
+                    } else {
+                        wsdlRegistryPath = "/t/" + tenantDomain + RegistryConstants.PATH_SEPARATOR + "registry"
+                                + RegistryConstants.PATH_SEPARATOR + "resource" + absoluteWSDLResourcePath;
+                    }
+                    importedApi.setWsdlUrl(wsdlRegistryPath);
+                }
             } catch (FileNotFoundException e) {
                 throw new APIManagementException(
-                        "WSDL file of the API: " + importedApi.getId().getName() + " is not found.", e,
+                        "WSDL file/archive of the API: " + importedApi.getId().getName() + " is not found.", e,
                         ExceptionCodes.NO_WSDL_FOUND_IN_WSDL_ARCHIVE);
             } catch (IOException e) {
                 throw new APIManagementException(
-                        "Error reading the WSDL file of the API: " + importedApi.getId().getName(), e,
+                        "Error reading the WSDL file/archive of the API: " + importedApi.getId().getName(), e,
                         ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
             }
         }
@@ -2081,7 +2216,7 @@ public class ImportUtils {
                     if (fileName.split(".xml").length != 0) {
                         method =
                                 fileName.split(".xml")[0].substring(file.getFileName().toString().lastIndexOf("_") + 1);
-                        resource = fileName.substring(0, fileName.indexOf("_"));
+                        resource = fileName.substring(0, fileName.lastIndexOf("_"));
                     }
                     try (InputStream inputFlowStream = new FileInputStream(file.toFile())) {
                         String content = IOUtils.toString(inputFlowStream);
@@ -2230,6 +2365,9 @@ public class ImportUtils {
                     deploymentInfoArray = deploymentsParam.getAsJsonArray();
                 }
             }
+
+            // Validate API Product Context
+            APIUtil.validateAPIContext(importedApiProductDTO.getContext(), importedApiProductDTO.getName());
 
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 

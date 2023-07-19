@@ -30,6 +30,7 @@ public class APISearchResultDTO extends SearchResultDTO  {
     private String status = null;
     private String thumbnailUri = null;
     private Boolean advertiseOnly = null;
+    private Boolean hasThumbnail = null;
 
   /**
    * A brief description about the API
@@ -173,6 +174,23 @@ public class APISearchResultDTO extends SearchResultDTO  {
     this.advertiseOnly = advertiseOnly;
   }
 
+  /**
+   **/
+  public APISearchResultDTO hasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("hasThumbnail")
+  public Boolean isHasThumbnail() {
+    return hasThumbnail;
+  }
+  public void setHasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -190,12 +208,13 @@ public class APISearchResultDTO extends SearchResultDTO  {
         Objects.equals(provider, apISearchResult.provider) &&
         Objects.equals(status, apISearchResult.status) &&
         Objects.equals(thumbnailUri, apISearchResult.thumbnailUri) &&
-        Objects.equals(advertiseOnly, apISearchResult.advertiseOnly);
+        Objects.equals(advertiseOnly, apISearchResult.advertiseOnly) &&
+        Objects.equals(hasThumbnail, apISearchResult.hasThumbnail);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, contextTemplate, version, provider, status, thumbnailUri, advertiseOnly);
+    return Objects.hash(description, context, contextTemplate, version, provider, status, thumbnailUri, advertiseOnly, hasThumbnail);
   }
 
   @Override
@@ -211,6 +230,7 @@ public class APISearchResultDTO extends SearchResultDTO  {
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
     sb.append("    advertiseOnly: ").append(toIndentedString(advertiseOnly)).append("\n");
+    sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("}");
     return sb.toString();
   }

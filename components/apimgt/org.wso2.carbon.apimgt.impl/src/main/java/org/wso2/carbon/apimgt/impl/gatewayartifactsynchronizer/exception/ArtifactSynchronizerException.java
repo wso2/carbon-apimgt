@@ -18,20 +18,37 @@
 
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception;
 
+import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+
 public class ArtifactSynchronizerException extends Exception {
+
+    private ErrorHandler errorHandler;
+    public ErrorHandler getErrorHandler() {
+        return errorHandler;
+    }
     public ArtifactSynchronizerException() {
+        this.errorHandler = ExceptionCodes.INTERNAL_ERROR;
     }
 
     public ArtifactSynchronizerException(String message) {
         super(message);
+        this.errorHandler = ExceptionCodes.INTERNAL_ERROR;
     }
 
     public ArtifactSynchronizerException(String message, Throwable cause) {
         super(message, cause);
+        this.errorHandler = ExceptionCodes.INTERNAL_ERROR;
     }
 
     public ArtifactSynchronizerException(Throwable cause) {
         super(cause);
+        this.errorHandler = ExceptionCodes.INTERNAL_ERROR;
+    }
+
+    public ArtifactSynchronizerException(String message, Throwable cause, ErrorHandler code) {
+        super(message, cause);
+        this.errorHandler = code;
     }
 
 }

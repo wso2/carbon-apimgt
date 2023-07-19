@@ -993,6 +993,32 @@ public class API implements Serializable {
     }
 
     public void setEndpointConfig(String endpointConfig) {
+        try {
+            if (endpointConfig != null && endpointConfig.contains(APIConstants.ENDPOINT_CONFIG_SESSION_TIMEOUT)) {
+                JSONParser parser = new JSONParser();
+                ObjectMapper objectMapper = new ObjectMapper();
+                JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfig);
+
+                if (endpointConfigJson.containsKey(APIConstants.ENDPOINT_CONFIG_SESSION_TIMEOUT)) {
+                    Object value = endpointConfigJson.get(APIConstants.ENDPOINT_CONFIG_SESSION_TIMEOUT);
+                    if (value instanceof Integer) {
+                        String strVal = value.toString();
+                        endpointConfigJson.put(APIConstants.ENDPOINT_CONFIG_SESSION_TIMEOUT, strVal);
+                    } else if (value instanceof  Double) {
+                        String strVal = String.valueOf(((Double) value).intValue());
+                        endpointConfigJson.put(APIConstants.ENDPOINT_CONFIG_SESSION_TIMEOUT, strVal);
+                    } else if (value instanceof String) {
+                        if (((String) value).contains(".")) {
+                            String strVal = String.valueOf(((String) value).split("\\.")[0]);
+                            endpointConfigJson.put(APIConstants.ENDPOINT_CONFIG_SESSION_TIMEOUT, strVal);
+                        }
+                    }
+                    endpointConfig = endpointConfigJson.toString();
+                }
+            }
+        } catch (ParseException e) {
+            log.error("Error while modifying sessionTimeout config for API : " + getUUID(), e);
+        }
         this.endpointConfig = endpointConfig;
     }
 
@@ -1436,5 +1462,15 @@ public class API implements Serializable {
 
     public void setAsyncTransportProtocols(String asyncTransportProtocols) {
         this.asyncTransportProtocols = asyncTransportProtocols;
+    }
+
+    public List<OperationPolicy> apiPolicies;
+
+    public List<OperationPolicy> getApiPolicies() {
+        return apiPolicies;
+    }
+
+    public void setApiPolicies(List<OperationPolicy> apiPolicies) {
+        this.apiPolicies = apiPolicies;
     }
 }

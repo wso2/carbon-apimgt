@@ -21,16 +21,18 @@ import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.dto.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
@@ -39,10 +41,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.DigestAuthConstants.CHARSET;
+
 public class BlockingConditionRetriever extends TimerTask {
     private static final Log log = LogFactory.getLog(BlockingConditionRetriever.class);
-    private static final int blockConditionsDataRetrievalTimeoutInSeconds = 15;
-    private static final int blockConditionsDataRetrievalRetries = 15;
 
     @Override
     public void run() {
@@ -71,40 +73,17 @@ public class BlockingConditionRetriever extends TimerTask {
             int keyMgtPort = eventHubUrl.getPort();
             String protocol = eventHubUrl.getProtocol();
             HttpClient httpClient = APIUtil.getHttpClient(keyMgtPort, protocol);
-            HttpResponse httpResponse = null;
-            int retryCount = 0;
-            boolean retry = true;
-            do {
-                try {
-                    httpResponse = httpClient.execute(method);
-                    if (httpResponse.getStatusLine().getStatusCode() == 200) {
-                        retry = false;
-                    }
-                } catch (IOException ex) {
-                    if (retryCount >= blockConditionsDataRetrievalRetries) {
-                        throw ex;
-                    }else{
-                        log.warn("Failed retrieving Blocking Conditions from remote endpoint: " + ex.getMessage()
-                                + ". Retrying after " + blockConditionsDataRetrievalTimeoutInSeconds + " seconds...");                    }
-                }
-                if (retry) {
-                    if (retryCount < blockConditionsDataRetrievalRetries) {
-                        log.warn("Failed retrieving Blocking Conditions from remote endpoint:. Retrying after "
-                                + blockConditionsDataRetrievalTimeoutInSeconds + " seconds...");
-                        Thread.sleep(blockConditionsDataRetrievalTimeoutInSeconds * 1000);
-                    } else {
-                        retry = false;
-                    }
-                    retryCount++;
-                }
+            String responseString;
+            try (CloseableHttpResponse httpResponse = APIUtil.executeHTTPRequestWithRetries(method, httpClient)) {
+                responseString = EntityUtils.toString(httpResponse.getEntity(), CHARSET);
+            } catch (APIManagementException e) {
+                throw new DataLoadingException("Error while retrieving Blocking Conditions", e);
+            }
 
-            } while (retry);
-
-            String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
             if (responseString != null && !responseString.isEmpty()) {
                 return new Gson().fromJson(responseString, BlockConditionsDTO.class);
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | DataLoadingException e) {
             log.error("Exception when retrieving Blocking Conditions from remote endpoint ", e);
         }
         return null;

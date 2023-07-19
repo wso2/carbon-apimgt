@@ -193,6 +193,7 @@ return null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private String createdTime = null;
     private String lastUpdatedTime = null;
+    private String lastUpdatedTimestamp = null;
     private String gatewayVendor = null;
     private List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
     private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
@@ -802,6 +803,23 @@ return null;
 
   /**
    **/
+  public APIProductDTO lastUpdatedTimestamp(String lastUpdatedTimestamp) {
+    this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("lastUpdatedTimestamp")
+  public String getLastUpdatedTimestamp() {
+    return lastUpdatedTimestamp;
+  }
+  public void setLastUpdatedTimestamp(String lastUpdatedTimestamp) {
+    this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+  }
+
+  /**
+   **/
   public APIProductDTO gatewayVendor(String gatewayVendor) {
     this.gatewayVendor = gatewayVendor;
     return this;
@@ -933,6 +951,7 @@ return null;
         Objects.equals(corsConfiguration, apIProduct.corsConfiguration) &&
         Objects.equals(createdTime, apIProduct.createdTime) &&
         Objects.equals(lastUpdatedTime, apIProduct.lastUpdatedTime) &&
+        Objects.equals(lastUpdatedTimestamp, apIProduct.lastUpdatedTimestamp) &&
         Objects.equals(gatewayVendor, apIProduct.gatewayVendor) &&
         Objects.equals(apis, apIProduct.apis) &&
         Objects.equals(scopes, apIProduct.scopes) &&
@@ -942,7 +961,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, gatewayVendor, apis, scopes, categories, workflowStatus);
+    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, lastUpdatedTimestamp, gatewayVendor, apis, scopes, categories, workflowStatus);
   }
 
   @Override
@@ -984,6 +1003,7 @@ return null;
     sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
+    sb.append("    lastUpdatedTimestamp: ").append(toIndentedString(lastUpdatedTimestamp)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    apis: ").append(toIndentedString(apis)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");

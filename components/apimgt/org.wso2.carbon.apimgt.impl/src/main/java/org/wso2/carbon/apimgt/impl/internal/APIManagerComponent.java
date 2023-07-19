@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.ssl.SSLContexts;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -143,15 +144,18 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.cache.Cache;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
 
 import static org.wso2.carbon.apimgt.common.gateway.util.CommonAPIUtil.ALLOW_ALL;
 import static org.wso2.carbon.apimgt.common.gateway.util.CommonAPIUtil.HOST_NAME_VERIFIER;
+import static org.wso2.carbon.apimgt.common.gateway.util.CommonAPIUtil.DEFAULT_AND_LOCALHOST;
 import static org.wso2.carbon.apimgt.common.gateway.util.CommonAPIUtil.STRICT;
 
 @Component(
@@ -1050,6 +1054,16 @@ public class APIManagerComponent {
                 break;
             case STRICT:
                 hostnameVerifier = new DefaultHostnameVerifier();
+                break;
+            case DEFAULT_AND_LOCALHOST:
+                hostnameVerifier = new HostnameVerifier() {
+                    final String[] localhosts = { "::1", "127.0.0.1", "localhost", "localhost.localdomain" };
+                    @Override
+                    public boolean verify(String urlHostName, SSLSession session) {
+                        return SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER.verify(urlHostName, session)
+                                || Arrays.asList(localhosts).contains(urlHostName);
+                    }
+                };
                 break;
             default:
                 hostnameVerifier = new BrowserHostnameVerifier();

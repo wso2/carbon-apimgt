@@ -515,10 +515,12 @@ public class ExportUtils {
             ResourceFile wsdlResource = apiProvider.getWSDL(apiIdentifier.getUUID(), tenantDomain);
             if (wsdlResource != null) {
                 CommonUtil.createDirectory(archivePath + File.separator + "WSDL");
+                String wsdlResourceExtension = APIConstants.APPLICATION_ZIP.equals(wsdlResource.getContentType()) ?
+                        APIConstants.ZIP_FILE_EXTENSION : APIConstants.WSDL_FILE_EXTENSION;
                 try (InputStream wsdlStream = wsdlResource.getContent();
                      OutputStream outputStream = new FileOutputStream(
                              archivePath + File.separator + "WSDL" + File.separator + apiIdentifier.getApiName()
-                                     + "-" + apiIdentifier.getVersion() + APIConstants.WSDL_FILE_EXTENSION)) {
+                                     + "-" + apiIdentifier.getVersion() + wsdlResourceExtension)) {
                     IOUtils.copy(wsdlStream, outputStream);
                     if (log.isDebugEnabled()) {
                         log.debug("WSDL file: " + wsdlPath + " retrieved successfully");
@@ -681,6 +683,23 @@ public class ExportUtils {
                     }
                 }
             }
+
+            if (api.getApiPolicies() != null && !api.getApiPolicies().isEmpty()) {
+                for (OperationPolicy policy : api.getApiPolicies()) {
+                    String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
+                            policy.getPolicyVersion());
+                    if (!exportedPolicies.contains(policyFileName)) {
+                        OperationPolicyData policyData =
+                                apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(),
+                                        currentApiUuid, tenantDomain, true);
+                        if (policyData != null) {
+                            exportPolicyData(policyFileName, policyData, archivePath, exportFormat);
+                            exportedPolicies.add(policy.getPolicyName() + "_" + policy.getPolicyVersion());
+                        }
+                    }
+                }
+            }
+
             if ((APIUtil.isSequenceDefined(api.getInSequence())
                     || APIUtil.isSequenceDefined(api.getOutSequence())
                     || APIUtil.isSequenceDefined(api.getFaultSequence())) && migrationEnabled == null) {

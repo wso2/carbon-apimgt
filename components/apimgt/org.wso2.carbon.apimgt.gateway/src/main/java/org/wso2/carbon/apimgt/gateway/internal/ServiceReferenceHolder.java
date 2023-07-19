@@ -46,6 +46,7 @@ import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.endpoint.service.EndpointAdmin;
 import org.wso2.carbon.localentry.service.LocalEntryAdmin;
+import org.wso2.carbon.mediation.initializer.services.SynapseConfigurationService;
 import org.wso2.carbon.mediation.security.vault.MediationSecurityAdminService;
 import org.wso2.carbon.rest.api.service.RestApiAdmin;
 import org.wso2.carbon.sequences.services.SequenceAdmin;
@@ -88,6 +89,7 @@ public class ServiceReferenceHolder {
     private CacheInvalidationService cacheInvalidationService;
     private RevokedTokenService revokedTokenService;
     private APIThrottleDataService throttleDataService;
+    private SynapseConfigurationService synapseConfigurationService;
     private Certificate publicCert;
     private PrivateKey privateKey;
 
@@ -437,5 +439,13 @@ public class ServiceReferenceHolder {
                 log.error("Error in obtaining custom publisher class", e);
             }
         }
+    }
+
+    public SynapseConfigurationService getSynapseConfigurationService() {
+        return synapseConfigurationService;
+    }
+
+    public void setSynapseConfigurationService(SynapseConfigurationService synapseConfigurationService) {
+        this.synapseConfigurationService = synapseConfigurationService;
     }
 }

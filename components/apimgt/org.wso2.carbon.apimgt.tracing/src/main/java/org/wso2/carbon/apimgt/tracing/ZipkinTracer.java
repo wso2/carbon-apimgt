@@ -33,6 +33,9 @@ import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 import zipkin2.reporter.AsyncReporter;
 import zipkin2.reporter.okhttp3.OkHttpSender;
 
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+
 /**
  * Class for getting Zipkin tracer from reading configuration file
  * @deprecated
@@ -49,21 +52,38 @@ public class ZipkinTracer implements OpenTracer {
     @Override
     public Tracer getTracer(String serviceName) {
 
-        String hostname = configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_HOST) != null ?
-                configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_HOST)
-                : TracingConstants.ZIPKIN_DEFAULT_HOST;
-
-        int port = configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_PORT) != null ?
-                Integer.parseInt(configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_PORT))
-                : TracingConstants.ZIPKIN_DEFAULT_PORT;
-
         boolean tracerLogEnabled =
                 Boolean.parseBoolean(configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED) != null
                         ? configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED)
                         : TracingConstants.DEFAULT_TRACER_LOG_ENABLED);
 
-        OkHttpSender sender =
-                OkHttpSender.create("http://" + hostname + ":" + port + TracingConstants.ZIPKIN_API_CONTEXT);
+        String hostname = configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_HOST) != null
+                ? configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_HOST)
+                : TracingConstants.ZIPKIN_DEFAULT_HOST;
+
+        int port = configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_PORT) != null
+                ? Integer.parseInt(configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_PORT))
+                : TracingConstants.ZIPKIN_DEFAULT_PORT;
+
+        // Read the configurable endpoint and format the endpoint based on whether is configurable or not
+        String endpoint = configuration
+                .getFirstProperty(TracingConstants.ZIPKIN_CONFIG_ENDPOINT_URL) != null
+                ? configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_ENDPOINT_URL)
+                : "http://" + hostname + ":" + port + TracingConstants.ZIPKIN_API_CONTEXT;
+
+        // Read proxy configurations from the configuration file.
+        String proxyHost = configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_PROXY_HOST);
+        String proxyPort = configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_PROXY_PORT);
+        OkHttpSender sender;
+        if (proxyHost != null && !proxyHost.isEmpty() && proxyPort != null && !proxyPort.isEmpty()) {
+            // Configure proxy if the proxy configurations are available.
+            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
+            OkHttpSender.Builder builder = OkHttpSender.newBuilder().endpoint(endpoint);
+            builder.clientBuilder().proxy(proxy);
+            sender = builder.build();
+        } else {
+            sender = OkHttpSender.create(endpoint);
+        }
         Tracer tracer = BraveTracer.create(Tracing.newBuilder()
                 .localServiceName(serviceName)
                 .spanReporter(AsyncReporter.builder(sender).build())

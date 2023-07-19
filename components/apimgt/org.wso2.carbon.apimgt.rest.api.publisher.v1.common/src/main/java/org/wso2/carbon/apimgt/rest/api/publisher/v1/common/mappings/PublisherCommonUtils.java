@@ -78,6 +78,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
@@ -110,7 +111,7 @@ import java.util.Set;
 public class PublisherCommonUtils {
 
     private static final Log log = LogFactory.getLog(PublisherCommonUtils.class);
-
+    public static final String SESSION_TIMEOUT_CONFIG_KEY = "sessionTimeOut";
     /**
      * Update an API.
      *
@@ -805,6 +806,14 @@ public class PublisherCommonUtils {
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
+        // validate context before proceeding
+        try {
+            APIUtil.validateAPIContext(apiDto.getContext(), apiDto.getName());
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error while importing API: " + e.getMessage(),
+                    ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
+        }
+
         // validate web socket api endpoint configurations
         if (isWSAPI && !PublisherCommonUtils.isValidWSAPI(apiDto)) {
             throw new APIManagementException("Endpoint URLs should be valid web socket URLs",
@@ -916,6 +925,49 @@ public class PublisherCommonUtils {
             }
         }
         return containsEndpoint && isValidProdUrl && isValidSandboxUrl;
+    }
+
+    /**
+     * Validate endpoint configurations.
+     *
+     * @param apiDto the APIDTO object containing the endpoint configuration to validate
+     * @return true if the endpoint configuration is valid, false otherwise
+     */
+    public static boolean validateEndpointConfigs(APIDTO apiDto) {
+        Map endpointConfigsMap = (Map) apiDto.getEndpointConfig();
+        if (endpointConfigsMap != null) {
+            for (Object config : endpointConfigsMap.keySet()) {
+                if (config instanceof String) {
+                    if (SESSION_TIMEOUT_CONFIG_KEY.equals(config)) {
+                        Object value = endpointConfigsMap.get(config);
+                        if (value == null) {
+                            continue;
+                        }
+                        String strVal;
+                        if (value instanceof String) {
+                            strVal = (String) value;
+                            if (strVal.length() == 0) {
+                                continue;
+                            }
+                        } else if (value instanceof Integer || value instanceof Long) {
+                            strVal = value.toString();
+                        } else if (value instanceof Double) {
+                            strVal = Integer.toString(((Double) value).intValue());
+                        } else {
+                            return false;
+                        }
+                        try {
+                            Long.parseLong(strVal);
+                        } catch (NumberFormatException e) {
+                            log.error("Failed to parse " + SESSION_TIMEOUT_CONFIG_KEY, e);
+                            return false;
+                        }
+                        endpointConfigsMap.put(config, strVal);
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -1142,9 +1194,10 @@ public class PublisherCommonUtils {
             }
         }
 
-        if (!apiProvider.isValidContext(body.getProvider(), body.getName(),
-                                        body.getContext() + "/" + APIConstants.VERSION_PLACEHOLDER, username,
-                                        organization)) {
+        String contextTemplate = body.getContext().contains(APIConstants.VERSION_PLACEHOLDER) ?
+                body.getContext() :
+                body.getContext() + "/" + APIConstants.VERSION_PLACEHOLDER;
+        if (!apiProvider.isValidContext(body.getProvider(), body.getName(), contextTemplate, username, organization)) {
             throw new APIManagementException(
                     ExceptionCodes.from(ExceptionCodes.BLOCK_CONDITION_UNSUPPORTED_API_CONTEXT));
         }
@@ -1665,6 +1718,10 @@ public class PublisherCommonUtils {
         // if not add product
         String provider = apiProductDTO.getProvider();
         String context = apiProductDTO.getContext();
+
+        // Validate the API context
+        APIUtil.validateAPIContext(context, apiProductDTO.getName());
+
         if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
             if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
                 if (log.isDebugEnabled()) {
@@ -1935,5 +1992,28 @@ public class PublisherCommonUtils {
 
         apiProvider.addAPI(apiToAdd);
         return apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization);
+    }
+
+    public static boolean validateMandatoryProperties(org.json.simple.JSONArray customProperties, APIDTO apiDto) {
+
+        Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = apiDto.getAdditionalPropertiesMap();
+
+        for (int i = 0; i < customProperties.size(); i++) {
+            JSONObject property = (JSONObject) customProperties.get(i);
+            String propertyName = (String) property.get(APIConstants.CustomPropertyAttributes.NAME);
+            boolean isRequired = (boolean) property.get(APIConstants.CustomPropertyAttributes.REQUIRED);
+
+            if (isRequired) {
+                APIInfoAdditionalPropertiesMapDTO mapProperty = additionalPropertiesMap.get(propertyName);
+                if (mapProperty == null) {
+                    return false;
+                }
+                String propertyValue = mapProperty.getValue();
+                if (propertyValue == null || propertyValue.isEmpty()) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

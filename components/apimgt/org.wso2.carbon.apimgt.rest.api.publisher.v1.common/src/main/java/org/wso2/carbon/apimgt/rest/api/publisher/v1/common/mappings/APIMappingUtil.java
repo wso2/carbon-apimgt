@@ -266,6 +266,12 @@ public class APIMappingUtil {
         Set<URITemplate> uriTemplates = getURITemplates(model, dto.getOperations());
         model.setUriTemplates(uriTemplates);
 
+        if (dto.getApiPolicies() != null) {
+            List<OperationPolicy> policyList = OperationPolicyMappingUtil.fromDTOToAPIOperationPoliciesList(
+                    dto.getApiPolicies());
+            model.setApiPolicies(policyList);
+        }
+
         // wsUriMapping
         if (dto.getType().toString().equals(APIConstants.API_TYPE_WS)) {
             Map<String, String> wsUriMapping = new HashMap<>();
@@ -1140,6 +1146,10 @@ public class APIMappingUtil {
         dto.setMediationPolicies(mediationPolicies);
         dto.setLifeCycleStatus(model.getStatus());
 
+        if (model.getApiPolicies() != null) {
+            dto.setApiPolicies(OperationPolicyMappingUtil.fromOperationPolicyListToDTO(model.getApiPolicies()));
+        }
+
         String subscriptionAvailability = model.getSubscriptionAvailability();
         if (subscriptionAvailability != null) {
             dto.setSubscriptionAvailability(mapSubscriptionAvailabilityFromAPItoDTO(subscriptionAvailability));
@@ -1339,6 +1349,7 @@ public class APIMappingUtil {
             Date lastUpdateDate = model.getLastUpdated();
             Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
             dto.setLastUpdatedTime(String.valueOf(timeStamp));
+            dto.setLastUpdatedTimestamp(String.valueOf(timeStamp.getTime()));
         }
         if (null != model.getCreatedTime()) {
             Date created = new Date(Long.parseLong(model.getCreatedTime()));
@@ -2453,6 +2464,7 @@ public class APIMappingUtil {
             Date lastUpdateDate = product.getLastUpdated();
             Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
             productDto.setLastUpdatedTime(String.valueOf(timeStamp));
+            productDto.setLastUpdatedTimestamp(String.valueOf(timeStamp.getTime()));
         }
         if (null != product.getCreatedTime()) {
             Date createdTime = product.getCreatedTime();

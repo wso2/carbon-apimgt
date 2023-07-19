@@ -646,11 +646,21 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
             CommonUtils.validateAPIExistence(apiId);
-
+            if (!PublisherCommonUtils.validateEndpointConfigs(body)) {
+                throw new APIManagementException("Invalid endpoint configs detected",
+                        ExceptionCodes.INVALID_ENDPOINT_CONFIG);
+            }
             // validate web socket api endpoint configurations
             if (isWSAPI && !PublisherCommonUtils.isValidWSAPI(body)) {
                 throw new APIManagementException("Endpoint URLs should be valid web socket URLs",
                         ExceptionCodes.INVALID_ENDPOINT_URL);
+            }
+
+            org.json.simple.JSONArray customProperties = APIUtil.getCustomProperties(username);
+            if (!PublisherCommonUtils.validateMandatoryProperties(customProperties, body)) {
+                Long errorCode = ExceptionCodes.ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES.getErrorCode();
+                RestApiUtil.handleBadRequest(
+                        ExceptionCodes.ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES.getErrorMessage(), errorCode, log);
             }
 
             // validate sandbox and production endpoints
@@ -1240,7 +1250,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             DocumentationContent docContent = apiProvider.getDocumentationContent(apiId, documentId, organization);
             if (docContent == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId);
                 return null;
             }
 
@@ -1721,6 +1731,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIIdentifier apiIdentifier;
             if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId) != null) {
                 apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId, organization).getId();
+                apiIdentifier.setUuid(apiId);
             } else {
                 apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             }
@@ -2179,7 +2190,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API api = null;
-        List<String> externalStoreIdList = Arrays.asList(externalStoreIds.split("\\s*,\\s*"));
+        List<String> externalStoreIdList;
+        if (externalStoreIds != null) {
+            externalStoreIdList = Arrays.asList(externalStoreIds.split("\\s*,\\s*"));
+        } else {
+            externalStoreIdList = new ArrayList<>();
+        }
         try {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             if (apiIdentifier == null) {
@@ -2561,6 +2577,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail,
             String ifMatch, MessageContext messageContext) {
+        ByteArrayInputStream inputStream = null;
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
@@ -2574,19 +2591,17 @@ public class ApisApiServiceImpl implements ApisApiService {
             String extension = FilenameUtils.getExtension(fileName);
             if (!RestApiConstants.ALLOWED_THUMBNAIL_EXTENSIONS.contains(extension.toLowerCase())) {
                 RestApiUtil.handleBadRequest(
-                        "Unsupported Thumbnail File Extension. Supported extensions are .jpg, .png, .jpeg .svg "
+                        "Unsupported Thumbnail File Extension. Supported extensions are .jpg, .png, .jpeg, .svg "
                                 + "and .gif", log);
             }
-            String fileContentType = URLConnection.guessContentTypeFromName(fileName);
-            if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
-                fileContentType = fileDetail.getContentType().toString();
-            }
-            PublisherCommonUtils.updateThumbnail(fileInputStream, fileContentType, apiProvider, apiId, organization);
+            inputStream = (ByteArrayInputStream) RestApiPublisherUtils.validateThumbnailContent(fileInputStream);
+            String fileMediaType = RestApiPublisherUtils.getMediaType(inputStream, fileDetail);
+            PublisherCommonUtils.updateThumbnail(inputStream, fileMediaType, apiProvider, apiId, organization);
             String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL.replace(RestApiConstants.APIID_PARAM, apiId);
             URI uri = new URI(uriString);
             FileInfoDTO infoDTO = new FileInfoDTO();
             infoDTO.setRelativePath(uriString);
-            infoDTO.setMediaType(fileContentType);
+            infoDTO.setMediaType(fileMediaType);
             return Response.created(uri).entity(infoDTO).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
@@ -2598,14 +2613,15 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .handleAuthorizationFailure("Authorization failure while adding thumbnail for API : " + apiId,
                                 e, log);
             } else {
-                String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
+                String errorMessage = "Error while updating thumbnail of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | IOException e) {
             String errorMessage = "Error while updating thumbnail of API: " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } finally {
             IOUtils.closeQuietly(fileInputStream);
+            IOUtils.closeQuietly(inputStream);
         }
         return null;
     }
@@ -2781,6 +2797,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO apiDTOFromProperties;
         try {
             apiDTOFromProperties = objectMapper.readValue(additionalProperties, APIDTO.class);
+            try {
+                APIUtil.validateAPIContext(apiDTOFromProperties.getContext(), apiDTOFromProperties.getName());
+            } catch (APIManagementException e) {
+                throw new APIManagementException(e.getMessage(),
+                        ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
+            }
         } catch (IOException e) {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
         }
@@ -2929,6 +2951,12 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // Minimum requirement name, version, context and endpointConfig.
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
+            try {
+                APIUtil.validateAPIContext(additionalPropertiesAPI.getContext(), additionalPropertiesAPI.getName());
+            } catch (APIManagementException e) {
+                throw new APIManagementException(e.getMessage(),
+                        ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
+            }
             String username = RestApiCommonUtil.getLoggedInUsername();
             additionalPropertiesAPI.setProvider(username);
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.fromValue(implementationType));
@@ -3313,6 +3341,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
+            APIUtil.validateAPIContext(additionalPropertiesAPI.getContext(), additionalPropertiesAPI.getName());
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.GRAPHQL);
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -3335,6 +3364,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
             return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (APIManagementException e) {
+            if (e.getMessage().contains(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION.getErrorMessage())) {
+                RestApiUtil.handleBadRequest(e.getMessage(), e, log);
+            }
             String errorMessage = "Error while adding new API : " + additionalPropertiesAPI.getProvider() + "-" +
                 additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion() + " - " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -3897,6 +3929,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (apiDTOFromProperties.getType() == null) {
                 RestApiUtil.handleBadRequest("Required property protocol is not specified for the Async API", log);
             }
+            try {
+                APIUtil.validateAPIContext(apiDTOFromProperties.getContext(), apiDTOFromProperties.getName());
+            } catch (APIManagementException e) {
+                throw new APIManagementException(e.getMessage(),
+                        ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
+            }
         } catch (IOException e) {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
         }
@@ -4039,6 +4077,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (service == null) {
                 RestApiUtil.handleResourceNotFoundError("Service", serviceKey, log);
             }
+            APIUtil.validateAPIContext(apiDto.getContext(), apiDto.getName());
             APIDTO createdApiDTO = null;
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
@@ -4071,6 +4110,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError("Service", serviceKey, e, log);
+            } else if (e.getMessage().contains(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION.getErrorMessage())) {
+                RestApiUtil.handleBadRequest(e.getMessage(), e, log);
+            } else if (e.getMessage().contains("duplicate API context")) {
+                RestApiUtil.handleBadRequest(e.getMessage(), e, log);
             } else {
                 String errorMessage = "Error while creating API using Service with Id : " + serviceKey
                         + " from Service Catalog";

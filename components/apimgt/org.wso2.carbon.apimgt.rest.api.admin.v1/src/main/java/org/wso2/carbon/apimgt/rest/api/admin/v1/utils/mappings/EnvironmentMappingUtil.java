@@ -152,6 +152,16 @@ public class EnvironmentMappingUtil {
         vhost.setHttpsPort(vhostDTO.getHttpsPort());
         vhost.setWsPort(vhostDTO.getWsPort());
         vhost.setWssPort(vhostDTO.getWssPort());
+        if (vhostDTO.getWsHost() == null) {
+            vhost.setWsHost(vhostDTO.getHost());
+        } else {
+            vhost.setWsHost(vhostDTO.getWsHost());
+        }
+        if (vhostDTO.getWssHost() == null) {
+            vhost.setWssHost(vhostDTO.getHost());
+        } else {
+            vhost.setWssHost(vhostDTO.getWssHost());
+        }
         return vhost;
     }
 

@@ -1535,6 +1535,7 @@ public class APIMgtDAOTest {
         api.setUriTemplates(getUriTemplateSetWithPolicies(policyList));
         apiMgtDAO.updateAPI(api);
         apiMgtDAO.updateURITemplates(api, -1234);
+        apiMgtDAO.updateAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), "carbon.super");
 
         String clonedPolicyUUID = null;
 
@@ -1628,6 +1629,7 @@ public class APIMgtDAOTest {
         api.setUriTemplates(getUriTemplateSetWithPolicies(policyList));
         apiMgtDAO.updateAPI(api);
         apiMgtDAO.updateURITemplates(api, -1234);
+        apiMgtDAO.updateAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), "carbon.super");
 
         String clonedAddHeaderPolicyUUID = null;
 
@@ -1645,6 +1647,7 @@ public class APIMgtDAOTest {
         api.setUriTemplates(getUriTemplateSetWithPolicies(newPolicyList));
         apiMgtDAO.updateAPI(api);
         apiMgtDAO.updateURITemplates(api, -1234);
+        apiMgtDAO.updateAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), "carbon.super");
 
         Set<URITemplate> updatedUriTemplates = apiMgtDAO.getURITemplatesWithOperationPolicies(api.getUuid());
         String clonedLogPolicyUUID = null;

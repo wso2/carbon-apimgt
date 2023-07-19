@@ -39,6 +39,8 @@ public final class APIConstants {
     //key value of the APIImpl rxt
     public static final String API_KEY = "api";
 
+    public static final String VERSION_PLACEHOLDER = "{version}";
+
     //governance registry apimgt root location
     public static final String APIMGT_REGISTRY_LOCATION = "/apimgt";
 
@@ -1468,8 +1470,6 @@ public final class APIConstants {
     public static final String API_MANAGER_HOSTNAME = "HostName";
     public static final String API_MANAGER_HOSTNAME_UNKNOWN = "UNKNOWN_HOST";
 
-    public static final String VERSION_PLACEHOLDER = "{version}";
-
     public enum SupportedHTTPVerbs {
         GET,
         POST,
@@ -1682,6 +1682,8 @@ public final class APIConstants {
     public static final String REST_API_SCOPES_CONFIG = "RESTAPIScopes";
     public static final String REST_API_ROLE_MAPPINGS_CONFIG = "RoleMappings";
     public static final String APIM_SUBSCRIBE_SCOPE = "apim:subscribe";
+    public static final String APIM_CREATOR_SCOPE = "apim:api_create";
+    public static final String APIM_PUBLISHER_SCOPE = "apim:api_publish";
 
     public static final String HTTPS_PROTOCOL = "https";
     public static final String HTTPS_PROTOCOL_URL_PREFIX = "https://";
@@ -1962,6 +1964,18 @@ public final class APIConstants {
         public static final String NAME = "Name";
         public static final String TOOLTIP = "Tooltip";
         public static final String TYPE = "Type";
+    }
+
+    public static class CustomPropertyAttributes {
+        public static final String PROPERTY_CONFIGURATIONS = "PropertyConfigurations";
+        public static final String CUSTOM_PROPERTIES = "CustomProperties";
+        public static final String PROPERTIES = "Properties";
+        public static final String PROPERTY = "Property";
+        public static final String REQUIRED = "Required";
+        public static final String HIDDEN = "Hidden";
+        public static final String DESCRIPTION = "Description";
+        public static final String DEFAULT = "Default";
+        public static final String NAME = "Name";
     }
 
     public static final String REGISTRY_ARTIFACT_SEARCH_DESC_ORDER = "DES";
@@ -2650,6 +2664,8 @@ public final class APIConstants {
         public static final String SAVER_CONFIG = "ArtifactSaver";
         public static final String RETRIEVER_CONFIG = "ArtifactRetriever";
         public static final String RETRY_DUARTION = "RetryDuration";
+        public static final String MAX_RETRY_COUNT = "MaxRetryCount";
+        public static final String RETRY_PROGRESSION_FACTOR = "RetryProgressionFactor";
         public static final String PUBLISH_DIRECTLY_TO_GW_CONFIG = "PublishDirectlyToGW";
         public static final String GATEWAY_LABELS_CONFIG = "GatewayLabels";
         public static final String LABEL_CONFIG = "Label";
@@ -2973,6 +2989,8 @@ public final class APIConstants {
     public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
 
     public static final String CASE_SENSITIVE_CHECK_PATH =    "caseSensitiveRoleValidation";
+    public static final String SOAP_TO_REST_PRESERVE_ELEMENT_ORDER = "soapToRestPreserveElementOrder";
+
     public static final String MIGRATE = "migrate";
     public static final String SWAGGER_RELAXED_VALIDATION = "swaggerRelaxedValidation";
 }

@@ -229,7 +229,16 @@ public class AbstractAPIManagerTestCase {
 
         String  docName = "TestDoc";
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiPersistenceInstance);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder sh = Mockito.mock(ServiceReferenceHolder.class);
+        APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration amConfig = Mockito.mock(APIManagerConfiguration.class);
 
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
+        PowerMockito.when(sh.getAPIManagerConfigurationService()).thenReturn(amConfigService);
+        PowerMockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
+        PowerMockito.when(amConfig.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS))
+                .thenReturn("false");
         org.wso2.carbon.apimgt.persistence.dto.Documentation document = Mockito
                 .mock(org.wso2.carbon.apimgt.persistence.dto.Documentation.class);
         Mockito.when(document.getName()).thenReturn(docName);

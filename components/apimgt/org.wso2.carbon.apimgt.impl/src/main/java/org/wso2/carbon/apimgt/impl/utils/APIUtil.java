@@ -67,6 +67,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.DeprecatedRuntimeConstants;
 import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.apache.xerces.util.SecurityManager;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
@@ -165,6 +166,7 @@ import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
@@ -286,6 +288,7 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.security.cert.X509Certificate;
+import javax.validation.constraints.NotNull;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -306,6 +309,8 @@ public final class APIUtil {
     private static boolean isContextCacheInitialized = false;
 
     public static final String DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION = "disableRoleValidationAtScopeCreation";
+
+    public static final String DISABLE_API_CONTEXT_VALIDATION = "disableApiContextValidation";
 
     private static final int ENTITY_EXPANSION_LIMIT = 0;
 
@@ -338,6 +343,7 @@ public final class APIUtil {
 
     private static Schema tenantConfigJsonSchema;
     private static Schema operationPolicySpecSchema;
+    private static final String contextRegex = "^[a-zA-Z0-9_${}/.;()-]+$";
 
     private APIUtil() {
 
@@ -368,6 +374,10 @@ public final class APIUtil {
     private static String hostAddress = null;
     private static final int timeoutInSeconds = 15;
     private static final int retries = 2;
+    private static long retrievalTimeout;
+    private static final long maxRetrievalTimeout = 1000 * 60 * 60;
+    private static double retryProgressionFactor;
+    private static int maxRetryCount;
 
     //constants for getting masked token
     private static final int MAX_LEN = 36;
@@ -390,6 +400,10 @@ public final class APIUtil {
                 .getFirstProperty(APIConstants.PUBLISHER_ROLE_CACHE_ENABLED);
         isPublisherRoleCacheEnabled = isPublisherRoleCacheEnabledConfiguration == null || Boolean
                 .parseBoolean(isPublisherRoleCacheEnabledConfiguration);
+        retrievalTimeout = apiManagerConfiguration.getGatewayArtifactSynchronizerProperties().getRetryDuartion();
+        maxRetryCount = apiManagerConfiguration.getGatewayArtifactSynchronizerProperties().getMaxRetryCount();
+        retryProgressionFactor = apiManagerConfiguration.getGatewayArtifactSynchronizerProperties()
+                .getRetryProgressionFactor();
         try {
             eventPublisherFactory = ServiceReferenceHolder.getInstance().getEventPublisherFactory();
             eventPublishers.putIfAbsent(EventPublisherType.ASYNC_WEBHOOKS,
@@ -462,6 +476,56 @@ public final class APIUtil {
                         // Ignore
                     }
                 } else {
+                    throw ex;
+                }
+            }
+        } while (retry);
+        return httpResponse;
+    }
+
+    /**
+     * This method is used to execute an HTTP request with retry parameters obtained from configuration parameters.
+     *
+     * @param method       HttpRequest Type
+     * @param httpClient   HttpClient
+     * @return CloseableHttpResponse
+     */
+    public static CloseableHttpResponse executeHTTPRequestWithRetries(HttpRequestBase method, HttpClient httpClient)
+            throws IOException, APIManagementException {
+
+        CloseableHttpResponse httpResponse = null;
+        String path = method.getURI().getPath();
+        long retryDuration = retrievalTimeout;
+        int retryCount = 0;
+        boolean retry;
+        do {
+            try {
+                httpResponse = (CloseableHttpResponse) httpClient.execute(method);
+                if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
+                    throw new DataLoadingException("Error while retrieving "
+                            + path + ". Received response with status code "
+                            + httpResponse.getStatusLine().getStatusCode());
+                }
+                retry = false;
+            } catch (IOException | DataLoadingException ex) {
+                retryCount++;
+                if (retryCount <= maxRetryCount) {
+                    retry = true;
+                    log.error("Failed to retrieve " + path + " from remote endpoint: " + ex.getMessage()
+                            + ". Retry attempt " + retryCount + " in " + (retryDuration / 1000) +
+                            " seconds.");
+                    try {
+                        Thread.sleep(retryDuration);
+                        retryDuration = (long) (retryDuration * retryProgressionFactor);
+                        if (retryDuration > maxRetrievalTimeout) {
+                            retryDuration = maxRetrievalTimeout;
+                        }
+                    } catch (InterruptedException e) {
+                        // Ignore
+                    }
+                } else {
+                    log.error("Failed to retrieve " + path + " from remote endpoint. Maximum retry count exceeded."
+                            + ex.getMessage());
                     throw ex;
                 }
             }
@@ -2690,6 +2754,96 @@ public final class APIUtil {
         }
         return input;
     }
+
+    /**
+     * This method is used to get the APIProvider instance for a given username
+     *
+     * @param context API Context of the API
+     * @throws APIManagementException If the context is not valid
+     */
+    public static void validateAPIContext(String context, String apiName) throws APIManagementException {
+        String disableAPIContextValidation = System.getProperty(DISABLE_API_CONTEXT_VALIDATION);
+        if (Boolean.parseBoolean(disableAPIContextValidation)) {
+            return;
+        }
+        Pattern pattern = Pattern.compile(contextRegex);
+        String errorMsg = ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION.getErrorMessage();
+
+        if (context == null || context.isEmpty()) {
+            errorMsg = errorMsg + " For API " + apiName + ", context cannot be empty or null";
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg);
+        }
+
+        if (context.endsWith("/")) {
+            errorMsg = errorMsg + " For API " + apiName + ", context " + context + " cannot end with /";
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg);
+        }
+
+        Matcher matcher = pattern.matcher(context);
+
+        // if the context has allowed characters
+        if (matcher.matches()) {
+            context = context.startsWith("/") ? context : "/".concat(context);
+            String split[] = context.split("/");
+
+            for (String param : split) {
+                if (param != null && !APIConstants.VERSION_PLACEHOLDER.equals(param)) {
+                    if (param.contains(APIConstants.VERSION_PLACEHOLDER)) {
+                        errorMsg = errorMsg + " For API " + apiName +
+                                ", {version} cannot exist as a substring of a sub-context";
+                        log.error(errorMsg);
+                        throw new APIManagementException(errorMsg);
+                    } else if (param.contains("{") || param.contains("}")) {
+                        errorMsg = errorMsg + " For API " + apiName +
+                                ", { or } cannot exist as a substring of a sub-context";
+                        log.error(errorMsg);
+                        throw new APIManagementException(errorMsg);
+                    }
+                }
+            }
+
+            //check whether the parentheses are balanced
+            boolean isBalanced = checkBalancedParentheses(context);
+            if (!isBalanced) {
+                errorMsg = errorMsg + " Unbalanced parenthesis cannot be used in context " + context + " for API "
+                        + apiName;
+                throw new APIManagementException(errorMsg);
+            }
+        } else {
+            errorMsg = errorMsg + " Special characters cannot be used in context " + context + " for API "+ apiName;
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg);
+        }
+    }
+
+    /**
+     * Check whether the parentheses are balanced
+     *
+     * @param input API Context
+     * @throws APIManagementException If parentheses are not balanced
+     */
+    public static boolean checkBalancedParentheses(@NotNull String input) throws APIManagementException {
+        int count = 0;
+        for (int i = 0; i < input.length(); i++) {
+            if (input.charAt(i) == '(') {
+                count++;
+            } else if (input.charAt(i) == ')') {
+                count--;
+            }
+            if (count < 0) {
+                log.error("Unbalanced parentheses in : " + input);
+                return false;
+            }
+        }
+        if (count > 0) {
+            log.error("Unbalanced parentheses in : " + input);
+            return false;
+        }
+        return true;
+    }
+
 
     public static void copyResourcePermissions(String username, String sourceArtifactPath, String targetArtifactPath)
             throws APIManagementException {
@@ -9318,6 +9472,33 @@ public final class APIUtil {
         return defaultReservedUsername;
     }
 
+    public static JSONArray getCustomProperties(String userId) throws APIManagementException {
+
+        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
+
+        JSONArray customPropertyAttributes = null;
+        JSONObject propertyConfig = getMandatoryPropertyKeysFromRegistry(tenantDomain);
+        if (propertyConfig != null) {
+            customPropertyAttributes = (JSONArray) propertyConfig.get(APIConstants.CustomPropertyAttributes.PROPERTIES);
+        } else {
+            APIManagerConfiguration apiManagerConfiguration =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            customPropertyAttributes = apiManagerConfiguration.getCustomProperties();
+        }
+        return customPropertyAttributes;
+    }
+
+    public static JSONObject getMandatoryPropertyKeysFromRegistry(String organization) throws APIManagementException {
+
+        JSONObject tenantConfigs = getTenantConfig(organization);
+        String property = APIConstants.CustomPropertyAttributes.PROPERTY_CONFIGURATIONS;
+        if (tenantConfigs.keySet().contains(property)) {
+            return (JSONObject) tenantConfigs.get(
+                    APIConstants.CustomPropertyAttributes.PROPERTY_CONFIGURATIONS);
+        }
+        return null;
+    }
+
     public static boolean isDefaultApplicationCreationEnabled() {
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -9708,10 +9889,14 @@ public final class APIUtil {
             throws APIManagementException {
 
         Schema schema = APIUtil.retrieveOperationPolicySpecificationJsonSchema();
+        org.json.JSONObject policySpecJson = null;
         if (schema != null) {
             try {
-                org.json.JSONObject uploadedConfig = new org.json.JSONObject(policySpecAsString);
-                schema.validate(uploadedConfig);
+                policySpecJson = new org.json.JSONObject(policySpecAsString);
+                if (policySpecJson.has(APIConstants.DATA)) {
+                    policySpecJson = policySpecJson.getJSONObject(APIConstants.DATA);
+                }
+                schema.validate(policySpecJson);
             } catch (ValidationException e) {
                 List<String> errors = e.getAllMessages();
                 String errorMessage = errors.size() + " validation error(s) found. Error(s) :" + errors.toString();
@@ -9719,9 +9904,9 @@ public final class APIUtil {
                         ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_POLICY_SPECIFICATION,
                                 errorMessage));
             }
-            return new Gson().fromJson(policySpecAsString, OperationPolicySpecification.class);
+            return new Gson().fromJson(policySpecJson.toString(), OperationPolicySpecification.class);
         }
-        return null;
+        throw new APIManagementException("API policy schema not found");
     }
 
     /**
@@ -9883,7 +10068,8 @@ public final class APIUtil {
         velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
         velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");
         velocityEngine.setProperty("runtime.conversion.handler", "none");
-
+        velocityEngine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
+        velocityEngine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
     }
 
     /**

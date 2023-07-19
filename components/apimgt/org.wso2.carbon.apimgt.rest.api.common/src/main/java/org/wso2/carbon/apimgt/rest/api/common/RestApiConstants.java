@@ -333,6 +333,11 @@ public final class RestApiConstants {
     public static final Set<String> ALLOWED_THUMBNAIL_EXTENSIONS = new HashSet<String>(
             Arrays.asList("jpg", "png", "jpeg", "gif", "svg"));
 
+    public static final Set<String> ALLOWED_THUMBNAIL_MEDIA_TYPES = new HashSet<String>(
+            Arrays.asList("image/jpeg", "image/png", "image/gif", "image/svg+xml"));
+
+    public static final String SVG_MEDIA_TYPE = "image/svg+xml";
+
     public static final int TAG_LIMIT_DEFAULT = 1000;
     public static final int TAG_OFFSET_DEFAULT = 0;
 

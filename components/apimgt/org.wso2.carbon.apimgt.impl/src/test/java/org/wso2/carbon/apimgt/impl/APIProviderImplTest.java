@@ -54,15 +54,12 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
-import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
@@ -99,14 +96,12 @@ import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
@@ -1364,7 +1359,7 @@ public class APIProviderImplTest {
     }
 
     @Test
-    public void testOperationPolicyListingWhenMediationPoliciesExists() throws APIManagementException {
+    public void testApiPolicyListingWhenMediationPoliciesExists() throws APIManagementException {
 
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
         APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
@@ -1402,17 +1397,15 @@ public class APIProviderImplTest {
                 APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, superTenantDomain, false)).thenReturn(null);
 
         PowerMockito.when(APIUtil.isSequenceDefined(Mockito.anyString())).thenReturn(true);
-        apiProvider.loadMediationPoliciesAsOperationPoliciesToAPI(api, superTenantDomain);
+        apiProvider.loadMediationPoliciesFromMigratedAPIToAPI(api, superTenantDomain);
 
-        Assert.assertNotNull(uriTemplate1.getOperationPolicies());
-        Assert.assertNotNull(uriTemplate2.getOperationPolicies());
-        Assert.assertEquals(uriTemplate1.getOperationPolicies().size(), 3);
-        Assert.assertEquals(uriTemplate2.getOperationPolicies().size(), 3);
-        Assert.assertEquals(uriTemplate1.getOperationPolicies().get(0).getPolicyName(), "test-sequence");
+        Assert.assertNotNull(api.getApiPolicies());
+        Assert.assertEquals(api.getApiPolicies().size(), 3);
+        Assert.assertEquals(api.getApiPolicies().get(0).getPolicyName(), "test-sequence");
     }
 
     @Test
-    public void testOperationPolicyListingWhenMediationPoliciesExistsAndPolicyAlreadyMigrated() throws APIManagementException {
+    public void testApiPolicyListingWhenMediationPoliciesExistsAndPolicyAlreadyMigrated() throws APIManagementException {
 
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
         APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
@@ -1454,25 +1447,24 @@ public class APIProviderImplTest {
                 APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, superTenantDomain, false)).thenReturn(policyData);
 
         PowerMockito.when(APIUtil.isSequenceDefined(Mockito.anyString())).thenReturn(true);
-        apiProvider.loadMediationPoliciesAsOperationPoliciesToAPI(api, superTenantDomain);
+        apiProvider.loadMediationPoliciesFromMigratedAPIToAPI(api, superTenantDomain);
 
-        for (URITemplate template : api.getUriTemplates()) {
-            for (OperationPolicy policy : template.getOperationPolicies()) {
-                if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(policy.getDirection())) {
-                    Assert.assertEquals(policy.getPolicyId(), policyId);
-                }
-                if (APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE.equals(policy.getDirection())) {
-                    Assert.assertNull(policy.getPolicyId());
-                }
-                if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(policy.getDirection())) {
-                    Assert.assertEquals(policy.getPolicyId(), policyId);
-                }
+
+        for (OperationPolicy policy : api.getApiPolicies()) {
+            if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(policy.getDirection())) {
+                Assert.assertEquals(policy.getPolicyId(), policyId);
+            }
+            if (APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE.equals(policy.getDirection())) {
+                Assert.assertNull(policy.getPolicyId());
+            }
+            if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(policy.getDirection())) {
+                Assert.assertEquals(policy.getPolicyId(), policyId);
             }
         }
     }
 
     @Test
-    public void testMigrationOfMediationPoliciesToOperationPolicies()
+    public void testMigrationOfMediationPoliciesToAPIPolicies()
             throws APIManagementException, MediationPolicyPersistenceException {
 
         String apiuuid = "63e1e37e-a5b8-4be6-86a5-d6ae0749f131";
@@ -1509,12 +1501,14 @@ public class APIProviderImplTest {
         appliedPolicy.setOrder(1);
         appliedPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
 
+        List<OperationPolicy> policyList = new ArrayList<>();
+        policyList.add(APIProviderImpl.cloneOperationPolicy(appliedPolicy));
+
         URITemplate uriTemplate1 = new URITemplate();
         uriTemplate1.setHTTPVerb("POST");
         uriTemplate1.setAuthType("Application");
         uriTemplate1.setUriTemplate("/add");
         uriTemplate1.setThrottlingTier("Gold");
-        uriTemplate1.addOperationPolicy(APIProviderImpl.cloneOperationPolicy(appliedPolicy));
         uriTemplates.add(uriTemplate1);
 
         URITemplate uriTemplate2 = new URITemplate();
@@ -1522,11 +1516,11 @@ public class APIProviderImplTest {
         uriTemplate2.setAuthType("Application");
         uriTemplate2.setUriTemplate("/update");
         uriTemplate2.setThrottlingTier("Gold");
-        uriTemplate2.addOperationPolicy(APIProviderImpl.cloneOperationPolicy(appliedPolicy));
         uriTemplates.add(uriTemplate2);
 
         api.setUriTemplates(uriTemplates);
         api.setInSequence("in-policy");
+        api.setApiPolicies(policyList);
 
         PowerMockito.when(APIUtil.isSequenceDefined(api.getInSequence())).thenReturn(true);
 
@@ -1538,13 +1532,11 @@ public class APIProviderImplTest {
 
         apiProvider.migrateMediationPoliciesOfAPI(api, superTenantDomain, false);
 
-        for (URITemplate template : api.getUriTemplates()) {
-            for (OperationPolicy policy : template.getOperationPolicies()) {
-                if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(policy.getDirection())) {
-                    Assert.assertEquals(policy.getPolicyId(), "11111");
-                } else {
-                    Assert.fail("template " + template.getUriTemplate() + " should not contain other paths for operation policies");
-                }
+        for (OperationPolicy policy : api.getApiPolicies()) {
+            if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(policy.getDirection())) {
+                Assert.assertEquals(policy.getPolicyId(), "11111");
+            } else {
+                Assert.fail("should not contain other paths for api policies");
             }
         }
         Assert.assertNull(api.getInSequence());
@@ -1553,7 +1545,7 @@ public class APIProviderImplTest {
 
 
     @Test
-    public void testMigrationOfMediationPoliciesToOperationPoliciesIfPoliciesAlreadyMigrated()
+    public void testMigrationOfMediationPoliciesToAPIPoliciesIfPoliciesAlreadyMigrated()
             throws APIManagementException, MediationPolicyPersistenceException {
 
         String apiuuid = "63e1e37e-a5b8-4be6-86a5-d6ae0749f131";
@@ -1590,12 +1582,14 @@ public class APIProviderImplTest {
         appliedPolicy.setOrder(1);
         appliedPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
 
+        List<OperationPolicy> policyList = new ArrayList<>();
+        policyList.add(APIProviderImpl.cloneOperationPolicy(appliedPolicy));
+
         URITemplate uriTemplate1 = new URITemplate();
         uriTemplate1.setHTTPVerb("POST");
         uriTemplate1.setAuthType("Application");
         uriTemplate1.setUriTemplate("/add");
         uriTemplate1.setThrottlingTier("Gold");
-        uriTemplate1.addOperationPolicy(APIProviderImpl.cloneOperationPolicy(appliedPolicy));
         uriTemplates.add(uriTemplate1);
 
         URITemplate uriTemplate2 = new URITemplate();
@@ -1603,11 +1597,11 @@ public class APIProviderImplTest {
         uriTemplate2.setAuthType("Application");
         uriTemplate2.setUriTemplate("/update");
         uriTemplate2.setThrottlingTier("Gold");
-        uriTemplate2.addOperationPolicy(APIProviderImpl.cloneOperationPolicy(appliedPolicy));
         uriTemplates.add(uriTemplate2);
 
         api.setUriTemplates(uriTemplates);
         api.setInSequence("in-policy");
+        api.setApiPolicies(policyList);
 
         PowerMockito.when(APIUtil.isSequenceDefined(api.getInSequence())).thenReturn(true);
 
@@ -1616,13 +1610,11 @@ public class APIProviderImplTest {
 
         apiProvider.migrateMediationPoliciesOfAPI(api, superTenantDomain, false);
 
-        for (URITemplate template : api.getUriTemplates()) {
-            for (OperationPolicy policy : template.getOperationPolicies()) {
-                if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(policy.getDirection())) {
-                    Assert.assertEquals(policy.getPolicyId(), "11111");
-                } else {
-                    Assert.fail("template " + template.getUriTemplate() + " should not contain other paths for operation policies");
-                }
+        for (OperationPolicy policy : api.getApiPolicies()) {
+            if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(policy.getDirection())) {
+                Assert.assertEquals(policy.getPolicyId(), "11111");
+            } else {
+                Assert.fail("Should not contain other paths for API policies");
             }
         }
 

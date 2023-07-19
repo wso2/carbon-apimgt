@@ -78,17 +78,21 @@ public class OperationPolicyMappingUtil {
         List<OperationPolicyDTO> request = new ArrayList<>();
         List<OperationPolicyDTO> response = new ArrayList<>();
         List<OperationPolicyDTO> fault = new ArrayList<>();
-        Collections.sort(operationPolicyList, new OperationPolicyComparator());
-        for (OperationPolicy op : operationPolicyList) {
-            OperationPolicyDTO policyDTO = fromOperationPolicyToDTO(op);
-            if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(op.getDirection())) {
-                request.add(policyDTO);
-            } else if (APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE.equals(op.getDirection())) {
-                response.add(policyDTO);
-            } else if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(op.getDirection())) {
-                fault.add(policyDTO);
+
+        if (operationPolicyList != null) {
+            Collections.sort(operationPolicyList, new OperationPolicyComparator());
+            for (OperationPolicy op : operationPolicyList) {
+                OperationPolicyDTO policyDTO = fromOperationPolicyToDTO(op);
+                if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(op.getDirection())) {
+                    request.add(policyDTO);
+                } else if (APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE.equals(op.getDirection())) {
+                    response.add(policyDTO);
+                } else if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(op.getDirection())) {
+                    fault.add(policyDTO);
+                }
             }
         }
+
         dto.setRequest(request);
         dto.setResponse(response);
         dto.setFault(fault);

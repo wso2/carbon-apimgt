@@ -74,7 +74,7 @@ public class TestSchemaValidator {
     @Test
     public void testValidRequestPostPet() throws IOException, XMLStreamException {
         // Happy Path: Valid Pet
-        setMockedRequest("POST", "/pet", "<jsonObject>" +
+        setMockedRequest("POST", "/pet", "/pet", "<jsonObject>" +
                 "<id>123</id><name>Doggie</name>" +
                 "<photoUrls>https://mydog_1.jpg</photoUrls><photoUrls>https://mydog_2.jpg</photoUrls>" +
                 "<category><id>2</id><name>dog</name></category>" +
@@ -87,7 +87,7 @@ public class TestSchemaValidator {
     @Test
     public void testValidRequestPostStoreOrder() throws IOException, XMLStreamException {
         // Happy Path: Valid Store Order: Valid date
-        setMockedRequest("POST", "/store/order", "<jsonObject>" +
+        setMockedRequest("POST", "/store/order", "/store/order", "<jsonObject>" +
                 "<id>123</id><petId>22</petId><quantity>8</quantity><shipDate>2020-05-14T10:29:24.160Z</shipDate>" +
                 "<status>placed</status><complete>false</complete>" +
                 "</jsonObject>");
@@ -97,7 +97,8 @@ public class TestSchemaValidator {
     @Test
     public void testValidRequestPostArrayOfUsers() throws IOException, XMLStreamException {
         // Happy Path: Valid Array of Users
-        setMockedRequest("POST", "/user/createWithArray", "<jsonArray><jsonElement>" +
+        setMockedRequest("POST", "/user/createWithArray", "/user/createWithArray",
+                "<jsonArray><jsonElement>" +
                 "<id>1234</id><username>andy</username><firstName>Andy</firstName>" +
                 "<lastName>Fernando</lastName><email>andy@abc.com</email><password>pw1234</password>" +
                 "<phone>01234567890</phone><userStatus>3</userStatus></jsonElement>" +
@@ -111,7 +112,7 @@ public class TestSchemaValidator {
     @Test
     public void testBadRequestInvalidEnum() throws IOException, XMLStreamException {
         // Invalid Enum
-        setMockedRequest("POST", "/pet", "<jsonObject>" +
+        setMockedRequest("POST", "/pet", "/pet", "<jsonObject>" +
                 "<id>123</id><name>Doggie</name>" +
                 "<photoUrls>https://mydog_1.jpg</photoUrls><photoUrls>https://mydog_2.jpg</photoUrls>" +
                 "<category><id>2</id><name>dog</name></category>" +
@@ -124,7 +125,7 @@ public class TestSchemaValidator {
     @Test
     public void testBadRequestInvalidInt() throws IOException, XMLStreamException {
         // Invalid Int
-        setMockedRequest("POST", "/pet", "<jsonObject>" +
+        setMockedRequest("POST", "/pet", "/pet", "<jsonObject>" +
                 "<id>INVALID-INT</id><name>Doggie</name>" +
                 "<photoUrls>https://mydog_1.jpg</photoUrls><photoUrls>https://mydog_2.jpg</photoUrls>" +
                 "<category><id>2</id><name>dog</name></category>" +
@@ -137,7 +138,7 @@ public class TestSchemaValidator {
     @Test
     public void testBadRequestInvalidString() throws IOException, XMLStreamException {
         // Invalid String: name of pet
-        setMockedRequest("POST", "/pet", "<jsonObject>" +
+        setMockedRequest("POST", "/pet", "/pet", "<jsonObject>" +
                 "<id>123</id><name>1234</name>" +
                 "<photoUrls>https://mydog_1.jpg</photoUrls><photoUrls>https://mydog_2.jpg</photoUrls>" +
                 "<category><id>2</id><name>dog</name></category>" +
@@ -150,7 +151,7 @@ public class TestSchemaValidator {
     @Test
     public void testBadRequestInvalidDate() throws IOException, XMLStreamException {
         // Invalid date
-        setMockedRequest("POST", "/store/order", "<jsonObject>" +
+        setMockedRequest("POST", "/store/order", "/store/order", "<jsonObject>" +
                 "<id>123</id><petId>22</petId><quantity>8</quantity><shipDate>2020-05-14</shipDate>" +
                 "<status>placed</status><complete>false</complete>" +
                 "</jsonObject>");
@@ -160,7 +161,7 @@ public class TestSchemaValidator {
     @Test
     public void testBadRequestMissRequiredField() throws IOException, XMLStreamException {
         // Missing required field - Name of Pet
-        setMockedRequest("POST", "/pet", "<jsonObject>" +
+        setMockedRequest("POST", "/pet", "/pet", "<jsonObject>" +
                 "<id>123</id>" +
                 "<photoUrls>https://mydog_1.jpg</photoUrls><photoUrls>https://mydog_2.jpg</photoUrls>" +
                 "<category><id>2</id><name>dog</name></category>" +
@@ -177,7 +178,7 @@ public class TestSchemaValidator {
         String contentType = "application/json";
         headers.put(CONTENT_TYPE_HEADER_LOWERCASE, contentType);
         Mockito.when(axis2MsgContext.getProperty(TRANSPORT_HEADERS)).thenReturn(headers);
-        setMockedRequest("POST", "/pet", "<jsonObject>" +
+        setMockedRequest("POST", "/pet", "/pet", "<jsonObject>" +
                 "<id>1</id><name>Doggie</name>" +
                 "<photoUrls>https://mydog_1.jpg</photoUrls><photoUrls>https://mydog_2.jpg</photoUrls>" +
                 "<category><id>2</id><name>dog</name></category>" +
@@ -194,7 +195,8 @@ public class TestSchemaValidator {
         String contentType = "application/json";
         headers.put(CONTENT_TYPE_HEADER_LOWERCASE, contentType);
         Mockito.when(axis2MsgContext.getProperty(TRANSPORT_HEADERS)).thenReturn(headers);
-        setMockedRequestWithOpenApiYaml("POST", "/100/002/107066", "<jsonObject>" +
+        setMockedRequestWithOpenApiYaml("POST", "/100/002/107066", "/100/002/107066",
+                "<jsonObject>" +
                 "<firstName>John</firstName><lastName>Doe</lastName><sport>Football</sport>" +
                 "</jsonObject>");
         assertValidRequest();
@@ -206,7 +208,8 @@ public class TestSchemaValidator {
         String contentType = "application/json";
         headers.put(CONTENT_TYPE_HEADER_LOWERCASE, contentType);
         Mockito.when(axis2MsgContext.getProperty(TRANSPORT_HEADERS)).thenReturn(headers);
-        setMockedRequestWithOpenApiYaml("POST", "/100/002/107066", "<jsonObject>" +
+        setMockedRequestWithOpenApiYaml("POST", "/100/002/107066", "/100/002/107066",
+                "<jsonObject>" +
                 "<vehicle>Car</vehicle><price>10</price>" +
                 "</jsonObject>");
         assertValidRequest();
@@ -218,7 +221,8 @@ public class TestSchemaValidator {
         String contentType = "application/json";
         headers.put(CONTENT_TYPE_HEADER_LOWERCASE, contentType);
         Mockito.when(axis2MsgContext.getProperty(TRANSPORT_HEADERS)).thenReturn(headers);
-        setMockedRequestWithOpenApiYaml("POST", "/100/002/107066", "<jsonObject>" +
+        setMockedRequestWithOpenApiYaml("POST", "/100/002/107066", "/100/002/107066",
+                "<jsonObject>" +
                 "<type>Computer</type><model>Desktop</model>" +
                 "</jsonObject>");
         assertBadRequest();
@@ -230,7 +234,8 @@ public class TestSchemaValidator {
         String contentType = "application/json";
         headers.put(CONTENT_TYPE_HEADER_LOWERCASE, contentType);
         Mockito.when(axis2MsgContext.getProperty(TRANSPORT_HEADERS)).thenReturn(headers);
-        setMockedRequestWithOpenApiYaml("POST", "/100/002/107066", "<jsonObject>" +
+        setMockedRequestWithOpenApiYaml("POST", "/100/002/107066", "/100/002/107066",
+                "<jsonObject>" +
                 "<firstName>John</firstName><lastName>Doe</lastName><sport>Football</sport><age>Twenty</age>" +
                 "</jsonObject>");
         assertBadRequest();
@@ -242,10 +247,47 @@ public class TestSchemaValidator {
         String contentType = "application/json";
         headers.put(CONTENT_TYPE_HEADER_LOWERCASE, contentType);
         Mockito.when(axis2MsgContext.getProperty(TRANSPORT_HEADERS)).thenReturn(headers);
-        setMockedRequestWithOpenApiYaml("POST", "/100/002/107066", "<jsonObject>" +
+        setMockedRequestWithOpenApiYaml("POST", "/100/002/107066", "/100/002/107066",
+                "<jsonObject>" +
                 "<vehicle>Car</vehicle><price>10</price><color>Red</color>" +
                 "</jsonObject>");
         assertValidRequest();
+    }
+
+    @Test
+    public void testValidRequestResourceWithOnlySlash() throws IOException, XMLStreamException {
+        // Happy path - testing resource with only slash
+        setMockedRequest("POST", "/", "/","<jsonObject>" +
+                "<pet>dog</pet>" +
+                "</jsonObject>");
+        assertValidRequest();
+    }
+
+    @Test
+    public void testBadRequestResourceWithOnlySlash() throws IOException, XMLStreamException {
+        // Missing required field - pet tag
+        setMockedRequest("POST", "/", "/", "<jsonObject>" +
+                "<pets>dog</pets>" +
+                "</jsonObject>");
+        assertBadRequest();
+    }
+
+    @Test
+    public void testValidRequestResourceWithTrailingSlash() throws IOException, XMLStreamException {
+        // Happy path - testing resource with trailing slash
+        setMockedRequest("POST", "/pet/sample", "/pet/sample/", "<jsonObject>" +
+                "<pet>dog</pet>" +
+                "</jsonObject>");
+        assertValidRequest();
+    }
+
+    @Test
+    public void testBadRequestResourceWithTrailingSlash() throws IOException, XMLStreamException {
+        // Missing required field - pet tag
+        setMockedRequest("POST", "/pet/sample", "/pet/sample/", "<jsonObject>" +
+                "<pets>dog</pets>" +
+                "</jsonObject>");
+        assertBadRequest();
     }
 
     private void assertValidRequest() {
@@ -259,23 +301,23 @@ public class TestSchemaValidator {
         Mockito.verify(messageContext).setProperty(APIMgtGatewayConstants.THREAT_FOUND, true);
     }
 
-    private void setMockedRequestWithOpenApiYaml(String httpMethod, String resourcePath, String xmlMessage)
-            throws IOException, XMLStreamException {
+    private void setMockedRequestWithOpenApiYaml(String httpMethod, String resourcePath, String subPath,
+                                                 String xmlMessage) throws IOException, XMLStreamException {
         File openApiYamlFile = new File(Thread.currentThread().getContextClassLoader().
                 getResource("swaggerEntry/openapi.yaml").getFile());
         String swaggerValue = FileUtils.readFileToString(openApiYamlFile);
-        setMockedRequest(httpMethod, resourcePath, xmlMessage, swaggerValue);
+        setMockedRequest(httpMethod, resourcePath, subPath, xmlMessage, swaggerValue);
     }
 
-    private void setMockedRequest(String httpMethod, String resourcePath, String xmlMessage)
+    private void setMockedRequest(String httpMethod, String resourcePath, String subPath, String xmlMessage)
             throws XMLStreamException, IOException {
         File swaggerJsonFile = new File(Thread.currentThread().getContextClassLoader().
                 getResource("swaggerEntry/swagger.json").getFile());
         String swaggerValue = FileUtils.readFileToString(swaggerJsonFile);
-        setMockedRequest(httpMethod, resourcePath, xmlMessage, swaggerValue);
+        setMockedRequest(httpMethod, resourcePath, subPath, xmlMessage, swaggerValue);
     }
 
-    private void setMockedRequest(String httpMethod, String resourcePath, String xmlMessage, String swaggerValue)
+    private void setMockedRequest(String httpMethod, String resourcePath, String subPath, String xmlMessage, String swaggerValue)
             throws XMLStreamException {
         SOAPFactory fac = OMAbstractFactory.getSOAP12Factory();
         SOAPEnvelope env = fac.createSOAPEnvelope();
@@ -306,7 +348,7 @@ public class TestSchemaValidator {
         Mockito.when((String) messageContext.getProperty((APIMgtGatewayConstants.API_ELECTED_RESOURCE))).
                 thenReturn(resourcePath);
         Mockito.when((String) messageContext.getProperty(RESTConstants.REST_SUB_REQUEST_PATH)).
-                thenReturn(resourcePath);
+                thenReturn(subPath);
         Mockito.when(synapseConfiguration.getLocalRegistry()).thenReturn(map);
         Mockito.when(map.get(ApiId)).thenReturn(entry);
         Mockito.when((String) entry.getValue()).thenReturn(swaggerValue);

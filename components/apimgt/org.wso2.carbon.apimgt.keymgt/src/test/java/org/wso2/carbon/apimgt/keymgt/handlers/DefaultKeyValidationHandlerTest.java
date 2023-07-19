@@ -35,6 +35,8 @@ import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
+import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -65,6 +67,7 @@ public class DefaultKeyValidationHandlerTest extends DefaultKeyValidationHandler
     private final String HTTP_VERB = "GET";
     private final String APPLICATION_NAME = "foo_PRODUCTION";
     private final String APPLICATION_ID = "1";
+    private final int APP_ID = 1;
     private final String SCOPES = "subscriber";
     private final String ACCESS_TOKEN = "ca19a540f544777860e44e75f605d927";
     private final String TIER = "unlimited";
@@ -167,10 +170,21 @@ public class DefaultKeyValidationHandlerTest extends DefaultKeyValidationHandler
                 .thenReturn(tenantSubscriptionStore);
         Mockito.when(tenantSubscriptionStore.getApiByContextAndVersion(eq(API_CONTEXT), eq(API_VERSION)))
         .thenReturn(api);
+        ApplicationKeyMapping key = new ApplicationKeyMapping();
+        Mockito.when(tenantSubscriptionStore.getKeyMappingByKeyAndKeyManager("xxxxxx", "default"))
+                .thenReturn(key);
+        key.setApplicationId(APP_ID);
+        Application application = new Application();
+        application.setId(APP_ID);
+        application.setName(APPLICATION_NAME);
+        application.setSubName(SUBSCRIBER);
+        Mockito.when(tenantSubscriptionStore.getApplicationById(eq(application.getId()))).thenReturn(application);
         APIKeyValidationInfoDTO info = defaultKeyValidationHandler.validateSubscription(API_CONTEXT, API_VERSION,
                 "xxxxxx", "default");
         Assert.assertEquals("Invalid error message status code ",
                 APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN, info.getValidationStatus());
+        Assert.assertEquals(APPLICATION_NAME, info.getApplicationName());
+        Assert.assertEquals(SUBSCRIBER, info.getSubscriber());
 
     }
 }
