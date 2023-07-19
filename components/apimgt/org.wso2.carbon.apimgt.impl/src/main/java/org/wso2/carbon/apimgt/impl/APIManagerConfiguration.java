@@ -725,8 +725,8 @@ public class APIManagerConfiguration {
 
             //Prefix websub endpoints with 'websub_' so that the endpoint URL
             // would begin with: 'websub_http://', since API type is identified by the URL protocol below.
-            webSubHttpEp = "websub_" + webSubHttpEp;
-            webSubHttpsEp = "websub_" + webSubHttpsEp;
+            webSubHttpEp = StringUtils.isNotBlank(webSubHttpEp) ? "websub_" + webSubHttpEp : webSubHttpEp;
+            webSubHttpsEp = StringUtils.isNotBlank(webSubHttpsEp) ? "websub_" + webSubHttpsEp : webSubHttpsEp;
 
             VHost vhost = VHost.fromEndpointUrls(new String[]{
                     httpEp, httpsEp, wsEp, wssEp, webSubHttpEp, webSubHttpsEp});
