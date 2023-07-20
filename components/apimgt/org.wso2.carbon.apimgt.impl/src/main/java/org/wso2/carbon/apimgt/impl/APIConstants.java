@@ -2547,6 +2547,20 @@ public final class APIConstants {
         public static final String PKCE_SUPPORT_PLAIN = "pkceSupportPlain";
         public static final String BYPASS_CLIENT_CREDENTIALS = "bypassClientCredentials";
 
+        public static final String[] REQUIRED_CONF_FOR_EXT_KEY_MANAGERS = {
+                APIConstants.KeyManager.ISSUER,
+                APIConstants.KeyManager.CONSUMER_KEY_CLAIM,
+                APIConstants.KeyManager.SCOPES_CLAIM,
+                APIConstants.KeyManager.CERTIFICATE_TYPE,
+                APIConstants.KeyManager.CERTIFICATE_VALUE
+        };
+
+        public static final String[] REQUIRED_ENDPOINTS_FOR_EXT_KEY_MANAGERS = {
+                APIConstants.KeyManager.AUTHORIZE_ENDPOINT,
+                APIConstants.KeyManager.TOKEN_ENDPOINT,
+                APIConstants.KeyManager.REVOKE_ENDPOINT
+        };
+
         public static class KeyManagerEvent {
 
             public static final String EVENT_TYPE = "event_type";

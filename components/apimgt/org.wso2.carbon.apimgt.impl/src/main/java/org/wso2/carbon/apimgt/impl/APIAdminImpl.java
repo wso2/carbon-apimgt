@@ -118,20 +118,6 @@ public class APIAdminImpl implements APIAdmin {
     protected ApiMgtDAO apiMgtDAO;
     protected ChoreoApiMgtDAO choreoApiMgtDAO;
 
-    private static final String[] requiredConfigurationsForExternalKeyManagers = {
-            APIConstants.KeyManager.ISSUER,
-            APIConstants.KeyManager.CONSUMER_KEY_CLAIM,
-            APIConstants.KeyManager.SCOPES_CLAIM,
-            APIConstants.KeyManager.CERTIFICATE_TYPE,
-            APIConstants.KeyManager.CERTIFICATE_VALUE
-    };
-
-    private static final String[] requiredEndpointConfigurationsForExternalKeyManagers = {
-            APIConstants.KeyManager.AUTHORIZE_ENDPOINT,
-            APIConstants.KeyManager.TOKEN_ENDPOINT,
-            APIConstants.KeyManager.REVOKE_ENDPOINT
-    };
-
     public APIAdminImpl() {
         apiMgtDAO = ApiMgtDAO.getInstance();
         choreoApiMgtDAO = ChoreoApiMgtDAO.getInstance();
@@ -660,7 +646,7 @@ public class APIAdminImpl implements APIAdmin {
     private void validateExternalKeyManagerEndpointConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
         List<String> missingRequiredConfigurations = new ArrayList<>();
-        for (String configuration : requiredEndpointConfigurationsForExternalKeyManagers) {
+        for (String configuration : APIConstants.KeyManager.REQUIRED_ENDPOINTS_FOR_EXT_KEY_MANAGERS) {
             if (!keyManagerConfigurationDTO.getEndpoints().containsKey(configuration)) {
                 missingRequiredConfigurations.add(configuration);
                 continue;
@@ -672,7 +658,7 @@ public class APIAdminImpl implements APIAdmin {
                     + " is/are required",
                     ExceptionCodes.from(ExceptionCodes.REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING, missingConfigs));
         }
-        for (String configuration: requiredEndpointConfigurationsForExternalKeyManagers) {
+        for (String configuration: APIConstants.KeyManager.REQUIRED_ENDPOINTS_FOR_EXT_KEY_MANAGERS) {
             // if the endpoint is not a valid URL,then throw an APIManagementException
             if (!APIUtil.isValidURL(keyManagerConfigurationDTO.getEndpoints().get(configuration))) {
                 throw new APIManagementException("Key Manager Endpoint Configuration value for " + configuration
@@ -798,14 +784,15 @@ public class APIAdminImpl implements APIAdmin {
                         KeyManagerConfiguration.TokenType.valueOf(oldKeyManagerConfiguration.getTokenType()
                                 .toUpperCase()))) {
             throw new APIManagementException("Cannot switch between tokenType when " +
-                    "the Key Manager's Token Type is External", ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                    "the Key Manager's Token Type is External",
+                    ExceptionCodes.from(ExceptionCodes.INVALID_KEY_MANAGER_PROPERTIES, "TokenType"));
         }
         if (!keyManagerTokenType.equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
             // If the issuer is changed compared to old Key manager's configuration.
             if (!Objects.equals(oldKeyManagerConfiguration.getAdditionalProperties().get(APIConstants.KeyManager.ISSUER),
                     keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.KeyManager.ISSUER))) {
                 validateKeyManagerIssuerUniqueness(keyManagerConfigurationDTO.getOrganization(),
-                        String.valueOf(oldKeyManagerConfiguration.getAdditionalProperties()
+                        String.valueOf(keyManagerConfigurationDTO.getAdditionalProperties()
                                 .get(APIConstants.KeyManager.ISSUER)));
             }
         }
@@ -1154,7 +1141,7 @@ public class APIAdminImpl implements APIAdmin {
             throw new APIManagementException("Key Manager Name can't be empty", ExceptionCodes.KEY_MANAGER_NAME_EMPTY);
         }
         List<String> missingRequiredConfigurations = new ArrayList<>();
-        for (String property : requiredConfigurationsForExternalKeyManagers) {
+        for (String property : APIConstants.KeyManager.REQUIRED_CONF_FOR_EXT_KEY_MANAGERS) {
             if (!keyManagerConfigurationDTO.getAdditionalProperties()
                     .containsKey(property)) {
                 missingRequiredConfigurations.add(property);
