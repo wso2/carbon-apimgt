@@ -1096,6 +1096,7 @@
                 {% endif %}
                 {% if apim.open_tracer.remote_tracer.properties.sampler_param is defined %}
                 <SamplerParam>{{apim.open_tracer.remote_tracer.properties.sampler_param}}</SamplerParam>
+                {% endif %}
                 {% if apim.open_tracer.remote_tracer.properties.proxy_host is defined %}
                 <ProxyHost>{{apim.open_tracer.remote_tracer.properties.proxy_host}}</ProxyHost>
                 {% endif %}
