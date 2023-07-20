@@ -37,11 +37,15 @@ public class SubscriptionEvent extends Event {
     private String applicationUUID;
     private String policyId;
     private String subscriptionState;
+    private String context;
+    private String versionRange;
+
+
 
     public SubscriptionEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,
                              int subscriptionId, String subscriptionUUID, int apiId, String apiUUID, int applicationId,
-                             String applicationUUID,
-                             String policyId, String subscriptionState) {
+                             String applicationUUID, String policyId, String subscriptionState,
+                             String context, String versionRange) {
 
         this.eventId = eventId;
         this.timeStamp = timestamp;
@@ -56,9 +60,11 @@ public class SubscriptionEvent extends Event {
         this.tenantDomain = tenantDomain;
         this.applicationUUID = applicationUUID;
         this.apiUUID = apiUUID;
+        this.context = context.replace("/" + APIConstants.VERSION_PLACEHOLDER, "");;
+        this.versionRange = versionRange;
     }
 
-    public SubscriptionEvent(String type,SubscribedAPI subscribedAPI,int tenantId,String tenantDomain) {
+    public SubscriptionEvent(String type,SubscribedAPI subscribedAPI,int tenantId,String tenantDomain, String context) {
         this.eventId = UUID.randomUUID().toString();
         this.timeStamp = System.currentTimeMillis();
         this.type = type;
@@ -72,6 +78,8 @@ public class SubscriptionEvent extends Event {
         this.applicationUUID = subscribedAPI.getApplication().getUUID();
         this.policyId = subscribedAPI.getTier().getName();
         this.subscriptionState = subscribedAPI.getSubStatus();
+        this.versionRange = subscribedAPI.getVersionRange();
+        this.context = context.replace("/" + APIConstants.VERSION_PLACEHOLDER, "");;
     }
 
     @Override
@@ -87,6 +95,8 @@ public class SubscriptionEvent extends Event {
                 ", policyId='" + policyId + '\'' +
                 ", subscriptionState='" + subscriptionState + '\'' +
                 ", tenantDomain='" + tenantDomain + '\'' +
+                ", context='" + context + '\'' +
+                ", versionRange='" + versionRange + '\'' +
                 '}';
     }
 
@@ -104,7 +114,8 @@ public class SubscriptionEvent extends Event {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getSubscriptionId(), getApiId(), getApplicationId(), getPolicyId(), getSubscriptionState());
+        return Objects.hash(getSubscriptionId(), getApiId(), getApplicationId(), getPolicyId(),
+                getSubscriptionState(), getContext(), getVersionRange());
     }
 
     public int getSubscriptionId() {
@@ -180,5 +191,21 @@ public class SubscriptionEvent extends Event {
     public void setApplicationUUID(String applicationUUID) {
 
         this.applicationUUID = applicationUUID;
+    }
+
+    public String getContext() {
+        return context;
+    }
+
+    public void setContext(String context) {
+        this.context = context;
+    }
+
+    public String getVersionRange() {
+        return versionRange;
+    }
+
+    public void setVersionRange(String versionRange) {
+        this.versionRange = versionRange;
     }
 }

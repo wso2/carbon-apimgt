@@ -41,6 +41,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             APIManagementException {
 
         Response result;
+        // TODO: 2023-07-20 (chathurangas) Send context and version range in the response
 
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         List<Subscription> subscriptionList = new ArrayList<>();

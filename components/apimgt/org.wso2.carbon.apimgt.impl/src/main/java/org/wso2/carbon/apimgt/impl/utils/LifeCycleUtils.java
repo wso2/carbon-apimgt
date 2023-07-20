@@ -379,7 +379,10 @@ public class LifeCycleUtils {
         Collections.sort(sortedAPIs, comparator);
         List<SubscribedAPI> subscribedAPIS = apiMgtDAO.makeKeysForwardCompatible(new ApiTypeWrapper(api), sortedAPIs);
         for (SubscribedAPI subscribedAPI : subscribedAPIS) {
-            SubscriptionEvent subscriptionEvent = new SubscriptionEvent(APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), subscribedAPI, APIUtil.getInternalOrganizationId(api.getOrganization()), api.getOrganization());
+            SubscriptionEvent subscriptionEvent = new SubscriptionEvent(
+                    APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), subscribedAPI,
+                    APIUtil.getInternalOrganizationId(api.getOrganization()), api.getOrganization(),
+                    api.getContextTemplate());
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         }
     }

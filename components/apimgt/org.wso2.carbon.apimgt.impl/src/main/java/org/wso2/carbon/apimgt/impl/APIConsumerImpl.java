@@ -39,43 +39,9 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIRating;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.CommentList;
-import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
-import org.wso2.carbon.apimgt.api.model.DocumentationContent;
-import org.wso2.carbon.apimgt.api.model.DocumentationType;
-import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
-import org.wso2.carbon.apimgt.api.model.Label;
-import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
-import org.wso2.carbon.apimgt.api.model.Tag;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.TierPermission;
-import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
@@ -806,7 +772,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             identifier.setUuid(product.getUuid());
             apiId = product.getProductId();
             apiUUID = product.getUuid();
-            apiContext = product.getContext();
+            apiContext = product.getContextTemplate();
             apiOrgId = product.getOrganization();
             apiVersion = identifier.getVersion();
         } else {
@@ -817,7 +783,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             identifier.setUuid(api.getUuid());
             apiId = api.getId().getId();
             apiUUID = api.getUuid();
-            apiContext = api.getContext();
+            apiContext = api.getContextTemplate();
             apiOrgId = api.getOrganization();
             apiVersion = identifier.getVersion();
         }
@@ -959,7 +925,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                             System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId,
                             apiOrgId, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
-                            application.getId(), application.getUUID(), identifier.getTier(), subscriptionStatus);
+                            application.getId(), application.getUUID(), identifier.getTier(), subscriptionStatus,
+                            apiContext, versionRange);
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                 }
             } else {
@@ -970,7 +937,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId,
                         apiOrgId, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
-                        application.getId(), application.getUUID(), identifier.getTier(), subscriptionStatus);
+                        application.getId(), application.getUUID(), identifier.getTier(), subscriptionStatus,
+                        apiContext, versionRange);
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
 
@@ -1168,14 +1136,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                             System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
                             apiOrgId, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId,
-                            application.getId(), application.getUUID(), requestedThrottlingPolicy, subscriptionStatus);
+                            application.getId(), application.getUUID(), requestedThrottlingPolicy, subscriptionStatus,
+                            apiContext, updatedSubscription.getVersionRange());
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                 }
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
                         apiOrgId, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId, application.getId(),
-                        application.getUUID(), requestedThrottlingPolicy, subscriptionStatus);
+                        application.getUUID(), requestedThrottlingPolicy, subscriptionStatus, apiContext,
+                        updatedSubscription.getVersionRange());
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
 
@@ -1442,6 +1412,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         + ") removed from app " + appName;
                 log.debug(logMessage);
             }
+            APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(subscription.getAPIUUId());
 
             // get the workflow state once the executor is executed.
             WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(application.getId()),
@@ -1462,7 +1433,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId,
                             organization, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
                             identifier.getUUID(), application.getId(), application.getUUID(), identifier.getTier(),
-                            subscription.getSubStatus());
+                            subscription.getSubStatus(), apiInfo.getContextTemplate(), subscription.getVersionRange());
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                 }
             } else {
@@ -1475,7 +1446,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId,
                         organization, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
                         identifier.getUUID(), application.getId(), application.getUUID(), identifier.getTier(),
-                        subscription.getSubStatus());
+                        subscription.getSubStatus(), apiInfo.getContextTemplate(), subscription.getVersionRange());
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
         } else {
