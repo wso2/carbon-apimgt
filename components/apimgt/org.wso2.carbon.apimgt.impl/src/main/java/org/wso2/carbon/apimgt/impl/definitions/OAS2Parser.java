@@ -891,15 +891,15 @@ public class OAS2Parser extends APIDefinition {
                 // If throttling limit remains unassigned in the swagger definition, the throttling-tier property
                 // will be used to generate the limit. If throttling-tier is also not defined, the default tier would
                 // be unlimited tier.
-                if (operation.getVendorExtensions() != null &&
-                        !operation.getVendorExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT) &&
-                        operation.getVendorExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER)) {
-                    String tier = (String) operation.getVendorExtensions().get(APIConstants.SWAGGER_X_THROTTLING_TIER);
-                    operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
-                            ModelUtil.generateThrottlingLimitFromThrottlingTier(tier));
-                } else {
+                if (operation.getVendorExtensions() == null) {
                     operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
                             ModelUtil.generateThrottlingLimitFromThrottlingTier(APIConstants.UNLIMITED_TIER));
+                } else if (!operation.getVendorExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
+                    String tier = operation.getVendorExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER) ?
+                            (String) operation.getVendorExtensions().get(APIConstants.SWAGGER_X_THROTTLING_TIER) :
+                            APIConstants.UNLIMITED_TIER;
+                    operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
+                            ModelUtil.generateThrottlingLimitFromThrottlingTier(tier));
                 }
             }
         }
