@@ -985,6 +985,16 @@ public class OAS3Parser extends APIDefinition {
                     operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
                             ModelUtil.generateThrottlingLimitFromThrottlingTier(tier));
                 }
+                if (operation.getExtensions() == null) {
+                    operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
+                            ModelUtil.generateThrottlingLimitFromThrottlingTier(APIConstants.UNLIMITED_TIER));
+                } else if (!operation.getExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
+                    String tier = operation.getExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER) ?
+                            (String) operation.getExtensions().get(APIConstants.SWAGGER_X_THROTTLING_TIER) :
+                            APIConstants.UNLIMITED_TIER;
+                    operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
+                            ModelUtil.generateThrottlingLimitFromThrottlingTier(tier));
+                }
             }
         }
         openAPI.addExtension(APIConstants.X_WSO2_RESPONSE_CACHE,
