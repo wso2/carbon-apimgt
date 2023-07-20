@@ -963,6 +963,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 PublisherAPIInfo apiInfo = new PublisherAPIInfo();
                 String artifactPath = GovernanceUtils.getArtifactPath(userRegistry, artifact.getId());
                 Resource apiResource = userRegistry.get(artifactPath);
+
+                Map<String, String> additionalProperties = setResourceProperties(apiInfo.getId(), apiResource);
+                apiInfo.setAdditionalProperties(additionalProperties);
+
                 apiInfo.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
                 apiInfo.setId(artifact.getId());
                 apiInfo.setApiName(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
@@ -1001,6 +1005,26 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
 
         return searchResults;
+    }
+
+    private static Map<String, String> setResourceProperties(String apiId, Resource apiResource) {
+        Map<String, String> additionalProperties = new HashMap<>();
+        Properties properties = apiResource.getProperties();
+        if (properties != null) {
+            Enumeration<?> propertyNames = properties.propertyNames();
+            while (propertyNames.hasMoreElements()) {
+                String propertyName = (String) propertyNames.nextElement();
+                if (log.isDebugEnabled()) {
+                    log.debug("API '" + apiId + "' " + "has the property " + propertyName);
+                }
+                if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
+                    String property = propertyName.substring(
+                            APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length());
+                    additionalProperties.put(property, apiResource.getProperty(propertyName));
+                }
+            }
+        }
+        return additionalProperties;
     }
 
     @Override
