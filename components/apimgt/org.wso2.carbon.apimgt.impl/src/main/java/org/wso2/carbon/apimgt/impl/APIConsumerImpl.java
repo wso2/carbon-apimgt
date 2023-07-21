@@ -526,7 +526,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return
      * @throws APIManagementException
      */
-    @Override
+    @Override //TODO: (VirajSalaka) See usages too
     public Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
                                                       String applicationName, String keyType, String tokenType,
                                                       String keyManagerName, String tenantDomain) throws APIManagementException {
@@ -583,6 +583,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (KeyManagerConfiguration.TokenType.EXTERNAL.toString().equals(keyManagerConfiguration.getTokenType())) {
             apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationId, clientId, keyManagerId,
                     keyMappingId);
+            String applicationUUID = apiMgtDAO.getApplicationById(applicationId) != null ?
+                    apiMgtDAO.getApplicationById(applicationId).getUUID() : "0";
+            ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
+                    UUID.randomUUID().toString(), System.currentTimeMillis(),
+                    APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(),
+                    MultitenantConstants.SUPER_TENANT_ID, tenantDomain, applicationId, applicationUUID, clientId,
+                    keyType, keyManagerName);
+            APIUtil.sendNotification(applicationRegistrationEvent,
+                    APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+
             Map<String, Object> keyDetails = new HashMap<String, Object>();
             keyDetails.put(APIConstants.FrontEndParameterNames.CONSUMER_KEY, clientId);
             keyDetails.put(APIConstants.FrontEndParameterNames.KEY_MAPPING_ID, keyMappingId);
