@@ -629,6 +629,12 @@
           "description" : "**Search condition**.\n type of gateway\n",
           "required" : false,
           "type" : "string"
+        }, {
+          "name" : "gatewayLabel",
+          "in" : "query",
+          "description" : "**Search condition**.\n label associated with the policy mapping\n",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "200" : {

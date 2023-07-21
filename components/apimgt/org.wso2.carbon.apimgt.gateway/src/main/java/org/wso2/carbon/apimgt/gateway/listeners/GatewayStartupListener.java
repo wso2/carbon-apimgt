@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
+import org.wso2.carbon.apimgt.gateway.GatewayPolicyDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
@@ -138,10 +139,14 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 ServiceReferenceHolder.getInstance()
                         .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
         boolean flag = false;
+        boolean globalPolicyDeploymentFlag = false;
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             InMemoryAPIDeployer inMemoryAPIDeployer = new InMemoryAPIDeployer();
+            GatewayPolicyDeployer gatewayPolicyDeployer = new GatewayPolicyDeployer();
             flag = inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(
                         gatewayArtifactSynchronizerProperties.getGatewayLabels(), tenantDomain);
+            globalPolicyDeploymentFlag = gatewayPolicyDeployer.deployGlobalPoliciesAtGatewayStartup(
+                    gatewayArtifactSynchronizerProperties.getGatewayLabels(), tenantDomain);
         }
         return flag;
     }

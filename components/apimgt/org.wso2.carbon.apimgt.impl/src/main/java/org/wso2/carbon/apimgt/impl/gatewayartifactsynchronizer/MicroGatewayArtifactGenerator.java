@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
+import org.wso2.carbon.apimgt.impl.dto.GatewayPolicyArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.ApiProjectDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.DeploymentDescriptorDto;
@@ -118,8 +119,8 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
     }
 
     @Override
-    public RuntimeArtifactDto generateGatewayPolicyArtifact(List<OperationPolicyData> gatewayPolicyDataList,
-            List<OperationPolicy> gatewayPolicyList, String org) {
+    public RuntimeArtifactDto generateGatewayPolicyArtifact(
+            List<GatewayPolicyArtifactDto> gatewayPolicyArtifactDtoList) {
         return null;
     }
 

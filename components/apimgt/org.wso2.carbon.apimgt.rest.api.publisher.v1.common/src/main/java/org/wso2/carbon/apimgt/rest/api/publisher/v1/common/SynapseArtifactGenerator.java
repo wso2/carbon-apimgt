@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
+import org.wso2.carbon.apimgt.impl.dto.GatewayPolicyArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
@@ -163,37 +164,41 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
         return runtimeArtifactDto;
     }
 
-    @Override
-    public RuntimeArtifactDto generateGatewayPolicyArtifact(List<OperationPolicyData> gatewayPolicyDataList,
-            List<OperationPolicy> gatewayPolicyList, String tenantDomain) throws APIManagementException {
+    @Override public RuntimeArtifactDto generateGatewayPolicyArtifact(
+            List<GatewayPolicyArtifactDto> gatewayPolicyArtifactDtoList) throws APIManagementException {
 
         RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
         List<String> synapseArtifacts = new ArrayList<>();
-        GatewayPolicyDTO gatewayPolicyDTO = new GatewayPolicyDTO();
-        gatewayPolicyDTO.setTenantDomain(tenantDomain);
-        GatewayContentDTO gatewayInContentDTO = retrieveGatewayPolicySequence(gatewayPolicyDataList, gatewayPolicyList,
-                APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
-        if (gatewayInContentDTO != null) {
-            gatewayPolicyDTO.setGatewayPolicySequenceToBeAdd(
-                    TemplateBuilderUtil.addGatewayContentToList(gatewayInContentDTO,
-                            gatewayPolicyDTO.getGatewayPolicySequenceToBeAdd()));
+        for (GatewayPolicyArtifactDto gatewayPolicyArtifactDto : gatewayPolicyArtifactDtoList) {
+            GatewayPolicyDTO gatewayPolicyDTO = new GatewayPolicyDTO();
+            gatewayPolicyDTO.setTenantDomain(gatewayPolicyArtifactDto.getTenantDomain());
+            GatewayContentDTO gatewayInContentDTO = retrieveGatewayPolicySequence(
+                    gatewayPolicyArtifactDto.getGatewayPolicyDataList(),
+                    gatewayPolicyArtifactDto.getGatewayPolicyList(), APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+            if (gatewayInContentDTO != null) {
+                gatewayPolicyDTO.setGatewayPolicySequenceToBeAdd(
+                        TemplateBuilderUtil.addGatewayContentToList(gatewayInContentDTO,
+                                gatewayPolicyDTO.getGatewayPolicySequenceToBeAdd()));
+            }
+            GatewayContentDTO gatewayOutContentDTO = retrieveGatewayPolicySequence(
+                    gatewayPolicyArtifactDto.getGatewayPolicyDataList(),
+                    gatewayPolicyArtifactDto.getGatewayPolicyList(), APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
+            if (gatewayOutContentDTO != null) {
+                gatewayPolicyDTO.setGatewayPolicySequenceToBeAdd(
+                        TemplateBuilderUtil.addGatewayContentToList(gatewayOutContentDTO,
+                                gatewayPolicyDTO.getGatewayPolicySequenceToBeAdd()));
+            }
+            GatewayContentDTO gatewayFaultContentDTO = retrieveGatewayPolicySequence(
+                    gatewayPolicyArtifactDto.getGatewayPolicyDataList(),
+                    gatewayPolicyArtifactDto.getGatewayPolicyList(), APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
+            if (gatewayFaultContentDTO != null) {
+                gatewayPolicyDTO.setGatewayPolicySequenceToBeAdd(
+                        TemplateBuilderUtil.addGatewayContentToList(gatewayFaultContentDTO,
+                                gatewayPolicyDTO.getGatewayPolicySequenceToBeAdd()));
+            }
+            String content = new Gson().toJson(gatewayPolicyDTO);
+            synapseArtifacts.add(content);
         }
-        GatewayContentDTO gatewayOutContentDTO = retrieveGatewayPolicySequence(gatewayPolicyDataList, gatewayPolicyList,
-                APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
-        if (gatewayOutContentDTO != null) {
-            gatewayPolicyDTO.setGatewayPolicySequenceToBeAdd(
-                    TemplateBuilderUtil.addGatewayContentToList(gatewayOutContentDTO,
-                            gatewayPolicyDTO.getGatewayPolicySequenceToBeAdd()));
-        }
-        GatewayContentDTO gatewayFaultContentDTO = retrieveGatewayPolicySequence(gatewayPolicyDataList,
-                gatewayPolicyList, APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
-        if (gatewayFaultContentDTO != null) {
-            gatewayPolicyDTO.setGatewayPolicySequenceToBeAdd(
-                    TemplateBuilderUtil.addGatewayContentToList(gatewayFaultContentDTO,
-                            gatewayPolicyDTO.getGatewayPolicySequenceToBeAdd()));
-        }
-        String content = new Gson().toJson(gatewayPolicyDTO);
-        synapseArtifacts.add(content);
         runtimeArtifactDto.setFile(false);
         runtimeArtifactDto.setArtifact(synapseArtifacts);
         return runtimeArtifactDto;
