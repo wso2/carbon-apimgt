@@ -490,6 +490,8 @@ public class SubscriptionValidationDAO {
                 subscription.setApiUUID(resultSet.getString("API_UUID"));
                 subscription.setApplicationUUID(resultSet.getString("APPLICATION_UUID"));
                 subscription.setSubscriptionState(resultSet.getString("STATUS"));
+                subscription.setVersionRange(resultSet.getString("VERSION_RANGE"));
+                subscription.setApiContextTemplate(resultSet.getString("CONTEXT_TEMPLATE"));
                 subscriptions.add(subscription);
             }
         }
@@ -777,6 +779,8 @@ public class SubscriptionValidationDAO {
                     subscription.setApiUUID(resultSet.getString("API_UUID"));
                     subscription.setApplicationUUID(resultSet.getString("APPLICATION_UUID"));
                     subscription.setSubscriptionState(resultSet.getString("STATUS"));
+                    subscription.setVersionRange(resultSet.getString("VERSION_RANGE"));
+                    subscription.setApiContextTemplate(resultSet.getString("CONTEXT_TEMPLATE"));
                     return subscription;
                 }
 
@@ -810,6 +814,8 @@ public class SubscriptionValidationDAO {
                     subscription.setApiUUID(resultSet.getString("API_UUID"));
                     subscription.setApplicationUUID(resultSet.getString("APPLICATION_UUID"));
                     subscription.setSubscriptionState(resultSet.getString("STATUS"));
+                    subscription.setVersionRange(resultSet.getString("VERSION_RANGE"));
+                    subscription.setApiContextTemplate(resultSet.getString("CONTEXT_TEMPLATE"));
                     return subscription;
                 }
 

@@ -1257,6 +1257,10 @@ definitions:
         type: integer
       subscriptionState:
         type: string
+      context:
+        type: string
+      versionRange:
+        type: string
 
   #-----------------------------------------------------
   # The Synapse Artifacts  List resource
