@@ -70,8 +70,9 @@ public class KeyManagerHolder {
         if (organizationKeyManagerDto.getKeyManagerByName(name) != null) {
             log.warn("Key Manager " + name + " already initialized in tenant " + organization);
         }
-        if (keyManagerConfiguration.isEnabled() && !KeyManagerConfiguration.TokenType.EXCHANGED
-                .equals(keyManagerConfiguration.getTokenType())) {
+        if (keyManagerConfiguration.isEnabled() &&
+                !KeyManagerConfiguration.TokenType.EXCHANGED.equals(keyManagerConfiguration.getTokenType()) &&
+                        !KeyManagerConfiguration.TokenType.EXTERNAL.equals(keyManagerConfiguration.getTokenType())) {
             KeyManager keyManager = null;
             JWTValidator jwtValidator = null;
             APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()

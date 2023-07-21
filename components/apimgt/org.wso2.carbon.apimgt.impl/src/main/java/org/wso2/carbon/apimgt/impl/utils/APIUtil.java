@@ -7413,6 +7413,9 @@ public final class APIUtil {
         } else if (KeyManagerConfiguration.TokenType.DIRECT.toString()
                 .equalsIgnoreCase(keyManagerConfigurationToStore.getTokenType())) {
             configuration.setTokenType(KeyManagerConfiguration.TokenType.DIRECT);
+        } else if (KeyManagerConfiguration.TokenType.EXTERNAL.toString()
+                .equalsIgnoreCase(keyManagerConfigurationToStore.getTokenType())) {
+            configuration.setTokenType(KeyManagerConfiguration.TokenType.EXTERNAL);
         }
         configuration.setType(keyManagerConfigurationToStore.getType());
         return configuration;

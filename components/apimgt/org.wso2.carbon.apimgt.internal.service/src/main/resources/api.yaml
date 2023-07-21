@@ -1211,13 +1211,13 @@ definitions:
       tokenType:
         type: string
         description: The type of the tokens to be used (exchanged or without exchanged).
-          Accepted values are EXCHANGED, DIRECT or BOTH.
+          Accepted values are EXCHANGED, DIRECT or EXTERNAL.
         example: EXCHANGED
         default: DIRECT
         enum:
           - EXCHANGED
           - DIRECT
-          - BOTH
+          - EXTERNAL
 
   #-----------------------------------------------------
   # The Subscription List resource
