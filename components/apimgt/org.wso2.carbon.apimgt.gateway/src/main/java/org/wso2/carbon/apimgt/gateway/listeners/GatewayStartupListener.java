@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
+import org.wso2.carbon.apimgt.gateway.GatewayPolicyDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
@@ -135,17 +136,31 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                         .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
 
         boolean flag = false;
+        boolean globalPolicyDeploymentFlag = false;
         long waitTime = System.currentTimeMillis() + 60 * 1000;
         long retryDuration = 5000;
 
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             InMemoryAPIDeployer inMemoryAPIDeployer = new InMemoryAPIDeployer();
+            GatewayPolicyDeployer gatewayPolicyDeployer = new GatewayPolicyDeployer();
 
             while (waitTime > System.currentTimeMillis() && !flag) {
                 flag = inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(
                         gatewayArtifactSynchronizerProperties.getGatewayLabels(), tenantDomain);
                 if (!flag) {
                     log.error("Unable to deploy synapse artifacts at gateway. Next retry in " + (retryDuration / 1000)
+                            + " seconds");
+                    try {
+                        Thread.sleep(retryDuration);
+                    } catch (InterruptedException ignore) {
+                    }
+                }
+            }
+            while (waitTime > System.currentTimeMillis() && !globalPolicyDeploymentFlag) {
+                globalPolicyDeploymentFlag = gatewayPolicyDeployer.deployGlobalPoliciesAtGatewayStartup(
+                        gatewayArtifactSynchronizerProperties.getGatewayLabels(), tenantDomain);
+                if (!globalPolicyDeploymentFlag) {
+                    log.error("Unable to deploy global policy artifacts at gateway. Next retry in " + (retryDuration / 1000)
                             + " seconds");
                     try {
                         Thread.sleep(retryDuration);

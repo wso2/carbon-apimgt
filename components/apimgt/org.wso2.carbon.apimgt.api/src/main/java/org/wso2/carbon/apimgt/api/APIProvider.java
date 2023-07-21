@@ -1735,4 +1735,13 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     List<OperationPolicy> getOperationPoliciesOfPolicyMapping(String policyMappingUUID) throws APIManagementException;
+
+    /**
+     * Get gateway policies mapping UUID attached to the gateway
+     *
+     * @param gatewayLabel Gateway label
+     * @return Policy mapping UUID list
+     * @throws APIManagementException
+     */
+    List<String> getAllPolicyMappingUUIDsByGatewayLabels(String[] gatewayLabel) throws APIManagementException;
 }

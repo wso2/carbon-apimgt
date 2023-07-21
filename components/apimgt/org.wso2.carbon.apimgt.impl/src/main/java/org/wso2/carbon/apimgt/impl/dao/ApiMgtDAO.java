@@ -19938,7 +19938,7 @@ public class ApiMgtDAO {
      * Get gateway policies attached to the policy mapping
      *
      * @param policyMappingUUID Policy mapping UUID
-     * @return
+     * @return List of gateway policies
      * @throws APIManagementException
      */
     public List<OperationPolicy> getGatewayPoliciesOfPolicyMapping(String policyMappingUUID)
@@ -19959,6 +19959,38 @@ public class ApiMgtDAO {
             handleException("Failed to get the policies under policy mapping UUID " + policyMappingUUID, e);
         }
         return gatewayPolicies;
+    }
+
+    /**
+     * Get gateway policies mapping UUID attached to the gateway
+     *
+     * @param gatewayLabels Array of gateway labels
+     * @return Policy mapping UUID
+     * @throws APIManagementException
+     */
+    public List<String> getGatewayPolicyMappingByGatewayLabel(String[] gatewayLabels)
+            throws APIManagementException {
+
+        String dbQuery = SQLConstants.GatewayPolicyConstants.GET_GLOBAL_POLICY_MAPPING_UUID_BY_GATEWAY_LABEL;
+        dbQuery = dbQuery.replaceAll(SQLConstants.GATEWAY_LABEL_REGEX,
+                String.join(",", Collections.nCopies(gatewayLabels.length, "?")));
+        List<String> policyMappingUUIDs = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+            int index = 1;
+            for (String label : gatewayLabels) {
+                statement.setString(index, label);
+                index++;
+            }
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    policyMappingUUIDs.add(rs.getString("GLOBAL_POLICY_MAPPING_UUID"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve Gateway policy mapping UUIDs for labels : " + StringUtils.join(",", gatewayLabels), e);
+        }
+        return policyMappingUUIDs;
     }
 
     private List<String> getPolicyUUIDsByPolicyMappingUUID(String policyMappingUUID) throws APIManagementException {

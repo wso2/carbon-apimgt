@@ -472,6 +472,12 @@ paths:
             **Search condition**.
              type of gateway
           type: string
+        - name: gatewayLabel
+          in: query
+          description: |
+            **Search condition**.
+             label associated with the policy mapping
+          type: string
       tags:
         - Retrieving Runtime artifacts for gateway policies
       responses:

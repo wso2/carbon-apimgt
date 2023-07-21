@@ -20,5 +20,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface GatewayPolicyArtifactsApiService {
-      public Response gatewayPolicyArtifactsGet(String xWSO2Tenant, String policyMappingUuid, String type, MessageContext messageContext) throws APIManagementException;
+      public Response gatewayPolicyArtifactsGet(String xWSO2Tenant, String policyMappingUuid, String type, String gatewayLabel, MessageContext messageContext) throws APIManagementException;
 }

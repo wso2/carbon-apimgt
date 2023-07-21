@@ -23,8 +23,8 @@ import java.util.List;
 
 public class GatewayPolicyArtifactsApiServiceImpl implements GatewayPolicyArtifactsApiService {
 
-    public Response gatewayPolicyArtifactsGet(String xWSO2Tenant, String policyMappingUuid, String type, MessageContext messageContext)
-            throws APIManagementException {
+    public Response gatewayPolicyArtifactsGet(String xWSO2Tenant, String policyMappingUuid, String type,
+            String gatewayLabel, MessageContext messageContext) throws APIManagementException {
         RuntimeArtifactDto runtimeArtifactDto = null;
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         String organization = RestApiUtil.getOrganization(messageContext);
@@ -37,7 +37,8 @@ public class GatewayPolicyArtifactsApiServiceImpl implements GatewayPolicyArtifa
 //            runtimeArtifactDto = GatewayPolicyArtifactGeneratorUtil.generateRuntimeArtifact(policyMappingUuid, type, xWSO2Tenant);
 //        }
         if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
-            runtimeArtifactDto = GatewayPolicyArtifactGeneratorUtil.generateRuntimeArtifact(policyMappingUuid, type, xWSO2Tenant);
+            runtimeArtifactDto = GatewayPolicyArtifactGeneratorUtil.generateRuntimeArtifact(policyMappingUuid, type,
+                    xWSO2Tenant, gatewayLabel);
         }
         if (runtimeArtifactDto != null) {
             if (runtimeArtifactDto.isFile()) {
