@@ -1378,27 +1378,6 @@ public class OASParserUtil {
     }
 
     /**
-     * generate app security information for OAS definition
-     *
-     * @param security application security
-     * @return JsonNode
-     */
-    static JsonNode getAppSecurity(String security) {
-        List<String> appSecurityList = new ArrayList<>();
-        ObjectNode endpointResult = objectMapper.createObjectNode();
-        boolean appSecurityOptional = false;
-        if (security != null) {
-            List<String> securityList = Arrays.asList(security.split(","));
-            appSecurityList = getAPISecurity(securityList);
-            appSecurityOptional = !securityList.contains(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
-        }
-        ArrayNode appSecurityTypes = objectMapper.valueToTree(appSecurityList);
-        endpointResult.set(APIConstants.WSO2_APP_SECURITY_TYPES, appSecurityTypes);
-        endpointResult.put(APIConstants.OPTIONAL, appSecurityOptional);
-        return endpointResult;
-    }
-
-    /**
      * Generated x-throttling-limit value for the API definition
      *
      * @param throttlingLimit provides throttling limit details

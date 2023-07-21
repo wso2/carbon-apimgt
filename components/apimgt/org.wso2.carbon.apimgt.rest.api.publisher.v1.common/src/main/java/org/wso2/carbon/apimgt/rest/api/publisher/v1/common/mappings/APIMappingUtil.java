@@ -675,6 +675,10 @@ public class APIMappingUtil {
             apiInfoDTO.setAdditionalProperties(additionalPropertiesList);
             apiInfoDTO.setAdditionalPropertiesMap(additionalPropertiesMap);
             apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
+            if (StringUtils.equalsIgnoreCase(api.getApiSecurity(), APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                apiInfoDTO.setSecurityScheme(Arrays.asList(APIConstants.DEFAULT_API_SECURITY_OAUTH2,
+                        APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY));
+            }
         }
         return apiInfoDTO;
     }

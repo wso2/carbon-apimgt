@@ -970,18 +970,17 @@ public class OAS3Parser extends APIDefinition {
                 openAPI.addExtension(APIConstants.X_WSO2_MUTUAL_SSL, mutualSSLOptional);
             }
         }
-        // This app security should be given in resource level,
-        // otherwise the default oauth2 scheme defined at each resource level will override application securities
-        JsonNode appSecurityExtension = OASParserUtil.getAppSecurity(apiSecurity);
         for (String pathKey : openAPI.getPaths().keySet()) {
             PathItem pathItem = openAPI.getPaths().get(pathKey);
             for (Map.Entry<PathItem.HttpMethod, Operation> entry : pathItem.readOperationsMap().entrySet()) {
                 Operation operation = entry.getValue();
-                operation.addExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
                 // If throttling limit remains unassigned in the swagger definition, the throttling-tier property
                 // will be used to generate the limit. If throttling-tier is also not defined, the default tier would
                 // be unlimited tier.
-                if (!operation.getExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
+                if (operation.getExtensions() == null) {
+                    operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_LIMIT,
+                            ModelUtil.generateThrottlingLimitFromThrottlingTier(APIConstants.UNLIMITED_TIER));
+                } else if (!operation.getExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_LIMIT)) {
                     String tier = operation.getExtensions().containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER) ?
                             (String) operation.getExtensions().get(APIConstants.SWAGGER_X_THROTTLING_TIER) :
                             APIConstants.UNLIMITED_TIER;
@@ -2065,7 +2064,6 @@ public class OAS3Parser extends APIDefinition {
                         resourceExtensions = new HashMap<>();
                         extensionsAreEmpty = true;
                     }
-                    resourceExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, "None");
                     if (extensionsAreEmpty) {
                         operation.setExtensions(resourceExtensions);
                     }
