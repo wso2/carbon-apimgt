@@ -3853,6 +3853,47 @@ public class ApiMgtDAO {
         return appId;
     }
 
+    /**
+     * @param appName      Application Name
+     * @param username     Subscriber
+     * @param organization Organization
+     * @return ApplicationId for given appname.
+     * @throws APIManagementException if failed to get Applications for given subscriber under given organization.
+     */
+    public int getOrgSpecificApplicationId(String appName, String username, String organization)
+            throws APIManagementException {
+
+        if (username == null) {
+            return 0;
+        }
+        Subscriber subscriber = getSubscriber(username);
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        int appId = 0;
+
+        String sqlQuery = SQLConstants.GET_ORG_SPECIFIC_APPLICATION_ID_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setInt(1, subscriber.getId());
+            prepStmt.setString(2, appName);
+            prepStmt.setString(3, organization);
+            rs = prepStmt.executeQuery();
+
+            while (rs.next()) {
+                appId = rs.getInt("APPLICATION_ID");
+            }
+
+        } catch (SQLException e) {
+            handleException("Error when getting the application id from" + " the persistence store.", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return appId;
+    }
+
     public String getApplicationUUID(String appName, String username) throws APIManagementException {
 
         if (username == null) {

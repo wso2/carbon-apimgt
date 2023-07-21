@@ -1113,6 +1113,50 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @param body          Contains consumer key, secret and key type information
      * @return A response object containing application keys
      */
+    public Response applicationsApplicationIdMapKeysPostOld(String applicationId, ApplicationKeyMappingRequestDTO body,
+                                                         String xWSO2Tenant, MessageContext messageContext)
+            throws APIManagementException {
+
+        checkAuthTokenScopesForAppCredentials(body.getKeyType().toString());
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        JSONObject jsonParamObj = new JSONObject();
+        APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+        Application application = apiConsumer.getApplicationByUUID(applicationId);
+        String keyManagerName = APIConstants.KeyManager.DEFAULT_KEY_MANAGER;
+        if (StringUtils.isNotEmpty(body.getKeyManager())) {
+            keyManagerName = body.getKeyManager();
+        }
+        if (application != null) {
+            if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+                String clientId = body.getConsumerKey();
+                String keyType = body.getKeyType().toString();
+                String tokenType = APIConstants.DEFAULT_TOKEN_TYPE;
+                jsonParamObj.put(APIConstants.SUBSCRIPTION_KEY_TYPE, body.getKeyType().toString());
+                jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, body.getConsumerSecret());
+                String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                Map<String, Object> keyDetails = apiConsumer
+                        .mapExistingOAuthClient(jsonParamObj.toJSONString(), username, clientId,
+                                application.getName(), keyType, tokenType, keyManagerName, organization);
+                ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil
+                        .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
+                applicationKeyDTO.setKeyManager(keyManagerName);
+                return Response.ok().entity(applicationKeyDTO).build();
+            } else {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+        } else {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+        }
+        return null;
+    }
+
+    /**
+     * Generate keys using existing consumer key and consumer secret
+     *
+     * @param applicationId Application id
+     * @param body          Contains consumer key, secret and key type information
+     * @return A response object containing application keys
+     */
     @Override
     public Response applicationsApplicationIdMapKeysPost(String applicationId, ApplicationKeyMappingRequestDTO body,
                                                          String xWSO2Tenant, MessageContext messageContext)
