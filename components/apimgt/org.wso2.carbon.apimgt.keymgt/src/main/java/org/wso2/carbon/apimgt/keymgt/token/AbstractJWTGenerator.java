@@ -25,6 +25,7 @@ import net.minidev.json.parser.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -49,8 +50,10 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -405,30 +408,23 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
                     .encodeToString(publicCertThumbprint.getBytes(StandardCharsets.UTF_8));
             java.security.cert.X509Certificate x509Certificate = (java.security.cert.X509Certificate) publicCert;
-            StringBuilder jwtHeader = new StringBuilder();
+
             /*
              * Sample header
              * {"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10",
              * "kid":"a_jhNus21KVuoFx65LmkW2O_l10_RS256"}
              * {"typ":"JWT", "alg":"[2]", "x5t":"[1]", "x5t":"[1]"}
              * */
-            jwtHeader.append("{\"typ\":\"JWT\",");
-            jwtHeader.append("\"alg\":\"");
-            jwtHeader.append(APIUtil.getJWSCompliantAlgorithmCode(signatureAlgorithm));
-            jwtHeader.append("\",");
-
-            jwtHeader.append("\"x5t\":\"");
-            jwtHeader.append(base64UrlEncodedThumbPrint);
-            jwtHeader.append("\"");
+            JSONObject jwtHeader = new JSONObject();
+            jwtHeader.put("typ", "JWT");
+            jwtHeader.put("alg", APIUtil.getJWSCompliantAlgorithmCode(signatureAlgorithm));
+            jwtHeader.put("x5t", base64UrlEncodedThumbPrint);
             if (useKid) {
-                jwtHeader.append(",\"kid\":\"");
-                jwtHeader.append(JWTUtil.getKID(x509Certificate));
-                jwtHeader.append("\"");
+                jwtHeader.put("kid", JWTUtil.getKID(x509Certificate));
             }
-            jwtHeader.append("}");
             return jwtHeader.toString();
 
-        } catch (Exception e) {
+        } catch (NoSuchAlgorithmException | CertificateEncodingException e) {
             throw new APIManagementException("Error in generating public certificate thumbprint", e);
         }
     }

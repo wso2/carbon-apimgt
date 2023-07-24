@@ -36,8 +36,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -141,24 +143,20 @@ public class DefaultApiKeyGenerator implements ApiKeyGenerator {
             String base64UrlEncodedThumbPrint;
             base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
                     .encodeToString(publicCertThumbprint.getBytes(StandardCharsets.UTF_8));
-            StringBuilder jwtHeader = new StringBuilder();
+
             /*
              * Sample header
              * {"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10",
              * "kid":"a_jhNus21KVuoFx65LmkW2O_l10_RS256"}
              * {"typ":"JWT", "alg":"[2]", "x5t":"[1]", "x5t":"[1]"}
              * */
-            jwtHeader.append("{\"typ\":\"JWT\",");
-            jwtHeader.append("\"alg\":\"");
-            jwtHeader.append(APIUtil.getJWSCompliantAlgorithmCode(signatureAlgorithm));
-            jwtHeader.append("\",");
-
-            jwtHeader.append("\"x5t\":\"");
-            jwtHeader.append(base64UrlEncodedThumbPrint);
-            jwtHeader.append("\"}");
+            JSONObject jwtHeader = new JSONObject();
+            jwtHeader.put("typ", "JWT");
+            jwtHeader.put("alg", APIUtil.getJWSCompliantAlgorithmCode(signatureAlgorithm));
+            jwtHeader.put("x5t", base64UrlEncodedThumbPrint);
             return jwtHeader.toString();
 
-        } catch (Exception e) {
+        } catch (NoSuchAlgorithmException | CertificateEncodingException e) {
             throw new APIManagementException("Error in generating public certificate thumbprint", e);
         }
     }

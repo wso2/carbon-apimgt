@@ -221,7 +221,7 @@ public class JwksHandler extends AbstractHandler {
             }
             certificates.addAll(getCertificatesFromKeyStore(keyStore));
         } catch (Exception e) {
-            log.error("Encountered an error while retrieving certificates", e);
+            log.error("Encountered an error while retrieving certificates for tenant " + tenantDomain, e);
         }
         return certificates;
     }

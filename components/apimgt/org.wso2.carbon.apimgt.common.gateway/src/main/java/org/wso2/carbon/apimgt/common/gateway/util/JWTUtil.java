@@ -27,6 +27,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.JWTSignatureAlg;
 
@@ -110,25 +112,19 @@ public final class JWTUtil {
             base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
                     .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
 
-            StringBuilder jwtHeader = new StringBuilder();
-            jwtHeader.append("{\"typ\":\"JWT\",");
-            jwtHeader.append("\"alg\":\"");
-            jwtHeader.append(getJWSCompliantAlgorithmCode(signatureAlgorithm));
-            jwtHeader.append("\",");
-            jwtHeader.append("\"x5t\":\"");
-            jwtHeader.append(base64UrlEncodedThumbPrint);
-            jwtHeader.append("\"");
-
+            JSONObject jwtHeader = new JSONObject();
+            jwtHeader.put("typ", "JWT");
+            jwtHeader.put("alg", getJWSCompliantAlgorithmCode(signatureAlgorithm));
+            jwtHeader.put("x5t", base64UrlEncodedThumbPrint);
             if (useKid) {
-                jwtHeader.append(",\"kid\":\"");
-                jwtHeader.append(getKID(x509Certificate));
-                jwtHeader.append("\"");
+                jwtHeader.put("kid", getKID(x509Certificate));
             }
-
-            jwtHeader.append("}");
             return jwtHeader.toString();
+
         } catch (NoSuchAlgorithmException | CertificateEncodingException | UnsupportedEncodingException e) {
             throw new JWTGeneratorException("Error in generating public certificate thumbprint", e);
+        } catch (JSONException e) {
+            throw new JWTGeneratorException("Encountered an error while generating JWT header json object", e);
         }
     }
 
