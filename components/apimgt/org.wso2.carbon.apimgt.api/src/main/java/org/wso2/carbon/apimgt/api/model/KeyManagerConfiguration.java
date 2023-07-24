@@ -36,7 +36,7 @@ public class KeyManagerConfiguration {
     private String organization;
 
     public enum TokenType {
-        EXCHANGED, DIRECT, BOTH
+        EXCHANGED, DIRECT, BOTH, EXTERNAL
     }
 
     private TokenType tokenType = TokenType.DIRECT;
