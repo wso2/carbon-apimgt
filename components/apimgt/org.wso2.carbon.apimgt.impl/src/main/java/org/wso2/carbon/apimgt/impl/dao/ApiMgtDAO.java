@@ -2346,6 +2346,41 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Update the consumer key for the given key type, application ID and keyManager ID.
+     *
+     * @param applicationId
+     * @param keyType
+     * @param keyManagerId
+     */
+    public void updateConsumerKeyInApplicationKeyMapping(int applicationId, String keyType,
+                                                String keyManagerId, String consumerKey)
+            throws APIManagementException {
+
+        if (consumerKey != null && applicationId != -1) {
+            String addApplicationKeyMapping = SQLConstants.UPDATE_CONSUMER_KEY_IN_APPLICATION_KEY_MAPPINGS_SQL;
+
+            Connection connection = null;
+            PreparedStatement ps = null;
+            try {
+                connection = APIMgtDBUtil.getConnection();
+                connection.setAutoCommit(false);
+                ps = connection.prepareStatement(addApplicationKeyMapping);
+                ps.setString(1, consumerKey);
+                ps.setInt(2, applicationId);
+                ps.setString(3, keyType);
+                ps.setString(4, keyManagerId);
+                ps.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                handleException("Error updating the CONSUMER KEY of the AM_APPLICATION_KEY_MAPPING table where " +
+                        "APPLICATION_ID = " + applicationId + " and KEY_TYPE = " + keyType, e);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(ps, connection, null);
+            }
+        }
+    }
+
+    /**
      * This method will create a new client at key-manager side.further it will add new record to
      * the AM_APPLICATION_KEY_MAPPING table
      *

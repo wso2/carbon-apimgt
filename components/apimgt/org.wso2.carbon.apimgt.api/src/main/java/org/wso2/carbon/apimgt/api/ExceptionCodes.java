@@ -439,6 +439,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Malformed URLs are provide under endpoint: %s"),
     INVALID_KEY_MANAGER_PROPERTIES(901413, "Invalid properties provided", 400,
             "Invalid value is provided for the property: %s"),
+    KEY_MANAGER_NOT_SUPPORTED_CLIENT_ID_UPDATE(901414, "Key Manager doesn't support changing clientId",
+            400, "Key Manager doesn't support changing clientId"),
 
     //Scope related
     SCOPE_NOT_FOUND_FOR_USER(901500, "Scope does not belong to this user", 404, "Scope not found"),
