@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApplicationsApiService {
-      public Response applicationsGet(String xWSO2Tenant, Integer appId, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsGet(String xWSO2Tenant, Integer appId, Boolean includeSystemOrgArtifacts, MessageContext messageContext) throws APIManagementException;
 }

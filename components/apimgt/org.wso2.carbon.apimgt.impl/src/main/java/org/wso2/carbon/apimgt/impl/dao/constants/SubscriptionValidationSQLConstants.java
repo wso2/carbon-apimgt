@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.impl.dao.constants;
 
 public class SubscriptionValidationSQLConstants {
-
+    public static final String IS_SYSTEM_APP_ATTRIBUTE = "isSystemApp";
     public static final String GET_ALL_APPLICATIONS_SQL =
             " SELECT " +
                     "   APP.UUID AS APP_UUID," +
@@ -87,6 +87,31 @@ public class SubscriptionValidationSQLConstants {
                     " WHERE " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
                     "   APP.ORGANIZATION = ? ";
+
+    public static final String GET_APPLICATIONS_BY_ORGANIZATION_SQL_WITH_SYSTEM_APPS =
+            " SELECT " +
+                    "   APP.UUID AS APP_UUID," +
+                    "   APP.APPLICATION_ID AS APP_ID," +
+                    "   APP.NAME AS APS_NAME," +
+                    "   APP.APPLICATION_TIER AS TIER," +
+                    "   APP.ORGANIZATION AS ORGANIZATION," +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
+                    "   SUB.USER_ID AS SUB_NAME," +
+                    "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
+                    "   ATTRIBUTES.APP_ATTRIBUTE AS ATTRIBUTE_VALUE," +
+                    "   GROUP_MAP.GROUP_ID AS GROUP_ID" +
+                    " FROM " +
+                    "   AM_SUBSCRIBER SUB," +
+                    "   AM_APPLICATION APP" +
+                    "   LEFT OUTER JOIN AM_APPLICATION_ATTRIBUTES ATTRIBUTES" +
+                    "  ON APP.APPLICATION_ID = ATTRIBUTES.APPLICATION_ID" +
+                    "   LEFT OUTER JOIN AM_APPLICATION_GROUP_MAPPING GROUP_MAP" +
+                    "  ON APP.APPLICATION_ID = GROUP_MAP.APPLICATION_ID" +
+                    " WHERE " +
+                    "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
+                    "  (APP.ORGANIZATION = ? OR" +
+                    "  (ATTRIBUTES.NAME='" + IS_SYSTEM_APP_ATTRIBUTE + "' AND " +
+                    "  ATTRIBUTES.APP_ATTRIBUTE='true' AND APP.ORGANIZATION = ?))";
 
     public static final String GET_APPLICATION_BY_ID_SQL =
             " SELECT " +
