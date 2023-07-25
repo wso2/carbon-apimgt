@@ -162,14 +162,16 @@ class LogUtils {
                         for (Map.Entry<Map<String, String>, String> entry : logProperties.entrySet()) {
                             Map<String, String> key = entry.getKey();
                             //if resource path is empty, proceeding with API level logs
-                            if (key.get("resourcePath") == null && key.get("resourceMethod") == null) {
-                                apiLogLevel = entry.getValue();
-                                //matching the methods first and then the resource path
-                            } else if (httpMethod.equals(key.get("resourceMethod"))) {
-                                if (helper.getString().equals(key.get("resourcePath"))) {
-                                    resourceLogLevel = entry.getValue();
-                                    resourcePath = key.get("resourcePath");
-                                    resourceMethod = key.get("resourceMethod");
+                            if (selectedApi.getContext().equals(key.get("context"))) {
+                                if (key.get("resourcePath") == null && key.get("resourceMethod") == null) {
+                                    apiLogLevel = entry.getValue();
+                                    //matching the methods first and then the resource path
+                                } else if (httpMethod.equals(key.get("resourceMethod"))) {
+                                    if (helper.getString().equals(key.get("resourcePath"))) {
+                                        resourceLogLevel = entry.getValue();
+                                        resourcePath = key.get("resourcePath");
+                                        resourceMethod = key.get("resourceMethod");
+                                    }
                                 }
                             }
                         }
