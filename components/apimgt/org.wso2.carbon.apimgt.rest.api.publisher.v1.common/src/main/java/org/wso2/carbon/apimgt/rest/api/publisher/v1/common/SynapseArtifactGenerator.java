@@ -176,25 +176,25 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                     gatewayPolicyArtifactDto.getGatewayPolicyDataList(),
                     gatewayPolicyArtifactDto.getGatewayPolicyList(), APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
             if (gatewayInContentDTO != null) {
-                gatewayPolicyDTO.setGatewayPolicySequenceToBeAdd(
+                gatewayPolicyDTO.setGatewayPolicySequenceToBeAdded(
                         TemplateBuilderUtil.addGatewayContentToList(gatewayInContentDTO,
-                                gatewayPolicyDTO.getGatewayPolicySequenceToBeAdd()));
+                                gatewayPolicyDTO.getGatewayPolicySequenceToBeAdded()));
             }
             GatewayContentDTO gatewayOutContentDTO = retrieveGatewayPolicySequence(
                     gatewayPolicyArtifactDto.getGatewayPolicyDataList(),
                     gatewayPolicyArtifactDto.getGatewayPolicyList(), APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
             if (gatewayOutContentDTO != null) {
-                gatewayPolicyDTO.setGatewayPolicySequenceToBeAdd(
+                gatewayPolicyDTO.setGatewayPolicySequenceToBeAdded(
                         TemplateBuilderUtil.addGatewayContentToList(gatewayOutContentDTO,
-                                gatewayPolicyDTO.getGatewayPolicySequenceToBeAdd()));
+                                gatewayPolicyDTO.getGatewayPolicySequenceToBeAdded()));
             }
             GatewayContentDTO gatewayFaultContentDTO = retrieveGatewayPolicySequence(
                     gatewayPolicyArtifactDto.getGatewayPolicyDataList(),
                     gatewayPolicyArtifactDto.getGatewayPolicyList(), APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
             if (gatewayFaultContentDTO != null) {
-                gatewayPolicyDTO.setGatewayPolicySequenceToBeAdd(
+                gatewayPolicyDTO.setGatewayPolicySequenceToBeAdded(
                         TemplateBuilderUtil.addGatewayContentToList(gatewayFaultContentDTO,
-                                gatewayPolicyDTO.getGatewayPolicySequenceToBeAdd()));
+                                gatewayPolicyDTO.getGatewayPolicySequenceToBeAdded()));
             }
             String content = new Gson().toJson(gatewayPolicyDTO);
             synapseArtifacts.add(content);

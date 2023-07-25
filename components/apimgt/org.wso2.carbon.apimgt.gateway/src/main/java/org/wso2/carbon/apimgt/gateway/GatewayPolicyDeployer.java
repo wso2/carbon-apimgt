@@ -54,8 +54,18 @@ public class GatewayPolicyDeployer {
         }
     }
 
-    public void undeployGatewayPolicyMapping() {
-
+    public void undeployGatewayPolicyMapping() throws ArtifactSynchronizerException {
+        try {
+            GatewayPolicyDTO gatewayPolicyDTO = retrieveGatewayPolicyArtifact(gatewayPolicyMappingUuid);
+            if (gatewayPolicyDTO != null) {
+                APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdmin();
+                MessageContext.setCurrentMessageContext(
+                        org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.createAxis2MessageContext());
+                apiGatewayAdmin.unDeployGatewayPolicy(gatewayPolicyDTO);
+            }
+        } catch (AxisFault e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private GatewayPolicyDTO retrieveGatewayPolicyArtifact(String policyMappingUUUID)
