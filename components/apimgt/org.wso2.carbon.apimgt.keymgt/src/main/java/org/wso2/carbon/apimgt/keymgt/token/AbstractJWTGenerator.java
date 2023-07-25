@@ -189,15 +189,10 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
         //if signature algo==NONE, header without cert
         if (NONE.equals(signatureAlgorithm)) {
-            StringBuilder jwtHeaderBuilder = new StringBuilder();
-            jwtHeaderBuilder.append("{\"typ\":\"JWT\",");
-            jwtHeaderBuilder.append("\"alg\":\"");
-            jwtHeaderBuilder.append(APIUtil.getJWSCompliantAlgorithmCode(NONE));
-            jwtHeaderBuilder.append('\"');
-            jwtHeaderBuilder.append('}');
-
+            JSONObject jwtHeaderBuilder = new JSONObject();
+            jwtHeaderBuilder.put("typ", "JWT");
+            jwtHeaderBuilder.put("alg", APIUtil.getJWSCompliantAlgorithmCode(NONE));
             jwtHeader = jwtHeaderBuilder.toString();
-
         } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
             jwtHeader = addCertToHeader(tenantDomain);
         }
