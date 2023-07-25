@@ -1,15 +1,15 @@
 package org.wso2.carbon.apimgt.api.gateway;
 
 public class GatewayPolicyDTO {
-    private GatewayContentDTO[] gatewayPolicySequenceToBeAdd;
+    private GatewayContentDTO[] gatewayPolicySequenceToBeAdded;
     private String tenantDomain;
 
-    public GatewayContentDTO[] getGatewayPolicySequenceToBeAdd() {
-        return gatewayPolicySequenceToBeAdd;
+    public GatewayContentDTO[] getGatewayPolicySequenceToBeAdded() {
+        return gatewayPolicySequenceToBeAdded;
     }
 
-    public void setGatewayPolicySequenceToBeAdd(GatewayContentDTO[] gatewayPolicySequenceToBeAdd) {
-        this.gatewayPolicySequenceToBeAdd = gatewayPolicySequenceToBeAdd;
+    public void setGatewayPolicySequenceToBeAdded(GatewayContentDTO[] gatewayPolicySequenceToBeAdded) {
+        this.gatewayPolicySequenceToBeAdded = gatewayPolicySequenceToBeAdded;
     }
 
     public String getTenantDomain() {

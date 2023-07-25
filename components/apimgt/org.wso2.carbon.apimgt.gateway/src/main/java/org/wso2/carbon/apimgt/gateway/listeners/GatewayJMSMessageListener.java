@@ -372,8 +372,22 @@ public class GatewayJMSMessageListener implements MessageListener {
                         }
                     }
                 } else if (EventType.REMOVE_POLICY_MAPPING_FROM_GATEWAY.toString().equals(eventType)) {
-                    new GatewayPolicyDeployer(
-                            gatewayPolicyEvent.getGatewayPolicyMappingUuid()).undeployGatewayPolicyMapping();
+                    boolean tenantFlowStarted = false;
+                    try {
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                .setTenantDomain(gatewayPolicyEvent.getTenantDomain(), true);
+                        tenantFlowStarted = true;
+                        new GatewayPolicyDeployer(
+                                gatewayPolicyEvent.getGatewayPolicyMappingUuid()).undeployGatewayPolicyMapping();
+                    } catch (ArtifactSynchronizerException e) {
+                        log.error("Error while un-deploying artifacts for " + gatewayPolicyEvent.getGatewayPolicyMappingUuid()
+                                + "from the Gateway");
+                    } finally {
+                        if (tenantFlowStarted) {
+                            PrivilegedCarbonContext.endTenantFlow();
+                        }
+                    }
                 }
             }
         }

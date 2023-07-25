@@ -906,8 +906,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
         SequenceAdminServiceProxy sequenceAdminServiceProxy =
                 getSequenceAdminServiceClient(gatewayPolicyDTO.getTenantDomain());
-        if (gatewayPolicyDTO.getGatewayPolicySequenceToBeAdd() != null) {
-            for (GatewayContentDTO sequence : gatewayPolicyDTO.getGatewayPolicySequenceToBeAdd()) {
+        if (gatewayPolicyDTO.getGatewayPolicySequenceToBeAdded() != null) {
+            for (GatewayContentDTO sequence : gatewayPolicyDTO.getGatewayPolicySequenceToBeAdded()) {
                 OMElement element;
                 try {
                     element = AXIOMUtil.stringToOM(sequence.getContent());
@@ -920,6 +920,19 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                     sequenceAdminServiceProxy.addSequence(element);
                 } else {
                     sequenceAdminServiceProxy.addSequence(element);
+                }
+            }
+        }
+    }
+
+    public void unDeployGatewayPolicy(GatewayPolicyDTO gatewayPolicyDTO) throws AxisFault {
+
+        SequenceAdminServiceProxy sequenceAdminServiceProxy = getSequenceAdminServiceClient(
+                gatewayPolicyDTO.getTenantDomain());
+        if (gatewayPolicyDTO.getGatewayPolicySequenceToBeAdded() != null) {
+            for (GatewayContentDTO sequence : gatewayPolicyDTO.getGatewayPolicySequenceToBeAdded()) {
+                if (sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
+                    sequenceAdminServiceProxy.deleteSequence(sequence.getName());
                 }
             }
         }
