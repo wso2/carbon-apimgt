@@ -123,7 +123,8 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
             }
         } catch (JSONException e) {
             throw new JWTGeneratorException("Encountered an error while generating JWT header json object", e);
-        } return jwtHeader;
+        }
+        return jwtHeader;
     }
 
     public byte[] signJWT(String assertion) throws JWTGeneratorException {
