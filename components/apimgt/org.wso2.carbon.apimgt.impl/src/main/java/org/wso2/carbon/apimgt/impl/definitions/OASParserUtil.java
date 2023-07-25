@@ -34,6 +34,8 @@ import io.swagger.models.RefPath;
 import io.swagger.models.RefResponse;
 import io.swagger.models.Response;
 import io.swagger.models.Swagger;
+import io.swagger.models.auth.OAuth2Definition;
+import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
@@ -81,12 +83,13 @@ import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -100,22 +103,22 @@ import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashMap;
-import java.util.stream.Collectors;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Arrays;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 /**
@@ -1795,5 +1798,193 @@ public class OASParserUtil {
             }
         }
         return definitionUpdated;
+    }
+
+    /**
+     * This method will set the scopes defined in the API to the security scheme in swagger3.
+     *
+     * @param swaggerData    SwaggerData object which contains the API data.
+     * @param securityScheme SecurityScheme object which contains the security scheme.
+     */
+    public static void setScopesFromAPIToSecurityScheme(SwaggerData swaggerData, SecurityScheme securityScheme) {
+
+        Map<String, String> scopeBindings = new LinkedHashMap<>();
+        Scopes oas3Scopes = new Scopes();
+        Set<Scope> scopes = swaggerData.getScopes(); // Get the scopes defined in the API.
+        if (scopes != null && !scopes.isEmpty()) {  // If scopes defined, add them to the OAS definition.
+            populateScopesFromAPI(scopes, oas3Scopes, scopeBindings);
+            // replace the scope bindings if the scopes are not empty.
+            if (SecurityScheme.Type.OAUTH2.toString().equals(securityScheme.getType().toString())) {
+                securityScheme.getFlows().getImplicit()
+                        .addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
+            } else if (SecurityScheme.Type.HTTP.toString().equals(securityScheme.getType().toString()) &&
+                    APIConstants.AUTHORIZATION_HEADER_BASIC.equals(securityScheme.getScheme())) {
+                securityScheme.addExtension(APIConstants.SWAGGER_X_BASIC_AUTH_SCOPES, oas3Scopes);
+                securityScheme.addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
+            }
+        }
+        if (SecurityScheme.Type.OAUTH2.toString().equals(securityScheme.getType().toString())) {
+            securityScheme.getFlows().getImplicit().setScopes(oas3Scopes);
+        }
+    }
+
+    /**
+     * This method will set the scopes defined in the API to the security scheme in swagger2.
+     *
+     * @param swaggerData              SwaggerData object which contains the API data.
+     * @param securitySchemeDefinition SecuritySchemeDefinition object which contains the security scheme.
+     */
+    public static void setScopesFromAPIToSecurityScheme(SwaggerData swaggerData,
+                                                        SecuritySchemeDefinition securitySchemeDefinition) {
+
+        Map<String, String> swaggerScopes = new LinkedHashMap<>();
+        Map<String, String> scopeBindings = new LinkedHashMap<>();
+        Set<Scope> scopes = swaggerData.getScopes();
+        if (scopes != null && !scopes.isEmpty()) {
+            populateScopesFromAPI(scopes, swaggerScopes, scopeBindings);
+            if (StringUtils.equals(APIConstants.DEFAULT_API_SECURITY_OAUTH2, securitySchemeDefinition.getType())) {
+                securitySchemeDefinition.setVendorExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
+            } else if (StringUtils.equals(APIConstants.SWAGGER_API_SECURITY_BASIC_AUTH_TYPE,
+                    securitySchemeDefinition.getType())) {
+                securitySchemeDefinition.setVendorExtension(APIConstants.SWAGGER_X_BASIC_AUTH_SCOPES, swaggerScopes);
+                securitySchemeDefinition.setVendorExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
+            }
+        }
+        if (StringUtils.equals(APIConstants.DEFAULT_API_SECURITY_OAUTH2, securitySchemeDefinition.getType())) {
+            ((OAuth2Definition) securitySchemeDefinition).setScopes(swaggerScopes);
+        }
+    }
+
+    private static void populateScopesFromAPI(Set<Scope> apiScopes, Map<String, String> scopes,
+                                              Map<String, String> scopeBindings) {
+
+        if (apiScopes != null && !apiScopes.isEmpty()) {
+            apiScopes.forEach(scope -> {
+                String description = scope.getDescription() != null ? scope.getDescription() : StringUtils.EMPTY;
+                scopes.put(scope.getKey(), description);
+                // If roles are defined for the scope, add them to the scope bindings.
+                String roles = (StringUtils.isNotBlank(scope.getRoles())
+                        && scope.getRoles().trim().split(",").length > 0) ? scope.getRoles() : StringUtils.EMPTY;
+                scopeBindings.put(scope.getKey(), roles);
+            });
+        }
+    }
+
+    /**
+     * Add security requirement to swagger2.
+     *
+     * @param swagger         Swagger2 object
+     * @param securityReqName SecurityRequirement name (Eg: default, basic_auth etc).
+     */
+    public static void addSecurityRequirementToSwagger(Swagger swagger, String securityReqName) {
+
+        io.swagger.models.SecurityRequirement securityRequirement = new io.swagger.models.SecurityRequirement();
+        securityRequirement.setRequirements(securityReqName, new ArrayList<>());
+        if (swagger.getSecurity() == null || !swagger.getSecurity().contains(securityRequirement)) {
+            swagger.addSecurity(securityRequirement);
+        }
+    }
+
+    /**
+     * Add security requirement to OAS definition.
+     *
+     * @param openAPI         OAS Definition object
+     * @param securityReqName SecurityRequirement name (Eg: default, basic_auth etc).
+     */
+    public static void addSecurityRequirementToSwagger(OpenAPI openAPI, String securityReqName) {
+
+        SecurityRequirement secReq = new SecurityRequirement();
+        secReq.addList(securityReqName, new ArrayList<>());
+        openAPI.addSecurityItem(secReq);
+    }
+
+    /**
+     * Add operation level security requirements from the API to OAS definition.
+     *
+     * @param operationSecurities Existing operation level security requirements
+     * @param apiSecurities       Security defined for API
+     * @param securityReqName     Specific security name (Eg: basic_auth, default etc)
+     * @param operationScopes     Operation specific scopes for the security requirement
+     */
+    public static void addOASOperationSecurityReqFromAPI(List<SecurityRequirement> operationSecurities,
+                                                         List<String> apiSecurities, String securityReqName,
+                                                         List<String> operationScopes) {
+
+        if (apiSecurities.contains(securityReqName)) {
+            boolean isSecurityExists = operationSecurities.stream().anyMatch(
+                    securityRequirement -> securityRequirement.containsKey(securityReqName));
+            if (!isSecurityExists) {
+                SecurityRequirement securityRequirement = new SecurityRequirement();
+                securityRequirement.addList(securityReqName, operationScopes);
+                operationSecurities.add(securityRequirement);
+            } else {
+                operationSecurities.stream().filter
+                                (securityRequirement -> securityRequirement.containsKey(securityReqName))
+                        .findFirst().ifPresent(securityRequirement -> securityRequirement
+                                .addList(securityReqName, operationScopes));
+            }
+        }
+    }
+
+    /**
+     * Set Basic Auth Scopes for API resources in OAS definition.
+     *
+     * @param operationScopes Operation specific scopes for the security requirement
+     * @param apiSecurities   Security defined for API
+     * @param operation       Existing operation
+     */
+    public static void addOASBasicAuthResourceScopesFromAPI(List<String> operationScopes, List<String> apiSecurities,
+                                                            Operation operation) {
+
+        if (!operationScopes.isEmpty() && apiSecurities.contains(APIConstants.API_SECURITY_BASIC_AUTH)) {
+            operation.addExtension(APIConstants.SWAGGER_X_BASIC_AUTH_RESOURCE_SCOPES, operationScopes);
+        }
+    }
+
+    /**
+     * Add operation level security requirements from the API to Swagger2.
+     *
+     * @param operationSecurities Existing operation level security requirements
+     * @param apiSecurities       Security defined for API
+     * @param securityReqName     Specific security name (Eg: basic_auth, default etc)
+     * @param operationScopes     Operation specific scopes for the security requirement
+     */
+    public static void addSwaggerOperationSecurityReqFromAPI(List<Map<String, List<String>>> operationSecurities,
+                                                             List<String> apiSecurities, String securityReqName,
+                                                             List<String> operationScopes) {
+
+        if (apiSecurities.contains(securityReqName)) {
+            // If security requirement is set for the API.
+            boolean isSecurityExists = operationSecurities.stream().anyMatch(
+                    securityRequirement -> securityRequirement.containsKey(securityReqName));
+            if (!isSecurityExists) {
+                // If security not defined in the swagger definition, add new.
+                Map<String, List<String>> securityRequirement = new HashMap<>();
+                securityRequirement.put(securityReqName, operationScopes);
+                operationSecurities.add(securityRequirement);
+            } else {
+                // If security already defined in the swagger definition, update the scope list.
+                operationSecurities.stream().filter
+                                (securityRequirement -> securityRequirement.containsKey(securityReqName))
+                        .findFirst().ifPresent(securityRequirement -> securityRequirement
+                                .put(securityReqName, operationScopes));
+            }
+        }
+    }
+
+    /**
+     * Set Basic Auth Scopes for API resources in Swagger2 definition.
+     *
+     * @param operationScopes Operation specific scopes for the security requirement
+     * @param apiSecurities   Security defined for API
+     * @param operation       Existing operation
+     */
+    public static void addSwaggerBasicAuthResourceScopesFromAPI(List<String> operationScopes,
+                                                                List<String> apiSecurities,
+                                                                io.swagger.models.Operation operation) {
+
+        if (!operationScopes.isEmpty() && apiSecurities.contains(APIConstants.API_SECURITY_BASIC_AUTH)) {
+            operation.setVendorExtension(APIConstants.SWAGGER_X_BASIC_AUTH_RESOURCE_SCOPES, operationScopes);
+        }
     }
 }
