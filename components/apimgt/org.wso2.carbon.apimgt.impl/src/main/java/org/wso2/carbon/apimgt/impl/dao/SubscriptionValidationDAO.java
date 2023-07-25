@@ -630,6 +630,25 @@ public class SubscriptionValidationDAO {
         return keyMappings;
     }
 
+    public List<ApplicationKeyMapping> getAllApplicationKeyMappingsByOrganization(String organization, String systemOrg) {
+
+        List<ApplicationKeyMapping> keyMappings = new ArrayList<>();
+        String sql = SubscriptionValidationSQLConstants.GET_ORGANIZATION_AM_KEY_MAPPING_SQL_WITH_SYSTEM_ORG;
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(sql)) {
+            ps.setString(1, organization);
+            ps.setString(2, systemOrg);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                populateApplicationKeyMappingsList(keyMappings, resultSet);
+            }
+        } catch (SQLException e) {
+            log.error("Error in loading Application key mappings for organization with system org : " + organization, e);
+        }
+
+        return keyMappings;
+    }
 
     private void populateApplicationKeyMappingsList(List<ApplicationKeyMapping> keyMappings, ResultSet resultSet)
             throws SQLException {

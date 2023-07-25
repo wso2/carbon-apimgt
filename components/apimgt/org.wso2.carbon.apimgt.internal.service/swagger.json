@@ -557,6 +557,12 @@
           "description" : "**Search condition**.\n KeyManager associated to consumer_key of the application\n",
           "required" : false,
           "type" : "string"
+        }, {
+          "name" : "includeSystemOrgArtifacts",
+          "in" : "query",
+          "description" : "Whether to include system org API artifacts\n",
+          "required" : false,
+          "type" : "boolean"
         } ],
         "responses" : {
           "200" : {

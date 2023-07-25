@@ -582,6 +582,19 @@ public class SubscriptionValidationSQLConstants {
                     "   MAPPING.APPLICATION_ID = APP.APPLICATION_ID AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
                     "   MAPPING.KEY_MANAGER = KEYM.UUID AND APP.ORGANIZATION = ?";
 
+    public static final String GET_ORGANIZATION_AM_KEY_MAPPING_SQL_WITH_SYSTEM_ORG =
+            "SELECT APP.UUID,MAPPING.APPLICATION_ID, MAPPING.CONSUMER_KEY,MAPPING.KEY_TYPE,KEYM.NAME AS KEY_MANAGER," +
+                    "MAPPING.STATE" +
+                    " FROM " +
+                    "   AM_APPLICATION_KEY_MAPPING MAPPING,AM_SUBSCRIBER SUB,AM_KEY_MANAGER KEYM, AM_APPLICATION APP " +
+                    "   LEFT OUTER JOIN AM_APPLICATION_ATTRIBUTES ATTRIBUTES" +
+                    "   ON APP.APPLICATION_ID = ATTRIBUTES.APPLICATION_ID" +
+                    " WHERE " +
+                    "   MAPPING.APPLICATION_ID = APP.APPLICATION_ID AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
+                    "   MAPPING.KEY_MANAGER = KEYM.UUID AND (APP.ORGANIZATION = ? OR" +
+                    "   (ATTRIBUTES.NAME='" + IS_SYSTEM_APP_ATTRIBUTE + "' AND " +
+                    "   ATTRIBUTES.APP_ATTRIBUTE='true' AND APP.ORGANIZATION = ?))";
+
     public static final String GET_ALL_GLOBAL_POLICIES_SQL =
             " SELECT " +
                     "   POLICY_ID," +
