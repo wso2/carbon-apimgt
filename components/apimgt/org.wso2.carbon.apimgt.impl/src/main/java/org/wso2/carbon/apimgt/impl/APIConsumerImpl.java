@@ -344,8 +344,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             ExceptionCodes.KEY_MANAGER_NOT_SUPPORTED_TOKEN_GENERATION);
                 }
                 KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerTenant, keyManagerName);
-                if (keyManager == null) {
-                    throw new APIManagementException("Key Manager " + keyManagerName + " not initialized",
+                if (keyManager == null) {throw new APIManagementException("Key Manager " + keyManagerName + " not initialized",
                             ExceptionCodes.KEY_MANAGER_INITIALIZATION_FAILED);
                 }
                 tokenRequest = ApplicationUtils.populateTokenRequest(keyManager, jsonInput, tokenRequest);
@@ -598,6 +597,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             keyDetails.put(APIConstants.FrontEndParameterNames.KEY_MAPPING_ID, keyMappingId);
             keyDetails.put(APIConstants.FrontEndParameterNames.MODE, APIConstants.OAuthAppMode.MAPPED.name());
             keyDetails.put(APIConstants.FrontEndParameterNames.CONSUMER_SECRET, "N/A");
+            keyDetails.put(APIConstants.FrontEndParameterNames.KEY_MANAGER, keyManagerName);
+            keyDetails.put(APIConstants.FrontEndParameterNames.KEY_TYPE, keyType);
+            keyDetails.put(APIConstants.FrontEndParameterNames.KEY_STATE, "APPROVED");
             return keyDetails;
         }
 
@@ -2883,7 +2885,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public OAuthApplicationInfo updateMappedApplicationKey(String userId, Application application,
                                                  String tokenType, String keyManagerID,
-                                                           String consumerKey) throws APIManagementException {
+                                                           String consumerKey, String organization)
+            throws APIManagementException {
         boolean tenantFlowStarted = false;
         try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -2916,7 +2919,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             } else {
                 //keeping this just in case the name is sent by mistake.
                 keyManagerConfiguration =
-                        apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerID);
+                        apiMgtDAO.getKeyManagerConfigurationByName(organization, keyManagerID);
                 if (keyManagerConfiguration == null) {
                     throw new APIManagementException("Key Manager " + keyManagerID + " couldn't found.",
                             ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);

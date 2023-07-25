@@ -447,11 +447,14 @@ public interface APIConsumer extends APIManager {
      * @param userId         Subscriber name.
      * @param application    The Application.
      * @param tokenType      Token type (PRODUCTION | SANDBOX)
-     * @param keyManagerName
+     * @param keyManagerName KeyManager Name
+     * @param consumerKey    Consumer Key
+     * @param organization   organization UUID
      * @throws APIManagementException if failed to applications for given subscriber
      */
     OAuthApplicationInfo updateMappedApplicationKey(String userId, Application application,
-                                                    String tokenType, String keyManagerName, String consumerKey)
+                                                    String tokenType, String keyManagerName, String consumerKey,
+                                                    String organization)
             throws APIManagementException;
 
     /**
