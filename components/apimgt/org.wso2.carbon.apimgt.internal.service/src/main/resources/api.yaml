@@ -307,6 +307,12 @@ paths:
             **Search condition**.
               Application UUID  of the subscription
           type: string
+        - name: includeSystemOrgArtifacts
+          in: query
+          description: |
+            Whether to include system org API artifacts
+          type: boolean
+          required: false
       tags:
         - Subscription Validation
       responses:

@@ -115,6 +115,31 @@ public class SubscriptionValidationDAO {
     }
 
     /*
+     * This method can be used to retrieve all the APIs of a given organization in the database
+     *
+     * @param organization : organization Id
+     * @param systemOrg : organization Id of system org
+     * @return {@link List<Subscription>}
+     * */
+    public List<Subscription> getAllSubscriptionsByOrganization(String organization, String systemOrg) throws APIManagementException {
+
+        List<Subscription> subscriptions = new ArrayList<>();
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ORGANIZATION_SUBSCRIPTIONS_SQL_WITH_SYSTEM_ORG)) {
+
+            ps.setString(1, organization);
+            ps.setString(2, systemOrg);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                populateSubscriptionsList(subscriptions, resultSet);
+            }
+        } catch (SQLException e) {
+            log.error("Error in loading Subscriptions for the organization with system org : " + organization, e);}
+        return subscriptions;
+    }
+
+    /*
      * This method can be used to retrieve all the Applications in the database
      *
      * @return {@link List<Application>}
@@ -519,6 +544,7 @@ public class SubscriptionValidationDAO {
     /*
      * This method can be used to retrieve all the Applications of a given tenant in the database
      * @param tenantId : tenant Id
+     * @param systemOrg: organization Id of system org
      * @return {@link Subscription}
      * */
     public List<Application> getAllApplications(String organization, String systemOrg) {

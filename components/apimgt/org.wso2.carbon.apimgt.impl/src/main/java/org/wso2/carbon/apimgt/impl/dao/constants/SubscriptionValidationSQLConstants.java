@@ -157,6 +157,32 @@ public class SubscriptionValidationSQLConstants {
                     "   SUBS.APPLICATION_ID = APP.APPLICATION_ID AND " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND " +
                     "   APP.ORGANIZATION = ? ";
+
+    public static final String GET_ORGANIZATION_SUBSCRIPTIONS_SQL_WITH_SYSTEM_ORG =
+            "SELECT " +
+                    "   SUBS.UUID AS SUBSCRIPTION_UUID," +
+                    "   SUBS.SUBSCRIPTION_ID AS SUB_ID," +
+                    "   SUBS.TIER_ID AS TIER," +
+                    "   SUBS.API_ID AS API_ID," +
+                    "   APP.APPLICATION_ID AS APP_ID," +
+                    "   APP.UUID AS APPLICATION_UUID," +
+                    "   API.API_UUID AS API_UUID," +
+                    "   SUBS.SUB_STATUS AS STATUS," +
+                    "   SUB.TENANT_ID AS TENANT_ID" +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUBS," +
+                    "   AM_API API," +
+                    "   AM_SUBSCRIBER SUB," +
+                    "   AM_APPLICATION APP " +
+                    "   LEFT OUTER JOIN AM_APPLICATION_ATTRIBUTES ATTRIBUTES" +
+                    "   ON APP.APPLICATION_ID = ATTRIBUTES.APPLICATION_ID" +
+                    " WHERE " +
+                    "   SUBS.API_ID = API.API_ID AND " +
+                    "   SUBS.APPLICATION_ID = APP.APPLICATION_ID AND " +
+                    "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND " +
+                    "   (APP.ORGANIZATION = ? OR" +
+                    "   (ATTRIBUTES.NAME='" + IS_SYSTEM_APP_ATTRIBUTE + "' AND " +
+                    "   ATTRIBUTES.APP_ATTRIBUTE='true' AND APP.ORGANIZATION = ?))";
     public static final String GET_ALL_SUBSCRIPTIONS_SQL =
             "SELECT " +
                     "   SUBS.UUID AS SUBSCRIPTION_UUID," +
