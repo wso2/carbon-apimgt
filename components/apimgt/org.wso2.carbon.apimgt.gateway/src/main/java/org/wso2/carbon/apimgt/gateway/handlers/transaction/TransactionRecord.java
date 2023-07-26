@@ -3,13 +3,13 @@ package org.wso2.carbon.apimgt.gateway.handlers.transaction;
 import java.time.Instant;
 import java.util.UUID;
 
-public class TransactionCountRecord {
+public class TransactionRecord {
 
-    private final String id = UUID.randomUUID().toString();
+    private static final String id = UUID.randomUUID().toString();
     private Integer count;
     private final String recordedTime;
 
-    public TransactionCountRecord(Integer count) {
+    public TransactionRecord(Integer count) {
         this.count = count;
         this.recordedTime = Instant.now().toString();
     }
