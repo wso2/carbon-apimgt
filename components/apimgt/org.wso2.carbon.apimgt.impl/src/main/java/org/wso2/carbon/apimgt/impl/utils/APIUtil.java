@@ -9621,9 +9621,10 @@ public final class APIUtil {
         UrlValidator urlValidator = new UrlValidator(authorityValidator, validatorOptions);
 
         for (String endpoint : endpoints) {
-            // If url is a JMS connection url or a Consul service discovery related url, validation is skipped.
-            // If not, validity is checked.
-            if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(") && !urlValidator.isValid(endpoint)) {
+            // If url is a JMS connection url or a Consul service discovery related url, or a parameterized URL
+            // validation is skipped. If not, validity is checked.
+            if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(") && !endpoint.contains("{") &&
+                    !endpoint.contains("}") && !urlValidator.isValid(endpoint)) {
                 try {
                     // If the url is not identified as valid from the above check,
                     // next step is determine the validity of the encoded url (done through the URI constructor).
