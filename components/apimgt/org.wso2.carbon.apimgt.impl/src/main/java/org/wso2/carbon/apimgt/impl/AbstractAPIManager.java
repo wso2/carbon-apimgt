@@ -1005,6 +1005,7 @@ public abstract class AbstractAPIManager implements APIManager {
                         KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().
                                 toUpperCase()))) {
                         // Do nothing as when the token type is external, there won't be any active keymanagers.
+                    resultantApiKeyList.add(apiKey);
                 } else {
                     log.error("Key Manager " + keyManagerName + " not initialized in tenant " + tenantDomain);
                 }
