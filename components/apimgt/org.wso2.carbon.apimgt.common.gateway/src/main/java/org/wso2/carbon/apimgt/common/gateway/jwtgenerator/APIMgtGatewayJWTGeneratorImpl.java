@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.common.gateway.jwtgenerator;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 
@@ -34,6 +36,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGenerator {
 
+    private static final Log log = LogFactory.getLog(APIMgtGatewayJWTGeneratorImpl.class);
     @Override
     public Map<String, Object> populateStandardClaims(JWTInfoDto jwtInfoDto) {
 
@@ -97,7 +100,7 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
     @Override
     public Map<String, Object> populateCustomClaims(JWTInfoDto jwtInfoDto) {
 
-        String[] restrictedClaims = {"iss", "sub", "aud", "exp", "nbf", "iat", "jti", "application", "tierInfo",
+        String[] restrictedClaims = {"iss", "sub", "exp", "nbf", "iat", "jti", "application", "tierInfo",
                 "subscribedAPIs", "aut"};
         Map<String, Object> claims = new HashMap<>();
         Set<String> jwtExcludedClaims = jwtConfigurationDto.getJWTExcludedClaims();
