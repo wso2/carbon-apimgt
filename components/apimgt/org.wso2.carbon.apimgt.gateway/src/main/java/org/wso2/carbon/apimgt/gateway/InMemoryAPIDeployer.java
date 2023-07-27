@@ -31,12 +31,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.transport.dynamicconfigurations.DynamicProfileReloaderHolder;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin;
@@ -194,6 +197,11 @@ public class InMemoryAPIDeployer {
             throws ArtifactSynchronizerException {
 
         boolean result = false;
+        try {
+            deployJWKSSynapseAPI(tenantDomain); // Deploy JWKS API
+        } catch (APIManagementException e) {
+            log.error("Error while deploying JWKS API for tenant domain :" + tenantDomain, e);
+        }
 
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             if (artifactRetriever != null) {
@@ -437,6 +445,58 @@ public class InMemoryAPIDeployer {
                                 retrievedAPI.getApiId(), retrievedAPI.getUuid(), gatewayLabels, apiName, version,
                                 retrievedAPI.getApiProvider(), retrievedAPI.getApiType(), retrievedAPI.getContext());
                 unDeployAPI(deployAPIInGatewayEvent);
+            }
+        }
+    }
+
+    /**
+     * Deploy Synapse API for JWKS endpoint
+     *
+     * @param tenantDomain tenant domain
+     */
+    public static void deployJWKSSynapseAPI(String tenantDomain) throws APIManagementException {
+        String api = org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.retrieveDeployedAPI(
+                JWTConstants.GATEWAY_JWKS_API_NAME, null, tenantDomain);
+        if (api == null) {
+            try {
+                // Deploy JWKS API for tenant
+                MessageContext.setCurrentMessageContext(
+                        org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.createAxis2MessageContext());
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                GatewayAPIDTO jwksAPIDto = new GatewayAPIDTO();
+                String jwksApiContext;
+                if (tenantDomain != null && !APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
+                    jwksApiContext = "/t/" + tenantDomain + JWTConstants.GATEWAY_JWKS_API_CONTEXT;
+                } else {
+                    jwksApiContext = JWTConstants.GATEWAY_JWKS_API_CONTEXT;
+                }
+                String jwksSynapseAPI = "<api xmlns=\"http://ws.apache.org/ns/synapse\" name=\"_JwksEndpoint_\" "
+                        + "context=\"" + jwksApiContext + "\">\n"
+                        + "    <resource methods=\"GET\" url-mapping=\"/*\" faultSequence=\"fault\">\n"
+                        + "        <inSequence>\n"
+                        + "            <respond/>\n"
+                        + "        </inSequence>\n"
+                        + "    </resource>\n"
+                        + "    <handlers>\n"
+                        + "        <handler class=\"org.wso2.carbon.apimgt.gateway.handlers.common.JwksHandler\"/>\n"
+                        + "    </handlers>\n"
+                        + "</api>\n";
+
+                jwksAPIDto.setName(JWTConstants.GATEWAY_JWKS_API_NAME);
+                jwksAPIDto.setTenantDomain(tenantDomain);
+                jwksAPIDto.setApiDefinition(jwksSynapseAPI);
+
+                log.info("Deploying synapse artifacts of " + jwksAPIDto.getName());
+                APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdmin();
+                apiGatewayAdmin.deployAPI(jwksAPIDto);
+                DataHolder.getInstance().markAPIAsDeployed(jwksAPIDto);
+            } catch (AxisFault axisFault) {
+                throw new APIManagementException("Error while retrieving JWKS API Artifact", axisFault,
+                        ExceptionCodes.INTERNAL_ERROR);
+            } finally {
+                MessageContext.destroyCurrentMessageContext();
+                PrivilegedCarbonContext.endTenantFlow();
             }
         }
     }
