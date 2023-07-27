@@ -19,8 +19,6 @@
 package org.wso2.carbon.apimgt.common.gateway.jwtgenerator;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 
@@ -36,7 +34,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGenerator {
 
-    private static final Log log = LogFactory.getLog(APIMgtGatewayJWTGeneratorImpl.class);
     @Override
     public Map<String, Object> populateStandardClaims(JWTInfoDto jwtInfoDto) {
 
