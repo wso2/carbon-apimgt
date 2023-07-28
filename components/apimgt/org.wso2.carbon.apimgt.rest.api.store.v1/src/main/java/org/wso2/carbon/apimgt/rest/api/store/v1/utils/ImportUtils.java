@@ -172,12 +172,12 @@ public class ImportUtils {
                         // It will throw an error if subscriber already exists
                         if (update == null || !update) {
                             // Version range is added as null since this flow is not used in Choreo
-                            apiConsumer.addSubscription(apiTypeWrapper, userId, application, null);
+                            apiConsumer.addSubscription(apiTypeWrapper, userId, application);
                         } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId
                                 , application.getId())) {
                             // on update skip subscriptions that already exists
                             // Version range is added as null since this flow is not used in Choreo
-                            apiConsumer.addSubscription(apiTypeWrapper, userId, application, null);
+                            apiConsumer.addSubscription(apiTypeWrapper, userId, application);
                         }
                     } else {
                         log.error("Failed to import Subscription as API/API Product "

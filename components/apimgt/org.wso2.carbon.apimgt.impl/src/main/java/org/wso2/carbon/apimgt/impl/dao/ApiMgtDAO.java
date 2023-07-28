@@ -622,6 +622,11 @@ public class ApiMgtDAO {
         return null;
     }
 
+    public int addSubscription(ApiTypeWrapper apiTypeWrapper, Application application, String status, String subscriber)
+            throws APIManagementException {
+        return addSubscription(apiTypeWrapper, application, status, subscriber, null);
+    }
+
     public int addSubscription(ApiTypeWrapper apiTypeWrapper, Application application, String status,
                                String subscriber, String versionRange) throws APIManagementException {
         int subscriptionId = -1;

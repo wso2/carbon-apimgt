@@ -846,7 +846,7 @@ public class APIConsumerImplTest {
         SubscribedAPI subscribedAPI = new SubscribedAPI(UUID.randomUUID().toString());
         Mockito.when(apiMgtDAO.getSubscriptionById(1)).thenReturn(subscribedAPI);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1);
-        SubscriptionResponse subscriptionResponse = apiConsumer.addSubscription(apiTypeWrapper, "user1",application, null);
+        SubscriptionResponse subscriptionResponse = apiConsumer.addSubscription(apiTypeWrapper, "user1",application);
         Assert.assertEquals(subscriptionResponse.getSubscriptionUUID(), subscribedAPI.getUUID());
         try {
             apiConsumer.addSubscription(apiTypeWrapper, "sub1", application, "1");
@@ -856,7 +856,7 @@ public class APIConsumerImplTest {
         }
         try {
             api.setStatus(APIConstants.CREATED);
-            apiConsumer.addSubscription(apiTypeWrapper, "sub1", application, null);
+            apiConsumer.addSubscription(apiTypeWrapper, "sub1", application);
             Assert.fail("Resource not found exception not thrown for wrong api state");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Subscriptions not allowed on APIs/API Products in the state"));
