@@ -436,6 +436,7 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
         Set<String> activeTenants = ServiceReferenceHolder.getInstance().getActiveTenants();
         activeTenants.forEach(tenantDomain -> {
             try {
+                new EndpointCertificateDeployer(tenantDomain).deployCertificatesAtStartup();
                 if (log.isDebugEnabled()) {
                     log.debug("Redeploying artifacts for tenant: " + tenantDomain);
                 }
@@ -444,6 +445,8 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                         tenantDomain, true);
             } catch (ArtifactSynchronizerException e) {
                 log.error("Error while redeploying gateway artifacts for tenant: " + tenantDomain, e);
+            } catch (APIManagementException e) {
+                log.error("Error while redeploying endpoint certificates for tenant: " + tenantDomain, e);
             }
         });
 
