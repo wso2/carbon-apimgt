@@ -14,6 +14,7 @@ public class TransactionCountConfig {
     private static int TRANSACTION_COUNT_RECORD_INTERVAL;
     private static int MAX_RETRY_COUNT;
     private static int MAX_TRANSACTION_RECORDS_PER_COMMIT;
+    private static String SERVER_ID = "Gateway1";
 
     static {
         APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
@@ -69,5 +70,9 @@ public class TransactionCountConfig {
 
     public static String getTransactionCountStoreClass() {
         return TRANSACTION_COUNT_STORE_CLASS;
+    }
+
+    public static String getServerID() {
+        return SERVER_ID;
     }
 }
