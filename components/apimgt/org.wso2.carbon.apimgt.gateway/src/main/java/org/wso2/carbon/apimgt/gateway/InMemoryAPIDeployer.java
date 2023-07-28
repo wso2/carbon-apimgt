@@ -205,10 +205,13 @@ public class InMemoryAPIDeployer {
 
         boolean result = false;
         Map<String, org.wso2.carbon.apimgt.keymgt.model.entity.API> apiMap = null;
-        try {
-            deployJWKSSynapseAPI(tenantDomain); // Deploy JWKS API
-        } catch (APIManagementException e) {
-            log.error("Error while deploying JWKS API for tenant domain :" + tenantDomain, e);
+
+        if (!redeployChangedAPIs) {
+            try {
+                deployJWKSSynapseAPI(tenantDomain); // Deploy JWKS API
+            } catch (APIManagementException e) {
+                log.error("Error while deploying JWKS API for tenant domain :" + tenantDomain, e);
+            }
         }
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             if (artifactRetriever != null) {

@@ -426,8 +426,10 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
         if (refreshOnReconnect) {
             log.info("Refreshing gateway data stores and deployments.");
             new Thread(() -> {
-                SubscriptionDataHolder.getInstance().refreshSubscriptionStore();
-                redeployGatewayArtifacts();
+                synchronized (this) {
+                    SubscriptionDataHolder.getInstance().refreshSubscriptionStore();
+                    redeployGatewayArtifacts();
+                }
             }).start();
         }
     }
