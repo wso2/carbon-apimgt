@@ -11,11 +11,8 @@ import java.util.concurrent.Executors;
 
 public class TransactionRecordConsumer {
 
-    // Todo: Make these parameters configurable via deployment.toml
-    private int MAX_RETRY_COUNT = 3;
-    private int TRANSACTION_COUNT_COMMIT_INTERVAL = 10;
-    private int MAX_TRANSACTION_RECORDS_PER_COMMIT = 10;
-
+    private int MAX_RETRY_COUNT;
+    private int MAX_TRANSACTION_RECORDS_PER_COMMIT;
     private static final Log LOG = LogFactory.getLog(TransactionRecordConsumer.class);
     private static TransactionRecordConsumer instance = null;
     private TransactionRecordStore transactionRecordStore;
@@ -25,6 +22,11 @@ public class TransactionRecordConsumer {
 
     private TransactionRecordConsumer(TransactionRecordStore transactionRecordStore,
                                       TransactionRecordQueue transactionRecordQueue, int threadPoolSize) {
+
+        // Obtain config values
+        MAX_RETRY_COUNT = TransactionCountConfig.getMaxRetryCount();
+        MAX_TRANSACTION_RECORDS_PER_COMMIT = TransactionCountConfig.getMaxTransactionRecordsPerCommit();
+
         this.transactionRecordStore = transactionRecordStore;
         this.transactionRecordQueue = transactionRecordQueue;
         this.executorService = Executors.newFixedThreadPool(threadPoolSize);

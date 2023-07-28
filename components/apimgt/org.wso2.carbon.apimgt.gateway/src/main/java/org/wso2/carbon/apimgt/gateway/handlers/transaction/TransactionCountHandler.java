@@ -14,12 +14,10 @@ import java.util.concurrent.*;
 
 public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
 
-    // Todo: Make these parameters configurable via deployment.toml
-    private final int PRODUCER_THREAD_POOL_SIZE = 5;
-    private final int CONSUMER_THREAD_POOL_SIZE = 5;
-    private final int TRANSACTION_RECORD_QUEUE_SIZE = 1000;
-    private final String TRANSACTION_COUNT_STORE_CLASS = "org.wso2.carbon.apimgt.gateway.handlers.transaction.store.TransactionRecordStoreImpl";
-
+    private int PRODUCER_THREAD_POOL_SIZE;
+    private int CONSUMER_THREAD_POOL_SIZE;
+    private int TRANSACTION_RECORD_QUEUE_SIZE;
+    private String TRANSACTION_COUNT_STORE_CLASS;
     private static final Log LOG = LogFactory.getLog(TransactionCountHandler.class);
     private TransactionRecordQueue transactionRecordQueue;
     private TransactionRecordProducer transactionRecordProducer;
@@ -28,6 +26,12 @@ public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
 
 
     public TransactionCountHandler() {
+
+        // Obtain config values
+        PRODUCER_THREAD_POOL_SIZE = TransactionCountConfig.getProducerThreadPoolSize();
+        CONSUMER_THREAD_POOL_SIZE = TransactionCountConfig.getConsumerThreadPoolSize();
+        TRANSACTION_RECORD_QUEUE_SIZE = TransactionCountConfig.getTransactionRecordQueueSize();
+        TRANSACTION_COUNT_STORE_CLASS = TransactionCountConfig.getTransactionCountStoreClass();
 
         this.transactionRecordQueue = TransactionRecordQueue.getInstance(TRANSACTION_RECORD_QUEUE_SIZE);
         // Load the transaction count store
@@ -55,7 +59,9 @@ public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
             // Setting this property to identify request-response pairs
-            axis2MessageContext.setProperty(APIMgtGatewayConstants.IS_THERE_ASSOCIATED_INCOMING_REQUEST, true);
+            messageContext.setProperty(APIMgtGatewayConstants.IS_THERE_ASSOCIATED_INCOMING_REQUEST, true);
+
+            LOG.info("Recieved an incoming request");
 
             // Counting message received via an open WebSocket
             String transport = axis2MessageContext.getIncomingTransportName();
@@ -72,9 +78,7 @@ public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
     @Override
     public boolean handleRequestOutFlow(MessageContext messageContext) {
         try {
-            org.apache.axis2.context.MessageContext axis2MessageContext =
-                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-            Object isThereAnAssociatedIncomingRequest = axis2MessageContext.getProperty(
+            Object isThereAnAssociatedIncomingRequest = messageContext.getProperty(
                     APIMgtGatewayConstants.IS_THERE_ASSOCIATED_INCOMING_REQUEST);
 
             // Counting outgoing messages that are not related to any request-response pair
@@ -95,9 +99,7 @@ public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
 
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
-        org.apache.axis2.context.MessageContext axis2MessageContext =
-                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        Object isThereAnAssociatedIncomingRequest = axis2MessageContext.getProperty(
+        Object isThereAnAssociatedIncomingRequest = messageContext.getProperty(
                 APIMgtGatewayConstants.IS_THERE_ASSOCIATED_INCOMING_REQUEST);
 
         // Counting request-response pairs
