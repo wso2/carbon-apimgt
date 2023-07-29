@@ -1,28 +1,78 @@
 package org.wso2.carbon.apimgt.gateway.handlers.transaction.store;
 
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.TransactionRecord;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class TransactionRecordStoreImpl implements TransactionRecordStore {
 
     private static final Log LOG = LogFactory.getLog(TransactionRecordStoreImpl.class);
-    private static final AtomicInteger transactionCount = new AtomicInteger(0);
+    private static final String endpoint = "http://localhost:8080/transactioncount";
+    private static HttpClient httpClient;
 
     public TransactionRecordStoreImpl() {
-        LOG.info("Transaction store loaded");
+        URL url = null;
+        try {
+            url = new URL(endpoint);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+        httpClient = APIUtil.getHttpClient(url.getPort(), url.getProtocol());
     }
 
     @Override
-    public boolean commit(ArrayList<TransactionRecord> transactionRecordList) {
-        LOG.info("Transaction count is commited");
-        transactionRecordList.forEach(transactionRecord -> {
-            transactionCount.addAndGet(transactionRecord.getCount());
-        });
-        LOG.info("Global Transaction count: " + transactionCount.get());
+    public boolean commit(ArrayList<TransactionRecord> transactionRecordList, int maxRetryCount) {
+
+        // Send the transaction count to the analytics server using apache http client
+        HttpPost httpPost = new HttpPost(endpoint);
+
+        Gson gson = new Gson();
+        String jsonPayload = gson.toJson(transactionRecordList);
+
+        HttpEntity stringEntity = new StringEntity(jsonPayload , ContentType.APPLICATION_JSON);
+        httpPost.setEntity(stringEntity);
+        httpPost.setHeader("Accept", "application/json");
+        httpPost.setHeader("Content-type", "application/json");
+
+        int retryCount = 0;
+        boolean retry;
+        do {
+            try {
+                httpClient.execute(httpPost);
+                retry = false;
+            } catch (IOException ex) {
+                retryCount++;
+                if (retryCount < maxRetryCount) {
+                    retry = true;
+                    LOG.warn("Failed to persist transaction count records to remote endpoint: " +
+                            ex.getMessage() + ". Retrying after 1s");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        LOG.error("Failed to transaction count records to remote endpoint. Data maybe loss");
+                    }
+                } else {
+                    LOG.error("Failed to persist subscription request to remote endpoint." +
+                            " Records may be added back to the queue. Error: " +
+                            ex.getMessage(), ex);
+                    return false;
+                }
+            }
+        } while (retry);
+
         return true;
     }
 

@@ -72,12 +72,7 @@ public class TransactionRecordConsumer {
 
         // Committing the transaction count records to the store with retries
         // If failed to commit after MAX_RETRY_COUNT, the transaction count records will be added to the queue again
-        boolean commited = false;
-        int retryCount = 0;
-        while (!commited && retryCount < MAX_RETRY_COUNT) {
-            commited = this.transactionRecordStore.commit(transactionRecordList);
-            retryCount++;
-        }
+        boolean commited = this.transactionRecordStore.commit(transactionRecordList, MAX_RETRY_COUNT);
         if (!commited) {
             transactionRecordQueue.addAll(transactionRecordList);
         }

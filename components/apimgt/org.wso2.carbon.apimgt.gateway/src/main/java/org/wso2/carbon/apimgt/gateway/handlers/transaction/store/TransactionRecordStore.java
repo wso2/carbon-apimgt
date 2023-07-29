@@ -5,6 +5,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.transaction.TransactionRecord;
 import java.util.ArrayList;
 
 public interface TransactionRecordStore {
-    boolean commit(ArrayList<TransactionRecord> transactionRecordList);
+    boolean commit(ArrayList<TransactionRecord> transactionRecordList, int retryCount);
     void clenUp();
 }
