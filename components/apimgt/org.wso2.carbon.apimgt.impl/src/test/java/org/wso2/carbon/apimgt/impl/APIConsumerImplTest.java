@@ -956,7 +956,7 @@ public class APIConsumerImplTest {
             Assert.assertNotNull(keyDetails);
             Assert.assertEquals(keyDetails.get("consumerKey"), "clientId1");
             Assert.assertEquals(keyDetails.get("mode"), "MAPPED");
-            Assert.assertEquals(keyDetails.get("consumerSecret"), "N/A");
+            Assert.assertEquals(keyDetails.get("consumerSecret"), null);
             Assert.assertNotNull(keyDetails.get("keyMappingId"));
             Assert.assertEquals(keyDetails.get("keyManager"), "auth0KM");
             Assert.assertEquals(keyDetails.get("keyType"), "PRODUCTION");
@@ -995,7 +995,7 @@ public class APIConsumerImplTest {
 
         Assert.assertNotNull(oAuthApplicationInfo);
         Assert.assertEquals(oAuthApplicationInfo.getClientId(), consumerKey);
-        Assert.assertEquals(oAuthApplicationInfo.getClientSecret(), "N/A");
+        Assert.assertEquals(oAuthApplicationInfo.getClientSecret(), null);
         Assert.assertEquals(oAuthApplicationInfo.getAppOwner(), "admin");
         Assert.assertEquals(oAuthApplicationInfo.getApplicationUUID(), appUUID);
         Assert.assertEquals(oAuthApplicationInfo.getTokenType(), "PRODUCTION");

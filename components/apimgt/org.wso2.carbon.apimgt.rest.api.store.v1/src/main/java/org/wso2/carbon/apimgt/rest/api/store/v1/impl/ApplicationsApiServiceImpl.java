@@ -1295,23 +1295,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 if (ApplicationKeyDTO.ModeEnum.MAPPED.equals(appKey.getMode())) {
                     updatedData = apiConsumer.updateMappedApplicationKey(username, application,
                             appKey.getKeyType().value(), appKey.getKeyManager(), body.getConsumerKey(), organization);
-
-                    ApplicationRegistrationEvent applicationKeyRemoveEvent = new ApplicationRegistrationEvent(
-                            UUID.randomUUID().toString(), System.currentTimeMillis(),
-                            APIConstants.EventType.REMOVE_APPLICATION_KEYMAPPING.name(),
-                            MultitenantConstants.SUPER_TENANT_ID, organization, application.getId(),
-                            application.getUUID(), appKey.getConsumerKey(),
-                            appKey.getKeyType().value().toUpperCase(), appKey.getKeyManager());
-                    APIUtil.sendNotification(applicationKeyRemoveEvent,
-                            APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
-                    ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
-                            UUID.randomUUID().toString(), System.currentTimeMillis(),
-                            APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(),
-                            MultitenantConstants.SUPER_TENANT_ID, organization, application.getId(),
-                            application.getUUID(), updatedData.getClientId(),
-                            updatedData.getTokenType(), appKey.getKeyManager());
-                    APIUtil.sendNotification(applicationRegistrationEvent,
-                            APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
                     ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
                     applicationKeyDTO.setConsumerKey(updatedData.getClientId());
                     applicationKeyDTO.setConsumerSecret(updatedData.getClientSecret());

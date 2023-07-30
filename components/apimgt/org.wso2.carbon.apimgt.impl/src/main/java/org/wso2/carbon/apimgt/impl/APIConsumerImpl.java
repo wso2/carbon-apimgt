@@ -344,7 +344,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             ExceptionCodes.KEY_MANAGER_NOT_SUPPORTED_TOKEN_GENERATION);
                 }
                 KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerTenant, keyManagerName);
-                if (keyManager == null) {throw new APIManagementException("Key Manager " + keyManagerName + " not initialized",
+                if (keyManager == null) {
+                    throw new APIManagementException("Key Manager " + keyManagerName + " not initialized",
                             ExceptionCodes.KEY_MANAGER_INITIALIZATION_FAILED);
                 }
                 tokenRequest = ApplicationUtils.populateTokenRequest(keyManager, jsonInput, tokenRequest);
@@ -528,7 +529,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override //TODO: (VirajSalaka) See usages too
     public Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
                                                       String applicationName, String keyType, String tokenType,
-                                                      String keyManagerName, String tenantDomain) throws APIManagementException {
+                                                      String keyManagerName, String tenantDomain, String appUUID) throws APIManagementException {
 
         String callBackURL = null;
         if (StringUtils.isEmpty(tenantDomain)) {
@@ -596,7 +597,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             keyDetails.put(APIConstants.FrontEndParameterNames.CONSUMER_KEY, clientId);
             keyDetails.put(APIConstants.FrontEndParameterNames.KEY_MAPPING_ID, keyMappingId);
             keyDetails.put(APIConstants.FrontEndParameterNames.MODE, APIConstants.OAuthAppMode.MAPPED.name());
-            keyDetails.put(APIConstants.FrontEndParameterNames.CONSUMER_SECRET, "N/A");
+            keyDetails.put(APIConstants.FrontEndParameterNames.CONSUMER_SECRET, null);
             keyDetails.put(APIConstants.FrontEndParameterNames.KEY_MANAGER, keyManagerName);
             keyDetails.put(APIConstants.FrontEndParameterNames.KEY_TYPE, keyType);
             keyDetails.put(APIConstants.FrontEndParameterNames.KEY_STATE, "APPROVED");
@@ -2884,84 +2885,87 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     @Override
     public OAuthApplicationInfo updateMappedApplicationKey(String userId, Application application,
-                                                 String tokenType, String keyManagerID,
+                                                           String tokenType, String keyManagerID,
                                                            String consumerKey, String organization)
             throws APIManagementException {
-        boolean tenantFlowStarted = false;
-        try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                tenantFlowStarted = true;
-            }
 
-            final String subscriberName = application.getSubscriber().getName();
+        final String subscriberName = application.getSubscriber().getName();
 
-            boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(getAPIManagerConfiguration().
-                    getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
+        boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
 
-            boolean isUserAppOwner;
-            if (isCaseInsensitiveComparisons) {
-                isUserAppOwner = subscriberName.equalsIgnoreCase(userId);
+        boolean isUserAppOwner;
+        if (isCaseInsensitiveComparisons) {
+            isUserAppOwner = subscriberName.equalsIgnoreCase(userId);
+        } else {
+            isUserAppOwner = subscriberName.equals(userId);
+        }
+
+        if (!isUserAppOwner) {
+            throw new APIManagementException("user: " + userId + ", attempted to update OAuth application " +
+                    "owned by: " + subscriberName);
+        }
+        String keyManagerName;
+        KeyManagerConfigurationDTO keyManagerConfiguration =
+                apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerID);
+        if (keyManagerConfiguration != null) {
+            keyManagerName = keyManagerConfiguration.getName();
+        } else {
+            //keeping this just in case the name is sent by mistake.
+            keyManagerConfiguration =
+                    apiMgtDAO.getKeyManagerConfigurationByName(organization, keyManagerID);
+            if (keyManagerConfiguration == null) {
+                throw new APIManagementException("Key Manager " + keyManagerID + " couldn't found.",
+                        ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
             } else {
-                isUserAppOwner = subscriberName.equals(userId);
-            }
-
-            if (!isUserAppOwner) {
-                throw new APIManagementException("user: " + userId + ", attempted to update OAuth application " +
-                        "owned by: " + subscriberName);
-            }
-            String keyManagerName;
-            KeyManagerConfigurationDTO keyManagerConfiguration =
-                    apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerID);
-            if (keyManagerConfiguration != null) {
-                keyManagerName = keyManagerConfiguration.getName();
-            } else {
-                //keeping this just in case the name is sent by mistake.
-                keyManagerConfiguration =
-                        apiMgtDAO.getKeyManagerConfigurationByName(organization, keyManagerID);
-                if (keyManagerConfiguration == null) {
-                    throw new APIManagementException("Key Manager " + keyManagerID + " couldn't found.",
-                            ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
-                } else {
-                    keyManagerName = keyManagerID;
-                    keyManagerID = keyManagerConfiguration.getUuid();
-                }
-            }
-
-            if (!keyManagerConfiguration.isEnabled()) {
-                throw new APIManagementException("Key Manager " + keyManagerName + " not activated in the requested " +
-                        "Tenant", ExceptionCodes.KEY_MANAGER_NOT_ENABLED);
-            }
-
-            if (!KeyManagerConfiguration.TokenType.EXTERNAL.toString().equals(keyManagerConfiguration.getTokenType())) {
-                throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support changing" +
-                        " ClientId", ExceptionCodes.KEY_MANAGER_NOT_SUPPORTED_CLIENT_ID_UPDATE);
-            }
-
-            apiMgtDAO.updateConsumerKeyInApplicationKeyMapping(application.getId(), tokenType, keyManagerID,
-                    consumerKey);
-            JSONObject appLogObject = new JSONObject();
-            appLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, application.getName());
-            appLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, application.getId());
-            appLogObject.put("KeyManager Id", keyManagerID);
-            appLogObject.put("Updated with consumer key", consumerKey);
-
-            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
-                    APIConstants.AuditLogConstants.UPDATED, this.username);
-            OAuthApplicationInfo oauthApplicationInfo = new OAuthApplicationInfo();
-            oauthApplicationInfo.setApplicationUUID(application.getUUID());
-            oauthApplicationInfo.setClientId(consumerKey);
-            oauthApplicationInfo.setClientSecret("N/A");
-            oauthApplicationInfo.setAppOwner(application.getOwner());
-            oauthApplicationInfo.setTokenType(tokenType);
-            return oauthApplicationInfo;
-        } finally {
-            if (tenantFlowStarted) {
-                endTenantFlow();
+                keyManagerName = keyManagerID;
+                keyManagerID = keyManagerConfiguration.getUuid();
             }
         }
 
+        if (!keyManagerConfiguration.isEnabled()) {
+            throw new APIManagementException("Key Manager " + keyManagerName + " not activated in the requested " +
+                    "Tenant", ExceptionCodes.KEY_MANAGER_NOT_ENABLED);
+        }
+
+        if (!KeyManagerConfiguration.TokenType.EXTERNAL.toString().equals(keyManagerConfiguration.getTokenType())) {
+            throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support changing" +
+                    " ClientId", ExceptionCodes.KEY_MANAGER_NOT_SUPPORTED_CLIENT_ID_UPDATE);
+        }
+
+        apiMgtDAO.updateConsumerKeyInApplicationKeyMapping(application.getId(), tokenType, keyManagerID,
+                consumerKey);
+        JSONObject appLogObject = new JSONObject();
+        appLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, application.getName());
+        appLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, application.getId());
+        appLogObject.put("KeyManager Id", keyManagerID);
+        appLogObject.put("Updated with consumer key", consumerKey);
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                APIConstants.AuditLogConstants.UPDATED, this.username);
+        OAuthApplicationInfo oauthApplicationInfo = new OAuthApplicationInfo();
+        oauthApplicationInfo.setApplicationUUID(application.getUUID());
+        oauthApplicationInfo.setClientId(consumerKey);
+        oauthApplicationInfo.setClientSecret(null);
+        oauthApplicationInfo.setAppOwner(application.getOwner());
+        oauthApplicationInfo.setTokenType(tokenType);
+        ApplicationRegistrationEvent applicationKeyRemoveEvent = new ApplicationRegistrationEvent(
+                UUID.randomUUID().toString(), System.currentTimeMillis(),
+                APIConstants.EventType.REMOVE_APPLICATION_KEYMAPPING.name(),
+                MultitenantConstants.SUPER_TENANT_ID, organization, application.getId(),
+                application.getUUID(), consumerKey,
+                tokenType, keyManagerName);
+        APIUtil.sendNotification(applicationKeyRemoveEvent,
+                APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+        ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
+                UUID.randomUUID().toString(), System.currentTimeMillis(),
+                APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(),
+                MultitenantConstants.SUPER_TENANT_ID, organization, application.getId(),
+                application.getUUID(), consumerKey,
+                tokenType, keyManagerName);
+        APIUtil.sendNotification(applicationRegistrationEvent,
+                APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+        return oauthApplicationInfo;
     }
 
     public boolean isSubscriberValid(String userId)
