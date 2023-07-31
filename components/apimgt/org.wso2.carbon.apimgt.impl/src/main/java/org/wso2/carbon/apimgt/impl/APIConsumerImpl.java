@@ -526,10 +526,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return
      * @throws APIManagementException
      */
-    @Override //TODO: (VirajSalaka) See usages too
+    @Override
     public Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
                                                       String applicationName, String keyType, String tokenType,
-                                                      String keyManagerName, String tenantDomain, String appUUID) throws APIManagementException {
+                                                      String keyManagerName, String tenantDomain) throws APIManagementException {
 
         String callBackURL = null;
         if (StringUtils.isEmpty(tenantDomain)) {
@@ -564,7 +564,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
         //Get application ID
-        int applicationId = apiMgtDAO.getOrgSpecificApplicationId(applicationName, userName, tenantDomain);
+        int applicationId = apiMgtDAO.getApplicationId(applicationName, userName);
 
         // Checking if clientId is mapped with another application.
         if (apiMgtDAO.isKeyMappingExistsForConsumerKeyOrApplication(applicationId, keyManagerName, keyManagerId,
@@ -607,6 +607,150 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         OAuthAppRequest oauthAppRequest = ApplicationUtils
                 .createOauthAppRequest(applicationName, clientId, callBackURL, "default", jsonString, tokenType,
                         tenantDomain, keyManagerName);
+
+        // if clientId is null in the argument `ApplicationUtils#createOauthAppRequest` will set it using
+        // the props in `jsonString`. Hence we are taking the updated `clientId` here
+        clientId = oauthAppRequest.getOAuthApplicationInfo().getClientId();
+
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+        if (keyManager == null) {
+            throw new APIManagementException(
+                    "Key Manager " + keyManagerName + "Couldn't initialized in tenant " + tenantDomain + ".",
+                    ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
+        }
+        //createApplication on oAuthorization server.
+        OAuthApplicationInfo oAuthApplication = isOauthAppValidation() ?
+                keyManager.mapOAuthApplication(oauthAppRequest) : oauthAppRequest.getOAuthApplicationInfo();
+
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationId, clientId, keyManagerId,
+                keyMappingId);
+
+        Object enableTokenGeneration =
+                keyManager.getKeyManagerConfiguration()
+                        .getParameter(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION);
+
+        AccessTokenInfo tokenInfo;
+        if (enableTokenGeneration != null && (Boolean) enableTokenGeneration &&
+                oAuthApplication.getJsonString().contains(APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS)) {
+            AccessTokenRequest tokenRequest =
+                    ApplicationUtils.createAccessTokenRequest(keyManager, oAuthApplication, null);
+            tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
+        } else {
+            tokenInfo = new AccessTokenInfo();
+            tokenInfo.setAccessToken("");
+            tokenInfo.setValidityPeriod(0L);
+            String[] noScopes = new String[]{"N/A"};
+            tokenInfo.setScope(noScopes);
+            oAuthApplication.addParameter("tokenScope", Arrays.toString(noScopes));
+        }
+
+        Map<String, Object> keyDetails = new HashMap<String, Object>();
+
+        if (tokenInfo != null) {
+            keyDetails.put("validityTime", tokenInfo.getValidityPeriod());
+            keyDetails.put("accessToken", tokenInfo.getAccessToken());
+            keyDetails.put("tokenDetails", tokenInfo.getJSONString());
+        }
+
+        keyDetails.put(APIConstants.FrontEndParameterNames.CONSUMER_KEY, oAuthApplication.getClientId());
+        keyDetails.put(APIConstants.FrontEndParameterNames.CONSUMER_SECRET, oAuthApplication.getParameter(
+                "client_secret"));
+        keyDetails.put(APIConstants.FrontEndParameterNames.CLIENT_DETAILS, oAuthApplication.getJsonString());
+        keyDetails.put(APIConstants.FrontEndParameterNames.KEY_MAPPING_ID, keyMappingId);
+        keyDetails.put(APIConstants.FrontEndParameterNames.MODE, APIConstants.OAuthAppMode.MAPPED.name());
+        return keyDetails;
+    }
+
+    /**
+     * @param jsonString     this string will contain oAuth app details
+     * @param userName       user name of logged in user.
+     * @param clientId       this is the consumer key of oAuthApplication
+     * @param application    {@link Application} object
+     * @param keyType
+     * @param tokenType      this is theApplication Token Type. This can be either default or jwt.
+     * @param keyManagerName key Manager name
+     * @return
+     * @throws APIManagementException
+     */
+    @Override
+    public Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
+                                                      Application application, String keyType, String tokenType,
+                                                      String keyManagerName, String tenantDomain)
+            throws APIManagementException {
+
+        String callBackURL = null;
+        if (StringUtils.isEmpty(tenantDomain)) {
+            tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        }
+        String keyManagerId = null;
+        KeyManagerConfigurationDTO keyManagerConfiguration = null;
+        if (keyManagerName != null) {
+            keyManagerConfiguration = apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+            if (keyManagerConfiguration == null) {
+                keyManagerConfiguration = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
+                if (keyManagerConfiguration != null) {
+                    keyManagerId = keyManagerName;
+                    keyManagerName = keyManagerConfiguration.getName();
+                }
+            } else {
+                keyManagerId = keyManagerConfiguration.getUuid();
+            }
+        } else {
+            keyManagerName = APIConstants.KeyManager.DEFAULT_KEY_MANAGER;
+            keyManagerConfiguration = apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+            keyManagerId = keyManagerConfiguration.getUuid();
+        }
+        if (keyManagerConfiguration == null || !keyManagerConfiguration.isEnabled()) {
+            throw new APIManagementException(
+                    "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
+                    ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
+        }
+        if (KeyManagerConfiguration.TokenType.EXCHANGED.toString().equals(keyManagerConfiguration.getTokenType())) {
+            throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
+                    " Client Application", ExceptionCodes.KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION);
+        }
+
+        int applicationId = application.getId();
+
+        // Checking if clientId is mapped with another application.
+        if (apiMgtDAO.isKeyMappingExistsForConsumerKeyOrApplication(applicationId, keyManagerName, keyManagerId,
+                keyType, clientId)) {
+            throw new APIManagementException("Key Mappings already exists for application " + application.getName()
+                    + " or consumer key " + clientId, ExceptionCodes.KEY_MAPPING_ALREADY_EXIST);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Client ID " + clientId + " not mapped previously with another application. No existing "
+                    + "key mappings available for application " + application.getUUID());
+        }
+
+        //Do application mapping with consumerKey.
+        String keyMappingId = UUID.randomUUID().toString();
+
+        if (KeyManagerConfiguration.TokenType.EXTERNAL.toString().equals(keyManagerConfiguration.getTokenType())) {
+            apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationId, clientId, keyManagerId,
+                    keyMappingId);
+            ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
+                    UUID.randomUUID().toString(), System.currentTimeMillis(),
+                    APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(),
+                    MultitenantConstants.SUPER_TENANT_ID, tenantDomain, applicationId, application.getUUID(), clientId,
+                    keyType, keyManagerName);
+            APIUtil.sendNotification(applicationRegistrationEvent,
+                    APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+
+            Map<String, Object> keyDetails = new HashMap<String, Object>();
+            keyDetails.put(APIConstants.FrontEndParameterNames.CONSUMER_KEY, clientId);
+            keyDetails.put(APIConstants.FrontEndParameterNames.KEY_MAPPING_ID, keyMappingId);
+            keyDetails.put(APIConstants.FrontEndParameterNames.MODE, APIConstants.OAuthAppMode.MAPPED.name());
+            keyDetails.put(APIConstants.FrontEndParameterNames.CONSUMER_SECRET, null);
+            keyDetails.put(APIConstants.FrontEndParameterNames.KEY_MANAGER, keyManagerName);
+            keyDetails.put(APIConstants.FrontEndParameterNames.KEY_TYPE, keyType);
+            keyDetails.put(APIConstants.FrontEndParameterNames.KEY_STATE, "APPROVED");
+            return keyDetails;
+        }
+
+        OAuthAppRequest oauthAppRequest = ApplicationUtils
+                .createOauthAppRequest(application.getName(), clientId, callBackURL, "default",
+                        jsonString, tokenType, tenantDomain, keyManagerName);
 
         // if clientId is null in the argument `ApplicationUtils#createOauthAppRequest` will set it using
         // the props in `jsonString`. Hence we are taking the updated `clientId` here
