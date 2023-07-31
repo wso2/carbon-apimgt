@@ -117,25 +117,26 @@ public class SubscriptionValidationDAO {
     /*
      * This method can be used to retrieve all the APIs of a given organization in the database
      *
-     * @param organization : organization Id
+     * @param dpOrg : organization Id of dataplane org
      * @param systemOrg : organization Id of system org
      * @return {@link List<Subscription>}
      * */
-    public List<Subscription> getAllSubscriptionsByOrganization(String organization, String systemOrg) throws APIManagementException {
+    public List<Subscription> getAllSubscriptionsOfDataplane(String dpOrg, String systemOrg) throws APIManagementException {
 
         List<Subscription> subscriptions = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ORGANIZATION_SUBSCRIPTIONS_SQL_WITH_SYSTEM_ORG)) {
 
-            ps.setString(1, organization);
+            ps.setString(1, dpOrg);
             ps.setString(2, systemOrg);
 
             try (ResultSet resultSet = ps.executeQuery()) {
                 populateSubscriptionsList(subscriptions, resultSet);
             }
         } catch (SQLException e) {
-            log.error("Error in loading Subscriptions for the organization with system org : " + organization, e);}
+            throw new APIManagementException("Error in loading Subscriptions for the organization with system org : " + dpOrg, e);
+        }
         return subscriptions;
     }
 
@@ -543,23 +544,23 @@ public class SubscriptionValidationDAO {
 
     /*
      * This method can be used to retrieve all the Applications of a given tenant in the database
-     * @param tenantId : tenant Id
+     * @param dpOrg : organization Id of dataplane Id
      * @param systemOrg: organization Id of system org
      * @return {@link Subscription}
      * */
-    public List<Application> getAllApplications(String organization, String systemOrg) {
+    public List<Application> getAllApplicationsOfDataplane(String dpOrg, String systemOrg) throws APIManagementException {
 
         ArrayList<Application> applications = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATIONS_BY_ORGANIZATION_SQL_WITH_SYSTEM_APPS)) {
-            ps.setString(1, organization);
-            ps.setString(2,systemOrg);
+            ps.setString(1, dpOrg);
+            ps.setString(2, systemOrg);
             try (ResultSet resultSet = ps.executeQuery()) {
                 addToApplicationList(applications, resultSet);
             }
         } catch (SQLException e) {
-            log.error("Error in loading Applications for organization : " + organization + " including system org", e);
+            throw new APIManagementException("Error in loading Applications for organization : " + dpOrg + " including system org", e);
         }
         return applications;
     }
@@ -630,7 +631,8 @@ public class SubscriptionValidationDAO {
         return keyMappings;
     }
 
-    public List<ApplicationKeyMapping> getAllApplicationKeyMappingsByOrganization(String organization, String systemOrg) {
+    public List<ApplicationKeyMapping> getAllApplicationKeyMappingsOfDataplane(String dpOrg, String systemOrg) throws
+            APIManagementException{
 
         List<ApplicationKeyMapping> keyMappings = new ArrayList<>();
         String sql = SubscriptionValidationSQLConstants.GET_ORGANIZATION_AM_KEY_MAPPING_SQL_WITH_SYSTEM_ORG;
@@ -638,13 +640,13 @@ public class SubscriptionValidationDAO {
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
                      conn.prepareStatement(sql)) {
-            ps.setString(1, organization);
+            ps.setString(1, dpOrg);
             ps.setString(2, systemOrg);
             try (ResultSet resultSet = ps.executeQuery()) {
                 populateApplicationKeyMappingsList(keyMappings, resultSet);
             }
         } catch (SQLException e) {
-            log.error("Error in loading Application key mappings for organization with system org : " + organization, e);
+            throw new APIManagementException("Error in loading Application key mappings for organization with system org : " + dpOrg, e);
         }
 
         return keyMappings;

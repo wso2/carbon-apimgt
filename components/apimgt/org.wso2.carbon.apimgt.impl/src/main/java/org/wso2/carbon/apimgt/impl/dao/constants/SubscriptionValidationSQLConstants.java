@@ -18,8 +18,9 @@
 
 package org.wso2.carbon.apimgt.impl.dao.constants;
 
+import org.wso2.carbon.apimgt.impl.APIConstants;
+
 public class SubscriptionValidationSQLConstants {
-    public static final String IS_SYSTEM_APP_ATTRIBUTE = "isSystemApp";
     public static final String GET_ALL_APPLICATIONS_SQL =
             " SELECT " +
                     "   APP.UUID AS APP_UUID," +
@@ -110,7 +111,7 @@ public class SubscriptionValidationSQLConstants {
                     " WHERE " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
                     "  (APP.ORGANIZATION = ? OR" +
-                    "  (ATTRIBUTES.NAME='" + IS_SYSTEM_APP_ATTRIBUTE + "' AND " +
+                    "  (ATTRIBUTES.NAME='" + APIConstants.IS_DP_SYSTEM_APP_ATTRIBUTE + "' AND " +
                     "  ATTRIBUTES.APP_ATTRIBUTE='true' AND APP.ORGANIZATION = ?))";
 
     public static final String GET_APPLICATION_BY_ID_SQL =
@@ -181,7 +182,7 @@ public class SubscriptionValidationSQLConstants {
                     "   SUBS.APPLICATION_ID = APP.APPLICATION_ID AND " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND " +
                     "   (APP.ORGANIZATION = ? OR" +
-                    "   (ATTRIBUTES.NAME='" + IS_SYSTEM_APP_ATTRIBUTE + "' AND " +
+                    "   (ATTRIBUTES.NAME='" + APIConstants.IS_DP_SYSTEM_APP_ATTRIBUTE + "' AND " +
                     "   ATTRIBUTES.APP_ATTRIBUTE='true' AND APP.ORGANIZATION = ?))";
     public static final String GET_ALL_SUBSCRIPTIONS_SQL =
             "SELECT " +
@@ -592,7 +593,7 @@ public class SubscriptionValidationSQLConstants {
                     " WHERE " +
                     "   MAPPING.APPLICATION_ID = APP.APPLICATION_ID AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
                     "   MAPPING.KEY_MANAGER = KEYM.UUID AND (APP.ORGANIZATION = ? OR" +
-                    "   (ATTRIBUTES.NAME='" + IS_SYSTEM_APP_ATTRIBUTE + "' AND " +
+                    "   (ATTRIBUTES.NAME='" + APIConstants.IS_DP_SYSTEM_APP_ATTRIBUTE + "' AND " +
                     "   ATTRIBUTES.APP_ATTRIBUTE='true' AND APP.ORGANIZATION = ?))";
 
     public static final String GET_ALL_GLOBAL_POLICIES_SQL =

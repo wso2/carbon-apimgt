@@ -66,7 +66,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) && includeSystemOrgArtifacts != null
                 && includeSystemOrgArtifacts && StringUtils.isNotEmpty(systemOrg)) {
             result = Response.ok().entity(SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(
-                    subscriptionValidationDAO.getAllSubscriptionsByOrganization(organization, systemOrg))).build();
+                    subscriptionValidationDAO.getAllSubscriptionsOfDataplane(organization, systemOrg))).build();
         } else if (StringUtils.isNotEmpty(organization) &&
                 !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
             result = Response.ok().entity(SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(

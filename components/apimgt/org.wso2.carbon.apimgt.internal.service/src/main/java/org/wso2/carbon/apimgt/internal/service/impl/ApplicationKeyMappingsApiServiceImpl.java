@@ -59,7 +59,7 @@ public class ApplicationKeyMappingsApiServiceImpl implements ApplicationKeyMappi
                 && includeSystemOrgArtifacts && StringUtils.isNotEmpty(systemOrg)) {
             return Response.ok().entity(SubscriptionValidationDataUtil.
                     fromApplicationKeyMappingToApplicationKeyMappingListDTO(subscriptionValidationDAO.
-                            getAllApplicationKeyMappingsByOrganization(organization, systemOrg))).build();
+                            getAllApplicationKeyMappingsOfDataplane(organization, systemOrg))).build();
         } else if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM))   {
             return Response.ok().entity(SubscriptionValidationDataUtil.
                     fromApplicationKeyMappingToApplicationKeyMappingListDTO(subscriptionValidationDAO.
