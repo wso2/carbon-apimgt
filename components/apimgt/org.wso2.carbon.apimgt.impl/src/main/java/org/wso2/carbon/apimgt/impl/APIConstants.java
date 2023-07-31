@@ -439,6 +439,7 @@ public final class APIConstants {
     public static final String JWT_DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
     public static final String JWT_CONFIGS = "JWTConfiguration";
     public static final String JWT_HEADER = "JWTHeader";
+    public static final String JWT_DECODING = "JWTDecoding";
     public static final String ENABLE_USER_CLAIMS = "EnableUserClaims";
     public static final String BINDING_FEDERATED_USER_CLAIMS = "EnableBindingFederatedUserClaims";
     public static final String TOKEN_GENERATOR_IMPL = "JWTGeneratorImpl";
@@ -2101,6 +2102,7 @@ public final class APIConstants {
         public static final String INTERNAL_KEY_TOKEN_TYPE = "InternalKey";
         public static final String TOKEN_TYPE = "token_type";
         public static final String API_KEY_TOKEN_TYPE = "apiKey";
+        public static final String DECODING_ALGORITHM_BASE64URL = "base64url";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";
