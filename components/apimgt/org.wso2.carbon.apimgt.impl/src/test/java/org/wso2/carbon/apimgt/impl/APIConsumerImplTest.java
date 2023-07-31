@@ -842,7 +842,7 @@ public class APIConsumerImplTest {
         String tenantAwareUsername = "user1@"+SAMPLE_TENANT_DOMAIN_1;
         Mockito.when(MultitenantUtils.getTenantAwareUsername(Mockito.eq("user1"))).thenReturn(tenantAwareUsername);
         Mockito.when(apiMgtDAO.addSubscription(apiTypeWrapper, application, APIConstants.SubscriptionStatus.ON_HOLD,
-                tenantAwareUsername, null)).thenReturn(1);
+                tenantAwareUsername)).thenReturn(1);
         SubscribedAPI subscribedAPI = new SubscribedAPI(UUID.randomUUID().toString());
         Mockito.when(apiMgtDAO.getSubscriptionById(1)).thenReturn(subscribedAPI);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1);
