@@ -2999,4 +2999,6 @@ public final class APIConstants {
 
     public static final String PRODUCTION_ENV_AUD_CLAIM = "choreo:deployment:production";
     public static final String DEVELOPMENT_ENV_AUD_CLAIM = "choreo:deployment:sandbox";
+
+    public static final String IS_DP_SYSTEM_APP_ATTRIBUTE = "isDpSystemApp";
 }

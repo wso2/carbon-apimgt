@@ -18,8 +18,9 @@
 
 package org.wso2.carbon.apimgt.impl.dao.constants;
 
-public class SubscriptionValidationSQLConstants {
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
+public class SubscriptionValidationSQLConstants {
     public static final String GET_ALL_APPLICATIONS_SQL =
             " SELECT " +
                     "   APP.UUID AS APP_UUID," +
@@ -88,6 +89,31 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
                     "   APP.ORGANIZATION = ? ";
 
+    public static final String GET_APPLICATIONS_BY_ORGANIZATION_SQL_WITH_SYSTEM_APPS =
+            " SELECT " +
+                    "   APP.UUID AS APP_UUID," +
+                    "   APP.APPLICATION_ID AS APP_ID," +
+                    "   APP.NAME AS APS_NAME," +
+                    "   APP.APPLICATION_TIER AS TIER," +
+                    "   APP.ORGANIZATION AS ORGANIZATION," +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
+                    "   SUB.USER_ID AS SUB_NAME," +
+                    "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
+                    "   ATTRIBUTES.APP_ATTRIBUTE AS ATTRIBUTE_VALUE," +
+                    "   GROUP_MAP.GROUP_ID AS GROUP_ID" +
+                    " FROM " +
+                    "   AM_SUBSCRIBER SUB," +
+                    "   AM_APPLICATION APP" +
+                    "   LEFT OUTER JOIN AM_APPLICATION_ATTRIBUTES ATTRIBUTES" +
+                    "  ON APP.APPLICATION_ID = ATTRIBUTES.APPLICATION_ID" +
+                    "   LEFT OUTER JOIN AM_APPLICATION_GROUP_MAPPING GROUP_MAP" +
+                    "  ON APP.APPLICATION_ID = GROUP_MAP.APPLICATION_ID" +
+                    " WHERE " +
+                    "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
+                    "  (APP.ORGANIZATION = ? OR" +
+                    "  (ATTRIBUTES.NAME='" + APIConstants.IS_DP_SYSTEM_APP_ATTRIBUTE + "' AND " +
+                    "  ATTRIBUTES.APP_ATTRIBUTE='true' AND APP.ORGANIZATION = ?))";
+
     public static final String GET_APPLICATION_BY_ID_SQL =
             " SELECT " +
                     "   APP.UUID AS APP_UUID," +
@@ -132,6 +158,32 @@ public class SubscriptionValidationSQLConstants {
                     "   SUBS.APPLICATION_ID = APP.APPLICATION_ID AND " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND " +
                     "   APP.ORGANIZATION = ? ";
+
+    public static final String GET_ORGANIZATION_SUBSCRIPTIONS_SQL_WITH_SYSTEM_ORG =
+            "SELECT " +
+                    "   SUBS.UUID AS SUBSCRIPTION_UUID," +
+                    "   SUBS.SUBSCRIPTION_ID AS SUB_ID," +
+                    "   SUBS.TIER_ID AS TIER," +
+                    "   SUBS.API_ID AS API_ID," +
+                    "   APP.APPLICATION_ID AS APP_ID," +
+                    "   APP.UUID AS APPLICATION_UUID," +
+                    "   API.API_UUID AS API_UUID," +
+                    "   SUBS.SUB_STATUS AS STATUS," +
+                    "   SUB.TENANT_ID AS TENANT_ID" +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUBS," +
+                    "   AM_API API," +
+                    "   AM_SUBSCRIBER SUB," +
+                    "   AM_APPLICATION APP " +
+                    "   LEFT OUTER JOIN AM_APPLICATION_ATTRIBUTES ATTRIBUTES" +
+                    "   ON APP.APPLICATION_ID = ATTRIBUTES.APPLICATION_ID" +
+                    " WHERE " +
+                    "   SUBS.API_ID = API.API_ID AND " +
+                    "   SUBS.APPLICATION_ID = APP.APPLICATION_ID AND " +
+                    "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND " +
+                    "   (APP.ORGANIZATION = ? OR" +
+                    "   (ATTRIBUTES.NAME='" + APIConstants.IS_DP_SYSTEM_APP_ATTRIBUTE + "' AND " +
+                    "   ATTRIBUTES.APP_ATTRIBUTE='true' AND APP.ORGANIZATION = ?))";
     public static final String GET_ALL_SUBSCRIPTIONS_SQL =
             "SELECT " +
                     "   SUBS.UUID AS SUBSCRIPTION_UUID," +
@@ -530,6 +582,19 @@ public class SubscriptionValidationSQLConstants {
                     " WHERE " +
                     "   MAPPING.APPLICATION_ID = APP.APPLICATION_ID AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
                     "   MAPPING.KEY_MANAGER = KEYM.UUID AND APP.ORGANIZATION = ?";
+
+    public static final String GET_ORGANIZATION_AM_KEY_MAPPING_SQL_WITH_SYSTEM_ORG =
+            "SELECT APP.UUID,MAPPING.APPLICATION_ID, MAPPING.CONSUMER_KEY,MAPPING.KEY_TYPE,KEYM.NAME AS KEY_MANAGER," +
+                    "MAPPING.STATE" +
+                    " FROM " +
+                    "   AM_APPLICATION_KEY_MAPPING MAPPING,AM_SUBSCRIBER SUB,AM_KEY_MANAGER KEYM, AM_APPLICATION APP " +
+                    "   LEFT OUTER JOIN AM_APPLICATION_ATTRIBUTES ATTRIBUTES" +
+                    "   ON APP.APPLICATION_ID = ATTRIBUTES.APPLICATION_ID" +
+                    " WHERE " +
+                    "   MAPPING.APPLICATION_ID = APP.APPLICATION_ID AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
+                    "   MAPPING.KEY_MANAGER = KEYM.UUID AND (APP.ORGANIZATION = ? OR" +
+                    "   (ATTRIBUTES.NAME='" + APIConstants.IS_DP_SYSTEM_APP_ATTRIBUTE + "' AND " +
+                    "   ATTRIBUTES.APP_ATTRIBUTE='true' AND APP.ORGANIZATION = ?))";
 
     public static final String GET_ALL_GLOBAL_POLICIES_SQL =
             " SELECT " +

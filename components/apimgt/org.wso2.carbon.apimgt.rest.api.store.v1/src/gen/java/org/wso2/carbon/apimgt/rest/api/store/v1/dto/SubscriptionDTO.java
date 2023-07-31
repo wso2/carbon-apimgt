@@ -67,6 +67,7 @@ return null;
     }
     private StatusEnum status = null;
     private String redirectionParams = null;
+    private String versionRange = null;
 
   /**
    * The UUID of the subscription
@@ -229,6 +230,24 @@ return null;
     this.redirectionParams = redirectionParams;
   }
 
+  /**
+   * The version range which the subscription is valid for.
+   **/
+  public SubscriptionDTO versionRange(String versionRange) {
+    this.versionRange = versionRange;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "v1", value = "The version range which the subscription is valid for.")
+  @JsonProperty("versionRange")
+  public String getVersionRange() {
+    return versionRange;
+  }
+  public void setVersionRange(String versionRange) {
+    this.versionRange = versionRange;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -247,12 +266,13 @@ return null;
         Objects.equals(throttlingPolicy, subscription.throttlingPolicy) &&
         Objects.equals(requestedThrottlingPolicy, subscription.requestedThrottlingPolicy) &&
         Objects.equals(status, subscription.status) &&
-        Objects.equals(redirectionParams, subscription.redirectionParams);
+        Objects.equals(redirectionParams, subscription.redirectionParams) &&
+        Objects.equals(versionRange, subscription.versionRange);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionId, applicationId, apiId, apiInfo, applicationInfo, throttlingPolicy, requestedThrottlingPolicy, status, redirectionParams);
+    return Objects.hash(subscriptionId, applicationId, apiId, apiInfo, applicationInfo, throttlingPolicy, requestedThrottlingPolicy, status, redirectionParams, versionRange);
   }
 
   @Override
@@ -269,6 +289,7 @@ return null;
     sb.append("    requestedThrottlingPolicy: ").append(toIndentedString(requestedThrottlingPolicy)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    redirectionParams: ").append(toIndentedString(redirectionParams)).append("\n");
+    sb.append("    versionRange: ").append(toIndentedString(versionRange)).append("\n");
     sb.append("}");
     return sb.toString();
   }

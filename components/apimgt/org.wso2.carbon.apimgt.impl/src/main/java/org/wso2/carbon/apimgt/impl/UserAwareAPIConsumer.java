@@ -73,6 +73,12 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
+    public SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application application,
+                                                String versionRange) throws APIManagementException {
+        return super.addSubscription(apiTypeWrapper, userId, application, versionRange);
+    }
+
+    @Override
     public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
         return super.getSubscriptionByUUID(uuid);
     }

@@ -4382,6 +4382,10 @@ components:
           description: A url and other parameters the subscriber can be redirected.
           readOnly: true
           example: ""
+        versionRange:
+          type: string
+          description: The version range which the subscription is valid for.
+          example: v1
     Tag:
       title: Tag
       type: object

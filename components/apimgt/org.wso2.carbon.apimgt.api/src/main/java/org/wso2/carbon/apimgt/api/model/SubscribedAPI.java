@@ -46,6 +46,8 @@ public class SubscribedAPI {
 
     private boolean isBlocked;   //TODO: what is the difference & usage of revoking & blocking users
 
+    private String versionRange;
+
     public SubscribedAPI(Subscriber subscriber, APIIdentifier apiId) {
         this.subscriber = subscriber;
         this.apiId = apiId;
@@ -248,5 +250,13 @@ public class SubscribedAPI {
         } else {
             return productId.getUUID();
         }
+    }
+
+    public String getVersionRange() {
+        return versionRange;
+    }
+
+    public void setVersionRange(String versionRange) {
+        this.versionRange = versionRange;
     }
 }

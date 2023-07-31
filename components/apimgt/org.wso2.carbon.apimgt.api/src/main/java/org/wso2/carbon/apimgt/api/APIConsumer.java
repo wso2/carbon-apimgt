@@ -193,7 +193,21 @@ public interface APIConsumer extends APIManager {
     Integer getSubscriptionCount(Subscriber subscriber,String applicationName,String groupingId) throws APIManagementException;
 
     /**
-     * Add new Subscriber
+     * Add new Subscription for api version range
+     *
+     * @param apiTypeWrapper    Identifier
+     * @param userId        id of the user
+     * @param application Application Id
+     * @param versionRange API version range for which the subscription is valid
+     * @return SubscriptionResponse subscription response object
+     * @throws APIManagementException if failed to add subscription details to database
+     */
+    SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application application,
+                                         String versionRange)
+            throws APIManagementException;
+
+    /**
+     * Add new Subscription
      *
      * @param apiTypeWrapper    Identifier
      * @param userId        id of the user

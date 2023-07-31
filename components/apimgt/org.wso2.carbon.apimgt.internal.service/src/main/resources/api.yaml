@@ -259,6 +259,12 @@ paths:
             **Search condition**.
              Application ID of the application
           type: integer
+        - name: includeSystemOrgArtifacts
+          in: query
+          description: |
+            Whether to include system org API artifacts
+          type: boolean
+          required: false
       tags:
         - Subscription Validation
       responses:
@@ -301,6 +307,12 @@ paths:
             **Search condition**.
               Application UUID  of the subscription
           type: string
+        - name: includeSystemOrgArtifacts
+          in: query
+          description: |
+            Whether to include system org API artifacts
+          type: boolean
+          required: false
       tags:
         - Subscription Validation
       responses:
@@ -427,7 +439,12 @@ paths:
             **Search condition**.
              KeyManager associated to consumer_key of the application
           type: string
-
+        - name: includeSystemOrgArtifacts
+          in: query
+          description: |
+            Whether to include system org API artifacts
+          type: boolean
+          required: false
       tags:
         - Subscription Validation
       responses:
