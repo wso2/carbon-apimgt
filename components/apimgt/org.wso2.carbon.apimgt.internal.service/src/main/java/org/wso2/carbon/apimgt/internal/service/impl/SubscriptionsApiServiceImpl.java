@@ -23,6 +23,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
@@ -37,7 +38,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
     @Override
     public Response subscriptionsGet(String xWSO2Tenant, Integer apiId, Integer appId, String apiUUID,
-                                     String applicationUUID, MessageContext messageContext) throws
+                                     String applicationUUID, Boolean includeSystemOrgArtifacts, MessageContext messageContext) throws
             APIManagementException {
 
         Response result;
@@ -46,6 +47,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         List<Subscription> subscriptionList = new ArrayList<>();
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         String organization = RestApiUtil.getOrganization(messageContext);
+        String systemOrg = APIManagerConfiguration.getChoreoSystemOrganization();
         if (StringUtils.isNotEmpty(applicationUUID) && StringUtils.isNotEmpty(apiUUID)) {
             Subscription subscription = subscriptionValidationDAO.getSubscription(apiUUID, applicationUUID);
             if (subscription != null) {
@@ -60,6 +62,11 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             }
             result = Response.ok().entity(
                     SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(subscriptionList)).build();
+        } else if (StringUtils.isNotEmpty(organization) &&
+                !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) && includeSystemOrgArtifacts != null
+                && includeSystemOrgArtifacts && StringUtils.isNotEmpty(systemOrg)) {
+            result = Response.ok().entity(SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(
+                    subscriptionValidationDAO.getAllSubscriptionsOfDataplane(organization, systemOrg))).build();
         } else if (StringUtils.isNotEmpty(organization) &&
                 !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
             result = Response.ok().entity(SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(

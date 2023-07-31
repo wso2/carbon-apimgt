@@ -20,21 +20,24 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.subscription.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.ApplicationsApiService;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.sql.SQLException;
 import java.util.List;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
     @Override
-    public Response applicationsGet(String xWSO2Tenant, Integer appId, MessageContext messageContext) {
+    public Response applicationsGet(String xWSO2Tenant, Integer appId, Boolean  includeSystemOrgArtifacts, MessageContext messageContext) throws APIManagementException {
 
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         if (appId != null && appId > 0) {
@@ -51,6 +54,14 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 xWSO2Tenant.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
             return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(
                     subscriptionValidationDAO.getAllApplications())).build();
+        }
+        if (includeSystemOrgArtifacts != null && includeSystemOrgArtifacts && StringUtils.isNotEmpty(xWSO2Tenant)) {
+            String systemOrg = APIManagerConfiguration.getChoreoSystemOrganization();
+            if (StringUtils.isNotEmpty(systemOrg)) {
+                return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(
+                                subscriptionValidationDAO.getAllApplicationsOfDataplane(xWSO2Tenant, systemOrg)))
+                        .build();
+            }
         }
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
             return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(

@@ -2517,6 +2517,7 @@ public final class APIConstants {
         public static final String REGISTERED_TENANT_DOMAIN = "tenantDomain";
         public static final String ENABLE_MAP_OAUTH_CONSUMER_APPS = "enable_map_oauth_consumer_apps";
         public static final String KEY_MANAGER_TYPE = "type";
+        public static final String KEY_MANAGER_TOKEN_TYPE = "tokenType";
         public static final String UUID_REGEX = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F" +
                 "]{3}-[0-9a-fA-F]{12}";
         public static final String CONSUMER_KEY_CLAIM = "consumer_key_claim";
@@ -2545,6 +2546,20 @@ public final class APIConstants {
         public static final String PKCE_MANDATORY = "pkceMandatory";
         public static final String PKCE_SUPPORT_PLAIN = "pkceSupportPlain";
         public static final String BYPASS_CLIENT_CREDENTIALS = "bypassClientCredentials";
+
+        public static final String[] REQUIRED_CONF_FOR_EXT_KEY_MANAGERS = {
+                APIConstants.KeyManager.ISSUER,
+                APIConstants.KeyManager.CONSUMER_KEY_CLAIM,
+                APIConstants.KeyManager.SCOPES_CLAIM,
+                APIConstants.KeyManager.CERTIFICATE_TYPE,
+                APIConstants.KeyManager.CERTIFICATE_VALUE
+        };
+
+        public static final String[] REQUIRED_ENDPOINTS_FOR_EXT_KEY_MANAGERS = {
+                APIConstants.KeyManager.AUTHORIZE_ENDPOINT,
+                APIConstants.KeyManager.TOKEN_ENDPOINT,
+                APIConstants.KeyManager.REVOKE_ENDPOINT
+        };
 
         public static class KeyManagerEvent {
 
@@ -2984,4 +2999,6 @@ public final class APIConstants {
 
     public static final String PRODUCTION_ENV_AUD_CLAIM = "choreo:deployment:production";
     public static final String DEVELOPMENT_ENV_AUD_CLAIM = "choreo:deployment:sandbox";
+
+    public static final String IS_DP_SYSTEM_APP_ATTRIBUTE = "isDpSystemApp";
 }

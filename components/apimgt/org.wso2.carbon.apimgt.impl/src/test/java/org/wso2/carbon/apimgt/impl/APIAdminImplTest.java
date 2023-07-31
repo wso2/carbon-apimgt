@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.LogFactory;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.junit.Assert;
@@ -32,15 +33,21 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class})
+@PrepareForTest({ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class, LogFactory.class})
 public class APIAdminImplTest {
 
     ServiceReferenceHolder serviceReferenceHolder;
@@ -163,5 +170,122 @@ public class APIAdminImplTest {
         Schema schema = Mockito.mock(Schema.class);
         PowerMockito.when(APIUtil.class, "retrieveTenantConfigJsonSchema").thenReturn(schema);
         Assert.assertEquals(apiAdmin.getTenantConfigSchema("abc.com"), schema.toString());
+    }
+
+    @Test
+    public void testAddKeyManagerConfiguration() throws Exception {
+
+        ApiMgtDAOMockCreator daoMockHolder = new ApiMgtDAOMockCreator(1);
+        ApiMgtDAO apiMgtDAO = daoMockHolder.getMock();
+
+        APIAdmin apiAdmin = new APIAdminImpl();
+        Map<String, Object> additionalProperties = new HashMap<>();
+        Map<String, String> endpoints = new HashMap<>();
+
+        endpoints.put("token_endpoint", "https://test.com/token");
+        endpoints.put("revoke_endpoint", "https://test.com/revoke");
+        endpoints.put("authorize_endpoint", "https://test.com/authorize");
+
+        additionalProperties.put("issuer", "https://test.com");
+        additionalProperties.put("consumer_key_claim", "client-id");
+        additionalProperties.put("scopes_claim", "scp");
+        additionalProperties.put("certificate_type", "JWKS");
+        additionalProperties.put("certificate_value", "https://test.com/jwks");
+
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+        keyManagerConfigurationDTO.setEnabled(true);
+        keyManagerConfigurationDTO.setTokenType("EXTERNAL");
+        keyManagerConfigurationDTO.setType("Auth0");
+        keyManagerConfigurationDTO.setName("TestAuth0");
+        keyManagerConfigurationDTO.setAdditionalProperties(additionalProperties);
+        keyManagerConfigurationDTO.setOrganization("testOrg");
+        keyManagerConfigurationDTO.setEndpoints(endpoints);
+
+        PowerMockito.when(APIUtil.isValidURL(Mockito.anyString())).thenReturn(true);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        KeyManagerConfigurationService keyManagerConfigurationService =
+                Mockito.mock(KeyManagerConfigurationService.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getKeyManagerConfigurationService())
+                .thenReturn(keyManagerConfigurationService);
+        APIManagerConfigurationService apiManagerConfigurationService =
+                Mockito.mock(APIManagerConfigurationService.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        EventHubConfigurationDto eventHubConfigurationDto = Mockito.mock(EventHubConfigurationDto.class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getEventHubConfigurationDto()).thenReturn(eventHubConfigurationDto);
+        Mockito.when(eventHubConfigurationDto.isEnabled()).thenReturn(false);
+        KeyManagerConfigurationDTO  generatedKMConfigDTO =
+                apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);
+        Assert.assertNotNull(generatedKMConfigDTO);
+        Assert.assertEquals(generatedKMConfigDTO.getName(), "TestAuth0");
+        Assert.assertEquals(generatedKMConfigDTO.getType(), "Auth0");
+        Assert.assertEquals(generatedKMConfigDTO.getTokenType(), "EXTERNAL");
+        Assert.assertEquals(generatedKMConfigDTO.getOrganization(), "testOrg");
+        Assert.assertEquals(generatedKMConfigDTO.getAdditionalProperties().get("issuer"), "https://test.com");
+        Assert.assertEquals(generatedKMConfigDTO.getAdditionalProperties().get("consumer_key_claim"), "client-id");
+        Assert.assertEquals(generatedKMConfigDTO.getAdditionalProperties().get("scopes_claim"), "scp");
+        Assert.assertEquals(generatedKMConfigDTO.getAdditionalProperties().get("certificate_type"), "JWKS");
+        Assert.assertEquals(generatedKMConfigDTO.getAdditionalProperties().get("certificate_value"),
+                "https://test.com/jwks");
+        Assert.assertEquals(generatedKMConfigDTO.getEndpoints().get("token_endpoint"), "https://test.com/token");
+        Assert.assertEquals(generatedKMConfigDTO.getEndpoints().get("revoke_endpoint"), "https://test.com/revoke");
+        Assert.assertEquals(generatedKMConfigDTO.getEndpoints().get("authorize_endpoint"),
+                "https://test.com/authorize");
+
+        // Issuer is the first URL validated
+        PowerMockito.when(APIUtil.isValidURL(Mockito.anyString())).thenReturn(false);
+        try {
+            apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);
+            Assert.fail("Add key managers is supposed to be failed but it passed");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Invalid JWKS URL is provided. Only valid URLs are supported");
+        }
+        PowerMockito.when(APIUtil.isValidURL(Mockito.anyString())).thenReturn(true);
+
+        // Test for error message when additional properties are not present
+        keyManagerConfigurationDTO.setAdditionalProperties(new HashMap<>());
+        try {
+            apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);
+            Assert.fail("Add key managers is supposed to be failed but it passed due to missing properties");
+        } catch (APIManagementException e) {
+            String commonRegex = "issuer|consumer_key_claim|scopes_claim|certificate_type|certificate_value";
+            Assert.assertTrue(e.getMessage().matches(String.format("Key Manager Configuration value for " +
+                    "((%s),){4}(%s) is/are required", commonRegex, commonRegex)));
+        }
+        keyManagerConfigurationDTO.setAdditionalProperties(additionalProperties);
+
+        // Test for error message when endpoints are not present
+        keyManagerConfigurationDTO.setEndpoints(new HashMap<>());
+        try {
+            apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);
+            Assert.fail("Add key managers is supposed to be failed but it passed due to missing endpoints");
+        } catch (APIManagementException e) {
+            String commonRegex = "token_endpoint|revoke_endpoint|authorize_endpoint";
+            Assert.assertTrue(e.getMessage().matches(String.format("Key Manager Endpoint Configuration value for " +
+                    "((%s),){2}(%s) is/are required", commonRegex, commonRegex)));
+        }
+        keyManagerConfigurationDTO.setEndpoints(endpoints);
+
+        ArrayList<KeyManagerConfigurationDTO> keyManagerList3 = new ArrayList<>();
+        KeyManagerConfigurationDTO existingKeyManagerConfigurationDTOBySameIssuer = new KeyManagerConfigurationDTO();
+        existingKeyManagerConfigurationDTOBySameIssuer.setAdditionalProperties(additionalProperties);
+        existingKeyManagerConfigurationDTOBySameIssuer.setEnabled(true);
+        existingKeyManagerConfigurationDTOBySameIssuer.setTokenType("EXTERNAL");
+        existingKeyManagerConfigurationDTOBySameIssuer.setType("Auth0");
+        existingKeyManagerConfigurationDTOBySameIssuer.setName("TestAuth02");
+        existingKeyManagerConfigurationDTOBySameIssuer.setAdditionalProperties(additionalProperties);
+        existingKeyManagerConfigurationDTOBySameIssuer.setOrganization("testOrg");
+        existingKeyManagerConfigurationDTOBySameIssuer.setEndpoints(endpoints);
+        keyManagerList3.add(existingKeyManagerConfigurationDTOBySameIssuer);
+        Mockito.when(apiMgtDAO.getKeyManagerConfigurationsByOrganization(Mockito.anyString())).thenReturn(keyManagerList3);
+        try {
+            apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);
+            Assert.fail("Add key managers is supposed to be failed but it passed as issuer is already added" );
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Issuer already exists for the organization testOrg");
+        }
+        Mockito.when(apiMgtDAO.getKeyManagerConfigurationsByOrganization(Mockito.anyString())).thenReturn(null);
     }
 }

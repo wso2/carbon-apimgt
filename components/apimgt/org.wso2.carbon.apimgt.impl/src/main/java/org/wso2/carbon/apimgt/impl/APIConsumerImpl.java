@@ -750,6 +750,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
+    public SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application application)
+            throws APIManagementException {
+        return addSubscription(apiTypeWrapper, userId, application, null);
+    }
+
+    @Override
     public SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application application,
                                                 String versionRange) throws APIManagementException {
 

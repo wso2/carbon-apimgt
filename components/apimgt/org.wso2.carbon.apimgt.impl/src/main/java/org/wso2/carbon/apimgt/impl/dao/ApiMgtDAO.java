@@ -622,6 +622,11 @@ public class ApiMgtDAO {
         return null;
     }
 
+    public int addSubscription(ApiTypeWrapper apiTypeWrapper, Application application, String status, String subscriber)
+            throws APIManagementException {
+        return addSubscription(apiTypeWrapper, application, status, subscriber, null);
+    }
+
     public int addSubscription(ApiTypeWrapper apiTypeWrapper, Application application, String status,
                                String subscriber, String versionRange) throws APIManagementException {
         int subscriptionId = -1;
@@ -5198,9 +5203,6 @@ public class ApiMgtDAO {
                                 APIConstants.SubscriptionCreatedStatus.SUBSCRIBE.equals(subCreationStatus)) {
 
                             // Throw error saying subscription for the api version range already exists.
-                            log.error(String.format("Subscription already exists for API/API Product %s version " +
-                                            "range %s in Application %s", apiTypeWrapper.getName(), versionRange,
-                                    application.getName()));
                             throw new APIManagementException(ExceptionCodes.from(
                                     ExceptionCodes.SUBSCRIPTION_EXISTS_FOR_VERSION_RANGE, apiTypeWrapper.getName(),
                                 versionRange, application.getName()));
@@ -5210,8 +5212,6 @@ public class ApiMgtDAO {
                             deleteSubscriptionByApiIDAndAppID(apiId, application.getId(), connection);
                         } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus) || APIConstants
                                 .SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
-                            log.error(String.format(String.format("Subscription to API/API Prouct %%s through application" +
-                                    " %%s was blocked"), apiTypeWrapper.getName(), application.getName()));
                             throw new SubscriptionBlockedException(String.format("Subscription to API/API Product %s " +
                                     "through application %s was blocked", apiTypeWrapper.getName(), application.getName()));
                         } else if (APIConstants.SubscriptionStatus.REJECTED.equals(subStatus)) {

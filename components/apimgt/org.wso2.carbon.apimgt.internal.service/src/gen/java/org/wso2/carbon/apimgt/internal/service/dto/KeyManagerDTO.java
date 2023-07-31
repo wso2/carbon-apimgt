@@ -28,7 +28,7 @@ public class KeyManagerDTO   {
     public enum TokenTypeEnum {
         EXCHANGED("EXCHANGED"),
         DIRECT("DIRECT"),
-        BOTH("BOTH");
+        EXTERNAL("EXTERNAL");
         private String value;
 
         TokenTypeEnum (String v) {
@@ -159,7 +159,7 @@ return null;
   }
 
   /**
-   * The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.
+   * The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or EXTERNAL.
    **/
   public KeyManagerDTO tokenType(TokenTypeEnum tokenType) {
     this.tokenType = tokenType;
@@ -167,7 +167,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "EXCHANGED", value = "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.")
+  @ApiModelProperty(example = "EXCHANGED", value = "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or EXTERNAL.")
   @JsonProperty("tokenType")
   public TokenTypeEnum getTokenType() {
     return tokenType;
