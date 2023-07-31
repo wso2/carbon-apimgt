@@ -254,6 +254,13 @@ public class SQLConstants {
             "   API_ID = ? " +
             "   AND APPLICATION_ID = ?";
 
+    public static final String CHECK_EXISTING_SUBSCRIPTION_API_VERSION_RANGE_SQL =
+            "SELECT API.API_ID, SUB_STATUS, SUBS_CREATE_STATE" +
+            " FROM AM_SUBSCRIPTION AS SUBSCRIPTION" +
+            " JOIN AM_API AS API ON API.API_ID = SUBSCRIPTION.API_ID" +
+            " WHERE SUBSCRIPTION.APPLICATION_ID = ?" +
+            " AND API.CONTEXT_TEMPLATE = ? AND SUBSCRIPTION.VERSION_RANGE = ?";
+
     public static final String RETRIEVE_SUBSCRIPTION_ID_SQL =
             " SELECT " +
             "   SUBSCRIPTION_ID " +
@@ -265,8 +272,8 @@ public class SQLConstants {
     public static final String ADD_SUBSCRIPTION_SQL =
             " INSERT INTO " +
             "   AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS,SUBS_CREATE_STATE,CREATED_BY,CREATED_TIME, " +
-            "   UPDATED_TIME, UUID, TIER_ID_PENDING) " +
-            " VALUES (?,?,?,?,?,?,?,?,?,?)";
+            "   UPDATED_TIME, UUID, TIER_ID_PENDING, VERSION_RANGE) " +
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String UPDATE_SINGLE_SUBSCRIPTION_SQL =
             " UPDATE AM_SUBSCRIPTION " +
@@ -326,6 +333,7 @@ public class SQLConstants {
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
             "   SUBS.UUID AS UUID, " +
+            "   SUBS.VERSION_RANGE AS VERSION_RANGE, " +
              "   API.API_ID AS API_ID," +
              "   API.API_UUID AS API_UUID " +
             " FROM " +
@@ -351,6 +359,7 @@ public class SQLConstants {
             "   SUBS.UUID AS UUID, " +
             "   SUBS.CREATED_TIME AS CREATED_TIME, " +
             "   SUBS.UPDATED_TIME AS UPDATED_TIME, " +
+            "   SUBS.VERSION_RANGE AS VERSION_RANGE, " +
             "   API.API_UUID AS API_UUID, " +
             "   API.API_ID AS API_ID " +
             " FROM " +
@@ -528,6 +537,7 @@ public class SQLConstants {
                     "   SUBS.SUB_STATUS AS SUB_STATUS, " +
                     "   SUBS.UUID AS SUB_UUID, " +
                     "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+                    "   SUBS.VERSION_RANGE AS VERSION_RANGE, " +
                     "   APP.NAME AS APP_NAME " +
                     " FROM " +
                     "   AM_APPLICATION APP, " +
@@ -942,7 +952,8 @@ public class SQLConstants {
                     "   SUBS.CREATED_TIME AS SUB_CREATED_TIME, " +
                     "   SUBS.TIER_ID AS SUB_TIER_ID, " +
                     "   APP.UUID AS APP_UUID, " +
-                    "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE " +
+                    "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+                    "   SUBS.VERSION_RANGE AS VERSION_RANGE " +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUBS, " +
                     "   AM_APPLICATION APP, " +
@@ -1428,6 +1439,7 @@ public class SQLConstants {
             "   SUB.TIER_ID AS TIER_ID," +
             "   SUB.APPLICATION_ID AS APPLICATION_ID," +
             "   SUB.SUB_STATUS AS SUB_STATUS," +
+            "   SUB.VERSION_RANGE AS VERSION_RANGE," +
             "   API.CONTEXT AS CONTEXT," +
             "   API.API_VERSION AS VERSION" +
             " FROM" +

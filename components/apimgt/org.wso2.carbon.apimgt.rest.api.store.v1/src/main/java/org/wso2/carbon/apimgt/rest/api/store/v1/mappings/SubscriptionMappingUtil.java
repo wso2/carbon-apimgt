@@ -102,6 +102,7 @@ public class SubscriptionMappingUtil {
         subscriptionDTO.setRequestedThrottlingPolicy(subscription.getRequestedTier().getName());
         ApplicationInfoDTO applicationInfoDTO = ApplicationMappingUtil.fromApplicationToInfoDTO(application);
         subscriptionDTO.setApplicationInfo(applicationInfoDTO);
+        subscriptionDTO.setVersionRange(subscription.getVersionRange());
         return subscriptionDTO;
     }
 
@@ -135,6 +136,7 @@ public class SubscriptionMappingUtil {
 
         ApplicationInfoDTO applicationInfoDTO = ApplicationMappingUtil.fromApplicationToInfoDTO(application);
         subscriptionDTO.setApplicationInfo(applicationInfoDTO);
+        subscriptionDTO.setVersionRange(subscription.getVersionRange());
 
         return subscriptionDTO;
     }

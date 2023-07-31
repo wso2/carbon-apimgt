@@ -115,6 +115,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.RemoteUserManagerClient;
+import org.wso2.carbon.apimgt.impl.utils.SemanticVersionUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
@@ -623,12 +624,17 @@ public class ApiMgtDAO {
 
     public int addSubscription(ApiTypeWrapper apiTypeWrapper, Application application, String status, String subscriber)
             throws APIManagementException {
+        return addSubscription(apiTypeWrapper, application, status, subscriber, null);
+    }
+
+    public int addSubscription(ApiTypeWrapper apiTypeWrapper, Application application, String status,
+                               String subscriber, String versionRange) throws APIManagementException {
         int subscriptionId = -1;
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             try {
                 conn.setAutoCommit(false);
-                subscriptionId = addSubscription(conn, apiTypeWrapper, application, status, subscriber);
+                subscriptionId = addSubscription(conn, apiTypeWrapper, application, status, subscriber, versionRange);
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -935,6 +941,7 @@ public class ApiMgtDAO {
                 subscribedAPI.setRequestedTier(new Tier(resultSet.getString("TIER_ID_PENDING")));
                 subscribedAPI.setUUID(resultSet.getString("UUID"));
                 subscribedAPI.setApplication(application);
+                subscribedAPI.setVersionRange(resultSet.getString("VERSION_RANGE"));
             }
             return subscribedAPI;
         } catch (SQLException e) {
@@ -1006,6 +1013,7 @@ public class ApiMgtDAO {
                 }
                 subscribedAPI.setApplication(application);
                 subscribedAPI.setOrganization(resultSet.getString("ORGANIZATION"));
+                subscribedAPI.setVersionRange(resultSet.getString("VERSION_RANGE"));
             }
             return subscribedAPI;
         } catch (SQLException e) {
@@ -2724,6 +2732,7 @@ public class ApiMgtDAO {
                 Application application = new Application(result.getInt("APPLICATION_ID"));
                 application.setName(result.getString("APPNAME"));
                 subscription.setApplication(application);
+                subscription.setVersionRange(result.getString("VERSION_RANGE"));
 
                 subscriptions.add(subscription);
             }
@@ -5011,14 +5020,18 @@ public class ApiMgtDAO {
                         List<SubscriptionInfo> subscriptionData = new ArrayList<SubscriptionInfo>();
                         while (rs.next() && !(APIConstants.SubscriptionStatus.ON_HOLD.equals(rs.getString("SUB_STATUS"
                         )))) {
-                            int subscriptionId = rs.getInt("SUBSCRIPTION_ID");
-                            String tierId = rs.getString("TIER_ID");
-                            int applicationId = rs.getInt("APPLICATION_ID");
-                            String apiVersion = rs.getString("VERSION");
-                            String subscriptionStatus = rs.getString("SUB_STATUS");
-                            SubscriptionInfo info = new SubscriptionInfo(subscriptionId, tierId, applicationId,
-                                    apiVersion, subscriptionStatus);
-                            subscriptionData.add(info);
+                            String versionRange = rs.getString("VERSION_RANGE");
+                            // Mark the subscription to copy if the subscription isn't made for a version range
+                            if (versionRange == null) {
+                                int subscriptionId = rs.getInt("SUBSCRIPTION_ID");
+                                String tierId = rs.getString("TIER_ID");
+                                int applicationId = rs.getInt("APPLICATION_ID");
+                                String apiVersion = rs.getString("VERSION");
+                                String subscriptionStatus = rs.getString("SUB_STATUS");
+                                SubscriptionInfo info = new SubscriptionInfo(subscriptionId, tierId, applicationId,
+                                        apiVersion, subscriptionStatus);
+                                subscriptionData.add(info);
+                            }
                         }
                         // To keep track of already added subscriptions (apps)
                         List<Integer> addedApplications = new ArrayList<>();
@@ -5045,7 +5058,7 @@ public class ApiMgtDAO {
                                                 info.getApplicationId());
                                         String subscriptionUUID = UUID.randomUUID().toString();
                                         int subscriptionId = addSubscription(connection, apiTypeWrapper, application,
-                                                subscriptionStatus, apiIdentifier.getProviderName(), subscriptionUUID);
+                                                subscriptionStatus, apiIdentifier.getProviderName(), subscriptionUUID, null);
                                         if (subscriptionId == -1) {
                                             String msg =
                                                     "Unable to add a new subscription for the API: " + apiIdentifier.getName() +
@@ -5087,13 +5100,14 @@ public class ApiMgtDAO {
     }
 
     private int addSubscription(Connection connection, ApiTypeWrapper apiTypeWrapper, Application application,
-                                String subscriptionStatus, String subscriber) throws APIManagementException,
-            SQLException {
-        return addSubscription(connection, apiTypeWrapper, application, subscriptionStatus, subscriber, UUID.randomUUID().toString());
+                                String subscriptionStatus, String subscriber, String versionRange)
+            throws APIManagementException, SQLException {
+        return addSubscription(connection, apiTypeWrapper, application, subscriptionStatus, subscriber,
+                UUID.randomUUID().toString(), versionRange);
     }
     private int addSubscription(Connection connection, ApiTypeWrapper apiTypeWrapper, Application application,
-                                String subscriptionStatus, String subscriber, String subscriptionUUID)
-            throws APIManagementException, SQLException {
+                                String subscriptionStatus, String subscriber, String subscriptionUUID,
+                                String versionRange) throws APIManagementException, SQLException {
 
         final boolean isProduct = apiTypeWrapper.isAPIProduct();
         int subscriptionId = -1;
@@ -5101,6 +5115,7 @@ public class ApiMgtDAO {
         String apiUUID;
         Identifier identifier;
         String tier;
+        String contextTemplate;
 
         //Query to check if this subscription already exists
         String checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_API_SQL;
@@ -5159,6 +5174,56 @@ public class ApiMgtDAO {
             }
         }
 
+        // Check a subscription is available for the API version range
+        if (versionRange != null) {
+            checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_API_VERSION_RANGE_SQL;
+            if (isProduct) {
+                contextTemplate = apiTypeWrapper.getApiProduct().getContextTemplate();
+            } else {
+                contextTemplate = apiTypeWrapper.getApi().getContextTemplate();
+            }
+
+            contextTemplate = contextTemplate.replace("/" + APIConstants.VERSION_PLACEHOLDER, "");
+
+            try (PreparedStatement ps = connection.prepareStatement(checkDuplicateQuery)) {
+                ps.setInt(1, application.getId());
+                ps.setString(2, contextTemplate);
+                ps.setString(3, versionRange);
+
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    // If the subscription already exists
+                    if (resultSet.next()) {
+                        String subStatus = resultSet.getString("SUB_STATUS");
+                        String subCreationStatus = resultSet.getString("SUBS_CREATE_STATE");
+                        int apiId = resultSet.getInt("API_ID");
+
+                        if ((APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus) ||
+                                APIConstants.SubscriptionStatus.ON_HOLD.equals(subStatus) ||
+                                APIConstants.SubscriptionStatus.REJECTED.equals(subStatus)) &&
+                                APIConstants.SubscriptionCreatedStatus.SUBSCRIBE.equals(subCreationStatus)) {
+
+                            // Throw error saying subscription for the api version range already exists.
+                            throw new APIManagementException(ExceptionCodes.from(
+                                    ExceptionCodes.SUBSCRIPTION_EXISTS_FOR_VERSION_RANGE, apiTypeWrapper.getName(),
+                                versionRange, application.getName()));
+
+                        } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus) && APIConstants
+                                .SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subCreationStatus)) {
+                            deleteSubscriptionByApiIDAndAppID(apiId, application.getId(), connection);
+                        } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus) || APIConstants
+                                .SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
+                            throw new SubscriptionBlockedException(String.format("Subscription to API/API Product %s " +
+                                    "through application %s was blocked", apiTypeWrapper.getName(), application.getName()));
+                        } else if (APIConstants.SubscriptionStatus.REJECTED.equals(subStatus)) {
+                            throw new SubscriptionBlockedException("Subscription to API " + apiTypeWrapper.getName()
+                                    + " through application " + application.getName() + " was rejected");
+                        }
+                    }
+
+                }
+            }
+        }
+
         //This query to update the AM_SUBSCRIPTION table
         String sqlQuery = SQLConstants.ADD_SUBSCRIPTION_SQL;
 
@@ -5190,6 +5255,7 @@ public class ApiMgtDAO {
                 preparedStForInsert.setTimestamp(7, timestamp);
                 preparedStForInsert.setTimestamp(8, timestamp);
                 preparedStForInsert.setString(9, subscriptionUUID);
+                preparedStForInsert.setString(11, versionRange);
 
                 preparedStForInsert.executeUpdate();
                 try (ResultSet rs = preparedStForInsert.getGeneratedKeys()) {
@@ -18320,6 +18386,7 @@ public class ApiMgtDAO {
                             identifier.setUUID(result.getString("API_UUID"));
                             SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
                             subscribedAPI.setApplication(application);
+                            subscribedAPI.setVersionRange(result.getString("VERSION_RANGE"));
                             initSubscribedAPI(subscribedAPI, result);
                             subscribedAPIs.add(subscribedAPI);
                         } else {
@@ -18329,6 +18396,7 @@ public class ApiMgtDAO {
                             identifier.setUuid(result.getString("API_UUID"));
                             SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
                             subscribedAPI.setApplication(application);
+                            subscribedAPI.setVersionRange(result.getString("VERSION_RANGE"));
                             initSubscribedAPI(subscribedAPI, result);
                             subscribedAPIs.add(subscribedAPI);
                         }
