@@ -159,6 +159,29 @@ public interface APIManager {
     Set<String> getAPIVersions(String providerName, String apiName, String organization) throws APIManagementException;
 
     /**
+     * Returns a list of the APIs for the given provider and name in given organization
+     *
+     * @param providerName name of the provider (common)
+     * @param apiName      name of the api
+     * @param organization organization
+     * @return Set of version strings (possibly empty)
+     * @throws APIManagementException if failed to get apis
+     */
+    List<API> getAllAPIVersions(String providerName, String apiName, String organization) throws APIManagementException;
+
+    /**
+     * Returns API for the given provider, API name and the version
+     *
+     * @param providerName name of the provider (common)
+     * @param apiName      name of the api
+     * @param apiVersion   version of the api
+     * @param organization organization
+     * @return Set of APIs (possibly empty)
+     * @throws APIManagementException if failed to the API
+     */
+    API getAPIInfoByNameVersion(String providerName, String apiName, String apiVersion, String organization) throws APIManagementException;
+
+    /**
      * Get graphql schema definition
      * @param apiId  ID of the API
      * @param orgId  Identifier of an organization

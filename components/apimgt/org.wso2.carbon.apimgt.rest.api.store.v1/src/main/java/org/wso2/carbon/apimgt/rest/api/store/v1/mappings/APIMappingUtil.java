@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.MajorRangeVersionInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -60,10 +61,12 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MajorRangeVersionInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.VersionInfoDTO;
 import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -279,6 +282,19 @@ public class APIMappingUtil {
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
+
+        MajorRangeVersionInfo majorRangeVersionInfo = model.getVersionInfo().getMajorRangeVersionInfo();
+
+        MajorRangeVersionInfoDTO majorRangeVersionInfoDTO = new MajorRangeVersionInfoDTO();
+        majorRangeVersionInfoDTO.setIsLatest(majorRangeVersionInfo.getLatest());
+        majorRangeVersionInfoDTO.setLatestVersionAPIId(majorRangeVersionInfo.getLatestVersionAPIId());
+        majorRangeVersionInfoDTO.setLatestVersion(majorRangeVersionInfo.getLatestVersion());
+
+        VersionInfoDTO versionInfoDTO = new VersionInfoDTO();
+        versionInfoDTO.setVersion(model.getId().getVersion());
+        versionInfoDTO.setMajorRange(majorRangeVersionInfoDTO);
+
+        dto.setVersionInfo(versionInfoDTO);
 
         return dto;
     }

@@ -1371,4 +1371,14 @@ public class API implements Serializable {
     public void setEnableBackendJWT(Boolean enableBackendJWT) {
         this.enableBackendJWT = enableBackendJWT;
     }
+
+    private VersionInfo versionInfo;
+
+    public VersionInfo getVersionInfo() {
+        return versionInfo;
+    }
+
+    public void setVersionInfo(VersionInfo versionInfo) {
+        this.versionInfo = versionInfo;
+    }
 }
