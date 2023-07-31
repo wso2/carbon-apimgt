@@ -3938,6 +3938,41 @@ components:
             - mqtt
           items:
             type: string
+        versionInfo:
+          $ref: '#/components/schemas/VersionInfo'
+    VersionInfo:
+      title: API version info object
+      required:
+        - version
+        - majorRange
+      type: object
+      properties:
+        version:
+          type: string
+          description: API version
+          example: v1.2.3
+        majorRange:
+          $ref: '#/components/schemas/MajorRangeVersionInfo'
+    MajorRangeVersionInfo:
+      title: Major version range info object
+      type: object
+      required:
+        - isLatest
+        - latestVersion
+        - latestVersionAPIId
+      properties:
+        isLatest:
+          type: boolean
+          description: Flag to indicate whether the API is the latest version in its major version range
+          example: false
+        latestVersion:
+          type: string
+          description: Latest API's version in API's major version range
+          example: v1.3.1
+        latestVersionAPIId:
+          type: string
+          description: Latest API's identifier in API's major version range
+          example: 64c37428722fa140f5457628
     APIMonetizationInfo:
       title: API monetization object
       required:

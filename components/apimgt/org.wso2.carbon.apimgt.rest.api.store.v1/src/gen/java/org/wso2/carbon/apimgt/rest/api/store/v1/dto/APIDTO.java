@@ -14,6 +14,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.VersionInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -63,6 +64,7 @@ public class APIDTO   {
     private String lastUpdatedTime = null;
     private String gatewayVendor = null;
     private List<String> asyncTransportProtocols = new ArrayList<String>();
+    private VersionInfoDTO versionInfo = null;
 
   /**
    * UUID of the api 
@@ -659,6 +661,24 @@ public class APIDTO   {
     this.asyncTransportProtocols = asyncTransportProtocols;
   }
 
+  /**
+   **/
+  public APIDTO versionInfo(VersionInfoDTO versionInfo) {
+    this.versionInfo = versionInfo;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("versionInfo")
+  public VersionInfoDTO getVersionInfo() {
+    return versionInfo;
+  }
+  public void setVersionInfo(VersionInfoDTO versionInfo) {
+    this.versionInfo = versionInfo;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -701,12 +721,13 @@ public class APIDTO   {
         Objects.equals(createdTime, API.createdTime) &&
         Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
         Objects.equals(gatewayVendor, API.gatewayVendor) &&
-        Objects.equals(asyncTransportProtocols, API.asyncTransportProtocols);
+        Objects.equals(asyncTransportProtocols, API.asyncTransportProtocols) &&
+        Objects.equals(versionInfo, API.versionInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols, versionInfo);
   }
 
   @Override
@@ -747,6 +768,7 @@ public class APIDTO   {
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    asyncTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
+    sb.append("    versionInfo: ").append(toIndentedString(versionInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }
