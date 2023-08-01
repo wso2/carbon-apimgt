@@ -132,18 +132,17 @@ public interface APIConsumer extends APIManager {
                                                String keyManagerName,String tenantDomain) throws APIManagementException;
 
     /**
-     * @param jsonString     this string will contain oAuth app details
-     * @param userName       user name of logged in user.
-     * @param clientId       this is the consumer key of oAuthApplication
-     * @param application    {@link Application} object
-     * @param keyType
-     * @param tokenType      this is theApplication Token Type. This can be either default or jwt.
-     * @param keyManagerName
+     * @param jsonString      this string will contain oAuth app details
+     * @param clientId        this is the consumer key of oAuthApplication
+     * @param applicationUUID application UUID
+     * @param keyType         PRODUCTION or SANDBOX
+     * @param tokenType       this is theApplication Token Type. This can be either default or jwt.
+     * @param keyManagerName  Key Manager related to the provided clientId
      * @return
      * @throws APIManagementException
      */
-    Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
-                                               Application application, String keyType, String tokenType,
+    Map<String, Object> mapExistingOAuthClient(String jsonString, String clientId,
+                                               String applicationUUID, String keyType, String tokenType,
                                                String keyManagerName, String tenantDomain) throws APIManagementException;
 
     /**

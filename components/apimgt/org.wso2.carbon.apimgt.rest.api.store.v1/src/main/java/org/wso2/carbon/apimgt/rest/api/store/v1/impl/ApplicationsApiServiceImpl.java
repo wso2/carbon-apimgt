@@ -1113,7 +1113,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     /**
      * Generate keys using existing consumer key and consumer secret
      *
-     * @param applicationId Application id
+     * @param applicationId Application UUID
      * @param body          Contains consumer key, secret and key type information
      * @return A response object containing application keys
      */
@@ -1141,7 +1141,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
                 Map<String, Object> keyDetails = apiConsumer
                         .mapExistingOAuthClient(jsonParamObj.toJSONString(), username, clientId,
-                                application, keyType, tokenType, keyManagerName, organization);
+                                applicationId, keyType, tokenType, keyManagerName, organization);
                 ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil
                         .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                 applicationKeyDTO.setKeyManager(keyManagerName);

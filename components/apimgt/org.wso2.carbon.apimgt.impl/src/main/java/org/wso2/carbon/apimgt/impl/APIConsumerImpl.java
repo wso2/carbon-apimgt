@@ -80,7 +80,6 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -662,27 +661,28 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
-     * @param jsonString     this string will contain oAuth app details
-     * @param userName       user name of logged in user.
-     * @param clientId       this is the consumer key of oAuthApplication
-     * @param application    {@link Application} object
-     * @param keyType
-     * @param tokenType      this is theApplication Token Type. This can be either default or jwt.
-     * @param keyManagerName key Manager name
+     * @param jsonString      this string will contain oAuth app details
+     * @param clientId        this is the consumer key of oAuthApplication
+     * @param applicationUUID applicationUUID
+     * @param keyType         PRODUCTION or SANDBOX
+     * @param tokenType       this is theApplication Token Type. This can be either default or jwt.
+     * @param keyManagerName  key Manager name
      * @return
      * @throws APIManagementException
      */
     @Override
-    public Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
-                                                      Application application, String keyType, String tokenType,
+    public Map<String, Object> mapExistingOAuthClient(String jsonString, String clientId,
+                                                      String applicationUUID, String keyType, String tokenType,
                                                       String keyManagerName, String tenantDomain)
             throws APIManagementException {
 
         String callBackURL = null;
-        if (StringUtils.isEmpty(tenantDomain)) {
-            tenantDomain = MultitenantUtils.getTenantDomain(userName);
-        }
         String keyManagerId = null;
+        Application application = getApplicationByUUID(applicationUUID);
+        if (application == null) {
+            throw new APIManagementException("Application not found for UUID " + applicationUUID,
+                    ExceptionCodes.APPLICATION_NOT_FOUND);
+        }
         KeyManagerConfigurationDTO keyManagerConfiguration = null;
         if (keyManagerName != null) {
             keyManagerConfiguration = apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);

@@ -938,11 +938,15 @@ public class APIConsumerImplTest {
         keyManagerConfigurationsDto.setTokenType("EXTERNAL");
         Mockito.when(apiMgtDAO.isKeyManagerConfigurationExistByName( "auth0KM","testorg"))
                 .thenReturn(true);
-        Mockito.when(apiMgtDAO.getKeyManagerConfigurationByName("testorg", "auth0KM")).thenReturn(keyManagerConfigurationsDto);
-        Mockito.when(apiMgtDAO.getOrgSpecificApplicationId( "testApp","admin", "testorg"))
-                .thenReturn(1);
+        Mockito.when(apiMgtDAO.getKeyManagerConfigurationByName("testorg", "auth0KM"))
+                .thenReturn(keyManagerConfigurationsDto);
+        Application application = new Application("9ac1ae0a-3039-11ee-be56-0242ac120002");
+        application.setId(1000);
+        application.setName("app1");
+        application.setOwner("admin");
+        Mockito.when(apiMgtDAO.getApplicationByUUID("9ac1ae0a-3039-11ee-be56-0242ac120002")).thenReturn(application);
         try {
-            apiConsumer.mapExistingOAuthClient("", "admin", "1", "app1",
+            apiConsumer.mapExistingOAuthClient("", "1", "9ac1ae0a-3039-11ee-be56-0242ac120002",
                     "PRODUCTION", "EXTERNAL", "auth0KM", "testorg");
             Assert.fail("Exception is not thrown when client id is already mapped to an application");
         } catch (APIManagementException e) {
@@ -950,8 +954,8 @@ public class APIConsumerImplTest {
         }
 
         try {
-            Map<String, Object> keyDetails = apiConsumer.mapExistingOAuthClient("", "admin",
-                    "clientId1", "app1",
+            Map<String, Object> keyDetails = apiConsumer.mapExistingOAuthClient("",
+                    "clientId1", "9ac1ae0a-3039-11ee-be56-0242ac120002",
                     "PRODUCTION", "EXTERNAL", "auth0KM", "testorg");
             Assert.assertNotNull(keyDetails);
             Assert.assertEquals(keyDetails.get("consumerKey"), "clientId1");
