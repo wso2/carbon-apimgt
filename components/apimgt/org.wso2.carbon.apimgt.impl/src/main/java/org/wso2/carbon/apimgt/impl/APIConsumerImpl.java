@@ -600,6 +600,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             keyDetails.put(APIConstants.FrontEndParameterNames.KEY_MANAGER, keyManagerName);
             keyDetails.put(APIConstants.FrontEndParameterNames.KEY_TYPE, keyType);
             keyDetails.put(APIConstants.FrontEndParameterNames.KEY_STATE, "APPROVED");
+
+            JSONObject appLogObject = new JSONObject();
+            appLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
+            appLogObject.put("KeyType", keyType);
+            appLogObject.put("KeyManager", keyManagerName);
+            appLogObject.put("Updated Keys for application with client Id", clientId);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                    APIConstants.AuditLogConstants.UPDATED, this.username);
             return keyDetails;
         }
 
@@ -745,6 +753,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             keyDetails.put(APIConstants.FrontEndParameterNames.KEY_MANAGER, keyManagerName);
             keyDetails.put(APIConstants.FrontEndParameterNames.KEY_TYPE, keyType);
             keyDetails.put(APIConstants.FrontEndParameterNames.KEY_STATE, "APPROVED");
+
+            JSONObject appLogObject = new JSONObject();
+            appLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
+            appLogObject.put("KeyType", keyType);
+            appLogObject.put("KeyManager", keyManagerName);
+            appLogObject.put("Mapped Keys for application with client Id", clientId);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                    APIConstants.AuditLogConstants.CREATED, this.username);
             return keyDetails;
         }
 
