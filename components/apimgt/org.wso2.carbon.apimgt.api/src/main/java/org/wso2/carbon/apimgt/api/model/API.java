@@ -1176,7 +1176,7 @@ public class API implements Serializable {
         this.authorizationHeader = authorizationHeader;
     }
 
-    public String getApiKeyHeader() {return apiKeyHeader; }
+    public String getApiKeyHeader() { return apiKeyHeader; }
 
     public void setApiKeyHeader(String apiKeyHeader) {
         this.apiKeyHeader = apiKeyHeader;
