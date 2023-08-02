@@ -6312,7 +6312,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, Set<String>> gatewaysToAdd = new HashMap<>();
         Map<String, Set<String>> gatewaysToRemove = new HashMap<>();
         for (boolean isDeployment : gatewayPolicyDeploymentMap.keySet()) {
-            // Check whether the gateway policy is deployed or undeployed
+            // Check whether the gateway policy is to be deployed or undeployed
             if (isDeployment) {
                 gatewayPolicyDeploymentList = gatewayPolicyDeploymentMap.get(true);
                 gatewaysToAdd = getGatewayPolicyDeploymentMap(gatewayPolicyDeploymentList);
@@ -6351,6 +6351,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public List<String> getAllPolicyMappingUUIDsByGatewayLabels(String[] gatewayLabels)
             throws APIManagementException {
         return apiMgtDAO.getGatewayPolicyMappingByGatewayLabel(gatewayLabels);
+    }
+
+    @Override
+    public void deleteGatewayPolicyMappingByPolicyMappingId(String gatewayPolicyMappingId, String tenantDomain)
+            throws APIManagementException {
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        Set<String> gatewayLabels = apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(
+                gatewayPolicyMappingId);
+        if (gatewayLabels.size() > 0) {
+            gatewayManager.undeployPolicyFromGateway(gatewayPolicyMappingId, tenantDomain, gatewayLabels);
+        }
+        apiMgtDAO.deleteGatewayPolicyMappingByPolicyId(gatewayPolicyMappingId);
     }
 
     //To get the hashmap of what mappingId is deployed or undeployed in which gateway

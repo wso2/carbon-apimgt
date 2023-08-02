@@ -14,12 +14,12 @@ import java.util.Map;
  */
 public class GatewayPolicyMappingUtil {
     public static Map<Boolean, List<GatewayPolicyDeployment>> fromDTOToGatewayPolicyDeploymentMap(
-            List<GatewayPolicyDeploymentDTO> gatewayPolicyDeploymentDTO) {
+            String gatewayPolicyMappingId, List<GatewayPolicyDeploymentDTO> gatewayPolicyDeploymentDTO) {
         List<GatewayPolicyDeployment> gatewayPolicyDeploymentList = new ArrayList<>();
         List<GatewayPolicyDeployment> gatewayPolicyUndeploymentList = new ArrayList<>();
         for (GatewayPolicyDeploymentDTO gatewayPolicyDeploymentDTOEntry : gatewayPolicyDeploymentDTO) {
             GatewayPolicyDeployment gatewayPolicyDeployment = new GatewayPolicyDeployment();
-            gatewayPolicyDeployment.setMappingUuid(gatewayPolicyDeploymentDTOEntry.getMappingUUID());
+            gatewayPolicyDeployment.setMappingUuid(gatewayPolicyMappingId);
             gatewayPolicyDeployment.setGatewayLabel(gatewayPolicyDeploymentDTOEntry.getGatewayLabel());
 
             if (gatewayPolicyDeploymentDTOEntry.isGatewayDeployment()) {

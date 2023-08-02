@@ -1,11 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.GatewayPoliciesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.GatewayPolicyMappingUtil;
@@ -53,7 +55,7 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
         return null;
     }
 
-    public Response engageGlobalPolicy(List<GatewayPolicyDeploymentDTO> gatewayPolicyDeploymentDTOList,
+    public Response engageGlobalPolicy(String gatewayPolicyMappingId, List<GatewayPolicyDeploymentDTO> gatewayPolicyDeploymentDTOList,
             MessageContext messageContext) {
 
         if (gatewayPolicyDeploymentDTOList == null) {
@@ -63,7 +65,7 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap =
-                    GatewayPolicyMappingUtil.fromDTOToGatewayPolicyDeploymentMap(gatewayPolicyDeploymentDTOList);
+                    GatewayPolicyMappingUtil.fromDTOToGatewayPolicyDeploymentMap(gatewayPolicyMappingId, gatewayPolicyDeploymentDTOList);
             apiProvider.engageGatewayGlobalPolicies(gatewayPolicyDeploymentMap, tenantDomain);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -74,6 +76,49 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
+        return null;
+    }
+
+    public Response deleteGatewayPolicyByPolicyId(String gatewayPolicyMappingId, MessageContext messageContext) {
+        if (StringUtils.isBlank(gatewayPolicyMappingId)) {
+            RestApiUtil.handleBadRequest("Gateway policy mapping ID is empty", log);
+        }
+        try {
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            List<OperationPolicyData> operationPolicyDataList = apiProvider.getGatewayPolicyDataListByPolicyId(
+                    gatewayPolicyMappingId, false);
+            if (!operationPolicyDataList.isEmpty()) {
+                apiProvider.deleteGatewayPolicyMappingByPolicyMappingId(gatewayPolicyMappingId, tenantDomain);
+                return Response.ok().build();
+            } else {
+                RestApiUtil.handleResourceNotFoundError(
+                        "Gateway policy mapping not found for the given Mapping ID : " + gatewayPolicyMappingId, log);
+            }
+        } catch (APIManagementException e) {
+            if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("User is not authorized to delete policy mapping", e, log);
+            } else {
+                String errorMessage = "Error while deleting the gateway policy mapping";
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    @Override public Response getAllGatewayPolicies(Integer limit, Integer offset, MessageContext messageContext)
+            throws APIManagementException {
+        return null;
+    }
+
+    @Override public Response getGatewayPolicyMappingContentByPolicyMappingId(String gatewayPolicyMappingId,
+            MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    @Override public Response updateGatewayPoliciesToFlows(String gatewayPolicyMappingId,
+            GatewayPolicyMappingsDTO gatewayPolicyMappingsDTO, MessageContext messageContext)
+            throws APIManagementException {
         return null;
     }
 

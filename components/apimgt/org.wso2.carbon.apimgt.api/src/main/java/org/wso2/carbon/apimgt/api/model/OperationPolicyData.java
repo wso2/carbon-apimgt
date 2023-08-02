@@ -25,9 +25,9 @@ public class OperationPolicyData {
     private String policyId = null;
     private String organization = null;
     private String md5Hash = null;
-    private String apiUUID = null; // Null for common policies
-    private String revisionUUID = null; // Null for common policies and API specific policies that are not revisioned yet
-    private String clonedCommonPolicyId = null; // Null for common policies and API specific policies that are not cloned.
+    private String apiUUID = null; // Null for common policies and gateway policies
+    private String revisionUUID = null; // Null for common policies, API specific policies that are not revisioned yet and gateway policies.
+    private String clonedCommonPolicyId = null; // Null for common policies, API specific policies that are not cloned and gateway policies.
     private OperationPolicySpecification specification;
     private OperationPolicyDefinition synapsePolicyDefinition;
     private OperationPolicyDefinition ccPolicyDefinition;
