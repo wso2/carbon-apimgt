@@ -1766,4 +1766,12 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     List<String> getAllPolicyMappingUUIDsByGatewayLabels(String[] gatewayLabel) throws APIManagementException;
+
+    /**
+     * This method is to delete a gateway policy mapping.
+     *
+     * @param gatewayPolicyMappingId Gateway policy mapping UUID
+     * @throws APIManagementException if failed to delete comment for identifier
+     */
+    void deleteGatewayPolicyMappingByPolicyMappingId(String gatewayPolicyMappingId, String tenantDomain) throws APIManagementException;
 }

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
 import javax.validation.constraints.*;
 
@@ -21,9 +23,28 @@ import javax.validation.Valid;
 
 public class GatewayPolicyMappingsDTO   {
   
+    private String id = null;
     private APIOperationPoliciesDTO policyMapping = null;
     private String description = null;
     private String displayName = null;
+    private List<String> appliedGatewayLabels = new ArrayList<String>();
+
+  /**
+   **/
+  public GatewayPolicyMappingsDTO id(String id) {
+    this.id = id;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "121223q41-24141-124124124-12414", value = "")
+  @JsonProperty("id")
+  public String getId() {
+    return id;
+  }
+  public void setId(String id) {
+    this.id = id;
+  }
 
   /**
    **/
@@ -33,9 +54,10 @@ public class GatewayPolicyMappingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
       @Valid
   @JsonProperty("policyMapping")
+  @NotNull
   public APIOperationPoliciesDTO getPolicyMapping() {
     return policyMapping;
   }
@@ -70,13 +92,31 @@ public class GatewayPolicyMappingsDTO   {
   }
 
   
-  @ApiModelProperty(example = "item_type_setter", value = "Meaningful name to identify the policy mapping")
+  @ApiModelProperty(example = "item_type_setter", required = true, value = "Meaningful name to identify the policy mapping")
   @JsonProperty("displayName")
+  @NotNull
   public String getDisplayName() {
     return displayName;
   }
   public void setDisplayName(String displayName) {
     this.displayName = displayName;
+  }
+
+  /**
+   **/
+  public GatewayPolicyMappingsDTO appliedGatewayLabels(List<String> appliedGatewayLabels) {
+    this.appliedGatewayLabels = appliedGatewayLabels;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("appliedGatewayLabels")
+  public List<String> getAppliedGatewayLabels() {
+    return appliedGatewayLabels;
+  }
+  public void setAppliedGatewayLabels(List<String> appliedGatewayLabels) {
+    this.appliedGatewayLabels = appliedGatewayLabels;
   }
 
 
@@ -89,14 +129,16 @@ public class GatewayPolicyMappingsDTO   {
       return false;
     }
     GatewayPolicyMappingsDTO gatewayPolicyMappings = (GatewayPolicyMappingsDTO) o;
-    return Objects.equals(policyMapping, gatewayPolicyMappings.policyMapping) &&
+    return Objects.equals(id, gatewayPolicyMappings.id) &&
+        Objects.equals(policyMapping, gatewayPolicyMappings.policyMapping) &&
         Objects.equals(description, gatewayPolicyMappings.description) &&
-        Objects.equals(displayName, gatewayPolicyMappings.displayName);
+        Objects.equals(displayName, gatewayPolicyMappings.displayName) &&
+        Objects.equals(appliedGatewayLabels, gatewayPolicyMappings.appliedGatewayLabels);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyMapping, description, displayName);
+    return Objects.hash(id, policyMapping, description, displayName, appliedGatewayLabels);
   }
 
   @Override
@@ -104,9 +146,11 @@ public class GatewayPolicyMappingsDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class GatewayPolicyMappingsDTO {\n");
     
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    policyMapping: ").append(toIndentedString(policyMapping)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
+    sb.append("    appliedGatewayLabels: ").append(toIndentedString(appliedGatewayLabels)).append("\n");
     sb.append("}");
     return sb.toString();
   }

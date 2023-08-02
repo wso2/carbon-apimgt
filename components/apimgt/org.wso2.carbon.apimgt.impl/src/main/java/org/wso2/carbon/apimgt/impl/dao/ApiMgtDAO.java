@@ -20601,6 +20601,60 @@ public class ApiMgtDAO {
         return policyMappingUUIDs;
     }
 
+    /**
+     * Get the gateway labels attached to the gateway policy mapping
+     *
+     * @param policyMappingUUID Policy mapping UUID
+     * @return Set of gateway labels
+     * @throws APIManagementException
+     */
+    public Set<String> getGatewayPolicyMappingDeploymentsByPolicyMappingId(String policyMappingUUID)
+            throws APIManagementException {
+
+        String dbQuery = SQLConstants.GatewayPolicyConstants.GET_GATEWAY_POLICY_DEPLOYMENT_BY_MAPPING_UUID;
+        Set<String> gatewayLabels = new HashSet<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+            statement.setString(1, policyMappingUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    gatewayLabels.add(rs.getString("GATEWAY_LABEL"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve the policy mapping UUID: " + policyMappingUUID + " attached gateway labels.", e);
+        }
+        return gatewayLabels;
+    }
+
+    /**
+     * Delete a gateway policy mapping by providing the policy mapping UUID
+     *
+     * @param gatewayPolicyMappingId UUID of the policy mapping to be deleted
+     * @return True if deleted successfully
+     * @throws APIManagementException
+     */
+    public void deleteGatewayPolicyMappingByPolicyId(String gatewayPolicyMappingId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            if (!getPolicyUsageByPolicyId(connection, gatewayPolicyMappingId)) {
+                String dbQuery = SQLConstants.GatewayPolicyConstants.DELETE_GATEWAY_POLICY_MAPPING_BY_ID;
+                try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+                    statement.setString(1, gatewayPolicyMappingId);
+                    statement.execute();
+                }
+                connection.commit();
+            } else {
+                throw new APIManagementException(
+                        "Cannot delete gateway policy mapping with id " + gatewayPolicyMappingId
+                                + " as policy usages exists");
+            }
+        } catch (SQLException e) {
+            handleException("Failed to delete gateway policy mapping " + gatewayPolicyMappingId, e);
+        }
+    }
+
     private List<String> getPolicyUUIDsByPolicyMappingUUID(String policyMappingUUID) throws APIManagementException {
 
         String dbQueryToGetPolicyUUID =
