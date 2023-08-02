@@ -138,12 +138,13 @@ public interface APIConsumer extends APIManager {
      * @param keyType         PRODUCTION or SANDBOX
      * @param tokenType       this is theApplication Token Type. This can be either default or jwt.
      * @param keyManagerName  Key Manager related to the provided clientId
+     * @param organization    organization UUID
      * @return
      * @throws APIManagementException
      */
     Map<String, Object> mapExistingOAuthClient(String jsonString, String clientId,
                                                String applicationUUID, String keyType, String tokenType,
-                                               String keyManagerName, String tenantDomain) throws APIManagementException;
+                                               String keyManagerName, String organization) throws APIManagementException;
 
     /**
      *This method will delete from application key mapping table and application registration table.
