@@ -100,6 +100,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
@@ -840,9 +842,9 @@ public class APIConsumerImplTest {
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         apiTypeWrapper.setTier("tier1");
         String tenantAwareUsername = "user1@"+SAMPLE_TENANT_DOMAIN_1;
-        Mockito.when(MultitenantUtils.getTenantAwareUsername(Mockito.eq("user1"))).thenReturn(tenantAwareUsername);
-        Mockito.when(apiMgtDAO.addSubscription(apiTypeWrapper, application, APIConstants.SubscriptionStatus.ON_HOLD,
-                tenantAwareUsername)).thenReturn(1);
+        Mockito.when(MultitenantUtils.getTenantAwareUsername(eq("user1"))).thenReturn(tenantAwareUsername);
+        Mockito.when(apiMgtDAO.addSubscription(eq(apiTypeWrapper), eq(application),
+                eq(APIConstants.SubscriptionStatus.ON_HOLD), eq(tenantAwareUsername), isNull())).thenReturn(1);
         SubscribedAPI subscribedAPI = new SubscribedAPI(UUID.randomUUID().toString());
         Mockito.when(apiMgtDAO.getSubscriptionById(1)).thenReturn(subscribedAPI);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1);
@@ -875,7 +877,7 @@ public class APIConsumerImplTest {
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         apiTypeWrapper.setTier("tier1");
         String tenantAwareUsername = "user1@"+SAMPLE_TENANT_DOMAIN_1;
-        Mockito.when(MultitenantUtils.getTenantAwareUsername(Mockito.eq("user1"))).thenReturn(tenantAwareUsername);
+        Mockito.when(MultitenantUtils.getTenantAwareUsername(eq("user1"))).thenReturn(tenantAwareUsername);
         Mockito.when(apiMgtDAO.addSubscription(apiTypeWrapper, application, APIConstants.SubscriptionStatus.ON_HOLD,
                 tenantAwareUsername, SAMPLE_API_SUBSCRIPTION_VERSION_RANGE)).thenReturn(1);
         SubscribedAPI subscribedAPI = new SubscribedAPI(UUID.randomUUID().toString());
@@ -902,7 +904,7 @@ public class APIConsumerImplTest {
         api.setAvailableTiers(tiers);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         apiTypeWrapper.setTier("tier2");
-        Mockito.when(apiMgtDAO.addSubscription(Mockito.eq(apiTypeWrapper), Mockito.eq(application), Mockito.anyString(),
+        Mockito.when(apiMgtDAO.addSubscription(eq(apiTypeWrapper), eq(application), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString())).thenReturn(1);
         SubscribedAPI subscribedAPI = new SubscribedAPI(UUID.randomUUID().toString());
         Mockito.when(apiMgtDAO.getSubscriptionById(1)).thenReturn(subscribedAPI);
