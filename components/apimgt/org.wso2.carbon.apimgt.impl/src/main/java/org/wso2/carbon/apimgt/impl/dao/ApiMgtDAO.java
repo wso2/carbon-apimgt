@@ -20644,6 +20644,7 @@ public class ApiMgtDAO {
                     statement.setString(1, gatewayPolicyMappingId);
                     statement.execute();
                 }
+                deleteGatewayPolicyMetaData(connection, gatewayPolicyMappingId);
                 connection.commit();
             } else {
                 throw new APIManagementException(
@@ -20673,5 +20674,14 @@ public class ApiMgtDAO {
             handleException("Failed to get all the gateway policies for mapping UUID " + policyMappingUUID, e);
         }
         return policyUUIDList;
+    }
+
+    private void deleteGatewayPolicyMetaData(Connection connection, String policyMappingUUID) throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                connection.prepareStatement(SQLConstants.GatewayPolicyConstants.DELETE_GATEWAY_POLICY_METADATA)) {
+            preparedStatement.setString(1, policyMappingUUID);
+            preparedStatement.executeUpdate();
+        }
     }
 }
