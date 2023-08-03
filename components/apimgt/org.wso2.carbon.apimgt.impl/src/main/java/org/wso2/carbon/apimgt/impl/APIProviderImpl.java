@@ -6360,7 +6360,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Set<String> gatewayLabels = apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(
                 gatewayPolicyMappingId);
         if (gatewayLabels.size() > 0) {
-            gatewayManager.undeployPolicyFromGateway(gatewayPolicyMappingId, tenantDomain, gatewayLabels);
+            //Logging as a WARN since this isn't an error scenario.
+            String message = "Cannot remove the gateway policy mapping as active deployments exist.";
+            log.warn(message);
+            throw new APIManagementException(message);
         }
         apiMgtDAO.deleteGatewayPolicyMappingByPolicyId(gatewayPolicyMappingId);
     }
