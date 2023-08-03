@@ -1151,9 +1151,6 @@ public class PublisherCommonUtils {
             body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
         if (body.getApiKeyHeader() == null) {
-            body.setApiKeyHeader(APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.API_KEY_HEADER));
-        }
-        if (body.getApiKeyHeader() == null) {
             body.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
         }
 
@@ -1771,10 +1768,6 @@ public class PublisherCommonUtils {
             apiProductDTO.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
 
-        if (apiProductDTO.getApiKeyHeader() == null) {
-            apiProductDTO.setApiKeyHeader(
-                    APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.API_KEY_HEADER));
-        }
         if (apiProductDTO.getApiKeyHeader() == null) {
             apiProductDTO.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
         }

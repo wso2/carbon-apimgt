@@ -371,6 +371,9 @@ public class APIMappingUtil {
         setMaxTpsFromApiDTOToModel(dto, model);
         model.setAuthorizationHeader(dto.getAuthorizationHeader());
         model.setApiKeyHeader(dto.getApiKeyHeader());
+        if (model.getApiKeyHeader() == null) {
+            model.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+        }
         model.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
 
         if (dto.getType().toString().equals(APIConstants.API_TYPE_WEBSUB)) {
@@ -2671,6 +2674,9 @@ public class APIMappingUtil {
         product.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
         product.setAuthorizationHeader(dto.getAuthorizationHeader());
         product.setApiKeyHeader(dto.getApiKeyHeader());
+        if (product.getApiKeyHeader() == null) {
+            product.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+        }
 
         //attach api categories to API model
         setAPICategoriesToModel(dto, product, provider);

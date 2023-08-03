@@ -625,7 +625,7 @@ return null;
   }
 
   /**
-   * Name of the API key header used for invoking the API. If it is not set, API key header name specified in tenant or system level will be used. 
+   * Name of the API key header used for invoking the API. If it is not set, default value &#x60;apiKey&#x60; will be used. 
    **/
   public APIProductDTO apiKeyHeader(String apiKeyHeader) {
     this.apiKeyHeader = apiKeyHeader;
@@ -633,7 +633,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "ApiKey", value = "Name of the API key header used for invoking the API. If it is not set, API key header name specified in tenant or system level will be used. ")
+  @ApiModelProperty(example = "ApiKey", value = "Name of the API key header used for invoking the API. If it is not set, default value `apiKey` will be used. ")
   @JsonProperty("apiKeyHeader")
   public String getApiKeyHeader() {
     return apiKeyHeader;

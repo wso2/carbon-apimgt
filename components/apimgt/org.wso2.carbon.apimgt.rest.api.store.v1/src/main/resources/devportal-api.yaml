@@ -3852,8 +3852,7 @@ components:
         apiKeyHeader:
           type: string
           description: |
-            Name of the API key header used for invoking the API. If it is not set, API key header name specified
-            in tenant or system level will be used.
+            Name of the API key header used for invoking the API. If it is not set, default value `apiKey` will be used.
           example: ApiKey
         securityScheme:
           type: array

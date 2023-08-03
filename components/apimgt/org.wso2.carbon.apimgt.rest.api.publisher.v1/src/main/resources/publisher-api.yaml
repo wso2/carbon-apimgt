@@ -8709,8 +8709,7 @@ components:
           type: string
           pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\s+]*$)'
           description: |
-            Name of the API key header used for invoking the API. If it is not set, API key header name specified
-            in tenant or system level will be used.
+            Name of the API key header used for invoking the API. If it is not set, default value `apiKey` will be used.
           example: apiKey
         securityScheme:
           type: array
@@ -9388,8 +9387,7 @@ components:
         apiKeyHeader:
           type: string
           description: |
-            Name of the API key header used for invoking the API. If it is not set, API key header name specified
-            in tenant or system level will be used.
+            Name of the API key header used for invoking the API. If it is not set, default value `apiKey` will be used.
           example: ApiKey
         securityScheme:
           type: array
@@ -11483,10 +11481,6 @@ components:
               required:
                 type: boolean
                 example: false
-        apiKeyHeader:
-          type: string
-          description: Api Key Header
-          example: apiKey
     SecurityAuditAttribute:
       title: SecurityAuditAttributeDTO
       type: object

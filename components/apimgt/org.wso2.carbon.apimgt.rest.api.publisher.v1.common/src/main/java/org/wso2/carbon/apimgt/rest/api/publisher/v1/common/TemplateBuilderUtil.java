@@ -125,7 +125,7 @@ public class TemplateBuilderUtil {
         if (!StringUtils.isBlank(api.getApiKeyHeader())) {
             apiKeyHeader = api.getApiKeyHeader();
         } else {
-            apiKeyHeader = APIUtil.getOAuthConfiguration(tenantDomain, APIConstants.API_KEY_HEADER);
+            apiKeyHeader = APIConstants.API_KEY_HEADER_DEFAULT;
         }
         if (!StringUtils.isBlank(apiKeyHeader)) {
             corsProperties.put(APIConstants.API_KEY_HEADER, apiKeyHeader);
@@ -313,7 +313,7 @@ public class TemplateBuilderUtil {
         if (!StringUtils.isBlank(apiProduct.getApiKeyHeader())) {
             apiKeyHeader = apiProduct.getApiKeyHeader();
         } else {
-            apiKeyHeader = APIUtil.getOAuthConfiguration(tenantDomain, APIConstants.API_KEY_HEADER);
+            apiKeyHeader = APIConstants.API_KEY_HEADER_DEFAULT;
         }
         if (!StringUtils.isBlank(apiKeyHeader)) {
             corsProperties.put(APIConstants.API_KEY_HEADER, apiKeyHeader);
