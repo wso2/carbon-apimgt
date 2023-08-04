@@ -16245,24 +16245,25 @@ public class ApiMgtDAO {
             statement.setString(2, apiName);
             statement.setString(3, organization);
             statement.setString(4, apiVersion);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                String version = resultSet.getString("API_VERSION");
-                String status = resultSet.getString("STATUS");
-                String versionTimestamp = resultSet.getString("VERSION_COMPARABLE");
-                String context = resultSet.getString("CONTEXT");
-                String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
-                String uuid = resultSet.getString("API_UUID");
-                APIIdentifier identifier = new APIIdentifier(apiProvider, apiName, version);
-                api.setId(identifier);
-                api.setUuid(uuid);
-                api.setStatus(status);
-                api.setVersionTimestamp(versionTimestamp);
-                api.setContext(context);
-                api.setContextTemplate(contextTemplate);
-            } else {
-                throw new APIManagementException("Couldn't find API for given api name: " + apiName + ", api version: "
-                        + apiVersion);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    String version = resultSet.getString("API_VERSION");
+                    String status = resultSet.getString("STATUS");
+                    String versionTimestamp = resultSet.getString("VERSION_COMPARABLE");
+                    String context = resultSet.getString("CONTEXT");
+                    String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
+                    String uuid = resultSet.getString("API_UUID");
+                    APIIdentifier identifier = new APIIdentifier(apiProvider, apiName, version);
+                    api.setId(identifier);
+                    api.setUuid(uuid);
+                    api.setStatus(status);
+                    api.setVersionTimestamp(versionTimestamp);
+                    api.setContext(context);
+                    api.setContextTemplate(contextTemplate);
+                } else {
+                    throw new APIManagementException("Couldn't find API for given api name: " + apiName
+                            + ", api version: " + apiVersion);
+                }
             }
         } catch (SQLException e) {
             throw new APIManagementException("Error while retrieving API info for api name: " + apiName
@@ -16289,28 +16290,28 @@ public class ApiMgtDAO {
             statement.setString(1, APIUtil.replaceEmailDomainBack(apiProvider));
             statement.setString(2, apiName);
             statement.setString(3, organization);
-            ResultSet resultSet = statement.executeQuery();
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    String version = resultSet.getString("API_VERSION");
+                    String status = resultSet.getString("STATUS");
+                    String versionTimestamp = resultSet.getString("VERSION_COMPARABLE");
+                    String context = resultSet.getString("CONTEXT");
+                    String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
 
-            while (resultSet.next()) {
-                String version = resultSet.getString("API_VERSION");
-                String status = resultSet.getString("STATUS");
-                String versionTimestamp = resultSet.getString("VERSION_COMPARABLE");
-                String context = resultSet.getString("CONTEXT");
-                String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
-
-                String uuid = resultSet.getString("API_UUID");
-                if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
-                    // skip api products
-                    continue;
+                    String uuid = resultSet.getString("API_UUID");
+                    if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
+                        // skip api products
+                        continue;
+                    }
+                    API api = new API(new APIIdentifier(apiProvider, apiName,
+                            version, uuid));
+                    api.setUuid(uuid);
+                    api.setStatus(status);
+                    api.setVersionTimestamp(versionTimestamp);
+                    api.setContext(context);
+                    api.setContextTemplate(contextTemplate);
+                    apiVersions.add(api);
                 }
-                API api = new API(new APIIdentifier(apiProvider, apiName,
-                        version, uuid));
-                api.setUuid(uuid);
-                api.setStatus(status);
-                api.setVersionTimestamp(versionTimestamp);
-                api.setContext(context);
-                api.setContextTemplate(contextTemplate);
-                apiVersions.add(api);
             }
         } catch (SQLException e) {
             throw new APIManagementException("Error while retrieving versions for api " + apiName
