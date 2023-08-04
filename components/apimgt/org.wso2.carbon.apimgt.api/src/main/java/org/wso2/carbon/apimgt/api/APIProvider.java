@@ -1713,7 +1713,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void engageGatewayGlobalPolicies(Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap,
-            String orgId) throws APIManagementException;
+            String orgId, String gatewayPolicyMappingId) throws APIManagementException;
 
     /**
      * Get gateway policy list for a given Policy Mapping UUID.
@@ -1751,5 +1751,17 @@ public interface APIProvider extends APIManager {
      * @param gatewayPolicyMappingId Gateway policy mapping UUID
      * @throws APIManagementException if failed to delete comment for identifier
      */
-    void deleteGatewayPolicyMappingByPolicyMappingId(String gatewayPolicyMappingId, String tenantDomain) throws APIManagementException;
+    void deleteGatewayPolicyMappingByPolicyMappingId(String gatewayPolicyMappingId, String tenantDomain)
+            throws APIManagementException;
+
+    /**
+     * Update globally added policies to the flows
+     *
+     * @param gatewayGlobalPolicyList List of Gateway Policy objects to be updated
+     * @param orgId                   Organization ID
+     * @param policyMappingId         Policy mapping UUID
+     * @throws APIManagementException
+     */
+    void updateGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPolicyList, String description, String name,
+            String orgId, String policyMappingId) throws APIManagementException;
 }
