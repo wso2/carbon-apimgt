@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.api.model.MajorRangeVersionInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.VersionInfo;
 import org.wso2.carbon.apimgt.api.model.endpointurlextractor.EndpointUrl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIEndpointUrlExtractorManager;
@@ -283,18 +284,21 @@ public class APIMappingUtil {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
 
-        MajorRangeVersionInfo majorRangeVersionInfo = model.getVersionInfo().getMajorRangeVersionInfo();
+        VersionInfo versionInfo = model.getVersionInfo();
+        if (versionInfo != null) {
+            MajorRangeVersionInfo majorRangeVersionInfo = model.getVersionInfo().getMajorRangeVersionInfo();
 
-        MajorRangeVersionInfoDTO majorRangeVersionInfoDTO = new MajorRangeVersionInfoDTO();
-        majorRangeVersionInfoDTO.setIsLatest(majorRangeVersionInfo.getLatest());
-        majorRangeVersionInfoDTO.setLatestVersionAPIId(majorRangeVersionInfo.getLatestVersionAPIId());
-        majorRangeVersionInfoDTO.setLatestVersion(majorRangeVersionInfo.getLatestVersion());
+            MajorRangeVersionInfoDTO majorRangeVersionInfoDTO = new MajorRangeVersionInfoDTO();
+            majorRangeVersionInfoDTO.setIsLatest(majorRangeVersionInfo.getLatest());
+            majorRangeVersionInfoDTO.setLatestVersionAPIId(majorRangeVersionInfo.getLatestVersionAPIId());
+            majorRangeVersionInfoDTO.setLatestVersion(majorRangeVersionInfo.getLatestVersion());
 
-        VersionInfoDTO versionInfoDTO = new VersionInfoDTO();
-        versionInfoDTO.setVersion(model.getId().getVersion());
-        versionInfoDTO.setMajorRange(majorRangeVersionInfoDTO);
+            VersionInfoDTO versionInfoDTO = new VersionInfoDTO();
+            versionInfoDTO.setVersion(model.getId().getVersion());
+            versionInfoDTO.setMajorRange(majorRangeVersionInfoDTO);
 
-        dto.setVersionInfo(versionInfoDTO);
+            dto.setVersionInfo(versionInfoDTO);
+        }
 
         return dto;
     }
