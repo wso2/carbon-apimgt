@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,6 +28,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIVersionValidationFailureException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -36,8 +38,11 @@ import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.MajorRangeVersionInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.VersionInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
@@ -45,8 +50,9 @@ import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
-import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.impl.dto.SemVersion;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.SemanticVersionUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
 
@@ -983,11 +989,57 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    private void addLatestMajorRangeVersionDetails(APIConsumer apiConsumer, ApiTypeWrapper api, String organization)
+            throws APIManagementException {
+        if (!api.getVersion().startsWith("v")) {
+            return;
+        }
+        String apiProvider = api.getId().getProviderName();
+        SemVersion semVersion = SemanticVersionUtil.validateAndGetVersionComponents(api.getVersion(), api.getName());
+        List<API> apiVersions = apiConsumer.getAllAPIVersions(apiProvider, api.getName(), organization);
+        List<SemVersion> semVersionList = new ArrayList<>();
+        for (API apiVersion : apiVersions) {
+            if (apiVersion.getStatus().equals(APIConstants.PUBLISHED_STATUS)
+                    && apiVersion.getId().getVersion().startsWith("v")) {
+                try {
+                    SemVersion currentSemVersion = SemanticVersionUtil.validateAndGetVersionComponents(
+                            apiVersion.getId().getVersion(), api.getName());
+                    if (currentSemVersion.getMajor() == semVersion.getMajor()) {
+                        semVersionList.add(currentSemVersion);
+                    }
+                } catch (APIVersionValidationFailureException e) {
+                    log.warn("Ignored API version: " + apiVersion.getId().getVersion() +
+                            " when calculating latest major version of API: " + api.getUuid());
+                }
+            }
+        }
+        Collections.sort(semVersionList);
+        SemVersion latestVersionInMajorRange = semVersionList.get(0);
+
+        MajorRangeVersionInfo majorRangeVersionInfo;
+        if (latestVersionInMajorRange.getVersion().equals(api.getVersion())) {
+            majorRangeVersionInfo = new MajorRangeVersionInfo(true, api.getVersion(), api.getUuid());
+        } else {
+            API latestMajorVersionAPI = apiConsumer.getAPIInfoByNameVersion(
+                    apiProvider, api.getName(), latestVersionInMajorRange.getVersion(), organization);
+            majorRangeVersionInfo = new MajorRangeVersionInfo(false,
+                    latestMajorVersionAPI.getId().getVersion(), latestMajorVersionAPI.getUuid());
+        }
+        VersionInfo versionInfo = new VersionInfo(api.getVersion(), majorRangeVersionInfo);
+        api.getApi().setVersionInfo(versionInfo);
+    }
+
     private APIDTO getAPIByAPIId(String apiId, String organization) throws APIManagementException {
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             String status = api.getStatus();
+            // Try adding major version range latest version details to API
+            try{
+                addLatestMajorRangeVersionDetails(apiConsumer, api, organization);
+            } catch (APIManagementException e) {
+                log.warn("Failed to add latest major version range info to API: " + api.getUuid());
+            }
 
             // Extracting clicked API name by the user, for the recommendation system
             String userName = RestApiCommonUtil.getLoggedInUsername();

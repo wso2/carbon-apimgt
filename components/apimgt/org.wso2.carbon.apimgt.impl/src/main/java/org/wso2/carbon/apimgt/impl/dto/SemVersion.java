@@ -18,7 +18,9 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
-public class SemVersion {
+import org.jetbrains.annotations.NotNull;
+
+public class SemVersion implements Comparable<SemVersion>{
     private String version;
     private int major;
     private int minor;
@@ -67,5 +69,36 @@ public class SemVersion {
 
     public void setPatch(Integer patch) {
         this.patch = patch;
+    }
+
+    @Override
+    public int compareTo(@NotNull SemVersion version) {
+        if (this.major < version.major) {
+            return 1;
+        } else if (this.major > version.major) {
+            return -1;
+        } else {
+            if (this.minor < version.minor) {
+                return 1;
+            } else if (this.minor > version.minor) {
+                return -1;
+            } else {
+                if (this.patch != null && version.patch != null) {
+                    if( this.patch < version.patch) {
+                        return 1;
+                    } else if (this.patch > version.patch) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
+                } else if (this.patch == null && version.patch != null) {
+                    return 1;
+                } else if (this.patch != null && version.patch == null) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
+        }
     }
 }

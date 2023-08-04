@@ -235,6 +235,15 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.getAPIVersions(apiName, providerName, organization);
     }
 
+    @Override
+    public List<API> getAllAPIVersions(String providerName, String apiName, String organization) throws APIManagementException {
+
+        return apiMgtDAO.getAllAPIVersions(apiName, providerName, organization);
+    }
+
+    public API getAPIInfoByNameVersion(String providerName, String apiName, String apiVersion, String organization) throws APIManagementException {
+        return apiMgtDAO.getAPIInfoByNameVersion(providerName, apiName, apiVersion, organization);
+    }
 
     @Override
     public ResourceFile getWSDL(String apiId, String organization) throws APIManagementException {
