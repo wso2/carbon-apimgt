@@ -6385,7 +6385,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void updateGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPolicyList, String description,
             String name, String orgId, String policyMappingId) throws APIManagementException {
         List<OperationPolicy> policyList = apiMgtDAO.getGatewayPoliciesOfPolicyMapping(policyMappingId);
-        if (policyList.size() > 0) {
+        if (policyList.isEmpty()) {
             String message = "Cannot update the gateway policy mapping. The policy mapping ID: " + policyMappingId
                     + " does not exist.";
             log.error(message);
