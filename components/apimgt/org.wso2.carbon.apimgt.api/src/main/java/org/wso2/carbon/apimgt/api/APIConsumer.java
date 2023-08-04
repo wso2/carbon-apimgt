@@ -127,6 +127,7 @@ public interface APIConsumer extends APIManager {
      * @return
      * @throws APIManagementException
      */
+    @Deprecated
     Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
                                                String applicationName, String keyType, String tokenType,
                                                String keyManagerName,String tenantDomain) throws APIManagementException;

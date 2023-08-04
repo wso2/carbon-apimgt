@@ -527,6 +527,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     @Override
+    @Deprecated
     public Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
                                                       String applicationName, String keyType, String tokenType,
                                                       String keyManagerName, String tenantDomain) throws APIManagementException {
