@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
@@ -132,6 +133,7 @@ public class APIConsumerImplTest {
     private static final String SAMPLE_API_VERSION = "1.0.0";
     private static final String SAMPLE_API_VERSION_WITH_VERSION_PREFIX = "v1.0.0";
     private static final String SAMPLE_API_SUBSCRIPTION_VERSION_RANGE = "v1";
+    private static final String SAMPLE_API_CONTEXT_TEMPLATE = "/test/" + APIConstants.VERSION_PLACEHOLDER;
     private RegistryService registryService;
     public static final String SAMPLE_TENANT_DOMAIN_1 = "abc.com";
     private APIPersistence apiPersistenceInstance;
@@ -772,6 +774,10 @@ public class APIConsumerImplTest {
         SubscribedAPI subscribedAPINew = new SubscribedAPI(subscriber, identifier);
         subscribedAPINew.setUUID(uuid);
         subscribedAPINew.setApplication(application);
+        APIInfo.Builder apiInfoBuilder = new APIInfo.Builder();
+        apiInfoBuilder.contextTemplate(SAMPLE_API_CONTEXT_TEMPLATE);
+        APIInfo apiInfo = apiInfoBuilder.build();
+        Mockito.when(apiMgtDAO.getAPIInfoByUUID(subscribedAPINew.getAPIUUId())).thenReturn(apiInfo);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, apiPersistenceInstance);
         apiConsumer.removeSubscription(subscribedAPINew, "org1");
         Mockito.verify(apiMgtDAO, Mockito.times(1)).getApplicationNameFromId(Mockito.anyInt());
@@ -834,6 +840,7 @@ public class APIConsumerImplTest {
     public void testAddSubscription() throws APIManagementException {
         API api  = new API(new APIIdentifier(API_PROVIDER, "published_api", SAMPLE_API_VERSION));
         api.setSubscriptionAvailability(APIConstants.SUBSCRIPTION_TO_ALL_TENANTS);
+        api.setContextTemplate(SAMPLE_API_CONTEXT_TEMPLATE);
         Application application = new Application(1);
         api.setStatus(APIConstants.PUBLISHED);
         Set<Tier> tiers = new HashSet<>();
@@ -869,6 +876,7 @@ public class APIConsumerImplTest {
     public void testAddSubscriptionWithVersionRange() throws APIManagementException {
         API api  = new API(new APIIdentifier(API_PROVIDER, "published_api", SAMPLE_API_VERSION_WITH_VERSION_PREFIX));
         api.setSubscriptionAvailability(APIConstants.SUBSCRIPTION_TO_ALL_TENANTS);
+        api.setContextTemplate(SAMPLE_API_CONTEXT_TEMPLATE);
         Application application = new Application(1);
         api.setStatus(APIConstants.PUBLISHED);
         Set<Tier> tiers = new HashSet<>();
