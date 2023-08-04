@@ -1516,6 +1516,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
 
+            if (error != null) {
+                throw new APIManagementException("Error occurred while deleting API: " + apiId, error);
+            } 
+            
             // Delete the API
             boolean isDeleted = false;
             try {
@@ -1525,9 +1529,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 log.error("Error while deleting API " + apiId + "on organization " + organization, e);
             }
 
-            if (error != null) {
-                throw new APIManagementException("Error occurred while deleting API: " + apiId, error);
-            } else if (!isDeleted) {
+            if (!isDeleted) {
                 RestApiUtil.handleInternalServerError("Error while deleting API : " + apiId + " on organization "
                         + organization, log);
                 return null;
