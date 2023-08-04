@@ -7155,13 +7155,6 @@ public class ApiMgtDAO {
         log.error(msg, t);
         throw new APIManagementException(msg, t);
     }
-
-    private void handleException(String msg) throws APIManagementException {
-
-        log.error(msg);
-        throw new APIManagementException(msg);
-    }
-
     public HashMap<String, String> getURITemplatesPerAPIAsString(String uuid)
             throws APIManagementException {
 
@@ -16268,11 +16261,12 @@ public class ApiMgtDAO {
                 api.setContext(context);
                 api.setContextTemplate(contextTemplate);
             } else {
-                handleException("Couldn't find API for given api name: " + apiName + ", api version: " + apiVersion);
+                throw new APIManagementException("Couldn't find API for given api name: " + apiName + ", api version: "
+                        + apiVersion);
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving API info for api name: " + apiName + ", api version:" + apiVersion + " and provider: " + apiProvider,
-                    e);
+            throw new APIManagementException("Error while retrieving API info for api name: " + apiName
+                    + ", api version:" + apiVersion + " and provider: " + apiProvider, e);
         }
         return api;
     }
@@ -16319,8 +16313,8 @@ public class ApiMgtDAO {
                 apiVersions.add(api);
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving versions for api " + apiName + " for the provider " + apiProvider,
-                    e);
+            throw new APIManagementException("Error while retrieving versions for api " + apiName
+                    + " for the provider " + apiProvider, e);
         }
         return apiVersions;
     }
@@ -16365,8 +16359,8 @@ public class ApiMgtDAO {
                 apiVersions.add(api);
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving versions for api " + apiName + " for the provider " + apiProvider,
-                    e);
+            throw new APIManagementException("Error while retrieving versions for api " + apiName
+                    + " for the provider " + apiProvider, e);
         }
         return apiVersions;
     }
