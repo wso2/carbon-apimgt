@@ -24,6 +24,8 @@ public class SubscriptionDTO   {
     private String applicationUUID = null;
     private Integer appId = null;
     private String subscriptionState = null;
+    private String context = null;
+    private String versionRange = null;
 
   /**
    **/
@@ -161,6 +163,40 @@ public class SubscriptionDTO   {
     this.subscriptionState = subscriptionState;
   }
 
+  /**
+   **/
+  public SubscriptionDTO context(String context) {
+    this.context = context;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("context")
+  public String getContext() {
+    return context;
+  }
+  public void setContext(String context) {
+    this.context = context;
+  }
+
+  /**
+   **/
+  public SubscriptionDTO versionRange(String versionRange) {
+    this.versionRange = versionRange;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("versionRange")
+  public String getVersionRange() {
+    return versionRange;
+  }
+  public void setVersionRange(String versionRange) {
+    this.versionRange = versionRange;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -178,12 +214,14 @@ public class SubscriptionDTO   {
         Objects.equals(apiId, subscription.apiId) &&
         Objects.equals(applicationUUID, subscription.applicationUUID) &&
         Objects.equals(appId, subscription.appId) &&
-        Objects.equals(subscriptionState, subscription.subscriptionState);
+        Objects.equals(subscriptionState, subscription.subscriptionState) &&
+        Objects.equals(context, subscription.context) &&
+        Objects.equals(versionRange, subscription.versionRange);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionUUID, subscriptionId, policyId, apiUUID, apiId, applicationUUID, appId, subscriptionState);
+    return Objects.hash(subscriptionUUID, subscriptionId, policyId, apiUUID, apiId, applicationUUID, appId, subscriptionState, context, versionRange);
   }
 
   @Override
@@ -199,6 +237,8 @@ public class SubscriptionDTO   {
     sb.append("    applicationUUID: ").append(toIndentedString(applicationUUID)).append("\n");
     sb.append("    appId: ").append(toIndentedString(appId)).append("\n");
     sb.append("    subscriptionState: ").append(toIndentedString(subscriptionState)).append("\n");
+    sb.append("    context: ").append(toIndentedString(context)).append("\n");
+    sb.append("    versionRange: ").append(toIndentedString(versionRange)).append("\n");
     sb.append("}");
     return sb.toString();
   }

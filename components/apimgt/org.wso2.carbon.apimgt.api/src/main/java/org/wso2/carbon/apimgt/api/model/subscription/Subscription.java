@@ -31,6 +31,8 @@ public class Subscription implements CacheableEntity<String> {
     private int appId;
     private String applicationUUID;
     private String subscriptionState = null;
+    private String versionRange;
+    private String apiContextTemplate;
 
     public int getSubscriptionId() {
 
@@ -121,5 +123,21 @@ public class Subscription implements CacheableEntity<String> {
     public void setApplicationUUID(String applicationUUID) {
 
         this.applicationUUID = applicationUUID;
+    }
+
+    public String getVersionRange() {
+        return versionRange;
+    }
+
+    public void setVersionRange(String versionRange) {
+        this.versionRange = versionRange;
+    }
+
+    public String getApiContextTemplate() {
+        return apiContextTemplate;
+    }
+
+    public void setApiContextTemplate(String apiContextTemplate) {
+        this.apiContextTemplate = apiContextTemplate;
     }
 }
