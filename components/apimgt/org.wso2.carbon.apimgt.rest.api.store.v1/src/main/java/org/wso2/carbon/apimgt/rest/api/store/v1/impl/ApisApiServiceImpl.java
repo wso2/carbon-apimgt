@@ -991,12 +991,16 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     private void addLatestMajorRangeVersionDetails(APIConsumer apiConsumer, ApiTypeWrapper api, String organization)
             throws APIManagementException {
+        if (!api.getVersion().startsWith("v")) {
+            return;
+        }
         String apiProvider = api.getId().getProviderName();
         SemVersion semVersion = SemanticVersionUtil.validateAndGetVersionComponents(api.getVersion(), api.getName());
         List<API> apiVersions = apiConsumer.getAllAPIVersions(apiProvider, api.getName(), organization);
         List<SemVersion> semVersionList = new ArrayList<>();
         for (API apiVersion : apiVersions) {
-            if (apiVersion.getStatus().equals(APIConstants.PUBLISHED_STATUS)) {
+            if (apiVersion.getStatus().equals(APIConstants.PUBLISHED_STATUS)
+                    && apiVersion.getId().getVersion().startsWith("v")) {
                 try {
                     SemVersion currentSemVersion = SemanticVersionUtil.validateAndGetVersionComponents(
                             apiVersion.getId().getVersion(), api.getName());
