@@ -127,9 +127,8 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
                     gatewayPolicyMappingsDTO.getPolicyMapping());
             String mappingDescription = gatewayPolicyMappingsDTO.getDescription();
             String displayName = gatewayPolicyMappingsDTO.getDisplayName();
-            String policyMappingId = gatewayPolicyMappingsDTO.getId();
             apiProvider.updateGatewayGlobalPolicies(gatewayPolicyList, mappingDescription, displayName, tenantDomain,
-                    policyMappingId);
+                    gatewayPolicyMappingId);
             return Response.ok().build();
         } catch (APIManagementException e) {
             if (isAuthorizationFailure(e)) {
