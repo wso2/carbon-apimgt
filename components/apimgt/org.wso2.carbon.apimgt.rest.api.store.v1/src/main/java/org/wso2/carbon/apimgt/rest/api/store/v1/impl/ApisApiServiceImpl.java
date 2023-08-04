@@ -1034,7 +1034,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             String status = api.getStatus();
-            // Try adding major version range latest version details to API's additional properties
+            // Try adding major version range latest version details to API
             try{
                 addLatestMajorRangeVersionDetails(apiConsumer, api, organization);
             } catch (APIManagementException e) {
