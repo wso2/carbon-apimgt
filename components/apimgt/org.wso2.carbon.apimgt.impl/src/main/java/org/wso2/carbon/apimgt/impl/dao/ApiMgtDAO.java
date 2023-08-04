@@ -20407,14 +20407,23 @@ public class ApiMgtDAO {
      *
      * @param gatewayGlobalPolicyList      List of applied policies for each direction in the gateways
      * @param orgId                        organization ID
+     * @param name                         Name of the policy mapping
+     * @param description                  Description of the policy mapping
+     * @param mappingUUID                  UUID of the mapping when updating the policy mapping
      * @throws APIManagementException
      */
     public void addGatewayGlobalPolicy(List<OperationPolicy> gatewayGlobalPolicyList, String description, String name,
-            String orgId) throws APIManagementException {
+            String orgId, String mappingUUID) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            String mapping_uuid = UUID.randomUUID().toString();
+            String mapping_uuid;
+            if (mappingUUID == null) {
+                mapping_uuid = UUID.randomUUID().toString();
+            } else {
+                // Policy mapping update flow
+                mapping_uuid = mappingUUID;
+            }
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     SQLConstants.GatewayPolicyConstants.ADD_GATEWAY_POLICY_METADATA)) {
                 preparedStatement.setString(1, mapping_uuid);
@@ -20505,6 +20514,34 @@ public class ApiMgtDAO {
                 statement.executeBatch();
                 connection.commit();
 
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to remove Gateway Policy Deployment Mapping", e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to remove Gateway Policy Deployment Information", e);
+        }
+    }
+
+    /**
+     * Remove gateway policy deployment mapping records corresponding to a mapping UUID from the database
+     *
+     * @param mappingUUID               UUID of the policy mapping
+     * @throws APIManagementException   if an error occurs when adding a new gateway policy deployment mapping
+     */
+    public void removeGatewayPolicyDeploymentByMappingUUIDAndGatewayLabel(String gatewayLabel, String mappingUUID)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                String dbQuery = SQLConstants.GatewayPolicyConstants.DELETE_GATEWAY_POLICY_DEPLOYMENT_STATUS;
+                try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+                    statement.setString(1, gatewayLabel);
+                    statement.setString(2, mappingUUID);
+                    statement.execute();
+                }
+                connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to remove Gateway Policy Deployment Mapping", e);
