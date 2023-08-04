@@ -127,9 +127,25 @@ public interface APIConsumer extends APIManager {
      * @return
      * @throws APIManagementException
      */
+    @Deprecated
     Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
                                                String applicationName, String keyType, String tokenType,
                                                String keyManagerName,String tenantDomain) throws APIManagementException;
+
+    /**
+     * @param jsonString      this string will contain oAuth app details
+     * @param clientId        this is the consumer key of oAuthApplication
+     * @param applicationUUID application UUID
+     * @param keyType         PRODUCTION or SANDBOX
+     * @param tokenType       this is theApplication Token Type. This can be either default or jwt.
+     * @param keyManagerName  Key Manager related to the provided clientId
+     * @param organization    organization UUID
+     * @return
+     * @throws APIManagementException
+     */
+    Map<String, Object> mapExistingOAuthClient(String jsonString, String clientId,
+                                               String applicationUUID, String keyType, String tokenType,
+                                               String keyManagerName, String organization) throws APIManagementException;
 
     /**
      *This method will delete from application key mapping table and application registration table.
@@ -453,6 +469,22 @@ public interface APIConsumer extends APIManager {
                                           String tokenScope,
                                           String groupingId,
                                           String jsonString, String keyManagerName)
+            throws APIManagementException;
+
+    /**
+     * Creates a request for application update.
+     *
+     * @param userId         Subscriber name.
+     * @param application    The Application.
+     * @param tokenType      Token type (PRODUCTION | SANDBOX)
+     * @param keyManagerName KeyManager Name
+     * @param consumerKey    Consumer Key
+     * @param organization   organization UUID
+     * @throws APIManagementException if failed to applications for given subscriber
+     */
+    OAuthApplicationInfo updateMappedApplicationKey(String userId, Application application,
+                                                    String tokenType, String keyManagerName, String consumerKey,
+                                                    String organization)
             throws APIManagementException;
 
     /**

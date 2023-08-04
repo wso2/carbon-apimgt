@@ -962,6 +962,88 @@ public class APIConsumerImplTest {
     }
 
     @Test
+    public void testMapKeysForExternalIDPs() throws APIManagementException {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
+        apiConsumer.tenantDomain = "carbon.super";
+
+        Mockito.when(apiMgtDAO.isKeyMappingExistsForConsumerKeyOrApplication(Mockito.anyInt(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn( true, false);
+        Mockito.doNothing().when(apiMgtDAO).createApplicationKeyTypeMappingForManualClients(Mockito.anyString(),
+                Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+        KeyManagerConfigurationDTO keyManagerConfigurationsDto = new KeyManagerConfigurationDTO();
+        keyManagerConfigurationsDto.setUuid(UUID.randomUUID().toString());
+        keyManagerConfigurationsDto.setEnabled(true);
+        keyManagerConfigurationsDto.setTokenType("EXTERNAL");
+        Mockito.when(apiMgtDAO.isKeyManagerConfigurationExistByName( "auth0KM","testorg"))
+                .thenReturn(true);
+        Mockito.when(apiMgtDAO.getKeyManagerConfigurationByName("testorg", "auth0KM"))
+                .thenReturn(keyManagerConfigurationsDto);
+        Application application = new Application("9ac1ae0a-3039-11ee-be56-0242ac120002");
+        application.setId(1000);
+        application.setName("app1");
+        application.setOwner("admin");
+        Mockito.when(apiMgtDAO.getApplicationByUUID("9ac1ae0a-3039-11ee-be56-0242ac120002")).thenReturn(application);
+        try {
+            apiConsumer.mapExistingOAuthClient("", "1", "9ac1ae0a-3039-11ee-be56-0242ac120002",
+                    "PRODUCTION", "EXTERNAL", "auth0KM", "testorg");
+            Assert.fail("Exception is not thrown when client id is already mapped to an application");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Key Mappings already exists for application"));
+        }
+
+        try {
+            Map<String, Object> keyDetails = apiConsumer.mapExistingOAuthClient("",
+                    "clientId1", "9ac1ae0a-3039-11ee-be56-0242ac120002",
+                    "PRODUCTION", "EXTERNAL", "auth0KM", "testorg");
+            Assert.assertNotNull(keyDetails);
+            Assert.assertEquals(keyDetails.get("consumerKey"), "clientId1");
+            Assert.assertEquals(keyDetails.get("mode"), "MAPPED");
+            Assert.assertEquals(keyDetails.get("consumerSecret"), null);
+            Assert.assertNotNull(keyDetails.get("keyMappingId"));
+            Assert.assertEquals(keyDetails.get("keyManager"), "auth0KM");
+            Assert.assertEquals(keyDetails.get("keyType"), "PRODUCTION");
+            Assert.assertEquals(keyDetails.get("keyState"), "APPROVED");
+        } catch (APIManagementException e) {
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testUpdateMappedApplicationKey() throws APIManagementException {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
+        apiConsumer.tenantDomain = "carbon.super";
+        String appUUID = UUID.randomUUID().toString();
+        Application application = new Application("app1", new Subscriber("admin"));
+        application.setId(1);
+        application.setTier("Unlimited");
+        application.setTokenType("JWT");
+        application.setGroupId("group1");
+        application.setUUID(appUUID);
+        application.setOwner("admin");
+
+        String consumerKey = "clientId1";
+
+        String keyManagerId = UUID.randomUUID().toString();
+        KeyManagerConfigurationDTO keyManagerConfigurationsDto = new KeyManagerConfigurationDTO();
+        keyManagerConfigurationsDto.setUuid(keyManagerId);
+        keyManagerConfigurationsDto.setEnabled(true);
+        keyManagerConfigurationsDto.setTokenType("EXTERNAL");
+        keyManagerConfigurationsDto.setName("auth0KM");
+        Mockito.when(apiMgtDAO.getKeyManagerConfigurationByUUID(Mockito.anyString()))
+                .thenReturn(keyManagerConfigurationsDto);
+
+        OAuthApplicationInfo oAuthApplicationInfo = apiConsumer.updateMappedApplicationKey("admin",
+                application,  "PRODUCTION", keyManagerId, consumerKey, "testorg");
+
+        Assert.assertNotNull(oAuthApplicationInfo);
+        Assert.assertEquals(oAuthApplicationInfo.getClientId(), consumerKey);
+        Assert.assertEquals(oAuthApplicationInfo.getClientSecret(), null);
+        Assert.assertEquals(oAuthApplicationInfo.getAppOwner(), "admin");
+        Assert.assertEquals(oAuthApplicationInfo.getApplicationUUID(), appUUID);
+        Assert.assertEquals(oAuthApplicationInfo.getTokenType(), "PRODUCTION");
+    }
+
+    @Test
     public void testCleanUpApplicationRegistration() throws APIManagementException {
         Application application = new Application(1);
         Mockito.when(apiMgtDAO.getApplicationByName(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))

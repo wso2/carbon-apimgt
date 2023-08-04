@@ -84,21 +84,21 @@ public class ApplicationKeyMappingUtil {
                         } else if (additionalPropertiesObj instanceof String) {
                             applicationKeyDTO.setAdditionalProperties(additionalPropertiesObj);
                         }
-
                     }
-
                 }
             }
 
-            ApplicationTokenDTO tokenDTO = new ApplicationTokenDTO();
-            tokenDTO.setValidityTime((Long) keyDetails.get(APIConstants.AccessTokenConstants.VALIDITY_TIME));
-            tokenDTO.setAccessToken((String) keyDetails.get(APIConstants.AccessTokenConstants.ACCESS_TOKEN));
-            String[] tokenScopes = (String[]) keyDetails.get(APIConstants.AccessTokenConstants.TOKEN_SCOPES);
-            if (tokenScopes != null) {
-                tokenDTO.setTokenScopes(Arrays.asList(tokenScopes));
-            }
+            if (keyDetails.get(APIConstants.AccessTokenConstants.ACCESS_TOKEN) != null) {
+                ApplicationTokenDTO tokenDTO = new ApplicationTokenDTO();
+                tokenDTO.setValidityTime((Long) keyDetails.get(APIConstants.AccessTokenConstants.VALIDITY_TIME));
+                tokenDTO.setAccessToken((String) keyDetails.get(APIConstants.AccessTokenConstants.ACCESS_TOKEN));
+                String[] tokenScopes = (String[]) keyDetails.get(APIConstants.AccessTokenConstants.TOKEN_SCOPES);
+                if (tokenScopes != null) {
+                    tokenDTO.setTokenScopes(Arrays.asList(tokenScopes));
+                }
 
-            applicationKeyDTO.setToken(tokenDTO);
+                applicationKeyDTO.setToken(tokenDTO);
+            }
         } catch (ParseException e) {
             String errorMsg = "Error while parsing application details string";
             log.error(errorMsg, e);
