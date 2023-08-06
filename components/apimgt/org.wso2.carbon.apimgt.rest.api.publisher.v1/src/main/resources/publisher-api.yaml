@@ -8227,7 +8227,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GatewayPolicyMappings'
+                $ref: '#/components/schemas/GatewayPolicyMappingDataList'
         404:
           $ref: '#/components/responses/NotFound'
         500:
@@ -8238,7 +8238,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v4/gateway-policies""'
+            "https://127.0.0.1:9443/api/am/publisher/v4/gateway-policies"'
 
   /gateway-policies/{gatewayPolicyMappingId}:
     get:
@@ -12197,6 +12197,21 @@ components:
         gatewayDeployment:
           type: boolean
           example: true
+    GatewayPolicyMappingDataList:
+      title: Gateway Policy Mapping List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of gateway policy mappings returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/GatewayPolicyMappings'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
     GatewayEnvironmentProtocolURI:
       title: Gateway Environment protocols and URIs
       required:

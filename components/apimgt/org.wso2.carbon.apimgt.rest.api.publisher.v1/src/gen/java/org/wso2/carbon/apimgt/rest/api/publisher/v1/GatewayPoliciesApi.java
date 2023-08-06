@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayPolicyDeploymentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayPolicyMappingDataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayPolicyMappingsDTO;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.GatewayPoliciesApiService;
@@ -96,13 +97,13 @@ GatewayPoliciesApiService delegate = new GatewayPoliciesApiServiceImpl();
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all gateway policies mapping information ", notes = "This operation provides you a list of all gateway policies mapping information. ", response = GatewayPolicyMappingsDTO.class, authorizations = {
+    @ApiOperation(value = "Get all gateway policies mapping information ", notes = "This operation provides you a list of all gateway policies mapping information. ", response = GatewayPolicyMappingDataListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={ "Gateway Policies",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. List of gateway policies is returned. ", response = GatewayPolicyMappingsDTO.class),
+        @ApiResponse(code = 200, message = "OK. List of gateway policies is returned. ", response = GatewayPolicyMappingDataListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getAllGatewayPolicies( @ApiParam(value = "Maximum size of policy array to return. ")  @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIManagementException{
