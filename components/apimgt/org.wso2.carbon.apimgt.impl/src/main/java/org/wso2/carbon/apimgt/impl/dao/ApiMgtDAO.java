@@ -59,6 +59,7 @@ import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
@@ -19802,9 +19803,10 @@ public class ApiMgtDAO {
      * @param name                         Name of the policy mapping
      * @param description                  Description of the policy mapping
      * @param mappingUUID                  UUID of the mapping when updating the policy mapping
+     * @return UUID of the policy mapping
      * @throws APIManagementException
      */
-    public void addGatewayGlobalPolicy(List<OperationPolicy> gatewayGlobalPolicyList, String description, String name,
+    public String addGatewayGlobalPolicy(List<OperationPolicy> gatewayGlobalPolicyList, String description, String name,
             String orgId, String mappingUUID) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
@@ -19843,6 +19845,7 @@ public class ApiMgtDAO {
                 }
                 preparedStatement.executeBatch();
                 connection.commit();
+                return mapping_uuid;
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Error while updating global Policy mappings", e);
@@ -19850,6 +19853,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while updating global Policy information", e);
         }
+        return null;
     }
 
     /**
@@ -20085,6 +20089,69 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Retrieve gateway policy mapping metadata for a organization
+     *
+     * @param organization Organization
+     * @return List of gateway policy metadata
+     * @throws APIManagementException
+     */
+    public List<GatewayPolicyData> getGatewayPolicyMappingMetadataForOrganization(String organization)
+            throws APIManagementException {
+
+        String dbQuery = SQLConstants.GatewayPolicyConstants.GET_ALL_GATEWAY_POLICY_METADATA_FOR_ORGANIZATION;
+        List<GatewayPolicyData> gatewayPolicyMetaDataList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+            statement.setString(1, organization);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    GatewayPolicyData gatewayPolicyData = populateGatewayPolicyDataWithRS(rs);
+
+                    gatewayPolicyMetaDataList.add(gatewayPolicyData);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve the gateway policy mapping metadata for organization: " + organization,
+                    e);
+        }
+        return gatewayPolicyMetaDataList;
+    }
+
+    /**
+     * Retrieve gateway policy mapping metadata by gateway policy mapping UUID
+     *
+     * @param policyMappingUUID Policy mapping UUID
+     * @return Gateway policy metadata
+     * @throws APIManagementException
+     */
+    public GatewayPolicyData getGatewayPolicyMappingMetadataByPolicyMappingUUID(String policyMappingUUID)
+            throws APIManagementException {
+
+        String dbQuery = SQLConstants.GatewayPolicyConstants.GET_GATEWAY_POLICY_METADATA_BY_POLICY_MAPPING_UUID;
+        GatewayPolicyData gatewayPolicyData = new GatewayPolicyData();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+            statement.setString(1, policyMappingUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    gatewayPolicyData = populateGatewayPolicyDataWithRS(rs);
+                }
+            }
+        } catch (SQLException e) {
+            handleException(
+                    "Failed to retrieve the gateway policy mapping metadata for mapping UUID: " + policyMappingUUID, e);
+        }
+        return gatewayPolicyData;
+    }
+
+    /**
+     * Retrieve list of policy UUIDs attached to a policy mapping.
+     *
+     * @param policyMappingUUID Policy mapping UUID
+     * @return List of policy UUIDs
+     * @throws APIManagementException
+     */
     private List<String> getPolicyUUIDsByPolicyMappingUUID(String policyMappingUUID) throws APIManagementException {
 
         String dbQueryToGetPolicyUUID =
@@ -20105,6 +20172,30 @@ public class ApiMgtDAO {
         return policyUUIDList;
     }
 
+    /**
+     * This method will read the result set and populate GatewayPolicyData object
+     *
+     * @param rs Result set
+     * @return GatewayPolicyData object
+     * @throws SQLException
+     */
+    private GatewayPolicyData populateGatewayPolicyDataWithRS(ResultSet rs) throws SQLException {
+
+        GatewayPolicyData gatewayPolicyData = new GatewayPolicyData();
+        gatewayPolicyData.setPolicyMappingId(rs.getString("GLOBAL_POLICY_MAPPING_UUID"));
+        gatewayPolicyData.setPolicyMappingName(rs.getString("DISPLAY_NAME"));
+        gatewayPolicyData.setPolicyMappingDescription(rs.getString("DESCRIPTION"));
+        gatewayPolicyData.setOrganization(rs.getString("ORGANIZATION"));
+        return gatewayPolicyData;
+    }
+
+    /**
+     * This method will delete the policy mapping metadata entries for a given policy mapping UUID
+     *
+     * @param connection            Database connection
+     * @param policyMappingUUID     Policy mapping UUID
+     * @throws SQLException
+     */
     private void deleteGatewayPolicyMetaData(Connection connection, String policyMappingUUID) throws SQLException {
 
         try (PreparedStatement preparedStatement =

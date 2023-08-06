@@ -1,7 +1,11 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayPolicyDeploymentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayPolicyMappingDataListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayPolicyMappingsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,5 +36,47 @@ public class GatewayPolicyMappingUtil {
         gatewayPolicyDeploymentMap.put(true, gatewayPolicyDeploymentList);
         gatewayPolicyDeploymentMap.put(false, gatewayPolicyUndeploymentList);
         return gatewayPolicyDeploymentMap;
+    }
+
+    public static GatewayPolicyMappingDataListDTO fromGatewayPolicyDataListToDTO(
+            List<GatewayPolicyData> policyDataList, int offset, int limit) {
+
+        List<GatewayPolicyMappingsDTO> gatewayPolicyDataList = new ArrayList<>();
+
+        if (policyDataList == null) {
+            policyDataList = new ArrayList<>();
+        }
+
+        int size = policyDataList.size();
+        int start = offset < size && offset >= 0 ? offset : Integer.MAX_VALUE;
+        int end = Math.min(offset + limit - 1, size - 1);
+        for (int i = start; i <= end; i++) {
+            gatewayPolicyDataList.add(fromGatewayPolicyDataToDTO(policyDataList.get(i)));
+        }
+
+        PaginationDTO paginationDTO = new PaginationDTO();
+        paginationDTO.setLimit(limit);
+        paginationDTO.setOffset(offset);
+        paginationDTO.setTotal(size);
+
+        GatewayPolicyMappingDataListDTO dataListDTO = new GatewayPolicyMappingDataListDTO();
+        dataListDTO.setList(gatewayPolicyDataList);
+        dataListDTO.setCount(gatewayPolicyDataList.size());
+        dataListDTO.setPagination(paginationDTO);
+
+        return dataListDTO;
+    }
+
+    public static GatewayPolicyMappingsDTO fromGatewayPolicyDataToDTO(GatewayPolicyData policyData) {
+
+        GatewayPolicyMappingsDTO gatewayPolicyMappingsDTO = new GatewayPolicyMappingsDTO();
+        gatewayPolicyMappingsDTO.appliedGatewayLabels(new ArrayList<>(policyData.getGatewayLabels()));
+        gatewayPolicyMappingsDTO.description(policyData.getPolicyMappingDescription());
+        gatewayPolicyMappingsDTO.displayName(policyData.getPolicyMappingName());
+        gatewayPolicyMappingsDTO.id(policyData.getPolicyMappingId());
+        gatewayPolicyMappingsDTO.policyMapping(
+                OperationPolicyMappingUtil.fromOperationPolicyListToDTO(policyData.getGatewayPolicies()));
+
+        return gatewayPolicyMappingsDTO;
     }
 }

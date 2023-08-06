@@ -1700,9 +1700,10 @@ public interface APIProvider extends APIManager {
      *
      * @param gatewayGlobalPolicyList   List of Gateway Policy objects
      * @param orgId                     Organization ID
+     * @return Policy Mapping ID
      * @throws APIManagementException
      */
-    void applyGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPolicyList, String description, String name,
+    String applyGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPolicyList, String description, String name,
             String orgId) throws APIManagementException;
 
     /**
@@ -1760,8 +1761,30 @@ public interface APIProvider extends APIManager {
      * @param gatewayGlobalPolicyList List of Gateway Policy objects to be updated
      * @param orgId                   Organization ID
      * @param policyMappingId         Policy mapping UUID
+     * @return Policy Mapping ID
      * @throws APIManagementException
      */
-    void updateGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPolicyList, String description, String name,
+    String updateGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPolicyList, String description, String name,
             String orgId, String policyMappingId) throws APIManagementException;
+
+    /**
+     * Get a lightweight version of all the gateway policies for the tenant domain. This will not include the policy
+     * definition as it is bulky.
+     *
+     * @param organization Organization name
+     * @return List of Gateway Policies
+     * @throws APIManagementException
+     */
+    List<GatewayPolicyData> getAllGatewayPolicyMappings(String organization) throws APIManagementException;
+
+    /**
+     * Get a lightweight policy mapping data for a particular mapping ID. This will not include the policy
+     * definition as it is bulky.
+     *
+     * @param policyMappingUUID Policy mapping UUID
+     * @return Gateway Policy Data
+     * @throws APIManagementException
+     */
+    GatewayPolicyData getGatewayPolicyMappingDataByPolicyMappingId(String policyMappingUUID)
+            throws APIManagementException;
 }
