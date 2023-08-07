@@ -19862,7 +19862,8 @@ public class ApiMgtDAO {
      * @param gatewayPolicyDeploymentList       content of the policy deployment mapping objects
      * @throws APIManagementException           if an error occurs when adding a new gateway policy deployment mapping
      */
-    public void addGatewayPolicyDeployment(List<GatewayPolicyDeployment> gatewayPolicyDeploymentList) throws APIManagementException {
+    public void addGatewayPolicyDeployment(List<GatewayPolicyDeployment> gatewayPolicyDeploymentList, String orgId)
+            throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
@@ -19873,6 +19874,7 @@ public class ApiMgtDAO {
                 for (GatewayPolicyDeployment gatewayPolicyDeployment : gatewayPolicyDeploymentList) {
                     statement.setString(1, gatewayPolicyDeployment.getMappingUuid());
                     statement.setString(2, gatewayPolicyDeployment.getGatewayLabel());
+                    statement.setString(3, orgId);
                     statement.addBatch();
                 }
                 statement.executeBatch();
@@ -19893,7 +19895,7 @@ public class ApiMgtDAO {
      * @param gatewayPolicyUnDeploymentList     content of the policy un-deployment mapping objects
      * @throws APIManagementException           if an error occurs when adding a new gateway policy deployment mapping
      */
-    public void removeGatewayPolicyDeployment(List<GatewayPolicyDeployment> gatewayPolicyUnDeploymentList)
+    public void removeGatewayPolicyDeployment(List<GatewayPolicyDeployment> gatewayPolicyUnDeploymentList, String orgId)
             throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
@@ -19905,6 +19907,7 @@ public class ApiMgtDAO {
                 for (GatewayPolicyDeployment gatewayPolicyUnDeployment : gatewayPolicyUnDeploymentList) {
                     statement.setString(1, gatewayPolicyUnDeployment.getGatewayLabel());
                     statement.setString(2, gatewayPolicyUnDeployment.getMappingUuid());
+                    statement.setString(3, orgId);
                     statement.addBatch();
                 }
                 statement.executeBatch();
@@ -19925,8 +19928,8 @@ public class ApiMgtDAO {
      * @param mappingUUID               UUID of the policy mapping
      * @throws APIManagementException   if an error occurs when adding a new gateway policy deployment mapping
      */
-    public void removeGatewayPolicyDeploymentByMappingUUIDAndGatewayLabel(String gatewayLabel, String mappingUUID)
-            throws APIManagementException {
+    public void removeGatewayPolicyDeploymentByMappingUUIDAndGatewayLabel(String gatewayLabel, String mappingUUID,
+            String orgId) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -19935,6 +19938,7 @@ public class ApiMgtDAO {
                 try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
                     statement.setString(1, gatewayLabel);
                     statement.setString(2, mappingUUID);
+                    statement.setString(3, orgId);
                     statement.execute();
                 }
                 connection.commit();
@@ -20009,7 +20013,7 @@ public class ApiMgtDAO {
      * @return Policy mapping UUID
      * @throws APIManagementException
      */
-    public List<String> getGatewayPolicyMappingByGatewayLabel(String[] gatewayLabels)
+    public List<String> getGatewayPolicyMappingByGatewayLabel(String[] gatewayLabels, String orgId)
             throws APIManagementException {
 
         String dbQuery = SQLConstants.GatewayPolicyConstants.GET_GLOBAL_POLICY_MAPPING_UUID_BY_GATEWAY_LABEL;
@@ -20018,7 +20022,8 @@ public class ApiMgtDAO {
         List<String> policyMappingUUIDs = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(dbQuery)) {
-            int index = 1;
+            statement.setString(1, orgId);
+            int index = 2;
             for (String label : gatewayLabels) {
                 statement.setString(index, label);
                 index++;
@@ -20041,7 +20046,7 @@ public class ApiMgtDAO {
      * @return Set of gateway labels
      * @throws APIManagementException
      */
-    public Set<String> getGatewayPolicyMappingDeploymentsByPolicyMappingId(String policyMappingUUID)
+    public Set<String> getGatewayPolicyMappingDeploymentsByPolicyMappingId(String policyMappingUUID, String orgId)
             throws APIManagementException {
 
         String dbQuery = SQLConstants.GatewayPolicyConstants.GET_GATEWAY_POLICY_DEPLOYMENT_BY_MAPPING_UUID;
@@ -20049,6 +20054,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, policyMappingUUID);
+            statement.setString(2, orgId);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     gatewayLabels.add(rs.getString("GATEWAY_LABEL"));

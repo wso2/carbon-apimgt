@@ -32,7 +32,7 @@ public class GatewayPolicyArtifactGeneratorUtil {
             if (StringUtils.isNotEmpty(gatewayLabel)) {
                 byte[] decodedValue = Base64.decodeBase64(gatewayLabel.getBytes());
                 String[] gatewayLabels = new String(decodedValue).split("\\|");
-                policyMappingUuids = apiProvider.getAllPolicyMappingUUIDsByGatewayLabels(gatewayLabels);
+                policyMappingUuids = apiProvider.getAllPolicyMappingUUIDsByGatewayLabels(gatewayLabels, tenantDomain);
             } else {
                 policyMappingUuids = new ArrayList<>();
                 policyMappingUuids.add(policyMappingUuid);

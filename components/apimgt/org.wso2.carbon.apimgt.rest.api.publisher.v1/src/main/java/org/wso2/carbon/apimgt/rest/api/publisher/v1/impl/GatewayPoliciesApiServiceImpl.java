@@ -152,9 +152,10 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
             MessageContext messageContext) {
 
         try {
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             GatewayPolicyData gatewayPolicyData = apiProvider.getGatewayPolicyMappingDataByPolicyMappingId(
-                    gatewayPolicyMappingId);
+                    gatewayPolicyMappingId, tenantDomain);
             GatewayPolicyMappingsDTO gatewayPolicyMappingsDTO = GatewayPolicyMappingUtil.fromGatewayPolicyDataToDTO(
                     gatewayPolicyData);
             return Response.ok().entity(gatewayPolicyMappingsDTO).build();

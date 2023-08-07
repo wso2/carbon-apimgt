@@ -1741,10 +1741,12 @@ public interface APIProvider extends APIManager {
      * Get gateway policies mapping UUID attached to the gateway
      *
      * @param gatewayLabel Gateway label
+     * @param orgId        Organization ID
      * @return Policy mapping UUID list
      * @throws APIManagementException
      */
-    List<String> getAllPolicyMappingUUIDsByGatewayLabels(String[] gatewayLabel) throws APIManagementException;
+    List<String> getAllPolicyMappingUUIDsByGatewayLabels(String[] gatewayLabel, String orgId)
+            throws APIManagementException;
 
     /**
      * This method is to delete a gateway policy mapping.
@@ -1782,9 +1784,10 @@ public interface APIProvider extends APIManager {
      * definition as it is bulky.
      *
      * @param policyMappingUUID Policy mapping UUID
+     * @param tenantDomain      Tenant domain
      * @return Gateway Policy Data
      * @throws APIManagementException
      */
-    GatewayPolicyData getGatewayPolicyMappingDataByPolicyMappingId(String policyMappingUUID)
+    GatewayPolicyData getGatewayPolicyMappingDataByPolicyMappingId(String policyMappingUUID, String tenantDomain)
             throws APIManagementException;
 }
