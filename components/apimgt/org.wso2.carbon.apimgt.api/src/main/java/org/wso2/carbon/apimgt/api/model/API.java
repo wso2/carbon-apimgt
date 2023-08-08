@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.api.model;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.util.ModelUtil;
 
@@ -122,6 +121,7 @@ public class API implements Serializable {
     private String subscriptionAvailability;
     private String subscriptionAvailableTenants;
     private CORSConfiguration corsConfiguration;
+    private BackendJWTConfiguration backendJWTConfiguration;
     private String endpointConfig;
     private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
     private WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration;
@@ -1380,5 +1380,13 @@ public class API implements Serializable {
 
     public void setVersionInfo(VersionInfo versionInfo) {
         this.versionInfo = versionInfo;
+    }
+
+    public void setBackendJWTConfiguration(BackendJWTConfiguration backendJWTConfig) {
+        this.backendJWTConfiguration = backendJWTConfig;
+    }
+
+    public BackendJWTConfiguration getBackendJWTConfiguration() {
+        return backendJWTConfiguration;
     }
 }

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBackendJWTConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
@@ -59,6 +60,7 @@ public class APIDTO   {
     private Boolean isDefaultVersion = null;
     private Boolean isRevision = null;
     private Boolean enableBackendJWT = null;
+    private APIBackendJWTConfigurationDTO backendJWTConfiguration = null;
     private String revisionedApiId = null;
     private Integer revisionId = null;
     private Boolean enableSchemaValidation = null;
@@ -579,6 +581,24 @@ return null;
   }
   public void setEnableBackendJWT(Boolean enableBackendJWT) {
     this.enableBackendJWT = enableBackendJWT;
+  }
+
+  /**
+   **/
+  public APIDTO backendJWTConfiguration(APIBackendJWTConfigurationDTO backendJWTConfiguration) {
+    this.backendJWTConfiguration = backendJWTConfiguration;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("backendJWTConfiguration")
+  public APIBackendJWTConfigurationDTO getBackendJWTConfiguration() {
+    return backendJWTConfiguration;
+  }
+  public void setBackendJWTConfiguration(APIBackendJWTConfigurationDTO backendJWTConfiguration) {
+    this.backendJWTConfiguration = backendJWTConfiguration;
   }
 
   /**
@@ -1372,6 +1392,7 @@ return null;
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(isRevision, API.isRevision) &&
         Objects.equals(enableBackendJWT, API.enableBackendJWT) &&
+        Objects.equals(backendJWTConfiguration, API.backendJWTConfiguration) &&
         Objects.equals(revisionedApiId, API.revisionedApiId) &&
         Objects.equals(revisionId, API.revisionId) &&
         Objects.equals(enableSchemaValidation, API.enableSchemaValidation) &&
@@ -1419,7 +1440,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, enableBackendJWT, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, throttlingLimit, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, scopePrefix, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, enableBackendJWT, backendJWTConfiguration, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, throttlingLimit, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, scopePrefix, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols);
   }
 
   @Override
@@ -1442,6 +1463,7 @@ return null;
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    isRevision: ").append(toIndentedString(isRevision)).append("\n");
     sb.append("    enableBackendJWT: ").append(toIndentedString(enableBackendJWT)).append("\n");
+    sb.append("    backendJWTConfiguration: ").append(toIndentedString(backendJWTConfiguration)).append("\n");
     sb.append("    revisionedApiId: ").append(toIndentedString(revisionedApiId)).append("\n");
     sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");

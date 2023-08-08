@@ -8431,6 +8431,18 @@ components:
         enableBackendJWT:
           type: boolean
           example: true
+        backendJWTConfiguration:
+          type: object
+          properties:
+            audiences:
+              type: array
+              description: |
+                The list of audiences to which the JWT should be issued.
+              example:
+                - sampleOrg1.com
+                - sampleOrg2.com
+              items:
+                type: string
         revisionedApiId:
           type: string
           description: |

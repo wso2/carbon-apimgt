@@ -70,6 +70,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private boolean enableSchemaValidation;
     private boolean enableStore;
     private Boolean enableBackendJWT;
+    private BackendJWTConfiguration backendJWTConfiguration;
     private String testKey;
     private String contextTemplate;
     private Set<String> availableTierNames;
@@ -421,6 +422,14 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.corsConfiguration = corsConfiguration;
     }
 
+    public BackendJWTConfiguration getBackendJWTConfiguration() {
+        return backendJWTConfiguration;
+    }
+
+    public void setBackendJWTConfiguration(BackendJWTConfiguration backendJWTConfig) {
+        this.backendJWTConfiguration = backendJWTConfig;
+    }
+
     public WebsubSubscriptionConfiguration getWebsubSubscriptionConfiguration() {
         return websubSubscriptionConfiguration;
     }
@@ -642,9 +651,10 @@ public class PublisherAPI extends PublisherAPIInfo {
                 + accessControlRoles + ", additionalProperties=" + additionalProperties
                 + ", thumbnail=" + thumbnail + ", createdTime=" + createdTime + ", lastUpdated=" + lastUpdated
                 + ", versionTimestamp=" + versionTimestamp + ",apiExternalProductionEndpoint="
-                + apiExternalProductionEndpoint + ",apiExternalSandboxEndpoint=" + apiExternalSandboxEndpoint
+                + apiExternalProductionEndpoint + ", backendJWTConfiguration=" + backendJWTConfiguration +
+                ",apiExternalSandboxEndpoint=" + apiExternalSandboxEndpoint
                 + ", originalDevportalURL" + redirectURL + ", apiOwner" + apiOwner + ", vendor" + vendor
-                + ", apiOwner" + enableBackendJWT + ", toString()=" + super.toString() + "]";
+                + ", enableBackendJWT" + enableBackendJWT + ", toString()=" + super.toString() + "]";
     }
 }
 

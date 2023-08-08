@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.BackendJWTConfiguration;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
@@ -68,6 +69,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBackendJWTConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -362,6 +364,14 @@ public class APIMappingUtil {
             corsConfiguration = APIUtil.getDefaultCorsConfiguration();
         }
         model.setCorsConfiguration(corsConfiguration);
+
+        if (dto.isEnableBackendJWT() && dto.getBackendJWTConfiguration() != null
+                && dto.getBackendJWTConfiguration().getAudiences() != null) {
+            BackendJWTConfiguration backendJWTConfig = new BackendJWTConfiguration(
+                    dto.getBackendJWTConfiguration().getAudiences());
+            model.setBackendJWTConfiguration(backendJWTConfig);
+        }
+
         setMaxTpsFromApiDTOToModel(dto, model);
         model.setAuthorizationHeader(dto.getAuthorizationHeader());
         model.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
@@ -906,6 +916,12 @@ public class APIMappingUtil {
         dto.setRevisionId(model.getRevisionId());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
         dto.setEnableBackendJWT(model.getEnableBackendJWT() != null ? model.getEnableBackendJWT() : true);
+        APIBackendJWTConfigurationDTO backendJWTConfigurationDetailsDTO = new APIBackendJWTConfigurationDTO();
+        if (model.getEnableBackendJWT() && model.getBackendJWTConfiguration() != null &&
+                model.getBackendJWTConfiguration().getAudiences() != null) {
+            backendJWTConfigurationDetailsDTO.setAudiences(model.getBackendJWTConfiguration().getAudiences());
+        }
+        dto.setBackendJWTConfiguration(backendJWTConfigurationDetailsDTO);
 
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
