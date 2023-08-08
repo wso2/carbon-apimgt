@@ -1575,6 +1575,12 @@
         },
         "subscriptionState" : {
           "type" : "string"
+        },
+        "context" : {
+          "type" : "string"
+        },
+        "versionRange" : {
+          "type" : "string"
         }
       }
     },
