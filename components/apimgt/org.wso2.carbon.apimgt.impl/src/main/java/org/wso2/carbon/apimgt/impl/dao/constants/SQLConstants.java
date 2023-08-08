@@ -4130,7 +4130,7 @@ public class SQLConstants {
     }
 
     /**
-     * Static class to hold database queries related to AM_Global_POLICY_MAPPING table
+     * Static class to hold database queries related to gateway policies tables
      */
     public static class GatewayPolicyConstants {
         // Global policy mapping

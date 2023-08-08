@@ -244,6 +244,16 @@ public class SynapsePolicyAggregator {
         return sequenceExtension;
     }
 
+    /**
+     * This method will render the gateway level policy mapping
+     *
+     * @param gatewayPolicyDataList List of gateway policy data
+     * @param gatewayPolicies       List of gateway policies
+     * @param flow                  Flow type
+     * @param sequenceName          Sequence name
+     * @return Rendered gateway policy mapping
+     * @throws IOException
+     */
     public static String generateGatewayPolicySequenceForPolicyMapping(List<OperationPolicyData> gatewayPolicyDataList,
             List<OperationPolicy> gatewayPolicies, String flow, String sequenceName) throws IOException {
 
@@ -263,7 +273,7 @@ public class SynapsePolicyAggregator {
         }
     }
 
-    public static List<String> renderGatewayPolicyMapping(List<OperationPolicyData> gatewayPolicyDataList,
+    private static List<String> renderGatewayPolicyMapping(List<OperationPolicyData> gatewayPolicyDataList,
             List<OperationPolicy> gatewayPolicyList, String flow) {
 
         List<String> renderedPolicyMappingList = new ArrayList<>();

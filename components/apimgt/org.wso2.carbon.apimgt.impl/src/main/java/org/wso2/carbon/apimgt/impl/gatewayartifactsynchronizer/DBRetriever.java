@@ -263,7 +263,8 @@ public class DBRetriever implements ArtifactRetriever {
         return null;
     }
 
-    @Override public List<String> retrieveGatewayPolicyArtifacts(String gatewayLabel, String tenantDomain)
+    @Override
+    public List<String> retrieveGatewayPolicyArtifacts(String gatewayLabel, String tenantDomain)
             throws ArtifactSynchronizerException {
         List<String> gatewayPolicyArtifactsArray = new ArrayList<>();
         try {

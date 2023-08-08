@@ -20560,8 +20560,8 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get the list of all gateway policies. If the policy mapping UUID is provided, this will return all the gateway policies
-     * for that policy mapping.
+     * Get the list of all gateway policies. If the policy mapping UUID is provided,
+     * this will return all the gateway policies for that policy mapping.
      * This list will include policy specification and policy definition of each policy and policy ID.
      *
      * @param policyMappingUUID UUID of the policy mapping
@@ -20642,7 +20642,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve Gateway policy mapping UUIDs for labels : " + StringUtils.join(",", gatewayLabels), e);
+            handleException("Failed to retrieve Gateway policy mapping UUIDs for labels : " +
+                    StringUtils.join(",", gatewayLabels), e);
         }
         return policyMappingUUIDs;
     }
@@ -20669,7 +20670,9 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve the policy mapping UUID: " + policyMappingUUID + " attached gateway labels.", e);
+            handleException(
+                    "Failed to retrieve the policy mapping UUID: " + policyMappingUUID + " attached gateway labels.",
+                    e);
         }
         return gatewayLabels;
     }
