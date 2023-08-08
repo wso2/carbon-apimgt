@@ -43,7 +43,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
+import org.wso2.carbon.apimgt.gateway.jwt.*;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -62,6 +62,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
 import java.security.cert.Certificate;
+import java.text.*;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -155,7 +156,13 @@ public class JWTValidator {
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
         String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
-
+        long jwtGeneratedTime = 0;
+        try {
+             jwtGeneratedTime = signedJWTInfo.getSignedJWT().getJWTClaimsSet().getIssueTime().getTime();
+        } catch (ParseException e) {
+            log.error("Error while obtaining JWT token generated time certificate. "
+                    + GatewayUtils.getMaskedToken(jwtHeader));
+        }
         // Check for CNF validation
         if (!isCNFValidationDisabled(disableCNFValidation, false)) {
             try {
@@ -171,6 +178,17 @@ public class JWTValidator {
                 if (log.isDebugEnabled()) {
                     log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
                             getMaskedToken(jwtHeader));
+                }
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Invalid JWT token");
+            }
+            if (jwtGeneratedTime != 0 && InternalRevokedJWTDataHolder.getInstance()
+                    .isJWTTokenClientIdExistsInRevokedMap((String) signedJWTInfo.getJwtClaimsSet()
+                            .getClaim("client_id"), jwtGeneratedTime)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Consumer key retrieved from the  jwt token map is in revoked consumer key map." +
+                            " Token: " + GatewayUtils.getMaskedToken(jwtHeader));
                 }
                 log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
