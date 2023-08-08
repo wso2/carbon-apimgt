@@ -172,6 +172,7 @@ public class SubscriptionValidationSQLConstants {
                     "   API.API_UUID AS API_UUID," +
                     "   SUBS.SUB_STATUS AS STATUS," +
                     "   SUB.TENANT_ID AS TENANT_ID," +
+                    "   API.CONTEXT_TEMPLATE AS CONTEXT_TEMPLATE," +
                     "   SUBS.VERSION_RANGE AS VERSION_RANGE" +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUBS," +
