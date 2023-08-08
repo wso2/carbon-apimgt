@@ -164,7 +164,15 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
         return runtimeArtifactDto;
     }
 
-    @Override public RuntimeArtifactDto generateGatewayPolicyArtifact(
+    /**
+     * This method used to generate gateway policy artifact.
+     *
+     * @param gatewayPolicyArtifactDtoList list of gateway policy artifacts
+     * @return RuntimeArtifactDto runtime artifact
+     * @throws APIManagementException
+     */
+    @Override
+    public RuntimeArtifactDto generateGatewayPolicyArtifact(
             List<GatewayPolicyArtifactDto> gatewayPolicyArtifactDtoList) throws APIManagementException {
 
         RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
@@ -208,7 +216,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
             List<OperationPolicy> gatewayPolicyList, String flow) throws APIManagementException {
         GatewayContentDTO gatewayPolicySequenceContentDto = new GatewayContentDTO();
 
-        String policySequence = null;
+        String policySequence;
         String seqExt = EXT_SEQUENCE_PREFIX + SynapsePolicyAggregator.getSequenceExtensionFlow(flow);
         try {
             policySequence = SynapsePolicyAggregator.generateGatewayPolicySequenceForPolicyMapping(

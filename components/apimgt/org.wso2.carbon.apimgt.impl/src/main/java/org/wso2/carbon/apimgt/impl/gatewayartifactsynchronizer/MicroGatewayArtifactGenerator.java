@@ -21,8 +21,6 @@ package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 import org.apache.commons.io.FileUtils;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.OperationPolicy;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
@@ -118,6 +116,9 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
         }
     }
 
+    /**
+     * This method is not used in Microgateway
+     */
     @Override
     public RuntimeArtifactDto generateGatewayPolicyArtifact(
             List<GatewayPolicyArtifactDto> gatewayPolicyArtifactDtoList) {

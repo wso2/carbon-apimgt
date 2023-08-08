@@ -6298,11 +6298,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     * This method will be used to add a new gateway policy mapping to the database.
+     *
+     * @param gatewayGlobalPoliciesList List of Gateway Policy objects
+     * @param description               Description of the policy mapping
+     * @param name                      Name of the policy mapping
+     * @param orgId                     Organization ID
+     * @return UUID of the added policy mapping
+     * @throws APIManagementException
+     */
     public String applyGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPoliciesList, String description,
             String name, String orgId) throws APIManagementException {
         return apiMgtDAO.addGatewayGlobalPolicy(gatewayGlobalPoliciesList, description, name, orgId, null);
     }
 
+    /**
+     * This method will be used to add a new gateway policy mapping deployment to the database.
+     *
+     * @param gatewayPolicyDeploymentMap Policy deployment status to gateway labels map
+     * @param orgId                      Organization ID
+     * @param gatewayPolicyMappingId     UUID of the policy mapping
+     * @throws APIManagementException
+     */
     public void engageGatewayGlobalPolicies(Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap,
             String orgId, String gatewayPolicyMappingId) throws APIManagementException {
 
@@ -6349,24 +6367,54 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     * This method will be used to retrieve the policies data added via the gateway policy mapping by mapping UUID.
+     *
+     * @param policyMappingUUID      Policy mapping UUID
+     * @param isWithPolicyDefinition This will decide whether to return policy definition or not, as policy definition
+     *                               is a bit bulky
+     * @return List of OperationPolicyData objects
+     * @throws APIManagementException
+     */
     @Override
     public List<OperationPolicyData> getGatewayPolicyDataListByPolicyId(String policyMappingUUID,
             boolean isWithPolicyDefinition) throws APIManagementException {
         return apiMgtDAO.getAllGatewayPoliciesDataForPolicyMappingUUID(policyMappingUUID, isWithPolicyDefinition);
     }
 
+    /**
+     * This method will be used to retrieve the policies added via the gateway policy mapping by mapping UUID.
+     *
+     * @param policyMappingUUID Policy mapping UUID
+     * @return List of OperationPolicy objects
+     * @throws APIManagementException
+     */
     @Override
     public List<OperationPolicy> getOperationPoliciesOfPolicyMapping(String policyMappingUUID)
             throws APIManagementException {
         return apiMgtDAO.getGatewayPoliciesOfPolicyMapping(policyMappingUUID);
     }
 
+    /**
+     * This method will be used to retrieve gateway policies mapping UUID attached to the gateway
+     *
+     * @param gatewayLabels List of gateway labels
+     * @param orgId         Organization ID
+     * @return Policy mapping UUID list
+     * @throws APIManagementException
+     */
     @Override
     public List<String> getAllPolicyMappingUUIDsByGatewayLabels(String[] gatewayLabels, String orgId)
             throws APIManagementException {
         return apiMgtDAO.getGatewayPolicyMappingByGatewayLabel(gatewayLabels, orgId);
     }
 
+    /**
+     * This method will be used to delete a gateway policy mapping.
+     *
+     * @param gatewayPolicyMappingId Gateway policy mapping UUID
+     * @throws APIManagementException if failed to delete comment for identifier
+     */
     @Override
     public void deleteGatewayPolicyMappingByPolicyMappingId(String gatewayPolicyMappingId, String tenantDomain)
             throws APIManagementException {
@@ -6383,6 +6431,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.deleteGatewayPolicyMappingByPolicyId(gatewayPolicyMappingId);
     }
 
+    /**
+     * This method will be used to update globally added policies to the flows
+     *
+     * @param gatewayGlobalPolicyList List of Gateway Policy objects to be updated
+     * @param orgId                   Organization ID
+     * @param policyMappingId         Policy mapping UUID
+     * @return Policy Mapping ID
+     * @throws APIManagementException
+     */
     @Override
     public String updateGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPolicyList, String description,
             String name, String orgId, String policyMappingId) throws APIManagementException {
@@ -6418,6 +6475,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return mappingID;
     }
 
+    /**
+     * This method will be used to get a lightweight version of all the gateway policies for the tenant domain.
+     * This will not include the policy definition as it is bulky.
+     *
+     * @param organization Organization name
+     * @return List of Gateway Policies
+     * @throws APIManagementException
+     */
     @Override
     public List<GatewayPolicyData> getAllGatewayPolicyMappings(String organization)
             throws APIManagementException {
@@ -6432,6 +6497,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return gatewayPolicyMappingMetadata;
     }
 
+    /**
+     * This method will be used to get a lightweight policy mapping data for a particular mapping ID.
+     * This will not include the policy definition as it is bulky.
+     *
+     * @param policyMappingUUID Policy mapping UUID
+     * @param tenantDomain      Tenant domain
+     * @return Gateway Policy Data
+     * @throws APIManagementException
+     */
     @Override
     public GatewayPolicyData getGatewayPolicyMappingDataByPolicyMappingId(String policyMappingUUID, String tenantDomain)
             throws APIManagementException {
@@ -6445,7 +6519,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return gatewayPolicyData;
     }
 
-    //To get the hashmap of what mappingId is deployed or undeployed in which gateway
+    /**
+     * To get the hashmap of what mappingId is deployed or undeployed in which gateway
+     */
     private Map<String, Set<String>> getGatewayPolicyDeploymentMap(List<GatewayPolicyDeployment>
             gatewayPolicyDeploymentList) {
         Map<String, Set<String>> gatewayPolicyDeploymentMapForResponse = new HashMap<>();

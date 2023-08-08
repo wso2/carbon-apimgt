@@ -144,6 +144,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             InMemoryAPIDeployer inMemoryAPIDeployer = new InMemoryAPIDeployer();
             GatewayPolicyDeployer gatewayPolicyDeployer = new GatewayPolicyDeployer();
 
+            // Deploying all API artifacts at server startup
             while (waitTime > System.currentTimeMillis() && !flag) {
                 flag = inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(
                         gatewayArtifactSynchronizerProperties.getGatewayLabels(), tenantDomain);
@@ -156,6 +157,8 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                     }
                 }
             }
+
+            // Deploying gateway policy mappings at server startup
             while (waitTime > System.currentTimeMillis() && !globalPolicyDeploymentFlag) {
                 globalPolicyDeploymentFlag = gatewayPolicyDeployer.deployGlobalPoliciesAtGatewayStartup(
                         gatewayArtifactSynchronizerProperties.getGatewayLabels(), tenantDomain);
