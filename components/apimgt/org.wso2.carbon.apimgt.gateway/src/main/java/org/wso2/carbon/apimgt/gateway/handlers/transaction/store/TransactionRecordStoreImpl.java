@@ -51,22 +51,24 @@ public class TransactionRecordStoreImpl implements TransactionRecordStore {
         boolean retry;
         do {
             try {
-                httpClient.execute(httpPost);
                 retry = false;
+                HttpResponse result = httpClient.execute(httpPost);
+                int statusCode = result.getStatusLine().getStatusCode();
+                if (statusCode < 200 || statusCode >= 300) {
+                    throw new IOException("Status Code: " + statusCode);
+                }
             } catch (IOException ex) {
                 retryCount++;
                 if (retryCount < maxRetryCount) {
                     retry = true;
-                    LOG.warn("Failed to persist transaction count records to remote endpoint: " +
-                            ex.getMessage() + ". Retrying after 1s");
+                    LOG.warn("Failed to persist transaction count records to remote endpoint. Retrying after 1s");
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
-                        LOG.error("Failed to transaction count records to remote endpoint. Data maybe loss");
+                        LOG.error("Could not persist following transaction count records: " + jsonPayload, e);
                     }
                 } else {
-                    LOG.error("Failed to persist subscription request to remote endpoint." +
-                            " Records may be added back to the queue. Error: " +
+                    LOG.error("Could not persist transaction count records. Added back to the queue. Error: " +
                             ex.getMessage(), ex);
                     return false;
                 }
