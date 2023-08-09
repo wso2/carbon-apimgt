@@ -365,7 +365,7 @@ public class APIMappingUtil {
         }
         model.setCorsConfiguration(corsConfiguration);
 
-        if (dto.isEnableBackendJWT() && dto.getBackendJWTConfiguration() != null
+        if (dto.isEnableBackendJWT() != null && dto.isEnableBackendJWT() && dto.getBackendJWTConfiguration() != null
                 && dto.getBackendJWTConfiguration().getAudiences() != null) {
             BackendJWTConfiguration backendJWTConfig = new BackendJWTConfiguration(
                     dto.getBackendJWTConfiguration().getAudiences());
@@ -917,7 +917,7 @@ public class APIMappingUtil {
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
         dto.setEnableBackendJWT(model.getEnableBackendJWT() != null ? model.getEnableBackendJWT() : true);
         APIBackendJWTConfigurationDTO backendJWTConfigurationDetailsDTO = new APIBackendJWTConfigurationDTO();
-        if (model.getEnableBackendJWT() && model.getBackendJWTConfiguration() != null &&
+        if (model.getEnableBackendJWT() != null && model.getEnableBackendJWT() && model.getBackendJWTConfiguration() != null &&
                 model.getBackendJWTConfiguration().getAudiences() != null) {
             backendJWTConfigurationDetailsDTO.setAudiences(model.getBackendJWTConfiguration().getAudiences());
         }
