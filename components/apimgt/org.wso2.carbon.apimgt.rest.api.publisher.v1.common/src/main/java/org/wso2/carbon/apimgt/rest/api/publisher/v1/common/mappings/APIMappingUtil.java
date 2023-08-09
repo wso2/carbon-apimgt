@@ -917,7 +917,8 @@ public class APIMappingUtil {
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
         dto.setEnableBackendJWT(model.getEnableBackendJWT() != null ? model.getEnableBackendJWT() : true);
         APIBackendJWTConfigurationDTO backendJWTConfigurationDetailsDTO = new APIBackendJWTConfigurationDTO();
-        if (model.getEnableBackendJWT() != null && model.getEnableBackendJWT() && model.getBackendJWTConfiguration() != null &&
+        if (model.getEnableBackendJWT() != null && model.getEnableBackendJWT() &&
+                model.getBackendJWTConfiguration() != null &&
                 model.getBackendJWTConfiguration().getAudiences() != null) {
             backendJWTConfigurationDetailsDTO.setAudiences(model.getBackendJWTConfiguration().getAudiences());
         }
