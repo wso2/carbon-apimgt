@@ -382,10 +382,7 @@ public class APIAdminImpl implements APIAdmin {
 
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
             decryptKeyManagerConfigurationValues(keyManagerConfigurationDTO);
-            if (!StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
-                    keyManagerConfigurationDTO.getTokenType())) {
-                getKeyManagerEndpoints(keyManagerConfigurationDTO);
-            }
+            getKeyManagerEndpoints(keyManagerConfigurationDTO);
         }
 
         setIdentityProviderRelatedInformation(keyManagerConfigurationsByTenant, organization);
@@ -504,10 +501,8 @@ public class APIAdminImpl implements APIAdmin {
         if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName())) {
             APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfigurationDTO);
         }
-        if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
-                .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
-            maskValues(keyManagerConfigurationDTO);
-        }
+        maskValues(keyManagerConfigurationDTO);
+
         if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
                 keyManagerConfigurationDTO.getTokenType()) ||
                 StringUtils.equals(KeyManagerConfiguration.TokenType.BOTH.toString(),
@@ -524,10 +519,8 @@ public class APIAdminImpl implements APIAdmin {
                         ExceptionCodes.IDP_RETRIEVAL_FAILED);
             }
         }
-        if (!StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
-                keyManagerConfigurationDTO.getTokenType())) {
-            getKeyManagerEndpoints(keyManagerConfigurationDTO);
-        }
+        getKeyManagerEndpoints(keyManagerConfigurationDTO);
+
         return keyManagerConfigurationDTO;
     }
 
@@ -976,10 +969,7 @@ public class APIAdminImpl implements APIAdmin {
             APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfiguration);
         }
         maskValues(keyManagerConfiguration);
-        if (!StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
-                keyManagerConfiguration.getTokenType())) {
-            getKeyManagerEndpoints(keyManagerConfiguration);
-        }
+        getKeyManagerEndpoints(keyManagerConfiguration);
         return keyManagerConfiguration;
     }
 
@@ -1257,6 +1247,14 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     private void maskValues(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
+        // For external key managers there is nothing to mask as no sensitive data is stored in the database.
+        if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                keyManagerConfigurationDTO.getTokenType()) ||
+                StringUtils.equals(KeyManagerConfiguration.TokenType.EXTERNAL.toString(),
+                        keyManagerConfigurationDTO.getTokenType())) {
+            return;
+        }
+
         KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
                 .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
 
@@ -1634,6 +1632,15 @@ public class APIAdminImpl implements APIAdmin {
         keyManagerDTO.addProperty(APIConstants.KeyManager.CLAIM_MAPPING, claimArray);
     }
     private void getKeyManagerEndpoints(KeyManagerConfigurationDTO keyManagerConfigurationDTO){
+
+        // For external and exchange type keymanagers, there are no Key Manager Connections available. And
+        // it is not required to call the open-id connect discovery endpoint.
+        if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                keyManagerConfigurationDTO.getTokenType()) ||
+                StringUtils.equals(KeyManagerConfiguration.TokenType.EXTERNAL.toString(),
+                        keyManagerConfigurationDTO.getTokenType())) {
+            return;
+        }
 
         Map<String, String> endpointConfigurationsMap = new HashMap<>();
         keyManagerConfigurationDTO.setEndpoints(endpointConfigurationsMap);
