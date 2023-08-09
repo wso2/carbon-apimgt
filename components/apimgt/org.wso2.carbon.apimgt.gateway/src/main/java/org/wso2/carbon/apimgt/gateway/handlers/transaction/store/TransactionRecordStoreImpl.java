@@ -9,21 +9,31 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.TransactionCountConfig;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.TransactionRecord;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 
 public class TransactionRecordStoreImpl implements TransactionRecordStore {
 
     private static final Log LOG = LogFactory.getLog(TransactionRecordStoreImpl.class);
-    private static final String endpoint = "http://localhost:8080/transactioncount";
     private static HttpClient httpClient;
 
+    private static String endpoint;
+    private static String username;
+    private static String password;
+
     public TransactionRecordStoreImpl() {
+        endpoint = TransactionCountConfig.getTransactionCountService();
+        username = TransactionCountConfig.getTransactionCountServiceUsername();
+        password = TransactionCountConfig.getTransactionCountServicePassword();
+
         URL url = null;
         try {
             url = new URL(endpoint);
@@ -42,10 +52,14 @@ public class TransactionRecordStoreImpl implements TransactionRecordStore {
         Gson gson = new Gson();
         String jsonPayload = gson.toJson(transactionRecordList);
 
+        String credentials = username + ":" + password;
+        String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+
         HttpEntity stringEntity = new StringEntity(jsonPayload , ContentType.APPLICATION_JSON);
         httpPost.setEntity(stringEntity);
         httpPost.setHeader("Accept", "application/json");
         httpPost.setHeader("Content-type", "application/json");
+        httpPost.setHeader("Authorization", "Basic " + encodedCredentials);
 
         int retryCount = 0;
         boolean retry;

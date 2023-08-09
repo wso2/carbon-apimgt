@@ -15,6 +15,9 @@ public class TransactionCountConfig {
     private static int MAX_RETRY_COUNT;
     private static int MAX_TRANSACTION_RECORDS_PER_COMMIT;
     private static String SERVER_ID = "Gateway1";
+    private static String TRANSACTION_COUNT_SERVVICE = "https://localhost:8080/transactioncount";
+    private static String TRANSACTION_COUNT_SERVVICE_USERNAME = "admin";
+    private static String TRANSACTION_COUNT_SERVVICE_PASSWORD = "admin";
 
     static {
         APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
@@ -74,5 +77,17 @@ public class TransactionCountConfig {
 
     public static String getServerID() {
         return SERVER_ID;
+    }
+
+    public static String getTransactionCountService() {
+        return TRANSACTION_COUNT_SERVVICE;
+    }
+
+    public static String getTransactionCountServiceUsername() {
+        return TRANSACTION_COUNT_SERVVICE_USERNAME;
+    }
+
+    public static String getTransactionCountServicePassword() {
+        return TRANSACTION_COUNT_SERVVICE_PASSWORD;
     }
 }
