@@ -95,6 +95,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ConflictException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -1502,6 +1503,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     if (apiUsages != null && apiUsages.size() > 0) {
                         RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
                     }
+                } catch (ConflictException e) {
+                    throw e;
                 } catch (Exception e) { // catching generic exception to continue the execution despite errors
                     log.error("Error while checking active subscriptions for deleting API " + apiId + " on organization "
                             + organization);
@@ -1549,6 +1552,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while deleting API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        } catch (ConflictException e) {
+            throw e;
         }
         return null;
     }
