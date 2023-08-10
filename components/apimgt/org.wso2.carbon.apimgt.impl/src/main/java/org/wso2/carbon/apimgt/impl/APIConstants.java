@@ -2986,6 +2986,13 @@ public final class APIConstants {
     // Constants related to basic health check APIs
     public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
 
+    // Constants related to API creator validation configs
+    public static final String API_CREATOR_VALIDATION_CONFIGS = "APICreatorValidationConfigs";
+    public static final String ENABLE_API_CREATOR_ORG_VALIDATION = "EnableOrgValidation";
+    public static final String DEFAULT_ENABLE_API_CREATOR_ORG_VALIDATION = "false";
+    public static final String SERVICE_ENDPOINT_URL_IDENTIFIER = "svc.cluster.local";
+    public static final String RUDDER_ENDPOINT_URL = "http://localhost:8002";
+
     // Constants related to internal API key configurations
     public static final String INTERNAL_API_TEST_KEY_EXPIRY_TIME = "exp";
     public static final String API_TEST_KEY_CONFIGURATIONS = "APITestKeyConfigs";

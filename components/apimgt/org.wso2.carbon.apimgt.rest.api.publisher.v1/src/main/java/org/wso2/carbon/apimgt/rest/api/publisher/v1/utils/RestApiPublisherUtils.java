@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils;
 
+import feign.FeignException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -27,6 +28,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -295,5 +297,30 @@ public class RestApiPublisherUtils {
         } catch (APIImportExportException | IOException e) {
             throw new APIManagementException("Error while exporting operation policy", e);
         }
+    }
+
+    /**
+     * Validates the organization considering the API endpoint URL
+     * @param endpointUrl endpoint URL relevant of the API
+     * @param requestCtxOrdId organization ID related to the API invocation
+     * @return if the endpoint belongs to an authorized organization or not
+     * @throws APIManagementException happens if the Rudder returns 404 for the given namespace
+     */
+    public static boolean isEndpointBelongingToAuthorizedOrg(String endpointUrl, String requestCtxOrdId) throws APIManagementException {
+        if (endpointUrl.contains(APIConstants.SERVICE_ENDPOINT_URL_IDENTIFIER) &&
+                endpointUrl.split("\\.")[1] != null) {
+            String namespace = endpointUrl.split("\\.")[1];
+            try {
+                String orgIdFromNamespace = Rudder.getOrgIdFromNamespace(namespace);
+                return orgIdFromNamespace.equals(requestCtxOrdId);
+            } catch (FeignException e) {
+                if (e.status() == 404) {
+                    throw  new APIManagementException ("Could not find the organization given with the request",
+                            ExceptionCodes.ORGANIZATION_NOT_FOUND);
+                }
+            }
+
+        }
+        return false;
     }
 }

@@ -1496,4 +1496,10 @@
         <Exp>{{apim.testkey.validity.exp}}</Exp>
      </APITestKeyConfigs>
      {% endif %}}
+
+     {% if apim.api.creator.validation is defined %}
+     <APICreatorValidationConfigs>
+        <EnableOrgValidation>{{apim.api.creator.validation.enableOrganizationValidation}}</EnableOrgValidation>
+     </APICreatorValidationConfigs>
+     {% endif %}}
 </APIManager>
