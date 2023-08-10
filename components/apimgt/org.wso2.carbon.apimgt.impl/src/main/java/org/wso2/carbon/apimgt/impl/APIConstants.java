@@ -3003,4 +3003,8 @@ public final class APIConstants {
     public static final String DEVELOPMENT_ENV_AUD_CLAIM = "choreo:deployment:sandbox";
 
     public static final String IS_DP_SYSTEM_APP_ATTRIBUTE = "isDpSystemApp";
+
+    // Constants related to ChoreoSystemEndpoints
+    public static final String CHOREO_SYSTEM = "ChoreoSystem";
+    public static final String CLOUD_MANAGER_SERVICE_URL = "CloudManagerServiceURL";
 }

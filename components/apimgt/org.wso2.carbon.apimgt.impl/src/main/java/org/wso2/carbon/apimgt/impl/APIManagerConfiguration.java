@@ -125,6 +125,14 @@ public class APIManagerConfiguration {
     private RedisConfig redisConfig = new RedisConfig();
     private Map<String, List<String>> restApiJWTAuthAudiences = new HashMap<>();
 
+    public static String getChoreoCloudManagerEndpointURL() {
+        return choreoCloudManagerEndpointURL;
+    }
+
+    public static void setChoreoCloudManagerEndpointURL(String choreoCloudManagerEndpointURL) {
+        APIManagerConfiguration.choreoCloudManagerEndpointURL = choreoCloudManagerEndpointURL;
+    }
+
     public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;
     }
@@ -181,6 +189,7 @@ public class APIManagerConfiguration {
     }
 
     private static String choreoSystemOrganization;
+    private static String choreoCloudManagerEndpointURL;
 
 
 
@@ -595,7 +604,21 @@ public class APIManagerConfiguration {
                 } else {
                     log.warn("Choreo System Organization UUID is not defined.");
                 }
-            } 
+            } else if (APIConstants.CHOREO_SYSTEM.equals(localName)) {
+                OMElement cloudManagerEndpoint =
+                        element.getFirstChildWithName(new QName(APIConstants.CLOUD_MANAGER_SERVICE_URL));
+                if (cloudManagerEndpoint != null) {
+                    String cloudManagerEndpointUrl = cloudManagerEndpoint.getText();
+                    try {
+                        new URL(cloudManagerEndpointUrl);
+                        setChoreoCloudManagerEndpointURL(cloudManagerEndpointUrl);
+                    } catch (MalformedURLException e) {
+                        log.error("Error while parsing the cloud manager service URL : " + e.getMessage(), e);
+                    }
+                } else {
+                    log.error("Choreo Cloud Manager Endpoint URL is not defined.");
+                }
+            }
             readChildElements(element, nameStack);
             nameStack.pop();
         }

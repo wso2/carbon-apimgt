@@ -71,7 +71,43 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
     // Under the assumption that the choreo environment name won't be edited, once it caches the choreo environment
     // it won't be required to edit.
     // OrganizationUUID -> APIM Environment name -> Choreo Environment
-    private static final Map<String, Map<String, String>> organizationEnvironments = new HashMap<>();
+    private static final Map<String, Map<String, String>> ORGANIZATION_ENVIRONMENTS = new HashMap<>();
+    private static final Map<String, String> APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP;
+
+    static {
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP = new HashMap<>();
+        // Old Development Environments
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("dev-us-east-azure", "Development");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("sandbox-dev", "Development");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("Dev-Internal", "Development");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("dev-eu-north-azure", "Development");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("sandbox-dev-eu-north", "Development");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("Dev-Internal-EU-North", "Development");
+
+        // New Development Environments
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("development-us-east-azure", "Development");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("development-sandbox-us-east-azure", "Development");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("development-internal-us-east-azure", "Development");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("development-eu-north-azure", "Development");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("development-sandbox-eu-north-azure", "Development");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("development-internal-eu-north-azure", "Development");
+
+        // Old Production Environments
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("Production and Sandbox", "Production");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("sandbox-prod", "Production");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("Prod-Internal", "Production");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("prod-eu-north-azure", "Production");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("sandbox-prod-eu-north", "Production");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("Prod-Internal-EU-North", "Production");
+
+        // New Production Environments
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("production-us-east-azure", "Production");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("production-sandbox-us-east-azure", "Production");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("production-internal-us-east-azure", "Production");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("production-eu-north-azure", "Production");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("production-sandbox-eu-north-azure", "Production");
+        APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.put("production-internal-eu-north-azure", "Production");
+    }
 
     private static final class CloudManagerHttpClientHolder {
         static ChoreoHttpClient cloudManagerHttpClient;
@@ -87,7 +123,7 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                         .logger(new Slf4jLogger())
                         .errorDecoder(new ChoreoClientErrorDecoder())
                         .retryer(new Retryer.Default())
-                        .target(ChoreoHttpClient.class, "http://localhost:4005");
+                        .target(ChoreoHttpClient.class, APIManagerConfiguration.getChoreoCloudManagerEndpointURL());
             } catch (APIManagementException e) {
                 cloudManagerHttpClient = null;
                 log.error("Error while initializing Cloud Manager HTTP client", e);
@@ -131,12 +167,29 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                     environment.setVhost(apiRuntimeArtifactDto.getVhost());
                     environment.setDeployedTimeStamp(apiRuntimeArtifactDto.getDeployedTimeStamp());
                     environment.setDeploymentType(getDeploymentType(gwEnvironments, apiRuntimeArtifactDto.getLabel()));
-                    if (apiRuntimeArtifactDto.isForPrivateDataPlane()
+                    String apimEnv = environment.getName();
+                    // Assumption: Already available environments in choreo cannot be deleted or renamed.
+                    if (!apiRuntimeArtifactDto.isForPrivateDataPlane()
                             && !CloudManagerHttpClientHolder.SYSTEM_ORGANIZATION
                             .equals(apiRuntimeArtifactDto.getOrganization())) {
-                        if (!(organizationEnvironments.containsKey(apiRuntimeArtifactDto.getOrganization()) &&
-                                organizationEnvironments.get(apiRuntimeArtifactDto.getOrganization()).containsKey(
-                                        environment.getName()))) {
+                        if (APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.containsKey(apimEnv)
+                                && StringUtils.isNotEmpty(APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.get(apimEnv))) {
+                            environment.setChoreoEnvironment(APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.get(apimEnv));
+                        }
+                        // If it does not contain the mapping then we need to check for the specific organization again.
+                        // This could happen in two occasions.
+                        // 1. When the environment is newly added by a shared data plane user
+                        // 2. When all the APIs for CDP is pulled, then for the APIs which belongs PDP org the environment
+                        // will not be intuitive.
+                        // TODO: (VirajSalaka) Improve logic to not to add PDP API artifacts when CDP call happens.
+                    }
+                    if (!CloudManagerHttpClientHolder.SYSTEM_ORGANIZATION
+                            .equals(apiRuntimeArtifactDto.getOrganization())
+                            && StringUtils.isEmpty(environment.getChoreoEnvironment())
+                            && StringUtils.isNotEmpty(APIManagerConfiguration.getChoreoCloudManagerEndpointURL())) {
+                        if (!(ORGANIZATION_ENVIRONMENTS.containsKey(apiRuntimeArtifactDto.getOrganization()) &&
+                                ORGANIZATION_ENVIRONMENTS.get(apiRuntimeArtifactDto.getOrganization()).containsKey(
+                                        apimEnv))) {
                             // We expect a single entity to be in the list
                             CloudManagerDataDTO envTemplateList = CloudManagerHttpClientHolder.cloudManagerHttpClient
                                     .getCloudManagerEnvironmentTemplatesForOrganization(
@@ -159,19 +212,17 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                                     }
                                 }
                             }
-                            organizationEnvironments.put(apiRuntimeArtifactDto.getOrganization(),
+                            ORGANIZATION_ENVIRONMENTS.put(apiRuntimeArtifactDto.getOrganization(),
                                     perOrganizationEnvironments);
                         }
-                        if (StringUtils.isNotEmpty(organizationEnvironments
-                                .get(apiRuntimeArtifactDto.getOrganization())
-                                .get(environment.getName()))) {
-                            environment.setChoreoEnvironment(organizationEnvironments
+                        if (StringUtils.isNotEmpty(ORGANIZATION_ENVIRONMENTS
+                                .get(apiRuntimeArtifactDto.getOrganization()).get(apimEnv))) {
+                            environment.setChoreoEnvironment(ORGANIZATION_ENVIRONMENTS
                                     .get(apiRuntimeArtifactDto.getOrganization())
-                                    .get(environment.getName()));
+                                    .get(apimEnv));
                         } else {
-                            environment.setChoreoEnvironment("Unresolved");
+                            // TODO: (VirajSalaka) Log
                         }
-
                     }
                     apiProjectDto.getEnvironments().add(environment); // ignored if the name of the environment is same
                 }

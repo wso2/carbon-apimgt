@@ -36,6 +36,8 @@ public class CloudManagerEnvTemplate {
     private String sandboxAPIMEnvironment;
     @SerializedName("critical")
     private boolean critical;
+    @SerializedName("choreo_env")
+    private String dataplaneType;
 
     public String getName() {
         return name;
@@ -91,5 +93,13 @@ public class CloudManagerEnvTemplate {
 
     public void setCritical(boolean critical) {
         this.critical = critical;
+    }
+
+    public String getDataplaneType() {
+        return dataplaneType;
+    }
+
+    public void setDataplaneType(String dataplaneType) {
+        this.dataplaneType = dataplaneType;
     }
 }

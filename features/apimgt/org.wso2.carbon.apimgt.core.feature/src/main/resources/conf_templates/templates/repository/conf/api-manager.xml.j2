@@ -1451,6 +1451,12 @@
     </ChoreoSystemOrganization>
     {% endif %}
 
+    {% if choreo.systemEndpoint is defined %}
+    <ChoreoSystem>
+        <CloudManagerServiceURL>{{choreo.systemEndpoint.cloudManagerServiceURL}}</CloudManagerServiceURL>
+    </ChoreoSystem>
+    {% endif %}
+
     {% if apim.extension.listener is defined %}
     <ExtensionListeners>
         {%- for listener in apim.extension.listener -%}
