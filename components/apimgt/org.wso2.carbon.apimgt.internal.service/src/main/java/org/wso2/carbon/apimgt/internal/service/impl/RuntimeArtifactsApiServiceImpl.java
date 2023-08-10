@@ -55,9 +55,11 @@ public class RuntimeArtifactsApiServiceImpl implements RuntimeArtifactsApiServic
         }
         if (StringUtils.isNotEmpty(organization) && organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) &&
                 xWSO2Tenant.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            // Shared Data plane scenario
             runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(apiId,
                     name, version, gatewayLabel, type);
         } else {
+            // Private data plane scenario
             runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateRuntimeArtifact(apiId,
                     name, version, gatewayLabel, type, xWSO2Tenant);
         }

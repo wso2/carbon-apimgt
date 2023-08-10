@@ -33,6 +33,17 @@ public class APIArtifactGeneratorUtil {
 
     private static final GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
 
+    /**
+     * Generate all API artifacts for the given set of APIs for private data plane (for a given organization).
+     *
+     * @param apiUuids     List of API UUIDs
+     * @param name         API name
+     * @param version      API version
+     * @param gatewayLabel Gateway label
+     * @param type         Gateway type
+     * @param tenantDomain Organization
+     * @return RuntimeArtifactDto
+     */
     public static RuntimeArtifactDto generateAPIArtifact(List<String> apiUuids, String name, String version,
                                                          String gatewayLabel, String type, String tenantDomain)
             throws APIManagementException {
@@ -61,6 +72,7 @@ public class APIArtifactGeneratorUtil {
                     throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
                 }
                 for (APIRuntimeArtifactDto apiRuntimeArtifactDto: gatewayArtifacts) {
+                    apiRuntimeArtifactDto.setForPrivateDataPlane(true);
                     ArtifactSynchronizerUtil.setArtifactProperties(apiRuntimeArtifactDto);
                 }
             }
@@ -77,6 +89,16 @@ public class APIArtifactGeneratorUtil {
         }
     }
 
+    /**
+     * Generate all API artifacts for the given set of APIs for shared data plane.
+     *
+     * @param apiUuids     List of API UUIDs
+     * @param name         API name
+     * @param version      API version
+     * @param gatewayLabel Gateway label
+     * @param type         Gateway type
+     * @return RuntimeArtifactDto
+     */
     public static RuntimeArtifactDto generateAllAPIArtifact(List<String> apiUuids, String name, String version,
                                                             String gatewayLabel, String type)
             throws APIManagementException {

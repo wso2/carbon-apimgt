@@ -55,8 +55,10 @@ public class RetrieveApiArtifactsApiServiceImpl implements RetrieveApiArtifactsA
         }
         if (StringUtils.isNotEmpty(organization) && organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) &&
                 xWSO2TenantOrOrganization.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            // Shared Data plane scenario
             runtimeArtifactDto = APIArtifactGeneratorUtil.generateAllAPIArtifact(uuidList.getUuids(), "", "", gatewayLabel, type);
         } else {
+            // Private dataplane scenario
             runtimeArtifactDto =  APIArtifactGeneratorUtil.generateAPIArtifact(uuidList.getUuids(), "", "", gatewayLabel, type,
                     xWSO2TenantOrOrganization);
         }

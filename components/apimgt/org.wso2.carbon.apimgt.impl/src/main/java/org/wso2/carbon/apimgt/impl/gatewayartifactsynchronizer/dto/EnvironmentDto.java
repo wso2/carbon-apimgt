@@ -31,6 +31,7 @@ public class EnvironmentDto {
     private String name;
     private String vhost;
     private DeploymentType deploymentType;
+    private String choreoEnvironment;
 
     public String getId() {
         return id;
@@ -38,6 +39,14 @@ public class EnvironmentDto {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getChoreoEnvironment() {
+        return choreoEnvironment;
+    }
+
+    public void setChoreoEnvironment(String choreoEnvironment) {
+        this.choreoEnvironment = choreoEnvironment;
     }
 
     public enum DeploymentType {

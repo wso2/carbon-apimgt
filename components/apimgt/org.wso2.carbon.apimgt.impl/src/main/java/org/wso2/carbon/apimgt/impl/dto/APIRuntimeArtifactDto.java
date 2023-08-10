@@ -14,6 +14,7 @@ public class APIRuntimeArtifactDto extends RuntimeArtifactDto {
     private String context;
     private long deployedTimeStamp;
     private String envUUID;
+    private boolean forPrivateDataPlane = false;
 
     public String getType() {
 
@@ -138,5 +139,13 @@ public class APIRuntimeArtifactDto extends RuntimeArtifactDto {
 
     public void setEnvUUID(String envUUID) {
         this.envUUID = envUUID;
+    }
+
+    public boolean isForPrivateDataPlane() {
+        return forPrivateDataPlane;
+    }
+
+    public void setForPrivateDataPlane(boolean forPrivateDataPlane) {
+        this.forPrivateDataPlane = forPrivateDataPlane;
     }
 }

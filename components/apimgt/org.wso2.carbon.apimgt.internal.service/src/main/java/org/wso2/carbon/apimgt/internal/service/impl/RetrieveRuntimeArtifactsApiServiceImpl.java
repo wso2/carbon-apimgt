@@ -57,9 +57,11 @@ public class RetrieveRuntimeArtifactsApiServiceImpl implements RetrieveRuntimeAr
                     .build();
         }
         if (organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
+            // Shared Data plane scenario
             runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(dataPlaneId,
                     gatewayAccessibilityType, type);
         } else {
+            // Private Data plane scenario
             ArrayList<String> organizations = new ArrayList<>();
             organizations.add(organization);
             if (includeSystemOrgArtifacts != null && includeSystemOrgArtifacts) {
@@ -99,7 +101,9 @@ public class RetrieveRuntimeArtifactsApiServiceImpl implements RetrieveRuntimeAr
     }
 
     @Override
-    public Response retrieveRuntimeArtifactsPost(String type, String dataPlaneId, String gatewayAccessibilityType, UUIDListDTO uuidList, MessageContext messageContext) throws APIManagementException {
+    public Response retrieveRuntimeArtifactsPost(String type, String dataPlaneId, String gatewayAccessibilityType,
+                                                 UUIDListDTO uuidList, MessageContext messageContext)
+            throws APIManagementException {
         RuntimeArtifactDto runtimeArtifactDto;
         String organization = RestApiUtil.getOrganization(messageContext);
         if (StringUtils.isEmpty(organization)) {
@@ -109,9 +113,11 @@ public class RetrieveRuntimeArtifactsApiServiceImpl implements RetrieveRuntimeAr
                     .build();
         }
         if (organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
+            // Shared Data plane scenario
             runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(type, dataPlaneId,
                     gatewayAccessibilityType, uuidList.getUuids());
         } else {
+            // Private Data plane scenario
             runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(organization, type, dataPlaneId,
                     gatewayAccessibilityType, uuidList.getUuids());
         }

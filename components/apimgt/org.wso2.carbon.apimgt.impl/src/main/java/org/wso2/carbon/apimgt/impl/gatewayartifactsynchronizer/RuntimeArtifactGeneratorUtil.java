@@ -54,6 +54,17 @@ public class RuntimeArtifactGeneratorUtil {
             = ChoreoGatewayArtifactsMgtDAO.getInstance();
     private static final Log log = LogFactory.getLog(RuntimeArtifactGeneratorUtil.class);
 
+    /**
+     * This method is used to get the runtime artifacts for the given API as required by the Private Data plane
+     *
+     * @param apiId        API ID
+     * @param name         API Name
+     * @param version      API Version
+     * @param gatewayLabel Gateway Label
+     * @param type         Gateway Type (Envoy or Synapse)
+     * @param tenantDomain organization
+     * @return RuntimeArtifactDto
+     */
     public static RuntimeArtifactDto generateRuntimeArtifact(String apiId, String name, String version,
                                                              String gatewayLabel, String type, String tenantDomain)
             throws APIManagementException {
@@ -62,6 +73,9 @@ public class RuntimeArtifactGeneratorUtil {
                 ServiceReferenceHolder.getInstance().getGatewayArtifactGenerator(type);
         if (gatewayArtifactGenerator != null) {
             List<APIRuntimeArtifactDto> gatewayArtifacts = getRuntimeArtifacts(apiId, gatewayLabel, tenantDomain);
+            for (APIRuntimeArtifactDto runtimeArtifactDto : gatewayArtifacts) {
+                runtimeArtifactDto.setForPrivateDataPlane(true);
+            }
             return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
         } else {
             Set<String> gatewayArtifactGeneratorTypes =
@@ -72,6 +86,17 @@ public class RuntimeArtifactGeneratorUtil {
         }
     }
 
+    /**
+     * generateAllRuntimeArtifact is used to generate all the runtime artifacts for the given API
+     * as required by the Shared Data plane
+     *
+     * @param apiId        API ID
+     * @param name         API Name
+     * @param version      API Version
+     * @param gatewayLabel Gateway Label
+     * @param type         Gateway Type (Envoy or Synapse)
+     * @return RuntimeArtifactDto
+     */
     public static RuntimeArtifactDto generateAllRuntimeArtifact(String apiId, String name, String version,
                                                                 String gatewayLabel, String type)
             throws APIManagementException {
@@ -171,6 +196,15 @@ public class RuntimeArtifactGeneratorUtil {
         return getRuntimeArtifactDto(gatewayArtifacts);
     }
 
+    /**
+     * generateAllRuntimeArtifact is used to generate all the runtime artifacts for the given API as required by the
+     * shared dataplane
+     *
+     * @param dataPlaneId              Data plane ID
+     * @param gatewayAccessibilityType Gateway accessibility type (Internal or External)
+     * @param type                     Gateway Type (Envoy or Synapse)
+     * @return RuntimeArtifactDto
+     */
     public static RuntimeArtifactDto generateAllRuntimeArtifact(String dataPlaneId, String gatewayAccessibilityType,
                                                                 String type)
             throws APIManagementException {
@@ -244,6 +278,16 @@ public class RuntimeArtifactGeneratorUtil {
         }
     }
 
+    /**
+     * generateAllRuntimeArtifact is used to generate all the runtime artifacts for the given API as required by the
+     * the private dataplane (Multiple Organizations are allowed to include system organization)
+     *
+     * @param organizations            List of organizations
+     * @param dataPlaneId              Data plane ID
+     * @param gatewayAccessibilityType Gateway accessibility type (Internal or External)
+     * @param type                     Gateway Type (Envoy or Synapse)
+     * @return RuntimeArtifactDto
+     */
     public static RuntimeArtifactDto generateAllRuntimeArtifact(ArrayList<String> organizations, String dataPlaneId, String gatewayAccessibilityType, String type)
             throws APIManagementException {
 
@@ -266,6 +310,7 @@ public class RuntimeArtifactGeneratorUtil {
                 Iterator<APIRuntimeArtifactDto> iterator = gatewayArtifacts.iterator();
                 while (iterator.hasNext()) {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = iterator.next();
+                    apiRuntimeArtifactDto.setForPrivateDataPlane(true);
                     try {
                         ArtifactSynchronizerUtil.setArtifactProperties(apiRuntimeArtifactDto);
                     } catch (APIManagementException e) {
@@ -288,6 +333,17 @@ public class RuntimeArtifactGeneratorUtil {
         }
     }
 
+    /**
+     * generateAllRuntimeArtifact is used to generate all the runtime artifacts for the given API as required by the
+     * the private dataplane
+     *
+     * @param organization             Organization
+     * @param type                     Gateway Type (Envoy or Synapse)
+     * @param dataPlaneId              Data plane ID
+     * @param gatewayAccessibilityType Gateway accessibility type (Internal or External)
+     * @param apiUuids                 List of API UUIDs
+     * @return RuntimeArtifactDto
+     */
     public static RuntimeArtifactDto generateAllRuntimeArtifact(String organization, String type, String dataPlaneId,
                                                                 String gatewayAccessibilityType, List<String> apiUuids)
             throws APIManagementException {
@@ -297,6 +353,9 @@ public class RuntimeArtifactGeneratorUtil {
             List<APIRuntimeArtifactDto> gatewayArtifacts = choreoGatewayArtifactsMgtDAO
                         .retrieveGatewayArtifactsByDataPlaneAndAPIIDs(organization, dataPlaneId,
                                 gatewayAccessibilityType, apiUuids);
+            for (APIRuntimeArtifactDto apiRuntimeArtifactDto: gatewayArtifacts) {
+                apiRuntimeArtifactDto.setForPrivateDataPlane(true);
+            }
 
             if (gatewayArtifacts != null) {
                 if (gatewayArtifacts.isEmpty()) {

@@ -15,17 +15,29 @@
  * under the License.
  */
 
-
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
+import feign.Feign;
+import feign.Retryer;
+import feign.gson.GsonDecoder;
+import feign.gson.GsonEncoder;
+import feign.slf4j.Slf4jLogger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.client.ChoreoClientErrorDecoder;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.client.ChoreoClientException;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.client.ChoreoHttpClient;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.client.CloudManagerDataDTO;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.client.CloudManagerEnvTemplate;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.ApiProjectDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.DeploymentDescriptorDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.EnvironmentDto;
@@ -33,6 +45,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.environmentspecif
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.File;
@@ -52,8 +65,35 @@ import java.util.stream.Collectors;
         service = GatewayArtifactGenerator.class
 )
 public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
+    private static final Log log = LogFactory.getLog(MicroGatewayArtifactGenerator.class);
     private static final EnvironmentSpecificAPIPropertyDAO environmentSpecificAPIPropertyDao =
             EnvironmentSpecificAPIPropertyDAO.getInstance();
+    // Under the assumption that the choreo environment name won't be edited, once it caches the choreo environment
+    // it won't be required to edit.
+    // OrganizationUUID -> APIM Environment name -> Choreo Environment
+    private static final Map<String, Map<String, String>> organizationEnvironments = new HashMap<>();
+
+    private static final class CloudManagerHttpClientHolder {
+        static ChoreoHttpClient cloudManagerHttpClient;
+        static final String SYSTEM_ORGANIZATION = APIManagerConfiguration.getChoreoSystemOrganization();
+
+        static {
+            try {
+                cloudManagerHttpClient = Feign.builder()
+                        .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(
+                                "http://localhost:4005")))
+                        .encoder(new GsonEncoder())
+                        .decoder(new GsonDecoder())
+                        .logger(new Slf4jLogger())
+                        .errorDecoder(new ChoreoClientErrorDecoder())
+                        .retryer(new Retryer.Default())
+                        .target(ChoreoHttpClient.class, "http://localhost:4005");
+            } catch (APIManagementException e) {
+                cloudManagerHttpClient = null;
+                log.error("Error while initializing Cloud Manager HTTP client", e);
+            }
+        }
+    }
 
     @Override
     public RuntimeArtifactDto generateGatewayArtifact(List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList)
@@ -91,6 +131,48 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                     environment.setVhost(apiRuntimeArtifactDto.getVhost());
                     environment.setDeployedTimeStamp(apiRuntimeArtifactDto.getDeployedTimeStamp());
                     environment.setDeploymentType(getDeploymentType(gwEnvironments, apiRuntimeArtifactDto.getLabel()));
+                    if (apiRuntimeArtifactDto.isForPrivateDataPlane()
+                            && !CloudManagerHttpClientHolder.SYSTEM_ORGANIZATION
+                            .equals(apiRuntimeArtifactDto.getOrganization())) {
+                        if (!(organizationEnvironments.containsKey(apiRuntimeArtifactDto.getOrganization()) &&
+                                organizationEnvironments.get(apiRuntimeArtifactDto.getOrganization()).containsKey(
+                                        environment.getName()))) {
+                            // We expect a single entity to be in the list
+                            CloudManagerDataDTO envTemplateList = CloudManagerHttpClientHolder.cloudManagerHttpClient
+                                    .getCloudManagerEnvironmentTemplatesForOrganization(
+                                            apiRuntimeArtifactDto.getOrganization());
+                            Map<String, String> perOrganizationEnvironments = new HashMap<>();
+                            if (envTemplateList != null && envTemplateList.getData() != null
+                                    && envTemplateList.getData().size() > 0) {
+                                for (CloudManagerEnvTemplate envTemplate: envTemplateList.getData()) {
+                                    if (StringUtils.isNotEmpty(envTemplate.getExternalAPIMEnvironment())) {
+                                        perOrganizationEnvironments.put(envTemplate.getExternalAPIMEnvironment(),
+                                                envTemplate.getName());
+                                    }
+                                    if (StringUtils.isNotEmpty(envTemplate.getInternalAPIMEnvironment())) {
+                                        perOrganizationEnvironments.put(envTemplate.getInternalAPIMEnvironment(),
+                                                envTemplate.getName());
+                                    }
+                                    if (StringUtils.isNotEmpty(envTemplate.getSandboxAPIMEnvironment())) {
+                                        perOrganizationEnvironments.put(envTemplate.getSandboxAPIMEnvironment(),
+                                                envTemplate.getName());
+                                    }
+                                }
+                            }
+                            organizationEnvironments.put(apiRuntimeArtifactDto.getOrganization(),
+                                    perOrganizationEnvironments);
+                        }
+                        if (StringUtils.isNotEmpty(organizationEnvironments
+                                .get(apiRuntimeArtifactDto.getOrganization())
+                                .get(environment.getName()))) {
+                            environment.setChoreoEnvironment(organizationEnvironments
+                                    .get(apiRuntimeArtifactDto.getOrganization())
+                                    .get(environment.getName()));
+                        } else {
+                            environment.setChoreoEnvironment("Unresolved");
+                        }
+
+                    }
                     apiProjectDto.getEnvironments().add(environment); // ignored if the name of the environment is same
                 }
             }
@@ -116,8 +198,12 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
             runtimeArtifactDto.setArtifact(new File(tempDirectory.getAbsolutePath() + APIConstants.ZIP_FILE_EXTENSION));
             runtimeArtifactDto.setFile(true);
             return runtimeArtifactDto;
-        } catch (APIImportExportException | IOException e) {
+        } catch (APIImportExportException |
+                 IOException e) {
             throw new APIManagementException("Error while Generating API artifact", e);
+        } catch (ChoreoClientException e) {
+            // TODO: (VirajSalaka) In case of cloud manager failure, this would result in authorization failures at gateway level
+            throw new APIManagementException("Error while getting environment templates for organization", e);
         }
     }
 
