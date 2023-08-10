@@ -95,6 +95,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ConflictException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -1496,6 +1497,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     if (apiUsages != null && apiUsages.size() > 0) {
                         RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
                     }
+                } catch (ConflictException e) {
+                    throw new APIManagementException("Error occurred while deleting API: " + apiId, e);
                 } catch (Exception e) { // catching generic exception to continue the execution despite errors
                     log.error("Error while checking active subscriptions for deleting API " + apiId + " on organization "
                             + organization);
@@ -1516,10 +1519,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
 
-            if (error != null) {
-                throw new APIManagementException("Error occurred while deleting API: " + apiId, error);
-            } 
-            
             // Delete the API
             boolean isDeleted = false;
             try {
@@ -1529,7 +1528,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 log.error("Error while deleting API " + apiId + "on organization " + organization, e);
             }
 
-            if (!isDeleted) {
+            if (error != null) {
+                throw new APIManagementException("Error occurred while deleting API: " + apiId, error);
+            } else if (!isDeleted) {
                 RestApiUtil.handleInternalServerError("Error while deleting API : " + apiId + " on organization "
                         + organization, log);
                 return null;
