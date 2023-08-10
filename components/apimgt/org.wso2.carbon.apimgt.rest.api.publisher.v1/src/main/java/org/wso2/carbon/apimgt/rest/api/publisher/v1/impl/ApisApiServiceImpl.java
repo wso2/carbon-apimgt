@@ -1498,7 +1498,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
                     }
                 } catch (ConflictException e) {
-                    throw new APIManagementException("Error occurred while deleting API: " + apiId, e);
+                    throw e;
                 } catch (Exception e) { // catching generic exception to continue the execution despite errors
                     log.error("Error while checking active subscriptions for deleting API " + apiId + " on organization "
                             + organization);
@@ -1546,6 +1546,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while deleting API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        } catch (ConflictException e) {
+            throw e;
         }
         return null;
     }
