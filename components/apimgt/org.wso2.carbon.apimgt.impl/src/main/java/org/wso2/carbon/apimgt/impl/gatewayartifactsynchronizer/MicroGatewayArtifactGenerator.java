@@ -111,7 +111,6 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
 
     private static final class CloudManagerHttpClientHolder {
         static ChoreoHttpClient cloudManagerHttpClient;
-        static final String SYSTEM_ORGANIZATION = APIManagerConfiguration.getChoreoSystemOrganization();
 
         static {
             try {
@@ -170,8 +169,8 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                     String apimEnv = environment.getName();
                     // Assumption: Already available environments in choreo cannot be deleted or renamed.
                     if (!apiRuntimeArtifactDto.isForPrivateDataPlane()
-                            && !CloudManagerHttpClientHolder.SYSTEM_ORGANIZATION
-                            .equals(apiRuntimeArtifactDto.getOrganization())) {
+                            && !apiRuntimeArtifactDto.getOrganization()
+                            .equals(APIManagerConfiguration.getChoreoSystemOrganization())) {
                         if (APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.containsKey(apimEnv)
                                 && StringUtils.isNotEmpty(APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.get(apimEnv))) {
                             environment.setChoreoEnvironment(APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.get(apimEnv));
@@ -183,8 +182,8 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                         // will not be intuitive.
                         // TODO: (VirajSalaka) Improve logic to not to add PDP API artifacts when CDP call happens.
                     }
-                    if (!CloudManagerHttpClientHolder.SYSTEM_ORGANIZATION
-                            .equals(apiRuntimeArtifactDto.getOrganization())
+                    if (!apiRuntimeArtifactDto.getOrganization()
+                            .equals(APIManagerConfiguration.getChoreoSystemOrganization())
                             && StringUtils.isEmpty(environment.getChoreoEnvironment())
                             && StringUtils.isNotEmpty(APIManagerConfiguration.getChoreoCloudManagerEndpointURL())) {
                         if (!(ORGANIZATION_ENVIRONMENTS.containsKey(apiRuntimeArtifactDto.getOrganization()) &&
