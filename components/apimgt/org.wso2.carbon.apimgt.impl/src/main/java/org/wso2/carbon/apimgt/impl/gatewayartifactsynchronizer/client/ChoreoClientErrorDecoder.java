@@ -25,7 +25,6 @@ import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.impl.kmclient.KeyManagerClientException;
 
 import java.io.IOException;
 
@@ -42,10 +41,10 @@ public class ChoreoClientErrorDecoder implements ErrorDecoder {
             errorDescription = response.reason();
         }
         if (response.status() >= 400 && response.status() <= 499) {
-            return new KeyManagerClientException(response.status(), errorDescription);
+            return new ChoreoClientException(response.status(), errorDescription);
         }
         if (response.status() >= 500 && response.status() <= 599) {
-            return new KeyManagerClientException(response.status(), errorDescription);
+            return new ChoreoClientException(response.status(), errorDescription);
         }
         return errorStatus(methodKey, response);
     }
@@ -58,7 +57,7 @@ public class ChoreoClientErrorDecoder implements ErrorDecoder {
                 String responseStr = IOUtils.toString(response.body().asInputStream(), UTF_8);
                 JSONParser jsonParser = new JSONParser();
                 JSONObject responseJson = (JSONObject) jsonParser.parse(responseStr);
-                Object errorObj = responseJson.get("error_description");
+                Object errorObj = responseJson.get("error");
                 if (errorObj != null) {
                     errorDescription = errorObj.toString();
                 }

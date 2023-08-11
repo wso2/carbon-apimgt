@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
 import feign.Feign;
+import feign.FeignException;
 import feign.Retryer;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
@@ -142,6 +143,8 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
 
             // "tempDirectory" is the root artifact directory
             File tempDirectory = CommonUtil.createTempDirectory(null);
+            // If cloud manager request failed once due to network issues, there is no point in trying again.
+            boolean cloudManagerRequestFailed = false;
             for (APIRuntimeArtifactDto apiRuntimeArtifactDto : apiRuntimeArtifactDtoList) {
                 if (apiRuntimeArtifactDto.isFile()) {
                     InputStream artifact = (InputStream) apiRuntimeArtifactDto.getArtifact();
@@ -181,18 +184,31 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                         // 2. When all the APIs for CDP is pulled, then for the APIs which belongs PDP org the environment
                         // will not be intuitive.
                         // TODO: (VirajSalaka) Improve logic to not to add PDP API artifacts when CDP call happens.
-                    }
-                    if (!apiRuntimeArtifactDto.getOrganization()
+                        // TODO: (VirajSalaka) Handle the scenario when we enable dyanmic environments for CDP
+                    } else if (!apiRuntimeArtifactDto.getOrganization()
                             .equals(APIManagerConfiguration.getChoreoSystemOrganization())
                             && StringUtils.isEmpty(environment.getChoreoEnvironment())
                             && StringUtils.isNotEmpty(APIManagerConfiguration.getChoreoCloudManagerEndpointURL())) {
-                        if (!(ORGANIZATION_ENVIRONMENTS.containsKey(apiRuntimeArtifactDto.getOrganization()) &&
-                                ORGANIZATION_ENVIRONMENTS.get(apiRuntimeArtifactDto.getOrganization()).containsKey(
-                                        apimEnv))) {
-                            // We expect a single entity to be in the list
-                            CloudManagerDataDTO envTemplateList = CloudManagerHttpClientHolder.cloudManagerHttpClient
-                                    .getCloudManagerEnvironmentTemplatesForOrganization(
-                                            apiRuntimeArtifactDto.getOrganization());
+                        if (!ORGANIZATION_ENVIRONMENTS.containsKey(apiRuntimeArtifactDto.getOrganization())
+                                || !ORGANIZATION_ENVIRONMENTS.get(apiRuntimeArtifactDto.getOrganization())
+                                .containsKey(apimEnv) && !cloudManagerRequestFailed) {
+                            CloudManagerDataDTO envTemplateList = null;
+                            try {
+                                envTemplateList = CloudManagerHttpClientHolder.cloudManagerHttpClient
+                                        .getCloudManagerEnvironmentTemplatesForOrganization(
+                                                apiRuntimeArtifactDto.getOrganization());
+                            } catch (FeignException e) {
+                                cloudManagerRequestFailed = true;
+                                // TODO: (VirajSalaka) Discuss how to respond to network issues.
+                            } catch (ChoreoClientException e) {
+                                // TODO: (VirajSalaka) Log the error.
+                                // TODO: (VirajSalaka) Discuss what to do if we get an error response
+                                //  from cloud manager.
+                                cloudManagerRequestFailed = true;
+                                // If the PDP request is for single API artifact APIM will throw the error,
+                                // else APIM will swallow the error.
+                                // TODO: (VirajSalaka) Exception should not be thrown if the PDP only has Direct KeyManagers
+                            }
                             Map<String, String> perOrganizationEnvironments = new HashMap<>();
                             if (envTemplateList != null && envTemplateList.getData() != null
                                     && envTemplateList.getData().size() > 0) {

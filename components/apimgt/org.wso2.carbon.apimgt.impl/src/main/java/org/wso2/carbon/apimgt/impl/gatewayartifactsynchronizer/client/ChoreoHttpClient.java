@@ -28,5 +28,5 @@ public interface ChoreoHttpClient {
     @RequestLine("GET /api/v1/env-templates/organization/{organizationId}")
     @Headers({"x-organization-id: 0", "x-project-id: global"})
     CloudManagerDataDTO getCloudManagerEnvironmentTemplatesForOrganization
-            (@Param("organizationId") String organizationId);
+            (@Param("organizationId") String organizationId) throws ChoreoClientException;
 }
