@@ -8,6 +8,8 @@ import org.wso2.carbon.apimgt.gateway.handlers.transaction.store.TransactionReco
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class TransactionRecordConsumer {
 
@@ -17,11 +19,11 @@ public class TransactionRecordConsumer {
     private static TransactionRecordConsumer instance = null;
     private TransactionRecordStore transactionRecordStore;
     private TransactionRecordQueue transactionRecordQueue;
-    private ExecutorService executorService;
-    private final int threadPoolSize;
+    private ScheduledExecutorService scheduledExecutorService;
+    private final int commitInterval;
 
     private TransactionRecordConsumer(TransactionRecordStore transactionRecordStore,
-                                      TransactionRecordQueue transactionRecordQueue, int threadPoolSize) {
+                                      TransactionRecordQueue transactionRecordQueue, int commitInterval) {
 
         // Obtain config values
         MAX_RETRY_COUNT = TransactionCountConfig.getMaxRetryCount();
@@ -29,15 +31,15 @@ public class TransactionRecordConsumer {
 
         this.transactionRecordStore = transactionRecordStore;
         this.transactionRecordQueue = transactionRecordQueue;
-        this.executorService = Executors.newFixedThreadPool(threadPoolSize);
-        this.threadPoolSize = threadPoolSize;
+        this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+        this.commitInterval = commitInterval;
     }
 
     public static TransactionRecordConsumer getInstance(TransactionRecordQueue transactionRecordQueue,
                                                         TransactionRecordStore transactionRecordStore,
-                                                        int threadPoolSize) {
+                                                        int commitInterval) {
         if(instance == null) {
-            instance = new TransactionRecordConsumer(transactionRecordStore, transactionRecordQueue, threadPoolSize);
+            instance = new TransactionRecordConsumer(transactionRecordStore, transactionRecordQueue, commitInterval);
         }
         return instance;
     }
@@ -45,30 +47,18 @@ public class TransactionRecordConsumer {
     public void start() {
         LOG.info("Transaction record consumer started");
         // execute the startCommitting method in all the threads
-        for (int i = 0; i < threadPoolSize; i++) {
-            executorService.execute(this::startCommitting);
-        }
+        scheduledExecutorService.scheduleAtFixedRate(this::commitWithRetries,
+                0, commitInterval, TimeUnit.SECONDS);
     }
 
-    private void startCommitting() {
-        try {
-            while (true) {
-                commitWithRetries();
-            }
-        } catch (InterruptedException ex) {
-            LOG.debug("Transaction record consumer interrupted");
-        }
-    }
-
-    private void commitWithRetries() throws InterruptedException {
-
-        // Arraylist of transaction count records will be committed to the store
+    private void commitWithRetries() {
+        // Drain the transaction count records from the queue
         ArrayList<TransactionRecord> transactionRecordList = new ArrayList<>();
-        TransactionRecord transactionRecord = null;
-        transactionRecord = transactionRecordQueue.take();
-
-        transactionRecordList.add(transactionRecord);
         transactionRecordQueue.drain(transactionRecordList, MAX_TRANSACTION_RECORDS_PER_COMMIT);
+
+        if(transactionRecordList.isEmpty()) {
+            return;
+        }
 
         // Committing the transaction count records to the store with retries
         // If failed to commit after MAX_RETRY_COUNT, the transaction count records will be added to the queue again
@@ -79,7 +69,7 @@ public class TransactionRecordConsumer {
     }
 
     public void shutdown() {
-        this.executorService.shutdownNow();
+        this.scheduledExecutorService.shutdownNow();
     }
 
 }

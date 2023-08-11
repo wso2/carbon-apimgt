@@ -7,7 +7,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 public class TransactionCountConfig {
 
     private static int PRODUCER_THREAD_POOL_SIZE;
-    private static int CONSUMER_THREAD_POOL_SIZE;
+    private static int CONSUMER_COMMIT_INTERVAL = 5;
     private static int TRANSACTION_RECORD_QUEUE_SIZE;
     private static String TRANSACTION_COUNT_STORE_CLASS;
     private static double MAX_TRANSACTION_COUNT;
@@ -26,8 +26,6 @@ public class TransactionCountConfig {
         if (apiManagerConfiguration != null) {
             PRODUCER_THREAD_POOL_SIZE = Integer.parseInt(apiManagerConfiguration.getFirstProperty(
                     APIMgtGatewayConstants.TRANSACTION_COUNTER_PRODUCER_THREAD_POOL_SIZE));
-            CONSUMER_THREAD_POOL_SIZE = Integer.parseInt(apiManagerConfiguration.getFirstProperty(
-                    APIMgtGatewayConstants.TRANSACTION_COUNTER_CONSUMER_THREAD_POOL_SIZE));
             TRANSACTION_RECORD_QUEUE_SIZE = Integer.parseInt(apiManagerConfiguration.getFirstProperty(
                     APIMgtGatewayConstants.TRANSACTION_COUNTER_QUEUE_SIZE));
             TRANSACTION_COUNT_STORE_CLASS = apiManagerConfiguration.getFirstProperty(
@@ -63,10 +61,6 @@ public class TransactionCountConfig {
         return MAX_TRANSACTION_RECORDS_PER_COMMIT;
     }
 
-    public static int getConsumerThreadPoolSize() {
-        return CONSUMER_THREAD_POOL_SIZE;
-    }
-
     public static int getTransactionRecordQueueSize() {
         return TRANSACTION_RECORD_QUEUE_SIZE;
     }
@@ -89,5 +83,9 @@ public class TransactionCountConfig {
 
     public static String getTransactionCountServicePassword() {
         return TRANSACTION_COUNT_SERVVICE_PASSWORD;
+    }
+
+    public static int getConsumerCommitInterval() {
+        return CONSUMER_COMMIT_INTERVAL;
     }
 }

@@ -198,8 +198,6 @@ public class APIMgtGatewayConstants {
     public static final String TRANSACTION_COUNTER_ENABLED = TRANSACTION_COUNTER_CONFIG_ROOT + ".Enabled";
     public static final String TRANSACTION_COUNTER_PRODUCER_THREAD_POOL_SIZE = TRANSACTION_COUNTER_CONFIG_ROOT +
             ".ProducerThreadPoolSize";
-    public static final String TRANSACTION_COUNTER_CONSUMER_THREAD_POOL_SIZE = TRANSACTION_COUNTER_CONFIG_ROOT +
-            ".PublisherThreadPoolSize";
     public static final String TRANSACTION_COUNTER_QUEUE_SIZE = TRANSACTION_COUNTER_CONFIG_ROOT + ".QueueSize";
     public static final String TRANSACTION_COUNTER_STORE_CLASS = TRANSACTION_COUNTER_CONFIG_ROOT + ".StoreClass";
     public static final String TRANSACTION_COUNTER_MAX_TRANSACTION_COUNT = TRANSACTION_COUNTER_CONFIG_ROOT +

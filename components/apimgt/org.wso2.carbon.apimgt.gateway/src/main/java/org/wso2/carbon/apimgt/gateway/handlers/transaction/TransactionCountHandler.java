@@ -15,7 +15,7 @@ import java.util.concurrent.*;
 public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
 
     private int PRODUCER_THREAD_POOL_SIZE;
-    private int CONSUMER_THREAD_POOL_SIZE;
+    private int CONSUMER_COMMIT_INTERVAL;
     private int TRANSACTION_RECORD_QUEUE_SIZE;
     private String TRANSACTION_COUNT_STORE_CLASS;
     private static final Log LOG = LogFactory.getLog(TransactionCountHandler.class);
@@ -29,7 +29,7 @@ public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
 
         // Obtain config values
         PRODUCER_THREAD_POOL_SIZE = TransactionCountConfig.getProducerThreadPoolSize();
-        CONSUMER_THREAD_POOL_SIZE = TransactionCountConfig.getConsumerThreadPoolSize();
+        CONSUMER_COMMIT_INTERVAL = TransactionCountConfig.getConsumerCommitInterval();
         TRANSACTION_RECORD_QUEUE_SIZE = TransactionCountConfig.getTransactionRecordQueueSize();
         TRANSACTION_COUNT_STORE_CLASS = TransactionCountConfig.getTransactionCountStoreClass();
 
@@ -46,7 +46,7 @@ public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
         this.transactionRecordProducer = TransactionRecordProducer.getInstance(transactionRecordQueue,
                 PRODUCER_THREAD_POOL_SIZE);
         this.transactionRecordConsumer = TransactionRecordConsumer.getInstance(transactionRecordQueue,
-                trasactionCountStore, CONSUMER_THREAD_POOL_SIZE);
+                trasactionCountStore, CONSUMER_COMMIT_INTERVAL);
 
         this.transactionRecordProducer.start();
         this.transactionRecordConsumer.start();
