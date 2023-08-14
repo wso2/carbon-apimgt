@@ -177,6 +177,9 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                         if (APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.containsKey(apimEnv)
                                 && StringUtils.isNotEmpty(APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.get(apimEnv))) {
                             environment.setChoreoEnvironment(APIM_ENV_TO_CHOREO_ENV_MAPPING_FOR_CDP.get(apimEnv));
+                            log.debug("Assigning Choreo Environment for the Common Data plane API Deployment " +
+                                    apiRuntimeArtifactDto.getApiId() + ":"  + apiRuntimeArtifactDto.getLabel()
+                                    + " - " + environment.getChoreoEnvironment());
                         }
                         // If it does not contain the mapping then we need to check for the specific organization again.
                         // This could happen in two occasions.
@@ -200,6 +203,7 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                             } catch (FeignException e) {
                                 cloudManagerRequestFailed = true;
                                 // TODO: (VirajSalaka) Discuss how to respond to network issues.
+                                log.error("Error while getting environment templates", e);
                             } catch (ChoreoClientException e) {
                                 // TODO: (VirajSalaka) Log the error.
                                 // TODO: (VirajSalaka) Discuss what to do if we get an error response
@@ -208,6 +212,8 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                                 // If the PDP request is for single API artifact APIM will throw the error,
                                 // else APIM will swallow the error.
                                 // TODO: (VirajSalaka) Exception should not be thrown if the PDP only has Direct KeyManagers
+                                log.error("Error while getting environment templates for organization "
+                                        + apiRuntimeArtifactDto.getOrganization(), e);
                             }
                             Map<String, String> perOrganizationEnvironments = new HashMap<>();
                             if (envTemplateList != null && envTemplateList.getData() != null
@@ -216,14 +222,26 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                                     if (StringUtils.isNotEmpty(envTemplate.getExternalAPIMEnvironment())) {
                                         perOrganizationEnvironments.put(envTemplate.getExternalAPIMEnvironment(),
                                                 envTemplate.getName());
+                                        log.debug("Choreo Environment for the external APIM environment is added " +
+                                                "for the organization " + apiRuntimeArtifactDto.getOrganization() +
+                                                " " + envTemplate.getExternalAPIMEnvironment() + " - "
+                                                + envTemplate.getName());
                                     }
                                     if (StringUtils.isNotEmpty(envTemplate.getInternalAPIMEnvironment())) {
                                         perOrganizationEnvironments.put(envTemplate.getInternalAPIMEnvironment(),
                                                 envTemplate.getName());
+                                        log.debug("Choreo Environment for the internal APIM environment is added " +
+                                                "for the organization " + apiRuntimeArtifactDto.getOrganization() +
+                                                " " + envTemplate.getExternalAPIMEnvironment() + " - "
+                                                + envTemplate.getName());
                                     }
                                     if (StringUtils.isNotEmpty(envTemplate.getSandboxAPIMEnvironment())) {
                                         perOrganizationEnvironments.put(envTemplate.getSandboxAPIMEnvironment(),
                                                 envTemplate.getName());
+                                        log.debug("Choreo Environment for the sandbox APIM environment is added " +
+                                                "for the organization " + apiRuntimeArtifactDto.getOrganization() +
+                                                " " + envTemplate.getExternalAPIMEnvironment() + " - "
+                                                + envTemplate.getName());
                                     }
                                 }
                             }
@@ -236,7 +254,9 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                                     .get(apiRuntimeArtifactDto.getOrganization())
                                     .get(apimEnv));
                         } else {
-                            // TODO: (VirajSalaka) Log
+                            log.error("Choreo Environment name is not resolved for the environment " +
+                                    environment.getName() + " for the organization : " +
+                                    apiRuntimeArtifactDto.getOrganization());
                         }
                     }
                     apiProjectDto.getEnvironments().add(environment); // ignored if the name of the environment is same
@@ -267,9 +287,6 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
         } catch (APIImportExportException |
                  IOException e) {
             throw new APIManagementException("Error while Generating API artifact", e);
-        } catch (ChoreoClientException e) {
-            // TODO: (VirajSalaka) In case of cloud manager failure, this would result in authorization failures at gateway level
-            throw new APIManagementException("Error while getting environment templates for organization", e);
         }
     }
 
