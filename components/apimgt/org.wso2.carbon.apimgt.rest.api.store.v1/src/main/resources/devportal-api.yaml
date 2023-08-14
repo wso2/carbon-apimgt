@@ -5440,6 +5440,9 @@ components:
         revokeEndpoint:
           type: string
           example: https://localhost:9443/oauth2/revoke
+        authorizeEndpoint:
+          type: string
+          example: https://localhost:9443/oauth2/authorize
         userInfoEndpoint:
           type: string
           example: ""

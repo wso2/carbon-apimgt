@@ -81,6 +81,10 @@ public class KeyManagerMappingUtil {
                         jsonObject.get(APIConstants.KeyManager.REVOKE_ENDPOINT).getAsString());
             }
         }
+        if (jsonObject.has(APIConstants.KeyManager.AUTHORIZE_ENDPOINT)) {
+            keyManagerInfoDTO.setAuthorizeEndpoint(
+                    jsonObject.get(APIConstants.KeyManager.AUTHORIZE_ENDPOINT).getAsString());
+        }
         Map<String,String> additionalProperties = new HashMap<>();
         if (keyManagerConfigurationDTO.getAdditionalProperties()
                 .containsKey(APIConstants.KeyManager.PRODUCTION_TOKEN_ENDPOINT)) {
