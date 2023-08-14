@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils;
+package org.wso2.carbon.apimgt.impl.clients.dto;
 
 /**
  * Maps the response relevant to the Rudder's /api/v1/choreo/mappings/namespace-to-project/{namespace} endpoint

@@ -596,8 +596,8 @@ public class APIManagerConfiguration {
                 } else {
                     log.warn("Choreo System Organization UUID is not defined.");
                 }
-            } else if (APIConstants.API_CREATOR_VALIDATION_CONFIGS.equals(localName)) {
-                setApiCreatorValidationConfigurations(element);
+            } else if (APIConstants.CHOREO_API_BACKEND_URL_VALIDATION_CONFIGS.equals(localName)) {
+                setApiBackendUrlValidationConfigurations(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -2043,15 +2043,15 @@ public class APIManagerConfiguration {
         }
     }
 
-    private void setApiCreatorValidationConfigurations(OMElement omElement) {
+    private void setApiBackendUrlValidationConfigurations(OMElement omElement) {
         OMElement enableOrgValidationElement = omElement
-                .getFirstChildWithName(new QName(APIConstants.ENABLE_API_CREATOR_ORG_VALIDATION));
+                .getFirstChildWithName(new QName(APIConstants.ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION));
         if (enableOrgValidationElement != null) {
-            apiCreatorValidationProperties.put(APIConstants.ENABLE_API_CREATOR_ORG_VALIDATION,
+            apiCreatorValidationProperties.put(APIConstants.ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION,
                     enableOrgValidationElement.getText());
         } else {
-            apiCreatorValidationProperties.put(APIConstants.ENABLE_API_CREATOR_ORG_VALIDATION,
-                    APIConstants.DEFAULT_ENABLE_API_CREATOR_ORG_VALIDATION);
+            apiCreatorValidationProperties.put(APIConstants.ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION,
+                    APIConstants.DEFAULT_ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION);
             log.debug("Enable API Creator Organization Validation not set. Set to default false");
         }
     }

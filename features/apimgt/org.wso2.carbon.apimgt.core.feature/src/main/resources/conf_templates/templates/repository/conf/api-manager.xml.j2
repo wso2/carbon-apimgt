@@ -1497,9 +1497,9 @@
      </APITestKeyConfigs>
      {% endif %}}
 
-     {% if apim.api.creator.validation is defined %}
-     <APICreatorValidationConfigs>
-        <EnableOrgValidation>{{apim.api.creator.validation.enableOrganizationValidation}}</EnableOrgValidation>
-     </APICreatorValidationConfigs>
+     {% if choreo.apiBackendUrlValidation is defined %}
+     <ChoreoApiBackendUrlValidationConfigs>
+        <EnableOrgValidation>{{choreo.apiBackendUrlValidation.enableOrganizationValidation}}</EnableOrgValidation>
+     </ChoreoApiBackendUrlValidationConfigs>
      {% endif %}}
 </APIManager>

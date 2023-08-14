@@ -93,6 +93,7 @@ import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.ApimConfigUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
@@ -193,43 +194,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             throws APIManagementException{
         URI createdApiUri;
         APIDTO createdApiDTO;
-
-        boolean isOrgValidationEnabled = false;
-
-        Map<String, String> apiCreatorValidationConfigs = APIManagerConfiguration.getApiCreatorValidationProperties();
-        if (apiCreatorValidationConfigs != null &&
-                apiCreatorValidationConfigs.containsKey(APIConstants.ENABLE_API_CREATOR_ORG_VALIDATION)) {
-            isOrgValidationEnabled = Boolean.valueOf(apiCreatorValidationConfigs.get(
-                    APIConstants.ENABLE_API_CREATOR_ORG_VALIDATION));
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        if (ApimConfigUtils.isBackendUrlValidationForOrgEnabled() && body.getEndpointConfig() != null) {
             log.debug("Organization validation for API creator is enabled");
-        }
-
-        if (isOrgValidationEnabled && body.getEndpointConfig() != null) {
-            String endpointUrl;
-            boolean isApiCreationBlocked = false;
-            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
-            if (((LinkedHashMap) body.getEndpointConfig()).get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) != null) {
-                endpointUrl = ((LinkedHashMap) body.getEndpointConfig())
-                        .get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS).toString();
-                isApiCreationBlocked = RestApiPublisherUtils.isEndpointBelongingToAuthorizedOrg(endpointUrl, organization);
-                log.debug("Production endpoint of API Id: " + body.getId() + " belonging to the Org: " +
-                        organization + " evaluated during the API creation.");
-            }
-            if (((LinkedHashMap) body.getEndpointConfig()).get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) != null) {
-                endpointUrl = ((LinkedHashMap) body.getEndpointConfig())
-                        .get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS).toString();
-                isApiCreationBlocked = RestApiPublisherUtils.isEndpointBelongingToAuthorizedOrg(endpointUrl, organization);
-                log.debug("Sandbox endpoint of API Id: " + body.getId() + " belonging to the Org: " +
-                        organization + " evaluated during the API creation.");
-            }
-            if (isApiCreationBlocked) {
-                throw new APIManagementException("Cannot create APIs considering endpoints relevant to a different " +
-                        "organization", ExceptionCodes.INVALID_ENDPOINT_URL);
+            if (isCreatingApiEndpointConfigInvalid(organization, (LinkedHashMap) body.getEndpointConfig(), body.getId())) {
+                throw new APIManagementException("The API creation is not possible as the backend endpoint is owned " +
+                        "by a different organization.", ExceptionCodes.INVALID_ENDPOINT_URL);
             }
         }
-
         try {
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             // enables OAuth2 by default
             if (body.getSecurityScheme() != null && body.getSecurityScheme().isEmpty()) {
                 body.setSecurityScheme( new ArrayList<>(Arrays.asList(APIConstants.DEFAULT_API_SECURITY_OAUTH2,
@@ -813,6 +786,33 @@ public class ApisApiServiceImpl implements ApisApiService {
             throw new APIManagementException("Couldn't retrieve existing API with Id: " + apiId + " and org: " + apiInfo.getOrganization() + " from the requested organization: " + organization, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
         }
         return apiInfo;
+    }
+
+    /**
+     * Checks whether the given API endpoints belong to a service endpoint of the same organization during the API creation
+     *
+     * @param organization   organization relevant to the creating API
+     * @param endpointConfig Endpoint configuration of the creating API
+     * @param apiId          API ID of the creating API
+     * @return whether the creating API has valid endpoints
+     */
+    private boolean isCreatingApiEndpointConfigInvalid(String organization, LinkedHashMap endpointConfig, String apiId) {
+        // Disallows creating proxy APIs with service endpoints belonging to the services in the same organization
+        boolean isApiCreationBlocked = false;
+        String endpointUrl;
+        if (endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) != null) {
+            endpointUrl = endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS).toString();
+            isApiCreationBlocked = RestApiPublisherUtils.isEndpointBelongingToAuthorizedOrg(endpointUrl, organization);
+            log.debug("Production endpoint of API Id: " + apiId + " belonging to the Org: " +
+                    organization + " evaluated during the API creation.");
+        }
+        if (endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) != null && !isApiCreationBlocked) {
+            endpointUrl = endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS).toString();
+            isApiCreationBlocked = RestApiPublisherUtils.isEndpointBelongingToAuthorizedOrg(endpointUrl, organization);
+            log.debug("Sandbox endpoint of API Id: " + apiId + " belonging to the Org: " +
+                    organization + " evaluated during the API creation.");
+        }
+        return isApiCreationBlocked;
     }
 
     /**
@@ -4969,39 +4969,16 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdEnvironmentsEnvIdKeysPut(String apiId, String envId, Map<String, String> requestBody,
             MessageContext messageContext) throws APIManagementException {
 
-        boolean isOrgValidationEnabled = false;
-
-        Map<String, String> apiCreatorValidationConfigs = APIManagerConfiguration.getApiCreatorValidationProperties();
-        if (apiCreatorValidationConfigs != null &&
-                apiCreatorValidationConfigs.containsKey(APIConstants.ENABLE_API_CREATOR_ORG_VALIDATION)){
-            isOrgValidationEnabled = Boolean.valueOf(apiCreatorValidationConfigs.get(
-                    APIConstants.ENABLE_API_CREATOR_ORG_VALIDATION));
-            log.debug("Organization validation for API creator is enabled. Hence validating environment specific API" +
-                    "properties.");
-        }
-
         // validate environment UUID
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         validateEnvironment(organization, envId);
-        // validate API creator and organization
         EnvironmentPropertiesDTO properties = validateRequestPayload(requestBody);
-        if (isOrgValidationEnabled && properties != null) {
-            boolean isApiCreationBlocked = false;
-            if (properties.getProductionEndpoint() != null) {
-                isApiCreationBlocked = RestApiPublisherUtils.isEndpointBelongingToAuthorizedOrg(
-                        properties.getProductionEndpoint(), organization);
-                log.debug("Production endpoint of API Id: " + apiId + " belonging to the Org: " + organization +
-                        " evaluated during the env properties update.");
-            }
-            if (properties.getSandboxEndpointChoreo() != null) {
-                isApiCreationBlocked = RestApiPublisherUtils.isEndpointBelongingToAuthorizedOrg(
-                        properties.getSandboxEndpoint(), organization);
-                log.debug("Sandbox endpoint of API Id: " + apiId + " belonging to the Org: " + organization +
-                        " evaluated during the env properties update.");
-            }
-
-            if (isApiCreationBlocked) {
-                throw new APIManagementException ("Cannot update endpoints. Not authorized to used given endpoints",
+        if (ApimConfigUtils.isBackendUrlValidationForOrgEnabled() && properties != null) {
+            log.debug("Organization validation for API creator is enabled. Hence validating environment properties" +
+                "relevant to the backend URLs.");
+            if (isUpdatingApiEndpointConfigInvalid(properties, apiId, organization)) {
+                throw new APIManagementException ("Cannot update endpoints. Not authorized to used given endpoints " +
+                        "which are owned by a different organization",
                         ExceptionCodes.INVALID_ENDPOINT_URL);
             }
         }
@@ -5034,6 +5011,33 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         // if apiProvider.getEnvironment(organization, envId) return null, it will throw an exception
         apiProvider.getEnvironment(organization, envId);
+    }
+
+    /**
+     * This method checks whether updating API endpoints relates to service API endpoint URL belonging to the same
+     * organization or not
+     *
+     * @param properties   EnvironmentPropertiesDTO object
+     * @param apiId        API Id
+     * @param organization Organization name
+     * @return true if updating API endpoint is invalid, false otherwise
+     */
+    private static boolean isUpdatingApiEndpointConfigInvalid(EnvironmentPropertiesDTO properties, String apiId,
+                                                              String organization) {
+        boolean isEndpointInvalid = false;
+        if (properties.getProductionEndpoint() != null) {
+            isEndpointInvalid = RestApiPublisherUtils.isEndpointBelongingToAuthorizedOrg(
+                    properties.getProductionEndpoint(), organization);
+            log.debug("Production endpoint of API Id: " + apiId + " belonging to the Org: " + organization +
+                    " evaluated during the env properties update.");
+        }
+        if (properties.getSandboxEndpointChoreo() != null && !isEndpointInvalid) {
+            isEndpointInvalid = RestApiPublisherUtils.isEndpointBelongingToAuthorizedOrg(
+                    properties.getSandboxEndpointChoreo(), organization);
+            log.debug("Sandbox endpoint of API Id: " + apiId + " belonging to the Org: " + organization +
+                    " evaluated during the env properties update.");
+        }
+        return isEndpointInvalid;
     }
 
 }

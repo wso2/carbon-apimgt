@@ -16,11 +16,12 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils;
+package org.wso2.carbon.apimgt.impl.clients;
 
 import feign.Feign;
 import feign.gson.GsonDecoder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.clients.dto.ApiCreatorResponse;
 
 /**
  * Contains the Rudder client implementation relevant to the  /api/v1/choreo/mappings/namespace-to-project/{namespace}

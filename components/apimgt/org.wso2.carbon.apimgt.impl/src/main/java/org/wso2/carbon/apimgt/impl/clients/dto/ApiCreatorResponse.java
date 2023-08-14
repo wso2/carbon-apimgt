@@ -16,15 +16,11 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils;
+package org.wso2.carbon.apimgt.impl.clients.dto;
 
-import feign.Headers;
-import feign.Param;
-import feign.RequestLine;
-
-public interface RudderClient {
-
-    @Headers("Content-Type: application/json")
-    @RequestLine("GET /api/v1/choreo/mappings/namespace-to-project/{namespace}")
-    ApiCreatorResponse getApiCreatorData(@Param("namespace") String namespace);
+/**
+ * Maps the response relevant to the Rudder's /api/v1/choreo/mappings/namespace-to-project/{namespace} endpoint
+ */
+public class ApiCreatorResponse {
+    public ApiCreatorData data;
 }

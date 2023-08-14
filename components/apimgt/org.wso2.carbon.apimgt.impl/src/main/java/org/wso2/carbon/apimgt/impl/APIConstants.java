@@ -2986,10 +2986,10 @@ public final class APIConstants {
     // Constants related to basic health check APIs
     public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
 
-    // Constants related to API creator validation configs
-    public static final String API_CREATOR_VALIDATION_CONFIGS = "APICreatorValidationConfigs";
-    public static final String ENABLE_API_CREATOR_ORG_VALIDATION = "EnableOrgValidation";
-    public static final String DEFAULT_ENABLE_API_CREATOR_ORG_VALIDATION = "false";
+    // Constants related to API backend URL validation
+    public static final String CHOREO_API_BACKEND_URL_VALIDATION_CONFIGS = "ChoreoApiBackendUrlValidationConfigs";
+    public static final String ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION = "EnableOrgValidation";
+    public static final String DEFAULT_ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION = "false";
     public static final String SERVICE_ENDPOINT_URL_IDENTIFIER = "svc.cluster.local";
     public static final String RUDDER_ENDPOINT_URL = "http://localhost:8002";
 

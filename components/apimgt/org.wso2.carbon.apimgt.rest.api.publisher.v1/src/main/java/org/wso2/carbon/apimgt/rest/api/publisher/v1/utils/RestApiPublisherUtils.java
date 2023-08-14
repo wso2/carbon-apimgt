@@ -28,10 +28,10 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.clients.Rudder;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -304,22 +304,27 @@ public class RestApiPublisherUtils {
      * @param endpointUrl endpoint URL relevant of the API
      * @param requestCtxOrdId organization ID related to the API invocation
      * @return if the endpoint belongs to an authorized organization or not
-     * @throws APIManagementException happens if the Rudder returns 404 for the given namespace
      */
-    public static boolean isEndpointBelongingToAuthorizedOrg(String endpointUrl, String requestCtxOrdId) throws APIManagementException {
-        if (endpointUrl.contains(APIConstants.SERVICE_ENDPOINT_URL_IDENTIFIER) &&
+    public static boolean isEndpointBelongingToAuthorizedOrg(String endpointUrl, String requestCtxOrdId) {
+        if (endpointUrl != null && endpointUrl.contains(APIConstants.SERVICE_ENDPOINT_URL_IDENTIFIER) &&
                 endpointUrl.split("\\.")[1] != null) {
             String namespace = endpointUrl.split("\\.")[1];
-            try {
-                String orgIdFromNamespace = Rudder.getOrgIdFromNamespace(namespace);
-                return orgIdFromNamespace.equals(requestCtxOrdId);
-            } catch (FeignException e) {
-                if (e.status() == 404) {
-                    throw  new APIManagementException ("Could not find the organization given with the request",
-                            ExceptionCodes.ORGANIZATION_NOT_FOUND);
+            if (StringUtils.isNotEmpty(namespace)) {
+                try {
+                    String orgIdFromNamespace = Rudder.getOrgIdFromNamespace(namespace);
+                    return orgIdFromNamespace.equals(requestCtxOrdId);
+                } catch (FeignException e) {
+                    if (e.status() == 404) {
+                        log.debug("Could not find an organization relevant to the given endpoint URL.");
+                    } else if (e.status() == 400){
+                        log.warn("Error occurred while validating the organization for the endpoint URL due to " +
+                                "a bad request.", e);
+                    } else if (Integer.toString(e.status()).startsWith("5")){
+                        log.warn("Error occurred while validating the organization for the endpoint URL due to " +
+                                "a server side error.", e);
+                    }
                 }
             }
-
         }
         return false;
     }
