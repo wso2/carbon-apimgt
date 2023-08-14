@@ -2548,6 +2548,9 @@ public final class APIConstants {
         public static final String PKCE_MANDATORY = "pkceMandatory";
         public static final String PKCE_SUPPORT_PLAIN = "pkceSupportPlain";
         public static final String BYPASS_CLIENT_CREDENTIALS = "bypassClientCredentials";
+        public static final String ENVIRONMENTS = "environments";
+        public static final String CHOREO_ENVIRONMENT = "choreo";
+        public static final String APIM_ENVIRONMENT = "apim";
 
         public static final String[] REQUIRED_CONF_FOR_EXT_KEY_MANAGERS = {
                 APIConstants.KeyManager.ISSUER,
