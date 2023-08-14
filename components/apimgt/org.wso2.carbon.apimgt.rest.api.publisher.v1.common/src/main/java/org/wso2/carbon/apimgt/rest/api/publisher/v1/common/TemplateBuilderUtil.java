@@ -468,6 +468,7 @@ public class TemplateBuilderUtil {
                             template.setMediationScripts(uriTemplate.getHTTPVerb(), uriTemplate.getMediationScript());
                             template.setAmznResourceName(uriTemplate.getAmznResourceName());
                             template.setAmznResourceTimeout(uriTemplate.getAmznResourceTimeout());
+                            template.setAmznResourceContentEncoded(uriTemplate.getAmznResourceContentEncoded());
                             break;
                         }
                     }

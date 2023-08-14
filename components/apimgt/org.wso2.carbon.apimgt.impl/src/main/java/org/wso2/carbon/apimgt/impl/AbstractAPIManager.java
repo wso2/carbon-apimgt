@@ -1284,6 +1284,10 @@ public abstract class AbstractAPIManager implements APIManager {
                                     operation.getAsJsonObject().get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)
                                             .getAsInt());
                         }
+                        if (operation.getAsJsonObject().get(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED) != null) {
+                            uriTemplate.setAmznResourceContentEncoded(operation.getAsJsonObject().
+                                    get(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED).getAsBoolean());
+                        }
                     }
                 }
             }
@@ -1426,6 +1430,10 @@ public abstract class AbstractAPIManager implements APIManager {
                             uriTemplate.setAmznResourceTimeout(
                                     operation.getAsJsonObject().get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)
                                             .getAsInt());
+                        }
+                        if (operation.getAsJsonObject().get(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED) != null) {
+                            uriTemplate.setAmznResourceContentEncoded(operation.getAsJsonObject().
+                                    get(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED).getAsBoolean());
                         }
                     }
                 }

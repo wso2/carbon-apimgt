@@ -397,6 +397,10 @@ public class OAS2Parser extends APIDefinition {
                         template.setAmznResourceTimeout(((Long)
                                 extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
                     }
+                    if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED)) {
+                        template.setAmznResourceContentEncoded((Boolean)
+                                extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED));
+                    }
                 }
                 urlTemplates.add(template);
             }
@@ -942,6 +946,9 @@ public class OAS2Parser extends APIDefinition {
         if (resource.getAmznResourceTimeout() != 0) {
             operation.setVendorExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT, resource.getAmznResourceTimeout());
         }
+        operation.setVendorExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED,
+                resource.isAmznResourceContentEncoded());
+
         updateLegacyScopesFromOperation(resource, operation);
         String oauth2SchemeKey = APIConstants.SWAGGER_APIM_DEFAULT_SECURITY;
         List<Map<String, List<String>>> security = operation.getSecurity();
