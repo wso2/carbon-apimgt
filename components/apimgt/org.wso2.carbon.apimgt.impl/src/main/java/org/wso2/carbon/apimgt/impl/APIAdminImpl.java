@@ -24,6 +24,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,6 +58,7 @@ import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ChoreoApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.dto.IDPEnvironmentDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -96,7 +98,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -115,6 +116,22 @@ import javax.xml.transform.stream.StreamResult;
 public class APIAdminImpl implements APIAdmin {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
+    private static final Map<String, String[]> choreoEnvToApimEnvMap = new HashMap<>();
+
+    static {
+        choreoEnvToApimEnvMap.put("DEV-US", new String[]{"dev-us-east-azure", "sandbox-dev", "Dev-Internal",
+                "development-us-east-azure", "development-sandbox-us-east-azure",
+                "development-internal-us-east-azure"});
+        choreoEnvToApimEnvMap.put("PROD-US", new String[]{"Production and Sandbox", "sandbox-prod",
+                "Prod-Internal", "production-us-east-azure", "production-sandbox-us-east-azure",
+                "production-internal-us-east-azure"});
+        choreoEnvToApimEnvMap.put("DEV-EU", new String[]{"dev-eu-north-azure", "sandbox-dev-eu-north",
+                "Dev-Internal-EU-North", "development-eu-north-azure", "development-sandbox-eu-north-azure",
+                "development-internal-eu-north-azure"});
+        choreoEnvToApimEnvMap.put("PROD-EU", new String[]{"prod-eu-north-azure", "sandbox-prod-eu-north",
+                "Prod-Internal-EU-North", "production-eu-north-azure", "production-sandbox-eu-north-azure",
+                "production-internal-eu-north-azure"});
+    }
     protected ApiMgtDAO apiMgtDAO;
     protected ChoreoApiMgtDAO choreoApiMgtDAO;
 
@@ -554,6 +571,7 @@ public class APIAdminImpl implements APIAdmin {
                 .equals(KeyManagerConfiguration.TokenType.EXTERNAL)) {
             validateExternalKeyManagerConfiguration(keyManagerConfigurationDTO);
             validateExternalKeyManagerEndpointConfiguration(keyManagerConfigurationDTO);
+            populateDuplicateEnvs(keyManagerConfigurationDTO);
         } else if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
                 .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
             validateKeyManagerConfiguration(keyManagerConfigurationDTO);
@@ -603,6 +621,50 @@ public class APIAdminImpl implements APIAdmin {
                     .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD);
         }
         return keyManagerConfigurationDTO;
+    }
+
+    // TODO: Remove the duplicate environment population once the environments completely migrated.
+    private void populateDuplicateEnvs(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException {
+        Map<String, Object> configuration = keyManagerConfigurationDTO.getAdditionalProperties();
+        if (configuration == null || !configuration.containsKey(APIConstants.KeyManager.ENVIRONMENTS)) {
+            return;
+        }
+
+        Object environmentsObj = configuration.get(APIConstants.KeyManager.ENVIRONMENTS);
+        Gson gson = new Gson();
+        if (environmentsObj instanceof List) {
+            String environmentsString = gson.toJson(environmentsObj);
+            IDPEnvironmentDTO[] environments = null;
+            try {
+                environments = gson.fromJson(environmentsString, IDPEnvironmentDTO[].class);
+            } catch (JsonSyntaxException e) {
+                throw new APIManagementException("Error while parsing environments assigned to IDP. "
+                        + e.getMessage(), e);
+            }
+            for (IDPEnvironmentDTO environmentDTO : environments) {
+                if (environmentDTO.getApim() == null) {
+                    continue;
+                }
+                if (Arrays.asList(environmentDTO.getApim()).contains("dev-us-east-azure")) {
+                    environmentDTO.setApim(choreoEnvToApimEnvMap.get("DEV-US"));
+                    continue;
+                }
+                if (Arrays.asList(environmentDTO.getApim()).contains("Production and Sandbox")) {
+                    environmentDTO.setApim(choreoEnvToApimEnvMap.get("PROD-US"));
+                    continue;
+                }
+                if (Arrays.asList(environmentDTO.getApim()).contains("dev-eu-north-azure")) {
+                    environmentDTO.setApim(choreoEnvToApimEnvMap.get("DEV-EU"));
+                    continue;
+                }
+                if (Arrays.asList(environmentDTO.getApim()).contains("prod-eu-north-azure")) {
+                    environmentDTO.setApim(choreoEnvToApimEnvMap.get("PROD-EU"));
+                }
+
+            }
+            configuration.put(APIConstants.KeyManager.ENVIRONMENTS, environments);
+        }
     }
 
     private void validateKeyManagerEndpointConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
@@ -760,6 +822,7 @@ public class APIAdminImpl implements APIAdmin {
         if (keyManagerTokenType.equals(KeyManagerConfiguration.TokenType.EXTERNAL)) {
             validateExternalKeyManagerConfiguration(keyManagerConfigurationDTO);
             validateExternalKeyManagerEndpointConfiguration(keyManagerConfigurationDTO);
+            populateDuplicateEnvs(keyManagerConfigurationDTO);
         }else if (!keyManagerTokenType.equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
             validateKeyManagerConfiguration(keyManagerConfigurationDTO);
             validateKeyManagerEndpointConfiguration(keyManagerConfigurationDTO);
