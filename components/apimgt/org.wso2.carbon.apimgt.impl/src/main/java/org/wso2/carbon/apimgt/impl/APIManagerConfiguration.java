@@ -118,6 +118,7 @@ public class APIManagerConfiguration {
     private static Map<String, String> analyticsProperties;
     private static Map<String, String> persistenceProperties = new HashMap<String, String>();
     private static Map<String, String> apiTestKeyProperties = new HashMap<String, String>();
+    private static Map<String, String> apiEndpointValidationProperties = new HashMap<String, String>();
     private static Map<String, String> operationPolicyProperties = new HashMap<>();
     private static String tokenRevocationClassName;
     private static String certificateBoundAccessEnabled;
@@ -595,7 +596,9 @@ public class APIManagerConfiguration {
                 } else {
                     log.warn("Choreo System Organization UUID is not defined.");
                 }
-            } 
+            } else if (APIConstants.CHOREO_API_BACKEND_URL_VALIDATION_CONFIGS.equals(localName)) {
+                setApiBackendUrlValidationConfigurations(element);
+            }
             readChildElements(element, nameStack);
             nameStack.pop();
         }
@@ -2040,6 +2043,19 @@ public class APIManagerConfiguration {
         }
     }
 
+    private void setApiBackendUrlValidationConfigurations(OMElement omElement) {
+        OMElement enableOrgValidationElement = omElement
+                .getFirstChildWithName(new QName(APIConstants.ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION));
+        if (enableOrgValidationElement != null) {
+            apiEndpointValidationProperties.put(APIConstants.ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION,
+                    enableOrgValidationElement.getText());
+        } else {
+            apiEndpointValidationProperties.put(APIConstants.ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION,
+                    APIConstants.DEFAULT_ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION);
+            log.debug("Enable API Creator Organization Validation not set. Set to default false");
+        }
+    }
+
     private void setRuntimeArtifactsSyncGatewayConfig (OMElement omElement){
 
         OMElement enableElement = omElement
@@ -2120,6 +2136,10 @@ public class APIManagerConfiguration {
 
     public static Map<String, String> getApiTestKeyProperties() {
         return apiTestKeyProperties;
+    }
+
+    public static Map<String, String> getApiEndpointValidationProperties() {
+        return apiEndpointValidationProperties;
     }
 
     public static Map<String, String> getOperationalPolicyProperties() {
