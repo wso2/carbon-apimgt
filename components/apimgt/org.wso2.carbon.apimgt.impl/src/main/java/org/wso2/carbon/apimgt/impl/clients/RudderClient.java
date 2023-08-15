@@ -21,11 +21,11 @@ package org.wso2.carbon.apimgt.impl.clients;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
-import org.wso2.carbon.apimgt.impl.clients.dto.ApiCreatorResponse;
+import org.wso2.carbon.apimgt.impl.clients.dto.NamespaceToOrgDetailsResponse;
 
 public interface RudderClient {
 
     @Headers("Content-Type: application/json")
     @RequestLine("GET /api/v1/choreo/mappings/namespace-to-project/{namespace}")
-    ApiCreatorResponse getApiCreatorData(@Param("namespace") String namespace);
+    NamespaceToOrgDetailsResponse getOrgDetailsFromNamespace(@Param("namespace") String namespace);
 }

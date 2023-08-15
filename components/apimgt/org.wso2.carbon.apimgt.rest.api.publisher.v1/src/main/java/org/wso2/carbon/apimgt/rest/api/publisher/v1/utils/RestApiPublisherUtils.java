@@ -28,6 +28,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -305,7 +306,8 @@ public class RestApiPublisherUtils {
      * @param requestCtxOrdId organization ID related to the API invocation
      * @return if the endpoint belongs to an authorized organization or not
      */
-    public static boolean isEndpointBelongingToAuthorizedOrg(String endpointUrl, String requestCtxOrdId) {
+    public static boolean isEndpointBelongingToAuthorizedOrg(String endpointUrl, String requestCtxOrdId)
+            throws APIManagementException {
         if (endpointUrl != null && endpointUrl.contains(APIConstants.SERVICE_ENDPOINT_URL_IDENTIFIER) &&
                 endpointUrl.split("\\.")[1] != null) {
             String namespace = endpointUrl.split("\\.")[1];
@@ -323,9 +325,14 @@ public class RestApiPublisherUtils {
                         log.warn("Error occurred while validating the organization for the endpoint URL due to " +
                                 "a server side error.", e);
                     }
+                    if (e == null && e.status() != 404) {
+                        throw  new APIManagementException ("Error occurred while obtaining organization details from " +
+                                "Rudder",
+                                ExceptionCodes.ORGANIZATION_NOT_FOUND);
+                    }
                 }
             }
         }
-        return false;
+        return true;
     }
 }

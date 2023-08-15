@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.impl.clients.dto;
 /**
  * Maps the response relevant to the Rudder's /api/v1/choreo/mappings/namespace-to-project/{namespace} endpoint
  */
-public class ApiCreatorData {
-    public String organization_id;
-    String project_id;
+public class NamespaceToOrgDetailsResponse {
+    public NamespaceToOrgDetails data;
 }

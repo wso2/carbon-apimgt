@@ -20,8 +20,12 @@ package org.wso2.carbon.apimgt.impl.clients;
 
 import feign.Feign;
 import feign.gson.GsonDecoder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.clients.dto.ApiCreatorResponse;
+import org.wso2.carbon.apimgt.impl.clients.dto.NamespaceToOrgDetailsResponse;
 
 /**
  * Contains the Rudder client implementation relevant to the  /api/v1/choreo/mappings/namespace-to-project/{namespace}
@@ -29,11 +33,24 @@ import org.wso2.carbon.apimgt.impl.clients.dto.ApiCreatorResponse;
  */
 public class Rudder {
 
-    private static RudderClient client = Feign.builder().decoder(new GsonDecoder())
+    private static Log log = LogFactory.getLog(Rudder.class);
+    private static final RudderClient client = Feign.builder().decoder(new GsonDecoder())
             .target(RudderClient.class, APIConstants.RUDDER_ENDPOINT_URL);
 
-    public static String getOrgIdFromNamespace(String namespace) {
-        ApiCreatorResponse response = client.getApiCreatorData(namespace);
-        return (response.data.organization_id);
+    public static String getOrgIdFromNamespace(String namespace) throws APIManagementException {
+        log.debug("Calling Rudder to obtain the organizationId for namespace: " + namespace);
+        NamespaceToOrgDetailsResponse response = client.getOrgDetailsFromNamespace(namespace);
+        if (response == null) {
+            throw  new APIManagementException ("Could not obtain a response from Rudder for namespace: " + namespace,
+                    ExceptionCodes.ORGANIZATION_NOT_FOUND);
+        } else if (response.data == null) {
+            throw  new APIManagementException ("Rudder response does not have a data field for namespace: " +
+                    namespace, ExceptionCodes.ORGANIZATION_NOT_FOUND);
+        } else if (response.data.organization_id == null) {
+            throw  new APIManagementException ("Rudder response does not have an organizationId field for namespace: " +
+                    namespace, ExceptionCodes.ORGANIZATION_NOT_FOUND);
+        }
+        log.debug("Obtained organizationId: " + response.data.organization_id + " for namespace: " + namespace);
+        return response.data.organization_id;
     }
 }

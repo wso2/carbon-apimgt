@@ -30,10 +30,10 @@ public class ApimConfigUtils {
 
     public static boolean isBackendUrlValidationForOrgEnabled() {
         boolean isOrgValidationEnabled = false;
-        Map<String, String> apiCreatorValidationConfigs = APIManagerConfiguration.getApiCreatorValidationProperties();
-        if (apiCreatorValidationConfigs != null &&
-                apiCreatorValidationConfigs.containsKey(APIConstants.ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION)) {
-            isOrgValidationEnabled = Boolean.valueOf(apiCreatorValidationConfigs.get(
+        Map<String, String> apiEndpointValidationConfigs = APIManagerConfiguration.getApiEndpointValidationProperties();
+        if (apiEndpointValidationConfigs != null &&
+                apiEndpointValidationConfigs.containsKey(APIConstants.ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION)) {
+            isOrgValidationEnabled = Boolean.valueOf(apiEndpointValidationConfigs.get(
                     APIConstants.ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION));
         }
         return isOrgValidationEnabled;

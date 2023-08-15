@@ -118,7 +118,7 @@ public class APIManagerConfiguration {
     private static Map<String, String> analyticsProperties;
     private static Map<String, String> persistenceProperties = new HashMap<String, String>();
     private static Map<String, String> apiTestKeyProperties = new HashMap<String, String>();
-    private static Map<String, String> apiCreatorValidationProperties = new HashMap<String, String>();
+    private static Map<String, String> apiEndpointValidationProperties = new HashMap<String, String>();
     private static Map<String, String> operationPolicyProperties = new HashMap<>();
     private static String tokenRevocationClassName;
     private static String certificateBoundAccessEnabled;
@@ -2047,10 +2047,10 @@ public class APIManagerConfiguration {
         OMElement enableOrgValidationElement = omElement
                 .getFirstChildWithName(new QName(APIConstants.ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION));
         if (enableOrgValidationElement != null) {
-            apiCreatorValidationProperties.put(APIConstants.ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION,
+            apiEndpointValidationProperties.put(APIConstants.ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION,
                     enableOrgValidationElement.getText());
         } else {
-            apiCreatorValidationProperties.put(APIConstants.ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION,
+            apiEndpointValidationProperties.put(APIConstants.ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION,
                     APIConstants.DEFAULT_ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION);
             log.debug("Enable API Creator Organization Validation not set. Set to default false");
         }
@@ -2138,8 +2138,8 @@ public class APIManagerConfiguration {
         return apiTestKeyProperties;
     }
 
-    public static Map<String, String> getApiCreatorValidationProperties() {
-        return apiCreatorValidationProperties;
+    public static Map<String, String> getApiEndpointValidationProperties() {
+        return apiEndpointValidationProperties;
     }
 
     public static Map<String, String> getOperationalPolicyProperties() {
