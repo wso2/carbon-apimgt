@@ -920,23 +920,27 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return monetizationImpl;
     }
 
-    private String getSubscriptionVersionRange(String versionRange, String apiVersion, String apiUUID) throws APIManagementException {
-        String subscriptionVersionRange = null;
+    private String validateSubscriptionVersionRange(String versionRange, String apiVersion, String apiUUID) throws APIManagementException {
         if (versionRange != null) {
-            if(apiVersion.startsWith("v")) {
-                SemVersion apiSemVersion = SemanticVersionUtil.validateAndGetVersionComponents(apiVersion, apiUUID);
-                int apiMajorVersion = apiSemVersion.getMajor();
-                if (versionRange.equals("v" + apiMajorVersion)) {
-                    subscriptionVersionRange = versionRange;
-                } else {
-                    throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_SUBSCRIPTION_VERSION_RANGE,
-                            versionRange, apiVersion));
-                }
+            String subscriptionVersionRange = getSubscriptionVersionRange(apiVersion, apiUUID);
+            if (versionRange.equals(subscriptionVersionRange)) {
+                return subscriptionVersionRange;
             } else {
-                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.VERSION_RANGE_NOT_ALLOWED));
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_SUBSCRIPTION_VERSION_RANGE,
+                        versionRange, apiVersion));
             }
         }
-        return subscriptionVersionRange;
+        return null;
+    }
+
+    public String getSubscriptionVersionRange(String apiVersion, String apiUUID) throws APIManagementException {
+        if(apiVersion.startsWith("v")) {
+            SemVersion apiSemVersion = SemanticVersionUtil.validateAndGetVersionComponents(apiVersion, apiUUID);
+            int apiMajorVersion = apiSemVersion.getMajor();
+            return "v" + apiMajorVersion;
+        } else {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.VERSION_RANGE_NOT_ALLOWED));
+        }
     }
 
     @Override
@@ -989,7 +993,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         checkSubscriptionAllowed(apiTypeWrapper);
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state)) {
-            String subscriptionVersionRange = getSubscriptionVersionRange(versionRange, apiVersion, apiUUID);
+            String subscriptionVersionRange = validateSubscriptionVersionRange(versionRange, apiVersion, apiUUID);
             subscriptionId = apiMgtDAO.addSubscription(apiTypeWrapper, application,
                     APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername, subscriptionVersionRange);
 
@@ -2762,6 +2766,23 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
                 subscribedAPISet.add(api);
             }
+        }
+        return subscribedAPISet;
+    }
+
+    public Set<SubscribedAPI> getSubscribedIdentifiersForAPIVersionRange(String versionRange, String apiName,
+                                                                         String orgUuid)
+            throws APIManagementException {
+
+        Set<SubscribedAPI> subscribedAPISet = new HashSet<>();
+        Set<SubscribedAPI> subscribedAPIs = apiMgtDAO.getVersionRangeSubscriptionsForApiIds(
+                apiName,versionRange, orgUuid);
+        for (SubscribedAPI api : subscribedAPIs) {
+            Set<APIKey> keys = getApplicationKeys(api.getApplication().getId());
+            for (APIKey key : keys) {
+                api.addKey(key);
+            }
+            subscribedAPISet.add(api);
         }
         return subscribedAPISet;
     }

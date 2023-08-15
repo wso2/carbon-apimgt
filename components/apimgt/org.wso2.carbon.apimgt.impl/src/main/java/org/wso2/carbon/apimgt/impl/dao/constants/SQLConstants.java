@@ -596,7 +596,8 @@ public class SQLConstants {
             "   APP.CALLBACK_URL AS CALLBACK_URL, " +
             "   SUBS.UUID AS SUB_UUID, " +
             "   APP.UUID AS APP_UUID, " +
-            "   APP.CREATED_BY AS OWNER" +
+            "   APP.CREATED_BY AS OWNER, " +
+            "   SUBS.VERSION_RANGE AS VERSION_RANGE" +
             " FROM " +
             "   AM_SUBSCRIBER SUB," +
             "   AM_APPLICATION APP, " +
@@ -3438,6 +3439,42 @@ public class SQLConstants {
     public static final String RETRIEVE_PER_API_LOGGING_BY_UUID_SQL =
             "SELECT AM_API.API_UUID, AM_API.LOG_LEVEL, AM_API.API_NAME, AM_API.CONTEXT, AM_API.API_VERSION " +
             "FROM AM_API WHERE AM_API.API_UUID = ? AND AM_API.ORGANIZATION=?";
+
+    public static final String GET_SUBSCRIPTIONS_FOR_API_VERSION_RANGE =
+            " SELECT " +
+                    "   SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
+                    "   API.API_PROVIDER AS API_PROVIDER, " +
+                    "   API.API_NAME AS API_NAME, " +
+                    "   API.API_VERSION AS API_VERSION, " +
+                    "   API.API_TYPE AS API_TYPE, " +
+                    "   API.ORGANIZATION AS ORGANIZATION, " +
+                    "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
+                    "   SUBS.TIER_ID AS TIER_ID, " +
+                    "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
+                    "   SUBS.SUB_STATUS AS SUB_STATUS, " +
+                    "   SUBS.SUBS_CREATE_STATE AS SUB_CREATE_STATE, " +
+                    "   SUBS.UUID AS UUID, " +
+                    "   SUBS.VERSION_RANGE AS VERSION_RANGE, " +
+                    "   API.API_ID AS API_ID," +
+                    "   API.API_UUID AS API_UUID," +
+                    "   SUBS.CREATED_BY AS CREATED_BY, " +
+                    "   APP.APPLICATION_ID AS APP_ID," +
+                    "   APP.NAME AS APP_NAME," +
+                    "   APP.TOKEN_TYPE AS APP_TOKEN_TYPE," +
+                    "   APP.CALLBACK_URL AS CALLBACK_URL," +
+                    "   APP.UUID AS APP_UUID," +
+                    "   APP.CREATED_BY AS OWNER " +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUBS," +
+                    "   AM_API API," +
+                    "   AM_APPLICATION APP" +
+                    " WHERE " +
+                    "   API.API_ID = SUBS.API_ID " +
+                    "   AND APP.APPLICATION_ID = SUBS.APPLICATION_ID " +
+                    "   AND VERSION_RANGE = ? " +
+                    "   AND API.API_ID IN (" +
+                    "      SELECT API_ID FROM AM_API WHERE API_NAME = ? AND ORGANIZATION = ? AND API_VERSION LIKE ?" +
+                    "   )";
     public static final String GATEWAY_LABEL_REGEX = "_GATEWAY_LABELS_";
     public static final String DATA_PLANE_IDS_REGEX = "_DATA_PLANE_IDS_";
     public static final String ORGANIZATION_IDS_REGEX = "_ORGANIZATION_IDS_";

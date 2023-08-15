@@ -2490,6 +2490,7 @@ paths:
         - $ref: '#/components/parameters/applicationId-Q'
         - $ref: '#/components/parameters/groupId'
         - $ref: '#/components/parameters/requestedTenant'
+        - $ref: '#/components/parameters/includeFromVersionRange'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/If-None-Match'
@@ -6017,6 +6018,13 @@ components:
       required: true
       schema:
         type: string
+    includeFromVersionRange:
+      name: includeFromVersionRange
+      in: query
+      description: Boolean value to include subscriptions from the version range
+      schema:
+        type: boolean
+        default: false
   securitySchemes:
     OAuth2Security:
       type: oauth2

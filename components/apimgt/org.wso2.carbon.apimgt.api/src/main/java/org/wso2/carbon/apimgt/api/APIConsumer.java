@@ -543,6 +543,17 @@ public interface APIConsumer extends APIManager {
     Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber,
                                                 Identifier identifier, String groupingId, String organization) throws APIManagementException;
 
+    /**
+     * Returns the subscriptions created or inherited from the version range of the API
+     * @param versionRange version range which the subscription was created
+     * @param apiName API name of the version range
+     * @param orgUuid organization uuid
+     * @return Set of SubscribedAPI
+     * @throws APIManagementException
+     */
+    Set<SubscribedAPI> getSubscribedIdentifiersForAPIVersionRange(String versionRange, String apiName,
+                                                                  String orgUuid) throws APIManagementException;
+
     Set<API> searchAPI(String searchTerm, String searchType,String tenantDomain) throws APIManagementException;
 
     int getUserRating(String apiId, String user) throws APIManagementException;
@@ -841,4 +852,13 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to retrieve policy.
      */
     Tier getThrottlePolicyByName(String name, int policyType, String organization) throws APIManagementException;
+
+    /**
+     * Returns the subscription version range for given API version
+     * @param apiVersion API version for which the version range is generated
+     * @param apiUUID API UUID or API name to be append on the exceptions and logs
+     * @return String version range
+     * @throws APIManagementException
+     */
+    public String getSubscriptionVersionRange(String apiVersion, String apiUUID) throws APIManagementException;
 }

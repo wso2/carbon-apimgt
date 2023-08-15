@@ -115,7 +115,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.RemoteUserManagerClient;
-import org.wso2.carbon.apimgt.impl.utils.SemanticVersionUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
@@ -1146,6 +1145,70 @@ public class ApiMgtDAO {
         return null;
     }
 
+    public Set<SubscribedAPI> getVersionRangeSubscriptionsForApiIds(String apiName, String versionRange, String orgUuid)
+            throws APIManagementException {
+
+        Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
+        PreparedStatement ps = null;
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            String sqlQueryForGetApiIds = SQLConstants.GET_SUBSCRIPTIONS_FOR_API_VERSION_RANGE;
+            ps = conn.prepareStatement(sqlQueryForGetApiIds);
+            ps.setString(1, versionRange);
+            ps.setString(2, apiName);
+            ps.setString(3, orgUuid);
+            ps.setString(4, versionRange + "%");
+            try (ResultSet result = ps.executeQuery()) {
+                while (result.next()) {
+                    String apiType = result.getString("API_TYPE");
+                    String createdUser = result.getString("CREATED_BY");
+                    Subscriber subscriber = new Subscriber(createdUser);
+                    SubscribedAPI subscribedAPI;
+                    if (APIConstants.API_PRODUCT.toString().equals(apiType)) {
+                        APIProductIdentifier identifier =
+                                new APIProductIdentifier(APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
+                                        result.getString("API_NAME"), result.getString("API_VERSION"));
+                        identifier.setUUID(result.getString("API_UUID"));
+                        subscribedAPI = new SubscribedAPI(subscriber, identifier);
+                    } else {
+                        APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
+                                ("API_PROVIDER")), result.getString("API_NAME"),
+                                result.getString("API_VERSION"));
+                        identifier.setUuid(result.getString("API_UUID"));
+                        subscribedAPI = new SubscribedAPI(subscriber, identifier);
+                    }
+
+                    subscribedAPI.setSubscriptionId(result.getInt("SUBSCRIPTION_ID"));
+                    subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
+                    subscribedAPI.setSubCreatedStatus(result.getString("SUB_CREATE_STATE"));
+                    String tierName = result.getString("TIER_ID");
+                    String requestedTierName = result.getString("TIER_ID_PENDING");
+                    subscribedAPI.setTier(new Tier(tierName));
+                    subscribedAPI.setRequestedTier(new Tier(requestedTierName));
+                    subscribedAPI.setUUID(result.getString("UUID"));
+                    subscribedAPI.setVersionRange(result.getString("VERSION_RANGE"));
+
+                    int applicationId = result.getInt("APP_ID");
+                    Application application = new Application(result.getString("APP_NAME"), subscriber);
+                    application.setId(result.getInt("APP_ID"));
+                    application.setTokenType(result.getString("APP_TOKEN_TYPE"));
+                    application.setCallbackUrl(result.getString("CALLBACK_URL"));
+                    application.setUUID(result.getString("APP_UUID"));
+                    if (multiGroupAppSharingEnabled) {
+                        application.setGroupId(getGroupId(conn, application.getId()));
+                        application.setOwner(result.getString("OWNER"));
+                    }
+                    subscribedAPI.setApplication(application);
+
+                    subscribedAPIs.add(subscribedAPI);
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Failed to retrieve API IDs of the API: " + apiName + ", version range :"
+                    + versionRange + " and organization UUID: " + orgUuid, e);
+        }
+        return subscribedAPIs;
+    }
+
     /**
      * Retrieves the web hook topc subscriptions from an application to a given api.
      *
@@ -1635,6 +1698,7 @@ public class ApiMgtDAO {
         subscribedAPI.setTier(new Tier(tierName));
         subscribedAPI.setRequestedTier(new Tier(requestedTierName));
         subscribedAPI.setUUID(result.getString("SUB_UUID"));
+        subscribedAPI.setVersionRange(result.getString("VERSION_RANGE"));
         //setting NULL for subscriber. If needed, Subscriber object should be constructed &
         // passed in
         int applicationId = result.getInt("APP_ID");
