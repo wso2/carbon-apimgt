@@ -316,19 +316,12 @@ public class RestApiPublisherUtils {
                     String orgIdFromNamespace = Rudder.getOrgIdFromNamespace(namespace);
                     return orgIdFromNamespace.equals(requestCtxOrdId);
                 } catch (FeignException e) {
-                    if (e.status() == 404) {
-                        log.debug("Could not find an organization relevant to the given endpoint URL.");
-                    } else if (e.status() == 400){
-                        log.warn("Error occurred while validating the organization for the endpoint URL due to " +
-                                "a bad request.", e);
-                    } else if (Integer.toString(e.status()).startsWith("5")){
-                        log.warn("Error occurred while validating the organization for the endpoint URL due to " +
-                                "a server side error.", e);
-                    }
-                    if (e == null && e.status() != 404) {
-                        throw  new APIManagementException ("Error occurred while obtaining organization details from " +
+                    if (e == null || e.status() != 404) {
+                        throw new APIManagementException("Error occurred while obtaining organization details from " +
                                 "Rudder",
                                 ExceptionCodes.ORGANIZATION_NOT_FOUND);
+                    } else {
+                        log.debug("Could not find an organization relevant to the given namespace.");
                     }
                 }
             }
