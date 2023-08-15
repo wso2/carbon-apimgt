@@ -32,6 +32,7 @@ public class KeyManagerInfoDTO   {
     private List<String> availableGrantTypes = new ArrayList<String>();
     private String tokenEndpoint = null;
     private String revokeEndpoint = null;
+    private String authorizeEndpoint = null;
     private String userInfoEndpoint = null;
     private Boolean enableTokenGeneration = null;
     private Boolean enableTokenEncryption = false;
@@ -233,6 +234,23 @@ return null;
 
   /**
    **/
+  public KeyManagerInfoDTO authorizeEndpoint(String authorizeEndpoint) {
+    this.authorizeEndpoint = authorizeEndpoint;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "https://localhost:9443/oauth2/authorize", value = "")
+  @JsonProperty("authorizeEndpoint")
+  public String getAuthorizeEndpoint() {
+    return authorizeEndpoint;
+  }
+  public void setAuthorizeEndpoint(String authorizeEndpoint) {
+    this.authorizeEndpoint = authorizeEndpoint;
+  }
+
+  /**
+   **/
   public KeyManagerInfoDTO userInfoEndpoint(String userInfoEndpoint) {
     this.userInfoEndpoint = userInfoEndpoint;
     return this;
@@ -424,6 +442,7 @@ return null;
         Objects.equals(availableGrantTypes, keyManagerInfo.availableGrantTypes) &&
         Objects.equals(tokenEndpoint, keyManagerInfo.tokenEndpoint) &&
         Objects.equals(revokeEndpoint, keyManagerInfo.revokeEndpoint) &&
+        Objects.equals(authorizeEndpoint, keyManagerInfo.authorizeEndpoint) &&
         Objects.equals(userInfoEndpoint, keyManagerInfo.userInfoEndpoint) &&
         Objects.equals(enableTokenGeneration, keyManagerInfo.enableTokenGeneration) &&
         Objects.equals(enableTokenEncryption, keyManagerInfo.enableTokenEncryption) &&
@@ -438,7 +457,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, type, displayName, description, enabled, availableGrantTypes, tokenEndpoint, revokeEndpoint, userInfoEndpoint, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableOAuthAppCreation, enableMapOAuthConsumerApps, applicationConfiguration, alias, additionalProperties, tokenType);
+    return Objects.hash(id, name, type, displayName, description, enabled, availableGrantTypes, tokenEndpoint, revokeEndpoint, authorizeEndpoint, userInfoEndpoint, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableOAuthAppCreation, enableMapOAuthConsumerApps, applicationConfiguration, alias, additionalProperties, tokenType);
   }
 
   @Override
@@ -455,6 +474,7 @@ return null;
     sb.append("    availableGrantTypes: ").append(toIndentedString(availableGrantTypes)).append("\n");
     sb.append("    tokenEndpoint: ").append(toIndentedString(tokenEndpoint)).append("\n");
     sb.append("    revokeEndpoint: ").append(toIndentedString(revokeEndpoint)).append("\n");
+    sb.append("    authorizeEndpoint: ").append(toIndentedString(authorizeEndpoint)).append("\n");
     sb.append("    userInfoEndpoint: ").append(toIndentedString(userInfoEndpoint)).append("\n");
     sb.append("    enableTokenGeneration: ").append(toIndentedString(enableTokenGeneration)).append("\n");
     sb.append("    enableTokenEncryption: ").append(toIndentedString(enableTokenEncryption)).append("\n");
