@@ -84,12 +84,13 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return matched subscriptions as a list of SubscriptionDTOs
      */
     @Override
-    public Response subscriptionsGet(String apiId, String applicationId, String groupId,
-                                     String xWSO2Tenant, Integer offset, Integer limit, String ifNoneMatch,
-                                     MessageContext messageContext) {
+    public Response subscriptionsGet(String apiId, String applicationId, String groupId, String xWSO2Tenant,
+                                     Boolean includeFromVersionRange, Integer offset, Integer limit,
+                                     String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         Subscriber subscriber = new Subscriber(username);
         Set<SubscribedAPI> subscriptions;
+        Set<SubscribedAPI> versionRangeSubscriptions;
         List<SubscribedAPI> subscribedAPIList = new ArrayList<>();
 
         //pre-processing
@@ -110,18 +111,40 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
                 // This will fail with an authorization failed exception if user does not have permission to access the API
                 ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
-
+                String apiVersion;
+                String apiName;
                 if (apiTypeWrapper.isAPIProduct()) {
                     subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber,
                             apiTypeWrapper.getApiProduct().getId(), groupId, organization);
+                    apiVersion = apiTypeWrapper.getApi().getId().getVersion();
+                    apiName = apiTypeWrapper.getApiProduct().getId().getName();
                 } else {
                     subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber,
                             apiTypeWrapper.getApi().getId(), groupId, organization);
+                    apiVersion = apiTypeWrapper.getApi().getId().getVersion();
+                    apiName = apiTypeWrapper.getApi().getId().getApiName();
+                }
+                if (includeFromVersionRange) {
+                    String versionRange;
+                    versionRange = apiConsumer.getSubscriptionVersionRange(apiVersion, apiTypeWrapper.getUuid());
+                    versionRangeSubscriptions = apiConsumer.getSubscribedIdentifiersForAPIVersionRange(
+                            versionRange, apiName, organization);
+                    subscribedAPIList.addAll(versionRangeSubscriptions);
+                }
+                for (SubscribedAPI sub : subscriptions) {
+                    boolean isAdded = false;
+                    for (SubscribedAPI existingSub : subscribedAPIList) {
+                        if (existingSub.getSubscriptionId() == sub.getSubscriptionId()) {
+                            isAdded = true;
+                            break;
+                        }
+                    }
+                    if (!isAdded) {
+                        subscribedAPIList.add(sub);
+                    }
                 }
 
-                //sort by application name
-                subscribedAPIList.addAll(subscriptions);
-
+                // Sort by application name
                 subscribedAPIList.sort(Comparator.comparing(o -> o.getApplication().getName()));
 
                 subscriptionListDTO = SubscriptionMappingUtil
@@ -162,8 +185,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
-                RestApiUtil.handleInternalServerError("Error while getting subscriptions of the user " + username, e,
-                        log);
+                throw e;
             }
         }
         return null;

@@ -861,7 +861,7 @@ public class APIConsumerImplTest {
             apiConsumer.addSubscription(apiTypeWrapper, "sub1", application, "1");
             Assert.fail("Version range not allowed exception is not thrown for wrong api version range when adding subscription");
         } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("API version should start with v to subscribe with a version range"));
+            Assert.assertTrue(e.getMessage().contains("API version should start with v to allow a version range"));
         }
         try {
             api.setStatus(APIConstants.CREATED);
