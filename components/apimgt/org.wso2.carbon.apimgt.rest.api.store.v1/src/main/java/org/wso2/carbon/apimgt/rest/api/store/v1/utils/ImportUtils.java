@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.utils;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -276,14 +277,15 @@ public class ImportUtils {
             jsonParamObj.put(APIConstants.JSON_CALLBACK_URL, applicationKeyDTO.getCallbackUrl());
         }
         if (applicationKeyDTO.getAdditionalProperties() != null) {
-            String additionalProperties = new Gson().toJson(applicationKeyDTO.getAdditionalProperties());
-            org.json.JSONObject jsonObject = new org.json.JSONObject(additionalProperties);
+            Gson gson = new Gson();
+            String additionalProperties = gson.toJson(applicationKeyDTO.getAdditionalProperties());
+            JsonObject jsonObject = gson.fromJson(additionalProperties, JsonObject.class);
             Set<String> keysSet = jsonObject.keySet();
             for (String key : keysSet) {
-                if (jsonObject.get(key) instanceof Double) {
-                    jsonObject.put(key, String.valueOf(((Double) jsonObject.get(key)).intValue()));
+                if (jsonObject.getAsJsonPrimitive(key).isNumber()) {
+                    jsonObject.addProperty(key, String.valueOf(jsonObject.getAsJsonPrimitive(key).getAsLong()));
                 } else {
-                    jsonObject.put(key, jsonObject.get(key).toString());
+                    jsonObject.addProperty(key, jsonObject.getAsJsonPrimitive(key).getAsString());
                 }
             }
             jsonParamObj.put(APIConstants.JSON_ADDITIONAL_PROPERTIES, jsonObject.toString());
