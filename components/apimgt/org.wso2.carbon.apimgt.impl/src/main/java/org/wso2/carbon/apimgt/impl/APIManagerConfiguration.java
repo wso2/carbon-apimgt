@@ -2046,6 +2046,8 @@ public class APIManagerConfiguration {
     private void setApiBackendUrlValidationConfigurations(OMElement omElement) {
         OMElement enableOrgValidationElement = omElement
                 .getFirstChildWithName(new QName(APIConstants.ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION));
+        OMElement rudderEpUrlElement = omElement
+                .getFirstChildWithName(new QName(APIConstants.RUDDER_ENDPOINT_URL));
         if (enableOrgValidationElement != null) {
             apiEndpointValidationProperties.put(APIConstants.ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION,
                     enableOrgValidationElement.getText());
@@ -2053,6 +2055,13 @@ public class APIManagerConfiguration {
             apiEndpointValidationProperties.put(APIConstants.ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION,
                     APIConstants.DEFAULT_ENABLE_CHOREO_API_BACKEND_URL_ORG_VALIDATION);
             log.debug("Enable API Creator Organization Validation not set. Set to default false");
+        }
+        // Set rudder endpoint URL
+        if (rudderEpUrlElement != null) {
+            apiEndpointValidationProperties.put(APIConstants.RUDDER_ENDPOINT_URL, rudderEpUrlElement.getText());
+        } else {
+            apiEndpointValidationProperties.put(APIConstants.RUDDER_ENDPOINT_URL, APIConstants.RUDDER_ENDPOINT_URL_VALUE);
+            log.debug("Rudder endpoint URL not assigned. Hence assigning the default value");
         }
     }
 

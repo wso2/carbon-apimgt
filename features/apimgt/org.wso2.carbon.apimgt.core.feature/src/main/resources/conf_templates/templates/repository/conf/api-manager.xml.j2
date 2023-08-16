@@ -1497,9 +1497,10 @@
      </APITestKeyConfigs>
      {% endif %}}
 
-     {% if choreo.apiBackendUrlValidation is defined %}
+     {% if choreo.api_backend_url_validation is defined %}
      <ChoreoApiBackendUrlValidationConfigs>
-        <EnableOrgValidation>{{choreo.apiBackendUrlValidation.enableOrganizationValidation}}</EnableOrgValidation>
+        <EnableOrgValidation>{{choreo.api_backend_url_validation.enable_organization_validation}}</EnableOrgValidation>
+        <RudderEndpointUrl>{{choreo.api_backend_url_validation.rudder_endpoint_url}}</RudderEndpointUrl>
      </ChoreoApiBackendUrlValidationConfigs>
      {% endif %}}
 </APIManager>
