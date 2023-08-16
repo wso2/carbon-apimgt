@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.importexport.utils;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -259,9 +260,9 @@ public class CommonUtil {
      */
     public static String jsonToYaml(String json) throws IOException {
 
-        ObjectMapper yamlReader = new ObjectMapper(
-                new YAMLFactory().enable(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER));
-        JsonNode jsonNodeTree = yamlReader.readTree(json);
+        ObjectMapper jsonReader = new ObjectMapper(
+                new JsonFactory().enable(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER));
+        JsonNode jsonNodeTree = jsonReader.readTree(json);
         YAMLMapper yamlMapper = new YAMLMapper().disable(YAMLGenerator.Feature.SPLIT_LINES)
                 .enable(YAMLGenerator.Feature.INDENT_ARRAYS).disable(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE)
                 .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER).enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
