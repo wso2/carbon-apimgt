@@ -25,7 +25,10 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.clients.dto.NamespaceToOrgDetailsResponse;
+
+import java.util.Map;
 
 /**
  * Contains the Rudder client implementation relevant to the  /api/v1/choreo/mappings/namespace-to-project/{namespace}
@@ -34,12 +37,28 @@ import org.wso2.carbon.apimgt.impl.clients.dto.NamespaceToOrgDetailsResponse;
 public class Rudder {
 
     private static Log log = LogFactory.getLog(Rudder.class);
-    private static final RudderClient client = Feign.builder().decoder(new GsonDecoder())
-            .target(RudderClient.class, APIConstants.RUDDER_ENDPOINT_URL);
+    private static RudderClient client;
+
+    private static synchronized RudderClient getClient() throws APIManagementException {
+        if (client == null) {
+            String rudderEp;
+            Map<String, String> apiEndpointValidationConfigs =
+                    APIManagerConfiguration.getApiEndpointValidationProperties();
+            if (apiEndpointValidationConfigs != null &&
+                    apiEndpointValidationConfigs.containsKey(APIConstants.RUDDER_ENDPOINT_URL)) {
+                rudderEp = apiEndpointValidationConfigs.get(APIConstants.RUDDER_ENDPOINT_URL);
+                return client = Feign.builder().decoder(new GsonDecoder())
+                        .target(RudderClient.class, rudderEp);
+            } else {
+                throw new APIManagementException("Error occurred while obtaining Rudder endpoint URL");
+            }
+        }
+        return client;
+    }
 
     public static String getOrgIdFromNamespace(String namespace) throws APIManagementException {
         log.debug("Calling Rudder to obtain the organizationId for namespace: " + namespace);
-        NamespaceToOrgDetailsResponse response = client.getOrgDetailsFromNamespace(namespace);
+        NamespaceToOrgDetailsResponse response = getClient().getOrgDetailsFromNamespace(namespace);
         if (response == null) {
             throw  new APIManagementException ("Could not obtain a response from Rudder for namespace: " + namespace,
                     ExceptionCodes.ORGANIZATION_NOT_FOUND);
