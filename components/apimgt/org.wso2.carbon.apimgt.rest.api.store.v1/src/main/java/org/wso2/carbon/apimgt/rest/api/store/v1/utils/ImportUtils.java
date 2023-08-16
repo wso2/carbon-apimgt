@@ -255,22 +255,22 @@ public class ImportUtils {
     public static void addApplicationKey(String username, Application application, ApplicationKeyDTO applicationKeyDTO,
             APIConsumer apiConsumer, Boolean update) throws APIManagementException {
         String[] accessAllowDomainsArray = { "ALL" };
-        JSONObject jsonParamObj = new JSONObject();
-        jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
+        JsonObject jsonParamObj = new JsonObject();
+        jsonParamObj.addProperty(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
         String grantTypes = StringUtils.join(applicationKeyDTO.getSupportedGrantTypes(), ',');
         if (!StringUtils.isEmpty(grantTypes)) {
-            jsonParamObj.put(APIConstants.JSON_GRANT_TYPES, grantTypes);
+            jsonParamObj.addProperty(APIConstants.JSON_GRANT_TYPES, grantTypes);
         }
         /* Read clientId & clientSecret from ApplicationKeyGenerateRequestDTO object.
            User can provide clientId only or both clientId and clientSecret
            User cannot provide clientSecret only
          */
         if (!StringUtils.isEmpty(applicationKeyDTO.getConsumerKey())) {
-            jsonParamObj.put(APIConstants.JSON_CLIENT_ID, applicationKeyDTO.getConsumerKey());
+            jsonParamObj.addProperty(APIConstants.JSON_CLIENT_ID, applicationKeyDTO.getConsumerKey());
             if (!StringUtils.isEmpty(applicationKeyDTO.getConsumerSecret())) {
                 byte[] bytes = Base64.decodeBase64(applicationKeyDTO.getConsumerSecret());
                 String consumerSecret = new String(bytes, StandardCharsets.UTF_8);
-                jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, consumerSecret);
+                jsonParamObj.addProperty(APIConstants.JSON_CLIENT_SECRET, consumerSecret);
             }
         }
         if (!StringUtils.isEmpty(applicationKeyDTO.getCallbackUrl())) {
@@ -288,7 +288,7 @@ public class ImportUtils {
                     jsonObject.addProperty(key, jsonObject.getAsJsonPrimitive(key).getAsString());
                 }
             }
-            jsonParamObj.put(APIConstants.JSON_ADDITIONAL_PROPERTIES, jsonObject.toString());
+            jsonParamObj.addProperty(APIConstants.JSON_ADDITIONAL_PROPERTIES, jsonObject.toString());
         }
         String jsonParams = jsonParamObj.toString();
         String tokenScopes = StringUtils.join(applicationKeyDTO.getToken().getTokenScopes(), ',');
