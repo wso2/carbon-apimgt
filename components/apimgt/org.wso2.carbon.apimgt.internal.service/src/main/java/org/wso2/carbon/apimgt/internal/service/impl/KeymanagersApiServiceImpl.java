@@ -7,6 +7,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.internal.service.KeymanagersApiService;
@@ -62,6 +63,13 @@ public class KeymanagersApiServiceImpl implements KeymanagersApiService {
 
             List<KeyManagerDTO> keyManagerDTOList = new ArrayList<>();
             for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
+                // TODO: (VirajSalaka) remove env flag
+                if ("true".equalsIgnoreCase(System.getenv("EXTERNAL_IDP_ENABLED"))) {
+                    if (KeyManagerConfiguration.TokenType.EXTERNAL.toString()
+                            .equals(keyManagerConfiguration.getTokenType())) {
+                        continue;
+                    }
+                }
                 keyManagerDTOList.add(toKeyManagerDTO(keyManagerConfiguration));
             }
             return Response.ok(keyManagerDTOList).build();
