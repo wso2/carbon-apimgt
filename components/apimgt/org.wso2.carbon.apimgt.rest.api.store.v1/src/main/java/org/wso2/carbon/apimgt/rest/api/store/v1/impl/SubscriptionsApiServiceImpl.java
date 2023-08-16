@@ -86,7 +86,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     @Override
     public Response subscriptionsGet(String apiId, String applicationId, String groupId, String xWSO2Tenant,
                                      Boolean includeFromVersionRange, Integer offset, Integer limit,
-                                     String ifNoneMatch, MessageContext messageContext) {
+                                     String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         Subscriber subscriber = new Subscriber(username);
         Set<SubscribedAPI> subscriptions;
@@ -126,12 +126,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 }
                 if (includeFromVersionRange) {
                     String versionRange;
-                    try {
-                        versionRange = apiConsumer.getSubscriptionVersionRange(apiVersion, apiTypeWrapper.getUuid());
-                    } catch (APIManagementException e) {
-                        RestApiUtil.handleBadRequest("Version range is not accepted for the API", log);
-                        return null;
-                    }
+                    versionRange = apiConsumer.getSubscriptionVersionRange(apiVersion, apiTypeWrapper.getUuid());
                     versionRangeSubscriptions = apiConsumer.getSubscribedIdentifiersForAPIVersionRange(
                             versionRange, apiName, organization);
                     subscribedAPIList.addAll(versionRangeSubscriptions);
@@ -190,8 +185,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
-                RestApiUtil.handleInternalServerError("Error while getting subscriptions of the user " + username, e,
-                        log);
+                throw e;
             }
         }
         return null;
