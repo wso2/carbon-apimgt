@@ -64,7 +64,7 @@ public class KeymanagersApiServiceImpl implements KeymanagersApiService {
             List<KeyManagerDTO> keyManagerDTOList = new ArrayList<>();
             for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
                 // TODO: (VirajSalaka) remove env flag
-                if ("true".equalsIgnoreCase(System.getenv("EXTERNAL_IDP_ENABLED"))) {
+                if (!"true".equalsIgnoreCase(System.getenv("EXTERNAL_IDP_ENABLED"))) {
                     if (KeyManagerConfiguration.TokenType.EXTERNAL.toString()
                             .equals(keyManagerConfiguration.getTokenType())) {
                         continue;

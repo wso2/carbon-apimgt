@@ -19,7 +19,7 @@ public class KeyMgtNotificationSender {
 
     public void notify(KeyManagerConfigurationDTO keyManagerConfigurationDTO,String action) {
         // TODO: (VirajSalaka) remove env flag
-        if ("true".equalsIgnoreCase(System.getenv("EXTERNAL_IDP_ENABLED"))) {
+        if (!"true".equalsIgnoreCase(System.getenv("EXTERNAL_IDP_ENABLED"))) {
             if (KeyManagerConfiguration.TokenType.EXTERNAL.toString()
                     .equals(keyManagerConfigurationDTO.getTokenType())) {
                 return;
