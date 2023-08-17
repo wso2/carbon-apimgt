@@ -2562,8 +2562,7 @@ public final class APIConstants {
 
         public static final String[] REQUIRED_ENDPOINTS_FOR_EXT_KEY_MANAGERS = {
                 APIConstants.KeyManager.AUTHORIZE_ENDPOINT,
-                APIConstants.KeyManager.TOKEN_ENDPOINT,
-                APIConstants.KeyManager.REVOKE_ENDPOINT
+                APIConstants.KeyManager.TOKEN_ENDPOINT
         };
 
         public static class KeyManagerEvent {
