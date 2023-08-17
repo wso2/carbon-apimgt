@@ -197,7 +197,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         if (ApimConfigUtils.isBackendUrlValidationForOrgEnabled() && body.getEndpointConfig() != null) {
             log.debug("Organization validation for API endpoints is enabled.");
-            if (!isCreatingApiEndpointConfigValid(organization, (LinkedHashMap) body.getEndpointConfig(), body.getId())) {
+            if (!isApiEndpointConfigValid(organization, (LinkedHashMap) body.getEndpointConfig(), body.getId())) {
                 throw new APIManagementException("The API creation is not possible as the backend endpoint is owned " +
                         "by a different organization.", ExceptionCodes.INVALID_ENDPOINT_URL);
             }
@@ -695,6 +695,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            if (ApimConfigUtils.isBackendUrlValidationForOrgEnabled() && body.getEndpointConfig() != null) {
+                log.debug("Organization validation for API endpoints update is enabled.");
+                if (!isApiEndpointConfigValid(organization, (LinkedHashMap) body.getEndpointConfig(), body.getId())) {
+                    throw new APIManagementException("The API update is not possible as the backend endpoint is owned " +
+                            "by a different organization.", ExceptionCodes.INVALID_ENDPOINT_URL);
+                }
+            }
             //validate if api exists
             validateAPIExistence(apiId, organization);
 
@@ -796,7 +803,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param apiId          API ID of the creating API
      * @return whether the creating API has valid endpoints
      */
-    private boolean isCreatingApiEndpointConfigValid(String organization, LinkedHashMap endpointConfig, String apiId)
+    private boolean isApiEndpointConfigValid(String organization, LinkedHashMap endpointConfig, String apiId)
             throws APIManagementException {
         // Disallows creating proxy APIs with service endpoints belonging to the services in the same organization
         boolean isApiEndpointsValid = false;
