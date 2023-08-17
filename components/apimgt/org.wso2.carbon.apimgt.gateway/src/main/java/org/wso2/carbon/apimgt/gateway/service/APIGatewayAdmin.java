@@ -665,37 +665,41 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         if (log.isDebugEnabled()) {
             log.debug("Start to undeploy API" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
         }
-        synchronized (ServiceReferenceHolder.getInstance().getSynapseConfigurationService().getSynapseConfiguration()) {
-            unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
-                    endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
-            if (log.isDebugEnabled()) {
-                log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " undeployed");
-                log.debug("Start to deploy Local entries" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
-            }
-            // Add Local Entries
-            if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
-                for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
-                    if (localEntryServiceProxy.isEntryExists(localEntry.getName())) {
-                        localEntryServiceProxy.deleteEntry(localEntry.getName());
-                        localEntryServiceProxy.addLocalEntry(localEntry.getContent());
-                    } else {
-                        localEntryServiceProxy.addLocalEntry(localEntry.getContent());
+        synchronized (ServiceReferenceHolder.getInstance().getSynapseConfigurationService().getSynapseConfiguration().
+                acquireLock(gatewayAPIDTO.getEndpointEntriesToBeAdd()[0].getName())) {
+            synchronized (ServiceReferenceHolder.getInstance().getSynapseConfigurationService().getSynapseConfiguration().
+                    acquireLock(gatewayAPIDTO.getEndpointEntriesToBeAdd()[1].getName())) {
+                unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
+                        endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
+                if (log.isDebugEnabled()) {
+                    log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " undeployed");
+                    log.debug("Start to deploy Local entries" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
+                }
+                // Add Local Entries
+                if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
+                    for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
+                        if (localEntryServiceProxy.isEntryExists(localEntry.getName())) {
+                            localEntryServiceProxy.deleteEntry(localEntry.getName());
+                            localEntryServiceProxy.addLocalEntry(localEntry.getContent());
+                        } else {
+                            localEntryServiceProxy.addLocalEntry(localEntry.getContent());
+                        }
                     }
                 }
-            }
-            if (log.isDebugEnabled()) {
-                log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Local Entries deployed");
-                log.debug("Start to deploy Endpoint entries" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
-            }
+                if (log.isDebugEnabled()) {
+                    log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Local Entries deployed");
+                    log.debug("Start to deploy Endpoint entries" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
+                }
 
-            // Add Endpoints
-            if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null) {
-                for (GatewayContentDTO endpointEntry : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
-                    if (endpointAdminServiceProxy.isEndpointExist(endpointEntry.getName())) {
-                        endpointAdminServiceProxy.deleteEndpoint(endpointEntry.getName());
-                        endpointAdminServiceProxy.addEndpoint(endpointEntry.getContent());
-                    } else {
-                        endpointAdminServiceProxy.addEndpoint(endpointEntry.getContent());
+                // Add Endpoints
+                if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null) {
+                    for (GatewayContentDTO endpointEntry : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
+                        if (endpointAdminServiceProxy.isEndpointExist(endpointEntry.getName())) {
+                            endpointAdminServiceProxy.deleteEndpoint(endpointEntry.getName());
+                            endpointAdminServiceProxy.addEndpoint(endpointEntry.getContent());
+                        } else {
+                            endpointAdminServiceProxy.addEndpoint(endpointEntry.getContent());
+                        }
                     }
                 }
             }
@@ -887,17 +891,23 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     public boolean unDeployAPI(GatewayAPIDTO gatewayAPIDTO) throws AxisFault {
 
-        SequenceAdminServiceProxy sequenceAdminServiceProxy =
-                getSequenceAdminServiceClient(gatewayAPIDTO.getTenantDomain());
-        RESTAPIAdminServiceProxy restapiAdminServiceProxy = getRestapiAdminClient(gatewayAPIDTO.getTenantDomain());
-        LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
-        EndpointAdminServiceProxy endpointAdminServiceProxy =
-                new EndpointAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
-        MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy =
-                new MediationSecurityAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
+        synchronized (ServiceReferenceHolder.getInstance().getSynapseConfigurationService().getSynapseConfiguration().
+                acquireLock(gatewayAPIDTO.getEndpointEntriesToBeRemove()[0])) {
+            synchronized (ServiceReferenceHolder.getInstance().getSynapseConfigurationService().getSynapseConfiguration().
+                    acquireLock(gatewayAPIDTO.getEndpointEntriesToBeRemove()[1])) {
+                SequenceAdminServiceProxy sequenceAdminServiceProxy =
+                        getSequenceAdminServiceClient(gatewayAPIDTO.getTenantDomain());
+                RESTAPIAdminServiceProxy restapiAdminServiceProxy = getRestapiAdminClient(gatewayAPIDTO.getTenantDomain());
+                LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
+                EndpointAdminServiceProxy endpointAdminServiceProxy =
+                        new EndpointAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
+                MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy =
+                        new MediationSecurityAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
 
-        unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
-                endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
-        return true;
+                unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
+                        endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
+                return true;
+            }
+        }
     }
 }
