@@ -665,10 +665,23 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         if (log.isDebugEnabled()) {
             log.debug("Start to undeploy API" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
         }
+
+        String productionEndpointName = "";
+        String sandboxEndpointName = "";
+
+        if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null) {
+            if (gatewayAPIDTO.getEndpointEntriesToBeAdd().length > 0) {
+                productionEndpointName = gatewayAPIDTO.getEndpointEntriesToBeAdd()[0].getName();
+            }
+            if (gatewayAPIDTO.getEndpointEntriesToBeAdd().length > 1) {
+                sandboxEndpointName = gatewayAPIDTO.getEndpointEntriesToBeAdd()[1].getName();
+            }
+        }
+
         synchronized (ServiceReferenceHolder.getInstance().getSynapseConfigurationService().getSynapseConfiguration().
-                acquireLock(gatewayAPIDTO.getEndpointEntriesToBeAdd()[0].getName())) {
+                acquireLock(productionEndpointName)) {
             synchronized (ServiceReferenceHolder.getInstance().getSynapseConfigurationService().getSynapseConfiguration().
-                    acquireLock(gatewayAPIDTO.getEndpointEntriesToBeAdd()[1].getName())) {
+                    acquireLock(sandboxEndpointName)) {
                 unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
                         endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
                 if (log.isDebugEnabled()) {
@@ -891,10 +904,22 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     public boolean unDeployAPI(GatewayAPIDTO gatewayAPIDTO) throws AxisFault {
 
+        String sandboxEndpointName = "";
+        String productionEndpointName = "";
+
+        if (gatewayAPIDTO.getEndpointEntriesToBeRemove() != null) {
+            if (gatewayAPIDTO.getEndpointEntriesToBeRemove().length > 0) {
+                sandboxEndpointName = gatewayAPIDTO.getEndpointEntriesToBeRemove()[0];
+            }
+            if (gatewayAPIDTO.getEndpointEntriesToBeRemove().length > 1) {
+                productionEndpointName = gatewayAPIDTO.getEndpointEntriesToBeRemove()[1];
+            }
+        }
+
         synchronized (ServiceReferenceHolder.getInstance().getSynapseConfigurationService().getSynapseConfiguration().
-                acquireLock(gatewayAPIDTO.getEndpointEntriesToBeRemove()[0])) {
+                acquireLock(productionEndpointName)) {
             synchronized (ServiceReferenceHolder.getInstance().getSynapseConfigurationService().getSynapseConfiguration().
-                    acquireLock(gatewayAPIDTO.getEndpointEntriesToBeRemove()[1])) {
+                    acquireLock(sandboxEndpointName)) {
                 SequenceAdminServiceProxy sequenceAdminServiceProxy =
                         getSequenceAdminServiceClient(gatewayAPIDTO.getTenantDomain());
                 RESTAPIAdminServiceProxy restapiAdminServiceProxy = getRestapiAdminClient(gatewayAPIDTO.getTenantDomain());
