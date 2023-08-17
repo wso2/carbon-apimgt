@@ -47,7 +47,7 @@ public class Rudder {
             if (apiEndpointValidationConfigs != null &&
                     apiEndpointValidationConfigs.containsKey(APIConstants.RUDDER_ENDPOINT_URL)) {
                 rudderEp = apiEndpointValidationConfigs.get(APIConstants.RUDDER_ENDPOINT_URL);
-                return client = Feign.builder().decoder(new GsonDecoder())
+                client = Feign.builder().decoder(new GsonDecoder())
                         .target(RudderClient.class, rudderEp);
             } else {
                 throw new APIManagementException("Error occurred while obtaining Rudder endpoint URL");
