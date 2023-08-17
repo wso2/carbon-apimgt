@@ -274,7 +274,7 @@ public class ImportUtils {
             }
         }
         if (!StringUtils.isEmpty(applicationKeyDTO.getCallbackUrl())) {
-            jsonParamObj.put(APIConstants.JSON_CALLBACK_URL, applicationKeyDTO.getCallbackUrl());
+            jsonParamObj.addProperty(APIConstants.JSON_CALLBACK_URL, applicationKeyDTO.getCallbackUrl());
         }
         if (applicationKeyDTO.getAdditionalProperties() != null) {
             Gson gson = new Gson();
