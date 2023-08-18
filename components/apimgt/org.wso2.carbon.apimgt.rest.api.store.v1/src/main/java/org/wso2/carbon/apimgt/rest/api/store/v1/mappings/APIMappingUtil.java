@@ -243,6 +243,7 @@ public class APIMappingUtil {
         }
 
         dto.setAuthorizationHeader(model.getAuthorizationHeader());
+        dto.setApiKeyHeader(model.getApiKeyHeader());
         if (model.getApiSecurity() != null) {
             dto.setSecurityScheme(Arrays.asList(model.getApiSecurity().split(",")));
         }
@@ -429,6 +430,7 @@ public class APIMappingUtil {
         }
 
         dto.setAuthorizationHeader(model.getAuthorizationHeader());
+        dto.setApiKeyHeader(model.getApiKeyHeader());
         if (model.getApiSecurity() != null) {
             dto.setSecurityScheme(Arrays.asList(model.getApiSecurity().split(",")));
         }

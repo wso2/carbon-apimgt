@@ -839,6 +839,9 @@ public class OAS2Parser extends APIDefinition {
         if (api.getAuthorizationHeader() != null) {
             swagger.setVendorExtension(APIConstants.X_WSO2_AUTH_HEADER, api.getAuthorizationHeader());
         }
+        if (api.getApiKeyHeader() != null) {
+            swagger.setVendorExtension(APIConstants.X_WSO2_API_KEY_HEADER, api.getApiKeyHeader());
+        }
         if (api.getApiLevelPolicy() != null) {
             swagger.setVendorExtension(APIConstants.X_THROTTLING_TIER, api.getApiLevelPolicy());
         }
@@ -1681,6 +1684,12 @@ public class OAS2Parser extends APIDefinition {
         if (StringUtils.isNotBlank(authHeader)) {
             api.setAuthorizationHeader(authHeader);
         }
+        //Setup custom api key header for API
+        String apiKeyHeader = OASParserUtil.getApiKeyHeaderFromSwagger(extensions);
+        if (StringUtils.isNotBlank(apiKeyHeader)) {
+            api.setApiKeyHeader(apiKeyHeader);
+        }
+
         //Setup application Security
         List<String> applicationSecurity = OASParserUtil.getApplicationSecurityTypes(extensions);
         Boolean isOptional = OASParserUtil.getAppSecurityStateFromSwagger(extensions);

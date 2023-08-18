@@ -152,6 +152,7 @@ public class API implements Serializable {
 
     //Custom authorization header specific to the API
     private String authorizationHeader;
+    private String apiKeyHeader;
     private Set<Scope> scopes;
 
     private boolean isDefaultVersion = false;
@@ -1173,6 +1174,12 @@ public class API implements Serializable {
 
     public void setAuthorizationHeader(String authorizationHeader) {
         this.authorizationHeader = authorizationHeader;
+    }
+
+    public String getApiKeyHeader() { return apiKeyHeader; }
+
+    public void setApiKeyHeader(String apiKeyHeader) {
+        this.apiKeyHeader = apiKeyHeader;
     }
 
     /**
