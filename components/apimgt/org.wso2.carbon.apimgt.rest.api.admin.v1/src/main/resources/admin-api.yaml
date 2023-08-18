@@ -5234,3 +5234,4 @@ components:
             apim:scope_manage: Manage system scopes
             apim:role_manage: Manage system roles
             apim:admin_application_view: View Applications
+            apim:keymanagers_manage: Manage Key Managers

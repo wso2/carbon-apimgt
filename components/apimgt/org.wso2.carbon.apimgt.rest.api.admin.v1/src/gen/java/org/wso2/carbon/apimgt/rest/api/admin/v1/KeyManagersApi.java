@@ -46,7 +46,7 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations"),
-            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "")
+            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "Manage Key Managers")
         })
     }, tags={ "Key Manager (Collection)",  })
     @ApiResponses(value = { 
@@ -63,7 +63,7 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations"),
-            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "")
+            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "Manage Key Managers")
         })
     }, tags={ "Key Manager (Collection)",  })
     @ApiResponses(value = { 
@@ -80,7 +80,7 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations"),
-            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "")
+            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "Manage Key Managers")
         })
     }, tags={ "Key Manager (Individual)",  })
     @ApiResponses(value = { 
@@ -98,7 +98,7 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations"),
-            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "")
+            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "Manage Key Managers")
         })
     }, tags={ "Key Manager (Individual)",  })
     @ApiResponses(value = { 
@@ -117,7 +117,7 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations"),
-            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "")
+            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "Manage Key Managers")
         })
     }, tags={ "Key Manager (Individual)",  })
     @ApiResponses(value = { 
@@ -136,7 +136,7 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations"),
-            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "")
+            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "Manage Key Managers")
         })
     }, tags={ "Key Manager (Collection)" })
     @ApiResponses(value = { 
