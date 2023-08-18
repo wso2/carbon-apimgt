@@ -614,12 +614,9 @@ public class OAS2Parser extends APIDefinition {
         updateSwaggerSecurityDefinition(swaggerObj, swaggerData, "https://test.com");
         updateLegacyScopesFromSwagger(swaggerObj, swaggerData);
         
-        if (StringUtils.isEmpty(swaggerObj.getInfo().getTitle())) {
-            swaggerObj.getInfo().setTitle(swaggerData.getTitle());
-        }
-        if (StringUtils.isEmpty(swaggerObj.getInfo().getVersion())) {
-            swaggerObj.getInfo().setVersion(swaggerData.getVersion());
-        }
+        swaggerObj.getInfo().setTitle(swaggerData.getTitle());
+        swaggerObj.getInfo().setVersion(swaggerData.getVersion());
+
         preserveResourcePathOrderFromAPI(swaggerData, swaggerObj);
         return getSwaggerJsonString(swaggerObj);
     }

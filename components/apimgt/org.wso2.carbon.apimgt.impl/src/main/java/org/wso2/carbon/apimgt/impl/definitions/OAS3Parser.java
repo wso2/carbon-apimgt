@@ -699,10 +699,8 @@ public class OAS3Parser extends APIDefinition {
         updateLegacyScopesFromSwagger(openAPI, swaggerData);
         
         openAPI.getInfo().setTitle(swaggerData.getTitle());
+        openAPI.getInfo().setVersion(swaggerData.getVersion());
 
-        if (StringUtils.isEmpty(openAPI.getInfo().getVersion())) {
-            openAPI.getInfo().setVersion(swaggerData.getVersion());
-        }
         if (!APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
             preserveResourcePathOrderFromAPI(swaggerData, openAPI);
         }
