@@ -2004,12 +2004,22 @@ public class PublisherCommonUtils {
             boolean isRequired = (boolean) property.get(APIConstants.CustomPropertyAttributes.REQUIRED);
 
             if (isRequired) {
+                APIInfoAdditionalPropertiesMapDTO mapPropertyDisplay =
+                        additionalPropertiesMap.get(propertyName + "__display");
                 APIInfoAdditionalPropertiesMapDTO mapProperty = additionalPropertiesMap.get(propertyName);
-                if (mapProperty == null) {
+                if (mapProperty == null && mapPropertyDisplay == null) {
                     return false;
                 }
-                String propertyValue = mapProperty.getValue();
-                if (propertyValue == null || propertyValue.isEmpty()) {
+                String propertyValue = "";
+                String propertyValueDisplay = "";
+                if (mapProperty != null) {
+                    propertyValue = mapProperty.getValue();
+                }
+                if (mapPropertyDisplay != null) {
+                    propertyValueDisplay = mapPropertyDisplay.getValue();
+                }
+                if ((propertyValue == null || propertyValue.isEmpty()) &&
+                        (propertyValueDisplay == null || propertyValueDisplay.isEmpty())) {
                     return false;
                 }
             }
