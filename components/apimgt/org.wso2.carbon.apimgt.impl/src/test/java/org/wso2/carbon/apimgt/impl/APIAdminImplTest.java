@@ -262,9 +262,9 @@ public class APIAdminImplTest {
             apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);
             Assert.fail("Add key managers is supposed to be failed but it passed due to missing endpoints");
         } catch (APIManagementException e) {
-            String commonRegex = "token_endpoint|revoke_endpoint|authorize_endpoint";
+            String commonRegex = "token_endpoint|authorize_endpoint";
             Assert.assertTrue(e.getMessage().matches(String.format("Key Manager Endpoint Configuration value for " +
-                    "((%s),){2}(%s) is/are required", commonRegex, commonRegex)));
+                    "(%s),(%s) is/are required", commonRegex, commonRegex)));
         }
         keyManagerConfigurationDTO.setEndpoints(endpoints);
 
