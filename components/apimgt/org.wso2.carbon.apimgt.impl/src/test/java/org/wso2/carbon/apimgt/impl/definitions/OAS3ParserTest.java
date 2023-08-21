@@ -216,7 +216,7 @@ public class OAS3ParserTest extends OASTestBase {
         String faultySwagger = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3"
                         + File.separator + "openApi3_validation.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true);
 
         Assert.assertFalse(response.isValid());
@@ -278,7 +278,7 @@ public class OAS3ParserTest extends OASTestBase {
         String swagger = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3"
                         + File.separator + "publisher" + File.separator + "oas3_mig_without_sec_extensions.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         API api = Mockito.mock(API.class);
         String apiSecurity = "oauth_basic_auth_api_key_mandatory,oauth2";
         when(api.getApiSecurity()).thenReturn(apiSecurity);
@@ -287,19 +287,19 @@ public class OAS3ParserTest extends OASTestBase {
         String oasDefinitionEdited = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "publisher" + File.separator + "oas3_mig_without_sec_extensions_response.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionEdited, response);
 
         // Testing API with migrated swagger coming from APIM version 2.x with x-wso2-security and x-scopes.
         swagger = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3"
                         + File.separator + "publisher" + File.separator + "oas3_mig_with_sec_extensions.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         response = parser.getOASDefinitionForPublisher(api, swagger);
         oasDefinitionEdited = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "publisher" + File.separator + "oas3_mig_with_sec_extensions_response.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionEdited, response);
 
         // Testing API with swagger generated after APIM 2.x versions with oauth security definitions and x-wso2
@@ -308,12 +308,13 @@ public class OAS3ParserTest extends OASTestBase {
         when(api.getApiSecurity()).thenReturn(apiSecurity);
         swagger = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
-                        + "publisher" + File.separator + "oas3_with_default_oauth.json"), StandardCharsets.UTF_8);
+                        + "publisher" + File.separator + "oas3_with_default_oauth.json"),
+                String.valueOf(StandardCharsets.UTF_8));
         response = parser.getOASDefinitionForPublisher(api, swagger);
         oasDefinitionEdited = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "publisher" + File.separator + "oas3_with_default_oauth_response.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionEdited, response);
 
         // Testing API with swagger generated after APIM 2.x version, but with basic_auth and api_key security in the
@@ -321,12 +322,12 @@ public class OAS3ParserTest extends OASTestBase {
         swagger = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "publisher" + File.separator + "oas3_with_apikey_basic_oauth_security_u2.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         response = parser.getOASDefinitionForPublisher(api, swagger);
         oasDefinitionEdited = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "publisher" + File.separator + "oas3_with_apikey_basic_oauth_security_u2_response.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionEdited, response);
     }
 
@@ -338,7 +339,7 @@ public class OAS3ParserTest extends OASTestBase {
         String swagger = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "publisher" + File.separator + "oas3_mig_without_sec_extensions.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         APIIdentifier apiIdentifier = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0");
         Map<String, String> hostWithSchemes = new HashMap<>();
         hostWithSchemes.put(APIConstants.HTTPS_PROTOCOL, "https://localhost");
@@ -351,80 +352,84 @@ public class OAS3ParserTest extends OASTestBase {
         String oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "devportal" + File.separator + "oas3_mig_without_sec_extensions_response.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionExpected, response);
 
         // Testing API with migrated swagger coming from APIM version 2.x with x-wso2-security and x-scopes.
         swagger = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
-                        + "publisher" + File.separator + "oas3_mig_with_sec_extensions.json"), StandardCharsets.UTF_8);
+                        + "publisher" + File.separator + "oas3_mig_with_sec_extensions.json"),
+                String.valueOf(StandardCharsets.UTF_8));
         api.setScopes(getAPITestScopes());
         response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "devportal" + File.separator + "oas3_mig_with_sec_extensions_response.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionExpected, response);
 
         // Testing API with swagger generated after APIM 2.x versions with oauth security definitions and x-wso2
         // extensions. API configured with all security.
         swagger = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
-                        + "devportal" + File.separator + "oas3_with_default_allsecurity.json"), StandardCharsets.UTF_8);
+                        + "devportal" + File.separator + "oas3_with_default_allsecurity.json"),
+                String.valueOf(StandardCharsets.UTF_8));
         api.setScopes(getAPITestScopes());
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,api_key,basic_auth,oauth2");
         response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "devportal" + File.separator + "oas3_with_default_allsecurity_response.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionExpected, response);
         // Testing API with swagger generated after APIM 2.x version, but with basic_auth and api_key security in
         // the scheme which went with as an u2 update for 4.1, then later reverted. API configured with all security.
         swagger = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "publisher" + File.separator + "oas3_with_apikey_basic_oauth_security_u2.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "devportal" + File.separator + "oas3_with_apikey_basic_oauth_security_u2_response.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionExpected, response);
         // Testing API with swagger generated after APIM 2.x versions with oauth security definitions and x-wso2
         // extensions. API configured with basic auth and api key.
         swagger = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3"
                         + File.separator + "devportal" + File.separator + "oas3_with_basic_apisec.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,api_key,basic_auth");
         response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "devportal" + File.separator + "oas3_with_basic_apisec_response.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionExpected, response);
         // API configured with basic auth only.
         swagger = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
-                        + "devportal" + File.separator + "oas3_with_basic.json"), StandardCharsets.UTF_8);
+                        + "devportal" + File.separator + "oas3_with_basic.json"),
+                String.valueOf(StandardCharsets.UTF_8));
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,basic_auth");
         response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
-                        + "devportal" + File.separator + "oas3_with_basic_response.json"), StandardCharsets.UTF_8);
+                        + "devportal" + File.separator + "oas3_with_basic_response.json"),
+                String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionExpected, response);
         // API Configured with api key only.
         swagger = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3"
                         + File.separator + "devportal" + File.separator + "oas3_with_apikey.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,api_key");
         response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3"
                         + File.separator + "devportal" + File.separator + "oas3_with_apikey_response.json"),
-                StandardCharsets.UTF_8);
+                String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionExpected, response);
     }
 
