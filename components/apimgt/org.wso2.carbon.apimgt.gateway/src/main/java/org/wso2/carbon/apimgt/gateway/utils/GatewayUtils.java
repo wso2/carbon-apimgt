@@ -1366,7 +1366,12 @@ public class GatewayUtils {
         try {
             MessageContext.setCurrentMessageContext(createAxis2MessageContext());
             RESTAPIAdminServiceProxy restapiAdminServiceProxy = new RESTAPIAdminServiceProxy(tenantDomain);
-            String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
+            String qualifiedName;
+            if (version != null) {
+                qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
+            } else {
+                qualifiedName = apiName;
+            }
             OMElement api = restapiAdminServiceProxy.getApiContent(qualifiedName);
             if (api != null) {
                 return api.toString();

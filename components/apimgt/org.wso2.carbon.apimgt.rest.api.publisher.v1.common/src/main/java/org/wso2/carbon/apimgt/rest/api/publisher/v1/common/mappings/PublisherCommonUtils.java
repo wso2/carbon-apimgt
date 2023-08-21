@@ -1150,6 +1150,9 @@ public class PublisherCommonUtils {
         if (body.getAuthorizationHeader() == null) {
             body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
+        if (body.getApiKeyHeader() == null) {
+            body.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+        }
 
         if (body.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED && body.getVisibleRoles().isEmpty()) {
             throw new APIManagementException(
@@ -1765,6 +1768,10 @@ public class PublisherCommonUtils {
             apiProductDTO.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
 
+        if (apiProductDTO.getApiKeyHeader() == null) {
+            apiProductDTO.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+        }
+
         //Remove the /{version} from the context.
         if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
@@ -2004,12 +2011,22 @@ public class PublisherCommonUtils {
             boolean isRequired = (boolean) property.get(APIConstants.CustomPropertyAttributes.REQUIRED);
 
             if (isRequired) {
+                APIInfoAdditionalPropertiesMapDTO mapPropertyDisplay =
+                        additionalPropertiesMap.get(propertyName + "__display");
                 APIInfoAdditionalPropertiesMapDTO mapProperty = additionalPropertiesMap.get(propertyName);
-                if (mapProperty == null) {
+                if (mapProperty == null && mapPropertyDisplay == null) {
                     return false;
                 }
-                String propertyValue = mapProperty.getValue();
-                if (propertyValue == null || propertyValue.isEmpty()) {
+                String propertyValue = "";
+                String propertyValueDisplay = "";
+                if (mapProperty != null) {
+                    propertyValue = mapProperty.getValue();
+                }
+                if (mapPropertyDisplay != null) {
+                    propertyValueDisplay = mapPropertyDisplay.getValue();
+                }
+                if ((propertyValue == null || propertyValue.isEmpty()) &&
+                        (propertyValueDisplay == null || propertyValueDisplay.isEmpty())) {
                     return false;
                 }
             }

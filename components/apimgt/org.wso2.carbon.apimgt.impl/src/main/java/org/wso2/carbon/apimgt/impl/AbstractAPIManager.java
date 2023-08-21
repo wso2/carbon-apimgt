@@ -1284,6 +1284,10 @@ public abstract class AbstractAPIManager implements APIManager {
                                     operation.getAsJsonObject().get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)
                                             .getAsInt());
                         }
+                        if (operation.getAsJsonObject().get(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED) != null) {
+                            uriTemplate.setAmznResourceContentEncoded(operation.getAsJsonObject().
+                                    get(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED).getAsBoolean());
+                        }
                     }
                 }
             }
@@ -1427,6 +1431,10 @@ public abstract class AbstractAPIManager implements APIManager {
                                     operation.getAsJsonObject().get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)
                                             .getAsInt());
                         }
+                        if (operation.getAsJsonObject().get(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED) != null) {
+                            uriTemplate.setAmznResourceContentEncoded(operation.getAsJsonObject().
+                                    get(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED).getAsBoolean());
+                        }
                     }
                 }
             }
@@ -1452,7 +1460,7 @@ public abstract class AbstractAPIManager implements APIManager {
             }
             List<APICategory> categoryList = new ArrayList<>();
 
-            if (!categoriesOfAPI.isEmpty()) {
+            if (!categoriesOfAPI.isEmpty() && migrationEnabled == null) {
                 // category array retrieved from artifact has only the category name, therefore we need to fetch
                 // categories
                 // and fill out missing attributes before attaching the list to the api

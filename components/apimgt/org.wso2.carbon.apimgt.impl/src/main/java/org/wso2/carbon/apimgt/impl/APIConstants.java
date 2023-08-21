@@ -335,6 +335,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_OUTSEQUENCE = "overview_outSequence";
     public static final String API_OVERVIEW_FAULTSEQUENCE = "overview_faultSequence";
     public static final String API_OVERVIEW_AUTHORIZATION_HEADER = "overview_authorizationHeader";
+    public static final String API_OVERVIEW_API_KEY_HEADER = "overview_apiKeyHeader";
     public static final String API_OVERVIEW_API_SECURITY = "overview_apiSecurity";
     public static final String API_OVERVIEW_WS_URI_MAPPING = "overview_wsUriMapping";
     public static final String AUTHORIZATION_HEADER_BASIC = "Basic";
@@ -439,11 +440,13 @@ public final class APIConstants {
     public static final String JWT_DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
     public static final String JWT_CONFIGS = "JWTConfiguration";
     public static final String JWT_HEADER = "JWTHeader";
+    public static final String JWT_DECODING = "JWTDecoding";
     public static final String ENABLE_USER_CLAIMS = "EnableUserClaims";
     public static final String BINDING_FEDERATED_USER_CLAIMS = "EnableBindingFederatedUserClaims";
     public static final String TOKEN_GENERATOR_IMPL = "JWTGeneratorImpl";
     public static final String ENABLE_JWT_GENERATION = "EnableJWTGeneration";
     public static final String CLAIMS_RETRIEVER_CLASS = "ClaimsRetrieverImplClass";
+    public static final String USE_KID = "UseKidProperty";
     public static final String CONSUMER_DIALECT_URI = "ConsumerDialectURI";
     public static final String JWT_SIGNATURE_ALGORITHM = "SignatureAlgorithm";
     public static final String GATEWAY_JWT_GENERATOR = "GatewayJWTGeneration";
@@ -457,10 +460,12 @@ public final class APIConstants {
     public static final String MEDIATOR_CONFIG = "MediatorConfigs.";
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
+    public static final String API_KEY_HEADER = "ApiKeyHeader";
     public static final String API_SECURITY = "APISecurity";
     public static final String API_LEVEL_POLICY = "APILevelPolicy";
     public static final String CERTIFICATE_INFORMATION = "CertificateInformation";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
+    public static final String API_KEY_HEADER_DEFAULT = "ApiKey";
     public static final String HEADER_TENANT = "xWSO2Tenant";
     public static final String X_WSO2_TENANT_HEADER = "X-WSO2-Tenant";
     public static final String AUTHORIZATION_QUERY_PARAM_DEFAULT = "access_token";
@@ -1523,6 +1528,7 @@ public final class APIConstants {
     public static final String SWAGGER_X_SCOPE = "x-scope";
     public static final String SWAGGER_X_AMZN_RESOURCE_NAME = "x-amzn-resource-name";
     public static final String SWAGGER_X_AMZN_RESOURCE_TIMEOUT = "x-amzn-resource-timeout";
+    public static final String SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED = "x-amzn-resource-content-encode";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
     public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
     public static final String SWAGGER_X_THROTTLING_BANDWIDTH = "x-throttling-bandwidth";
@@ -1596,6 +1602,7 @@ public final class APIConstants {
 
     //swagger MG related constants
     public static final String X_WSO2_AUTH_HEADER = "x-wso2-auth-header";
+    public static final String X_WSO2_API_KEY_HEADER = "x-wso2-api-key-header";
     public static final String X_THROTTLING_TIER = "x-throttling-tier";
     public static final String X_WSO2_CORS = "x-wso2-cors";
     public static final String X_WSO2_PRODUCTION_ENDPOINTS = "x-wso2-production-endpoints";
@@ -2103,6 +2110,7 @@ public final class APIConstants {
         public static final String INTERNAL_KEY_TOKEN_TYPE = "InternalKey";
         public static final String TOKEN_TYPE = "token_type";
         public static final String API_KEY_TOKEN_TYPE = "apiKey";
+        public static final String DECODING_ALGORITHM_BASE64URL = "base64url";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";

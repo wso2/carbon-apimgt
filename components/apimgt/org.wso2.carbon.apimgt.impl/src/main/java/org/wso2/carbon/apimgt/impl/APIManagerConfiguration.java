@@ -725,8 +725,8 @@ public class APIManagerConfiguration {
 
             //Prefix websub endpoints with 'websub_' so that the endpoint URL
             // would begin with: 'websub_http://', since API type is identified by the URL protocol below.
-            webSubHttpEp = "websub_" + webSubHttpEp;
-            webSubHttpsEp = "websub_" + webSubHttpsEp;
+            webSubHttpEp = StringUtils.isNotBlank(webSubHttpEp) ? "websub_" + webSubHttpEp : webSubHttpEp;
+            webSubHttpsEp = StringUtils.isNotBlank(webSubHttpsEp) ? "websub_" + webSubHttpsEp : webSubHttpsEp;
 
             VHost vhost = VHost.fromEndpointUrls(new String[]{
                     httpEp, httpsEp, wsEp, wssEp, webSubHttpEp, webSubHttpsEp});
@@ -1598,10 +1598,20 @@ public class APIManagerConfiguration {
             if (claimRetrieverImplElement != null) {
                 jwtConfigurationDto.setClaimRetrieverImplClass(claimRetrieverImplElement.getText());
             }
+            OMElement useKidElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.USE_KID));
+            if (useKidElement != null) {
+                jwtConfigurationDto.setUseKid(Boolean.parseBoolean(useKidElement.getText()));
+            }
             OMElement jwtHeaderElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.JWT_HEADER));
             if (jwtHeaderElement != null) {
                 jwtConfigurationDto.setJwtHeader(jwtHeaderElement.getText());
+            }
+            OMElement jwtDecoding =
+                    omElement.getFirstChildWithName(new QName(APIConstants.JWT_DECODING));
+            if (jwtDecoding != null) {
+                jwtConfigurationDto.setJwtDecoding(jwtDecoding.getText());
             }
             OMElement jwtUserClaimsElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS));

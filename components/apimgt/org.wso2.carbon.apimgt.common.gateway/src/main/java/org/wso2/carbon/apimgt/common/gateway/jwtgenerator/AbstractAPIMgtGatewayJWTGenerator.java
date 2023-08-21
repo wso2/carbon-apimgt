@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
@@ -33,6 +35,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -104,19 +107,22 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
 
     public String buildHeader() throws JWTGeneratorException {
         String jwtHeader = null;
+        X509Certificate x509Certificate = (X509Certificate) jwtConfigurationDto.getPublicCert();
 
-        if (NONE.equals(signatureAlgorithm)) {
-            StringBuilder jwtHeaderBuilder = new StringBuilder();
-            jwtHeaderBuilder.append("{\"typ\":\"JWT\",");
-            jwtHeaderBuilder.append("\"alg\":\"");
-            jwtHeaderBuilder.append(JWTUtil.getJWSCompliantAlgorithmCode(NONE));
-            jwtHeaderBuilder.append('\"');
-            jwtHeaderBuilder.append('}');
-
-            jwtHeader = jwtHeaderBuilder.toString();
-
-        } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
-            jwtHeader = addCertToHeader();
+        try {
+            if (NONE.equals(signatureAlgorithm)) {
+                JSONObject jwtHeaderBuilder = new JSONObject();
+                jwtHeaderBuilder.put("typ", "JWT");
+                jwtHeaderBuilder.put("alg", JWTUtil.getJWSCompliantAlgorithmCode(NONE));
+                if (jwtConfigurationDto.useKid()) {
+                    jwtHeaderBuilder.put("kid", JWTUtil.getKID(x509Certificate));
+                }
+                jwtHeader = jwtHeaderBuilder.toString();
+            } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
+                jwtHeader = addCertToHeader();
+            }
+        } catch (JSONException e) {
+            throw new JWTGeneratorException("Encountered an error while generating JWT header json object", e);
         }
         return jwtHeader;
     }

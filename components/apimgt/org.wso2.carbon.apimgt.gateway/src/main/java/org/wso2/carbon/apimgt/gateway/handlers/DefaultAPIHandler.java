@@ -25,6 +25,8 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -34,9 +36,6 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.Artifac
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.InboundWebsocketConstants;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -49,10 +48,34 @@ public class DefaultAPIHandler extends AbstractSynapseHandler {
         if (messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
             return true;
         }
+        String path = ApiUtils.getFullRequestPath(messageContext);
+        String tenantDomain = GatewayUtils.getTenantDomain();
+
+        // Handle JWKS API calls
+        boolean isJWKSEndpoint = false;
+        if (APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenantDomain)) {
+            if (path.equals(JWTConstants.GATEWAY_JWKS_API_CONTEXT)) {
+                isJWKSEndpoint = true;
+            }
+        } else {
+            if (path.equals(APIConstants.TENANT_PREFIX + tenantDomain + JWTConstants.GATEWAY_JWKS_API_CONTEXT)) {
+                isJWKSEndpoint = true;
+            }
+        }
+
+        if (isJWKSEndpoint) {
+            try {
+                InMemoryAPIDeployer.deployJWKSSynapseAPI(tenantDomain);
+            } catch(APIManagementException e){
+                log.error("Error while deploying JWKS API for tenant domain :" + tenantDomain, e);
+            }
+            return true;
+        }
+
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        String path = ApiUtils.getFullRequestPath(messageContext);
-        TreeMap<String, API> selectedAPIS = Utils.getSelectedAPIList(path, GatewayUtils.getTenantDomain());
+        TreeMap<String, API> selectedAPIS = Utils.getSelectedAPIList(path, tenantDomain);
+
         if (selectedAPIS.size() > 0) {
             Object transportInUrl = axis2MessageContext.getProperty(APIConstants.TRANSPORT_URL_IN);
             String selectedPath = selectedAPIS.firstKey();
