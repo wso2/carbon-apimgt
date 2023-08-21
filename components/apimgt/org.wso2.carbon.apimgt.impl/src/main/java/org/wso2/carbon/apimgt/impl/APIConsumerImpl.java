@@ -3908,8 +3908,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end,
-            String sortBy, String sortOrder) throws APIManagementException {
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String aggregateBy,
+                                                   String organization, int start, int end, String sortBy,
+                                                   String sortOrder) throws APIManagementException {
         Map<String, Object> result = new HashMap<String, Object>();
         if (log.isDebugEnabled()) {
             log.debug("Original search query received : " + searchQuery);
@@ -3920,8 +3921,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
         UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
         try {
-            DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery,
-                    start, end, userCtx);
+            DevPortalAPISearchResult searchAPIs;
+            if (aggregateBy == null) {
+                searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery, start, end, userCtx);
+            } else {
+                searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery, aggregateBy,
+                        start, end, userCtx);
+            }
             if (log.isDebugEnabled()) {
                 log.debug("searched Devportal APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
             }
@@ -3962,6 +3968,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIManagementException("Error while searching the api ", e);
         }
         return result;
+    }
+
+    @Override
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end,
+            String sortBy, String sortOrder) throws APIManagementException {
+        return searchPaginatedAPIs(searchQuery, null, organization, start, end, sortBy, sortOrder);
     }
 
 
