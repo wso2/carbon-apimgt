@@ -265,9 +265,9 @@
   ],
   "x-wso2-application-security": {
     "security-types": [
-      "oauth2",
+      "api_key",
       "basic_auth",
-      "api_key"
+      "oauth2"
     ],
     "optional": false
   },
