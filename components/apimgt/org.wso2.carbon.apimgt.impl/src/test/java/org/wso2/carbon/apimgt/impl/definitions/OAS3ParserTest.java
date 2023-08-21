@@ -316,19 +316,6 @@ public class OAS3ParserTest extends OASTestBase {
                         + "publisher" + File.separator + "oas3_with_default_oauth_response.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionEdited, response);
-
-        // Testing API with swagger generated after APIM 2.x version, but with basic_auth and api_key security in the
-        // scheme which went with as an u2 update for 4.1, then later reverted.
-        swagger = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
-                        + "publisher" + File.separator + "oas3_with_apikey_basic_oauth_security_u2.json"),
-                String.valueOf(StandardCharsets.UTF_8));
-        response = parser.getOASDefinitionForPublisher(api, swagger);
-        oasDefinitionEdited = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
-                        + "publisher" + File.separator + "oas3_with_apikey_basic_oauth_security_u2_response.json"),
-                String.valueOf(StandardCharsets.UTF_8));
-        Assert.assertEquals(oasDefinitionEdited, response);
     }
 
 

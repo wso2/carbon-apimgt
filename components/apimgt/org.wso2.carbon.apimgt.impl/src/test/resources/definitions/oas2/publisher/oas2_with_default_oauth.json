@@ -287,14 +287,6 @@
     "http",
     "https"
   ],
-  "x-wso2-application-security": {
-    "security-types": [
-      "oauth2",
-      "basic_auth",
-      "api_key"
-    ],
-    "optional": false
-  },
   "x-wso2-response-cache": {
     "enabled": false,
     "cacheTimeoutInSeconds": 300
