@@ -1372,7 +1372,7 @@ public class OAS2Parser extends APIDefinition {
             }
             OASParserUtil.addSecurityRequirementToSwagger(swagger, APIConstants.API_SECURITY_API_KEY);
             ApiKeyAuthDefinition apiKeyAuthDefinition = new ApiKeyAuthDefinition();
-            apiKeyAuthDefinition.setName(APIConstants.API_KEY_AUTH_TYPE);
+            apiKeyAuthDefinition.setName(APIConstants.API_KEY_HEADER_QUERY_PARAM);
             apiKeyAuthDefinition.setIn(In.HEADER);
             swagger.addSecurityDefinition(APIConstants.API_SECURITY_API_KEY, apiKeyAuthDefinition);
         }
@@ -1380,6 +1380,9 @@ public class OAS2Parser extends APIDefinition {
         for (Map.Entry<String, Path> pathEntry : swagger.getPaths().entrySet()) {
             for (Operation operation : pathEntry.getValue().getOperations()) {
                 List<Map<String, List<String>>> oldSecList = operation.getSecurity();
+                if (oldSecList == null) {
+                    oldSecList = new ArrayList<>();
+                }
                 // Get scopes from default oauth2 security of each resource.
                 List<String> operationScopes = oldSecList.stream()
                         .filter(security -> security.containsKey(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY))
@@ -1392,7 +1395,8 @@ public class OAS2Parser extends APIDefinition {
                         APIConstants.API_SECURITY_BASIC_AUTH, new ArrayList<>());
                 OASParserUtil.addSwaggerOperationSecurityReqFromAPI(oldSecList, secList,
                         APIConstants.API_SECURITY_API_KEY, new ArrayList<>());
-                if (!secList.isEmpty() && !secList.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                if (!secList.isEmpty() && !secList.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        && operation.getSecurity() != null) {
                     // If oauth2 is not set for the API, remove oauth security scheme from resource level if exists.
                     operation.setSecurity(operation.getSecurity().stream()
                             .filter(securityRequirement -> !securityRequirement
@@ -1407,11 +1411,15 @@ public class OAS2Parser extends APIDefinition {
                 log.debug("Removing default oauth2 security of API: " + swaggerData.getTitle()
                         + " Version: " + swaggerData.getVersion() + " from Swagger definition");
             }
-            swagger.getSecurityDefinitions().remove(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
-            swagger.setSecurity(swagger.getSecurity().stream().filter(
-                            securityRequirement -> !securityRequirement.getRequirements()
-                                    .containsKey(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY))
-                    .collect(Collectors.toList()));
+            if (swagger.getSecurityDefinitions() != null) {
+                swagger.getSecurityDefinitions().remove(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
+            }
+            if (swagger.getSecurity() != null) {
+                swagger.setSecurity(swagger.getSecurity().stream().filter(
+                                securityRequirement -> !securityRequirement.getRequirements()
+                                        .containsKey(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY))
+                        .collect(Collectors.toList()));
+            }
         }
     }
 

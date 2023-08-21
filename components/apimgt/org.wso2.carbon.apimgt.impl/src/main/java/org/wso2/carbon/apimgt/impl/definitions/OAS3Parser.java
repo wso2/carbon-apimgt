@@ -1366,7 +1366,7 @@ public class OAS3Parser extends APIDefinition {
                     key -> {
                         SecurityScheme scheme = new SecurityScheme();
                         scheme.setType(SecurityScheme.Type.HTTP);
-                        scheme.setScheme(APIConstants.AUTHORIZATION_HEADER_BASIC);
+                        scheme.setScheme(APIConstants.SWAGGER_API_SECURITY_BASIC_AUTH_TYPE);
                         return scheme;
                     });
             // Set the scopes defined in the API to the OAS definition.
@@ -1384,7 +1384,7 @@ public class OAS3Parser extends APIDefinition {
                         SecurityScheme scheme = new SecurityScheme();
                         scheme.setType(SecurityScheme.Type.APIKEY);
                         scheme.setIn(SecurityScheme.In.HEADER);
-                        scheme.setName(APIConstants.API_KEY_AUTH_TYPE);
+                        scheme.setName(APIConstants.API_KEY_HEADER_QUERY_PARAM);
                         return scheme;
                     });
             // Add global api key security requirement to the OAS definition.
@@ -1394,6 +1394,9 @@ public class OAS3Parser extends APIDefinition {
         for (Map.Entry<String, PathItem> pathEntry : openAPI.getPaths().entrySet()) {
             for (Operation operation : pathEntry.getValue().readOperations()) {
                 List<SecurityRequirement> oldSecList = operation.getSecurity();
+                if (oldSecList == null) {
+                    oldSecList = new ArrayList<>();
+                }
                 List<String> operationScopes = oldSecList.stream()
                         .filter(securityRequirement -> securityRequirement.containsKey(OPENAPI_SECURITY_SCHEMA_KEY))
                         .findFirst()
@@ -1405,7 +1408,8 @@ public class OAS3Parser extends APIDefinition {
                         APIConstants.API_SECURITY_BASIC_AUTH, new ArrayList<>());
                 OASParserUtil.addOASOperationSecurityReqFromAPI(oldSecList, secList, APIConstants.API_SECURITY_API_KEY,
                         new ArrayList<>());
-                if (!secList.isEmpty() && !secList.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                if (!secList.isEmpty() && !secList.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        && operation.getSecurity() != null) {
                     // If oauth2 is not set for the API, remove oauth security scheme from resource level if exists.
                     operation.setSecurity(operation.getSecurity().stream()
                             .filter(securityRequirement -> !securityRequirement

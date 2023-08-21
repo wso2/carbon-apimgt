@@ -1832,7 +1832,7 @@ public class OASParserUtil {
                 securityScheme.getFlows().getImplicit()
                         .addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
             } else if (SecurityScheme.Type.HTTP.toString().equals(securityScheme.getType().toString()) &&
-                    APIConstants.AUTHORIZATION_HEADER_BASIC.equals(securityScheme.getScheme())) {
+                    APIConstants.SWAGGER_API_SECURITY_BASIC_AUTH_TYPE.equals(securityScheme.getScheme())) {
                 securityScheme.addExtension(APIConstants.SWAGGER_X_BASIC_AUTH_SCOPES, oas3Scopes);
                 securityScheme.addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
             }
