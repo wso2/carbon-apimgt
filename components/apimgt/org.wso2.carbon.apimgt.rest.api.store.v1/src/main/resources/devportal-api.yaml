@@ -160,6 +160,7 @@ paths:
             given query string against API Name.
           schema:
             type: string
+        - $ref: '#/components/parameters/aggregateBy'
         - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
@@ -6028,6 +6029,12 @@ components:
       schema:
         type: boolean
         default: false
+    aggregateBy:
+      name: aggregateBy
+      in: query
+      description: Aggregate APIs by their version. Supported values - 'majorVersion'.
+      schema:
+        type: string
   securitySchemes:
     OAuth2Security:
       type: oauth2

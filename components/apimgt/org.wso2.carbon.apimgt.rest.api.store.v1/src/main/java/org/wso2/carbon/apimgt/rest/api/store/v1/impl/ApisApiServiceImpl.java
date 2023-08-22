@@ -85,8 +85,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
 
     @Override
-    public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch,
-            MessageContext messageContext) {
+    public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String aggregateBy,
+                            String ifNoneMatch, MessageContext messageContext) {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "" : query;
@@ -102,9 +102,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":", APIConstants.NAME_TYPE_PREFIX + ":");
             }
 
-            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, organization, offset,
-                    limit, null, null);
-            
+            Map<String, Object> allMatchedApisMap;
+            if (aggregateBy == null) {
+                allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, organization, offset,
+                        limit, null, null);
+            } else {
+                allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, aggregateBy, organization, offset,
+                        limit, null, null);
+            }
 
             Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);

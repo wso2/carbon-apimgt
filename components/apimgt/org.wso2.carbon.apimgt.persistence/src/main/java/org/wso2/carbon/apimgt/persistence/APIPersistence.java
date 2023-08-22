@@ -181,6 +181,21 @@ public interface APIPersistence {
                                     UserContext ctx) throws APIPersistenceException;
 
     /**
+     * Search APIs to be displayed on Dev Portal API listing
+     *
+     * @param org         Organization the APIs are owned by
+     * @param searchQuery search query
+     * @param aggregateBy aggregate by. Ex: majorVersion
+     * @param start       starting index
+     * @param offset      search offset
+     * @return Dev Portal API Search Result
+     * @throws APIPersistenceException
+     */
+    DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, String aggregateBy,
+                                                    int start, int offset, UserContext ctx)
+            throws APIPersistenceException;
+
+    /**
      * Search based on content to display on publisher
      *
      * @param org         Organization the APIs are owned by

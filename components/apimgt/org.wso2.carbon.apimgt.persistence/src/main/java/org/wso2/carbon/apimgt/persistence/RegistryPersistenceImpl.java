@@ -1031,6 +1031,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
         return result;
     }
 
+    @Override
+    public DevPortalAPISearchResult searchAPIsForDevPortal
+            (Organization org, String searchQuery, String aggregateBy, int start, int offset, UserContext ctx)
+            throws APIPersistenceException {
+        throw new APIPersistenceException("Aggregated API search is not implemented");
+    }
+
     private DevPortalAPISearchResult searchPaginatedDevPortalAPIs(Registry userRegistry, int tenantIDLocal,
             String searchQuery, int start, int offset) throws APIManagementException {
         int totalLength = 0;

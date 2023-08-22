@@ -527,6 +527,19 @@ public interface APIManager {
             String sortBy, String sortOrder) throws APIManagementException;
 
     /**
+     * @param searchQuery search query. ex : provider:admin
+     * @param aggregateBy aggregate param. Ex: 'majorVersion'
+     * @param organization Identifier of an organization
+     * @param start starting number
+     * @param end ending number
+     * @return
+     * @throws APIManagementException
+     */
+    Map<String, Object> searchPaginatedAPIs(String searchQuery, String aggregateBy, String organization,
+                                            int start, int end, String sortBy, String sortOrder)
+            throws APIManagementException;
+
+    /**
      * Search in content of apis, api products and documents and provide the results
      * @param searchQuery search query
      * @param orgId Identifier of an organization

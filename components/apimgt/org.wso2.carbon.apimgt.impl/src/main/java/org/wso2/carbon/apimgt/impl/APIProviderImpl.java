@@ -4928,6 +4928,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String aggregateBy, String organization, int start, int end, String sortBy, String sortOrder) throws APIManagementException {
+        throw new APIManagementException("Aggregated API search is not implemented");
+    }
+
+    @Override
     public String addComment(String uuid, Comment comment, String user) throws APIManagementException {
         return apiMgtDAO.addComment(uuid, comment, user);
     }
