@@ -631,6 +631,11 @@ public class ImportUtils {
                         OperationPolicyDefinition synapseDefinition =
                                 APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
                                         policyFileName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                        // Synapse definition files can be either in .j2 or .xml format
+                        if (synapseDefinition == null) {
+                            synapseDefinition = APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                    policyFileName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML);
+                        }
                         if (synapseDefinition != null) {
                             synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
                             operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
