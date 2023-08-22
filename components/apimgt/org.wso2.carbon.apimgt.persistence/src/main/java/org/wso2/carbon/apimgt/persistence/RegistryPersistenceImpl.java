@@ -1535,7 +1535,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
     public DevPortalContentSearchResult searchContentForDevPortal(Organization org, String searchQuery, int start,
                                                                   int offset, UserContext ctx) throws APIPersistenceException {
         log.debug("Requested query for devportal content search: " + searchQuery);
-        Map<String, String> attributes = RegistrySearchUtil.getDevPortalSearchAttributes(searchQuery, ctx,
+        String userTenantDomain = MultitenantUtils.getTenantDomain(ctx.getUserame());
+        //check if a cross tenant scenario
+        boolean isCrossTenant = false;
+        if (userTenantDomain != null && !userTenantDomain.equals(org.getName())) {
+            isCrossTenant = true;
+        }
+        Map<String, String> attributes = RegistrySearchUtil.getDevPortalSearchAttributes(searchQuery, ctx, isCrossTenant,
                 isAllowDisplayAPIsWithMultipleStatus());
 
         if (log.isDebugEnabled()) {
@@ -1608,6 +1614,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             if (apiArtifactId != null) {
                                 GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
                                 devAPI = RegistryPersistenceUtil.getDevPortalAPIForSearch(apiArtifact);
+                                devAPI.setVisibility(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
                                 docSearch.setApiName(devAPI.getApiName());
                                 docSearch.setApiProvider(devAPI.getProviderName());
                                 docSearch.setApiVersion(devAPI.getVersion());
@@ -1627,6 +1634,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             if (apiArtifactId != null) {
                                 GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
                                 DevPortalAPI devAPI = RegistryPersistenceUtil.getDevPortalAPIForSearch(apiArtifact);
+                                devAPI.setVisibility(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
                                 DevPortalSearchContent content = new DevPortalSearchContent();
                                 content.setContext(devAPI.getContext());
                                 content.setDescription(devAPI.getDescription());
