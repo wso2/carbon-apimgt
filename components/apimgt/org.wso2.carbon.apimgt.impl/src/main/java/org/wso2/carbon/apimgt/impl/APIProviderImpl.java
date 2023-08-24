@@ -1776,6 +1776,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
+        log.debug("Undeploy event envDetails attribute: " + new Gson().toJson(envDetails));
+
         gatewayManager.unDeployFromGateway(api, tenantDomain, environmentsToRemove, envToDataPlaneIdMap,
                 envToGatewayAccessibilityTypeMap, envDetails);
         if (log.isDebugEnabled()) {
@@ -3900,6 +3902,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 envDetails.put(envName, envDetailsFromDAO);
             }
         }
+        log.debug("Undeploy event envDetails attribute: " + new Gson().toJson(envDetails));
         gatewayManager.unDeployFromGateway(apiProduct, tenantDomain, associatedAPIs,
                 environmentsToRemove, envToDataPlaneIdMap, envToGatewayAccessibilityTypeMap, envDetails);
     }
@@ -5509,6 +5512,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     envDetails.put(envName, envDetailsFromDAO);
                 }
             }
+            log.debug("Deploy event envDetails attribute: " + new Gson().toJson(envDetails));
             // TODO remove this to organization once the microgateway can build gateway based on organization.
             gatewayManager.deployToGateway(api, organization, environmentsToAdd, envToDataPlaneIdMap,
                     envToGatewayAccessibilityTypeMap, envDetails);
@@ -5905,6 +5909,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     envDetails.put(envName, envDetailsFromDAO);
                 }
             }
+            log.debug("Deploy event envDetails attribute: " + new Gson().toJson(envDetails));
             gatewayManager.deployToGateway(product, tenantDomain, environmentsToAdd, envToDataPlaneIdMap,
                     envToGatewayAccessibilityTypeMap, envDetails);
         }
