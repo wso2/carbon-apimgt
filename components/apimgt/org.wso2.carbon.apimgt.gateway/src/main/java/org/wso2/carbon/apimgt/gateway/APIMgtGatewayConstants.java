@@ -195,7 +195,6 @@ public class APIMgtGatewayConstants {
     public static final String TRANSPORT_WS = "ws";
     public static final String TRANSPORT_WSS = "wss";
     public static final String TRANSACTION_COUNTER_CONFIG_ROOT = "APIGateway.TransactionCounter";
-    public static final String TRANSACTION_COUNTER_ENABLED = TRANSACTION_COUNTER_CONFIG_ROOT + ".Enabled";
     public static final String TRANSACTION_COUNTER_PRODUCER_THREAD_POOL_SIZE = TRANSACTION_COUNTER_CONFIG_ROOT +
             ".ProducerThreadPoolSize";
     public static final String TRANSACTION_COUNTER_QUEUE_SIZE = TRANSACTION_COUNTER_CONFIG_ROOT + ".QueueSize";
@@ -205,7 +204,16 @@ public class APIMgtGatewayConstants {
     public static final String TRANSACTION_COUNTER_RECORD_INTERVAL = TRANSACTION_COUNTER_CONFIG_ROOT
             + ".ProducerScheduledInterval";
     public static final String TRANSACTION_COUNTER_MAX_RETRY_COUNT = TRANSACTION_COUNTER_CONFIG_ROOT + ".MaxRetryCount";
+    public static final String TRANSACTION_COUNTER_MIN_RETRY_COUNT = TRANSACTION_COUNTER_CONFIG_ROOT + ".MinRetryCount";
     public static final String TRANSACTION_COUNTER_MAX_TRANSACTION_RECORDS_PER_COMMIT = TRANSACTION_COUNTER_CONFIG_ROOT
             + ".MaxBatchSize";
+    public static final String TRANSACTION_COUNTER_CONSUMER_COMMIT_INTERVAL = TRANSACTION_COUNTER_CONFIG_ROOT
+            + ".PublisherScheduledInterval";
+    public static final String TRANSACTION_COUNTER_SERVER_ID = TRANSACTION_COUNTER_CONFIG_ROOT + ".ServerID";
+    public static final String TRANSACTION_COUNTER_SERVICE = TRANSACTION_COUNTER_CONFIG_ROOT + ".ServiceURL";
+    public static final String TRANSACTION_COUNTER_SERVICE_USERNAME = TRANSACTION_COUNTER_CONFIG_ROOT
+            + ".ServiceUsername";
+    public static final String TRANSACTION_COUNTER_SERVICE_PASSWORD = TRANSACTION_COUNTER_CONFIG_ROOT
+            + ".ServicePassword";
 }
 
