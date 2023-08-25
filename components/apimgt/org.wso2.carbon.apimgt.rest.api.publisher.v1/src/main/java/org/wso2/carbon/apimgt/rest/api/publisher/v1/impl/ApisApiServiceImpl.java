@@ -3202,6 +3202,27 @@ public class ApisApiServiceImpl implements ApisApiService {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
         }
 
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        boolean isApiContextExists = apiProvider.isContextExist(apiDTOFromProperties.getContext(), organization);
+        if (isApiContextExists) {
+            throw new APIManagementException(
+                    "Error occurred while adding the API. A duplicate API context already exists for "
+                            + apiDTOFromProperties.getContext() + " in the organization" + " : " + organization, ExceptionCodes
+                    .from(ExceptionCodes.API_CONTEXT_ALREADY_EXISTS, apiDTOFromProperties.getContext()));
+        }
+
+        boolean isApiNameExists =
+                apiProvider.isApiNameExist(apiDTOFromProperties.getName(), organization) ||
+                        apiProvider.isApiNameWithDifferentCaseExist(apiDTOFromProperties.getName(),
+                                organization);
+        if (isApiNameExists) {
+            throw new APIManagementException(
+                    "Error occurred while updating the API name. API with name " + apiDTOFromProperties.getName() +
+                            " already exists.",
+                    ExceptionCodes.from(ExceptionCodes.API_NAME_ALREADY_EXISTS, apiDTOFromProperties.getName()));
+        }
+
         // validate sandbox and production endpoints
         if (!PublisherCommonUtils.validateEndpoints(apiDTOFromProperties)) {
             throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
@@ -3217,7 +3238,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                             StringUtils.EMPTY, StringUtils.EMPTY, apiDTOFromProperties);
 
             // Import the API and Definition
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIDTO createdApiDTO = importOpenAPIDefinition(fileInputStream, url, inlineApiDefinition,
                     apiDTOFromProperties, fileDetail, null, organization);
             if (createdApiDTO != null) {
