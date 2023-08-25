@@ -9,8 +9,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.wso2.carbon.apimgt.gateway.handlers.transaction.TransactionCountConfig;
-import org.wso2.carbon.apimgt.gateway.handlers.transaction.TransactionRecord;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.util.TransactionCountConfig;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.record.TransactionRecord;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;

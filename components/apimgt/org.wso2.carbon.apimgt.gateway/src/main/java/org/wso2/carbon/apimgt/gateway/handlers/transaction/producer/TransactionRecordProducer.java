@@ -1,7 +1,9 @@
-package org.wso2.carbon.apimgt.gateway.handlers.transaction;
+package org.wso2.carbon.apimgt.gateway.handlers.transaction.producer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.util.TransactionCountConfig;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.record.TransactionRecord;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.queue.TransactionRecordQueue;
 
 import java.util.concurrent.ExecutorService;

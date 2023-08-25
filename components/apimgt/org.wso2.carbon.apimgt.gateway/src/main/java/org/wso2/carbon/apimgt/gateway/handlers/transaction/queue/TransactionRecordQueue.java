@@ -2,8 +2,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.transaction.queue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.gateway.handlers.transaction.TransactionRecord;
-import org.wso2.carbon.apimgt.gateway.handlers.transaction.TransactionRecordProducer;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.record.TransactionRecord;
 
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;

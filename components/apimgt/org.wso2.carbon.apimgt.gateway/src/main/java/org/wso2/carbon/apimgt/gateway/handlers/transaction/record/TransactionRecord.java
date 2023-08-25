@@ -1,4 +1,6 @@
-package org.wso2.carbon.apimgt.gateway.handlers.transaction;
+package org.wso2.carbon.apimgt.gateway.handlers.transaction.record;
+
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.util.TransactionCountConfig;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.gateway.handlers.transaction;
+package org.wso2.carbon.apimgt.gateway.handlers.transaction.util;
 
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;

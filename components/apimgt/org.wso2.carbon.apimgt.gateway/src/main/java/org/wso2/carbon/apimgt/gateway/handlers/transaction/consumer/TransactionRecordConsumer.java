@@ -1,12 +1,13 @@
-package org.wso2.carbon.apimgt.gateway.handlers.transaction;
+package org.wso2.carbon.apimgt.gateway.handlers.transaction.consumer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.util.TransactionCountConfig;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.record.TransactionRecord;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.queue.TransactionRecordQueue;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.store.TransactionRecordStore;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;

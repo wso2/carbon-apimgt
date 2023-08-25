@@ -6,8 +6,11 @@ import org.apache.synapse.AbstractExtendedSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.consumer.TransactionRecordConsumer;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.producer.TransactionRecordProducer;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.queue.TransactionRecordQueue;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.store.TransactionRecordStore;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.util.TransactionCountConfig;
 
 import java.lang.reflect.Constructor;
 import java.util.concurrent.*;
