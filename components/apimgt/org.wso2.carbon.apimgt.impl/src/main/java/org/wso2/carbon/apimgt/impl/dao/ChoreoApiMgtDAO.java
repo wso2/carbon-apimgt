@@ -87,10 +87,8 @@ public class ChoreoApiMgtDAO {
      * @param envUUID        UUID of the Environment
      * @throws APIManagementException if failed to update mapping
      */
-    public void updateEnvToDataPlaneMapping(Connection connection, String envUUID)
+    public void updateEnvToDataPlaneMapping(Connection connection, String envUUID, String dataplaneId)
             throws APIManagementException {
-
-        String dataplaneId = getDataPlaneIdForEnvironment(connection, envUUID);
         try (PreparedStatement prepStmt =
                      connection.prepareStatement(SQLConstants.UPDATE_ENV_TO_DATA_PLANE_MAPPING_SQL)) {
             prepStmt.setString(1, dataplaneId);

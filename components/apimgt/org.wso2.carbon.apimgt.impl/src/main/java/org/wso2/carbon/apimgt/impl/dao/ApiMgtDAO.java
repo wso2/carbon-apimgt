@@ -14290,7 +14290,8 @@ public class ApiMgtDAO {
                 prepStmt.executeUpdate();
                 deleteGatewayVhosts(connection, environment.getId());
                 addGatewayVhosts(connection, environment.getId(), environment.getVhosts());
-                ChoreoApiMgtDAO.getInstance().updateEnvToDataPlaneMapping(connection, environment.getUuid());
+                ChoreoApiMgtDAO.getInstance().updateEnvToDataPlaneMapping(connection, environment.getUuid(),
+                        environment.getDataPlaneId());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
