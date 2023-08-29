@@ -33,6 +33,8 @@ public class Constants {
     public static final String REQUEST_CACHE_HIT = "api.analytics.cacheHit";
     public static final String API_USER_NAME_KEY = "userName";
     public static final String API_CONTEXT_KEY = "apiContext";
+    public static final String RESPONSE_SIZE = "responseSize";
+    public static final String RESPONSE_CONTENT_TYPE = "responseContentType";
     public static final String API_ANALYTICS_CUSTOM_DATA_PROVIDER_CLASS = "publisher.custom.data.provider.class";
 
     public static final String REGION_ID_PROP = "apim.gw.region";
@@ -68,6 +70,6 @@ public class Constants {
     public static final String API_GOOGLE_ANALYTICS_MEASUREMENT_ID = "MeasurementID";
     public static final String API_GOOGLE_ANALYTICS_API_SECRET = "APISecret";
     public static final String X_FORWARDED_FOR_HEADER = "X-Forwarded-For";
-
     public static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
+    public static final String BUILD_RESPONSE_MESSAGE_CONFIG = "build_response_message";
 }
