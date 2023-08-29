@@ -1150,6 +1150,9 @@ public class PublisherCommonUtils {
         if (body.getAuthorizationHeader() == null) {
             body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
+        if (body.getApiKeyHeader() == null) {
+            body.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+        }
 
         if (body.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED && body.getVisibleRoles().isEmpty()) {
             throw new APIManagementException(
@@ -1763,6 +1766,10 @@ public class PublisherCommonUtils {
         }
         if (apiProductDTO.getAuthorizationHeader() == null) {
             apiProductDTO.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
+        }
+
+        if (apiProductDTO.getApiKeyHeader() == null) {
+            apiProductDTO.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
         }
 
         //Remove the /{version} from the context.

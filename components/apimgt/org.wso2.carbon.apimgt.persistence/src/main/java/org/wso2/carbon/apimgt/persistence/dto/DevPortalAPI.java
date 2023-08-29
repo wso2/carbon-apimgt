@@ -46,6 +46,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String subscriptionAvailability; // need to decide isSubscriptionAvailable
     private String subscriptionAvailableOrgs; // (subscriptionAvailableTenants): need to decide the value of "isSubscriptionAvailable"
     private String authorizationHeader;
+    private String apiKeyHeader;
     private List<String> securityScheme = new ArrayList<>();
     private Set<String> environments;
     private Set<String> apiCategories;
@@ -219,6 +220,14 @@ public class DevPortalAPI extends DevPortalAPIInfo {
 
     public String getAuthorizationHeader() {
         return authorizationHeader;
+    }
+
+    public void setApiKeyHeader(String apiKeyHeader) {
+        this.apiKeyHeader = apiKeyHeader;
+    }
+
+    public String getApiKeyHeader() {
+        return apiKeyHeader;
     }
 
     public void setAuthorizationHeader(String authorizationHeader) {
