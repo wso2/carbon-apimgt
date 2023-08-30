@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.transaction.producer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.gateway.handlers.transaction.util.TransactionCountConfig;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.config.TransactionCounterConfig;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.record.TransactionRecord;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.queue.TransactionRecordQueue;
 
@@ -27,8 +27,8 @@ public class TransactionRecordProducer {
     private TransactionRecordProducer(TransactionRecordQueue transactionRecordQueue, int threadPoolSize) {
 
         // Obtain config values
-        MAX_TRANSACTION_COUNT = TransactionCountConfig.getMaxTransactionCount();
-        TRANSACTION_COUNT_RECORD_INTERVAL = TransactionCountConfig.getTransactionCountRecordInterval();
+        MAX_TRANSACTION_COUNT = TransactionCounterConfig.getMaxTransactionCount();
+        TRANSACTION_COUNT_RECORD_INTERVAL = TransactionCounterConfig.getTransactionCountRecordInterval();
 
         this.transactionRecordQueue = transactionRecordQueue;
         this.executorService = Executors.newFixedThreadPool(threadPoolSize);

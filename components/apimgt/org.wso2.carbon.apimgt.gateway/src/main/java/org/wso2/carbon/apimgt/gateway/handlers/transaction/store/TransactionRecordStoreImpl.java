@@ -9,7 +9,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.wso2.carbon.apimgt.gateway.handlers.transaction.util.TransactionCountConfig;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.config.TransactionCounterConfig;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.record.TransactionRecord;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -30,9 +30,9 @@ public class TransactionRecordStoreImpl implements TransactionRecordStore {
     private static String password;
 
     public TransactionRecordStoreImpl() {
-        endpoint = TransactionCountConfig.getTransactionCountService();
-        username = TransactionCountConfig.getTransactionCountServiceUsername();
-        password = TransactionCountConfig.getTransactionCountServicePassword();
+        endpoint = TransactionCounterConfig.getTransactionCountService();
+        username = TransactionCounterConfig.getTransactionCountServiceUsername();
+        password = TransactionCounterConfig.getTransactionCountServicePassword();
 
         URL url = null;
         try {

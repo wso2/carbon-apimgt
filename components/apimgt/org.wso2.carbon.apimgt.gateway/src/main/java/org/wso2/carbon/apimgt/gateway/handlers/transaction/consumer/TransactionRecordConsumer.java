@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.transaction.consumer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.gateway.handlers.transaction.util.TransactionCountConfig;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.config.TransactionCounterConfig;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.record.TransactionRecord;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.queue.TransactionRecordQueue;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.store.TransactionRecordStore;
@@ -27,8 +27,8 @@ public class TransactionRecordConsumer {
                                       TransactionRecordQueue transactionRecordQueue, int commitInterval) {
 
         // Obtain config values
-        MAX_RETRY_COUNT = TransactionCountConfig.getMaxRetryCount();
-        MAX_TRANSACTION_RECORDS_PER_COMMIT = TransactionCountConfig.getMaxTransactionRecordsPerCommit();
+        MAX_RETRY_COUNT = TransactionCounterConfig.getMaxRetryCount();
+        MAX_TRANSACTION_RECORDS_PER_COMMIT = TransactionCounterConfig.getMaxTransactionRecordsPerCommit();
 
         this.transactionRecordStore = transactionRecordStore;
         this.transactionRecordQueue = transactionRecordQueue;

@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.gateway.handlers.transaction.record;
 
-import org.wso2.carbon.apimgt.gateway.handlers.transaction.util.TransactionCountConfig;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.config.TransactionCounterConfig;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -12,7 +12,7 @@ public class TransactionRecord {
     private static String server;
 
     static {
-        server = TransactionCountConfig.getServerID();
+        server = TransactionCounterConfig.getServerID();
         try {
              localhost = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {

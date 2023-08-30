@@ -5,12 +5,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.AbstractExtendedSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.consumer.TransactionRecordConsumer;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.exception.TransactionCounterInitializationException;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.producer.TransactionRecordProducer;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.queue.TransactionRecordQueue;
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.store.TransactionRecordStore;
-import org.wso2.carbon.apimgt.gateway.handlers.transaction.util.TransactionCountConfig;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.config.TransactionCounterConfig;
 
 import java.lang.reflect.Constructor;
 import java.util.concurrent.*;
@@ -30,11 +30,17 @@ public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
 
     public TransactionCountHandler() {
 
+        try {
+            TransactionCounterConfig.init();
+        } catch (TransactionCounterInitializationException e) {
+            throw new RuntimeException(e);
+        }
+
         // Obtain config values
-        PRODUCER_THREAD_POOL_SIZE = TransactionCountConfig.getProducerThreadPoolSize();
-        CONSUMER_COMMIT_INTERVAL = TransactionCountConfig.getConsumerCommitInterval();
-        TRANSACTION_RECORD_QUEUE_SIZE = TransactionCountConfig.getTransactionRecordQueueSize();
-        TRANSACTION_COUNT_STORE_CLASS = TransactionCountConfig.getTransactionCountStoreClass();
+        PRODUCER_THREAD_POOL_SIZE = TransactionCounterConfig.getProducerThreadPoolSize();
+        CONSUMER_COMMIT_INTERVAL = TransactionCounterConfig.getConsumerCommitInterval();
+        TRANSACTION_RECORD_QUEUE_SIZE = TransactionCounterConfig.getTransactionRecordQueueSize();
+        TRANSACTION_COUNT_STORE_CLASS = TransactionCounterConfig.getTransactionCountStoreClass();
 
         this.transactionRecordQueue = TransactionRecordQueue.getInstance(TRANSACTION_RECORD_QUEUE_SIZE);
         // Load the transaction count store
@@ -62,13 +68,14 @@ public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
             // Setting this property to identify request-response pairs
-            messageContext.setProperty(APIMgtGatewayConstants.IS_THERE_ASSOCIATED_INCOMING_REQUEST, true);
+            messageContext.setProperty(TransactionCounterConstants.IS_THERE_ASSOCIATED_INCOMING_REQUEST, true);
 
             LOG.info("Recieved an incoming request");
 
             // Counting message received via an open WebSocket
             String transport = axis2MessageContext.getIncomingTransportName();
-            if (transport.equals(APIMgtGatewayConstants.TRANSPORT_WS) || transport.equals(APIMgtGatewayConstants.TRANSPORT_WSS)){
+            if (transport.equals(TransactionCounterConstants.TRANSPORT_WS) ||
+                    transport.equals(TransactionCounterConstants.TRANSPORT_WSS)){
                 LOG.info("Counting WebSocket message");
                 this.transactionRecordProducer.addTransaction();
             }
@@ -82,7 +89,7 @@ public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
     public boolean handleRequestOutFlow(MessageContext messageContext) {
         try {
             Object isThereAnAssociatedIncomingRequest = messageContext.getProperty(
-                    APIMgtGatewayConstants.IS_THERE_ASSOCIATED_INCOMING_REQUEST);
+                    TransactionCounterConstants.IS_THERE_ASSOCIATED_INCOMING_REQUEST);
 
             // Counting outgoing messages that are not related to any request-response pair
             if (isThereAnAssociatedIncomingRequest == null) {
@@ -103,7 +110,7 @@ public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
         Object isThereAnAssociatedIncomingRequest = messageContext.getProperty(
-                APIMgtGatewayConstants.IS_THERE_ASSOCIATED_INCOMING_REQUEST);
+                TransactionCounterConstants.IS_THERE_ASSOCIATED_INCOMING_REQUEST);
 
         // Counting request-response pairs
         if (isThereAnAssociatedIncomingRequest instanceof Boolean) {
