@@ -41,6 +41,11 @@ public class TransactionCounterConfig {
                 configFetcher.getConfigValue(TransactionCounterConstants.MAX_TRANSACTION_COUNT));
     }
 
+    public static double getMinTransactionCount() {
+        return Double.parseDouble(
+                configFetcher.getConfigValue(TransactionCounterConstants.MIN_TRANSACTION_COUNT));
+    }
+
     public static int getTransactionCountRecordInterval() {
         return Integer.parseInt(
                 configFetcher.getConfigValue(TransactionCounterConstants.TRANSACTION_COUNT_RECORD_INTERVAL));

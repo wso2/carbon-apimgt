@@ -13,7 +13,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.transaction.store.TransactionReco
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.config.TransactionCounterConfig;
 
 import java.lang.reflect.Constructor;
-import java.util.concurrent.*;
+import java.util.concurrent.RejectedExecutionException;
 
 public class TransactionCountHandler extends AbstractExtendedSynapseHandler {
 

@@ -12,6 +12,7 @@ public class TransactionCounterConstants {
     public static final String PRODUCER_THREAD_POOL_SIZE = "producerThreadPoolSize";
     public static final String TRANSACTION_COUNT_RECORD_INTERVAL = "transactionCountRecordInterval";
     public static final String MAX_TRANSACTION_COUNT = "maxTransactionCount";
+    public static final String MIN_TRANSACTION_COUNT = "minTransactionCount";
     public static final String CONSUMER_COMMIT_INTERVAL = "consumerCommitInterval";
     public static final String MAX_TRANSACTION_RECORDS_PER_COMMIT = "maxTransactionRecordsPerCommit";
     public static final String MAX_RETRY_COUNT = "maxRetryCount";
@@ -28,6 +29,8 @@ public class TransactionCounterConstants {
     public static final String GATEWAY_STORE_CLASS = GATEWAY_CONFIG_ROOT + ".StoreClass";
     public static final String GATEWAY_MAX_TRANSACTION_COUNT = GATEWAY_CONFIG_ROOT +
             ".MaxTransactionCount";
+    public static final String GATEWAY_MIN_TRANSACTION_COUNT = GATEWAY_CONFIG_ROOT +
+            ".MinTransactionCount";
     public static final String GATEWAY_RECORD_INTERVAL = GATEWAY_CONFIG_ROOT
             + ".ProducerScheduledInterval";
     public static final String GATEWAY_MAX_RETRY_COUNT = GATEWAY_CONFIG_ROOT + ".MaxRetryCount";

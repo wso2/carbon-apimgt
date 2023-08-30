@@ -58,6 +58,11 @@ public class APIMConfigFetcher implements ConfigFetcher {
             Double MAX_TRANSACTION_COUNT = Double.parseDouble(temp);
 
             temp = (String) getFirstProperty.invoke(apiManagerConfiguration,
+                    TransactionCounterConstants.GATEWAY_MIN_TRANSACTION_COUNT);
+            temp = Objects.requireNonNull(temp, "Min transaction count cannot be null");
+            Double MIN_TRANSACTION_COUNT = Double.parseDouble(temp);
+
+            temp = (String) getFirstProperty.invoke(apiManagerConfiguration,
                     TransactionCounterConstants.GATEWAY_CONSUMER_COMMIT_INTERVAL);
             temp = Objects.requireNonNull(temp, "Consumer commit interval cannot be null");
             Integer CONSUMER_COMMIT_INTERVAL = Integer.parseInt(temp);
@@ -93,6 +98,7 @@ public class APIMConfigFetcher implements ConfigFetcher {
             configMap.put(TransactionCounterConstants.PRODUCER_THREAD_POOL_SIZE, PRODUCER_THREAD_POOL_SIZE);
             configMap.put(TransactionCounterConstants.TRANSACTION_COUNT_RECORD_INTERVAL , TRANSACTION_COUNT_RECORD_INTERVAL);
             configMap.put(TransactionCounterConstants.MAX_TRANSACTION_COUNT, MAX_TRANSACTION_COUNT);
+            configMap.put(TransactionCounterConstants.MIN_TRANSACTION_COUNT, MIN_TRANSACTION_COUNT);
             configMap.put(TransactionCounterConstants.CONSUMER_COMMIT_INTERVAL, CONSUMER_COMMIT_INTERVAL);
             configMap.put(TransactionCounterConstants.MAX_TRANSACTION_RECORDS_PER_COMMIT, MAX_TRANSACTION_RECORDS_PER_COMMIT);
             configMap.put(TransactionCounterConstants.MAX_RETRY_COUNT, MAX_RETRY_COUNT);
@@ -104,10 +110,8 @@ public class APIMConfigFetcher implements ConfigFetcher {
             // This error won't be thrown here because it is already checked in TransactionCountConfig
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new TransactionCounterInitializationException();
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException | NullPointerException e) {
             throw new TransactionCounterInitializationException("Error while reading the config values", e);
-        } catch (NullPointerException e) {
-            throw new TransactionCounterInitializationException("All configuration values needs to be provided", e);
         }
     }
 

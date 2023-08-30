@@ -16,6 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class TransactionRecordProducer {
 
     private static double MAX_TRANSACTION_COUNT;
+    private static double MIN_TRANSACTION_COUNT;
     private static int TRANSACTION_COUNT_RECORD_INTERVAL;
     private static final Log LOG = LogFactory.getLog(TransactionRecordProducer.class);
     private static TransactionRecordProducer instance = null;
@@ -28,6 +29,7 @@ public class TransactionRecordProducer {
 
         // Obtain config values
         MAX_TRANSACTION_COUNT = TransactionCounterConfig.getMaxTransactionCount();
+        MIN_TRANSACTION_COUNT = TransactionCounterConfig.getMinTransactionCount();
         TRANSACTION_COUNT_RECORD_INTERVAL = TransactionCounterConfig.getTransactionCountRecordInterval();
 
         this.transactionRecordQueue = transactionRecordQueue;
@@ -76,7 +78,7 @@ public class TransactionRecordProducer {
         lock.lock();
         try {
             int transactionCountValue = transactionCount.get();
-            if (transactionCountValue != 0) {
+            if (transactionCountValue >= MIN_TRANSACTION_COUNT) {
                 TransactionRecord transactionRecord = new TransactionRecord(transactionCountValue);
                 LOG.info("Transaction count is added to the queue from scheduled producer");
                 transactionRecordQueue.add(transactionRecord);
