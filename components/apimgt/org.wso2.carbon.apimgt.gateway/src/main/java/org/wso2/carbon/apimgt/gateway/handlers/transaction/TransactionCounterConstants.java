@@ -2,6 +2,10 @@ package org.wso2.carbon.apimgt.gateway.handlers.transaction;
 
 public class TransactionCounterConstants {
 
+    public static enum ServerType {
+        GATEWAY, MI
+    }
+
     public static final String IS_THERE_ASSOCIATED_INCOMING_REQUEST = "is_there_incoming_request";
     public static final String TRANSPORT_WS = "ws";
     public static final String TRANSPORT_WSS = "wss";

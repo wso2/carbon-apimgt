@@ -9,23 +9,23 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class TransactionRecordQueue {
 
-    private static final Log LOG = LogFactory.getLog(TransactionRecordQueue.class);
     private static TransactionRecordQueue instance = null;
     private static ArrayBlockingQueue<TransactionRecord> transactionRecordQueue;
 
-    private TransactionRecordQueue(int size) {
-        transactionRecordQueue = new ArrayBlockingQueue<>(size);
-    }
+    private TransactionRecordQueue() {}
 
-    public static TransactionRecordQueue getInstance(int size) {
+    public static TransactionRecordQueue getInstance() {
         if(instance == null) {
-            instance = new TransactionRecordQueue(size);
+            instance = new TransactionRecordQueue();
         }
         return instance;
     }
+
+    public void init(int size) {
+        transactionRecordQueue = new ArrayBlockingQueue<>(size);
+    }
     
     public void add(TransactionRecord transactionRecord) {
-        LOG.info("Transaction count is added to the queue");
         transactionRecordQueue.add(transactionRecord);
     }
     public void addAll(ArrayList<TransactionRecord> transactionRecordList) {

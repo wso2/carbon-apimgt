@@ -1,7 +1,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.transaction.config;
 
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.TransactionCounterConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.transaction.exception.TransactionCounterInitializationException;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.exception.TransactionCounterConfigurationException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -11,9 +11,9 @@ import java.util.Objects;
 public class APIMConfigFetcher implements ConfigFetcher {
 
     private static APIMConfigFetcher instance = null;
-    private static HashMap<String, Object> configMap = new HashMap<>();
+    private final static HashMap<String, Object> configMap = new HashMap<>();
 
-    private APIMConfigFetcher() throws TransactionCounterInitializationException {
+    private APIMConfigFetcher() throws TransactionCounterConfigurationException {
         try {
             Class<?> configClass = Class.forName(TransactionCounterConstants.APIM_CONFIG_CLASS);
 
@@ -109,13 +109,13 @@ public class APIMConfigFetcher implements ConfigFetcher {
         } catch (ClassNotFoundException e) {
             // This error won't be thrown here because it is already checked in TransactionCountConfig
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            throw new TransactionCounterInitializationException();
+            throw new TransactionCounterConfigurationException();
         } catch (NumberFormatException | NullPointerException e) {
-            throw new TransactionCounterInitializationException("Error while reading the config values", e);
+            throw new TransactionCounterConfigurationException("Error while reading the config values", e);
         }
     }
 
-    public static ConfigFetcher getInstance() throws TransactionCounterInitializationException {
+    public static ConfigFetcher getInstance() throws TransactionCounterConfigurationException {
         if (instance == null) {
             instance = new APIMConfigFetcher();
         }

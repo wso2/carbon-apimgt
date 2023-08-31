@@ -24,15 +24,15 @@ public class TransactionRecordStoreImpl implements TransactionRecordStore {
 
     private static final Log LOG = LogFactory.getLog(TransactionRecordStoreImpl.class);
     private static HttpClient httpClient;
+    private static String ENDPOINT;
+    private static String encodedCredentials;
 
-    private static String endpoint;
-    private static String username;
-    private static String password;
-
-    public TransactionRecordStoreImpl() {
-        endpoint = TransactionCounterConfig.getTransactionCountService();
-        username = TransactionCounterConfig.getTransactionCountServiceUsername();
-        password = TransactionCounterConfig.getTransactionCountServicePassword();
+    @Override
+    public void init(String endpoint, String username, String password) {
+        
+        ENDPOINT = endpoint;
+        String credentials = username + ":" + password;
+        encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
 
         URL url = null;
         try {
@@ -46,15 +46,10 @@ public class TransactionRecordStoreImpl implements TransactionRecordStore {
     @Override
     public boolean commit(ArrayList<TransactionRecord> transactionRecordList, int maxRetryCount) {
 
-        // Send the transaction count to the analytics server using apache http client
-        HttpPost httpPost = new HttpPost(endpoint);
-
         Gson gson = new Gson();
         String jsonPayload = gson.toJson(transactionRecordList);
 
-        String credentials = username + ":" + password;
-        String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
-
+        HttpPost httpPost = new HttpPost(ENDPOINT);
         HttpEntity stringEntity = new StringEntity(jsonPayload , ContentType.APPLICATION_JSON);
         httpPost.setEntity(stringEntity);
         httpPost.setHeader("Accept", "application/json");

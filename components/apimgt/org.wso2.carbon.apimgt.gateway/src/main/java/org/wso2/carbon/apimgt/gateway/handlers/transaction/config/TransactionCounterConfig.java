@@ -1,30 +1,37 @@
 package org.wso2.carbon.apimgt.gateway.handlers.transaction.config;
 
 import org.wso2.carbon.apimgt.gateway.handlers.transaction.TransactionCounterConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.transaction.exception.TransactionCounterInitializationException;
+import org.wso2.carbon.apimgt.gateway.handlers.transaction.exception.TransactionCounterConfigurationException;
 
 public class TransactionCounterConfig {
 
     private static ConfigFetcher configFetcher;
+    private static TransactionCounterConstants.ServerType serverType;
 
-    public static void init() throws TransactionCounterInitializationException {
+    public static void init() throws TransactionCounterConfigurationException {
         try {
             // Check whether the APIM Config class is available
             Class.forName(TransactionCounterConstants.APIM_CONFIG_CLASS);
             configFetcher = APIMConfigFetcher.getInstance();
+            serverType = TransactionCounterConstants.ServerType.GATEWAY;
         } catch (ClassNotFoundException e) {
             try {
                 // Check whether the MI Config class is available
                 Class.forName(TransactionCounterConstants.MI_CONFIG_CLASS);
                 configFetcher = MIConfigFetcher.getInstance();
+                serverType = TransactionCounterConstants.ServerType.MI;
             } catch (ClassNotFoundException ex) {
-                throw new TransactionCounterInitializationException(ex);
+                throw new TransactionCounterConfigurationException(ex);
             }
         }
     }
 
+    public static TransactionCounterConstants.ServerType getServerType() {
+        return serverType;
+    }
+
     public static String getServerID() {
-        return configFetcher.getConfigValue(TransactionCounterConstants.GATEWAY_SERVER_ID);
+        return configFetcher.getConfigValue(TransactionCounterConstants.SERVER_ID);
     }
 
     public static String getTransactionCountStoreClass() {

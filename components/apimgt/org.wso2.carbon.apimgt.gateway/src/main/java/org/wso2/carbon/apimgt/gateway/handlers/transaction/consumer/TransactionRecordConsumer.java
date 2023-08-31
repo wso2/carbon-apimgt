@@ -16,38 +16,30 @@ public class TransactionRecordConsumer {
 
     private int MAX_RETRY_COUNT;
     private int MAX_TRANSACTION_RECORDS_PER_COMMIT;
-    private static final Log LOG = LogFactory.getLog(TransactionRecordConsumer.class);
     private static TransactionRecordConsumer instance = null;
     private TransactionRecordStore transactionRecordStore;
     private TransactionRecordQueue transactionRecordQueue;
     private ScheduledExecutorService scheduledExecutorService;
-    private final int commitInterval;
 
-    private TransactionRecordConsumer(TransactionRecordStore transactionRecordStore,
-                                      TransactionRecordQueue transactionRecordQueue, int commitInterval) {
+    private TransactionRecordConsumer() {}
 
-        // Obtain config values
-        MAX_RETRY_COUNT = TransactionCounterConfig.getMaxRetryCount();
-        MAX_TRANSACTION_RECORDS_PER_COMMIT = TransactionCounterConfig.getMaxTransactionRecordsPerCommit();
-
-        this.transactionRecordStore = transactionRecordStore;
-        this.transactionRecordQueue = transactionRecordQueue;
-        this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-        this.commitInterval = commitInterval;
-    }
-
-    public static TransactionRecordConsumer getInstance(TransactionRecordQueue transactionRecordQueue,
-                                                        TransactionRecordStore transactionRecordStore,
-                                                        int commitInterval) {
+    public static TransactionRecordConsumer getInstance() {
         if(instance == null) {
-            instance = new TransactionRecordConsumer(transactionRecordStore, transactionRecordQueue, commitInterval);
+            instance = new TransactionRecordConsumer();
         }
         return instance;
     }
 
-    public void start() {
-        LOG.info("Transaction record consumer started");
-        // execute the startCommitting method in all the threads
+    public void init(TransactionRecordStore transactionRecordStore, TransactionRecordQueue transactionRecordQueue,
+                     int commitInterval, int maxRetryCount, int maxTransactionRecordsPerCommit) {
+
+        MAX_RETRY_COUNT = maxRetryCount;
+        MAX_TRANSACTION_RECORDS_PER_COMMIT = maxTransactionRecordsPerCommit;
+
+        this.transactionRecordStore = transactionRecordStore;
+        this.transactionRecordQueue = transactionRecordQueue;
+        this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+
         scheduledExecutorService.scheduleAtFixedRate(this::commitWithRetries,
                 0, commitInterval, TimeUnit.SECONDS);
     }
