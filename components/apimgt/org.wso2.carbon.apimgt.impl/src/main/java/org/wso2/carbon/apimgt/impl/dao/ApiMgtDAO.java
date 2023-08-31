@@ -107,12 +107,7 @@ import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
-import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -9294,6 +9289,122 @@ public class ApiMgtDAO {
                     e);
         }
 
+    }
+
+    public KeyManagerPermissionDTO getKeyManagerPermission(String keyManagerUUID, String role) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet resultSet = null;
+
+        KeyManagerPermissionDTO keyManagerPermission = null;
+        try {
+            String getKeyManagerPermissionQuery = SQLConstants.KeyManagerPermissionsSqlConstants.GET_KEY_MANAGER_PERMISSION_SQL;
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getKeyManagerPermissionQuery);
+
+            ps.setString(1, keyManagerUUID);
+            ps.setString(2, role);
+
+            resultSet = ps.executeQuery();
+            keyManagerPermission = new KeyManagerPermissionDTO();
+            keyManagerPermission.setKeyManagerUUID(keyManagerUUID);
+            keyManagerPermission.setRole(role);
+            if(resultSet.next()){
+                keyManagerPermission.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
+                keyManagerPermission.setKeyManagerPermissionID(resultSet.getInt("KEY_MANAGER_PERMISSION_ID"));
+            } else {
+                keyManagerPermission.setPermissionType("Public");
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Key Manager permission information for Key Manager " + keyManagerUUID +
+                    "for the role " +  role, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return keyManagerPermission;
+    }
+
+    public void updateKeyManagerPermission(String keyManagerUUID, String role, String permissionType)
+            throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        PreparedStatement insertOrUpdatePS = null;
+        ResultSet resultSet = null;
+        int keyManagerPermissionId = -1;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            String getKeyManagerPermissionQuery = SQLConstants.KeyManagerPermissionsSqlConstants.GET_KEY_MANAGER_PERMISSION_ID_SQL;
+            ps = conn.prepareStatement(getKeyManagerPermissionQuery);
+            ps.setString(1, keyManagerUUID);
+            ps.setString(2, role);
+            resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                keyManagerPermissionId = resultSet.getInt("KEY_MANAGER_PERMISSION_ID");
+            }
+
+            if (keyManagerPermissionId == -1) {
+                String query = SQLConstants.KeyManagerPermissionsSqlConstants.ADD_KEY_MANAGER_PERMISSION_SQL;
+                insertOrUpdatePS = conn.prepareStatement(query);
+                insertOrUpdatePS.setString(1, keyManagerUUID);
+                insertOrUpdatePS.setString(2, permissionType);
+                insertOrUpdatePS.setString(3, role);
+                insertOrUpdatePS.execute();
+            } else {
+                String query = SQLConstants.KeyManagerPermissionsSqlConstants.UPDATE_KEY_MANAGER_PERMISSION_SQL;
+                insertOrUpdatePS = conn.prepareStatement(query);
+                insertOrUpdatePS.setString(1, keyManagerUUID);
+                insertOrUpdatePS.setString(2, permissionType);
+                insertOrUpdatePS.setString(3, role);
+                insertOrUpdatePS.setInt(4, keyManagerPermissionId);
+                insertOrUpdatePS.executeUpdate();
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            handleException("Error in updating tier permissions: " + e.getMessage(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            APIMgtDBUtil.closeAllConnections(insertOrUpdatePS, null, null);
+        }
+    }
+
+    public void deleteKeyManagerPermission(String keyManagerUUID, String role) throws APIManagementException {
+        int keyManagerPermissionId = -1;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SQLConstants.KeyManagerPermissionsSqlConstants.GET_KEY_MANAGER_PERMISSION_ID_SQL)) {
+            ps.setString(1, keyManagerUUID);
+            ps.setString(2, role);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    keyManagerPermissionId = resultSet.getInt("KEY_MANAGER_PERMISSION_ID");
+                }
+            }
+            if (keyManagerPermissionId != -1) {
+                try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants
+                        .KeyManagerPermissionsSqlConstants.DELETE_KEY_MANAGER_PERMISSION_SQL)) {
+                    preparedStatement.setInt(1, keyManagerPermissionId);
+                    preparedStatement.setString(2, role);
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error in deleting key manager permissions: " + e.getMessage(), e);
+        }
+    }
+
+    public void deleteAllKeyManagerPermission(String keyManagerUUID) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants
+                     .KeyManagerPermissionsSqlConstants.DELETE_ALL_KEY_MANAGER_PERMISSION_SQL)) {
+             preparedStatement.setString(1, keyManagerUUID);
+             preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Error in deleting key manager permissions: " + e.getMessage(), e);
+        }
     }
 
     public List<KeyManagerConfigurationDTO> getKeyManagerConfigurations() throws APIManagementException {

@@ -3602,6 +3602,43 @@ public class SQLConstants {
     }
 
     /**
+     * Static class to hold database queries related to AM_KEY_MANAGER_PERMISSIONS table
+     */
+    public static class KeyManagerPermissionsSqlConstants {
+
+        public static final String GET_KEY_MANAGER_PERMISSION_ID_SQL =
+                " SELECT KEY_MANAGER_PERMISSION_ID " +
+                        " FROM AM_KEY_MANAGER_PERMISSIONS " +
+                        " WHERE KEY_MANAGER_UUID = ? AND " + "ROLE = ?";
+
+        public static final String ADD_KEY_MANAGER_PERMISSION_SQL =
+                " INSERT INTO" +
+                        " AM_KEY_MANAGER_PERMISSIONS (KEY_MANAGER_UUID, PERMISSIONS_TYPE, ROLE)" +
+                        " VALUES(?, ?, ?)";
+
+        public static final String UPDATE_KEY_MANAGER_PERMISSION_SQL =
+                " UPDATE" +
+                        " AM_KEY_MANAGER_PERMISSIONS " +
+                        " SET " +
+                        "   KEY_MANAGER_UUID = ?, " +
+                        "   PERMISSIONS_TYPE = ?," +
+                        "   ROLE = ? " +
+                        " WHERE " +
+                        "   KEY_MANAGER_PERMISSIONS_ID = ? ";
+
+        public static final String DELETE_KEY_MANAGER_PERMISSION_SQL = "DELETE FROM AM_KEY_MANAGER_PERMISSIONS WHERE " +
+                "KEY_MANAGER_PERMISSION_ID = ?";
+
+        public static final String DELETE_ALL_KEY_MANAGER_PERMISSION_SQL = "DELETE FROM AM_KEY_MANAGER_PERMISSIONS WHERE " +
+                "KEY_MANAGER_UUID = ?";
+
+        public static final String GET_KEY_MANAGER_PERMISSION_SQL =
+                " SELECT KEY_MANAGER_PERMISSION_ID, PERMISSIONS_TYPE" +
+                        " FROM AM_KEY_MANAGER_PERMISSIONS " +
+                        " WHERE KEY_MANAGER_UUID = ? AND ROLE = ?";
+    }
+
+    /**
      * Static class to hold database queries related to AM_TENANT_THEMES table
      */
     public static class TenantThemeConstants {
