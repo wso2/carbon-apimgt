@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.common.gateway.graphql.QueryValidator;
 import org.wso2.carbon.apimgt.gateway.dto.GraphQLOperationDTO;
 import org.wso2.carbon.apimgt.common.gateway.graphql.GraphQLProcessorUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
@@ -71,7 +72,7 @@ public class GraphQLRequestProcessor extends RequestProcessor {
      */
     @Override
     public InboundProcessorResponseDTO handleRequest(int msgSize, String msgText,
-                                                     InboundMessageContext inboundMessageContext) {
+                                                     InboundMessageContext inboundMessageContext) throws APISecurityException {
         InboundProcessorResponseDTO responseDTO;
         JSONObject graphQLMsg = new JSONObject(msgText);
         // removing the existing resource already set in the channel so that new resource can be extracted and set,

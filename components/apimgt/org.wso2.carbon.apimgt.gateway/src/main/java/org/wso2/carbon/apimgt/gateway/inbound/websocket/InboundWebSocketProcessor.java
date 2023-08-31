@@ -158,7 +158,7 @@ public class InboundWebSocketProcessor {
      * @param inboundMessageContext InboundMessageContext
      * @return InboundProcessorResponseDTO with handshake processing response
      */
-    public InboundProcessorResponseDTO handleRequest(WebSocketFrame msg, InboundMessageContext inboundMessageContext) {
+    public InboundProcessorResponseDTO handleRequest(WebSocketFrame msg, InboundMessageContext inboundMessageContext) throws APISecurityException {
 
         RequestProcessor requestProcessor;
         String msgText = null;
@@ -208,7 +208,8 @@ public class InboundWebSocketProcessor {
     private boolean validateOAuthHeader(FullHttpRequest req, InboundMessageContext inboundMessageContext)
             throws APISecurityException {
 
-        if (!inboundMessageContext.getRequestHeaders().containsKey(WebsocketUtil.authorizationHeader)) {
+        if (!(inboundMessageContext.getRequestHeaders().containsKey(WebsocketUtil.authorizationHeader) ||
+                inboundMessageContext.getRequestHeaders().containsKey("apikey"))) {
             QueryStringDecoder decoder = new QueryStringDecoder(inboundMessageContext.getFullRequestPath());
             Map<String, List<String>> requestMap = decoder.parameters();
             if (requestMap.containsKey(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT)) {

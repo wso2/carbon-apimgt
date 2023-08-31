@@ -44,7 +44,7 @@ public class ResponseProcessor {
     public InboundProcessorResponseDTO handleResponse(int msgSize, String msgText,
                                                       InboundMessageContext inboundMessageContext) throws Exception {
         InboundProcessorResponseDTO responseDTO;
-        responseDTO = InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext);
+        responseDTO = InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext);//
         if (!responseDTO.isError()) {
             responseDTO = WebsocketUtil.validateDenyPolicies(inboundMessageContext);
             if (!responseDTO.isError()) {
