@@ -26,6 +26,7 @@ public class InboundProcessorResponseDTO {
     int errorCode;
     String errorMessage;
     boolean closeConnection = false; // whether to close the connection if during frame validation
+    boolean continueToNextAuthenticator = false;
 
     public boolean isError() {
         return isError;
@@ -61,5 +62,13 @@ public class InboundProcessorResponseDTO {
 
     public String getErrorResponseString() {
         return "Error code: " + errorCode + " reason: " + errorMessage;
+    }
+
+    public void setContinueToNextAuthenticator(boolean isContinueToNextAuthenticator) {
+        this.continueToNextAuthenticator = isContinueToNextAuthenticator;
+    }
+
+    public boolean getContinueToNextAuthenticator() {
+        return continueToNextAuthenticator;
     }
 }
