@@ -364,7 +364,9 @@ public class InboundWebsocketProcessorUtil {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
                     inboundMessageContext.getTenantDomain(), true);
 
-            return !authenticateToken(inboundMessageContext).isError();
+            boolean isAuthenticated = !authenticateToken(inboundMessageContext, "handshake").isError();
+
+            return isAuthenticated;
 //            String authorizationHeader = inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader);
 //            String[] auth = authorizationHeader.split(StringUtils.SPACE);
 //            List<String> keyManagerList =
@@ -441,10 +443,10 @@ public class InboundWebsocketProcessorUtil {
      * @return InboundProcessorResponseDTO
      */
     public static InboundProcessorResponseDTO authenticateToken(InboundMessageContext inboundMessageContext) throws APISecurityException {
-        return authenticateToken(inboundMessageContext, false);
+        return authenticateToken(inboundMessageContext, "frame");
     }
 
-    public static InboundProcessorResponseDTO authenticateToken(InboundMessageContext inboundMessageContext, boolean validateScopes) throws APISecurityException {
+    public static InboundProcessorResponseDTO authenticateToken(InboundMessageContext inboundMessageContext, String authenticationType) throws APISecurityException {
 
         ArrayList<Authenticator> authenticators = new ArrayList<>();
 
@@ -457,7 +459,7 @@ public class InboundWebsocketProcessorUtil {
         InboundProcessorResponseDTO inboundProcessorResponseDTO = null;
 
         for (Authenticator authenticator : authenticators) {
-            inboundProcessorResponseDTO = authenticator.authenticate(inboundMessageContext);
+            inboundProcessorResponseDTO = authenticator.authenticate(inboundMessageContext, authenticationType);
             if (!inboundProcessorResponseDTO.getContinueToNextAuthenticator()) {
                 break;
             }

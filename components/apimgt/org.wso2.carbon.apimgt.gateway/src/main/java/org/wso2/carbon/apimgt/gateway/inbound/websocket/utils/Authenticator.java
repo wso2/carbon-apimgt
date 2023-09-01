@@ -6,5 +6,5 @@ import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponse
 
 public interface Authenticator {
 
-    InboundProcessorResponseDTO authenticate(InboundMessageContext inboundMessageContext) throws APISecurityException;
+    InboundProcessorResponseDTO authenticate(InboundMessageContext inboundMessageContext, String authenticationType) throws APISecurityException;
 }
