@@ -97,7 +97,7 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
     @Override
     public Map<String, Object> populateCustomClaims(JWTInfoDto jwtInfoDto) {
 
-        String[] restrictedClaims = {"iss", "sub", "aud", "exp", "nbf", "iat", "jti", "application", "tierInfo",
+        String[] restrictedClaims = {"iss", "sub", "exp", "nbf", "iat", "jti", "application", "tierInfo",
                 "subscribedAPIs", "aut"};
         Map<String, Object> claims = new HashMap<>();
         Set<String> jwtExcludedClaims = jwtConfigurationDto.getJWTExcludedClaims();
