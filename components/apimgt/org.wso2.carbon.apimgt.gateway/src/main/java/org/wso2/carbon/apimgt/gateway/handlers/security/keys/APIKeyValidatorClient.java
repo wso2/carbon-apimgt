@@ -41,7 +41,7 @@ public class APIKeyValidatorClient {
             justification = "It is required to set two options on the Options object")
     public APIKeyValidatorClient() {
 
-        apiKeyValidationService = new APIKeyValidationService(); //Oauth //APIKey
+        apiKeyValidationService = new APIKeyValidationService();
     }
 
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey,
@@ -66,7 +66,7 @@ public class APIKeyValidatorClient {
             throws APISecurityException {
 
         try {
-            return apiKeyValidationService  //Oauth
+            return apiKeyValidationService
                     .validateSubscription(context, version, consumerKey, tenantDomain, keyManager);
         } catch (APIKeyMgtException | APIManagementException e) {
             log.error("Error while  validate subscriptions", e);
@@ -80,7 +80,7 @@ public class APIKeyValidatorClient {
             throws APISecurityException {
 
         try {
-            return apiKeyValidationService //APIKey
+            return apiKeyValidationService
                     .validateSubscription(context, version, appId, tenantDomain);
         } catch (APIKeyMgtException | APIManagementException e) {
             log.error("Error while  validate subscriptions", e);
@@ -93,7 +93,7 @@ public class APIKeyValidatorClient {
             throws APISecurityException {
 
         try {
-            return apiKeyValidationService.validateScopes(tokenValidationContext, tenantDomain); //Oauth
+            return apiKeyValidationService.validateScopes(tokenValidationContext, tenantDomain);
         } catch (APIKeyMgtException e) {
             String message = "Error while accessing backend services for token scope validation";
             log.error(message, e);
@@ -105,7 +105,7 @@ public class APIKeyValidatorClient {
                                                     ) throws APISecurityException {
 
         try {
-            return apiKeyValidationService.getAllURITemplates(context, apiVersion); //APIKey
+            return apiKeyValidationService.getAllURITemplates(context, apiVersion);
         } catch (APIManagementException e) {
             log.error("Error while retrieving data from datastore", e);
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,

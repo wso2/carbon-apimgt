@@ -365,72 +365,7 @@ public class InboundWebsocketProcessorUtil {
                     inboundMessageContext.getTenantDomain(), true);
 
             boolean isAuthenticated = !authenticateToken(inboundMessageContext, "handshake").isError();
-
             return isAuthenticated;
-//            String authorizationHeader = inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader);
-//            String[] auth = authorizationHeader.split(StringUtils.SPACE);
-//            List<String> keyManagerList =
-//                    DataHolder.getInstance().getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid());
-//            if (APIConstants.CONSUMER_KEY_SEGMENT.equals(auth[0])) {
-//                boolean isJwtToken = false;
-//                String apiKey = auth[1];
-//                if (WebsocketUtil.isRemoveOAuthHeadersFromOutMessage()) {
-//                    inboundMessageContext.getHeadersToRemove().add(WebsocketUtil.authorizationHeader);
-//                }
-//
-//                //Initial guess of a JWT token using the presence of a DOT.
-//                if (StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT)) {
-//                    try {
-//                        // Check if the header part is decoded
-//                        if (StringUtils.countMatches(apiKey, APIConstants.DOT) != 2) {
-//                            log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
-//                            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-//                                    "Invalid JWT token");
-//                        }
-//                        inboundMessageContext.setSignedJWTInfo(getSignedJwtInfo(apiKey));
-//                        String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
-//                                .getKeyManagerNameIfJwtValidatorExist(inboundMessageContext.getSignedJWTInfo());
-//                        if (StringUtils.isNotEmpty(keyManager)) {
-//                            if (log.isDebugEnabled()){
-//                                log.debug("KeyManager " + keyManager + "found for authenticate token " + GatewayUtils.getMaskedToken(apiKey));
-//                            }
-//                            if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
-//                                    keyManagerList.contains(keyManager)) {
-//                                if (log.isDebugEnabled()) {
-//                                    log.debug("Elected KeyManager " + keyManager + "found in API level list " + String.join(",", keyManagerList));
-//                                }
-//                                isJwtToken = true;
-//                            } else {
-//                                if (log.isDebugEnabled()) {
-//                                    log.debug("Elected KeyManager " + keyManager + " not found in API level list " + String.join(",", keyManagerList));
-//                                }
-//                                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-//                                        "Invalid JWT token");
-//                            }
-//                        } else {
-//                            if (log.isDebugEnabled()) {
-//                                log.debug("KeyManager not found for accessToken " + GatewayUtils.getMaskedToken(apiKey));
-//                            }
-//                        }
-//                    } catch (ParseException e) {
-//                        log.debug("Not a JWT token. Failed to decode the token header.", e);
-//                    } catch (APIManagementException e) {
-//                        log.error("Error while checking validation of JWT", e);
-//                        throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-//                                APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
-//                    }
-//                }
-//                // Find the authentication scheme based on the token type
-//                if (isJwtToken) {
-//                    log.debug("The token was identified as a JWT token");
-//                    inboundMessageContext.setJWTToken(true);
-//                }
-//                boolean isGQL = APIConstants.GRAPHQL_API.equals(inboundMessageContext.getElectedAPI().getApiType());
-//                boolean authenticated = !(authenticateToken(inboundMessageContext, !isGQL).isError());
-//                return authenticated;
-//            } else {
-//                return false;
-//            }
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -453,9 +388,6 @@ public class InboundWebsocketProcessorUtil {
         OAuthAuthenticator oAuthAuthenticator = new OAuthAuthenticator();
         authenticators.add(oAuthAuthenticator);
 
-//        ApiKeyAuthenticator apiKeyAuthenticator = new ApiKeyAuthenticator();
-//        authenticators.add(apiKeyAuthenticator);
-
         InboundProcessorResponseDTO inboundProcessorResponseDTO = null;
 
         for (Authenticator authenticator : authenticators) {
@@ -467,98 +399,6 @@ public class InboundWebsocketProcessorUtil {
         return inboundProcessorResponseDTO;
     }
 
-    /**
-     * Authenticate token during inbound websocket request (frame) execution.
-     *
-     * @param inboundMessageContext InboundMessageContext
-     * @param validateScopes flag to denote whether to validate the scopes or not
-     * @return InboundProcessorResponseDTO
-     */
-//    public static InboundProcessorResponseDTO authenticateToken(InboundMessageContext inboundMessageContext, boolean validateScopes) {
-//
-//        InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
-//        try {
-//            //validate token and subscriptions
-//            if (inboundMessageContext.isJWTToken()) {
-//                log.debug("Authentication started for JWT tokens");
-//                JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(),
-//                        inboundMessageContext.getTenantDomain());
-//                AuthenticationContext authenticationContext;
-//                String matchingResources = validateScopes ? inboundMessageContext.getMatchingResource() : null;
-//                authenticationContext = jwtValidator.
-//                        authenticateForWebSocket(inboundMessageContext.getSignedJWTInfo(),
-//                                inboundMessageContext.getApiContext(), inboundMessageContext.getVersion(),
-//                                matchingResources, validateScopes);
-//                if (!validateAuthenticationContext(authenticationContext, inboundMessageContext)) {
-//                    inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
-//                            WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS,
-//                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, true);
-//                }
-//            } else {
-//                log.debug("Authentication started for Opaque tokens");
-//                String apiKey;
-//                if (inboundMessageContext.getToken() == null) {
-//                    String authHeader = inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader);
-//                    apiKey = getTokenFromAuthHeader(authHeader);
-//                } else {
-//                    apiKey = inboundMessageContext.getToken();
-//                }
-//                APIKeyValidationInfoDTO info;
-//                String cacheKey;
-//                //If the key have already been validated
-//                if (WebsocketUtil.isGatewayTokenCacheEnabled()) {
-//                    cacheKey = WebsocketUtil.getAccessTokenCacheKey(apiKey, inboundMessageContext.getApiContext(),
-//                            inboundMessageContext.getMatchingResource());
-//                    info = WebsocketUtil.validateCache(apiKey, cacheKey);
-//                    if (info != null) {
-//                        inboundMessageContext.setKeyType(info.getType());
-//                        inboundMessageContext.setInfoDTO(info);
-//                        inboundMessageContext.setToken(info.getEndUserToken());
-//                    } else {
-//                        String revokedCachedToken = (String) CacheProvider.getInvalidTokenCache().get(apiKey);
-//                        if (revokedCachedToken != null) {
-//                            // Token is revoked/invalid or expired
-//                            return InboundWebsocketProcessorUtil.getFrameErrorDTO(
-//                                    WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS,
-//                                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, true);
-//                        }
-//                    }
-//                }
-//                List<String> keyManagerList =
-//                        DataHolder.getInstance().getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid());
-//                info = getApiKeyDataForWSClient(apiKey, inboundMessageContext.getTenantDomain(),
-//                        inboundMessageContext.getApiContext(), inboundMessageContext.getVersion(), keyManagerList);
-//                if (info == null || !info.isAuthorized()) {
-//                    info.setAuthorized(false);
-//                }
-//                if (WebsocketUtil.isGatewayTokenCacheEnabled()) {
-//                    cacheKey = WebsocketUtil.getAccessTokenCacheKey(apiKey,
-//                            inboundMessageContext.getApiContext(), inboundMessageContext.getMatchingResource());
-//                    WebsocketUtil.putCache(info, apiKey, cacheKey);
-//                }
-//                inboundMessageContext.setKeyType(info.getType());
-//                inboundMessageContext.setToken(info.getEndUserToken());
-//                inboundMessageContext.setInfoDTO(info);
-//                if (info.isAuthorized()) {
-//                    return inboundProcessorResponseDTO;
-//                }
-//                return InboundWebsocketProcessorUtil.getFrameErrorDTO(
-//                        WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS,
-//                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, true);
-//            }
-//        } catch (APIManagementException e) {
-//            log.error(WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_MESSAGE, e);
-//            inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
-//                    WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_ERROR,
-//                    WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_MESSAGE, true);
-//        } catch (APISecurityException e) {
-//            log.error(WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS, e);
-//            inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
-//                    WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS,
-//                    e.getMessage(), true);
-//        }
-//        return inboundProcessorResponseDTO;
-//    }
 
     /**
      * Get signed JWT info for access token
