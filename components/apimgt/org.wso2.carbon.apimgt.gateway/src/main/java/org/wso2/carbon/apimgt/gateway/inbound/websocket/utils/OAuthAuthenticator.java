@@ -25,7 +25,7 @@ import javax.cache.Cache;
 import java.text.ParseException;
 import java.util.List;
 
-public class OAuthAuthenticator implements Authenticator{
+public class OAuthAuthenticator implements Authenticator {
 
     private static final Log log = LogFactory.getLog(OAuthAuthenticator.class);
 
@@ -36,18 +36,18 @@ public class OAuthAuthenticator implements Authenticator{
     public InboundProcessorResponseDTO authenticate(InboundMessageContext inboundMessageContext, String authenticationType) throws APISecurityException {
 
         InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
-        boolean validateScopes = false;
-
+        boolean validateScopes = false; // This is false when authenticating websocket request (frame)
         List<String> keyManagerList =
                 DataHolder.getInstance().getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid());
 
+//        if (authenticationType.equals("handshake") && inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader) != null) {
         if (authenticationType.equals("handshake")) {
             String authorizationHeader = inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader);
             String[] auth = authorizationHeader.split(StringUtils.SPACE);
             if (APIConstants.CONSUMER_KEY_SEGMENT.equals(auth[0])) {
                 boolean isJwtToken = false;
                 String apiKey = auth[1];
-                if (WebsocketUtil.isRemoveOAuthHeadersFromOutMessage()) {
+                if (WebsocketUtil.isRemoveOAuthHeadersFromOutMessage()) { //this will be needed
                     inboundMessageContext.getHeadersToRemove().add(WebsocketUtil.authorizationHeader);
                 }
 
@@ -60,11 +60,11 @@ public class OAuthAuthenticator implements Authenticator{
                             throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                     "Invalid JWT token");
                         }
-                        inboundMessageContext.setSignedJWTInfo(getSignedJwtInfo(apiKey));
+                        inboundMessageContext.setSignedJWTInfo(getSignedJwtInfo(apiKey)); //this wii be needed
                         String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
                                 .getKeyManagerNameIfJwtValidatorExist(inboundMessageContext.getSignedJWTInfo());
                         if (StringUtils.isNotEmpty(keyManager)) {
-                            if (log.isDebugEnabled()){
+                            if (log.isDebugEnabled()) {
                                 log.debug("KeyManager " + keyManager + "found for authenticate token " + GatewayUtils.getMaskedToken(apiKey));
                             }
                             if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
@@ -96,14 +96,12 @@ public class OAuthAuthenticator implements Authenticator{
                 // Find the authentication scheme based on the token type
                 if (isJwtToken) {
                     log.debug("The token was identified as a JWT token");
-                    inboundMessageContext.setJWTToken(true);
+                    inboundMessageContext.setJWTToken(true); //this will be needed
                 }
-//            boolean isGQL = APIConstants.GRAPHQL_API.equals(inboundMessageContext.getElectedAPI().getApiType());
                 validateScopes = !APIConstants.GRAPHQL_API.equals(inboundMessageContext.getElectedAPI().getApiType());
-//            boolean authenticated = !(authenticateToken(inboundMessageContext, !isGQL).isError());
-//            return authenticated;
             } else {
                 inboundProcessorResponseDTO.setError(true);
+                return inboundProcessorResponseDTO;
             }
         }
 
@@ -154,8 +152,7 @@ public class OAuthAuthenticator implements Authenticator{
                         }
                     }
                 }
-//                List<String> keyManagerList =
-//                        DataHolder.getInstance().getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid());
+
                 info = getApiKeyDataForWSClient(apiKey, inboundMessageContext.getTenantDomain(),
                         inboundMessageContext.getApiContext(), inboundMessageContext.getVersion(), keyManagerList);
                 if (info == null || !info.isAuthorized()) {
@@ -192,7 +189,7 @@ public class OAuthAuthenticator implements Authenticator{
     }
 
     public boolean validateAuthenticationContext(AuthenticationContext authenticationContext,
-                                                        InboundMessageContext inboundMessageContext) {
+                                                 InboundMessageContext inboundMessageContext) {
 
         if (authenticationContext == null || !authenticationContext.isAuthenticated()) {
             return false;

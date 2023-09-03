@@ -60,6 +60,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
@@ -723,7 +724,7 @@ public class GatewayUtils {
                     authContext.setIsContentAware(true);
                     ;
                 }
-                if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
+                if (synCtx != null && APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
                     Integer graphQLMaxDepth = (int) (long) subscriptionTierObj.get(GraphQLConstants.GRAPHQL_MAX_DEPTH);
                     Integer graphQLMaxComplexity =
                             (int) (long) subscriptionTierObj.get(GraphQLConstants.GRAPHQL_MAX_COMPLEXITY);
@@ -1068,6 +1069,20 @@ public class GatewayUtils {
                 jwtInfoDto.setSubscriber(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
             }
         }
+    }
+
+    public static JWTInfoDto generateJWTInfoDto(JSONObject subscribedAPI, JWTValidationInfo jwtValidationInfo,
+                                                APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
+                                                InboundMessageContext inboundMessageContext) {
+
+        JWTInfoDto jwtInfoDto = new JWTInfoDto();
+        jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
+        String apiContext = inboundMessageContext.getApiContext();
+        String apiVersion = inboundMessageContext.getVersion();
+        jwtInfoDto.setApiContext(apiContext);
+        jwtInfoDto.setVersion(apiVersion);
+        constructJWTContent(subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
+        return jwtInfoDto;
     }
 
     public static JWTInfoDto generateJWTInfoDto(JSONObject subscribedAPI, JWTValidationInfo jwtValidationInfo,
