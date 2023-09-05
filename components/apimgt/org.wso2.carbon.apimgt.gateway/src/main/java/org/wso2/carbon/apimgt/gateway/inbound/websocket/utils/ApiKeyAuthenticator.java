@@ -10,11 +10,8 @@ import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.transport.nhttp.NhttpConstants;
-import org.apache.synapse.util.xpath.SynapseXPath;
-import org.jaxen.JaxenException;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URIBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -24,7 +21,9 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.dto.JWTTokenPayloadInfo;
-import org.wso2.carbon.apimgt.gateway.handlers.security.*;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
@@ -44,10 +43,12 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
 import javax.cache.Cache;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.net.URISyntaxException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Base64;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ApiKeyAuthenticator implements Authenticator {
 
@@ -57,12 +58,6 @@ public class ApiKeyAuthenticator implements Authenticator {
     private AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator = null;
     private ExtendedJWTConfigurationDto jwtConfigurationDto = null;
     private Boolean isGatewayTokenCacheEnabled = null;
-    private static boolean gatewayApiKeyKeyCacheInit = false;
-    private static boolean gatewayInvalidApiKeyCacheInit = false;
-    private String contextHeader = null;
-    private String securityParam;
-    private String apiLevelPolicy;
-    private boolean isMandatory;
     private static volatile long ttl = -1L;
 
     public InboundProcessorResponseDTO authenticate(InboundMessageContext inboundMessageContext, String authenticationType) throws APISecurityException {
@@ -75,8 +70,7 @@ public class ApiKeyAuthenticator implements Authenticator {
 
         try {
             // Extract apikey from the request while removing it from the msg context.
-//            String apiKey = extractApiKey(synCtx);
-            String apiKey = inboundMessageContext.getRequestHeaders().get("apikey");
+            String apiKey = extractApiKey(inboundMessageContext);
             JWTTokenPayloadInfo payloadInfo = null;
 
             if (jwtConfigurationDto == null) {
@@ -115,8 +109,8 @@ public class ApiKeyAuthenticator implements Authenticator {
 
             String splitToken[] = apiKey.split("\\.");
             JWSHeader decodedHeader;
-            JWTClaimsSet payload = null;
-            SignedJWT signedJWT = null;
+            JWTClaimsSet payload;
+            SignedJWT signedJWT;
             String tokenIdentifier, certAlias;
             if (splitToken.length != 3) {
                 log.error("Api Key does not have the format {header}.{payload}.{signature} ");
@@ -143,7 +137,7 @@ public class ApiKeyAuthenticator implements Authenticator {
 
             }
             if (decodedHeader.getKeyID() == null) {
-                if (log.isDebugEnabled()){
+                if (log.isDebugEnabled()) {
                     log.debug("Invalid Api Key. Could not find alias in header. Api Key: " +
                             GatewayUtils.getMaskedToken(splitToken[0]));
                 }
@@ -156,30 +150,7 @@ public class ApiKeyAuthenticator implements Authenticator {
 
             String apiContext = inboundMessageContext.getApiContext();
             String apiVersion = inboundMessageContext.getVersion();
-//            String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
-//                    getProperty(Constants.Configuration.HTTP_METHOD);
             String matchingResource = inboundMessageContext.getMatchingResource();
-
-//            OpenAPI openAPI = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
-//            if (openAPI == null && !APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
-//                log.error("Swagger is missing in the gateway. " +
-//                        "Therefore, Api Key authentication cannot be performed.");
-//                return new AuthenticationResponse(false, isMandatory, true,
-//                        APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF,
-//                        APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF_ERROR_MESSAGE);
-//            }
-//            String resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
-//                    matchingResource, httpMethod);
-//            VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
-//            verbInfoDTO.setHttpVerb(httpMethod);
-//            //Not doing resource level authentication
-//            verbInfoDTO.setAuthType(APIConstants.AUTH_NO_AUTHENTICATION);
-//            verbInfoDTO.setRequestKey(resourceCacheKey);
-//            verbInfoDTO.setThrottling(OpenAPIUtils.getResourceThrottlingTier(openAPI, synCtx));
-//            List<VerbInfoDTO> verbInfoList = new ArrayList<>();
-//            verbInfoList.add(verbInfoDTO);
-//            synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoList);
-
             String cacheKey = GatewayUtils.getAccessTokenCacheKey(tokenIdentifier, apiContext, apiVersion,
                     matchingResource, null);
             boolean isVerified = false;
@@ -313,7 +284,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                         try {
                             signedJWT = (SignedJWT) JWTParser.parse(apiKey);
                             payload = signedJWT.getJWTClaimsSet();
-                        } catch (JSONException | IllegalArgumentException|ParseException e) {
+                        } catch (JSONException | IllegalArgumentException | ParseException e) {
                             if (log.isDebugEnabled()) {
                                 log.debug("Invalid ApiKey. ApiKey: " + GatewayUtils.getMaskedToken(splitToken[0]));
                             }
@@ -331,7 +302,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                 APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                     }
-                    validateAPIKeyRestrictions(payload, inboundMessageContext); ////
+                    validateAPIKeyRestrictions(payload, inboundMessageContext);
                     if (isGatewayTokenCacheEnabled) {
                         JWTTokenPayloadInfo jwtTokenPayloadInfo = new JWTTokenPayloadInfo();
                         jwtTokenPayloadInfo.setPayload(payload);
@@ -354,23 +325,16 @@ public class ApiKeyAuthenticator implements Authenticator {
                     contextHeader = getContextHeader();
                 }
 
-
                 AuthenticationContext authenticationContext = GatewayUtils
-                        .generateAuthenticationContext(tokenIdentifier, payload, api, getApiLevelPolicy(),
-                                endUserToken, null);
-//                APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, contextHeader);
+                        .generateAuthenticationContext(tokenIdentifier, payload, api, "", endUserToken, null);
                 if (!validateAuthenticationContext(inboundMessageContext, authenticationContext, contextHeader)) {
-                    inboundProcessorResponseDTO.setError(true);
-                    inboundProcessorResponseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS);
-                    inboundProcessorResponseDTO.setErrorMessage(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-                    inboundProcessorResponseDTO.setCloseConnection(true);
-                    return inboundProcessorResponseDTO;
+                    return getErrorInboundProcessorResponseDTO(inboundProcessorResponseDTO, true,
+                            WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS,
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, true);
                 }
-//                synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, authenticationContext.getUsername());
                 if (log.isDebugEnabled()) {
                     log.debug("User is authorized to access the resource using Api Key.");
                 }
-//                new AuthenticationResponse(true, isMandatory, false, 0, null);
                 inboundProcessorResponseDTO.setErrorCode(0);
                 inboundProcessorResponseDTO.setErrorMessage(null);
                 return inboundProcessorResponseDTO;
@@ -385,31 +349,27 @@ public class ApiKeyAuthenticator implements Authenticator {
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
 
         } catch (APISecurityException e) {
-//            new AuthenticationResponse(false, isMandatory, true, e.getErrorCode(), e.getMessage());
-            inboundProcessorResponseDTO.setError(true);
-            inboundProcessorResponseDTO.setErrorCode(e.getErrorCode());
-            inboundProcessorResponseDTO.setErrorMessage(e.getMessage());
-            inboundProcessorResponseDTO.setCloseConnection(true);
-            return inboundProcessorResponseDTO;
+            return getErrorInboundProcessorResponseDTO(inboundProcessorResponseDTO, true,
+                    e.getErrorCode(), e.getMessage(), true);
         } catch (ParseException e) {
             log.error("Error while parsing API Key", e);
-//            new AuthenticationResponse(false, isMandatory, true, APISecurityConstants.API_AUTH_GENERAL_ERROR,
-//                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
-            inboundProcessorResponseDTO.setError(true);
-            inboundProcessorResponseDTO.setErrorCode(APISecurityConstants.API_AUTH_GENERAL_ERROR);
-            inboundProcessorResponseDTO.setErrorMessage(APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
-            inboundProcessorResponseDTO.setCloseConnection(true);
-            return inboundProcessorResponseDTO;
+            return getErrorInboundProcessorResponseDTO(inboundProcessorResponseDTO, true,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, true);
         } catch (APIManagementException e) {
             log.error("Error while setting public cert/private key for backend jwt generation", e);
-//            return new AuthenticationResponse(false, isMandatory, true,
-//                    APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
-            inboundProcessorResponseDTO.setError(true);
-            inboundProcessorResponseDTO.setErrorCode(APISecurityConstants.API_AUTH_GENERAL_ERROR);
-            inboundProcessorResponseDTO.setErrorMessage(APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
-            inboundProcessorResponseDTO.setCloseConnection(true);
-            return inboundProcessorResponseDTO;
+            return getErrorInboundProcessorResponseDTO(inboundProcessorResponseDTO, true,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, true);
         }
+    }
+
+    private InboundProcessorResponseDTO getErrorInboundProcessorResponseDTO(InboundProcessorResponseDTO inboundProcessorResponseDTO,
+                                                                            boolean isError, int errorCode, String errorMessage,
+                                                                            boolean closeConnection) {
+        inboundProcessorResponseDTO.setError(isError);
+        inboundProcessorResponseDTO.setErrorCode(errorCode);
+        inboundProcessorResponseDTO.setErrorMessage(errorMessage);
+        inboundProcessorResponseDTO.setCloseConnection(closeConnection);
+        return inboundProcessorResponseDTO;
     }
 
     private void validateAPIKeyRestrictions(JWTClaimsSet payload, InboundMessageContext inboundMessageContext) throws APISecurityException {
@@ -517,45 +477,53 @@ public class ApiKeyAuthenticator implements Authenticator {
         return endUserToken;
     }
 
-//    private String extractApiKey(InboundMessageContext mCtx) throws APISecurityException {
-//
-////        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) mCtx).getAxis2MessageContext();
-//        String apiKey;
-//
-//        //check headers to get apikey
-//        Map headers = (Map) (axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
-//        if (headers != null) {
-//            apiKey = (String) headers.get(securityParam);
-//            if (apiKey != null) {
-//                //Remove apikey header from the request
-//                headers.remove(securityParam);
-//                return apiKey.trim();
-//            }
-//        }
-//        //check query params to get apikey
-//        try {
-//            apiKey = new SynapseXPath("$url:apikey").stringValueOf(mCtx);
-//            if (StringUtils.isNotBlank(apiKey)) {
-//                String rest_url_postfix = (String) axis2MC.getProperty(NhttpConstants.REST_URL_POSTFIX);
-//                rest_url_postfix = removeApiKeyFromQueryParameters(rest_url_postfix, URLEncoder.encode(apiKey));
-//                axis2MC.setProperty(NhttpConstants.REST_URL_POSTFIX, rest_url_postfix);
-//                return apiKey.trim();
-//            } else {
-//                if (log.isDebugEnabled()){
-//                    log.debug("Api Key Authentication failed: Header or Query parameter with the name '"
-//                            .concat(securityParam).concat("' was not found."));
+    private String extractApiKey(InboundMessageContext inboundMessageContext) throws APISecurityException {
+
+        String apiKey = null;
+
+        //check headers to get apikey
+        Map headers = inboundMessageContext.getRequestHeaders();
+        String securityParam = "apikey";
+        if (headers != null) {
+            apiKey = (String) headers.get(securityParam);
+            if (apiKey != null) {
+                //Remove apikey header from the request
+                headers.remove(securityParam);
+                return apiKey.trim();
+            }
+        }
+        //check query params to get apikey
+        //            ArrayList<NameValuePair> queryParams = (ArrayList<NameValuePair>) new URIBuilder(inboundMessageContext.getFullRequestPath()).getQueryParams();
+//            for (NameValuePair queryParam : queryParams) {
+//                if (queryParam.getName().equals(securityParam)) {
+//                    apiKey = queryParam.getValue();
+//                    break;
 //                }
-//                throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
-//                        APISecurityConstants.API_AUTH_MISSING_CREDENTIALS_MESSAGE);
 //            }
-//        } catch (JaxenException e) {
-//            if (log.isDebugEnabled()) {
-//                log.debug("Error while retrieving apikey from the request query params.", e);
-//            }
-//            throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
-//                    APISecurityConstants.API_AUTH_MISSING_CREDENTIALS_MESSAGE);
-//        }
-//    }
+        apiKey = inboundMessageContext.getApiKeyFromQueryParams();
+        if (StringUtils.isNotBlank(apiKey)) {
+            //Remove apikey query param from the full request path
+            inboundMessageContext.setFullRequestPath(removeApiKeyFromQueryParameters(inboundMessageContext.getFullRequestPath(), apiKey));
+            return apiKey.trim();
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Api Key Authentication failed: Header or Query parameter with the name '"
+                        .concat(securityParam).concat("' was not found."));
+            }
+            throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_MISSING_CREDENTIALS_MESSAGE);
+        }
+    }
+
+    private String removeApiKeyFromQueryParameters(String queryParam, String apiKey) {
+        queryParam = queryParam.replace("?apikey=" + apiKey, "?");
+        queryParam = queryParam.replace("&apikey=" + apiKey, "");
+        queryParam = queryParam.replace("?&", "?");
+        if (queryParam.lastIndexOf("?") == (queryParam.length() - 1)) {
+            queryParam = queryParam.replace("?", "");
+        }
+        return queryParam;
+    }
 
     public boolean validateAuthenticationContext(InboundMessageContext inboundMessageContext, AuthenticationContext authenticationContext, String contextHeader) {
 
@@ -596,57 +564,6 @@ public class ApiKeyAuthenticator implements Authenticator {
         return authenticationContext.isAuthenticated();
     }
 
-    private String extractApiKey(MessageContext mCtx) throws APISecurityException {
-
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) mCtx).getAxis2MessageContext();
-        String apiKey;
-
-        //check headers to get apikey
-        Map headers = (Map) (axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
-        if (headers != null) {
-            apiKey = (String) headers.get(securityParam);
-            if (apiKey != null) {
-                //Remove apikey header from the request
-                headers.remove(securityParam);
-                return apiKey.trim();
-            }
-        }
-        //check query params to get apikey
-        try {
-            apiKey = new SynapseXPath("$url:apikey").stringValueOf(mCtx);
-            if (StringUtils.isNotBlank(apiKey)) {
-                String rest_url_postfix = (String) axis2MC.getProperty(NhttpConstants.REST_URL_POSTFIX);
-                rest_url_postfix = removeApiKeyFromQueryParameters(rest_url_postfix, URLEncoder.encode(apiKey));
-                axis2MC.setProperty(NhttpConstants.REST_URL_POSTFIX, rest_url_postfix);
-                return apiKey.trim();
-            } else {
-                if (log.isDebugEnabled()){
-                    log.debug("Api Key Authentication failed: Header or Query parameter with the name '"
-                            .concat(securityParam).concat("' was not found."));
-                }
-                throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
-                        APISecurityConstants.API_AUTH_MISSING_CREDENTIALS_MESSAGE);
-            }
-        } catch (JaxenException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Error while retrieving apikey from the request query params.", e);
-            }
-            throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
-                    APISecurityConstants.API_AUTH_MISSING_CREDENTIALS_MESSAGE);
-        }
-    }
-
-    private String removeApiKeyFromQueryParameters(String queryParam, String apiKey) {
-        queryParam = queryParam.replace("?apikey=" + apiKey, "?");
-        queryParam = queryParam.replace("&apikey=" + apiKey, "");
-        queryParam = queryParam.replace("?&", "?");
-        if (queryParam.lastIndexOf("?") == (queryParam.length() - 1)) {
-            queryParam = queryParam.replace("?", "");
-        }
-        return queryParam;
-
-    }
-
     /**
      * Check whether the jwt token is expired or not.
      *
@@ -682,18 +599,10 @@ public class ApiKeyAuthenticator implements Authenticator {
         return jwtValidationInfo;
     }
 
-    private byte[] decode(String payload) throws IllegalArgumentException {
-        return java.util.Base64.getUrlDecoder().decode(payload.getBytes(StandardCharsets.UTF_8));
-    }
-
     public String getContextHeader() {
         APIManagerConfiguration apimConf = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         JWTConfigurationDto jwtConfigDto = apimConf.getJwtConfigurationDto();
         return jwtConfigDto.getJwtHeader();
-    }
-
-    public void setContextHeader(String contextHeader) {
-        this.contextHeader = contextHeader;
     }
 
     //first level cache
@@ -710,7 +619,4 @@ public class ApiKeyAuthenticator implements Authenticator {
         return CacheProvider.getGatewayApiKeyDataCache();
     }
 
-    private String getApiLevelPolicy() {
-        return apiLevelPolicy;
-    }
 }

@@ -31,6 +31,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.dto.GraphQLOperationDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
@@ -68,7 +69,7 @@ public class GraphQLResponseProcessorTest {
     }
 
     @Test
-    public void testHandleResponseSuccess() {
+    public void testHandleResponseSuccess() throws APISecurityException {
 
         InboundMessageContext inboundMessageContext = new InboundMessageContext();
         int msgSize = 100;
@@ -108,7 +109,7 @@ public class GraphQLResponseProcessorTest {
     }
 
     @Test
-    public void testHandleNonSubscribeResponse() {
+    public void testHandleNonSubscribeResponse() throws APISecurityException {
 
         InboundMessageContext inboundMessageContext = new InboundMessageContext();
         int msgSize = 100;
@@ -129,7 +130,7 @@ public class GraphQLResponseProcessorTest {
     }
 
     @Test
-    public void testHandleBadResponse() {
+    public void testHandleBadResponse() throws APISecurityException {
 
         InboundMessageContext inboundMessageContext = new InboundMessageContext();
         int msgSize = 100;
@@ -161,7 +162,7 @@ public class GraphQLResponseProcessorTest {
     }
 
     @Test
-    public void testHandleThrottleOut() {
+    public void testHandleThrottleOut() throws APISecurityException {
 
         InboundMessageContext inboundMessageContext = new InboundMessageContext();
         int msgSize = 100;
@@ -201,7 +202,7 @@ public class GraphQLResponseProcessorTest {
     }
 
     @Test
-    public void testHandleInvalidScope() {
+    public void testHandleInvalidScope() throws APISecurityException {
 
         InboundMessageContext inboundMessageContext = new InboundMessageContext();
         int msgSize = 100;
@@ -243,7 +244,7 @@ public class GraphQLResponseProcessorTest {
     }
 
     @Test
-    public void testHandleResponseScopeValidationSkipWhenSecurityDisabled() {
+    public void testHandleResponseScopeValidationSkipWhenSecurityDisabled() throws APISecurityException {
 
         InboundMessageContext inboundMessageContext = new InboundMessageContext();
         int msgSize = 100;

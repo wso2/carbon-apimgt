@@ -40,14 +40,13 @@ public class OAuthAuthenticator implements Authenticator {
         List<String> keyManagerList =
                 DataHolder.getInstance().getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid());
 
-//        if (authenticationType.equals("handshake") && inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader) != null) {
-        if (authenticationType.equals("handshake")) {
+        if (authenticationType.equals("handshake") && inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader) != null) {
             String authorizationHeader = inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader);
             String[] auth = authorizationHeader.split(StringUtils.SPACE);
             if (APIConstants.CONSUMER_KEY_SEGMENT.equals(auth[0])) {
                 boolean isJwtToken = false;
                 String apiKey = auth[1];
-                if (WebsocketUtil.isRemoveOAuthHeadersFromOutMessage()) { //this will be needed
+                if (WebsocketUtil.isRemoveOAuthHeadersFromOutMessage()) {
                     inboundMessageContext.getHeadersToRemove().add(WebsocketUtil.authorizationHeader);
                 }
 
@@ -60,7 +59,7 @@ public class OAuthAuthenticator implements Authenticator {
                             throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                     "Invalid JWT token");
                         }
-                        inboundMessageContext.setSignedJWTInfo(getSignedJwtInfo(apiKey)); //this wii be needed
+                        inboundMessageContext.setSignedJWTInfo(getSignedJwtInfo(apiKey));
                         String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
                                 .getKeyManagerNameIfJwtValidatorExist(inboundMessageContext.getSignedJWTInfo());
                         if (StringUtils.isNotEmpty(keyManager)) {

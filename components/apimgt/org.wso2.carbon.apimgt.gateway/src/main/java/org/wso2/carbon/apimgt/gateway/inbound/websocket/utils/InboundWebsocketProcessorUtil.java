@@ -364,8 +364,7 @@ public class InboundWebsocketProcessorUtil {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
                     inboundMessageContext.getTenantDomain(), true);
 
-            boolean isAuthenticated = !authenticateToken(inboundMessageContext, "handshake").isError();
-            return isAuthenticated;
+            return !authenticateToken(inboundMessageContext, "handshake").isError();
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -381,37 +380,37 @@ public class InboundWebsocketProcessorUtil {
         return authenticateToken(inboundMessageContext, "frame");
     }
 
-    public static InboundProcessorResponseDTO authenticateToken(InboundMessageContext inboundMessageContext, String authenticationType) throws APISecurityException {
-
-        OAuthAuthenticator oAuthAuthenticator = new OAuthAuthenticator();
-        ApiKeyAuthenticator apiKeyAuthenticator = new ApiKeyAuthenticator();
-        if (inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader) != null) {
-            return oAuthAuthenticator.authenticate(inboundMessageContext, authenticationType);
-        } else if (inboundMessageContext.getRequestHeaders().get("apikey") != null) {
-            return apiKeyAuthenticator.authenticate(inboundMessageContext, authenticationType);
-        } else {
-            return null;
-        }
-
-    }
-
 //    public static InboundProcessorResponseDTO authenticateToken(InboundMessageContext inboundMessageContext, String authenticationType) throws APISecurityException {
 //
-//        ArrayList<Authenticator> authenticators = new ArrayList<>();
-//
 //        OAuthAuthenticator oAuthAuthenticator = new OAuthAuthenticator();
-//        authenticators.add(oAuthAuthenticator);
-//
-//        InboundProcessorResponseDTO inboundProcessorResponseDTO = null;
-//
-//        for (Authenticator authenticator : authenticators) {
-//            inboundProcessorResponseDTO = authenticator.authenticate(inboundMessageContext, authenticationType);
-//            if (!inboundProcessorResponseDTO.isError()) {
-//                break;
-//            }
+//        ApiKeyAuthenticator apiKeyAuthenticator = new ApiKeyAuthenticator();
+//        if (inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader) != null) {
+//            return oAuthAuthenticator.authenticate(inboundMessageContext, authenticationType);
+//        } else if (inboundMessageContext.getRequestHeaders().get("apikey") != null) {
+//            return apiKeyAuthenticator.authenticate(inboundMessageContext, authenticationType);
+//        } else {
+//            return null;
 //        }
-//        return inboundProcessorResponseDTO;
+//
 //    }
+
+    public static InboundProcessorResponseDTO authenticateToken(InboundMessageContext inboundMessageContext, String authenticationType) throws APISecurityException {
+
+        ArrayList<Authenticator> authenticators = new ArrayList<>();
+
+        OAuthAuthenticator oAuthAuthenticator = new OAuthAuthenticator();
+        authenticators.add(oAuthAuthenticator);
+        ApiKeyAuthenticator apiKeyAuthenticator = new ApiKeyAuthenticator();
+        authenticators.add(apiKeyAuthenticator);
+
+        for (Authenticator authenticator : authenticators) {
+            InboundProcessorResponseDTO inboundProcessorResponseDTO = authenticator.authenticate(inboundMessageContext, authenticationType);
+            if (!inboundProcessorResponseDTO.isError()) {
+                return inboundProcessorResponseDTO;
+            }
+        }
+        return null;
+    }
 
 
     /**

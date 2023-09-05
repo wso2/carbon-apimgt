@@ -60,6 +60,7 @@ public class InboundMessageContext {
     private String matchingResource; //invoking API resource
     private ChannelHandlerContext ctx;
     private boolean isJWTToken;
+    private String apiKeyFromQueryParams;
 
     //Graphql Subscription specific connection context information
     private GraphQLSchemaDTO graphQLSchemaDTO;
@@ -251,5 +252,13 @@ public class InboundMessageContext {
 
     public void setJWTToken(boolean JWTToken) {
         isJWTToken = JWTToken;
+    }
+
+    public String getApiKeyFromQueryParams() {
+        return apiKeyFromQueryParams;
+    }
+
+    public void setApiKeyFromQueryParams(String apiKeyFromQueryParams) {
+        this.apiKeyFromQueryParams = apiKeyFromQueryParams;
     }
 }

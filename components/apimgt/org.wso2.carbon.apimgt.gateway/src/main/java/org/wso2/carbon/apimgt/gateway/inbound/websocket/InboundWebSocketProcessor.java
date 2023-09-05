@@ -28,6 +28,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.api.API;
@@ -36,6 +38,7 @@ import org.apache.synapse.api.Resource;
 import org.apache.synapse.api.dispatch.RESTDispatcher;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
@@ -93,7 +96,7 @@ public class InboundWebSocketProcessor {
      * @return InboundProcessorResponseDTO with handshake processing response
      */
     public InboundProcessorResponseDTO handleHandshake(FullHttpRequest req, ChannelHandlerContext ctx,
-                                                       InboundMessageContext inboundMessageContext) {
+                                                       InboundMessageContext inboundMessageContext) throws APIManagementException {
 
         InboundProcessorResponseDTO inboundProcessorResponseDTO;
         try {
@@ -113,6 +116,13 @@ public class InboundWebSocketProcessor {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
                     inboundMessageContext.getTenantDomain(), true);
             if (validateOAuthHeader(req, inboundMessageContext)) {
+                setRequestHeaders(req, inboundMessageContext);
+                inboundMessageContext.getRequestHeaders().put(WebsocketUtil.authorizationHeader, req.headers()
+                        .get(WebsocketUtil.authorizationHeader));
+                inboundProcessorResponseDTO =
+                        handshakeProcessor.processHandshake(inboundMessageContext);
+                setRequestHeaders(req, inboundMessageContext);
+            } else if (validateAPIKeyHeaderOrQueryParameter(inboundMessageContext)) {
                 setRequestHeaders(req, inboundMessageContext);
                 inboundMessageContext.getRequestHeaders().put(WebsocketUtil.authorizationHeader, req.headers()
                         .get(WebsocketUtil.authorizationHeader));
@@ -147,6 +157,22 @@ public class InboundWebSocketProcessor {
             publishResourceNotFoundEvent(ctx);
         }
         return inboundProcessorResponseDTO;
+    }
+
+    private boolean validateAPIKeyHeaderOrQueryParameter(InboundMessageContext inboundMessageContext) {
+
+        String securityParam = "apikey";
+        if (inboundMessageContext.getRequestHeaders().containsKey(securityParam)) {
+            return true;
+        } else {
+            QueryStringDecoder decoder = new QueryStringDecoder(inboundMessageContext.getFullRequestPath());
+            Map<String, List<String>> requestMap = decoder.parameters();
+            if (requestMap.containsKey(securityParam)) {
+                inboundMessageContext.setApiKeyFromQueryParams(requestMap.get(securityParam).get(0));
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -208,8 +234,7 @@ public class InboundWebSocketProcessor {
     private boolean validateOAuthHeader(FullHttpRequest req, InboundMessageContext inboundMessageContext)
             throws APISecurityException {
 
-        if (!(inboundMessageContext.getRequestHeaders().containsKey(WebsocketUtil.authorizationHeader) ||
-                inboundMessageContext.getRequestHeaders().containsKey("apikey"))) {
+        if (!(inboundMessageContext.getRequestHeaders().containsKey(WebsocketUtil.authorizationHeader))) {
             QueryStringDecoder decoder = new QueryStringDecoder(inboundMessageContext.getFullRequestPath());
             Map<String, List<String>> requestMap = decoder.parameters();
             if (requestMap.containsKey(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT)) {
