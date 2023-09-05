@@ -5286,6 +5286,44 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Returns whether a given API Name already exists
+     *
+     * @param apiName      Name of the API
+     * @param organization Identifier of an Organization
+     * @return String Provider or null
+     * @throws APIManagementException if failed to get API Names
+     */
+    public String
+    getAPIProviderByNameAndOrganization(String apiName, String organization)
+            throws APIManagementException {
+
+        String providerName = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection
+                     .prepareStatement(SQLConstants.GET_API_PROVIDER_MATCHES_API_NAME_AND_ORGANIZATION_SQL)) {
+            boolean initialAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            ps.setString(1, apiName);
+            ps.setString(2, organization);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                while (resultSet.next()) {
+                    providerName = resultSet.getString("API_PROVIDER");
+                    break;
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                APIMgtDBUtil.rollbackConnection(connection,
+                        "Failed to rollback get API versions matches API name " + apiName, e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get API versions matches API name" + apiName, e);
+        }
+        return providerName;
+    }
+
+    /**
      * Returns whether a given API Context already exists
      *
      * @param contextTemplate Requested context template
