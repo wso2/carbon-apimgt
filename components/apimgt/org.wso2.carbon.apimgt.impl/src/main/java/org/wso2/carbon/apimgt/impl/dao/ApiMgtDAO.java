@@ -33,12 +33,7 @@ import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
-import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.dto.ClonePolicyMetadataDTO;
-import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
-import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
-import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+import org.wso2.carbon.apimgt.api.dto.*;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -108,6 +103,7 @@ import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.*;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -9291,13 +9287,13 @@ public class ApiMgtDAO {
 
     }
 
-    public KeyManagerPermissionDTO getKeyManagerPermission(String keyManagerUUID, String role) throws APIManagementException {
+    public KeyManagerPermissionConfigurationDTO getKeyManagerPermission(String keyManagerUUID, String role) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet resultSet = null;
 
-        KeyManagerPermissionDTO keyManagerPermission = null;
+        KeyManagerPermissionConfigurationDTO keyManagerPermission = null;
         try {
             String getKeyManagerPermissionQuery = SQLConstants.KeyManagerPermissionsSqlConstants.GET_KEY_MANAGER_PERMISSION_SQL;
             conn = APIMgtDBUtil.getConnection();
@@ -9307,7 +9303,7 @@ public class ApiMgtDAO {
             ps.setString(2, role);
 
             resultSet = ps.executeQuery();
-            keyManagerPermission = new KeyManagerPermissionDTO();
+            keyManagerPermission = new KeyManagerPermissionConfigurationDTO();
             keyManagerPermission.setKeyManagerUUID(keyManagerUUID);
             keyManagerPermission.setRole(role);
             if(resultSet.next()){
