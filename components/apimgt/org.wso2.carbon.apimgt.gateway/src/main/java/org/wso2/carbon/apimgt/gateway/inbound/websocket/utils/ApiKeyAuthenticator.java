@@ -488,7 +488,7 @@ public class ApiKeyAuthenticator implements Authenticator {
             apiKey = (String) headers.get(securityParam);
             if (apiKey != null) {
                 //Remove apikey header from the request
-                headers.remove(securityParam);
+//                headers.remove(securityParam);
                 return apiKey.trim();
             }
         }
