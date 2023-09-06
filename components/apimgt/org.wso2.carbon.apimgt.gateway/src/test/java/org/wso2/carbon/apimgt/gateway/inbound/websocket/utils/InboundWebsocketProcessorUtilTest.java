@@ -59,12 +59,13 @@ import java.util.UUID;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ InboundWebsocketProcessorUtil.class, PrivilegedCarbonContext.class,
         ServiceReferenceHolder.class, WebsocketUtil.class, ThrottleDataPublisher.class, APIUtil.class, DataHolder.class,
-        InboundWebsocketProcessorUtil.class })
+        InboundWebsocketProcessorUtil.class, OAuthAuthenticator.class })
 public class InboundWebsocketProcessorUtilTest {
 
     private DataPublisher dataPublisher;
     private DataHolder dataHolder;
     List<String> keyManagers;
+    String authenticationHeader;
 
     @Before
     public void init() throws APIManagementException {
@@ -92,6 +93,17 @@ public class InboundWebsocketProcessorUtilTest {
         PowerMockito.mockStatic(DataHolder.class);
         Mockito.when(DataHolder.getInstance()).thenReturn(dataHolder);
         keyManagers = Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS);
+        authenticationHeader = "Bearer eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFpUQTNNV0kyTkRBelpHU"
+                + "XpOR00wWkdSbE5qSmtPREZrWkRSaU9URmtNV0ZoTXpVMlpHVmxOZyIsImtpZCI6Ik16WXhNbUZrT0dZd01XSTBaV05tTkRjeE5HW"
+                + "XdZbU00WlRBM01XSTJOREF6WkdRek5HTTBaR1JsTmpKa09ERmtaRFJpT1RGa01XRmhNelUyWkdWbE5nX1JTMjU2IiwiYWxnIjoiU"
+                + "lMyNTYifQ.eyJzdWIiOiJhZG1pbiIsImF1dCI6IkFQUExJQ0FUSU9OIiwiYXVkIjoiT2s3eVN6amdPVnVkdzVBRkdBbUlVYTl1WV"
+                + "h3YSIsIm5iZiI6MTY2Mjk4MjkzOSwiYXpwIjoiT2s3eVN6amdPVnVkdzVBRkdBbUlVYTl1WVh3YSIsInNjb3BlIjoiZGVmYXVsdC"
+                + "IsImlzcyI6Imh0dHBzOlwvXC9sb2NhbGhvc3Q6OTQ0M1wvb2F1dGgyXC90b2tlbiIsImV4cCI6MTY2Mjk4NjUzOSwiaWF0IjoxNj"
+                + "YyOTgyOTM5LCJqdGkiOiI2NjMyNDUxMC0yOTVhLTQyMTAtODc4Mi0xNzMwMWY4N2UxYzYifQ.boseFmeSEzUCXRS1erAjL4Sdd2k"
+                + "q2VOisx9EjOH2il-UtSqaCgfCzjZoi9QhwokKA98oT65X9U2yeptQC5GQnSJ8nx_wKywGYbCBL-aO6lo53uf_AHxPWWRkUAAD9Od"
+                + "cReHIYTC7kHmozvGGSBl2aul_c7-ND1twPF8N3cXfdJMrdlL0i-fE5D39BUS4RkLstbrLVPNDJ-HQAJ8AR0UN7dDEnQYwiaTXTMM"
+                + "EgIGtk-PF1o8a9Rao_HPdiM0v9xiuZUXWBVqGPgnJkXH2tq_EZwY3sFzuvW_jBE84cvyD9w_wU0f89sIC8RHhc0L17riSA-21yKO"
+                + "6twHWjeAgZe_Kdg";
     }
 
     @Test
@@ -185,24 +197,13 @@ public class InboundWebsocketProcessorUtilTest {
 
     @Test
     public void isAuthenticatedJWT() throws Exception {
-        String authenticationHeader = "Bearer eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFpUQTNNV0kyTkRBelpHU"
-                + "XpOR00wWkdSbE5qSmtPREZrWkRSaU9URmtNV0ZoTXpVMlpHVmxOZyIsImtpZCI6Ik16WXhNbUZrT0dZd01XSTBaV05tTkRjeE5HW"
-                + "XdZbU00WlRBM01XSTJOREF6WkdRek5HTTBaR1JsTmpKa09ERmtaRFJpT1RGa01XRmhNelUyWkdWbE5nX1JTMjU2IiwiYWxnIjoiU"
-                + "lMyNTYifQ.eyJzdWIiOiJhZG1pbiIsImF1dCI6IkFQUExJQ0FUSU9OIiwiYXVkIjoiT2s3eVN6amdPVnVkdzVBRkdBbUlVYTl1WV"
-                + "h3YSIsIm5iZiI6MTY2Mjk4MjkzOSwiYXpwIjoiT2s3eVN6amdPVnVkdzVBRkdBbUlVYTl1WVh3YSIsInNjb3BlIjoiZGVmYXVsdC"
-                + "IsImlzcyI6Imh0dHBzOlwvXC9sb2NhbGhvc3Q6OTQ0M1wvb2F1dGgyXC90b2tlbiIsImV4cCI6MTY2Mjk4NjUzOSwiaWF0IjoxNj"
-                + "YyOTgyOTM5LCJqdGkiOiI2NjMyNDUxMC0yOTVhLTQyMTAtODc4Mi0xNzMwMWY4N2UxYzYifQ.boseFmeSEzUCXRS1erAjL4Sdd2k"
-                + "q2VOisx9EjOH2il-UtSqaCgfCzjZoi9QhwokKA98oT65X9U2yeptQC5GQnSJ8nx_wKywGYbCBL-aO6lo53uf_AHxPWWRkUAAD9Od"
-                + "cReHIYTC7kHmozvGGSBl2aul_c7-ND1twPF8N3cXfdJMrdlL0i-fE5D39BUS4RkLstbrLVPNDJ-HQAJ8AR0UN7dDEnQYwiaTXTMM"
-                + "EgIGtk-PF1o8a9Rao_HPdiM0v9xiuZUXWBVqGPgnJkXH2tq_EZwY3sFzuvW_jBE84cvyD9w_wU0f89sIC8RHhc0L17riSA-21yKO"
-                + "6twHWjeAgZe_Kdg";
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
         Mockito.when(dataHolder.getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid()))
                 .thenReturn(keyManagers);
         inboundMessageContext.getRequestHeaders().put(WebsocketUtil.authorizationHeader, authenticationHeader);
         JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
         PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
-        PowerMockito.stub(PowerMockito.method(InboundWebsocketProcessorUtil.class, "validateAuthenticationContext"))
+        PowerMockito.stub(PowerMockito.method(OAuthAuthenticator.class, "validateAuthenticationContext"))
                 .toReturn(true);
         InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext);
         Assert.assertTrue(inboundMessageContext.isJWTToken());
@@ -232,9 +233,10 @@ public class InboundWebsocketProcessorUtilTest {
     public void authenticateToken() throws Exception {
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
         inboundMessageContext.setJWTToken(true);
+        inboundMessageContext.getRequestHeaders().put(WebsocketUtil.authorizationHeader, authenticationHeader);
         JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
         PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
-        PowerMockito.stub(PowerMockito.method(InboundWebsocketProcessorUtil.class, "validateAuthenticationContext"))
+        PowerMockito.stub(PowerMockito.method(OAuthAuthenticator.class, "validateAuthenticationContext"))
                 .toReturn(true);
         InboundProcessorResponseDTO responseDTO = InboundWebsocketProcessorUtil.authenticateToken(
                 inboundMessageContext);
@@ -245,9 +247,10 @@ public class InboundWebsocketProcessorUtilTest {
     public void authenticateTokenFailure() throws Exception {
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
         inboundMessageContext.setJWTToken(true);
+        inboundMessageContext.getRequestHeaders().put(WebsocketUtil.authorizationHeader, authenticationHeader);
         JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
         PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
-        PowerMockito.stub(PowerMockito.method(InboundWebsocketProcessorUtil.class, "validateAuthenticationContext"))
+        PowerMockito.stub(PowerMockito.method(OAuthAuthenticator.class, "validateAuthenticationContext"))
                 .toReturn(false);
         InboundProcessorResponseDTO responseDTO = InboundWebsocketProcessorUtil.authenticateToken(
                 inboundMessageContext);
