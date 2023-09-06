@@ -25,14 +25,13 @@ import javax.cache.Cache;
 import java.text.ParseException;
 import java.util.List;
 
-public class OAuthAuthenticator implements Authenticator {
+public class OAuthAuthenticator {
 
     private static final Log log = LogFactory.getLog(OAuthAuthenticator.class);
 
     public OAuthAuthenticator() {
     }
 
-    @Override
     public InboundProcessorResponseDTO authenticate(InboundMessageContext inboundMessageContext, String authenticationType) throws APISecurityException {
 
         InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
@@ -99,8 +98,9 @@ public class OAuthAuthenticator implements Authenticator {
                 }
                 validateScopes = !APIConstants.GRAPHQL_API.equals(inboundMessageContext.getElectedAPI().getApiType());
             } else {
-                inboundProcessorResponseDTO.setError(true);
-                return inboundProcessorResponseDTO;
+                return InboundWebsocketProcessorUtil.getFrameErrorDTO(
+                        WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, true);
             }
         }
 

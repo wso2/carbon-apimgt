@@ -96,7 +96,7 @@ public class InboundWebSocketProcessor {
      * @return InboundProcessorResponseDTO with handshake processing response
      */
     public InboundProcessorResponseDTO handleHandshake(FullHttpRequest req, ChannelHandlerContext ctx,
-                                                       InboundMessageContext inboundMessageContext) throws APIManagementException {
+                                                       InboundMessageContext inboundMessageContext) {
 
         InboundProcessorResponseDTO inboundProcessorResponseDTO;
         try {

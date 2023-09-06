@@ -47,17 +47,16 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.HashMap;
 
-public class ApiKeyAuthenticator implements Authenticator {
+public class ApiKeyAuthenticator {
 
-    private static final Log log = LogFactory.getLog(org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.ApiKeyAuthenticator.class);
-
+    private static final Log log = LogFactory.getLog(ApiKeyAuthenticator.class);
     private Boolean jwtGenerationEnabled = null;
     private AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator = null;
     private ExtendedJWTConfigurationDto jwtConfigurationDto = null;
     private Boolean isGatewayTokenCacheEnabled = null;
     private static volatile long ttl = -1L;
 
-    public InboundProcessorResponseDTO authenticate(InboundMessageContext inboundMessageContext, String authenticationType) throws APISecurityException {
+    public InboundProcessorResponseDTO authenticate(InboundMessageContext inboundMessageContext) throws APISecurityException {
 
         InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
 
@@ -75,12 +74,12 @@ public class ApiKeyAuthenticator implements Authenticator {
                         ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
             }
 
-            if (jwtGenerationEnabled == null) {
+            if (jwtGenerationEnabled == null && jwtConfigurationDto != null) {
                 jwtGenerationEnabled = jwtConfigurationDto.isEnabled();
             }
 
 
-            if (apiMgtGatewayJWTGenerator == null) {
+            if (apiMgtGatewayJWTGenerator == null && jwtConfigurationDto != null) {
                 apiMgtGatewayJWTGenerator = ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
                         .get(jwtConfigurationDto.getGatewayJWTGeneratorImpl());
             }
@@ -88,7 +87,7 @@ public class ApiKeyAuthenticator implements Authenticator {
             String tenantDomain = GatewayUtils.getTenantDomain();
             int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
-            if (jwtGenerationEnabled) {
+            if (jwtGenerationEnabled != null && jwtGenerationEnabled) {
                 // Set certificate to jwtConfigurationDto
                 if (jwtConfigurationDto.isTenantBasedSigningEnabled()) {
                     this.jwtConfigurationDto.setPublicCert(SigningUtil.getPublicCertificate(tenantId));
@@ -516,7 +515,7 @@ public class ApiKeyAuthenticator implements Authenticator {
         return queryParam;
     }
 
-    public boolean validateAuthenticationContext(InboundMessageContext inboundMessageContext, AuthenticationContext authenticationContext, String contextHeader) {
+    private boolean validateAuthenticationContext(InboundMessageContext inboundMessageContext, AuthenticationContext authenticationContext, String contextHeader) {
 
         if (authenticationContext == null || !authenticationContext.isAuthenticated()) {
             return false;
@@ -561,7 +560,7 @@ public class ApiKeyAuthenticator implements Authenticator {
      * @param payload The payload of the JWT token
      * @return returns true if the JWT token is expired
      */
-    private static boolean isJwtTokenExpired(JWTClaimsSet payload) {
+    private boolean isJwtTokenExpired(JWTClaimsSet payload) {
 
         int timestampSkew = (int) OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds();
 
@@ -590,7 +589,7 @@ public class ApiKeyAuthenticator implements Authenticator {
         return jwtValidationInfo;
     }
 
-    public String getContextHeader() {
+    private String getContextHeader() {
         APIManagerConfiguration apimConf = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         JWTConfigurationDto jwtConfigDto = apimConf.getJwtConfigurationDto();
         return jwtConfigDto.getJwtHeader();

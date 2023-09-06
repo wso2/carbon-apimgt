@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.inbound.websocket.utils;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -41,8 +42,10 @@ import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponse
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
@@ -57,15 +60,16 @@ import java.util.List;
 import java.util.UUID;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ InboundWebsocketProcessorUtil.class, PrivilegedCarbonContext.class,
+@PrepareForTest({InboundWebsocketProcessorUtil.class, PrivilegedCarbonContext.class,
         ServiceReferenceHolder.class, WebsocketUtil.class, ThrottleDataPublisher.class, APIUtil.class, DataHolder.class,
-        InboundWebsocketProcessorUtil.class, OAuthAuthenticator.class })
+        OAuthAuthenticator.class, ApiKeyAuthenticator.class, CacheProvider.class, GatewayUtils.class, JWTClaimsSet.class})
 public class InboundWebsocketProcessorUtilTest {
 
     private DataPublisher dataPublisher;
     private DataHolder dataHolder;
     List<String> keyManagers;
     String authenticationHeader;
+    String apiKey;
 
     @Before
     public void init() throws APIManagementException {
@@ -104,6 +108,21 @@ public class InboundWebsocketProcessorUtilTest {
                 + "cReHIYTC7kHmozvGGSBl2aul_c7-ND1twPF8N3cXfdJMrdlL0i-fE5D39BUS4RkLstbrLVPNDJ-HQAJ8AR0UN7dDEnQYwiaTXTMM"
                 + "EgIGtk-PF1o8a9Rao_HPdiM0v9xiuZUXWBVqGPgnJkXH2tq_EZwY3sFzuvW_jBE84cvyD9w_wU0f89sIC8RHhc0L17riSA-21yKO"
                 + "6twHWjeAgZe_Kdg";
+        apiKey = "eyJ4NXQiOiJPREUzWTJaaE1UQmpNRE00WlRCbU1qQXlZemxpWVRJMllqUmhZVFpsT0dJeVptVXhOV0UzWVE9PSIsImtpZCI" +
+                "6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbkBjYXJib24uc" +
+                "3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lciI6ImFkbWluIiwidGllclF1b3RhVHlwZSI6bnVsbCwidGllciI6IlVubGltaXRlZCIs" +
+                "Im5hbWUiOiJEZWZhdWx0QXBwbGljYXRpb24iLCJpZCI6MSwidXVpZCI6IjA2MzRkMGI0LWRmMGEtNGMzZS04ZmY2LWRmODNhOTAzYTl" +
+                "mNiJ9LCJpc3MiOiJodHRwczpcL1wvbG9jYWxob3N0Ojk0NDNcL29hdXRoMlwvdG9rZW4iLCJ0aWVySW5mbyI6eyJBc3luY1VubGltaX" +
+                "RlZCI6eyJ0aWVyUXVvdGFUeXBlIjoiZXZlbnRDb3VudCIsImdyYXBoUUxNYXhDb21wbGV4aXR5IjowLCJncmFwaFFMTWF4RGVwdGgiO" +
+                "jAsInN0b3BPblF1b3RhUmVhY2giOnRydWUsInNwaWtlQXJyZXN0TGltaXQiOjAsInNwaWtlQXJyZXN0VW5pdCI6bnVsbH19LCJrZXl0" +
+                "eXBlIjoiU0FOREJPWCIsInBlcm1pdHRlZFJlZmVyZXIiOiIiLCJzdWJzY3JpYmVkQVBJcyI6W3sic3Vic2NyaWJlclRlbmFudERvbWF" +
+                "pbiI6ImNhcmJvbi5zdXBlciIsIm5hbWUiOiJDaGF0cyIsImNvbnRleHQiOiJcL2NoYXRzXC8xLjAuMCIsInB1Ymxpc2hlciI6ImFkbW" +
+                "luIiwidmVyc2lvbiI6IjEuMC4wIiwic3Vic2NyaXB0aW9uVGllciI6IkFzeW5jVW5saW1pdGVkIn1dLCJ0b2tlbl90eXBlIjoiYXBpS" +
+                "2V5IiwicGVybWl0dGVkSVAiOiIiLCJpYXQiOjE2OTM5OTk3MDcsImp0aSI6IjhjY2M1YzBlLWFlODMtNGM4MS1hN2JmLTVjMmNiYTc0" +
+                "ZmM1OCJ9.VYkMrt6vs82V1cVJ-ChFcgBfej3m8P22lmnG0_Q1g_fox0ZeJklWhjtsI8dxyTJ0tRx57dg1dOFQD-VbRTnoxOmWDnZdxB" +
+                "_cGQfrn-2A72HBTMx-lAaMGAi0Gi9OjXBa8J2ilc7qBgL4au4HVfSyOxpAJIDgwPnjIYjDovnYQPMhZemaOfKTbfReU3g_w8MBKLN20" +
+                "hjZT02gKpwyak1LnXG4ulKi-A0qZlm2VSArpwF73x9vK0rIiWT17UR43IJNoDAmXjG76lwmNeIIiDhyqRBLDdRwmxFLlac6KsqeESMh" +
+                "xoklqH1_0x4VyUG-JYlJMQVFd5FmWmnjjF4eJZwSaQ==";
     }
 
     @Test
@@ -196,7 +215,7 @@ public class InboundWebsocketProcessorUtilTest {
     }
 
     @Test
-    public void isAuthenticatedJWT() throws Exception {
+    public void isAuthenticatedJWTForOAuth() throws Exception {
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
         Mockito.when(dataHolder.getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid()))
                 .thenReturn(keyManagers);
@@ -210,7 +229,7 @@ public class InboundWebsocketProcessorUtilTest {
     }
 
     @Test
-    public void isAuthenticatedOpaque() throws Exception {
+    public void isAuthenticatedOpaqueForOAuth() throws Exception {
         String apiKey = "5ccc069c403ebaf9f0171e9517f40e41";
         String authenticationHeader = "Bearer " + apiKey;
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
@@ -230,7 +249,7 @@ public class InboundWebsocketProcessorUtilTest {
     }
 
     @Test
-    public void authenticateToken() throws Exception {
+    public void authenticateTokenForOAuth() throws Exception {
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
         inboundMessageContext.setJWTToken(true);
         inboundMessageContext.getRequestHeaders().put(WebsocketUtil.authorizationHeader, authenticationHeader);
@@ -244,7 +263,7 @@ public class InboundWebsocketProcessorUtilTest {
     }
 
     @Test
-    public void authenticateTokenFailure() throws Exception {
+    public void authenticateTokenFailureForOAuth() throws Exception {
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
         inboundMessageContext.setJWTToken(true);
         inboundMessageContext.getRequestHeaders().put(WebsocketUtil.authorizationHeader, authenticationHeader);
@@ -255,6 +274,42 @@ public class InboundWebsocketProcessorUtilTest {
         InboundProcessorResponseDTO responseDTO = InboundWebsocketProcessorUtil.authenticateToken(
                 inboundMessageContext);
         Assert.assertTrue(responseDTO.isError());
+    }
+
+    @Test
+    public void isAuthenticatedForAPIKeyAsRequestHeader() throws Exception {
+        InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
+        InboundProcessorResponseDTO InboundProcessorResponseDTO = new InboundProcessorResponseDTO();
+        Mockito.when(dataHolder.getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid()))
+                .thenReturn(keyManagers);
+        inboundMessageContext.getRequestHeaders().put(APIConstants.API_KEY_HEADER_QUERY_PARAM, apiKey);
+        PowerMockito.stub(PowerMockito.method(ApiKeyAuthenticator.class, "authenticate", InboundMessageContext.class))
+                .toReturn(InboundProcessorResponseDTO);
+        Assert.assertTrue(InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext));
+    }
+
+    @Test
+    public void isAuthenticatedForAPIKeyAsQueryParam() throws Exception {
+        InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
+        InboundProcessorResponseDTO InboundProcessorResponseDTO = new InboundProcessorResponseDTO();
+        Mockito.when(dataHolder.getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid()))
+                .thenReturn(keyManagers);
+        inboundMessageContext.setApiKeyFromQueryParams(apiKey);
+        JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
+        PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
+        PowerMockito.stub(PowerMockito.method(ApiKeyAuthenticator.class, "authenticate", InboundMessageContext.class))
+                .toReturn(InboundProcessorResponseDTO);
+        Assert.assertTrue(InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext));
+    }
+
+    @Test
+    public void isAuthenticatedFailWithUnclassifiedAuthenticationFailure() {
+        InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
+        Mockito.when(dataHolder.getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid()))
+                .thenReturn(keyManagers);
+        Assert.assertThrows(APISecurityException.class, () -> {
+            InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext);
+        });
     }
 
     private InboundMessageContext createWebSocketApiMessageContext() {
