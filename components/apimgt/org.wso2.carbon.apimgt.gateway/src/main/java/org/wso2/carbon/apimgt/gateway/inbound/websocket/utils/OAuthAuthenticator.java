@@ -40,7 +40,7 @@ public class OAuthAuthenticator implements Authenticator {
         List<String> keyManagerList =
                 DataHolder.getInstance().getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid());
 
-        if (authenticationType.equals("handshake") && inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader) != null) {
+        if (APIConstants.WEBSOCKET_HANDSHAKE.equals(authenticationType) && inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader) != null) {
             String authorizationHeader = inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader);
             String[] auth = authorizationHeader.split(StringUtils.SPACE);
             if (APIConstants.CONSUMER_KEY_SEGMENT.equals(auth[0])) {
@@ -95,7 +95,7 @@ public class OAuthAuthenticator implements Authenticator {
                 // Find the authentication scheme based on the token type
                 if (isJwtToken) {
                     log.debug("The token was identified as a JWT token");
-                    inboundMessageContext.setJWTToken(true); //this will be needed
+                    inboundMessageContext.setJWTToken(true);
                 }
                 validateScopes = !APIConstants.GRAPHQL_API.equals(inboundMessageContext.getElectedAPI().getApiType());
             } else {
@@ -234,6 +234,16 @@ public class OAuthAuthenticator implements Authenticator {
         }
     }
 
+    /**
+     * Get Websocket API Key data from websocket client.
+     *
+     * @param key           API key
+     * @param domain        tenant domain
+     * @param apiContextUri API context
+     * @param apiVersion    API version
+     * @return APIKeyValidationInfoDTO
+     * @throws APISecurityException if validation fails
+     */
     private static APIKeyValidationInfoDTO getApiKeyDataForWSClient(String key, String domain, String apiContextUri,
                                                                     String apiVersion, List<String> keyManagers)
             throws APISecurityException {

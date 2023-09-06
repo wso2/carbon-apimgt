@@ -17,8 +17,6 @@
  */
 package org.wso2.carbon.apimgt.gateway.inbound.websocket.utils;
 
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
 import org.apache.axiom.util.UIDGenerator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -32,11 +30,8 @@ import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.DataPublisherUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
-import org.wso2.carbon.apimgt.gateway.handlers.WebsocketWSClient;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
-import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiException;
@@ -44,33 +39,26 @@ import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.GraphQLProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
-import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
-import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.Authenticator;
-import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.OAuthAuthenticator;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.TreeMap;
-import javax.cache.Cache;
 
 /**
  * The util class to handle inbound websocket processor execution.
@@ -78,48 +66,6 @@ import javax.cache.Cache;
 public class InboundWebsocketProcessorUtil {
 
     private static final Log log = LogFactory.getLog(InboundWebsocketProcessorUtil.class);
-
-    /**
-     * Validates AuthenticationContext and set APIKeyValidationInfoDTO to InboundMessageContext.
-     *
-     * @param authenticationContext Validated AuthenticationContext
-     * @param inboundMessageContext InboundMessageContext
-     * @return true if authenticated
-     */
-    public static boolean validateAuthenticationContext(AuthenticationContext authenticationContext,
-                                                        InboundMessageContext inboundMessageContext) {
-
-        if (authenticationContext == null || !authenticationContext.isAuthenticated()) {
-            return false;
-        }
-        // The information given by the AuthenticationContext is set to an APIKeyValidationInfoDTO object
-        // so to feed information analytics and throttle data publishing
-        APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
-        info.setAuthorized(authenticationContext.isAuthenticated());
-        info.setApplicationTier(authenticationContext.getApplicationTier());
-        info.setTier(authenticationContext.getTier());
-        info.setSubscriberTenantDomain(authenticationContext.getSubscriberTenantDomain());
-        info.setSubscriber(authenticationContext.getSubscriber());
-        info.setStopOnQuotaReach(authenticationContext.isStopOnQuotaReach());
-        info.setApiName(authenticationContext.getApiName());
-        info.setApplicationId(authenticationContext.getApplicationId());
-        info.setType(authenticationContext.getKeyType());
-        info.setApiPublisher(authenticationContext.getApiPublisher());
-        info.setApplicationName(authenticationContext.getApplicationName());
-        info.setConsumerKey(authenticationContext.getConsumerKey());
-        info.setEndUserName(authenticationContext.getUsername());
-        info.setApiTier(authenticationContext.getApiTier());
-        info.setGraphQLMaxDepth(authenticationContext.getGraphQLMaxDepth());
-        info.setGraphQLMaxComplexity(authenticationContext.getGraphQLMaxComplexity());
-        info.setEndUserToken(authenticationContext.getCallerToken());
-
-        inboundMessageContext.setKeyType(info.getType());
-        inboundMessageContext.setInfoDTO(info);
-        inboundMessageContext.setAuthContext(authenticationContext);
-        inboundMessageContext.setInfoDTO(info);
-        inboundMessageContext.setToken(info.getEndUserToken());
-        return authenticationContext.isAuthenticated();
-    }
 
     /**
      * Validate scopes of JWT token for incoming GraphQL subscription messages.
@@ -364,7 +310,7 @@ public class InboundWebsocketProcessorUtil {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
                     inboundMessageContext.getTenantDomain(), true);
 
-            return !authenticateToken(inboundMessageContext, "handshake").isError();
+            return !authenticateToken(inboundMessageContext, APIConstants.WEBSOCKET_HANDSHAKE).isError();
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -377,88 +323,18 @@ public class InboundWebsocketProcessorUtil {
      * @return InboundProcessorResponseDTO
      */
     public static InboundProcessorResponseDTO authenticateToken(InboundMessageContext inboundMessageContext) throws APISecurityException {
-        return authenticateToken(inboundMessageContext, "frame");
+        return authenticateToken(inboundMessageContext, APIConstants.WEBSOCKET_FRAME);
     }
-
-//    public static InboundProcessorResponseDTO authenticateToken(InboundMessageContext inboundMessageContext, String authenticationType) throws APISecurityException {
-//
-//        OAuthAuthenticator oAuthAuthenticator = new OAuthAuthenticator();
-//        ApiKeyAuthenticator apiKeyAuthenticator = new ApiKeyAuthenticator();
-//        if (inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader) != null) {
-//            return oAuthAuthenticator.authenticate(inboundMessageContext, authenticationType);
-//        } else if (inboundMessageContext.getRequestHeaders().get("apikey") != null) {
-//            return apiKeyAuthenticator.authenticate(inboundMessageContext, authenticationType);
-//        } else {
-//            return null;
-//        }
-//
-//    }
 
     public static InboundProcessorResponseDTO authenticateToken(InboundMessageContext inboundMessageContext, String authenticationType) throws APISecurityException {
 
-        ArrayList<Authenticator> authenticators = new ArrayList<>();
-
-        OAuthAuthenticator oAuthAuthenticator = new OAuthAuthenticator();
-        authenticators.add(oAuthAuthenticator);
-        ApiKeyAuthenticator apiKeyAuthenticator = new ApiKeyAuthenticator();
-        authenticators.add(apiKeyAuthenticator);
-
-        for (Authenticator authenticator : authenticators) {
-            InboundProcessorResponseDTO inboundProcessorResponseDTO = authenticator.authenticate(inboundMessageContext, authenticationType);
-            if (!inboundProcessorResponseDTO.isError()) {
-                return inboundProcessorResponseDTO;
-            }
-        }
-        return null;
-    }
-
-
-    /**
-     * Get signed JWT info for access token
-     *
-     * @param accessToken Access token
-     * @return SignedJWTInfo
-     * @throws ParseException if an error occurs
-     */
-    private static SignedJWTInfo getSignedJwtInfo(String accessToken) throws ParseException {
-
-        String signature = accessToken.split("\\.")[2];
-        SignedJWTInfo signedJWTInfo = null;
-        Cache gatewaySignedJWTParseCache = CacheProvider.getGatewaySignedJWTParseCache();
-        if (gatewaySignedJWTParseCache != null) {
-            Object cachedEntry = gatewaySignedJWTParseCache.get(signature);
-            if (cachedEntry != null) {
-                signedJWTInfo = (SignedJWTInfo) cachedEntry;
-            }
-            if (signedJWTInfo == null || !signedJWTInfo.getToken().equals(accessToken)) {
-                SignedJWT signedJWT = SignedJWT.parse(accessToken);
-                JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
-                signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
-                gatewaySignedJWTParseCache.put(signature, signedJWTInfo);
-            }
+        if (inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader) != null) {
+            return new OAuthAuthenticator().authenticate(inboundMessageContext, authenticationType);
+        } else if (inboundMessageContext.getRequestHeaders().get(APIConstants.API_KEY_HEADER_QUERY_PARAM) != null || inboundMessageContext.getApiKeyFromQueryParams() != null) {
+            return new ApiKeyAuthenticator().authenticate(inboundMessageContext, authenticationType);
         } else {
-            SignedJWT signedJWT = SignedJWT.parse(accessToken);
-            JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
-            signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
+            return null;
         }
-        return signedJWTInfo;
-    }
-
-    /**
-     * Get Websocket API Key data from websocket client.
-     *
-     * @param key           API key
-     * @param domain        tenant domain
-     * @param apiContextUri API context
-     * @param apiVersion    API version
-     * @return APIKeyValidationInfoDTO
-     * @throws APISecurityException if validation fails
-     */
-    private static APIKeyValidationInfoDTO getApiKeyDataForWSClient(String key, String domain, String apiContextUri,
-                                                                    String apiVersion, List<String> keyManagers)
-            throws APISecurityException {
-
-        return new WebsocketWSClient().getAPIKeyData(apiContextUri, apiVersion, key, domain, keyManagers);
     }
 
     /**
@@ -520,7 +396,6 @@ public class InboundWebsocketProcessorUtil {
         inboundProcessorResponseDTO.setErrorCode(errorCode);
         inboundProcessorResponseDTO.setErrorMessage(errorMessage);
         inboundProcessorResponseDTO.setCloseConnection(closeConnection);
-//        inboundProcessorResponseDTO.setContinueToNextAuthenticator(true);
         return inboundProcessorResponseDTO;
     }
 
@@ -616,17 +491,5 @@ public class InboundWebsocketProcessorUtil {
             }
         }
         return responseDTO;
-    }
-
-    private static String getTokenFromAuthHeader(String authHeader) {
-        if (StringUtils.isEmpty(authHeader)) {
-            return StringUtils.EMPTY;
-        }
-        String[] auth = authHeader.split(StringUtils.SPACE);
-        if (auth.length > 1) {
-            return auth[1];
-        } else {
-            return StringUtils.EMPTY;
-        }
     }
 }

@@ -10,8 +10,6 @@ import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URIBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -21,6 +19,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.dto.JWTTokenPayloadInfo;
+import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -43,11 +42,9 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
 import javax.cache.Cache;
-import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.Base64;
 import java.util.Map;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ApiKeyAuthenticator implements Authenticator {
@@ -326,7 +323,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                 }
 
                 AuthenticationContext authenticationContext = GatewayUtils
-                        .generateAuthenticationContext(tokenIdentifier, payload, api, "", endUserToken, null);
+                        .generateAuthenticationContext(tokenIdentifier, payload, api, null, endUserToken, null);
                 if (!validateAuthenticationContext(inboundMessageContext, authenticationContext, contextHeader)) {
                     return getErrorInboundProcessorResponseDTO(inboundProcessorResponseDTO, true,
                             WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS,
@@ -479,27 +476,21 @@ public class ApiKeyAuthenticator implements Authenticator {
 
     private String extractApiKey(InboundMessageContext inboundMessageContext) throws APISecurityException {
 
-        String apiKey = null;
+        String apiKey;
 
         //check headers to get apikey
         Map headers = inboundMessageContext.getRequestHeaders();
-        String securityParam = "apikey";
         if (headers != null) {
-            apiKey = (String) headers.get(securityParam);
+            apiKey = (String) headers.get(APIConstants.API_KEY_HEADER_QUERY_PARAM);
             if (apiKey != null) {
                 //Remove apikey header from the request
-//                headers.remove(securityParam);
+                if (WebsocketUtil.isRemoveOAuthHeadersFromOutMessage()) {
+                    inboundMessageContext.getHeadersToRemove().add(APIConstants.API_KEY_HEADER_QUERY_PARAM);
+                }
                 return apiKey.trim();
             }
         }
         //check query params to get apikey
-        //            ArrayList<NameValuePair> queryParams = (ArrayList<NameValuePair>) new URIBuilder(inboundMessageContext.getFullRequestPath()).getQueryParams();
-//            for (NameValuePair queryParam : queryParams) {
-//                if (queryParam.getName().equals(securityParam)) {
-//                    apiKey = queryParam.getValue();
-//                    break;
-//                }
-//            }
         apiKey = inboundMessageContext.getApiKeyFromQueryParams();
         if (StringUtils.isNotBlank(apiKey)) {
             //Remove apikey query param from the full request path
@@ -508,7 +499,7 @@ public class ApiKeyAuthenticator implements Authenticator {
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("Api Key Authentication failed: Header or Query parameter with the name '"
-                        .concat(securityParam).concat("' was not found."));
+                        .concat(APIConstants.API_KEY_HEADER_QUERY_PARAM).concat("' was not found."));
             }
             throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
                     APISecurityConstants.API_AUTH_MISSING_CREDENTIALS_MESSAGE);

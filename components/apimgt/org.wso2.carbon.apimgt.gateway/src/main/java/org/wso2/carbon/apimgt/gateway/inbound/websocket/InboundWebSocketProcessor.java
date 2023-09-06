@@ -115,14 +115,7 @@ public class InboundWebSocketProcessor {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
                     inboundMessageContext.getTenantDomain(), true);
-            if (validateOAuthHeader(req, inboundMessageContext)) {
-                setRequestHeaders(req, inboundMessageContext);
-                inboundMessageContext.getRequestHeaders().put(WebsocketUtil.authorizationHeader, req.headers()
-                        .get(WebsocketUtil.authorizationHeader));
-                inboundProcessorResponseDTO =
-                        handshakeProcessor.processHandshake(inboundMessageContext);
-                setRequestHeaders(req, inboundMessageContext);
-            } else if (validateAPIKeyHeaderOrQueryParameter(inboundMessageContext)) {
+            if (validateOAuthHeader(req, inboundMessageContext) || validateAPIKeyHeaderOrQueryParameter(inboundMessageContext)) {
                 setRequestHeaders(req, inboundMessageContext);
                 inboundMessageContext.getRequestHeaders().put(WebsocketUtil.authorizationHeader, req.headers()
                         .get(WebsocketUtil.authorizationHeader));
@@ -161,14 +154,13 @@ public class InboundWebSocketProcessor {
 
     private boolean validateAPIKeyHeaderOrQueryParameter(InboundMessageContext inboundMessageContext) {
 
-        String securityParam = "apikey";
-        if (inboundMessageContext.getRequestHeaders().containsKey(securityParam)) {
+        if (inboundMessageContext.getRequestHeaders().containsKey(APIConstants.API_KEY_HEADER_QUERY_PARAM)) {
             return true;
         } else {
             QueryStringDecoder decoder = new QueryStringDecoder(inboundMessageContext.getFullRequestPath());
             Map<String, List<String>> requestMap = decoder.parameters();
-            if (requestMap.containsKey(securityParam)) {
-                inboundMessageContext.setApiKeyFromQueryParams(requestMap.get(securityParam).get(0));
+            if (requestMap.containsKey(APIConstants.API_KEY_HEADER_QUERY_PARAM)) {
+                inboundMessageContext.setApiKeyFromQueryParams(requestMap.get(APIConstants.API_KEY_HEADER_QUERY_PARAM).get(0));
                 return true;
             }
         }

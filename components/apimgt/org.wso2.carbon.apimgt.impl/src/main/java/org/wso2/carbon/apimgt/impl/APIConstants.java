@@ -713,7 +713,8 @@ public final class APIConstants {
     public static final String API_GATEWAY_PROVIDER = "Provider";
     public static final String API_GATEWAY_ADDITIONAL_PROPERTIES = "Properties";
     public static final String API_GATEWAY_ADDITIONAL_PROPERTY = "Property";
-
+    public static final String WEBSOCKET_HANDSHAKE = "handshake";
+    public static final String WEBSOCKET_FRAME = "frame";
 
     public static final String CACHE_CONFIGS = "CacheConfigurations.";
     public static final String GATEWAY_TOKEN_CACHE_ENABLED = CACHE_CONFIGS + "EnableGatewayTokenCache";
