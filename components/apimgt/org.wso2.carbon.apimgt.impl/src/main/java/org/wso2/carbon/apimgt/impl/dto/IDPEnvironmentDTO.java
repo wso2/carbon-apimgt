@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.dto;
 public class IDPEnvironmentDTO {
     private String choreo;
     private String[] apim;
+    private String envTemplateId;
 
     public String getChoreo() {
         return choreo;
@@ -35,5 +36,13 @@ public class IDPEnvironmentDTO {
 
     public void setApim(String[] apim) {
         this.apim = apim;
+    }
+
+    public String getEnvTemplateId() {
+        return envTemplateId;
+    }
+
+    public void setEnvTemplateId(String envTemplateId) {
+        this.envTemplateId = envTemplateId;
     }
 }
