@@ -1301,8 +1301,131 @@ public class OAS3Parser extends APIDefinition {
         } else {
             authUrl = (hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL)).concat("/authorize");
         }
-        updateSwaggerSecurityDefinition(openAPI, swaggerData, authUrl);
+        updateSwaggerSecurityDefinitionForStore(openAPI, swaggerData, authUrl);
         return Json.pretty(openAPI);
+    }
+
+
+    /**
+     * Update Swagger security definition for dev portal only.
+     *
+     * @param openAPI     OpenAPI
+     * @param swaggerData SwaggerData
+     * @param authUrl     Authorization URL
+     */
+    private void updateSwaggerSecurityDefinitionForStore(OpenAPI openAPI, SwaggerData swaggerData, String authUrl) {
+
+        if (openAPI.getComponents() == null) openAPI.setComponents(new Components());
+        // Get the security defined for the current API.
+        List<String> secList = swaggerData.getSecurity() != null ? Arrays.asList(swaggerData.getSecurity().split(","))
+                : new ArrayList<>();
+        // Get the security schemes defined in the OAS definition.
+        Map<String, SecurityScheme> securitySchemes = openAPI.getComponents().getSecuritySchemes();
+        if (securitySchemes == null) {
+            // If no security schemes defined, create a new map.
+            securitySchemes = new HashMap<>();
+            openAPI.getComponents().setSecuritySchemes(securitySchemes);
+        }
+        List<SecurityRequirement> security = new ArrayList<>(); // Override with new global security requirements.
+        openAPI.setSecurity(security);
+        // If the security in API is empty or default oauth, add oauth2 security to the OAS definition.
+        if (secList.isEmpty() || secList.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Updating the OAS definition with default oauth2 security of API: " + swaggerData.getTitle()
+                        + " Version: " + swaggerData.getVersion());
+            }
+            // Add oauth to global security requirement to the OAS definition.
+            OASParserUtil.addSecurityRequirementToSwagger(openAPI, OPENAPI_SECURITY_SCHEMA_KEY);
+            // If default oauth type security scheme in the OAS definition, add it.
+            SecurityScheme securityScheme = securitySchemes.computeIfAbsent(OPENAPI_SECURITY_SCHEMA_KEY,
+                    key -> {
+                        SecurityScheme newOAuthScheme = new SecurityScheme();
+                        newOAuthScheme.setType(SecurityScheme.Type.OAUTH2);
+                        return newOAuthScheme;
+                    });
+            if (securityScheme.getFlows() == null) { // If no flows defined, create a new one.
+                securityScheme.setFlows(new OAuthFlows());
+            }
+            OAuthFlow oAuthFlow = securityScheme.getFlows().getImplicit();
+            if (oAuthFlow == null) {    // If no implicit flow defined, create a new one.
+                oAuthFlow = new OAuthFlow();
+                securityScheme.getFlows().setImplicit(oAuthFlow);
+            }
+            // rewrite the authorization url if the authorization url is not empty.
+            oAuthFlow.setAuthorizationUrl(authUrl);
+            // Set the scopes defined in the API to the OAS definition.
+            OASParserUtil.setScopesFromAPIToSecurityScheme(swaggerData, securityScheme);
+        }
+        // If the Basic Auth security is in API, add basic security to the OAS definition.
+        if (secList.contains(APIConstants.API_SECURITY_BASIC_AUTH)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Updating the OAS definition with basic_auth security of API: " + swaggerData.getTitle()
+                        + " Version: " + swaggerData.getVersion());
+            }
+            SecurityScheme securityScheme = securitySchemes.computeIfAbsent(APIConstants.API_SECURITY_BASIC_AUTH,
+                    key -> {
+                        SecurityScheme scheme = new SecurityScheme();
+                        scheme.setType(SecurityScheme.Type.HTTP);
+                        scheme.setScheme(APIConstants.SWAGGER_API_SECURITY_BASIC_AUTH_TYPE);
+                        return scheme;
+                    });
+            // Set the scopes defined in the API to the OAS definition.
+            OASParserUtil.setScopesFromAPIToSecurityScheme(swaggerData, securityScheme);
+            // Add global basic security requirement to the OAS definition.
+            OASParserUtil.addSecurityRequirementToSwagger(openAPI, APIConstants.API_SECURITY_BASIC_AUTH);
+        }
+        if (secList.contains(APIConstants.API_SECURITY_API_KEY)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Updating the OAS definition with api_key security of API: " + swaggerData.getTitle()
+                        + " Version: " + swaggerData.getVersion());
+            }
+            securitySchemes.computeIfAbsent(APIConstants.API_SECURITY_API_KEY,
+                    key -> {
+                        SecurityScheme scheme = new SecurityScheme();
+                        scheme.setType(SecurityScheme.Type.APIKEY);
+                        scheme.setIn(SecurityScheme.In.HEADER);
+                        scheme.setName(APIConstants.API_KEY_HEADER_QUERY_PARAM);
+                        return scheme;
+                    });
+            // Add global api key security requirement to the OAS definition.
+            OASParserUtil.addSecurityRequirementToSwagger(openAPI, APIConstants.API_SECURITY_API_KEY);
+        }
+        // Add requirement with scopes to the operations in OAS definition.
+        for (Map.Entry<String, PathItem> pathEntry : openAPI.getPaths().entrySet()) {
+            for (Operation operation : pathEntry.getValue().readOperations()) {
+                List<SecurityRequirement> oldSecList = operation.getSecurity();
+                if (oldSecList == null) {
+                    oldSecList = new ArrayList<>();
+                }
+                List<String> operationScopes = oldSecList.stream()
+                        .filter(securityRequirement -> securityRequirement.containsKey(OPENAPI_SECURITY_SCHEMA_KEY))
+                        .findFirst()
+                        .map(securityRequirement -> securityRequirement.get(OPENAPI_SECURITY_SCHEMA_KEY))
+                        .orElse(new ArrayList<>());
+                // Add operation level security for basic_auth and api_key.
+                OASParserUtil.addOASBasicAuthResourceScopesFromAPI(operationScopes, secList, operation);
+                OASParserUtil.addOASOperationSecurityReqFromAPI(oldSecList, secList,
+                        APIConstants.API_SECURITY_BASIC_AUTH, new ArrayList<>());
+                OASParserUtil.addOASOperationSecurityReqFromAPI(oldSecList, secList, APIConstants.API_SECURITY_API_KEY,
+                        new ArrayList<>());
+                if (!secList.isEmpty() && !secList.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        && operation.getSecurity() != null) {
+                    // If oauth2 is not set for the API, remove oauth security scheme from resource level if exists.
+                    operation.setSecurity(operation.getSecurity().stream()
+                            .filter(securityRequirement -> !securityRequirement
+                                    .containsKey(OPENAPI_SECURITY_SCHEMA_KEY))
+                            .collect(Collectors.toList()));
+                }
+            }
+        }
+        if (!secList.isEmpty() && !secList.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Removing default oauth2 security of API: " + swaggerData.getTitle()
+                        + " Version: " + swaggerData.getVersion() + " from OAS definition");
+            }
+            // Remove oauth security scheme from global level and resource level if exists
+            securitySchemes.remove(OPENAPI_SECURITY_SCHEMA_KEY);
+        }
     }
 
     /**

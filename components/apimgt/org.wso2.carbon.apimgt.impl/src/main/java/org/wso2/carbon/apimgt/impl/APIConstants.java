@@ -342,6 +342,7 @@ public final class APIConstants {
     public static final String DEFAULT_API_SECURITY_OAUTH2 = "oauth2";
     public static final String API_SECURITY_MUTUAL_SSL = "mutualssl";
     public static final String API_SECURITY_BASIC_AUTH = "basic_auth";
+    public static final String SWAGGER_API_SECURITY_BASIC_AUTH_TYPE = "basic";
     public static final String API_SECURITY_API_KEY = "api_key";
     public static final String API_SECURITY_MUTUAL_SSL_MANDATORY = "mutualssl_mandatory";
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
@@ -1576,6 +1577,9 @@ public final class APIConstants {
     public static final String SWAGGER_IS_MISSING_MSG = "swagger is missing";
     public static final String OPENAPI_IS_MISSING_MSG = "openapi is missing";
     public static final String SWAGGER_X_SCOPES_BINDINGS = "x-scopes-bindings";
+    public static final String SWAGGER_X_BASIC_AUTH_SCOPES = "x-scopes";
+    public static final String SWAGGER_X_BASIC_AUTH_RESOURCE_SCOPES = "x-basic-auth-scopes";
+    public static final String OPENAPI_SECURITY_SCHEMA_KEY = "default";
 
     //swagger v1.2 constants
     public static final String SWAGGER_RESOURCES = "resources";

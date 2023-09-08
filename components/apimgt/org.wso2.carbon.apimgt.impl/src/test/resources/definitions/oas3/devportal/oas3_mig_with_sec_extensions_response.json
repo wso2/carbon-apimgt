@@ -1,0 +1,104 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "title" : "PizzaShackAPI",
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "https://localhost/"
+  } ],
+  "security" : [ {
+    "default" : [ ]
+  } ],
+  "paths" : {
+    "/test" : {
+      "put" : {
+        "requestBody" : {
+          "description" : "Request Body",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "payload" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : ""
+          }
+        },
+        "x-auth-type" : "Application & Application User",
+        "x-throttling-tier" : "Unlimited",
+        "x-scope" : "MenuScope"
+      },
+      "post" : {
+        "requestBody" : {
+          "description" : "Request Body",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "payload" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : ""
+          }
+        },
+        "x-auth-type" : "Application & Application User",
+        "x-throttling-tier" : "Unlimited",
+        "x-scope" : "OrderScope"
+      }
+    }
+  },
+  "components" : {
+    "securitySchemes" : {
+      "default" : {
+        "type" : "oauth2",
+        "flows" : {
+          "implicit" : {
+            "authorizationUrl" : "https://localhost/authorize",
+            "scopes" : {
+              "OrderScope" : "",
+              "MenuScope" : "description"
+            },
+            "x-scopes-bindings" : {
+              "OrderScope" : "admin",
+              "MenuScope" : ""
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-wso2-security" : {
+    "apim" : {
+      "x-wso2-scopes" : [ {
+        "name" : "OrderScope",
+        "description" : "",
+        "key" : "OrderScope",
+        "roles" : "admin"
+      }, {
+        "name" : "MenuScope",
+        "description" : "description",
+        "key" : "MenuScope",
+        "roles" : ""
+      } ]
+    }
+  }
+}
