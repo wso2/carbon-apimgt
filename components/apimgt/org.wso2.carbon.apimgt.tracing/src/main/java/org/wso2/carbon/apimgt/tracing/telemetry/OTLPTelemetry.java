@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.tracing.telemetry;
 
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
@@ -36,7 +37,10 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Class for getting Otlp tracer from reading configuration file.
@@ -44,6 +48,9 @@ import java.util.Set;
 public class OTLPTelemetry implements APIMOpenTelemetry {
 
     private static final String NAME = "otlp";
+    private static final String OTEL_RESOURCE_ATTRIBUTE_CONFIG_KEYS_PREFIX =
+            "OpenTelemetry.RemoteTracer.ResourceAttributes.";
+    private static final String OTEL_RESOURCE_ATTRIBUTES_ENV_VAR_NAME = "OTEL_RESOURCE_ATTRIBUTES";
     private static final Log log = LogFactory.getLog(OTLPTelemetry.class);
     private static final APIManagerConfiguration configuration =
             ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
@@ -71,11 +78,9 @@ public class OTLPTelemetry implements APIMOpenTelemetry {
                 log.debug("OTLP exporter: " + otlpGrpcSpanExporterBuilder + " is configured at " + endPointURL);
             }
 
-            Resource serviceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, serviceName));
-
             sdkTracerProvider = SdkTracerProvider.builder()
                     .addSpanProcessor(BatchSpanProcessor.builder(otlpGrpcSpanExporterBuilder.build()).build())
-                    .setResource(Resource.getDefault().merge(serviceNameResource))
+                    .setResource(getTracerProviderResource(serviceName))
                     .build();
 
             openTelemetry = OpenTelemetrySdk.builder()
@@ -89,6 +94,48 @@ public class OTLPTelemetry implements APIMOpenTelemetry {
         } else {
             log.error("Either endpoint url or the header key value is null or empty");
         }
+    }
+
+    private Resource getTracerProviderResource(String defaultServiceName) {
+        Map<String, String> otelResourceAttributes = getOtelResourceAttributes();
+        AttributesBuilder attributesBuilder = Attributes.builder();
+        for (Map.Entry<String, String> otelResourceAttribute : otelResourceAttributes.entrySet()) {
+            attributesBuilder.put(otelResourceAttribute.getKey(), otelResourceAttribute.getValue());
+        }
+        Attributes attributes = attributesBuilder.build();
+
+        Resource tracerProviderResource = Resource.getDefault();
+        Resource serviceNameResource = Resource.create(
+                Attributes.of(ResourceAttributes.SERVICE_NAME, defaultServiceName));
+        tracerProviderResource = tracerProviderResource.merge(serviceNameResource);
+        tracerProviderResource = tracerProviderResource.merge(Resource.create(attributes));
+
+        return tracerProviderResource;
+    }
+
+    private Map<String, String> getOtelResourceAttributes() {
+        Map<String, String> otelResourceAttributes = new HashMap<>();
+
+        // Get from configuration
+        Set<String> otelResourceAttributeConfigKeys = configuration.getConfigKeySet()
+                .stream().filter(entry -> entry.startsWith(OTEL_RESOURCE_ATTRIBUTE_CONFIG_KEYS_PREFIX))
+                .collect(Collectors.toSet());
+        for (String configKey : otelResourceAttributeConfigKeys) {
+            String otelResourceAttributeKey = configKey.substring(OTEL_RESOURCE_ATTRIBUTE_CONFIG_KEYS_PREFIX.length());
+            otelResourceAttributes.put(otelResourceAttributeKey, configuration.getFirstProperty(configKey));
+        }
+
+        // Get from environment variables
+        String environmentVariableValue = System.getenv(OTEL_RESOURCE_ATTRIBUTES_ENV_VAR_NAME);
+        if (environmentVariableValue != null) {
+            String[] resourceAttributes = StringUtils.split(environmentVariableValue,",");
+            for (String keyValuePair : resourceAttributes) {
+                String[] keyValue = StringUtils.split(keyValuePair, "=");
+                otelResourceAttributes.put(keyValue[0], keyValue[1]);
+            }
+        }
+
+        return otelResourceAttributes;
     }
 
     @Override
