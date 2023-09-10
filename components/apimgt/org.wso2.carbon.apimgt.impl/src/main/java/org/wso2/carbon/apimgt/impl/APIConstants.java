@@ -1618,6 +1618,8 @@ public final class APIConstants {
     public static final String X_WSO2_REQUEST_INTERCEPTOR = "x-wso2-request-interceptor";
     public static final String X_WSO2_RESPONSE_INTERCEPTOR = "x-wso2-response-interceptor";
     public static final String X_WSO2_ENDPOINT_TYPE = "type";
+    public static final String ADVANCE_ENDPOINT_CONFIG = "advanceEndpointConfig";
+    public static final String TIMEOUT_IN_MILLIS = "timeoutInMillis";
 
     //API Constants
     public static final String API_DATA_NAME = "name";
