@@ -429,6 +429,8 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         list.add(apiLevelThrottlingKey);
         infoDTO.setSpikeArrestLimit(spikeArrest);
         infoDTO.setSpikeArrestUnit(spikeArrestUnit);
+        infoDTO.setApplicationSpikeArrestLimit(3);
+        infoDTO.setApplicationSpikeArrestUnit("MINUTES");
         infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
         infoDTO.setSubscriberTenantDomain(subscriberTenant);
         infoDTO.setGraphQLMaxDepth(graphQLMaxDepth);

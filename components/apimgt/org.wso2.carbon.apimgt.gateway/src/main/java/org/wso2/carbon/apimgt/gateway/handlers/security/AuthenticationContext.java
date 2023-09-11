@@ -180,6 +180,25 @@ public class AuthenticationContext {
         this.consumerKey = consumerKey;
     }
 
+    private int applicationSpikesArrestLimit;
+
+    public String getApplicationSpikesArrestUnit() {
+        return applicationSpikesArrestUnit;
+    }
+
+    public void setApplicationSpikesArrestUnit(String applicationSpikesArrestUnit) {
+        this.applicationSpikesArrestUnit = applicationSpikesArrestUnit;
+    }
+
+    private String applicationSpikesArrestUnit;
+
+    public int getApplicationSpikesArrestLimit(){
+        return applicationSpikesArrestLimit;
+    }
+    public void setApplicationSpikesArrestLimit(int applicationSpikesArrestLimit) {
+        this.applicationSpikesArrestLimit = applicationSpikesArrestLimit;
+    }
+
     public int getSpikeArrestLimit() {
         return spikeArrestLimit;
     }

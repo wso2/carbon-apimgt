@@ -377,12 +377,16 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         //if subscription level not throttled then move to application level
                         //Stop on quata reach
                         if (!isSubscriptionLevelThrottled && !isSubscriptionLevelSpikeThrottled) {
+                            boolean isApplicationLevelSpikeThrottled = false;
                             //Application Level Throttling
                             isApplicationLevelThrottled = getThrottleDataHolder().
                                     isThrottled(applicationLevelThrottleKey);
-
+                            if(!isApplicationLevelThrottled) {
+                                isApplicationLevelSpikeThrottled = isApplicationLevelSpike(synCtx,
+                                        applicationLevelThrottleKey);
+                            }
                             //if application level not throttled means it does not throttled at any level.
-                            if (!isApplicationLevelThrottled) {
+                            if (!isApplicationLevelSpikeThrottled) {
                                 for (VerbInfoDTO verbInfo : verbInfoDTOList) {
                                     resourceLevelThrottleKey = verbInfo.getRequestKey();
                                     resourceLevelTier = verbInfo.getThrottling();
@@ -627,6 +631,15 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             initThrottleForSubscriptionLevelSpikeArrest(messageContext, authenticationContext);
             context.stop();
         }
+
+        if(authenticationContext != null && authenticationContext.getApplicationSpikesArrestLimit() > 0) {
+            Timer timer = getTimer(MetricManager.name(
+                    APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "INIT_APP_SPIKE"));
+            Timer.Context context = timer.start();
+            initThrottleForApplicationLevelSpikeArrest(messageContext, authenticationContext);
+            context.stop();
+        }
+
         boolean isThrottled = false;
 
         if (!messageContext.isResponse()) {
@@ -833,6 +846,80 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         return parsedPolicy;
     }
 
+    private OMElement createSpikeArrestApplicationLevelPolicy(String policyName, int maxCount, int unitTime) {
+
+        OMElement parsedPolicy = null;
+        StringBuilder policy = new StringBuilder(APIThrottleConstants.WS_THROTTLE_POLICY_HEADER);
+        if (maxCount != 0 && unitTime != 0) {
+            policy.append(createPolicyForRole(policyName, Integer.toString(unitTime), Integer.toString(maxCount)));
+        }
+        policy.append(APIThrottleConstants.WS_THROTTLE_POLICY_BOTTOM);
+        try {
+            parsedPolicy = AXIOMUtil.stringToOM(policy.toString());
+        } catch (XMLStreamException e) {
+            log.error("Error occurred while creating policy file for Hard Throttling.", e);
+        }
+        return parsedPolicy;
+    }
+    private void initThrottleForApplicationLevelSpikeArrest(MessageContext synCtx,
+                                                            AuthenticationContext authenticationContext) {
+        policyKeyApplication = authenticationContext.getApplicationTier();
+        String applicationLevelThrottleKey = authenticationContext.getApplicationId()+":"+authenticationContext.getUsername();
+        int maxRequestCount = authenticationContext.getApplicationSpikesArrestLimit();
+        int applicationSpikeArrestWindowUnitTime = 0;
+        if(maxRequestCount != 0) {
+            String unitTime = authenticationContext.getApplicationSpikesArrestUnit();
+            if (APIThrottleConstants.MIN.equalsIgnoreCase(unitTime)) {
+                applicationSpikeArrestWindowUnitTime = 60000;
+            } else {
+                applicationSpikeArrestWindowUnitTime = 1000;
+            }
+        }
+        try {
+            synchronized (this) {
+                if (throttle == null) {
+                    OMElement spikeArrestApplicationLevelPolicy = createSpikeArrestApplicationLevelPolicy(
+                             applicationLevelThrottleKey, maxRequestCount, applicationSpikeArrestWindowUnitTime);
+                    if (spikeArrestApplicationLevelPolicy != null) {
+                        throttle = ThrottleFactory.createMediatorThrottle(
+                                PolicyEngine.getPolicy(spikeArrestApplicationLevelPolicy));
+                    }
+                } else {
+                    boolean createApplicationLevelSpikeArrestPolicy = false;
+                    if (throttle.getThrottleContext(applicationLevelThrottleKey) == null) {
+                        createApplicationLevelSpikeArrestPolicy = true;
+                    } else {
+                        CallerConfiguration existingCallerConfig =
+                                throttle.getThrottleContext(applicationLevelThrottleKey).getThrottleConfiguration()
+                                        .getCallerConfiguration(applicationLevelThrottleKey);
+                        if (existingCallerConfig.getMaximumRequestPerUnitTime() != maxRequestCount ||
+                                existingCallerConfig.getUnitTime() != applicationSpikeArrestWindowUnitTime) {
+                            createApplicationLevelSpikeArrestPolicy = true;
+                        }
+                    }
+
+                    if (createApplicationLevelSpikeArrestPolicy) {
+                        OMElement spikeArrestSubscriptionLevelPolicy = createSpikeArrestSubscriptionLevelPolicy(
+                                applicationLevelThrottleKey, maxRequestCount, applicationSpikeArrestWindowUnitTime);
+                        if (spikeArrestSubscriptionLevelPolicy != null) {
+                            Throttle tempThrottle = ThrottleFactory.createMediatorThrottle(
+                                    PolicyEngine.getPolicy(spikeArrestSubscriptionLevelPolicy));
+                            ThrottleConfiguration newThrottleConfig = tempThrottle.
+                                    getThrottleConfiguration(ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
+                            ThrottleContext subscriptionLevelSpikeThrottle = ThrottleContextFactory.
+                                    createThrottleContext(ThrottleConstants.ROLE_BASE, newThrottleConfig);
+                            throttle.addThrottleContext(applicationLevelThrottleKey,
+                                    subscriptionLevelSpikeThrottle);
+                        }
+                    }
+                }
+            }
+        }catch (ThrottleException e) {
+            log.error("Error while initializing throttling object for subscription level spike arrest policy" +
+                    e.getMessage());
+        }
+    }
+
     /**
      * This method will intialize subscription level throttling context and throttle object.
      * This method need to be called for each and every request of spike arrest is enabled.
@@ -932,6 +1019,41 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 log.error("Error occurred while creating policy file for Hard Throttling.", e);
             }
         }
+    }
+
+    public boolean isApplicationLevelSpike(MessageContext synCtx, String throttleKey) {
+        ThrottleContext subscriptionLevelSpikeArrestThrottleContext = throttle.getThrottleContext(throttleKey);
+        try {
+            AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(synCtx);
+
+            if (subscriptionLevelSpikeArrestThrottleContext != null && authContext.getKeyType() != null) {
+                org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) synCtx).
+                        getAxis2MessageContext();
+                ConfigurationContext cc = axis2MC.getConfigurationContext();
+                subscriptionLevelSpikeArrestThrottleContext.setConfigurationContext(cc);
+
+                subscriptionLevelSpikeArrestThrottleContext.setThrottleId(id + APIThrottleConstants.SUBSCRIPTION_BURST_LIMIT);
+                AccessInformation info = getAccessInformation(subscriptionLevelSpikeArrestThrottleContext,
+                        throttleKey, throttleKey);
+                if (log.isDebugEnabled()) {
+                    log.debug("Throttle by subscription level burst limit " + throttleKey);
+                    log.debug("Allowed = " + (info != null ? info.isAccessAllowed() : "false"));
+                }
+
+                if (info != null && !info.isAccessAllowed()) {
+                    synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.SUBSCRIPTON_BURST_LIMIT_EXCEEDED);
+                    log.debug("Apppln level burst control limit exceeded for key " + throttleKey);
+                    return true;
+                }
+            }
+
+        } catch (ThrottleException e) {
+            log.warn("Exception occurred while performing role " +
+                    "based throttling", e);
+            synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.HARD_LIMIT_EXCEEDED);
+            return false;
+        }
+        return false;
     }
 
     /**

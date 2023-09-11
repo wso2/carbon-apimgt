@@ -352,6 +352,8 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setSubscriberTenantDomain(info.getSubscriberTenantDomain());
             authContext.setSpikeArrestLimit(info.getSpikeArrestLimit());
             authContext.setSpikeArrestUnit(info.getSpikeArrestUnit());
+            authContext.setApplicationSpikesArrestLimit(info.getApplicationSpikeArrestLimit());
+            authContext.setApplicationSpikesArrestUnit(info.getApplicationSpikeArrestUnit());
             authContext.setStopOnQuotaReach(info.isStopOnQuotaReach());
             authContext.setIsContentAware(info.isContentAware());
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
