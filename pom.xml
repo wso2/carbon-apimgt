@@ -2205,7 +2205,7 @@
         <org.wso2.orbit.com.amazonaws.version>1.11.1034.wso2v2</org.wso2.orbit.com.amazonaws.version>
 
         <zipkin.version>2.23.2</zipkin.version>
-        <okhttp.wso2.version>4.9.3.wso2v2</okhttp.wso2.version>
+        <okhttp.wso2.version>4.11.0.wso2v1</okhttp.wso2.version>
         <okio.wso2.version>3.5.0.wso2v1</okio.wso2.version>
 
         <openfeign.version>11.0</openfeign.version>
