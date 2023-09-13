@@ -41,6 +41,7 @@ public class API implements CacheableEntity<String> {
     private String organization;
     private boolean deployed = false;
     private boolean isDefaultVersion = false;
+    private String securityScheme;
 
     public API() {
     }
@@ -203,6 +204,7 @@ public class API implements CacheableEntity<String> {
                 ", policy='" + policy + '\'' +
                 ", apiType='" + apiType + '\'' +
                 ", status='" + status + '\'' +
+                ", securityScheme='" + securityScheme + '\'' +
                 ", isDefaultVersion=" + isDefaultVersion +
                 ", urlMappings=" + urlMappings +
                 '}';
@@ -294,5 +296,13 @@ public class API implements CacheableEntity<String> {
 
     public void setDeployed(boolean deployed) {
         this.deployed = deployed;
+    }
+
+    public String getSecurityScheme() {
+        return securityScheme;
+    }
+
+    public void setSecurityScheme(String securityScheme) {
+        this.securityScheme = securityScheme;
     }
 }

@@ -329,10 +329,13 @@ public class InboundWebsocketProcessorUtil {
     public static InboundProcessorResponseDTO authenticateToken(InboundMessageContext inboundMessageContext,
                                                                 String authenticationType) throws APISecurityException {
 
-        if (inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader) != null) {
+        List<String> securitySchemeList = Utils.getSecuritySchemeOfWebSocketAPI(inboundMessageContext.getApiContext(),
+                inboundMessageContext.getVersion(), inboundMessageContext.getTenantDomain());
+        if (securitySchemeList.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) && inboundMessageContext.getRequestHeaders().get(WebsocketUtil.
+                authorizationHeader) != null) {
             return new OAuthAuthenticator().authenticate(inboundMessageContext, authenticationType);
-        } else if (inboundMessageContext.getRequestHeaders().get(APIConstants.API_KEY_HEADER_QUERY_PARAM) != null ||
-                inboundMessageContext.getApiKeyFromQueryParams() != null) {
+        } else if (securitySchemeList.contains(APIConstants.API_SECURITY_API_KEY) && (inboundMessageContext.getRequestHeaders().
+                get(APIConstants.API_KEY_HEADER_QUERY_PARAM) != null || inboundMessageContext.getApiKeyFromQueryParams() != null)) {
             return new ApiKeyAuthenticator().authenticate(inboundMessageContext);
         } else {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,

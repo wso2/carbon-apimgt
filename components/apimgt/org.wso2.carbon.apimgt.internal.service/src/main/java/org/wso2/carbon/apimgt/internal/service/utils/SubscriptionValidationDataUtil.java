@@ -123,6 +123,7 @@ public class SubscriptionValidationDataUtil {
             apidto.setStatus(model.getStatus());
             apidto.setIsDefaultVersion(model.isDefaultVersion());
             apidto.setOrganization(model.getOrganization());
+            apidto.setSecurityScheme(model.getSecurityScheme());
             Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {

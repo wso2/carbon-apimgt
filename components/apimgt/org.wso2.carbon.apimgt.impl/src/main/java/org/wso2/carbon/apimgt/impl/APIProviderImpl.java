@@ -489,7 +489,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
                 apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
-                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus());
+                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), api.getApiSecurity());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
@@ -768,7 +768,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, apiIdentifier.getApiName(),
                 api.getId().getId(), api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
-                api.getStatus(), APIConstants.EventAction.DEFAULT_VERSION);
+                api.getStatus(), APIConstants.EventAction.DEFAULT_VERSION, api.getApiSecurity());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
@@ -881,7 +881,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, api.getId().getApiName(), apiId,
                 api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
-                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), action);
+                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), action, api.getApiSecurity());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
         // Extracting API details for the recommendation system
@@ -2234,7 +2234,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     APIConstants.EventType.API_DELETE.name(), tenantId, organization, api.getId().getApiName(), apiId,
                     api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                     APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
-                    api.getStatus());
+                    api.getStatus(), api.getApiSecurity());
             APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
         } else {
             log.debug("Event has not published to gateways due to API id has failed to retrieve from DB for API "
@@ -4298,7 +4298,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, product.getId().getName(), productId,
                 product.getId().getUUID(), product.getId().getVersion(), product.getType(), product.getContext(),
-                product.getId().getProviderName(), APIConstants.LC_PUBLISH_LC_STATE);
+                product.getId().getProviderName(), APIConstants.LC_PUBLISH_LC_STATE, product.getApiSecurity());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
         return apiToProductResourceMapping;

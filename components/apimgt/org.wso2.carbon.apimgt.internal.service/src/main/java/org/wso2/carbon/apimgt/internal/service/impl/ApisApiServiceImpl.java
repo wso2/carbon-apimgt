@@ -67,6 +67,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
                 API api = subscriptionValidationDAO
                         .getAPIByContextAndVersion(context, version, gatewayLabel, expand);
+                if (api != null) {
+                    api.setSecurityScheme(RestApiCommonUtil.getLoggedInUserProvider().getAPIbyUUID(api.getApiUUID(),
+                            api.getOrganization()).getApiSecurity());
+                }
                 apiListDTO = SubscriptionValidationDataUtil.fromAPIToAPIListDTO(api);
             } else {
                 if (APIConstants.ORG_ALL_QUERY_PARAM.equals(organization)) {

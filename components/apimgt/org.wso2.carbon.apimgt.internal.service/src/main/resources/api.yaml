@@ -867,6 +867,10 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/URLMapping'
+      securityScheme:
+        type: string
+        description: Available authentication methods of the API.
+        example: Oauth2,api_key
 
   #-----------------------------------------------------
   # synapse Artifact resource

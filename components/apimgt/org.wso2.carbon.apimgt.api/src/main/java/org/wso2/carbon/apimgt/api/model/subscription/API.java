@@ -39,6 +39,7 @@ public class API implements CacheableEntity<String> {
     private String status;
     private String revision;
     private String organization;
+    private String securityScheme;
 
     public String getRevision() {
 
@@ -198,5 +199,13 @@ public class API implements CacheableEntity<String> {
 
     public void setOrganization(String organization) {
         this.organization = organization;
+    }
+
+    public String getSecurityScheme() {
+        return securityScheme;
+    }
+
+    public void setSecurityScheme(String securityScheme) {
+        this.securityScheme = securityScheme;
     }
 }
