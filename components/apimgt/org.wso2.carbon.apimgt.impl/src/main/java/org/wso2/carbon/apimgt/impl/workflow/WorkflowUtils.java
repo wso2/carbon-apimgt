@@ -156,7 +156,7 @@ public class WorkflowUtils {
                     apiStateWFDto.getMetadata("ApiVersion"),
                     apiStateWFDto.getApiType(), apiStateWFDto.getMetadata( "ApiContext"),
                     apiStateWFDto.getMetadata("ApiProvider"),
-                    apiStateWFDto.getMetadata("Action"));
+                    apiStateWFDto.getMetadata("Action"), null);
             APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
         } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION.equalsIgnoreCase(wfType)) {
             ApplicationRegistrationWorkflowDTO appRegWFDto = (ApplicationRegistrationWorkflowDTO) workflowDTO;

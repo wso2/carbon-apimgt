@@ -37,6 +37,7 @@ public class APIEvent extends Event {
     private String apiStatus;
     private String logLevel;
     private APIConstants.EventAction action;
+    private String securityScheme;
 
     public APIEvent(String uuid, String logLevel, String type, String apiContext) {
         this.uuid = uuid;
@@ -45,8 +46,8 @@ public class APIEvent extends Event {
         this.apiContext = apiContext;
     }
 
-    public APIEvent(String uuid, String apiName, String apiVersion, String apiProvider, String apiType,
-                    String apiStatus) {
+    public APIEvent(String uuid, String apiName, String apiVersion, String apiProvider, String apiType, String apiStatus,
+                    String securityScheme) {
 
         this.uuid = uuid;
         this.apiName = apiName;
@@ -54,11 +55,12 @@ public class APIEvent extends Event {
         this.apiProvider = apiProvider;
         this.apiType = apiType;
         this.apiStatus = apiStatus;
+        this.securityScheme = securityScheme;
     }
 
     public APIEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, String apiName,
                     int apiId, String uuid, String apiVersion, String apiType, String apiContext, String apiProvider,
-                    String apiStatus) {
+                    String apiStatus, String securityScheme) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -72,11 +74,12 @@ public class APIEvent extends Event {
         this.apiProvider = apiProvider;
         this.apiStatus = apiStatus;
         this.tenantDomain = tenantDomain;
+        this.securityScheme = securityScheme;
     }
 
     public APIEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, String apiName,
                     int apiId, String uuid, String apiVersion, String apiType, String apiContext, String apiProvider,
-                    String apiStatus, APIConstants.EventAction action) {
+                    String apiStatus, APIConstants.EventAction action, String securityScheme) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -91,6 +94,7 @@ public class APIEvent extends Event {
         this.apiStatus = apiStatus;
         this.tenantDomain = tenantDomain;
         this.action = action;
+        this.securityScheme = securityScheme;
     }
 
     @Override
@@ -106,6 +110,7 @@ public class APIEvent extends Event {
                 ", apiType='" + apiType + '\'' +
                 ", apiStatus='" + apiStatus + '\'' +
                 ", action='" + action + '\'' +
+                ", securityScheme='" + securityScheme + '\'' +
                 '}';
     }
 
@@ -221,5 +226,13 @@ public class APIEvent extends Event {
 
     public void setAction(APIConstants.EventAction action) {
         this.action = action;
+    }
+
+    public String getSecurityScheme() {
+        return securityScheme;
+    }
+
+    public void setSecurityScheme(String securityScheme) {
+        this.securityScheme = securityScheme;
     }
 }

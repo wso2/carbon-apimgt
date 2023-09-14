@@ -114,6 +114,16 @@ public interface APIPersistence {
     PublisherAPI updateAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException;
 
     /**
+     * Get security scheme of API
+     *
+     * @param org   Organization the API is owned by
+     * @param apiId API ID
+     * @return A String contains the security scheme of the API
+     * @throws APIPersistenceException
+     */
+    String getSecuritySchemeOfAPI(Organization org, String apiId) throws APIPersistenceException;
+
+    /**
      * Get the API information stored in persistence layer, that is used for publisher operations
      *
      * @param org   Organization the API is owned by

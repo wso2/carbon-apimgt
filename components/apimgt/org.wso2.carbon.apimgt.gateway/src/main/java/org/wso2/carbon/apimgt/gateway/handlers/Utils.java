@@ -640,6 +640,19 @@ public class Utils {
 
         return selectedAPIMap;
     }
+
+    public static List<String> getSecuritySchemeOfWebSocketAPI(String context, String version, String tenantDomain) {
+
+        List<String> securitySchemeList = new ArrayList<>();
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        if (tenantSubscriptionStore != null) {
+            securitySchemeList =  Arrays.asList(tenantSubscriptionStore.getApiByContextAndVersion(context, version).
+                    getSecurityScheme().split(","));
+        }
+        return securitySchemeList;
+    }
+
     private static class ContextLengthSorter implements Comparator<String> {
 
         @Override

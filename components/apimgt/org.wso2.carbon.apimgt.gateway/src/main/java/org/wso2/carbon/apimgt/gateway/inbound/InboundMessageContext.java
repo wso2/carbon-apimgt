@@ -23,6 +23,7 @@ import org.apache.synapse.api.API;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.dto.GraphQLOperationDTO;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.Authentication.Authenticator;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
@@ -60,6 +61,8 @@ public class InboundMessageContext {
     private String matchingResource; //invoking API resource
     private ChannelHandlerContext ctx;
     private boolean isJWTToken;
+    private Authenticator authenticator;
+    private boolean isHandShake = false;
 
     //Graphql Subscription specific connection context information
     private GraphQLSchemaDTO graphQLSchemaDTO;
@@ -251,5 +254,21 @@ public class InboundMessageContext {
 
     public void setJWTToken(boolean JWTToken) {
         isJWTToken = JWTToken;
+    }
+
+    public void setAuthenticator (Authenticator authenticator) {
+        this.authenticator = authenticator;
+    }
+
+    public Authenticator getAuthenticator () {
+        return this.authenticator;
+    }
+
+    public boolean isHandShake() {
+        return isHandShake;
+    }
+
+    public void setHandShake(boolean isHandShake) {
+        this.isHandShake = isHandShake;
     }
 }

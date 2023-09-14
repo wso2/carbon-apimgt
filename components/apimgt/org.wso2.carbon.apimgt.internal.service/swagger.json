@@ -1113,6 +1113,11 @@
           "items" : {
             "$ref" : "#/definitions/URLMapping"
           }
+        },
+        "securityScheme" : {
+          "type" : "string",
+          "example" : "Oauth2,api_key",
+          "description" : "Available authentication methods of the API."
         }
       }
     },

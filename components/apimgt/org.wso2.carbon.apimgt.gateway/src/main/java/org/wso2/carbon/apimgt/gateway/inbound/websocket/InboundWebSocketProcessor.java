@@ -52,7 +52,9 @@ import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.GraphQLRequestPr
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.RequestProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.response.GraphQLResponseProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.response.ResponseProcessor;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.Authentication.ApiKeyAuthenticator;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.Authentication.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -112,15 +114,26 @@ public class InboundWebSocketProcessor {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
                     inboundMessageContext.getTenantDomain(), true);
+            inboundMessageContext.setHandShake(true);
             if (validateOAuthHeader(req, inboundMessageContext)) {
+                inboundMessageContext.setAuthenticator(new OAuthAuthenticator());
                 setRequestHeaders(req, inboundMessageContext);
                 inboundMessageContext.getRequestHeaders().put(WebsocketUtil.authorizationHeader, req.headers()
                         .get(WebsocketUtil.authorizationHeader));
                 inboundProcessorResponseDTO =
                         handshakeProcessor.processHandshake(inboundMessageContext);
                 setRequestHeaders(req, inboundMessageContext);
+            } else if (validateAPIKeyHeader(req, inboundMessageContext)) {
+                inboundMessageContext.setAuthenticator(new ApiKeyAuthenticator());
+                setRequestHeaders(req, inboundMessageContext);
+                inboundMessageContext.getRequestHeaders().put(APIConstants.API_KEY_HEADER_QUERY_PARAM, req.headers()
+                        .get(APIConstants.API_KEY_HEADER_QUERY_PARAM));
+                inboundProcessorResponseDTO =
+                        handshakeProcessor.processHandshake(inboundMessageContext);
+                setRequestHeaders(req, inboundMessageContext);
             } else {
-                String errorMessage = "No Authorization Header or access_token query parameter present";
+                String errorMessage = "No Authorization header, access_token query parameter, apikey header or query " +
+                        "parameter present";
                 log.error(errorMessage + " in request for the websocket context "
                         + inboundMessageContext.getApiContext());
                 inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
@@ -158,7 +171,8 @@ public class InboundWebSocketProcessor {
      * @param inboundMessageContext InboundMessageContext
      * @return InboundProcessorResponseDTO with handshake processing response
      */
-    public InboundProcessorResponseDTO handleRequest(WebSocketFrame msg, InboundMessageContext inboundMessageContext) {
+    public InboundProcessorResponseDTO handleRequest(WebSocketFrame msg, InboundMessageContext inboundMessageContext)
+            throws APISecurityException {
 
         RequestProcessor requestProcessor;
         String msgText = null;
@@ -212,9 +226,38 @@ public class InboundWebSocketProcessor {
             QueryStringDecoder decoder = new QueryStringDecoder(inboundMessageContext.getFullRequestPath());
             Map<String, List<String>> requestMap = decoder.parameters();
             if (requestMap.containsKey(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT)) {
-                inboundMessageContext.getHeadersToAdd().put(WebsocketUtil.authorizationHeader, APIConstants.CONSUMER_KEY_SEGMENT
-                        + StringUtils.SPACE + requestMap.get(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT).get(0));
-                InboundWebsocketProcessorUtil.removeTokenFromQuery(requestMap, inboundMessageContext);
+                inboundMessageContext.getHeadersToAdd().put(WebsocketUtil.authorizationHeader,
+                        APIConstants.CONSUMER_KEY_SEGMENT + StringUtils.SPACE + requestMap.get(APIConstants.
+                                AUTHORIZATION_QUERY_PARAM_DEFAULT).get(0));
+                InboundWebsocketProcessorUtil.removeTokenFromQuery(requestMap, inboundMessageContext, APIConstants.
+                        AUTHORIZATION_QUERY_PARAM_DEFAULT);
+                req.setUri(inboundMessageContext.getFullRequestPath());
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Validates apikey query param and reset apikey header in the handshake request.
+     *
+     * @param req                   Handshake request
+     * @param inboundMessageContext InboundMessageContext
+     * @return if validation success
+     * @throws APISecurityException if an error occurs
+     */
+    private boolean validateAPIKeyHeader(FullHttpRequest req, InboundMessageContext inboundMessageContext)
+            throws APISecurityException {
+
+        if (!inboundMessageContext.getRequestHeaders().containsKey(APIConstants.API_KEY_HEADER_QUERY_PARAM)) {
+            QueryStringDecoder decoder = new QueryStringDecoder(inboundMessageContext.getFullRequestPath());
+            Map<String, List<String>> requestMap = decoder.parameters();
+            if (requestMap.containsKey(APIConstants.API_KEY_HEADER_QUERY_PARAM)) {
+                inboundMessageContext.getHeadersToAdd().put(APIConstants.API_KEY_HEADER_QUERY_PARAM, requestMap.
+                        get(APIConstants.API_KEY_HEADER_QUERY_PARAM).get(0));
+                InboundWebsocketProcessorUtil.removeTokenFromQuery(requestMap, inboundMessageContext,
+                        APIConstants.API_KEY_HEADER_QUERY_PARAM);
                 req.setUri(inboundMessageContext.getFullRequestPath());
             } else {
                 return false;
@@ -430,5 +473,4 @@ public class InboundWebSocketProcessor {
         }
         inboundMessageContext.setHeadersToRemove(new ArrayList<>());
     }
-
 }
