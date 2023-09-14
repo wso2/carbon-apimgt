@@ -54,7 +54,6 @@ public class ApiKeyAuthenticator {
     private static AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator = null;
     private static ExtendedJWTConfigurationDto jwtConfigurationDto = null;
     private static Boolean isGatewayTokenCacheEnabled = null;
-    private static volatile long ttl = -1L;
 
     public static InboundProcessorResponseDTO authenticate(InboundMessageContext inboundMessageContext) throws APISecurityException {
 
@@ -65,7 +64,7 @@ public class ApiKeyAuthenticator {
         }
 
         try {
-            // Extract apikey from the request while removing it from the msg context.
+            // Extract apikey from the request while removing it from the inboundMessageContext.
             String apiKey = extractApiKey(inboundMessageContext);
             JWTTokenPayloadInfo payloadInfo = null;
 
@@ -483,9 +482,9 @@ public class ApiKeyAuthenticator {
             apiKey = (String) headers.get(APIConstants.API_KEY_HEADER_QUERY_PARAM);
             if (apiKey != null) {
                 //Remove apikey header from the request
-                if (WebsocketUtil.isRemoveOAuthHeadersFromOutMessage()) {
+//                if (WebsocketUtil.isRemoveOAuthHeadersFromOutMessage()) {
                     inboundMessageContext.getHeadersToRemove().add(APIConstants.API_KEY_HEADER_QUERY_PARAM);
-                }
+//                }
                 return apiKey.trim();
             }
         }
