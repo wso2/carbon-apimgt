@@ -50,13 +50,13 @@ import java.util.HashMap;
 public class ApiKeyAuthenticator {
 
     private static final Log log = LogFactory.getLog(ApiKeyAuthenticator.class);
-    private Boolean jwtGenerationEnabled = null;
-    private AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator = null;
-    private ExtendedJWTConfigurationDto jwtConfigurationDto = null;
-    private Boolean isGatewayTokenCacheEnabled = null;
+    private static Boolean jwtGenerationEnabled = null;
+    private static AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator = null;
+    private static ExtendedJWTConfigurationDto jwtConfigurationDto = null;
+    private static Boolean isGatewayTokenCacheEnabled = null;
     private static volatile long ttl = -1L;
 
-    public InboundProcessorResponseDTO authenticate(InboundMessageContext inboundMessageContext) throws APISecurityException {
+    public static InboundProcessorResponseDTO authenticate(InboundMessageContext inboundMessageContext) throws APISecurityException {
 
         InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
 
@@ -90,17 +90,17 @@ public class ApiKeyAuthenticator {
             if (jwtGenerationEnabled != null && jwtGenerationEnabled) {
                 // Set certificate to jwtConfigurationDto
                 if (jwtConfigurationDto.isTenantBasedSigningEnabled()) {
-                    this.jwtConfigurationDto.setPublicCert(SigningUtil.getPublicCertificate(tenantId));
-                    this.jwtConfigurationDto.setPrivateKey(SigningUtil.getSigningKey(tenantId));
+                    jwtConfigurationDto.setPublicCert(SigningUtil.getPublicCertificate(tenantId));
+                    jwtConfigurationDto.setPrivateKey(SigningUtil.getSigningKey(tenantId));
                 } else {
-                    this.jwtConfigurationDto.setPublicCert(ServiceReferenceHolder.getInstance().getPublicCert());
-                    this.jwtConfigurationDto.setPrivateKey(ServiceReferenceHolder.getInstance().getPrivateKey());
+                    jwtConfigurationDto.setPublicCert(ServiceReferenceHolder.getInstance().getPublicCert());
+                    jwtConfigurationDto.setPrivateKey(ServiceReferenceHolder.getInstance().getPrivateKey());
                 }
                 // Set ttl to jwtConfigurationDto
-                this.jwtConfigurationDto.setTtl(org.wso2.carbon.apimgt.impl.utils.GatewayUtils.getTtl());
+                jwtConfigurationDto.setTtl(org.wso2.carbon.apimgt.impl.utils.GatewayUtils.getTtl());
 
                 //setting the jwt configuration dto
-                apiMgtGatewayJWTGenerator.setJWTConfigurationDto(this.jwtConfigurationDto);
+                apiMgtGatewayJWTGenerator.setJWTConfigurationDto(jwtConfigurationDto);
             }
 
             String splitToken[] = apiKey.split("\\.");
@@ -358,7 +358,7 @@ public class ApiKeyAuthenticator {
         }
     }
 
-    private InboundProcessorResponseDTO getErrorInboundProcessorResponseDTO(InboundProcessorResponseDTO inboundProcessorResponseDTO,
+    private static InboundProcessorResponseDTO getErrorInboundProcessorResponseDTO(InboundProcessorResponseDTO inboundProcessorResponseDTO,
                                                                             boolean isError, int errorCode, String errorMessage,
                                                                             boolean closeConnection) {
         inboundProcessorResponseDTO.setError(isError);
@@ -368,7 +368,7 @@ public class ApiKeyAuthenticator {
         return inboundProcessorResponseDTO;
     }
 
-    private void validateAPIKeyRestrictions(JWTClaimsSet payload, InboundMessageContext inboundMessageContext) throws APISecurityException {
+    private static void validateAPIKeyRestrictions(JWTClaimsSet payload, InboundMessageContext inboundMessageContext) throws APISecurityException {
 
         String permittedIPList = null;
         if (payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_IP) != null) {
@@ -434,7 +434,7 @@ public class ApiKeyAuthenticator {
         }
     }
 
-    private String generateAndRetrieveBackendJWTToken(String tokenSignature, JWTInfoDto jwtInfoDto)
+    private static String generateAndRetrieveBackendJWTToken(String tokenSignature, JWTInfoDto jwtInfoDto)
             throws APISecurityException {
 
         String endUserToken = null;
@@ -473,7 +473,7 @@ public class ApiKeyAuthenticator {
         return endUserToken;
     }
 
-    private String extractApiKey(InboundMessageContext inboundMessageContext) throws APISecurityException {
+    private static String extractApiKey(InboundMessageContext inboundMessageContext) throws APISecurityException {
 
         String apiKey;
 
@@ -505,7 +505,7 @@ public class ApiKeyAuthenticator {
         }
     }
 
-    private String removeApiKeyFromQueryParameters(String queryParam, String apiKey) {
+    private static String removeApiKeyFromQueryParameters(String queryParam, String apiKey) {
         queryParam = queryParam.replace("?apikey=" + apiKey, "?");
         queryParam = queryParam.replace("&apikey=" + apiKey, "");
         queryParam = queryParam.replace("?&", "?");
@@ -515,7 +515,7 @@ public class ApiKeyAuthenticator {
         return queryParam;
     }
 
-    private boolean validateAuthenticationContext(InboundMessageContext inboundMessageContext, AuthenticationContext authenticationContext, String contextHeader) {
+    private static boolean validateAuthenticationContext(InboundMessageContext inboundMessageContext, AuthenticationContext authenticationContext, String contextHeader) {
 
         if (authenticationContext == null || !authenticationContext.isAuthenticated()) {
             return false;
@@ -560,7 +560,7 @@ public class ApiKeyAuthenticator {
      * @param payload The payload of the JWT token
      * @return returns true if the JWT token is expired
      */
-    private boolean isJwtTokenExpired(JWTClaimsSet payload) {
+    private static boolean isJwtTokenExpired(JWTClaimsSet payload) {
 
         int timestampSkew = (int) OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds();
 
@@ -582,30 +582,30 @@ public class ApiKeyAuthenticator {
         return false;
     }
 
-    private JWTValidationInfo getJwtValidationInfo(SignedJWTInfo signedJWTInfo) {
+    private static JWTValidationInfo getJwtValidationInfo(SignedJWTInfo signedJWTInfo) {
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
         jwtValidationInfo.setClaims(new HashMap<>(signedJWTInfo.getJwtClaimsSet().getClaims()));
         jwtValidationInfo.setUser(signedJWTInfo.getJwtClaimsSet().getSubject());
         return jwtValidationInfo;
     }
 
-    private String getContextHeader() {
+    private static String getContextHeader() {
         APIManagerConfiguration apimConf = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         JWTConfigurationDto jwtConfigDto = apimConf.getJwtConfigurationDto();
         return jwtConfigDto.getJwtHeader();
     }
 
     //first level cache
-    private Cache getGatewayApiKeyCache() {
+    private static Cache getGatewayApiKeyCache() {
         return CacheProvider.getGatewayApiKeyCache();
     }
 
-    private Cache getInvalidGatewayApiKeyCache() {
+    private static Cache getInvalidGatewayApiKeyCache() {
         return CacheProvider.getInvalidGatewayApiKeyCache();
     }
 
     //second level cache
-    private Cache getGatewayApiKeyDataCache() {
+    private static Cache getGatewayApiKeyDataCache() {
         return CacheProvider.getGatewayApiKeyDataCache();
     }
 

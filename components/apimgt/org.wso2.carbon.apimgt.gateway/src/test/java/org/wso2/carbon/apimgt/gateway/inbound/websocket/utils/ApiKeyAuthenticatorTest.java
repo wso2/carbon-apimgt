@@ -11,6 +11,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.testng.Assert;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
@@ -85,7 +86,6 @@ public class ApiKeyAuthenticatorTest {
     @Test
     public void authenticationForAPIKeyAsRequestHeader() throws Exception {
 
-        ApiKeyAuthenticator apiKeyAuthenticator = PowerMockito.spy(new ApiKeyAuthenticator());
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
         inboundMessageContext.getRequestHeaders().put(APIConstants.API_KEY_HEADER_QUERY_PARAM, apiKey);
         Mockito.when(dataHolder.getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid()))
@@ -104,7 +104,8 @@ public class ApiKeyAuthenticatorTest {
         Mockito.when(invalidGatewayApiKeyCache.get(Mockito.anyString())).thenReturn(null);
         JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
         PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
-        PowerMockito.doReturn(false).when(apiKeyAuthenticator, "isJwtTokenExpired", Mockito.any(JWTClaimsSet.class));
+        PowerMockito.stub(PowerMockito.method(ApiKeyAuthenticator.class, "isJwtTokenExpired"))
+                .toReturn(false);
         Cache gatewayApiKeyDataCache = Mockito.mock(Cache.class);
         PowerMockito.when(CacheProvider.getGatewayApiKeyDataCache()).thenReturn(gatewayApiKeyDataCache);
         Mockito.when(invalidGatewayApiKeyCache.get(Mockito.anyString())).thenReturn(null);
@@ -115,13 +116,12 @@ public class ApiKeyAuthenticatorTest {
                 org.apache.synapse.MessageContext.class)).toReturn(new AuthenticationContext());
         PowerMockito.stub(PowerMockito.method(ApiKeyAuthenticator.class, "validateAuthenticationContext"))
                 .toReturn(true);
-        Assert.assertFalse(apiKeyAuthenticator.authenticate(inboundMessageContext).isError());
+        Assert.assertFalse(ApiKeyAuthenticator.authenticate(inboundMessageContext).isError());
     }
 
     @Test
     public void authenticationForAPIKeyAsQueryParam() throws Exception {
 
-        ApiKeyAuthenticator apiKeyAuthenticator = PowerMockito.spy(new ApiKeyAuthenticator());
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
         inboundMessageContext.setApiKeyFromQueryParams(apiKey);
         inboundMessageContext.setFullRequestPath("ws://localhost:9099/chats/1.0.0/notifications?apikey=" + apiKey);
@@ -141,7 +141,8 @@ public class ApiKeyAuthenticatorTest {
         Mockito.when(invalidGatewayApiKeyCache.get(Mockito.anyString())).thenReturn(null);
         JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
         PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
-        PowerMockito.doReturn(false).when(apiKeyAuthenticator, "isJwtTokenExpired", Mockito.any(JWTClaimsSet.class));
+        PowerMockito.stub(PowerMockito.method(ApiKeyAuthenticator.class, "isJwtTokenExpired"))
+                .toReturn(false);
         Cache gatewayApiKeyDataCache = Mockito.mock(Cache.class);
         PowerMockito.when(CacheProvider.getGatewayApiKeyDataCache()).thenReturn(gatewayApiKeyDataCache);
         Mockito.when(invalidGatewayApiKeyCache.get(Mockito.anyString())).thenReturn(null);
@@ -152,13 +153,12 @@ public class ApiKeyAuthenticatorTest {
                 org.apache.synapse.MessageContext.class)).toReturn(new AuthenticationContext());
         PowerMockito.stub(PowerMockito.method(ApiKeyAuthenticator.class, "validateAuthenticationContext"))
                 .toReturn(true);
-        Assert.assertFalse(apiKeyAuthenticator.authenticate(inboundMessageContext).isError());
+        Assert.assertFalse(ApiKeyAuthenticator.authenticate(inboundMessageContext).isError());
     }
 
     @Test
     public void authenticationTestForExpiredAPIKey() throws Exception {
 
-        ApiKeyAuthenticator apiKeyAuthenticator = PowerMockito.spy(new ApiKeyAuthenticator());
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
         inboundMessageContext.getRequestHeaders().put(APIConstants.API_KEY_HEADER_QUERY_PARAM, apiKey);
         Mockito.when(dataHolder.getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid()))
@@ -177,7 +177,8 @@ public class ApiKeyAuthenticatorTest {
         Mockito.when(invalidGatewayApiKeyCache.get(Mockito.anyString())).thenReturn(null);
         JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
         PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
-        PowerMockito.doReturn(true).when(apiKeyAuthenticator, "isJwtTokenExpired", Mockito.any(JWTClaimsSet.class));
+        PowerMockito.stub(PowerMockito.method(ApiKeyAuthenticator.class, "isJwtTokenExpired"))
+                .toReturn(true);
         Cache gatewayApiKeyDataCache = Mockito.mock(Cache.class);
         PowerMockito.when(CacheProvider.getGatewayApiKeyDataCache()).thenReturn(gatewayApiKeyDataCache);
         Mockito.when(invalidGatewayApiKeyCache.get(Mockito.anyString())).thenReturn(null);
@@ -188,7 +189,7 @@ public class ApiKeyAuthenticatorTest {
                 org.apache.synapse.MessageContext.class)).toReturn(new AuthenticationContext());
         PowerMockito.stub(PowerMockito.method(ApiKeyAuthenticator.class, "validateAuthenticationContext"))
                 .toReturn(true);
-        Assert.assertTrue(apiKeyAuthenticator.authenticate(inboundMessageContext).isError());
+        Assert.assertTrue(ApiKeyAuthenticator.authenticate(inboundMessageContext).isError());
     }
 
     @Test
@@ -210,7 +211,6 @@ public class ApiKeyAuthenticatorTest {
                 "7s-E8jI-2oI_xdHc4hEXkU81GGUJtjfDkXbM2OrfOUAd-OWmFmgyp3p1tdbux2GbwBnuTcrF3kgxuQRHTv86hyxz_0Ik70ypNbpJ0qs" +
                 "5z8qDyU4jSMoid7gyeCoOOJxyCAwCNjGNxc-6YsQpknQjXVd3cMfbOqneQ==";
 
-        ApiKeyAuthenticator apiKeyAuthenticator = PowerMockito.spy(new ApiKeyAuthenticator());
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
         inboundMessageContext.setApiKeyFromQueryParams(apiKey);
         inboundMessageContext.setFullRequestPath("ws://localhost:9099/chats/1.0.0/notifications?apikey=" + apiKey);
@@ -231,7 +231,8 @@ public class ApiKeyAuthenticatorTest {
         Mockito.when(invalidGatewayApiKeyCache.get(Mockito.anyString())).thenReturn(null);
         JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
         PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
-        PowerMockito.doReturn(false).when(apiKeyAuthenticator, "isJwtTokenExpired", Mockito.any(JWTClaimsSet.class));
+        PowerMockito.stub(PowerMockito.method(ApiKeyAuthenticator.class, "isJwtTokenExpired"))
+                .toReturn(false);
         Cache gatewayApiKeyDataCache = Mockito.mock(Cache.class);
         PowerMockito.when(CacheProvider.getGatewayApiKeyDataCache()).thenReturn(gatewayApiKeyDataCache);
         Mockito.when(invalidGatewayApiKeyCache.get(Mockito.anyString())).thenReturn(null);
@@ -242,7 +243,7 @@ public class ApiKeyAuthenticatorTest {
                 org.apache.synapse.MessageContext.class)).toReturn(new AuthenticationContext());
         PowerMockito.stub(PowerMockito.method(ApiKeyAuthenticator.class, "validateAuthenticationContext"))
                 .toReturn(true);
-        Assert.assertTrue(apiKeyAuthenticator.authenticate(inboundMessageContext).isError());
+        Assert.assertTrue(ApiKeyAuthenticator.authenticate(inboundMessageContext).isError());
     }
 
     @Test
@@ -268,7 +269,6 @@ public class ApiKeyAuthenticatorTest {
                 "VDt-vRAfuchtaKTS2AlKwIzajael-3-88RWsI9i6LpboDB0VGyFzvHjP2uTp_Hg7cI5xTyaYvcbcIz71kyPc4PwCCkpyJAwvmE6EHLw" +
                 "HdYQK3_K3j8B0W1TWq4aTOTluTf2KTJd1Bp36zT9KkVYuMdcCguacA3-ZJ_HhEb7AvSVNv9nC5flHw==";
 
-        ApiKeyAuthenticator apiKeyAuthenticator = PowerMockito.spy(new ApiKeyAuthenticator());
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
         inboundMessageContext.setApiKeyFromQueryParams(apiKey);
         inboundMessageContext.setFullRequestPath("ws://localhost:9099/chats/1.0.0/notifications?apikey=" + apiKey);
@@ -289,7 +289,8 @@ public class ApiKeyAuthenticatorTest {
         Mockito.when(invalidGatewayApiKeyCache.get(Mockito.anyString())).thenReturn(null);
         JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
         PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
-        PowerMockito.doReturn(false).when(apiKeyAuthenticator, "isJwtTokenExpired", Mockito.any(JWTClaimsSet.class));
+        PowerMockito.stub(PowerMockito.method(ApiKeyAuthenticator.class, "isJwtTokenExpired"))
+                .toReturn(false);
         Cache gatewayApiKeyDataCache = Mockito.mock(Cache.class);
         PowerMockito.when(CacheProvider.getGatewayApiKeyDataCache()).thenReturn(gatewayApiKeyDataCache);
         Mockito.when(invalidGatewayApiKeyCache.get(Mockito.anyString())).thenReturn(null);
@@ -300,7 +301,7 @@ public class ApiKeyAuthenticatorTest {
                 org.apache.synapse.MessageContext.class)).toReturn(new AuthenticationContext());
         PowerMockito.stub(PowerMockito.method(ApiKeyAuthenticator.class, "validateAuthenticationContext"))
                 .toReturn(true);
-        Assert.assertTrue(apiKeyAuthenticator.authenticate(inboundMessageContext).isError());
+        Assert.assertTrue(ApiKeyAuthenticator.authenticate(inboundMessageContext).isError());
     }
 
     private InboundMessageContext createWebSocketApiMessageContext() {

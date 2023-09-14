@@ -333,10 +333,10 @@ public class InboundWebsocketProcessorUtil {
                 inboundMessageContext.getVersion(), inboundMessageContext.getTenantDomain());
         if (securitySchemeList.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) && inboundMessageContext.getRequestHeaders().get(WebsocketUtil.
                 authorizationHeader) != null) {
-            return new OAuthAuthenticator().authenticate(inboundMessageContext, authenticationType);
+            return OAuthAuthenticator.authenticate(inboundMessageContext, authenticationType);
         } else if (securitySchemeList.contains(APIConstants.API_SECURITY_API_KEY) && (inboundMessageContext.getRequestHeaders().
                 get(APIConstants.API_KEY_HEADER_QUERY_PARAM) != null || inboundMessageContext.getApiKeyFromQueryParams() != null)) {
-            return new ApiKeyAuthenticator().authenticate(inboundMessageContext);
+            return ApiKeyAuthenticator.authenticate(inboundMessageContext);
         } else {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);

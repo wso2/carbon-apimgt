@@ -29,10 +29,7 @@ public class OAuthAuthenticator {
 
     private static final Log log = LogFactory.getLog(OAuthAuthenticator.class);
 
-    public OAuthAuthenticator() {
-    }
-
-    public InboundProcessorResponseDTO authenticate(InboundMessageContext inboundMessageContext, String authenticationType) throws APISecurityException {
+    public static InboundProcessorResponseDTO authenticate(InboundMessageContext inboundMessageContext, String authenticationType) throws APISecurityException {
 
         InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
         boolean validateScopes = false; // This is false when authenticating websocket request (frame)
@@ -187,8 +184,8 @@ public class OAuthAuthenticator {
 
     }
 
-    public boolean validateAuthenticationContext(AuthenticationContext authenticationContext,
-                                                 InboundMessageContext inboundMessageContext) {
+    public static boolean validateAuthenticationContext(AuthenticationContext authenticationContext,
+                                                        InboundMessageContext inboundMessageContext) {
 
         if (authenticationContext == null || !authenticationContext.isAuthenticated()) {
             return false;
