@@ -32,6 +32,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.testng.Assert;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketWSClient;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -42,7 +43,6 @@ import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponse
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
-import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -55,6 +55,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -62,7 +63,7 @@ import java.util.UUID;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({InboundWebsocketProcessorUtil.class, PrivilegedCarbonContext.class,
         ServiceReferenceHolder.class, WebsocketUtil.class, ThrottleDataPublisher.class, APIUtil.class, DataHolder.class,
-        OAuthAuthenticator.class, ApiKeyAuthenticator.class, CacheProvider.class, GatewayUtils.class, JWTClaimsSet.class})
+        OAuthAuthenticator.class, ApiKeyAuthenticator.class, CacheProvider.class, JWTClaimsSet.class, Utils.class})
 public class InboundWebsocketProcessorUtilTest {
 
     private DataPublisher dataPublisher;
@@ -224,8 +225,31 @@ public class InboundWebsocketProcessorUtilTest {
         PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
         PowerMockito.stub(PowerMockito.method(OAuthAuthenticator.class, "validateAuthenticationContext"))
                 .toReturn(true);
+        List<String> securitySchemeList = new ArrayList<>();
+        securitySchemeList.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+        PowerMockito.stub(PowerMockito.method(Utils.class, "getSecuritySchemeOfWebSocketAPI"))
+                .toReturn(securitySchemeList);
         InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext);
         Assert.assertTrue(inboundMessageContext.isJWTToken());
+    }
+
+    @Test
+    public void isAuthenticatedJWTForOAuthWhenOauthIsDisabled() throws Exception {
+        InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
+        Mockito.when(dataHolder.getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid()))
+                .thenReturn(keyManagers);
+        inboundMessageContext.getRequestHeaders().put(WebsocketUtil.authorizationHeader, authenticationHeader);
+        JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
+        PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
+        PowerMockito.stub(PowerMockito.method(OAuthAuthenticator.class, "validateAuthenticationContext"))
+                .toReturn(true);
+        List<String> securitySchemeList = new ArrayList<>();
+        securitySchemeList.add(APIConstants.API_SECURITY_API_KEY);
+        PowerMockito.stub(PowerMockito.method(Utils.class, "getSecuritySchemeOfWebSocketAPI"))
+                .toReturn(securitySchemeList);
+        Assert.assertThrows(APISecurityException.class, () -> {
+            InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext);
+        });
     }
 
     @Test
@@ -244,6 +268,10 @@ public class InboundWebsocketProcessorUtilTest {
         Mockito.when(websocketWSClient.getAPIKeyData(inboundMessageContext.getApiContext(),
                         inboundMessageContext.getVersion(), apiKey, inboundMessageContext.getTenantDomain(), keyManagers))
                 .thenReturn(apiKeyValidationInfoDTO);
+        List<String> securitySchemeList = new ArrayList<>();
+        securitySchemeList.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+        PowerMockito.stub(PowerMockito.method(Utils.class, "getSecuritySchemeOfWebSocketAPI"))
+                .toReturn(securitySchemeList);
         InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext);
         Assert.assertFalse(inboundMessageContext.isJWTToken());
     }
@@ -257,6 +285,10 @@ public class InboundWebsocketProcessorUtilTest {
         PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
         PowerMockito.stub(PowerMockito.method(OAuthAuthenticator.class, "validateAuthenticationContext"))
                 .toReturn(true);
+        List<String> securitySchemeList = new ArrayList<>();
+        securitySchemeList.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+        PowerMockito.stub(PowerMockito.method(Utils.class, "getSecuritySchemeOfWebSocketAPI"))
+                .toReturn(securitySchemeList);
         InboundProcessorResponseDTO responseDTO = InboundWebsocketProcessorUtil.authenticateToken(
                 inboundMessageContext);
         Assert.assertFalse(responseDTO.isError());
@@ -271,6 +303,10 @@ public class InboundWebsocketProcessorUtilTest {
         PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
         PowerMockito.stub(PowerMockito.method(OAuthAuthenticator.class, "validateAuthenticationContext"))
                 .toReturn(false);
+        List<String> securitySchemeList = new ArrayList<>();
+        securitySchemeList.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+        PowerMockito.stub(PowerMockito.method(Utils.class, "getSecuritySchemeOfWebSocketAPI"))
+                .toReturn(securitySchemeList);
         InboundProcessorResponseDTO responseDTO = InboundWebsocketProcessorUtil.authenticateToken(
                 inboundMessageContext);
         Assert.assertTrue(responseDTO.isError());
@@ -285,7 +321,29 @@ public class InboundWebsocketProcessorUtilTest {
         inboundMessageContext.getRequestHeaders().put(APIConstants.API_KEY_HEADER_QUERY_PARAM, apiKey);
         PowerMockito.stub(PowerMockito.method(ApiKeyAuthenticator.class, "authenticate", InboundMessageContext.class))
                 .toReturn(InboundProcessorResponseDTO);
+        List<String> securitySchemeList = new ArrayList<>();
+        securitySchemeList.add(APIConstants.API_SECURITY_API_KEY);
+        PowerMockito.stub(PowerMockito.method(Utils.class, "getSecuritySchemeOfWebSocketAPI"))
+                .toReturn(securitySchemeList);
         Assert.assertTrue(InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext));
+    }
+
+    @Test
+    public void isAuthenticatedForAPIKeyAsRequestHeaderWhenAPIKeyIsDisabled() throws Exception {
+        InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
+        InboundProcessorResponseDTO InboundProcessorResponseDTO = new InboundProcessorResponseDTO();
+        Mockito.when(dataHolder.getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid()))
+                .thenReturn(keyManagers);
+        inboundMessageContext.getRequestHeaders().put(APIConstants.API_KEY_HEADER_QUERY_PARAM, apiKey);
+        PowerMockito.stub(PowerMockito.method(ApiKeyAuthenticator.class, "authenticate", InboundMessageContext.class))
+                .toReturn(InboundProcessorResponseDTO);
+        List<String> securitySchemeList = new ArrayList<>();
+        securitySchemeList.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+        PowerMockito.stub(PowerMockito.method(Utils.class, "getSecuritySchemeOfWebSocketAPI"))
+                .toReturn(securitySchemeList);
+        Assert.assertThrows(APISecurityException.class, () -> {
+            InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext);
+        });
     }
 
     @Test
@@ -299,7 +357,31 @@ public class InboundWebsocketProcessorUtilTest {
         PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
         PowerMockito.stub(PowerMockito.method(ApiKeyAuthenticator.class, "authenticate", InboundMessageContext.class))
                 .toReturn(InboundProcessorResponseDTO);
+        List<String> securitySchemeList = new ArrayList<>();
+        securitySchemeList.add(APIConstants.API_SECURITY_API_KEY);
+        PowerMockito.stub(PowerMockito.method(Utils.class, "getSecuritySchemeOfWebSocketAPI"))
+                .toReturn(securitySchemeList);
         Assert.assertTrue(InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext));
+    }
+
+    @Test
+    public void isAuthenticatedForAPIKeyAsQueryParamWhenAPIKeyIsDisabled() throws Exception {
+        InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
+        InboundProcessorResponseDTO InboundProcessorResponseDTO = new InboundProcessorResponseDTO();
+        Mockito.when(dataHolder.getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid()))
+                .thenReturn(keyManagers);
+        inboundMessageContext.setApiKeyFromQueryParams(apiKey);
+        JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
+        PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
+        PowerMockito.stub(PowerMockito.method(ApiKeyAuthenticator.class, "authenticate", InboundMessageContext.class))
+                .toReturn(InboundProcessorResponseDTO);
+        List<String> securitySchemeList = new ArrayList<>();
+        securitySchemeList.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+        PowerMockito.stub(PowerMockito.method(Utils.class, "getSecuritySchemeOfWebSocketAPI"))
+                .toReturn(securitySchemeList);
+        Assert.assertThrows(APISecurityException.class, () -> {
+            InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext);
+        });
     }
 
     @Test
@@ -307,6 +389,8 @@ public class InboundWebsocketProcessorUtilTest {
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
         Mockito.when(dataHolder.getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid()))
                 .thenReturn(keyManagers);
+        PowerMockito.stub(PowerMockito.method(Utils.class, "getSecuritySchemeOfWebSocketAPI"))
+                .toReturn(new ArrayList<>());
         Assert.assertThrows(APISecurityException.class, () -> {
             InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext);
         });
