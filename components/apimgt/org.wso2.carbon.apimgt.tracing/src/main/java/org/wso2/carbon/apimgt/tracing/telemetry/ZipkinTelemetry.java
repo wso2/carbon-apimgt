@@ -65,11 +65,9 @@ public class ZipkinTelemetry implements APIMOpenTelemetry {
             log.debug("Zipkin exporter: " + zipkinExporter + " is configured at http://" + hostname + ":" + port);
         }
 
-        Resource serviceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, serviceName));
-
         sdkTracerProvider = SdkTracerProvider.builder()
                 .addSpanProcessor(BatchSpanProcessor.builder(zipkinExporter).build())
-                .setResource(Resource.getDefault().merge(serviceNameResource))
+                .setResource(TelemetryUtil.getTracerProviderResource(serviceName))
                 .build();
 
         openTelemetry = OpenTelemetrySdk.builder()

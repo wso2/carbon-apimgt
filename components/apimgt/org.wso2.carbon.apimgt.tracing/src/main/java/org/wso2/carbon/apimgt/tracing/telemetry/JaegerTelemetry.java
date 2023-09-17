@@ -68,11 +68,9 @@ public class JaegerTelemetry implements APIMOpenTelemetry {
             log.debug("Jaeger exporter: " + jaegerExporter + " is configured at http://" + hostname + ":" + port);
         }
 
-        Resource serviceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, serviceName));
-
         sdkTracerProvider = SdkTracerProvider.builder()
                 .addSpanProcessor(BatchSpanProcessor.builder(jaegerExporter).build())
-                .setResource(Resource.getDefault().merge(serviceNameResource))
+                .setResource(TelemetryUtil.getTracerProviderResource(serviceName))
                 .build();
 
         openTelemetry = OpenTelemetrySdk.builder()

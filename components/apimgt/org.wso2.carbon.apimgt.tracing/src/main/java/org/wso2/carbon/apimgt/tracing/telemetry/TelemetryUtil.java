@@ -19,17 +19,28 @@
 package org.wso2.carbon.apimgt.tracing.telemetry;
 
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.context.propagation.TextMapSetter;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.wso2.carbon.apimgt.tracing.telemetry.TelemetryConstants.OTEL_RESOURCE_ATTRIBUTES_ENVIRONMENT_VARIABLE_NAME;
+import static org.wso2.carbon.apimgt.tracing.telemetry.TelemetryConstants.OTEL_RESOURCE_ATTRIBUTE_CONFIG_KEYS_PREFIX;
 
 /**
  * Span utility class.
@@ -227,6 +238,50 @@ public class TelemetryUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets the tracer provider resource with the provided default service name.
+     * @param defaultServiceName    Default service name.
+     * @return                      Tracer provider resource.
+     */
+    public static Resource getTracerProviderResource(String defaultServiceName) {
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        Map<String, String> otelResourceAttributes = new HashMap<>();
+
+        // Get resource attributes from configuration
+        Set<String> otelResourceAttributeConfigKeys = configuration.getConfigKeySet().stream()
+                .filter(entry -> entry.startsWith(OTEL_RESOURCE_ATTRIBUTE_CONFIG_KEYS_PREFIX))
+                .collect(Collectors.toSet());
+        for (String configKey : otelResourceAttributeConfigKeys) {
+            String otelResourceAttributeKey = configKey.substring(OTEL_RESOURCE_ATTRIBUTE_CONFIG_KEYS_PREFIX.length());
+            otelResourceAttributes.put(otelResourceAttributeKey, configuration.getFirstProperty(configKey));
+        }
+
+        /* Get resource attributes from environment variables. If a resource attribute's value has been already
+        provided via configuration, the value provided via environment variable will overwrite that. */
+        String environmentVariableValue = System.getenv(OTEL_RESOURCE_ATTRIBUTES_ENVIRONMENT_VARIABLE_NAME);
+        if (environmentVariableValue != null) {
+            String[] resourceAttributes = StringUtils.split(environmentVariableValue,",");
+            for (String keyValuePair : resourceAttributes) {
+                String[] keyValue = StringUtils.split(keyValuePair, "=");
+                otelResourceAttributes.put(keyValue[0], keyValue[1]);
+            }
+        }
+
+        AttributesBuilder attributesBuilder = Attributes.builder();
+        for (Map.Entry<String, String> otelResourceAttribute : otelResourceAttributes.entrySet()) {
+            attributesBuilder.put(otelResourceAttribute.getKey(), otelResourceAttribute.getValue());
+        }
+        Attributes attributes = attributesBuilder.build();
+
+        Resource tracerProviderResource = Resource.getDefault();
+        Resource serviceNameResource = Resource.create(
+                Attributes.of(ResourceAttributes.SERVICE_NAME, defaultServiceName));
+        tracerProviderResource = tracerProviderResource.merge(serviceNameResource);
+        tracerProviderResource = tracerProviderResource.merge(Resource.create(attributes));
+
+        return tracerProviderResource;
     }
 
     private TelemetryUtil() {
