@@ -279,8 +279,8 @@ public class ImportUtils {
                     setOperationsToDTO(importedApiDTO, validationResponse);
                 }
                 targetApi.setOrganization(organization);
-                importedApi = PublisherCommonUtils
-                        .updateApi(targetApi, importedApiDTO, RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes);
+                importedApi = PublisherCommonUtils.updateApiAndDefinition(targetApi, importedApiDTO,
+                        RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes, validationResponse);
             } else {
                 if (targetApi == null && Boolean.TRUE.equals(overwrite)) {
                     log.info("Cannot find : " + importedApiDTO.getName() + "-" + importedApiDTO.getVersion()
@@ -293,6 +293,14 @@ public class ImportUtils {
                     importedApi = PublisherCommonUtils
                             .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
                                     importedApiDTO.getProvider(), organization);
+                    // Add/update swagger content except for streaming APIs and GraphQL APIs
+                    if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
+                            && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
+                        // Add the validated swagger separately since the UI does the same procedure
+                        PublisherCommonUtils.updateSwagger(importedApi.getUuid(), validationResponse, false,
+                                organization);
+                        importedApi =  apiProvider.getAPIbyUUID(importedApi.getUuid(), currentTenantDomain);
+                    }
                 } else {
                     importedApi = PublisherCommonUtils.importAsyncAPIWithDefinition(validationResponse, Boolean.FALSE,
                             importedApiDTO, null, currentTenantDomain, apiProvider);
@@ -317,13 +325,6 @@ public class ImportUtils {
             // Retrieving the life cycle actions to do the lifecycle state change explicitly later
             lifecycleActions = getLifeCycleActions(currentStatus, targetStatus);
 
-            // Add/update swagger content except for streaming APIs and GraphQL APIs
-            if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
-                    && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
-                // Add the validated swagger separately since the UI does the same procedure
-                PublisherCommonUtils.updateSwagger(importedApi.getUuid(), validationResponse, false, organization);
-                importedApi =  apiProvider.getAPIbyUUID(importedApi.getUuid(), currentTenantDomain);
-            }
             // Add the GraphQL schema
             if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                 importedApi.setOrganization(organization);
