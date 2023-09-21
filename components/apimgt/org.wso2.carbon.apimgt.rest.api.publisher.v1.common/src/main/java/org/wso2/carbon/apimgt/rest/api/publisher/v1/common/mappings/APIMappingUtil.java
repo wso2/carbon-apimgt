@@ -705,6 +705,11 @@ public class APIMappingUtil {
             apiInfoDTO.setAdditionalPropertiesMap(additionalPropertiesMap);
             apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
         }
+        apiInfoDTO.setMonetizedInfo(api.isMonetizationEnabled());
+        apiInfoDTO.setBusinessOwner(api.getBusinessOwner());
+        apiInfoDTO.setBusinessOwnerEmail(api.getBusinessOwnerEmail());
+        apiInfoDTO.setTechnicalOwner(api.getTechnicalOwner());
+        apiInfoDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
         return apiInfoDTO;
     }
 

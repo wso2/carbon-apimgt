@@ -8493,6 +8493,21 @@ components:
         advertiseOnly:
           type: boolean
           example: true
+        monetizedInfo:
+          type: boolean
+          example: true
+        businessOwner:
+          type: string
+          example: Business Owner
+        businessOwnerEmail:
+          type: string
+          example: businessowner@abc.com
+        TechnicalOwner:
+          type: string
+          example: Technical Owner
+        TechnicalOwnerEmail:
+          type: string
+          example: technicalowner@abc.com
     APIMetadata:
       title: API Info object with basic minimal API details.
       type: object
