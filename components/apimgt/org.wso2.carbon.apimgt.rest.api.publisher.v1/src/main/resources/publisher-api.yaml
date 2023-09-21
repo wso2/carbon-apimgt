@@ -9257,6 +9257,21 @@ components:
         gatewayVendor:
           type: string
           example: wso2
+        monetizedInfo:
+          type: boolean
+          example: true
+        businessOwner:
+          type: string
+          example: Business Owner
+        businessOwnerEmail:
+          type: string
+          example: businessowner@abc.com
+        TechnicalOwner:
+          type: string
+          example: Technical Owner
+        TechnicalOwnerEmail:
+          type: string
+          example: technicalowner@abc.com
     APIProduct:
       title: API Product object
       required:

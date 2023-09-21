@@ -2279,6 +2279,11 @@ public class APIMappingUtil {
             if (apiProduct.getApiSecurity() != null) {
                 productDto.setSecurityScheme(Arrays.asList(apiProduct.getApiSecurity().split(",")));
             }
+            productDto.setBusinessOwner(apiProduct.getBusinessOwner());
+            productDto.setBusinessOwnerEmail(apiProduct.getBusinessOwnerEmail());
+            productDto.setTechnicalOwner(apiProduct.getTechnicalOwner());
+            productDto.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
+            productDto.setMonetizedInfo(apiProduct.isMonetizationEnabled());
 
             list.add(productDto);
         }
