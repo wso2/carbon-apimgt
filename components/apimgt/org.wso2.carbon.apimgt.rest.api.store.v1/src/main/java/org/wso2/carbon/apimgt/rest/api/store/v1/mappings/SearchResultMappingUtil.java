@@ -25,7 +25,13 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentSearchResultDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APISearchResultDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.util.Map;

@@ -44,7 +44,6 @@ public class DevPortalAPIInfo {
     private String technicalOwner;
     private String technicalOwnerEmail;
     private Boolean isMonetizationEnabled;
-
     private boolean advertiseOnly;
 
     public void setGatewayVendor(String gatewayVendor) {
