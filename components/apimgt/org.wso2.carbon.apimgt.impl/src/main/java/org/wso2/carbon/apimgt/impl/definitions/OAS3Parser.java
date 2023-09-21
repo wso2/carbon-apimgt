@@ -1234,6 +1234,10 @@ public class OAS3Parser extends APIDefinition {
         // AWS Lambda: set arn & timeout to swagger
         if (resource.getAmznResourceName() != null) {
             operation.addExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME, resource.getAmznResourceName());
+            if (resource.isAmznResourceContentEncoded()) {
+                operation.addExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED,
+                        resource.isAmznResourceContentEncoded());
+            }
         }
         if (resource.getAmznResourceTimeout() != 0) {
             operation.addExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT, resource.getAmznResourceTimeout());
