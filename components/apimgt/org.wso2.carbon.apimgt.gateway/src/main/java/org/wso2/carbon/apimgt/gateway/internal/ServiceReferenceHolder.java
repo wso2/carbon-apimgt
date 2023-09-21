@@ -107,6 +107,7 @@ public class ServiceReferenceHolder {
         return throttleDataHolder;
     }
     private ArtifactRetriever artifactRetriever;
+    private int gatewayCount = 1;
 
     private ServiceReferenceHolder() {
 
@@ -448,4 +449,13 @@ public class ServiceReferenceHolder {
     public void setSynapseConfigurationService(SynapseConfigurationService synapseConfigurationService) {
         this.synapseConfigurationService = synapseConfigurationService;
     }
+
+    public int getGatewayCount() {
+        return gatewayCount;
+    }
+
+    public void setGatewayCount(int gatewayCount) {
+        this.gatewayCount = gatewayCount;
+    }
+
 }
