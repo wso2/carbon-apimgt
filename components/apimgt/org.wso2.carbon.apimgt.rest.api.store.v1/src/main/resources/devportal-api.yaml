@@ -5136,6 +5136,11 @@ components:
               type: string
               description: Average rating of the API
               example: "4.5"
+            monetizedInfo:
+              type: boolean
+              example: true
+            advertiseInfo:
+              $ref: '#/components/schemas/AdvertiseInfo'
     DocumentSearchResult:
       title: Document Result
       allOf:

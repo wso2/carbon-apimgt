@@ -11251,6 +11251,21 @@ components:
             hasThumbnail:
               type: boolean
               example: true
+            monetizedInfo:
+              type: boolean
+              example: true
+            businessOwner:
+              type: string
+              example: Business Owner
+            businessOwnerEmail:
+              type: string
+              example: businessowner@abc.com
+            TechnicalOwner:
+              type: string
+              example: Technical Owner
+            TechnicalOwnerEmail:
+              type: string
+              example: technicalowner@abc.com
     APIProductSearchResult:
       title: API Result
       allOf:
@@ -11285,6 +11300,21 @@ components:
             hasThumbnail:
               type: boolean
               example: true
+            monetizedInfo:
+              type: boolean
+              example: true
+            businessOwner:
+              type: string
+              example: Business Owner
+            businessOwnerEmail:
+              type: string
+              example: businessowner@abc.com
+            TechnicalOwner:
+              type: string
+              example: Technical Owner
+            TechnicalOwnerEmail:
+              type: string
+              example: technicalowner@abc.com
     APIMonetizationInfo:
       title: API monetization object
       required:

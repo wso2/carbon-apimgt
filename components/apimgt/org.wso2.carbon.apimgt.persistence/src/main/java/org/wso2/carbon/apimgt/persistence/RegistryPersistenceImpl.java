@@ -1117,6 +1117,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 apiInfo.setSubscriptionAvailableOrgs(
                         artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
                 apiInfo.setGatewayVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR));
+                apiInfo.setMonetizationStatus(Boolean.parseBoolean(artifact.
+                        getAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS)));
+                apiInfo.setAdvertiseOnly(Boolean.parseBoolean(artifact
+                        .getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
                 devPortalAPIInfoList.add(apiInfo);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -1231,6 +1235,15 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 apiInfo.setSubscriptionAvailableOrgs(artifact
                                         .getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
                                 apiInfo.setGatewayVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR));
+                                apiInfo.setAdvertiseOnly(Boolean.parseBoolean(artifact
+                                        .getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+                                apiInfo.setBusinessOwnerEmail(artifact.
+                                        getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
+                                apiInfo.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
+                                apiInfo.setTechnicalOwnerEmail(artifact.
+                                        getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
+                                apiInfo.setMonetizationStatus(Boolean.parseBoolean(artifact.
+                                        getAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS)));
                                 devPortalAPIInfoList.add(apiInfo);
                             }
 
@@ -1346,6 +1359,14 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
                                 apiInfo.setAdvertiseOnly(Boolean.parseBoolean(artifact
                                         .getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+                                apiInfo.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
+                                apiInfo.setBusinessOwnerEmail(artifact.
+                                        getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
+                                apiInfo.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
+                                apiInfo.setTechnicalOwnerEmail(artifact.
+                                        getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
+                                apiInfo.setMonetizationStatus(Boolean.parseBoolean(artifact.
+                                        getAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS)));
                                 publisherAPIInfoList.add(apiInfo);
                             }
 
@@ -1516,6 +1537,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 content.setStatus(pubAPI.getStatus());
                                 content.setAdvertiseOnly(pubAPI.isAdvertiseOnly());
                                 content.setThumbnailUri(pubAPI.getThumbnail());
+                                content.setBusinessOwner(pubAPI.getBusinessOwner());
+                                content.setBusinessOwnerEmail(pubAPI.getBusinessOwnerEmail());
+                                content.setTechnicalOwner(pubAPI.getTechnicalOwner());
+                                content.setTechnicalOwnerEmail(pubAPI.getTechnicalOwnerEmail());
+                                content.setMonetizationStatus(pubAPI.getMonetizationStatus());
                                 contentData.add(content);
                             } else {
                                 throw new GovernanceException("artifact id is null for " + resourcePath);
@@ -1654,6 +1680,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 content.setStatus(devAPI.getStatus());
                                 content.setBusinessOwner(devAPI.getBusinessOwner());
                                 content.setBusinessOwnerEmail(devAPI.getBusinessOwnerEmail());
+                                content.setBusinessOwnerEmail(devAPI.getBusinessOwnerEmail());
+                                content.setTechnicalOwner(devAPI.getTechnicalOwner());
+                                content.setTechnicalOwnerEmail(devAPI.getTechnicalOwnerEmail());
+                                content.setMonetizationStatus(devAPI.getMonetizationStatus());
+                                content.setAdvertiseOnly(devAPI.isAdvertiseOnly());
 
                                 contentData.add(content);
                             } else {
@@ -3311,6 +3342,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 info.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
                 info.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
                 info.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
+                info.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
+                info.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
+                info.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
+                info.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
+                info.setMonetizationStatus(Boolean.parseBoolean(artifact.
+                        getAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS)));
 
                 publisherAPIProductInfoList.add(info);
 

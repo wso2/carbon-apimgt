@@ -5186,6 +5186,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setContextTemplate(publiserAPI.getContext());
                         api.setStatus(publiserAPI.getStatus());
                         api.setThumbnailUrl(publiserAPI.getThumbnailUri());
+                        api.setBusinessOwner(publiserAPI.getBusinessOwner());
+                        api.setBusinessOwnerEmail(publiserAPI.getBusinessOwnerEmail());
+                        api.setTechnicalOwner(publiserAPI.getTechnicalOwner());
+                        api.setTechnicalOwnerEmail(publiserAPI.getTechnicalOwnerEmail());
+                        api.setMonetizationEnabled(publiserAPI.getMonetizationStatus());
+                        api.setAdvertiseOnly(publiserAPI.getAdvertiseOnly());
                         apiSet.add(api);
                     } else if ("APIProduct".equals(item.getType())) {
 
@@ -5196,6 +5202,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setContextTemplate(publiserAPI.getContext());
                         api.setState(publiserAPI.getStatus());
                         api.setThumbnailUrl(publiserAPI.getThumbnailUri());
+                        api.setBusinessOwner(publiserAPI.getBusinessOwner());
+                        api.setBusinessOwnerEmail(publiserAPI.getBusinessOwnerEmail());
+                        api.setTechnicalOwner(publiserAPI.getTechnicalOwner());
+                        api.setTechnicalOwnerEmail(publiserAPI.getTechnicalOwnerEmail());
+                        api.setMonetizationEnabled(publiserAPI.getMonetizationStatus());
                         apiProductSet.add(api);
                     } else if (item instanceof DocumentSearchContent) {
                         // doc item
@@ -5344,6 +5355,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     mappedAPI.setContext(publisherAPIInfo.getContext());
                     mappedAPI.setApiSecurity(publisherAPIInfo.getApiSecurity());
                     mappedAPI.setThumbnailUrl(publisherAPIInfo.getThumbnail());
+                    mappedAPI.setBusinessOwner(publisherAPIInfo.getBusinessOwner());
+                    mappedAPI.setBusinessOwnerEmail(publisherAPIInfo.getBusinessOwnerEmail());
+                    mappedAPI.setTechnicalOwner(publisherAPIInfo.getTechnicalOwner());
+                    mappedAPI.setTechnicalOwnerEmail(publisherAPIInfo.getTechnicalOwnerEmail());
+                    mappedAPI.setMonetizationEnabled(publisherAPIInfo.getMonetizationStatus());
                     populateAPIStatus(mappedAPI);
                     productList.add(mappedAPI);
                 }
