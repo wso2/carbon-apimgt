@@ -3757,6 +3757,9 @@ components:
           description: |
             Custom(user defined) properties of API
           example: { }
+        monetizedInfo:
+          type: boolean
+          example: true
     APIInfoList:
       title: API Info List
       type: object
