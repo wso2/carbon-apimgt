@@ -930,12 +930,14 @@ public class OAS2Parser extends APIDefinition {
         // AWS Lambda: set arn & timeout to swagger
         if (resource.getAmznResourceName() != null) {
             operation.setVendorExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME, resource.getAmznResourceName());
+            if (resource.isAmznResourceContentEncoded()) {
+                operation.setVendorExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED,
+                        resource.isAmznResourceContentEncoded());
+            }
         }
         if (resource.getAmznResourceTimeout() != 0) {
             operation.setVendorExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT, resource.getAmznResourceTimeout());
         }
-        operation.setVendorExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED,
-                resource.isAmznResourceContentEncoded());
 
         updateLegacyScopesFromOperation(resource, operation);
         String oauth2SchemeKey = APIConstants.SWAGGER_APIM_DEFAULT_SECURITY;
