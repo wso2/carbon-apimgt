@@ -242,6 +242,7 @@ public class TelemetryUtil {
 
     /**
      * Gets the tracer provider resource with the provided default service name.
+     *
      * @param defaultServiceName    Default service name.
      * @return                      Tracer provider resource.
      */
@@ -262,7 +263,7 @@ public class TelemetryUtil {
         provided via configuration, the value provided via environment variable will overwrite that. */
         String environmentVariableValue = System.getenv(OTEL_RESOURCE_ATTRIBUTES_ENVIRONMENT_VARIABLE_NAME);
         if (environmentVariableValue != null) {
-            String[] resourceAttributes = StringUtils.split(environmentVariableValue,",");
+            String[] resourceAttributes = StringUtils.split(environmentVariableValue, ",");
             for (String keyValuePair : resourceAttributes) {
                 String[] keyValue = StringUtils.split(keyValuePair, "=");
                 otelResourceAttributes.put(keyValue[0], keyValue[1]);
