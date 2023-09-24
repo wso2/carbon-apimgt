@@ -23,6 +23,25 @@ package org.wso2.carbon.apimgt.api.model.subscription;
  */
 public class ApplicationPolicy extends Policy {
 
+    public int getRateLimitCount() {
+        return rateLimitCount;
+    }
+
+    public void setRateLimitCount(int rateLimitCount) {
+        this.rateLimitCount = rateLimitCount;
+    }
+
+    private int rateLimitCount = -1;
+
+    public String getRateLimitTimeUnit() {
+        return rateLimitTimeUnit;
+    }
+
+    public void setRateLimitTimeUnit(String rateLimitTimeUnit) {
+        this.rateLimitTimeUnit = rateLimitTimeUnit;
+    }
+
+    private String rateLimitTimeUnit = null;
     @Override
     public String getCacheKey() {
 

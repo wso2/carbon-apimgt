@@ -22,6 +22,8 @@ import javax.validation.Valid;
 public class ApplicationThrottlePolicyAllOfDTO   {
   
     private ThrottleLimitDTO defaultLimit = null;
+    private Integer rateLimitCount = null;
+    private String rateLimitTimeUnit = null;
 
   /**
    **/
@@ -42,6 +44,42 @@ public class ApplicationThrottlePolicyAllOfDTO   {
     this.defaultLimit = defaultLimit;
   }
 
+  /**
+   * Burst control request count
+   **/
+  public ApplicationThrottlePolicyAllOfDTO rateLimitCount(Integer rateLimitCount) {
+    this.rateLimitCount = rateLimitCount;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "10", value = "Burst control request count")
+  @JsonProperty("rateLimitCount")
+  public Integer getRateLimitCount() {
+    return rateLimitCount;
+  }
+  public void setRateLimitCount(Integer rateLimitCount) {
+    this.rateLimitCount = rateLimitCount;
+  }
+
+  /**
+   * Burst control time unit
+   **/
+  public ApplicationThrottlePolicyAllOfDTO rateLimitTimeUnit(String rateLimitTimeUnit) {
+    this.rateLimitTimeUnit = rateLimitTimeUnit;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "min", value = "Burst control time unit")
+  @JsonProperty("rateLimitTimeUnit")
+  public String getRateLimitTimeUnit() {
+    return rateLimitTimeUnit;
+  }
+  public void setRateLimitTimeUnit(String rateLimitTimeUnit) {
+    this.rateLimitTimeUnit = rateLimitTimeUnit;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -52,12 +90,14 @@ public class ApplicationThrottlePolicyAllOfDTO   {
       return false;
     }
     ApplicationThrottlePolicyAllOfDTO applicationThrottlePolicyAllOf = (ApplicationThrottlePolicyAllOfDTO) o;
-    return Objects.equals(defaultLimit, applicationThrottlePolicyAllOf.defaultLimit);
+    return Objects.equals(defaultLimit, applicationThrottlePolicyAllOf.defaultLimit) &&
+        Objects.equals(rateLimitCount, applicationThrottlePolicyAllOf.rateLimitCount) &&
+        Objects.equals(rateLimitTimeUnit, applicationThrottlePolicyAllOf.rateLimitTimeUnit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(defaultLimit);
+    return Objects.hash(defaultLimit, rateLimitCount, rateLimitTimeUnit);
   }
 
   @Override
@@ -66,6 +106,8 @@ public class ApplicationThrottlePolicyAllOfDTO   {
     sb.append("class ApplicationThrottlePolicyAllOfDTO {\n");
     
     sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
+    sb.append("    rateLimitCount: ").append(toIndentedString(rateLimitCount)).append("\n");
+    sb.append("    rateLimitTimeUnit: ").append(toIndentedString(rateLimitTimeUnit)).append("\n");
     sb.append("}");
     return sb.toString();
   }

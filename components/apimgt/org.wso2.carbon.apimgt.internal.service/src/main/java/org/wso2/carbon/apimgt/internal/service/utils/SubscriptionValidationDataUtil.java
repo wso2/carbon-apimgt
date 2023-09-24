@@ -356,6 +356,8 @@ public class SubscriptionValidationDataUtil {
                 applicationPolicyDTO.setTenantId(applicationPolicyModel.getTenantId());
                 applicationPolicyDTO.setTenantDomain(applicationPolicyModel.getTenantDomain());
                 applicationPolicyDTO.setDefaultLimit(getThrottleLimitDTO(applicationPolicyModel));
+                applicationPolicyDTO.setRateLimitCount(applicationPolicyModel.getRateLimitCount());
+                applicationPolicyDTO.setRateLimitTimeUnit(applicationPolicyModel.getRateLimitTimeUnit());
 
                 applicationPolicyListDTO.getList().add(applicationPolicyDTO);
 

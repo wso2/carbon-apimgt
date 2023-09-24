@@ -31,8 +31,27 @@ public class ApplicationPolicyEvent extends PolicyEvent {
     private String policyName;
     private String quotaType;
 
+    public int getRateLimitCount() {
+        return rateLimitCount;
+    }
+
+    public void setRateLimitCount(int rateLimitCount) {
+        this.rateLimitCount = rateLimitCount;
+    }
+
+    public String getRateLimitTimeUnit() {
+        return rateLimitTimeUnit;
+    }
+
+    public void setRateLimitTimeUnit(String rateLimitTimeUnit) {
+        this.rateLimitTimeUnit = rateLimitTimeUnit;
+    }
+
+    private int rateLimitCount;
+    private String rateLimitTimeUnit;
+
     public ApplicationPolicyEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,
-            int policyId, String policyName, String quotaType) {
+            int policyId, String policyName, String quotaType, int rateLimitCount, String rateLimitTimeUnit) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -42,6 +61,8 @@ public class ApplicationPolicyEvent extends PolicyEvent {
         this.quotaType = quotaType;
         this.tenantDomain = tenantDomain;
         this.policyType = PolicyType.APPLICATION;
+        this.rateLimitCount = rateLimitCount;
+        this.rateLimitTimeUnit = rateLimitTimeUnit;
     }
 
     @Override
@@ -55,6 +76,8 @@ public class ApplicationPolicyEvent extends PolicyEvent {
                 ", type='" + type + '\'' +
                 ", tenantId=" + tenantId + '\'' +
                 ", tenantDomain=" + tenantDomain +
+                ", rateLimitCount=" + rateLimitCount +
+                ", rateLimitTimeUnit=" + rateLimitTimeUnit +
                 '}';
     }
 
@@ -65,7 +88,9 @@ public class ApplicationPolicyEvent extends PolicyEvent {
         ApplicationPolicyEvent that = (ApplicationPolicyEvent) o;
         return getPolicyId() == that.getPolicyId() &&
                 getPolicyName().equals(that.getPolicyName()) &&
-                getQuotaType().equals(that.getQuotaType());
+                getQuotaType().equals(that.getQuotaType()) &&
+                getRateLimitCount() == that.getRateLimitCount() &&
+                getRateLimitTimeUnit().equals(that.getRateLimitTimeUnit());
     }
 
     @Override

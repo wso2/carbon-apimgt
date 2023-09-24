@@ -349,7 +349,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Matched Application Throttle Policy by the given name
      */
     @Override
-    public Response throttlingPoliciesApplicationPolicyIdGet(String policyId, MessageContext messageContext) {
+    public Response
+    throttlingPoliciesApplicationPolicyIdGet(String policyId, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();

@@ -381,46 +381,50 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                             //Application Level Throttling
                             isApplicationLevelThrottled = getThrottleDataHolder().
                                     isThrottled(applicationLevelThrottleKey);
-                            if(!isApplicationLevelThrottled) {
+                            //if application level not throttled means it does not throttled at any level.
+                            if (!isApplicationLevelThrottled) {
                                 isApplicationLevelSpikeThrottled = isApplicationLevelSpike(synCtx,
                                         applicationLevelThrottleKey);
-                            }
-                            //if application level not throttled means it does not throttled at any level.
-                            if (!isApplicationLevelSpikeThrottled) {
-                                for (VerbInfoDTO verbInfo : verbInfoDTOList) {
-                                    resourceLevelThrottleKey = verbInfo.getRequestKey();
-                                    resourceLevelTier = verbInfo.getThrottling();
-                                    boolean keyTemplatesAvailable = getThrottleDataHolder().isKeyTemplatesPresent();
-                                    if (!keyTemplatesAvailable || !validateCustomPolicy(authorizedUser,
-                                            applicationLevelThrottleKey, resourceLevelThrottleKey, apiLevelThrottleKey,
-                                            subscriptionLevelThrottleKey, apiContext, apiVersion, subscriberTenantDomain,
-                                            apiTenantDomain, applicationId, clientIp,
-                                            getThrottleDataHolder().getKeyTemplateMap(),
-                                            synCtx)) {
-                                        //Pass message context and continue to avoid performance issue.
-                                        //Did not throttled at any level. So let message go and publish event.
-                                        //publish event to Global Policy Server
-                                        if (isHardLimitThrottled(synCtx, authContext, apiContext, apiVersion)) {
+                                if (!isApplicationLevelSpikeThrottled) {
+                                    for (VerbInfoDTO verbInfo : verbInfoDTOList) {
+                                        resourceLevelThrottleKey = verbInfo.getRequestKey();
+                                        resourceLevelTier = verbInfo.getThrottling();
+                                        boolean keyTemplatesAvailable = getThrottleDataHolder().isKeyTemplatesPresent();
+                                        if (!keyTemplatesAvailable || !validateCustomPolicy(authorizedUser,
+                                                applicationLevelThrottleKey, resourceLevelThrottleKey, apiLevelThrottleKey,
+                                                subscriptionLevelThrottleKey, apiContext, apiVersion, subscriberTenantDomain,
+                                                apiTenantDomain, applicationId, clientIp,
+                                                getThrottleDataHolder().getKeyTemplateMap(),
+                                                synCtx)) {
+                                            //Pass message context and continue to avoid performance issue.
+                                            //Did not throttled at any level. So let message go and publish event.
+                                            //publish event to Global Policy Server
+                                            if (isHardLimitThrottled(synCtx, authContext, apiContext, apiVersion)) {
+                                                isThrottled = true;
+
+                                            } else {
+                                                ServiceReferenceHolder.getInstance().getThrottleDataPublisher().
+                                                        publishNonThrottledEvent(applicationLevelThrottleKey,
+                                                                applicationLevelTier, apiLevelThrottleKey, apiLevelTier,
+                                                                subscriptionLevelThrottleKey, subscriptionLevelTier,
+                                                                resourceLevelThrottleKey, resourceLevelTier,
+                                                                authorizedUser, apiContext,
+                                                                apiVersion, subscriberTenantDomain, apiTenantDomain,
+                                                                applicationId,
+                                                                synCtx, authContext);
+                                            }
+                                        } else {
+                                            log.debug("Request throttled at custom throttling");
+                                            synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
+                                                    APIThrottleConstants.CUSTOM_POLICY_LIMIT_EXCEED);
                                             isThrottled = true;
 
-                                        } else {
-                                            ServiceReferenceHolder.getInstance().getThrottleDataPublisher().
-                                                    publishNonThrottledEvent(applicationLevelThrottleKey,
-                                                            applicationLevelTier, apiLevelThrottleKey, apiLevelTier,
-                                                            subscriptionLevelThrottleKey, subscriptionLevelTier,
-                                                            resourceLevelThrottleKey, resourceLevelTier,
-                                                            authorizedUser, apiContext,
-                                                            apiVersion, subscriberTenantDomain, apiTenantDomain,
-                                                            applicationId,
-                                                            synCtx, authContext);
                                         }
-                                    } else {
-                                        log.debug("Request throttled at custom throttling");
-                                        synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
-                                                APIThrottleConstants.CUSTOM_POLICY_LIMIT_EXCEED);
-                                        isThrottled = true;
-
                                     }
+                                } else {
+                                    synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
+                                            APIThrottleConstants.APPLICATION_BURST_LIMIT_EXCEEDED);
+                                    isThrottled = true;
                                 }
                             } else {
                                 if (log.isDebugEnabled()) {
@@ -1036,13 +1040,13 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 AccessInformation info = getAccessInformation(subscriptionLevelSpikeArrestThrottleContext,
                         throttleKey, throttleKey);
                 if (log.isDebugEnabled()) {
-                    log.debug("Throttle by subscription level burst limit " + throttleKey);
+                    log.debug("Throttle by Application level burst limit " + throttleKey);
                     log.debug("Allowed = " + (info != null ? info.isAccessAllowed() : "false"));
                 }
 
                 if (info != null && !info.isAccessAllowed()) {
                     synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.SUBSCRIPTON_BURST_LIMIT_EXCEEDED);
-                    log.debug("Apppln level burst control limit exceeded for key " + throttleKey);
+                    log.debug("Application level burst control limit exceeded for key " + throttleKey);
                     return true;
                 }
             }

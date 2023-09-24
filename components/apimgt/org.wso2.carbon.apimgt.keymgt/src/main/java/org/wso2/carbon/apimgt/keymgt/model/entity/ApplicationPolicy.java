@@ -25,6 +25,29 @@ public class ApplicationPolicy extends Policy {
 
     private static final String type = "APPLICATION";
 
+    private Integer rateLimitCount = null;
+    private String rateLimitTimeUnit = null;
+
+    public int getRateLimitCount() {
+
+        return rateLimitCount;
+    }
+
+    public void setRateLimitCount(int rateLimitCount) {
+
+        this.rateLimitCount = rateLimitCount;
+    }
+
+    public String getRateLimitTimeUnit() {
+
+        return rateLimitTimeUnit;
+    }
+
+    public void setRateLimitTimeUnit(String rateLimitTimeUnit) {
+
+        this.rateLimitTimeUnit = rateLimitTimeUnit;
+    }
+
     @Override
     public String getCacheKey() {
 
@@ -34,6 +57,6 @@ public class ApplicationPolicy extends Policy {
     @Override
     public String toString() {
         return "ApplicationPolicy [getId()=" + getId() + ", getQuotaType()=" + getQuotaType() + ", isContentAware()="
-                + isContentAware() + ", getTenantId()=" + getTenantId() + ", getName()=" + getName() + "]";
+                + isContentAware() + ", getTenantId()=" + getTenantId() + ", getName()=" + getName() +  "]";
     }
 }

@@ -24,6 +24,8 @@ public class ApplicationPolicyDTO   {
     private String name = null;
     private String quotaType = null;
     private ThrottleLimitDTO defaultLimit = null;
+    private Integer rateLimitCount = null;
+    private String rateLimitTimeUnit = null;
 
   /**
    **/
@@ -127,6 +129,40 @@ public class ApplicationPolicyDTO   {
     this.defaultLimit = defaultLimit;
   }
 
+  /**
+   **/
+  public ApplicationPolicyDTO rateLimitCount(Integer rateLimitCount) {
+    this.rateLimitCount = rateLimitCount;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("rateLimitCount")
+  public Integer getRateLimitCount() {
+    return rateLimitCount;
+  }
+  public void setRateLimitCount(Integer rateLimitCount) {
+    this.rateLimitCount = rateLimitCount;
+  }
+
+  /**
+   **/
+  public ApplicationPolicyDTO rateLimitTimeUnit(String rateLimitTimeUnit) {
+    this.rateLimitTimeUnit = rateLimitTimeUnit;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("rateLimitTimeUnit")
+  public String getRateLimitTimeUnit() {
+    return rateLimitTimeUnit;
+  }
+  public void setRateLimitTimeUnit(String rateLimitTimeUnit) {
+    this.rateLimitTimeUnit = rateLimitTimeUnit;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -142,12 +178,14 @@ public class ApplicationPolicyDTO   {
         Objects.equals(tenantDomain, applicationPolicy.tenantDomain) &&
         Objects.equals(name, applicationPolicy.name) &&
         Objects.equals(quotaType, applicationPolicy.quotaType) &&
-        Objects.equals(defaultLimit, applicationPolicy.defaultLimit);
+        Objects.equals(defaultLimit, applicationPolicy.defaultLimit) &&
+        Objects.equals(rateLimitCount, applicationPolicy.rateLimitCount) &&
+        Objects.equals(rateLimitTimeUnit, applicationPolicy.rateLimitTimeUnit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, tenantId, tenantDomain, name, quotaType, defaultLimit);
+    return Objects.hash(id, tenantId, tenantDomain, name, quotaType, defaultLimit, rateLimitCount, rateLimitTimeUnit);
   }
 
   @Override
@@ -161,6 +199,8 @@ public class ApplicationPolicyDTO   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    quotaType: ").append(toIndentedString(quotaType)).append("\n");
     sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
+    sb.append("    rateLimitCount: ").append(toIndentedString(rateLimitCount)).append("\n");
+    sb.append("    rateLimitTimeUnit: ").append(toIndentedString(rateLimitTimeUnit)).append("\n");
     sb.append("}");
     return sb.toString();
   }

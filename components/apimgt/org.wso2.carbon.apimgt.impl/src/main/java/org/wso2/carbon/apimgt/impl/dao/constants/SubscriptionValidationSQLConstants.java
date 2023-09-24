@@ -203,7 +203,9 @@ public class SubscriptionValidationSQLConstants {
                     "   QUOTA, " +
                     "   QUOTA_UNIT, " +
                     "   UNIT_TIME, " +
-                    "   TIME_UNIT " +
+                    "   TIME_UNIT, " +
+                    "   RATE_LIMIT_COUNT, " +
+                    "   RATE_LIMIT_TIME_UNIT " +
                     "FROM " +
                     "   AM_POLICY_APPLICATION";
 
@@ -323,7 +325,9 @@ public class SubscriptionValidationSQLConstants {
                     "   QUOTA, " +
                     "   QUOTA_UNIT, " +
                     "   UNIT_TIME, " +
-                    "   TIME_UNIT " +
+                    "   TIME_UNIT, " +
+                    "   RATE_LIMIT_COUNT, " +
+                    "   RATE_LIMIT_TIME_UNIT " +
                     "FROM " +
                     "   AM_POLICY_APPLICATION" +
                     " WHERE " +
@@ -389,7 +393,9 @@ public class SubscriptionValidationSQLConstants {
                     "   QUOTA, " +
                     "   QUOTA_UNIT, " +
                     "   UNIT_TIME, " +
-                    "   TIME_UNIT " +
+                    "   TIME_UNIT, " +
+                    "   RATE_LIMIT_COUNT, " +
+                    "   RATE_LIMIT_TIME_UNIT " +
                     "FROM " +
                     "   AM_POLICY_APPLICATION" +
                     " WHERE " +

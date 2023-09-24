@@ -3432,6 +3432,14 @@ components:
           properties:
             defaultLimit:
               $ref: '#/components/schemas/ThrottleLimit'
+            rateLimitCount:
+              type: integer
+              description: Burst control request count
+              example: 10
+            rateLimitTimeUnit:
+              type: string
+              description: Burst control time unit
+              example: min
     ApplicationThrottlePolicyList:
       title: Application Level Throttling Policy List
       type: object

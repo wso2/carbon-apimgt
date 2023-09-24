@@ -1259,6 +1259,10 @@ definitions:
     properties:
       defaultLimit:
         $ref: '#/definitions/ThrottleLimit'
+      rateLimitCount:
+        type: integer
+      rateLimitTimeUnit:
+        type: string
   #-----------------------------------------------------
   # The Api Policy List resource
   #-----------------------------------------------------
