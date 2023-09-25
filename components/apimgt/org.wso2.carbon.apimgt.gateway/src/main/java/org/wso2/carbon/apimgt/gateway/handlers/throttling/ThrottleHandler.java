@@ -391,11 +391,10 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                         resourceLevelTier = verbInfo.getThrottling();
                                         boolean keyTemplatesAvailable = getThrottleDataHolder().isKeyTemplatesPresent();
                                         if (!keyTemplatesAvailable || !validateCustomPolicy(authorizedUser,
-                                                applicationLevelThrottleKey, resourceLevelThrottleKey, apiLevelThrottleKey,
-                                                subscriptionLevelThrottleKey, apiContext, apiVersion, subscriberTenantDomain,
-                                                apiTenantDomain, applicationId, clientIp,
-                                                getThrottleDataHolder().getKeyTemplateMap(),
-                                                synCtx)) {
+                                                applicationLevelThrottleKey, resourceLevelThrottleKey,
+                                                apiLevelThrottleKey, subscriptionLevelThrottleKey, apiContext,
+                                                apiVersion, subscriberTenantDomain, apiTenantDomain, applicationId,
+                                                clientIp, getThrottleDataHolder().getKeyTemplateMap(), synCtx)) {
                                             //Pass message context and continue to avoid performance issue.
                                             //Did not throttled at any level. So let message go and publish event.
                                             //publish event to Global Policy Server
@@ -422,6 +421,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                         }
                                     }
                                 } else {
+                                    log.debug("Request throttled at application level for burst limit");
                                     synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
                                             APIThrottleConstants.APPLICATION_BURST_LIMIT_EXCEEDED);
                                     isThrottled = true;
@@ -433,7 +433,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                 }
                                 synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
                                                    APIThrottleConstants.APPLICATION_LIMIT_EXCEEDED);
-                                long timestamp = getThrottleDataHolder().getThrottleNextAccessTimestamp(applicationLevelThrottleKey);
+                                long timestamp = getThrottleDataHolder().getThrottleNextAccessTimestamp(
+                                        applicationLevelThrottleKey);
                                 synCtx.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP, timestamp);
                                 isThrottled = isApplicationLevelThrottled = true;
                             }
@@ -447,7 +448,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                 isThrottled = false;
                                 if (log.isDebugEnabled()) {
                                     log.debug("Request throttled at subscription level for throttle key" +
-                                              subscriptionLevelThrottleKey + ". But subscription policy " + subscriptionLevelTier + " allows to continue to serve requests");
+                                              subscriptionLevelThrottleKey + ". But subscription policy " +
+                                            subscriptionLevelTier + " allows to continue to serve requests");
                                 }
                             } else {
                                 if (log.isDebugEnabled()) {

@@ -30,6 +30,8 @@ public class ApplicationPolicyEvent extends PolicyEvent {
     private int policyId;
     private String policyName;
     private String quotaType;
+    private int rateLimitCount;
+    private String rateLimitTimeUnit;
 
     public int getRateLimitCount() {
         return rateLimitCount;
@@ -46,9 +48,6 @@ public class ApplicationPolicyEvent extends PolicyEvent {
     public void setRateLimitTimeUnit(String rateLimitTimeUnit) {
         this.rateLimitTimeUnit = rateLimitTimeUnit;
     }
-
-    private int rateLimitCount;
-    private String rateLimitTimeUnit;
 
     public ApplicationPolicyEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,
             int policyId, String policyName, String quotaType, int rateLimitCount, String rateLimitTimeUnit) {
