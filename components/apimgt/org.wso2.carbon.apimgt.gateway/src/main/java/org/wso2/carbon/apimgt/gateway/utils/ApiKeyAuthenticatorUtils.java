@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2023, WSO2 LLC. (https://www.wso2.com/).
- * <p>
+ *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.impl.utils.SigningUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.apache.synapse.MessageContext;
 
 import javax.cache.Cache;
 import java.text.ParseException;
@@ -212,8 +213,7 @@ public class ApiKeyAuthenticatorUtils {
                                                                 String apiContext, String apiVersion, String referer,
                                                                 String apiKey, String token, boolean jwtGenerationEnabled,
                                                                 ExtendedJWTConfigurationDto jwtConfigurationDto,
-                                                                int tenantId, String apiLevelPolicy,
-                                                                org.apache.synapse.MessageContext synCtx)
+                                                                int tenantId, String apiLevelPolicy, MessageContext synCtx)
             throws APISecurityException, ParseException, APIManagementException {
 
         if (log.isDebugEnabled()) {
@@ -311,8 +311,7 @@ public class ApiKeyAuthenticatorUtils {
                     apiMgtGatewayJWTGenerator);
         }
 
-        return GatewayUtils
-                .generateAuthenticationContext(tokenIdentifier, payload, api, apiLevelPolicy, endUserToken,
+        return GatewayUtils.generateAuthenticationContext(tokenIdentifier, payload, api, apiLevelPolicy, endUserToken,
                         synCtx);
     }
 

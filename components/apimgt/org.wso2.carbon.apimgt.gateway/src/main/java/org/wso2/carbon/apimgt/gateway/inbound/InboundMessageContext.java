@@ -62,7 +62,6 @@ public class InboundMessageContext {
     private ChannelHandlerContext ctx;
     private boolean isJWTToken;
     private Authenticator authenticator;
-    private boolean isHandShake = false;
 
     //Graphql Subscription specific connection context information
     private GraphQLSchemaDTO graphQLSchemaDTO;
@@ -262,13 +261,5 @@ public class InboundMessageContext {
 
     public Authenticator getAuthenticator () {
         return this.authenticator;
-    }
-
-    public boolean isHandShake() {
-        return isHandShake;
-    }
-
-    public void setHandShake(boolean isHandShake) {
-        this.isHandShake = isHandShake;
     }
 }

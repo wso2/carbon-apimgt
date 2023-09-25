@@ -647,8 +647,13 @@ public class Utils {
         SubscriptionDataStore tenantSubscriptionStore =
                 SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         if (tenantSubscriptionStore != null) {
-            securitySchemeList =  Arrays.asList(tenantSubscriptionStore.getApiByContextAndVersion(context, version).
-                    getSecurityScheme().split(","));
+            org.wso2.carbon.apimgt.keymgt.model.entity.API api = tenantSubscriptionStore.getApiByContextAndVersion(context, version);
+            if (api != null) {
+                String securityScheme = api.getSecurityScheme();
+                if (securityScheme != null) {
+                    securitySchemeList = Arrays.asList(securityScheme.split(","));
+                }
+            }
         }
         return securitySchemeList;
     }

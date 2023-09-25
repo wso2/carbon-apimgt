@@ -114,8 +114,7 @@ public class InboundWebSocketProcessor {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
                     inboundMessageContext.getTenantDomain(), true);
-            inboundMessageContext.setHandShake(true);
-            if (validateOAuthHeader(req, inboundMessageContext)) {
+            if (isOauthAuthentication(req, inboundMessageContext)) {
                 inboundMessageContext.setAuthenticator(new OAuthAuthenticator());
                 setRequestHeaders(req, inboundMessageContext);
                 inboundMessageContext.getRequestHeaders().put(WebsocketUtil.authorizationHeader, req.headers()
@@ -123,7 +122,7 @@ public class InboundWebSocketProcessor {
                 inboundProcessorResponseDTO =
                         handshakeProcessor.processHandshake(inboundMessageContext);
                 setRequestHeaders(req, inboundMessageContext);
-            } else if (validateAPIKeyHeader(req, inboundMessageContext)) {
+            } else if (isAPIKeyAuthentication(req, inboundMessageContext)) {
                 inboundMessageContext.setAuthenticator(new ApiKeyAuthenticator());
                 setRequestHeaders(req, inboundMessageContext);
                 inboundMessageContext.getRequestHeaders().put(APIConstants.API_KEY_HEADER_QUERY_PARAM, req.headers()
@@ -219,13 +218,14 @@ public class InboundWebSocketProcessor {
      * @return if validation success
      * @throws APISecurityException if an error occurs
      */
-    private boolean validateOAuthHeader(FullHttpRequest req, InboundMessageContext inboundMessageContext)
+    private boolean isOauthAuthentication(FullHttpRequest req, InboundMessageContext inboundMessageContext)
             throws APISecurityException {
 
         if (!inboundMessageContext.getRequestHeaders().containsKey(WebsocketUtil.authorizationHeader)) {
             QueryStringDecoder decoder = new QueryStringDecoder(inboundMessageContext.getFullRequestPath());
             Map<String, List<String>> requestMap = decoder.parameters();
-            if (requestMap.containsKey(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT)) {
+            if (requestMap.containsKey(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT) && requestMap.get(APIConstants.
+                    AUTHORIZATION_QUERY_PARAM_DEFAULT) != null) {
                 inboundMessageContext.getHeadersToAdd().put(WebsocketUtil.authorizationHeader,
                         APIConstants.CONSUMER_KEY_SEGMENT + StringUtils.SPACE + requestMap.get(APIConstants.
                                 AUTHORIZATION_QUERY_PARAM_DEFAULT).get(0));
@@ -247,13 +247,14 @@ public class InboundWebSocketProcessor {
      * @return if validation success
      * @throws APISecurityException if an error occurs
      */
-    private boolean validateAPIKeyHeader(FullHttpRequest req, InboundMessageContext inboundMessageContext)
+    private boolean isAPIKeyAuthentication(FullHttpRequest req, InboundMessageContext inboundMessageContext)
             throws APISecurityException {
 
         if (!inboundMessageContext.getRequestHeaders().containsKey(APIConstants.API_KEY_HEADER_QUERY_PARAM)) {
             QueryStringDecoder decoder = new QueryStringDecoder(inboundMessageContext.getFullRequestPath());
             Map<String, List<String>> requestMap = decoder.parameters();
-            if (requestMap.containsKey(APIConstants.API_KEY_HEADER_QUERY_PARAM)) {
+            if (requestMap.containsKey(APIConstants.API_KEY_HEADER_QUERY_PARAM) && requestMap.get(APIConstants.
+                    API_KEY_HEADER_QUERY_PARAM) != null) {
                 inboundMessageContext.getHeadersToAdd().put(APIConstants.API_KEY_HEADER_QUERY_PARAM, requestMap.
                         get(APIConstants.API_KEY_HEADER_QUERY_PARAM).get(0));
                 InboundWebsocketProcessorUtil.removeTokenFromQuery(requestMap, inboundMessageContext,

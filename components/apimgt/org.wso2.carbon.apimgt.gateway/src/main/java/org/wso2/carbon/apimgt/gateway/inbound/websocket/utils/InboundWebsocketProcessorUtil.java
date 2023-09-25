@@ -56,6 +56,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -345,17 +346,19 @@ public class InboundWebsocketProcessorUtil {
      * @throws APIManagementException if an internal error occurs
      * @throws APISecurityException   if authentication fails
      */
-    public static boolean isAuthenticated(InboundMessageContext inboundMessageContext)
-            throws APISecurityException, APIManagementException {
+    public static boolean isAuthenticated(InboundMessageContext inboundMessageContext) throws APISecurityException {
 
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
                     inboundMessageContext.getTenantDomain(), true);
-            return !authenticate(inboundMessageContext).isError();
+            if (inboundMessageContext.getAuthenticator().validateToken(inboundMessageContext)) {
+                return !authenticate(inboundMessageContext).isError();
+            }
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
+        return false;
     }
 
     /**
@@ -536,15 +539,14 @@ public class InboundWebsocketProcessorUtil {
         return responseDTO;
     }
 
-    public static void isAuthenticatorEnabled(String authenticationType, InboundMessageContext inboundMessageContext)
-            throws APISecurityException {
+    public static boolean isAuthenticatorEnabled(String authenticationType, InboundMessageContext inboundMessageContext) {
         if (!Utils.getSecuritySchemeOfWebSocketAPI(inboundMessageContext.getApiContext(), inboundMessageContext.
                 getVersion(), inboundMessageContext.getTenantDomain()).contains(authenticationType)) {
             if (log.isDebugEnabled()) {
-                log.debug("ApiKey Authentication has not enabled for the Authentication type: " + authenticationType);
+                log.debug("Authentication has not enabled for the Authentication type: " + authenticationType);
             }
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+            return false;
         }
+        return true;
     }
 }

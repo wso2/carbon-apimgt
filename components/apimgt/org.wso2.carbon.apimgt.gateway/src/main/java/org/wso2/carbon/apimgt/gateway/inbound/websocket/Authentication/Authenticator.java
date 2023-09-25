@@ -22,6 +22,9 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 
+import java.text.ParseException;
+
 public interface Authenticator {
     InboundProcessorResponseDTO authenticate(InboundMessageContext inboundMessageContext) throws APISecurityException;
+    boolean validateToken(InboundMessageContext inboundMessageContext) throws APISecurityException;
 }
