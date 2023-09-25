@@ -56,21 +56,16 @@ import java.text.ParseException;
 import java.util.Base64;
 import java.util.HashMap;
 
+/**
+ * This class contains the common utility methods required for API Key authentication.
+ */
 public class ApiKeyAuthenticatorUtils {
     private static final Log log = LogFactory.getLog(ApiKeyAuthenticatorUtils.class);
 
     /**
-     * Get Websocket API Key data from websocket client.
-     *
-     * @param key           API key
-     * @param domain        tenant domain
-     * @param apiContextUri API context
-     * @param apiVersion    API version
-     * @return APIKeyValidationInfoDTO
-     * @throws APISecurityException if validation fails
+     * This method is used to check whether the format of the API Key is valid or not.
      */
-    public static boolean validateAPIKeyFormat(String[] splitToken, JWSHeader decodedHeader, JWTClaimsSet payload)
-            throws APISecurityException, ParseException {
+    public static boolean validateAPIKeyFormat(String[] splitToken, JWSHeader decodedHeader, JWTClaimsSet payload) {
 
         if (splitToken.length != 3) {
             log.error("Api Key does not have the format {header}.{payload}.{signature} ");
@@ -99,6 +94,9 @@ public class ApiKeyAuthenticatorUtils {
         return true;
     }
 
+    /**
+     * This method is used to verify the signature of the API Key.
+     */
     public static boolean verifyAPIKeySignature(boolean isGatewayTokenCacheEnabled, String tokenIdentifier,
                                                 String cacheKey, String apiKey, String token, String certAlias,
                                                 String tenantDomain) throws APISecurityException {
@@ -206,13 +204,16 @@ public class ApiKeyAuthenticatorUtils {
         return isVerified;
     }
 
+    /**
+     * This method checks whether the API Key is expired or not and validates the API Key against the given restrictions.
+     */
     public static AuthenticationContext authenticateUsingAPIKey(boolean isGatewayTokenCacheEnabled, String cacheKey,
-                                                       String tokenIdentifier, String tenantDomain, String clientIP,
-                                                       String apiContext, String apiVersion, String referer,
-                                                       String apiKey, String token, boolean jwtGenerationEnabled,
-                                                       ExtendedJWTConfigurationDto jwtConfigurationDto,
-                                                       int tenantId, String apiLevelPolicy,
-                                                       org.apache.synapse.MessageContext synCtx)
+                                                                String tokenIdentifier, String tenantDomain, String clientIP,
+                                                                String apiContext, String apiVersion, String referer,
+                                                                String apiKey, String token, boolean jwtGenerationEnabled,
+                                                                ExtendedJWTConfigurationDto jwtConfigurationDto,
+                                                                int tenantId, String apiLevelPolicy,
+                                                                org.apache.synapse.MessageContext synCtx)
             throws APISecurityException, ParseException, APIManagementException {
 
         if (log.isDebugEnabled()) {
@@ -385,7 +386,7 @@ public class ApiKeyAuthenticatorUtils {
     }
 
     private static void validateAPIKeyRestrictions(JWTClaimsSet payload, String clientIP, String apiContext,
-                                                  String apiVersion, String referer) throws APISecurityException {
+                                                   String apiVersion, String referer) throws APISecurityException {
 
         String permittedIPList = null;
         if (payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_IP) != null) {

@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2023, WSO2 LLC. (https://www.wso2.com/).
- *
+ * <p>
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,7 +23,6 @@ import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketWSClient;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -51,7 +50,7 @@ import java.util.List;
 /**
  * This class is used to authenticate web socket API requests when using OAuth as the authentication mechanism.
  */
-public class OAuthAuthenticator implements Authenticator{
+public class OAuthAuthenticator implements Authenticator {
 
     private static final Log log = LogFactory.getLog(OAuthAuthenticator.class);
 
@@ -83,7 +82,9 @@ public class OAuthAuthenticator implements Authenticator{
                     try {
                         // Check if the header part is decoded
                         if (StringUtils.countMatches(apiKey, APIConstants.DOT) != 2) {
-                            log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
+                            if (log.isDebugEnabled()) {
+                                log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
+                            }
                             throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                     "Invalid JWT token");
                         }
@@ -117,7 +118,9 @@ public class OAuthAuthenticator implements Authenticator{
                             }
                         }
                     } catch (ParseException e) {
-                        log.debug("Not a JWT token. Failed to decode the token header.", e);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Not a JWT token. Failed to decode the token header.", e);
+                        }
                     } catch (APIManagementException e) {
                         log.error("Error while checking validation of JWT", e);
                         throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
@@ -126,7 +129,9 @@ public class OAuthAuthenticator implements Authenticator{
                 }
                 // Find the authentication scheme based on the token type
                 if (isJwtToken) {
-                    log.debug("The token was identified as a JWT token");
+                    if (log.isDebugEnabled()) {
+                        log.debug("The token was identified as a JWT token");
+                    }
                     inboundMessageContext.setJWTToken(true);
                 }
                 validateScopes = !APIConstants.GRAPHQL_API.equals(inboundMessageContext.getElectedAPI().getApiType());
@@ -140,7 +145,9 @@ public class OAuthAuthenticator implements Authenticator{
         try {
             //validate token and subscriptions
             if (inboundMessageContext.isJWTToken()) {
-                log.debug("Authentication started for JWT tokens");
+                if (log.isDebugEnabled()) {
+                    log.debug("Authentication started for JWT tokens");
+                }
                 JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(),
                         inboundMessageContext.getTenantDomain());
                 AuthenticationContext authenticationContext;
@@ -156,7 +163,9 @@ public class OAuthAuthenticator implements Authenticator{
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, true);
                 }
             } else {
-                log.debug("Authentication started for Opaque tokens");
+                if (log.isDebugEnabled()) {
+                    log.debug("Authentication started for Opaque tokens");
+                }
                 String apiKey;
                 if (inboundMessageContext.getToken() == null) {
                     String authHeader = inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader);
@@ -244,7 +253,7 @@ public class OAuthAuthenticator implements Authenticator{
      * @throws APISecurityException if validation fails
      */
     private APIKeyValidationInfoDTO getApiKeyDataForWSClient(String key, String domain, String apiContextUri,
-                                                                    String apiVersion, List<String> keyManagers)
+                                                             String apiVersion, List<String> keyManagers)
             throws APISecurityException {
 
         return new WebsocketWSClient().getAPIKeyData(apiContextUri, apiVersion, key, domain, keyManagers);

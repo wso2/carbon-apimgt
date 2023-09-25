@@ -240,7 +240,7 @@ public class ApiKeyAuthenticator implements Authenticator {
         return queryParam;
     }
 
-    public String getContextHeader() {
+    private String getContextHeader() {
         APIManagerConfiguration apimConf = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         JWTConfigurationDto jwtConfigDto = apimConf.getJwtConfigurationDto();
         return jwtConfigDto.getJwtHeader();

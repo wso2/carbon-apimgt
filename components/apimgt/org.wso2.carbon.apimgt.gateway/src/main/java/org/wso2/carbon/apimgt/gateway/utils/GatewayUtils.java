@@ -894,6 +894,7 @@ public class GatewayUtils {
      * @param apiContext API context
      * @param apiVersion API version
      * @param payload    The payload of the JWT token
+     * @param token      The token which was used to invoke the API
      * @return an JSON object containing subscribed API information retrieved from token payload.
      * If the subscription information is not found, return a null object.
      * @throws APISecurityException if the user is not subscribed to the API
