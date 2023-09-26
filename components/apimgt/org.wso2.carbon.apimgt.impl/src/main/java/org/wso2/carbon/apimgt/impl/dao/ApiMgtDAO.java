@@ -9055,6 +9055,7 @@ public class ApiMgtDAO {
                     } catch (IOException e) {
                         log.error("Error while converting configurations in " + uuid, e);
                     }
+                    keyManagerConfigurationDTO.setPermissions(this.getKeyManagerPermissions(keyManagerConfigurationDTO.getUuid()));
                     keyManagerConfigurationDTOS.add(keyManagerConfigurationDTO);
                 }
             }
@@ -9359,6 +9360,36 @@ public class ApiMgtDAO {
         return keyManagerPermission;
     }
 
+    public List<KeyManagerPermissionConfigurationDTO> getKeyManagerPermissions(String keyManagerUUID) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet resultSet = null;
+
+        List<KeyManagerPermissionConfigurationDTO> keyManagerPermissions = new ArrayList<>();
+        try {
+            String getKeyManagerPermissionQuery = SQLConstants.KeyManagerPermissionsSqlConstants.GET_KEY_MANAGER_PERMISSIONS_SQL;
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getKeyManagerPermissionQuery);
+
+            ps.setString(1, keyManagerUUID);
+
+            resultSet = ps.executeQuery();
+            if(resultSet.next()){
+                KeyManagerPermissionConfigurationDTO keyManagerPermission = new KeyManagerPermissionConfigurationDTO();
+                keyManagerPermission.setKeyManagerUUID(keyManagerUUID);
+                keyManagerPermission.setRole(resultSet.getString("ROLE"));
+                keyManagerPermission.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
+                keyManagerPermission.setKeyManagerPermissionID(resultSet.getInt("KEY_MANAGER_PERMISSION_ID"));
+                keyManagerPermissions.add(keyManagerPermission);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Key Manager permission information for Key Manager " + keyManagerUUID , e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return keyManagerPermissions;
+    }
     public void updateKeyManagerPermission(String keyManagerUUID, String role, String permissionType)
             throws APIManagementException {
 
@@ -9399,7 +9430,7 @@ public class ApiMgtDAO {
             }
             conn.commit();
         } catch (SQLException e) {
-            handleException("Error in updating tier permissions: " + e.getMessage(), e);
+            handleException("Error in updating key manager permissions: " + e.getMessage(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
             APIMgtDBUtil.closeAllConnections(insertOrUpdatePS, null, null);

@@ -3627,7 +3627,7 @@ public class SQLConstants {
                         "   PERMISSIONS_TYPE = ?," +
                         "   ROLE = ? " +
                         " WHERE " +
-                        "   KEY_MANAGER_PERMISSIONS_ID = ? ";
+                        "   KEY_MANAGER_PERMISSION_ID = ? ";
 
         public static final String DELETE_KEY_MANAGER_PERMISSION_SQL = "DELETE FROM AM_KEY_MANAGER_PERMISSIONS WHERE " +
                 "KEY_MANAGER_PERMISSION_ID = ?";
@@ -3639,6 +3639,11 @@ public class SQLConstants {
                 " SELECT KEY_MANAGER_PERMISSION_ID, PERMISSIONS_TYPE" +
                         " FROM AM_KEY_MANAGER_PERMISSIONS " +
                         " WHERE KEY_MANAGER_UUID = ? AND ROLE = ?";
+
+        public static final String GET_KEY_MANAGER_PERMISSIONS_SQL =
+                "SELECT KEY_MANAGER_PERMISSION_ID, PERMISSIONS_TYPE, ROLE" +
+                        " FROM AM_KEY_MANAGER_PERMISSIONS " +
+                        " WHERE KEY_MANAGER_UUID = ?";
     }
 
     /**
