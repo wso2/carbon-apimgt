@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api.dto;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,6 +43,7 @@ public class KeyManagerConfigurationDTO implements Serializable {
     private String tokenType;
     private String externalReferenceId = null;
     private String alias = null;
+    private List<KeyManagerPermissionConfigurationDTO> permissions = null;
 
     public KeyManagerConfigurationDTO() {
 
@@ -183,5 +185,13 @@ public class KeyManagerConfigurationDTO implements Serializable {
     public void setEndpoints(Map<String, String> endpoints) {
 
         this.endpoints = endpoints;
+    }
+
+    public List<KeyManagerPermissionConfigurationDTO> getPermissions () {
+        return permissions;
+    }
+
+    public void setPermissions (List<KeyManagerPermissionConfigurationDTO> permissions) {
+        this.permissions = permissions;
     }
 }

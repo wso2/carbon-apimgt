@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.KeyManagerInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.KeyManagerListDTO;
 
@@ -51,6 +52,12 @@ public class KeyManagerMappingUtil {
         keyManagerInfoDTO.setId(configurationDto.getUuid());
         keyManagerInfoDTO.setEnabled(configurationDto.isEnabled());
         keyManagerInfoDTO.setType(configurationDto.getType());
+        List<KeyManagerPermissionConfigurationDTO> permissions = configurationDto.getPermissions();
+        if (permissions != null && permissions.size() > 0 && !(permissions.get(0).getPermissionType().equals("NONE"))) {
+            keyManagerInfoDTO.setIsRoleRestricted(true);
+        } else {
+            keyManagerInfoDTO.setIsRoleRestricted(false);
+        }
         return keyManagerInfoDTO;
     }
 }
