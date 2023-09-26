@@ -57,11 +57,6 @@ public class HandshakeProcessor {
         boolean isTokenValid;
         try {
             isTokenValid = InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext);
-        } catch (APIManagementException e) {
-            log.error(WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_GENERAL_MESSAGE, e);
-            return InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
-                    WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_ERROR,
-                    WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_GENERAL_MESSAGE);
         } catch (APISecurityException e) {
             log.error(e);
             return InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
