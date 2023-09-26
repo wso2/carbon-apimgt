@@ -31,14 +31,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.APIConsumer;
-import org.wso2.carbon.apimgt.api.APIDefinition;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -99,6 +94,7 @@ import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
+import org.wso2.carbon.apimgt.impl.service.APIKeyMgtRemoteUserStoreMgtService;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
@@ -4228,5 +4224,72 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_TIER_NOT_ALLOWED,
                     apiTypeWrapper.getTier(), username));
         }
+    }
+
+    /**
+     * This method used to retrieve key manager configurations for tenant
+     * @param organization organization of the key manager
+     * @return KeyManagerConfigurationDTO list
+     * @throws APIManagementException if error occurred
+     */
+    public List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization, String username) throws APIManagementException{
+        APIAdmin apiAdmin = new APIAdminImpl();
+        List<KeyManagerConfigurationDTO> keyManagerConfigurations =
+                apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
+        APIKeyMgtRemoteUserStoreMgtService apiKeyMgtRemoteUserStoreMgtService = new APIKeyMgtRemoteUserStoreMgtService();
+        String[] userRoles = apiKeyMgtRemoteUserStoreMgtService.getUserRoles(username);
+        System.out.println(Arrays.toString(userRoles));
+        List<KeyManagerConfigurationDTO> permittedKeyManagerConfigurations = new ArrayList<>();
+        if(keyManagerConfigurations.size() > 0) {
+            for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
+                List<KeyManagerPermissionConfigurationDTO> permissions=
+                        apiAdmin.getKeyManagerPermissions(keyManagerConfiguration.getUuid());
+                if (permissions != null && permissions.size() > 0) {
+                    String permissionType = permissions.get(0).getPermissionType();
+                    String[] permissionRoles = permissions
+                            .stream()
+                            .map(permission -> permission.getRole())
+                            .toArray(String[]::new);
+                    if (permissionType.equals("ALLOW") && hasIntersection(userRoles,permissionRoles)) {
+                        permittedKeyManagerConfigurations.add(keyManagerConfiguration);
+                    } else if (permissionType.equals("DENY") && !(hasIntersection(userRoles,permissionRoles))){
+                        permittedKeyManagerConfigurations.add(keyManagerConfiguration);
+                    }
+                } else {
+                    permittedKeyManagerConfigurations.add(keyManagerConfiguration);
+                }
+            }
+        }
+        return permittedKeyManagerConfigurations;
+    }
+    public boolean isKeyManagerAllowedForUser(String uuid, String username) throws APIManagementException {
+        APIAdmin apiAdmin = new APIAdminImpl();
+        List<KeyManagerPermissionConfigurationDTO> permissions= apiAdmin.getKeyManagerPermissions(uuid);
+        APIKeyMgtRemoteUserStoreMgtService apiKeyMgtRemoteUserStoreMgtService = new APIKeyMgtRemoteUserStoreMgtService();
+        String[] userRoles = apiKeyMgtRemoteUserStoreMgtService.getUserRoles(username);
+        if (permissions != null && permissions.size() > 0) {
+            String permissionType = permissions.get(0).getPermissionType();
+            String[] permissionRoles = permissions
+                    .stream()
+                    .map(permission -> permission.getRole())
+                    .toArray(String[]::new);
+            if (permissionType.equals("ALLOW") && hasIntersection(userRoles,permissionRoles)) {
+                return true;
+            } else if (permissionType.equals("DENY") && !(hasIntersection(userRoles,permissionRoles))){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasIntersection(String[] arr1, String[] arr2) {
+        for (String element : arr1) {
+            for (String element2 : arr2) {
+                if (element.equals(element2)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
