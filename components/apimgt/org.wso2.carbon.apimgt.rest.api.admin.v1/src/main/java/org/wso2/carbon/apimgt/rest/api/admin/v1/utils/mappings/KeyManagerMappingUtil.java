@@ -11,7 +11,15 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIdConnectConfiguration;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ClaimMappingEntryDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerCertificatesDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerEndpointDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerPermissionsDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.TokenValidationDTO;
 
 import java.util.ArrayList;
 import java.util.Arrays;
