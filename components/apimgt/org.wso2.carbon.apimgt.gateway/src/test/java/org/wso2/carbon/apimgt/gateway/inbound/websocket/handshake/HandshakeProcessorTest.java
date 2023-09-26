@@ -92,18 +92,17 @@ public class HandshakeProcessorTest {
 
         InboundMessageContext inboundMessageContext = new InboundMessageContext();
         PowerMockito.mockStatic(InboundWebsocketProcessorUtil.class);
-        PowerMockito.when(InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext)).thenThrow(
-                new APIManagementException("Error while accessing truststore"));
+        PowerMockito.when(InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext)).thenReturn(false);
         HandshakeProcessor handshakeProcessor = new HandshakeProcessor();
         InboundProcessorResponseDTO errorResponseDTO = new InboundProcessorResponseDTO();
         errorResponseDTO.setError(true);
         errorResponseDTO.setErrorCode(WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_ERROR);
         errorResponseDTO
-                .setErrorMessage(WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_GENERAL_MESSAGE);
+                .setErrorMessage(WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
         errorResponseDTO.setCloseConnection(true);
         PowerMockito.when(InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
                         WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_ERROR,
-                        WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_GENERAL_MESSAGE))
+                        WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE))
                 .thenReturn(errorResponseDTO);
         InboundProcessorResponseDTO inboundProcessorResponseDTO =
                 handshakeProcessor.processHandshake(inboundMessageContext);

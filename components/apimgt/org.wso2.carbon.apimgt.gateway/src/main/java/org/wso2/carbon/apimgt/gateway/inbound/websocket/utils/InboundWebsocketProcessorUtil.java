@@ -343,7 +343,6 @@ public class InboundWebsocketProcessorUtil {
      *
      * @param inboundMessageContext InboundMessageContext
      * @return whether authenticated or not
-     * @throws APIManagementException if an internal error occurs
      * @throws APISecurityException   if authentication fails
      */
     public static boolean isAuthenticated(InboundMessageContext inboundMessageContext) throws APISecurityException {
