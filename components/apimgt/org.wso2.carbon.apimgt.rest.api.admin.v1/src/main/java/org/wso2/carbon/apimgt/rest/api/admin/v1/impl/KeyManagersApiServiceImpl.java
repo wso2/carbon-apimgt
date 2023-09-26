@@ -13,6 +13,7 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
@@ -23,6 +24,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.KeyManagersApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerPermissionsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.KeyManagerMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -82,8 +84,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                 apiAdmin.getKeyManagerConfigurationById(organization, keyManagerId);
         if (keyManagerConfigurationDTO != null) {
+            apiAdmin.deleteKeyManagerPermissionsByUUID(keyManagerId);
             apiAdmin.deleteKeyManagerConfigurationById(organization, keyManagerConfigurationDTO);
-
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
                     new Gson().toJson(keyManagerConfigurationDTO), APIConstants.AuditLogConstants.DELETED,
                     RestApiCommonUtil.getLoggedInUsername());
@@ -100,6 +102,12 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         APIAdmin apiAdmin = new APIAdminImpl();
         KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                 apiAdmin.getKeyManagerConfigurationById(organization, keyManagerId);
+        if (!(keyManagerConfigurationDTO.getName().equals("Resident Key Manager") && organization.equals("carbon.super"))) {
+            List<KeyManagerPermissionConfigurationDTO> permissions = apiAdmin.getKeyManagerPermissions(keyManagerId);
+            if (permissions.size() > 0) {
+                keyManagerConfigurationDTO.setPermissions(permissions);
+            }
+        }
         if (keyManagerConfigurationDTO != null) {
             KeyManagerDTO keyManagerDTO = KeyManagerMappingUtil.toKeyManagerDTO(keyManagerConfigurationDTO);
             return Response.ok(keyManagerDTO).build();
@@ -113,6 +121,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
+            body.setId(keyManagerId);
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                     KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
             keyManagerConfigurationDTO.setUuid(keyManagerId);
@@ -127,6 +136,10 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                 }
                 KeyManagerConfigurationDTO retrievedKeyManagerConfigurationDTO =
                         apiAdmin.updateKeyManagerConfiguration(keyManagerConfigurationDTO);
+                if (!(keyManagerConfigurationDTO.getName().equals("Resident Key Manager") && organization.equals("carbon.super"))) {
+                    apiAdmin.deleteKeyManagerPermissionsByUUID(keyManagerId);
+                    apiAdmin.updateKeyManagerPermissions(keyManagerConfigurationDTO.getPermissions());
+                }
                 APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
                         new Gson().toJson(keyManagerConfigurationDTO),
                         APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
@@ -149,6 +162,9 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                     KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
             KeyManagerConfigurationDTO createdKeyManagerConfiguration =
                     apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);
+            if (!(keyManagerConfigurationDTO.getName().equals("Resident Key Manager") && organization.equals("carbon.super"))) {
+                apiAdmin.addKeyManagerPermissions(createdKeyManagerConfiguration.getUuid(), keyManagerConfigurationDTO.getPermissions());
+            }
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
                     new Gson().toJson(keyManagerConfigurationDTO),
                     APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());
