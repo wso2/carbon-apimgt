@@ -27,6 +27,7 @@ public class APIThrottleConstants {
     public static final int APPLICATION_THROTTLE_OUT_ERROR_CODE = 900803;
     public static final int SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE = 900804;
     public static final int SUBSCRIPTION_BURST_THROTTLE_OUT_ERROR_CODE = 900807;
+    public static final int APPLICATION_BURST_THROTTLE_OUT_ERROR_CODE = 900809;
     public static final int BLOCKED_ERROR_CODE = 900805;
     public static final int CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE = 900806;
     public static final int CONNECTIONS_COUNT_THROTTLE_OUT_ERROR_CODE = 900808;

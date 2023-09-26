@@ -760,6 +760,14 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
             errorDescription = "You have exceeded your quota";
             nextAccessTimeString = getNextAccessTimeString(messageContext);
+        } else if (APIThrottleConstants.APPLICATION_BURST_LIMIT_EXCEEDED
+                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.APPLICATION_BURST_THROTTLE_OUT_ERROR_CODE;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your application burst limit quota";
+            nextAccessTimeString = getNextAccessTimeString(messageContext);
         } else {
             errorCode = APIThrottleConstants.APPLICATION_THROTTLE_OUT_ERROR_CODE;
             errorMessage = "Message throttled out";
