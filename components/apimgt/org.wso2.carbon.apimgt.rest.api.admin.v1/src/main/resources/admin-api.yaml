@@ -4491,6 +4491,15 @@ components:
             self_validate_jwt: true
             Username: admin
             Password: admin
+        permissions:
+          type: object
+          properties:
+            permissionType:
+              type: string
+            roles:
+              type: array
+              items:
+                type: string
         tokenType:
           type: string
           description: The type of the tokens to be used (exchanged or without exchanged).
