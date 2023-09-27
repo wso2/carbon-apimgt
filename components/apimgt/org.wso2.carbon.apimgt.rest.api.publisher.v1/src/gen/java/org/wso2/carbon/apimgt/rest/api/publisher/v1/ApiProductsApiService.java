@@ -40,6 +40,7 @@ public interface ApiProductsApiService {
       public Response changeAPIProductLifecycle(String action, String apiProductId, String lifecycleChecklist, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response createAPIProduct(APIProductDTO apIProductDTO, MessageContext messageContext) throws APIManagementException;
       public Response createAPIProductRevision(String apiProductId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) throws APIManagementException;
+      public Response createNewAPIProductVersion(String newVersion, String apiProductId, Boolean defaultVersion, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIProduct(String apiProductId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIProductDocument(String apiProductId, String documentId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIProductLifecycleStatePendingTasks(String apiProductId, MessageContext messageContext) throws APIManagementException;

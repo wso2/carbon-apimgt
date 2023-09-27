@@ -1841,18 +1841,9 @@ public class PublisherCommonUtils {
             apiProductDTO.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
         }
 
-        //Remove the /{version} from the context.
-        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
-            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
-        }
-        //Make sure context starts with "/". ex: /pizzaProduct
-        context = context.startsWith("/") ? context : ("/" + context);
-        //Check whether the context already exists
-        if (apiProvider.isContextExist(context, organization)) {
-            throw new APIManagementException(
-                    "Error occurred while adding API Product. API Product with the context " + context + " already " +
-                            "exists.", ExceptionCodes.from(ExceptionCodes.API_PRODUCT_CONTEXT_ALREADY_EXISTS, context));
-        }
+        //isDefaultVersion is true for a new API Product.
+        apiProductDTO.setIsDefaultVersion(true);
+        checkDuplicateContext(apiProvider, apiProductDTO, username, organization);
 
         // Set default gatewayVendor
         if (apiProductDTO.getGatewayVendor() == null) {
@@ -1874,6 +1865,71 @@ public class PublisherCommonUtils {
 
         createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
         return createdProduct;
+    }
+
+    private static void checkDuplicateContext(APIProvider apiProvider, APIProductDTO apiProductDTO, String username,
+            String organization)
+            throws APIManagementException {
+
+        String context = apiProductDTO.getContext();
+        //Remove the /{version} from the context.
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }
+
+        //Make sure context starts with "/". ex: /pizzaProduct
+        context = context.startsWith("/") ? context : ("/" + context);
+
+        //Create tenant aware context for API
+        if (context.startsWith("/t/" + organization)) {
+            context = context.replace("/t/" + organization, "");
+        }
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(organization) &&
+                !context.contains("/t/" + organization)) {
+            context = "/t/" + organization + context;
+        }
+
+        // Check whether the context already exists for migrated API products which were created with
+        // version appended context
+        String contextWithVersion = context;
+        if (contextWithVersion.contains("/" + RestApiConstants.API_VERSION_PARAM)) {
+            contextWithVersion = contextWithVersion.replace(RestApiConstants.API_VERSION_PARAM,
+                    apiProductDTO.getVersion());
+        } else {
+            contextWithVersion = contextWithVersion + "/" + apiProductDTO.getVersion();
+        }
+
+        //Get all existing versions of  api product been adding
+        List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(apiProductDTO.getName(),
+                username, organization);
+        if (!apiVersions.isEmpty()) {
+            //If any previous version exists
+            for (String version : apiVersions) {
+                if (version.equalsIgnoreCase(apiProductDTO.getVersion())) {
+                    //If version already exists
+                    if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context, organization)) {
+                        throw new APIManagementException(
+                                "Error occurred while adding the API Product. A duplicate API context already exists "
+                                        + "for " + context + " in the organization : " + organization,
+                                ExceptionCodes.API_ALREADY_EXISTS);
+                    } else {
+                        throw new APIManagementException(
+                                "Error occurred while adding API Product. API Product with name "
+                                        + apiProductDTO.getName() + " already exists with different context " + context
+                                        + " in the organization" + " : " + organization,
+                                ExceptionCodes.API_ALREADY_EXISTS);
+                    }
+                }
+            }
+        } else {
+            //If no any previous version exists
+            if (apiProvider.isContextExistForAPIProducts(context, contextWithVersion, organization)) {
+                throw new APIManagementException(
+                        "Error occurred while adding the API Product. A duplicate API context already exists for "
+                                + context + " in the organization" + " : " + organization, ExceptionCodes
+                        .from(ExceptionCodes.API_CONTEXT_ALREADY_EXISTS, context));
+            }
+        }
     }
 
     public static boolean isStreamingAPI(APIDTO apidto) {
@@ -1997,15 +2053,16 @@ public class PublisherCommonUtils {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(identifier.getUUID(), organization);
+        String apiType;
+        if (identifier instanceof APIProductIdentifier) {
+            apiType = APIConstants.API_PRODUCT;
+        } else {
+            apiType = APIConstants.API_IDENTIFIER_TYPE;
+        }
+
         if (apiLCData == null) {
-            String type;
-            if (identifier instanceof APIProductIdentifier) {
-                type = APIConstants.API_PRODUCT;
-            } else {
-                type = APIConstants.API_IDENTIFIER_TYPE;
-            }
-            throw new APIManagementException("Error while getting lifecycle state for " + type + " with ID "
-                    + identifier, ExceptionCodes.from(ExceptionCodes.LIFECYCLE_STATE_INFORMATION_NOT_FOUND, type,
+            throw new APIManagementException("Error while getting lifecycle state for " + apiType + " with ID "
+                    + identifier, ExceptionCodes.from(ExceptionCodes.LIFECYCLE_STATE_INFORMATION_NOT_FOUND, apiType,
                     identifier.getUUID()));
         } else {
             boolean apiOlderVersionExist = false;
@@ -2021,7 +2078,7 @@ public class PublisherCommonUtils {
                     break;
                 }
             }
-            return APIMappingUtil.fromLifecycleModelToDTO(apiLCData, apiOlderVersionExist);
+            return APIMappingUtil.fromLifecycleModelToDTO(apiLCData, apiOlderVersionExist, apiType);
         }
     }
 

@@ -25,8 +25,10 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.Constants;
 import org.apache.axis2.util.JavaUtils;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -95,6 +97,7 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
+import org.wso2.carbon.identity.application.common.model.IdentityProvider;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -104,6 +107,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -738,31 +742,36 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return field.length() <= maxLength;
     }
 
-    private String getDefaultVersion(APIIdentifier apiid) throws APIManagementException {
+    private String getDefaultVersion(Identifier apiid) throws APIManagementException {
 
         String defaultVersion = null;
         try {
             defaultVersion = apiMgtDAO.getDefaultVersion(apiid);
         } catch (APIManagementException e) {
-            handleException("Error while getting default version :" + apiid.getApiName(), e);
+            handleException("Error while getting default version :" + apiid.getName(), e);
         }
         return defaultVersion;
     }
 
 
-    public String getPublishedDefaultVersion(APIIdentifier apiid) throws APIManagementException {
+    public String getPublishedDefaultVersion(Identifier apiId) throws APIManagementException {
 
         String defaultVersion = null;
         try {
-            defaultVersion = apiMgtDAO.getPublishedDefaultVersion(apiid);
+            if (apiId instanceof APIIdentifier) {
+                defaultVersion = apiMgtDAO.getPublishedDefaultVersion((APIIdentifier) apiId);
+            } else if (apiId instanceof APIProductIdentifier) {
+                defaultVersion = apiMgtDAO.getPublishedDefaultVersion((APIProductIdentifier) apiId);
+            }
         } catch (APIManagementException e) {
-            handleException("Error while getting published default version :" + apiid.getApiName(), e);
+            handleException("Error while getting published default version :" + apiId.getName(), e);
         }
         return defaultVersion;
     }
 
 
-    private void sendUpdateEventToPreviousDefaultVersion(APIIdentifier apiIdentifier, String organization) throws APIManagementException {
+    private void sendUpdateEventToPreviousDefaultVersion(APIIdentifier apiIdentifier, String organization)
+            throws APIManagementException {
         API api = apiMgtDAO.getLightWeightAPIInfoByAPIIdentifier(apiIdentifier, organization);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, apiIdentifier.getApiName(),
@@ -1913,6 +1922,87 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while updating API details", e);
         }
         return getAPIbyUUID(newAPIId, organization);
+    }
+
+    /**
+     * Create a new API Product version from an existing API Product
+     * @param existingApiProductId The id of the API Product to be copied
+     * @param newVersion The version of the new API Product
+     * @param isDefaultVersion whether this version is default or not
+     * @param organization Identifier of an organization
+     * @return APIProduct object
+     * @throws APIManagementException
+     */
+    public APIProduct createNewAPIProductVersion(String existingApiProductId, String newVersion,
+            Boolean isDefaultVersion, String organization) throws APIManagementException {
+
+        APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(existingApiProductId);
+        if (apiProductIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with ID: "
+                    + existingApiProductId, ExceptionCodes.from(ExceptionCodes.API_PRODUCT_NOT_FOUND,
+                    existingApiProductId));
+        }
+
+        //Get all existing versions of APIProducts
+        Set<String> apiProductVersions = getAPIVersions(apiProductIdentifier.getProviderName(),
+                apiProductIdentifier.getName(), organization);
+
+        if (apiProductVersions.contains(newVersion)) {
+            throw new APIMgtResourceAlreadyExistsException(
+                    "Version " + newVersion + " exists for API product " + apiProductIdentifier.getName(),
+                    ExceptionCodes.from(ExceptionCodes.API_PRODUCT_VERSION_ALREADY_EXISTS, newVersion,
+                            apiProductIdentifier.getName()));
+        }
+
+        APIProduct existingAPIProduct = getAPIProductbyUUID(existingApiProductId, organization);
+
+        APIProduct clonedAPIProduct = cloneExistingAPIProduct(existingAPIProduct);
+        clonedAPIProduct.setOrganization(organization);
+        APIProductIdentifier newApiProductId = new APIProductIdentifier(
+                clonedAPIProduct.getId().getProviderName(), clonedAPIProduct.getId().getName(), newVersion);
+        clonedAPIProduct.setID(newApiProductId);
+        clonedAPIProduct.setUuid(null);
+        clonedAPIProduct.setState(APIConstants.CREATED);
+        clonedAPIProduct.setDefaultVersion(isDefaultVersion);
+        clonedAPIProduct.setVersionTimestamp("");
+        clonedAPIProduct.setContext(clonedAPIProduct.getContextTemplate().replace("{version}", newVersion));
+
+        //Add new version of the API Product
+        Map<API, List<APIProductResource>> apiToProductResourceMapping = addAPIProductWithoutPublishingToGateway(
+                clonedAPIProduct);
+
+        APIProduct createdApiProduct = getAPIProduct(newApiProductId);
+        String newAPIProductUUId = createdApiProduct.getUuid();
+
+        // add swagger
+        addAPIProductSwagger(newAPIProductUUId, apiToProductResourceMapping, createdApiProduct, organization);
+
+        // copy docs
+        List<Documentation> existingDocs = getAllDocumentation(existingApiProductId, organization);
+        if (existingDocs != null) {
+            for (Documentation documentation : existingDocs) {
+                Documentation newDoc = addDocumentation(newAPIProductUUId, documentation, organization);
+                DocumentationContent content = getDocumentationContent(existingApiProductId, documentation.getId(),
+                        organization);
+                if (content != null) {
+                    addDocumentationContent(newAPIProductUUId, newDoc.getId(), organization, content);
+                }
+            }
+        }
+
+        // copy icon
+        ResourceFile icon = getIcon(existingApiProductId, organization);
+        if (icon != null) {
+            setThumbnailToAPI(newAPIProductUUId, icon, organization);
+        }
+
+        return getAPIProductbyUUID(newAPIProductUUId, organization);
+    }
+
+    private APIProduct cloneExistingAPIProduct(APIProduct apiProduct) {
+
+        Gson gson = new Gson();
+        return gson.fromJson(gson.toJson(apiProduct), APIProduct.class);
     }
 
     private void cloneAPIPoliciesForNewAPIVersion(String oldAPIUuid, API newAPI,
@@ -4094,10 +4184,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String apiProductUUID = createAPIProduct(product);
         product.setUuid(apiProductUUID);
 
+        //If the context template ends with {version} this means that the version will be at the end of the context.
+        String contextTemplate = product.getContextTemplate();
+        if (contextTemplate.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)) {
+            //Remove the {version} part from the context template.
+            contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
+        }
+        product.setContextTemplate(contextTemplate);
+
         // Add to database
         apiMgtDAO.addAPIProduct(product, product.getOrganization());
 
         return apiToProductResourceMapping;
+    }
+
+    private static void validateAPIProductContextTemplate(APIProduct product) throws APIManagementException {
+        String contextTemplate = product.getContextTemplate();
+
+        //Validate if the API Product has an unsupported context before executing the query
+        String invalidContext = "/" + APIConstants.VERSION_PLACEHOLDER;
+        if (invalidContext.equals(contextTemplate)) {
+            throw new APIManagementException(
+                    "Cannot add API Product : " + product.getId() + " with unsupported context : "
+                            + contextTemplate);
+        }
     }
 
     private String calculateVersionTimestamp(String provider, String name, String version, String org)
@@ -4213,6 +4323,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<API, List<APIProductResource>> apiToProductResourceMapping = new HashMap<>();
         //validate resources and set api identifiers and resource ids to product
         List<APIProductResource> resources = product.getProductResources();
+        String publishedDefaultVersion = getPublishedDefaultVersion(product.getId());
+        String prevDefaultVersion = getDefaultVersion(product.getId());
         for (APIProductResource apiProductResource : resources) {
             API api;
             APIProductIdentifier productIdentifier = apiProductResource.getProductIdentifier();
@@ -4297,9 +4409,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         //todo : check whether permissions need to be updated and pass it along
         updateApiProductArtifact(product, true, true);
-        apiMgtDAO.updateAPIProduct(product, userNameWithoutChange);
 
+        if (product.isDefaultVersion() == null) {
+            product.setDefaultVersion(true);
+        }
+        apiMgtDAO.updateAPIProduct(product, userNameWithoutChange);
+        if (publishedDefaultVersion != null && product.isPublishedDefaultVersion() && !product.getId().getVersion()
+                .equals(publishedDefaultVersion)) {
+            sendUpdateEventToPreviousDefaultVersion(product.getId().getProviderName(), product.getId().getName(),
+                    publishedDefaultVersion);
+        }
+
+        APIConstants.EventAction action = null;
         int productId = apiMgtDAO.getAPIProductId(product.getId());
+
+        if (product.isDefaultVersion() ^ product.getId().getVersion().equals(prevDefaultVersion)) {
+            action = APIConstants.EventAction.DEFAULT_VERSION;
+        }
+        if (product.isDefaultVersion() ^ product.getId().getVersion().equals(prevDefaultVersion)) {
+            APIEvent apiEventToNotifyDefaultVersionAPIProduct =
+                    new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                            APIConstants.EventType.API_UPDATE.name(), tenantId, organization, product.getId().getName(),
+                            productId, product.getUuid(), product.getId().getVersion(), product.getType(), product.getContext(),
+                            APIUtil.replaceEmailDomainBack(product.getId().getProviderName()), product.getState(), action);
+            APIUtil.sendNotification(apiEventToNotifyDefaultVersionAPIProduct, APIConstants.NotifierType.API.name());
+        }
 
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, product.getId().getName(), productId,
@@ -4308,6 +4442,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
         return apiToProductResourceMapping;
+    }
+
+
+    private void sendUpdateEventToPreviousDefaultVersion(String providerName, String name, String publishedDefaultVersion)
+            throws APIManagementException {
+        APIIdentifier previousDefaultVersionIdentifier = new APIIdentifier(providerName, name, publishedDefaultVersion);
+        sendUpdateEventToPreviousDefaultVersion(previousDefaultVersionIdentifier, organization);
     }
 
     @Override
@@ -4341,7 +4482,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("API Name contains one or more illegal characters  " +
                     "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )");
         }
-        //version is not a mandatory field for now
+        String apiVersion = product.getId().getVersion();
+
+        if (apiVersion == null) {
+            handleException("API Version is required.");
+        } else if (containsIllegals(apiVersion)) {
+            handleException("API Version contains one or more illegal characters  " +
+                    "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )");
+        }
+
         if (!hasValidLength(apiName, APIConstants.MAX_LENGTH_API_NAME)
                 || !hasValidLength(product.getId().getVersion(), APIConstants.MAX_LENGTH_VERSION)
                 || !hasValidLength(product.getId().getProviderName(), APIConstants.MAX_LENGTH_PROVIDER)
@@ -4349,6 +4498,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Character length exceeds the allowable limit",
                     ExceptionCodes.LENGTH_EXCEEDS);
         }
+
+        validateAPIProductContextTemplate(product);
     }
     /**
      * Create an Api Product
@@ -4959,6 +5110,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateAPIProductInformation(uuid, organization, product);
                 populateAPIStatus(product);
                 populateAPITier(product);
+                populateDefaultVersion(product);
                 return product;
             } else {
                 String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid
@@ -5352,13 +5504,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             if (searchAPIs != null) {
                 List<PublisherAPIProductInfo> list = searchAPIs.getPublisherAPIProductInfoList();
-                List<Object> apiList = new ArrayList<>();
                 for (PublisherAPIProductInfo publisherAPIInfo : list) {
                     APIProduct mappedAPI = new APIProduct(new APIProductIdentifier(publisherAPIInfo.getProviderName(),
                             publisherAPIInfo.getApiProductName(), publisherAPIInfo.getVersion()));
                     mappedAPI.setUuid(publisherAPIInfo.getId());
                     mappedAPI.setState(publisherAPIInfo.getState());
-                    mappedAPI.setContext(publisherAPIInfo.getContext());
                     mappedAPI.setApiSecurity(publisherAPIInfo.getApiSecurity());
                     mappedAPI.setThumbnailUrl(publisherAPIInfo.getThumbnail());
                     mappedAPI.setBusinessOwner(publisherAPIInfo.getBusinessOwner());
@@ -5366,6 +5516,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     mappedAPI.setTechnicalOwner(publisherAPIInfo.getTechnicalOwner());
                     mappedAPI.setTechnicalOwnerEmail(publisherAPIInfo.getTechnicalOwnerEmail());
                     mappedAPI.setMonetizationEnabled(publisherAPIInfo.getMonetizationStatus());
+                    mappedAPI.setContextTemplate(publisherAPIInfo.getContext());
+                    populateDefaultVersion(mappedAPI);
                     populateAPIStatus(mappedAPI);
                     productList.add(mappedAPI);
                 }
@@ -6067,8 +6219,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         APIProduct product = getAPIProductbyUUID(apiRevisionId, tenantDomain);
         product.setUuid(apiProductId);
-        List<APIRevisionDeployment> currentApiRevisionDeploymentList =
-                apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiProductId);
+        List<APIRevisionDeployment> currentApiRevisionDeploymentList = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiProductId);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         Set<String> environmentsToAdd = new HashSet<>();
         Map<String, String> gatewayVhosts = new HashMap<>();
@@ -6091,10 +6242,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .addAndRemovePublishedGatewayLabels(apiProductId, apiRevisionId, environmentsToAdd, gatewayVhosts,
                         environmentsToRemove);
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
+
         if (environmentsToAdd.size() > 0) {
             gatewayManager.deployToGateway(product, tenantDomain, environmentsToAdd);
         }
 
+        String publishedDefaultVersion = getPublishedDefaultVersion(apiProductIdentifier);
+        String defaultVersion = getDefaultVersion(apiProductIdentifier);
+        apiMgtDAO.updateDefaultAPIPublishedVersion(apiProductIdentifier);
+
+        if (publishedDefaultVersion != null) {
+            if (apiProductIdentifier.getVersion().equals(defaultVersion)) {
+                product.setAsPublishedDefaultVersion(true);
+            } else {
+                product.setAsPublishedDefaultVersion(false);
+            }
+
+            if (product.isPublishedDefaultVersion() && !apiProductIdentifier.getVersion()
+                    .equals(publishedDefaultVersion)) {
+                sendUpdateEventToPreviousDefaultVersion(product.getId().getProviderName(),  product.getId().getName(),
+                        publishedDefaultVersion);
+            }
+        }
     }
 
     @Override

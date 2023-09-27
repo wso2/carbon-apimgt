@@ -329,6 +329,19 @@ public interface APIProvider extends APIManager {
             throws APIManagementException;
 
     /**
+     * Create a new version of the <code>apiProduct</code>, with version <code>newVersion</code>
+     *
+     * @param apiProductId The id of the API Product to be copied
+     * @param newVersion The version of the new API Product
+     * @param defaultVersion whether this version is default or not
+     * @param organization Identifier of an organization
+     * @return apiProduct created apiProduct
+     * @throws APIManagementException If an error occurs while trying to create
+     *      *                                the new version of the API Product
+     */
+    APIProduct createNewAPIProductVersion(String apiProductId, String newVersion, Boolean defaultVersion,
+            String organization) throws APIManagementException;
+    /**
      * Retrieve the Key of the Service used in the API
      * @param apiId Unique Identifier of the API
      * @param tenantId Logged-in tenant domain

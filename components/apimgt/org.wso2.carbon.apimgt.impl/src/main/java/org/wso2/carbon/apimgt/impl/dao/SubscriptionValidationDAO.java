@@ -21,6 +21,7 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jetbrains.annotations.Nullable;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
@@ -406,6 +407,7 @@ public class SubscriptionValidationDAO {
                         API api = new API();
                         String provider = resultSet.getString("API_PROVIDER");
                         String name = resultSet.getString("API_NAME");
+                        String context = resultSet.getString("CONTEXT");
                         String version = resultSet.getString("API_VERSION");
                         api.setApiUUID(apiUuid);
                         api.setApiId(resultSet.getInt("API_ID"));
@@ -413,13 +415,14 @@ public class SubscriptionValidationDAO {
                         api.setProvider(provider);
                         api.setName(name);
                         api.setApiType(apiType);
-                        api.setContext(resultSet.getString("CONTEXT"));
+                        api.setContext(context);
                         api.setStatus(resultSet.getString("STATUS"));
                         api.setOrganization(resultSet.getString("ORGANIZATION"));
                         String publishedDefaultApiVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
-                        if (StringUtils.isNotBlank(publishedDefaultApiVersion)) {
-                            api.setIsDefaultVersion(true);
-                        }
+                        String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
+
+                        setDefaultVersionContext(apiType, api, version, publishedDefaultApiVersion, context, contextTemplate);
+
                         if (isExpand) {
                             String revision = resultSet.getString("REVISION_UUID");
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
@@ -1081,6 +1084,7 @@ public class SubscriptionValidationDAO {
                         API api = new API();
                         String provider = resultSet.getString("API_PROVIDER");
                         String name = resultSet.getString("API_NAME");
+                        String context = resultSet.getString("CONTEXT");
                         String version = resultSet.getString("API_VERSION");
                         String apiUuid = resultSet.getString("API_UUID");
                         api.setApiUUID(apiUuid);
@@ -1089,14 +1093,16 @@ public class SubscriptionValidationDAO {
                         api.setProvider(provider);
                         api.setName(name);
                         api.setApiType(apiType);
+                        api.setContext(context);
                         api.setStatus(resultSet.getString("STATUS"));
                         api.setPolicy(resultSet.getString("API_TIER"));
-                        api.setContext(resultSet.getString("CONTEXT"));
                         api.setOrganization(resultSet.getString("ORGANIZATION"));
                         String publishedDefaultApiVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
-                        if (StringUtils.isNotBlank(publishedDefaultApiVersion)) {
-                            api.setIsDefaultVersion(true);
-                        }
+                        String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
+
+                        setDefaultVersionContext(apiType, api, version, publishedDefaultApiVersion, context,
+                                contextTemplate);
+
                         if (isExpand) {
                             String revision = resultSet.getString("REVISION_UUID");
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
@@ -1116,6 +1122,25 @@ public class SubscriptionValidationDAO {
             log.error("Error in loading APIs for api : " + deployment, e);
         }
         return apiList;
+    }
+
+    private static void setDefaultVersionContext(String apiType, API api, String version,
+            String publishedDefaultApiVersion, String context, String contextTemplate) {
+
+        if (StringUtils.isNotBlank(publishedDefaultApiVersion)
+                && StringUtils.equals(version, publishedDefaultApiVersion)) {
+            api.setIsDefaultVersion(true);
+        }
+
+        if (APIConstants.API_PRODUCT.equals(apiType)
+                && APIConstants.API_PRODUCT_VERSION_1_0_0.equals(version)
+                && StringUtils.isBlank(contextTemplate)) {
+            if (StringUtils.isBlank(publishedDefaultApiVersion)) {
+                api.setIsDefaultVersion(true);
+            }
+            String synapseContext = context + "/" + APIConstants.API_PRODUCT_VERSION_1_0_0;
+            api.setContext(synapseContext);
+        }
     }
 
     private void attachURlMappingDetailsOfApiProduct(Connection connection, API api) throws SQLException {
@@ -1150,10 +1175,20 @@ public class SubscriptionValidationDAO {
     public API getAPIByContextAndVersion(String context, String version, String deployment, boolean isExpand) {
 
         String sql = SubscriptionValidationSQLConstants.GET_API_BY_CONTEXT_AND_VERSION_SQL;
+        String contextWhenContextTemplateIsNull = context;
+
+        String versionInContext = "/" + version;
+        int lastIndex = context.lastIndexOf(versionInContext);
+        if (lastIndex >= 0) {
+            contextWhenContextTemplateIsNull = context.substring(0, lastIndex) +
+                    context.substring(lastIndex + versionInContext.length());
+        }
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                preparedStatement.setString(1, context);
-                preparedStatement.setString(2, version);
+                preparedStatement.setString(1, contextWhenContextTemplateIsNull);
+                preparedStatement.setString(2, context);
+                preparedStatement.setString(3, version);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         String deploymentName = resultSet.getString("DEPLOYMENT_NAME");
@@ -1256,12 +1291,15 @@ public class SubscriptionValidationDAO {
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         String deploymentName = resultSet.getString("DEPLOYMENT_NAME");
+                        String context = resultSet.getString("CONTEXT");
+
                         if (!deployment.equals(deploymentName)) {
                             continue;
                         }
                         String apiType = resultSet.getString("API_TYPE");
                         String version = resultSet.getString("API_VERSION");
                         String apiUuid = resultSet.getString("API_UUID");
+                        String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
                         API api = new API();
                         String provider = resultSet.getString("API_PROVIDER");
                         String name = resultSet.getString("API_NAME");
@@ -1273,10 +1311,13 @@ public class SubscriptionValidationDAO {
                         api.setApiType(apiType);
                         api.setOrganization(resultSet.getString("ORGANIZATION"));
                         api.setPolicy(resultSet.getString("API_TIER"));
-                        api.setContext(resultSet.getString("CONTEXT"));
+                        api.setContext(context);
                         api.setStatus(resultSet.getString("STATUS"));
                         String revision = resultSet.getString("REVISION_UUID");
-                        api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                        String publishedDefaultApiVersion = getAPIDefaultVersion(connection, provider, name);
+
+                        setDefaultVersionContext(apiType, api, version, publishedDefaultApiVersion, context,
+                                contextTemplate);
                         if (isExpand) {
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
                             if (APIConstants.API_PRODUCT.equals(apiType)) {
@@ -1293,6 +1334,24 @@ public class SubscriptionValidationDAO {
             }
         } catch (SQLException e) {
             log.error("Error in loading API for api : " + apiId + " : " + deployment, e);
+        }
+        return null;
+    }
+
+    private String getAPIDefaultVersion(Connection connection, String provider, String name)
+            throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                connection.prepareStatement(SubscriptionValidationSQLConstants.GET_API_DEFAULT_VERSION_STRING_SQL)) {
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, provider);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error while loading default version", e);
         }
         return null;
     }
@@ -1328,6 +1387,7 @@ public class SubscriptionValidationDAO {
                         API api = new API();
                         String provider = resultSet.getString("API_PROVIDER");
                         String name = resultSet.getString("API_NAME");
+                        String context = resultSet.getString("CONTEXT");
                         String version = resultSet.getString("API_VERSION");
                         api.setApiUUID(apiUuid);
                         api.setApiId(resultSet.getInt("API_ID"));
@@ -1335,16 +1395,18 @@ public class SubscriptionValidationDAO {
                         api.setProvider(provider);
                         api.setName(name);
                         api.setApiType(apiType);
-                        api.setContext(resultSet.getString("CONTEXT"));
+                        api.setContext(context);
                         api.setStatus(resultSet.getString("STATUS"));
                         api.setOrganization(resultSet.getString("ORGANIZATION"));
                         String revision = resultSet.getString("REVISION_UUID");
                         api.setRevision(revision);
                         api.setEnvironment(deploymentName);
                         String publishedDefaultApiVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
-                        if (StringUtils.isNotBlank(publishedDefaultApiVersion)) {
-                            api.setIsDefaultVersion(true);
-                        }
+                        String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
+
+                        setDefaultVersionContext(apiType, api, version, publishedDefaultApiVersion, context,
+                                contextTemplate);
+
                         if (expand) {
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
                             if (APIConstants.API_PRODUCT.equals(apiType)) {
