@@ -48,6 +48,7 @@ public class APIThrottleConstants {
     public static final String HARD_THROTTLING_CONFIGURATION = "hard_throttling_limits";
     public static final String PRODUCTION_HARD_LIMIT = "PRODUCTION_HARD_LIMIT";
     public static final String SUBSCRIPTION_BURST_LIMIT = "SUBSCRIPTION_BURST_LIMIT";
+    public static final String APPLICATION_BURST_LIMIT = "APPLICATION_BURST_LIMIT";
     public static final String APPLICATION_BURST_LIMIT_EXCEEDED = "APPLICATION_BURST_LIMIT_EXCEED";
     public static final String SANDBOX_HARD_LIMIT = "SANDBOX_HARD_LIMIT";
     public static final String THROTTLED_OUT_REASON = APIConstants.THROTTLE_OUT_REASON_KEY;

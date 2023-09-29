@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.internal.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import org.wso2.carbon.apimgt.internal.service.dto.BurstLimitDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.PolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ThrottleLimitDTO;
 import javax.validation.constraints.*;
@@ -24,8 +25,7 @@ public class ApplicationPolicyDTO   {
     private String name = null;
     private String quotaType = null;
     private ThrottleLimitDTO defaultLimit = null;
-    private Integer rateLimitCount = null;
-    private String rateLimitTimeUnit = null;
+    private BurstLimitDTO burstLimit = null;
 
   /**
    **/
@@ -131,36 +131,19 @@ public class ApplicationPolicyDTO   {
 
   /**
    **/
-  public ApplicationPolicyDTO rateLimitCount(Integer rateLimitCount) {
-    this.rateLimitCount = rateLimitCount;
+  public ApplicationPolicyDTO burstLimit(BurstLimitDTO burstLimit) {
+    this.burstLimit = burstLimit;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("rateLimitCount")
-  public Integer getRateLimitCount() {
-    return rateLimitCount;
+  @JsonProperty("burstLimit")
+  public BurstLimitDTO getBurstLimit() {
+    return burstLimit;
   }
-  public void setRateLimitCount(Integer rateLimitCount) {
-    this.rateLimitCount = rateLimitCount;
-  }
-
-  /**
-   **/
-  public ApplicationPolicyDTO rateLimitTimeUnit(String rateLimitTimeUnit) {
-    this.rateLimitTimeUnit = rateLimitTimeUnit;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("rateLimitTimeUnit")
-  public String getRateLimitTimeUnit() {
-    return rateLimitTimeUnit;
-  }
-  public void setRateLimitTimeUnit(String rateLimitTimeUnit) {
-    this.rateLimitTimeUnit = rateLimitTimeUnit;
+  public void setBurstLimit(BurstLimitDTO burstLimit) {
+    this.burstLimit = burstLimit;
   }
 
 
@@ -179,13 +162,12 @@ public class ApplicationPolicyDTO   {
         Objects.equals(name, applicationPolicy.name) &&
         Objects.equals(quotaType, applicationPolicy.quotaType) &&
         Objects.equals(defaultLimit, applicationPolicy.defaultLimit) &&
-        Objects.equals(rateLimitCount, applicationPolicy.rateLimitCount) &&
-        Objects.equals(rateLimitTimeUnit, applicationPolicy.rateLimitTimeUnit);
+        Objects.equals(burstLimit, applicationPolicy.burstLimit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, tenantId, tenantDomain, name, quotaType, defaultLimit, rateLimitCount, rateLimitTimeUnit);
+    return Objects.hash(id, tenantId, tenantDomain, name, quotaType, defaultLimit, burstLimit);
   }
 
   @Override
@@ -199,8 +181,7 @@ public class ApplicationPolicyDTO   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    quotaType: ").append(toIndentedString(quotaType)).append("\n");
     sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
-    sb.append("    rateLimitCount: ").append(toIndentedString(rateLimitCount)).append("\n");
-    sb.append("    rateLimitTimeUnit: ").append(toIndentedString(rateLimitTimeUnit)).append("\n");
+    sb.append("    burstLimit: ").append(toIndentedString(burstLimit)).append("\n");
     sb.append("}");
     return sb.toString();
   }

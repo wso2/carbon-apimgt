@@ -1568,6 +1568,9 @@
       "properties" : {
         "defaultLimit" : {
           "$ref" : "#/definitions/ThrottleLimit"
+        },
+        "burstLimit" : {
+          "$ref" : "#/definitions/BurstLimit"
         }
       },
       "allOf" : [ {
@@ -1763,6 +1766,22 @@
         }
       },
       "title" : "Throttle Limit"
+    },
+    "BurstLimit" : {
+      "type" : "object",
+      "properties" : {
+        "rateLimitCount" : {
+          "type" : "integer",
+          "example" : 10,
+          "description" : "Burst control request count"
+        },
+        "rateLimitTimeUnit" : {
+          "type" : "string",
+          "example" : "min",
+          "description" : "Burst control time unit"
+        }
+      },
+      "title" : "Burst Limit object"
     },
     "BandwidthLimit" : {
       "title" : "Bandwidth Limit object",
