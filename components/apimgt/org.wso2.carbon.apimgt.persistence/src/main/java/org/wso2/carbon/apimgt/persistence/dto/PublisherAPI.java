@@ -65,6 +65,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String productionMaxTps;
     private String sandboxMaxTps;
     private String authorizationHeader;
+    private String apiKeyHeader;
     private String apiSecurity; // ?check whether same to private List<String> securityScheme = new ArrayList<>();
     private boolean enableSchemaValidation;
     private boolean enableSubscriberVerification;
@@ -348,6 +349,14 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.authorizationHeader = authorizationHeader;
     }
 
+    public String getApiKeyHeader() {
+        return apiKeyHeader;
+    }
+
+    public void setApiKeyHeader(String apiKeyHeader) {
+        this.apiKeyHeader = apiKeyHeader;
+    }
+
     public String getApiSecurity() {
         return apiSecurity;
     }
@@ -621,6 +630,7 @@ public class PublisherAPI extends PublisherAPIInfo {
                 + ", subscriptionAvailability=" + subscriptionAvailability + ", subscriptionAvailableOrgs="
                 + subscriptionAvailableOrgs + ", implementation=" + implementation + ", productionMaxTps="
                 + productionMaxTps + ", sandboxMaxTps=" + sandboxMaxTps + ", authorizationHeader=" + authorizationHeader
+                + ", apiKeyHeader=" + apiKeyHeader
                 + ", apiSecurity=" + apiSecurity + ", enableSchemaValidation=" + enableSchemaValidation
                 + ", enableSubscriberVerification=" + enableSubscriberVerification + ", enableStore=" + enableStore
                 + ", testKey=" + testKey + ", contextTemplate=" + contextTemplate + ", availableTierNames="

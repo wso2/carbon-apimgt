@@ -112,6 +112,36 @@ public class PublisherCommonUtils {
 
     private static final Log log = LogFactory.getLog(PublisherCommonUtils.class);
     public static final String SESSION_TIMEOUT_CONFIG_KEY = "sessionTimeOut";
+
+    /**
+     * Update API and API definition.
+     *
+     * @param originalAPI       existing API
+     * @param apiDtoToUpdate    DTO object with updated API data
+     * @param apiProvider       API Provider
+     * @param tokenScopes       token scopes
+     * @param response          response of the API definition validation
+     * @return                  updated API
+     * @throws APIManagementException   If an error occurs while updating the API and API definition
+     * @throws ParseException           If an error occurs while parsing the endpoint configuration
+     * @throws CryptoException          If an error occurs while encrypting the secret key of API
+     * @throws FaultGatewaysException   If an error occurs while updating manage of an existing API
+     */
+    public static API updateApiAndDefinition(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider,
+                                             String[] tokenScopes, APIDefinitionValidationResponse response)
+            throws APIManagementException, ParseException, CryptoException, FaultGatewaysException {
+
+        API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
+        String organization = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        if (!PublisherCommonUtils.isStreamingAPI(apiDtoToUpdate) && !APIConstants.APITransportType.GRAPHQL.toString()
+                .equalsIgnoreCase(apiDtoToUpdate.getType().toString())) {
+            prepareForUpdateSwagger(originalAPI.getUuid(), response, false, apiProvider, organization,
+                    response.getParser(), apiToUpdate);
+        }
+        apiProvider.updateAPI(apiToUpdate, originalAPI);
+        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
+    }
+
     /**
      * Update an API.
      *
@@ -126,6 +156,28 @@ public class PublisherCommonUtils {
      */
     public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes)
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
+
+        API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
+        apiProvider.updateAPI(apiToUpdate, originalAPI);
+
+        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
+        // TODO use returend api
+    }
+
+    /**
+     * Prepare for API object before updating the API.
+     *
+     * @param originalAPI    Existing API
+     * @param apiDtoToUpdate New API DTO to update
+     * @param apiProvider    API Provider
+     * @param tokenScopes    Scopes of the token
+     * @throws ParseException         If an error occurs while parsing the endpoint configuration
+     * @throws CryptoException        If an error occurs while encrypting the secret key of API
+     * @throws APIManagementException If an error occurs while updating the API
+     */
+    private static API prepareForUpdateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider,
+                                           String[] tokenScopes)
+            throws APIManagementException, ParseException, CryptoException {
 
         APIIdentifier apiIdentifier = originalAPI.getId();
         // Validate if the USER_REST_API_SCOPES is not set in WebAppAuthenticator when scopes are validated
@@ -359,10 +411,7 @@ public class PublisherCommonUtils {
         }
 
         apiToUpdate.setOrganization(originalAPI.getOrganization());
-        apiProvider.updateAPI(apiToUpdate, originalAPI);
-
-        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
-        // TODO use returend api
+        return apiToUpdate;
     }
 
     /**
@@ -1150,6 +1199,9 @@ public class PublisherCommonUtils {
         if (body.getAuthorizationHeader() == null) {
             body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
+        if (body.getApiKeyHeader() == null) {
+            body.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+        }
 
         if (body.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED && body.getVisibleRoles().isEmpty()) {
             throw new APIManagementException(
@@ -1340,6 +1392,36 @@ public class PublisherCommonUtils {
         //this will fail if user does not have access to the API or the API does not exist
         API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
         APIDefinition oasParser = response.getParser();
+        prepareForUpdateSwagger(apiId, response, isServiceAPI, apiProvider, organization, oasParser, existingAPI);
+
+        //Update API is called to update URITemplates and scopes of the API
+        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organization);
+        existingAPI.setStatus(unModifiedAPI.getStatus());
+        apiProvider.updateAPI(existingAPI, unModifiedAPI);
+
+        //retrieves the updated swagger definition
+        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organization); // TODO see why we need to get it
+        // instead of passing same
+        return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
+    }
+
+    /**
+     * Prepare the API object before updating swagger.
+     *
+     * @param apiId         API Id
+     * @param response      response of a swagger definition validation call
+     * @param isServiceAPI  whether the API is a service API or not
+     * @param apiProvider   API Provider
+     * @param organization  tenant domain
+     * @param oasParser     OASParser for the API definition
+     * @param existingAPI   existing API
+     * @throws APIManagementException when error occurred updating swagger
+     */
+    private static void prepareForUpdateSwagger(String apiId, APIDefinitionValidationResponse response,
+                                                boolean isServiceAPI, APIProvider apiProvider, String organization,
+                                                APIDefinition oasParser, API existingAPI)
+            throws APIManagementException {
+
         String apiDefinition = response.getJsonContent();
         if (isServiceAPI) {
             apiDefinition = oasParser.copyVendorExtensions(existingAPI.getSwaggerDefinition(), apiDefinition);
@@ -1387,20 +1469,10 @@ public class PublisherCommonUtils {
         existingAPI.setScopes(scopes);
         PublisherCommonUtils.validateScopes(existingAPI);
 
-        //Update API is called to update URITemplates and scopes of the API
-        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organization);
-        existingAPI.setStatus(unModifiedAPI.getStatus());
-        apiProvider.updateAPI(existingAPI, unModifiedAPI);
         SwaggerData swaggerData = new SwaggerData(existingAPI);
-
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
         apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, organization);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
-
-        //retrieves the updated swagger definition
-        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organization); // TODO see why we need to get it
-        // instead of passing same
-        return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
     }
 
     /**
@@ -1765,6 +1837,10 @@ public class PublisherCommonUtils {
             apiProductDTO.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
 
+        if (apiProductDTO.getApiKeyHeader() == null) {
+            apiProductDTO.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+        }
+
         //Remove the /{version} from the context.
         if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
@@ -2004,12 +2080,22 @@ public class PublisherCommonUtils {
             boolean isRequired = (boolean) property.get(APIConstants.CustomPropertyAttributes.REQUIRED);
 
             if (isRequired) {
+                APIInfoAdditionalPropertiesMapDTO mapPropertyDisplay =
+                        additionalPropertiesMap.get(propertyName + "__display");
                 APIInfoAdditionalPropertiesMapDTO mapProperty = additionalPropertiesMap.get(propertyName);
-                if (mapProperty == null) {
+                if (mapProperty == null && mapPropertyDisplay == null) {
                     return false;
                 }
-                String propertyValue = mapProperty.getValue();
-                if (propertyValue == null || propertyValue.isEmpty()) {
+                String propertyValue = "";
+                String propertyValueDisplay = "";
+                if (mapProperty != null) {
+                    propertyValue = mapProperty.getValue();
+                }
+                if (mapPropertyDisplay != null) {
+                    propertyValueDisplay = mapPropertyDisplay.getValue();
+                }
+                if ((propertyValue == null || propertyValue.isEmpty()) &&
+                        (propertyValueDisplay == null || propertyValueDisplay.isEmpty())) {
                     return false;
                 }
             }

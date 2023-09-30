@@ -841,14 +841,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
         apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
         apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
-        try {
-            api.setCreatedTime(existingAPI.getCreatedTime());
-            apiPersistenceInstance.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
-        } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while updating API details", e);
-        }
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
-                APIConstants.AuditLogConstants.UPDATED, this.username);
 
         //Validate Transports
         validateAndSetTransports(api);
@@ -859,7 +851,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while updating API details", e);
         }
-
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                APIConstants.AuditLogConstants.UPDATED, this.username);
 
         //notify key manager with API update
         registerOrUpdateResourceInKeyManager(api, tenantDomain);

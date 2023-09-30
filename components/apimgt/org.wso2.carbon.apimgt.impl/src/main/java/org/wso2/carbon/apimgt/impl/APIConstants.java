@@ -335,12 +335,14 @@ public final class APIConstants {
     public static final String API_OVERVIEW_OUTSEQUENCE = "overview_outSequence";
     public static final String API_OVERVIEW_FAULTSEQUENCE = "overview_faultSequence";
     public static final String API_OVERVIEW_AUTHORIZATION_HEADER = "overview_authorizationHeader";
+    public static final String API_OVERVIEW_API_KEY_HEADER = "overview_apiKeyHeader";
     public static final String API_OVERVIEW_API_SECURITY = "overview_apiSecurity";
     public static final String API_OVERVIEW_WS_URI_MAPPING = "overview_wsUriMapping";
     public static final String AUTHORIZATION_HEADER_BASIC = "Basic";
     public static final String DEFAULT_API_SECURITY_OAUTH2 = "oauth2";
     public static final String API_SECURITY_MUTUAL_SSL = "mutualssl";
     public static final String API_SECURITY_BASIC_AUTH = "basic_auth";
+    public static final String SWAGGER_API_SECURITY_BASIC_AUTH_TYPE = "basic";
     public static final String API_SECURITY_API_KEY = "api_key";
     public static final String API_SECURITY_MUTUAL_SSL_MANDATORY = "mutualssl_mandatory";
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
@@ -439,6 +441,7 @@ public final class APIConstants {
     public static final String JWT_DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
     public static final String JWT_CONFIGS = "JWTConfiguration";
     public static final String JWT_HEADER = "JWTHeader";
+    public static final String JWT_DECODING = "JWTDecoding";
     public static final String ENABLE_USER_CLAIMS = "EnableUserClaims";
     public static final String BINDING_FEDERATED_USER_CLAIMS = "EnableBindingFederatedUserClaims";
     public static final String TOKEN_GENERATOR_IMPL = "JWTGeneratorImpl";
@@ -458,10 +461,12 @@ public final class APIConstants {
     public static final String MEDIATOR_CONFIG = "MediatorConfigs.";
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
+    public static final String API_KEY_HEADER = "ApiKeyHeader";
     public static final String API_SECURITY = "APISecurity";
     public static final String API_LEVEL_POLICY = "APILevelPolicy";
     public static final String CERTIFICATE_INFORMATION = "CertificateInformation";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
+    public static final String API_KEY_HEADER_DEFAULT = "ApiKey";
     public static final String HEADER_TENANT = "xWSO2Tenant";
     public static final String X_WSO2_TENANT_HEADER = "X-WSO2-Tenant";
     public static final String AUTHORIZATION_QUERY_PARAM_DEFAULT = "access_token";
@@ -1418,6 +1423,12 @@ public final class APIConstants {
     public static final String CONFIG_REDIS_MIN_EVICTABLE_IDLE_TIME_IN_MILLIS = "minEvictableIdleTimeMillis";
     public static final String CONFIG_REDIS_TIME_BETWEEN_EVICTION_RUNS_IN_MILLIS = "timeBetweenEvictionRunsMillis";
     public static final String CONFIG_REDIS_NUM_TESTS_PER_EVICTION_RUNS = "numTestsPerEvictionRun";
+    public static final String CONFIG_REDIS_GATEWAY_ID = "GatewayId";
+
+    public static final String CONFIG_REDIS_MIN_GATEWAY_COUNT = "MinGatewayCount";
+
+    public static final String CONFIG_REDIS_KEY_LOCK_RETRIEVAL_TIMEOUT = "KeyLockRetrievalTimeout";
+    public static final String HYBRID_THROTTLE_PROCESSOR_TYPE_START_TIME_BASED = "start_time_based";
 
     // Primary/Secondary Login configuration
     public static final String USERID_LOGIN = "UserIdLogin";
@@ -1524,6 +1535,7 @@ public final class APIConstants {
     public static final String SWAGGER_X_SCOPE = "x-scope";
     public static final String SWAGGER_X_AMZN_RESOURCE_NAME = "x-amzn-resource-name";
     public static final String SWAGGER_X_AMZN_RESOURCE_TIMEOUT = "x-amzn-resource-timeout";
+    public static final String SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED = "x-amzn-resource-content-encode";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
     public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
     public static final String SWAGGER_X_THROTTLING_BANDWIDTH = "x-throttling-bandwidth";
@@ -1571,6 +1583,9 @@ public final class APIConstants {
     public static final String SWAGGER_IS_MISSING_MSG = "swagger is missing";
     public static final String OPENAPI_IS_MISSING_MSG = "openapi is missing";
     public static final String SWAGGER_X_SCOPES_BINDINGS = "x-scopes-bindings";
+    public static final String SWAGGER_X_BASIC_AUTH_SCOPES = "x-scopes";
+    public static final String SWAGGER_X_BASIC_AUTH_RESOURCE_SCOPES = "x-basic-auth-scopes";
+    public static final String OPENAPI_SECURITY_SCHEMA_KEY = "default";
 
     //swagger v1.2 constants
     public static final String SWAGGER_RESOURCES = "resources";
@@ -1594,6 +1609,7 @@ public final class APIConstants {
 
     //swagger MG related constants
     public static final String X_WSO2_AUTH_HEADER = "x-wso2-auth-header";
+    public static final String X_WSO2_API_KEY_HEADER = "x-wso2-api-key-header";
     public static final String X_THROTTLING_TIER = "x-throttling-tier";
     public static final String X_WSO2_CORS = "x-wso2-cors";
     public static final String X_WSO2_PRODUCTION_ENDPOINTS = "x-wso2-production-endpoints";
@@ -1608,6 +1624,8 @@ public final class APIConstants {
     public static final String X_WSO2_REQUEST_INTERCEPTOR = "x-wso2-request-interceptor";
     public static final String X_WSO2_RESPONSE_INTERCEPTOR = "x-wso2-response-interceptor";
     public static final String X_WSO2_ENDPOINT_TYPE = "type";
+    public static final String ADVANCE_ENDPOINT_CONFIG = "advanceEndpointConfig";
+    public static final String TIMEOUT_IN_MILLIS = "timeoutInMillis";
 
     //API Constants
     public static final String API_DATA_NAME = "name";
@@ -2101,6 +2119,7 @@ public final class APIConstants {
         public static final String INTERNAL_KEY_TOKEN_TYPE = "InternalKey";
         public static final String TOKEN_TYPE = "token_type";
         public static final String API_KEY_TOKEN_TYPE = "apiKey";
+        public static final String DECODING_ALGORITHM_BASE64URL = "base64url";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";
@@ -2934,6 +2953,7 @@ public final class APIConstants {
     public static final String OPERATION_SEQUENCE_TYPE_RESPONSE = "response";
     public static final String OPERATION_SEQUENCE_TYPE_FAULT = "fault";
     public static final String SYNAPSE_POLICY_DEFINITION_EXTENSION = ".j2";
+    public static final String SYNAPSE_POLICY_DEFINITION_EXTENSION_XML = ".xml";
     public static final String CC_POLICY_DEFINITION_EXTENSION = ".gotmpl";
     public static final String YAML_CONTENT_TYPE = "text/yaml";
     public static final String COMMON_OPERATION_POLICY_SPECIFICATIONS_LOCATION = "repository" + File.separator

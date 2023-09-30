@@ -174,6 +174,7 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS, api.getProductionMaxTps());
             artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS, api.getSandboxMaxTps());
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER, api.getAuthorizationHeader());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_API_KEY_HEADER, api.getApiKeyHeader());
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, api.getApiSecurity());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA,
                                             Boolean.toString(api.isEnableSchemaValidation()));
@@ -680,6 +681,7 @@ public class RegistryPersistenceUtil {
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             api.setWebsubSubscriptionConfiguration(getWebsubSubscriptionConfigurationFromArtifact(artifact));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+            api.setApiKeyHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_API_KEY_HEADER));
             api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
             //set data and status related to monetization
             api.setMonetizationEnabled(Boolean.parseBoolean(artifact.getAttribute
@@ -1469,6 +1471,7 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
                     getCorsConfigurationJsonFromDto(apiProduct.getCorsConfiguration()));
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER, apiProduct.getAuthorizationHeader());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_API_KEY_HEADER, apiProduct.getApiKeyHeader());
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, apiProduct.getApiSecurity());
 
             //Validate if the API has an unsupported context before setting it in the artifact
@@ -1568,6 +1571,7 @@ public class RegistryPersistenceUtil {
             apiProduct.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
             apiProduct.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
             apiProduct.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+            apiProduct.setApiKeyHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_API_KEY_HEADER));
             apiProduct.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             apiProduct.setCreatedTime(registry.get(artifactPath).getCreatedTime());
             apiProduct.setLastUpdated(registry.get(artifactPath).getLastModified());

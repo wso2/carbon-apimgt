@@ -69,6 +69,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     private List<String> allowedMethodList;
     private boolean allowCredentialsEnabled;
     private String authorizationHeader;
+    private String apiKeyHeader;
 
     public void init(SynapseEnvironment synapseEnvironment) {
         if (log.isDebugEnabled()) {
@@ -94,6 +95,9 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         }
         if (authorizationHeader != null) {
             allowHeaders += APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT + authorizationHeader;
+        }
+        if (apiKeyHeader != null) {
+            allowHeaders += APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT + apiKeyHeader;
         }
         if (allowedOrigins == null) {
             String allowedOriginsList = APIUtil.getAllowedOrigins();
@@ -446,5 +450,13 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
     public void setAuthorizationHeader(String authorizationHeader) {
         this.authorizationHeader = authorizationHeader;
+    }
+
+    public String getApiKeyHeader() {
+        return apiKeyHeader;
+    }
+
+    public void setApiKeyHeader(String apiKeyHeader) {
+        this.apiKeyHeader = apiKeyHeader;
     }
 }

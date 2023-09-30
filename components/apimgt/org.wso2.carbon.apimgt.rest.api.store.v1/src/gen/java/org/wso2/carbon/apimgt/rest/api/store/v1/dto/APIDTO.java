@@ -44,6 +44,7 @@ public class APIDTO   {
     private List<String> transport = new ArrayList<String>();
     private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
     private String authorizationHeader = null;
+    private String apiKeyHeader = null;
     private List<String> securityScheme = new ArrayList<String>();
     private List<String> tags = new ArrayList<String>();
     private List<APITiersDTO> tiers = new ArrayList<APITiersDTO>();
@@ -317,6 +318,24 @@ public class APIDTO   {
   }
   public void setAuthorizationHeader(String authorizationHeader) {
     this.authorizationHeader = authorizationHeader;
+  }
+
+  /**
+   * Name of the API key header used for invoking the API. If it is not set, default value &#x60;apiKey&#x60; will be used. 
+   **/
+  public APIDTO apiKeyHeader(String apiKeyHeader) {
+    this.apiKeyHeader = apiKeyHeader;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "ApiKey", value = "Name of the API key header used for invoking the API. If it is not set, default value `apiKey` will be used. ")
+  @JsonProperty("apiKeyHeader")
+  public String getApiKeyHeader() {
+    return apiKeyHeader;
+  }
+  public void setApiKeyHeader(String apiKeyHeader) {
+    this.apiKeyHeader = apiKeyHeader;
   }
 
   /**
@@ -683,6 +702,7 @@ public class APIDTO   {
         Objects.equals(transport, API.transport) &&
         Objects.equals(operations, API.operations) &&
         Objects.equals(authorizationHeader, API.authorizationHeader) &&
+        Objects.equals(apiKeyHeader, API.apiKeyHeader) &&
         Objects.equals(securityScheme, API.securityScheme) &&
         Objects.equals(tags, API.tags) &&
         Objects.equals(tiers, API.tiers) &&
@@ -706,7 +726,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, apiKeyHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols);
   }
 
   @Override
@@ -728,6 +748,7 @@ public class APIDTO   {
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
+    sb.append("    apiKeyHeader: ").append(toIndentedString(apiKeyHeader)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    tiers: ").append(toIndentedString(tiers)).append("\n");

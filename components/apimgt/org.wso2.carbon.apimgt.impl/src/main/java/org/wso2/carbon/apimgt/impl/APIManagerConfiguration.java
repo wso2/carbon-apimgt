@@ -385,9 +385,26 @@ public class APIManagerConfiguration {
                 OMElement redisConnectionTimeout = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_CONNECTION_TIMEOUT));
                 OMElement redisIsSslEnabled = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_IS_SSL_ENABLED));
                 OMElement propertiesElement = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_PROPERTIES));
+                OMElement gatewayId = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_GATEWAY_ID));
+                OMElement minGatewayCount = element.getFirstChildWithName(
+                        new QName(APIConstants.CONFIG_REDIS_MIN_GATEWAY_COUNT));
+                OMElement keyLockRetrievalTimeout = element.getFirstChildWithName(
+                        new QName(APIConstants.CONFIG_REDIS_KEY_LOCK_RETRIEVAL_TIMEOUT));
                 redisConfig.setRedisEnabled(true);
                 redisConfig.setHost(redisHost.getText());
                 redisConfig.setPort(Integer.parseInt(redisPort.getText()));
+                if (gatewayId != null) {
+                    redisConfig.setGatewayId(gatewayId.getText());
+                } else {
+                    log.error("gateway_id is not configured in deployment.toml. Please add the gateway ID" +
+                            " configuration under [apim.redis_config] section in deployment.toml");
+                }
+                if (minGatewayCount != null) {
+                    redisConfig.setMinGatewayCount(Integer.parseInt(minGatewayCount.getText()));
+                }
+                if (keyLockRetrievalTimeout != null) {
+                    redisConfig.setKeyLockRetrievalTimeout(Integer.parseInt(keyLockRetrievalTimeout.getText()));
+                }
                 if (redisUser != null) {
                     redisConfig.setUser(redisUser.getText());
                 }
@@ -1607,6 +1624,11 @@ public class APIManagerConfiguration {
                     omElement.getFirstChildWithName(new QName(APIConstants.JWT_HEADER));
             if (jwtHeaderElement != null) {
                 jwtConfigurationDto.setJwtHeader(jwtHeaderElement.getText());
+            }
+            OMElement jwtDecoding =
+                    omElement.getFirstChildWithName(new QName(APIConstants.JWT_DECODING));
+            if (jwtDecoding != null) {
+                jwtConfigurationDto.setJwtDecoding(jwtDecoding.getText());
             }
             OMElement jwtUserClaimsElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS));

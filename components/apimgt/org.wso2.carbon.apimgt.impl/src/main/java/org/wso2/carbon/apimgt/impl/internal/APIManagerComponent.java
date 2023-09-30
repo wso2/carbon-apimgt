@@ -1025,9 +1025,7 @@ public class APIManagerComponent {
             int proxyPort = Integer.parseInt(configuration.getFirstProperty(APIConstants.PROXY_PORT));
             String proxyUsername = configuration.getFirstProperty(APIConstants.PROXY_USERNAME);
             String proxyPassword = configuration.getFirstProperty(APIConstants.PROXY_PASSWORD);
-            String nonProxyHostsString = configuration.getFirstProperty(APIConstants.NON_PROXY_HOSTS);
-            String[] nonProxyHosts = configuration.getFirstProperty(nonProxyHostsString) != null ?
-                    nonProxyHostsString.split("\\|") : null;
+            String[] nonProxyHosts = getNonProxyHostsListByNonProxyHostsStringConfiguration(configuration);
             String proxyProtocol = configuration.getFirstProperty(APIConstants.PROXY_PROTOCOL);
             builder = builder.withProxy(proxyHost, proxyPort, proxyUsername, proxyPassword, proxyProtocol,
                     nonProxyHosts);
@@ -1071,6 +1069,18 @@ public class APIManagerComponent {
         configuration.setHttpClientConfiguration(builder.withConnectionParams(maxTotal, defaultMaxPerRoute)
                 .withSSLContext(sslContext, hostnameVerifier).build());
     }
+
+    /**
+     * Populate list of NonProxyHosts for given nonProxyHostsString through APIManagerConfiguration
+     *
+     * @param config APIManagerConfiguration
+     * @return String array of proxy list
+     */
+    String[] getNonProxyHostsListByNonProxyHostsStringConfiguration(APIManagerConfiguration config) {
+        String nonProxyHostsString = config.getFirstProperty(APIConstants.NON_PROXY_HOSTS);
+        return nonProxyHostsString != null ? nonProxyHostsString.split("\\|") : null;
+    }
+
     @Reference(
             name = "apim.workflow.task.service",
             service = org.wso2.carbon.apimgt.api.model.WorkflowTaskService.class,

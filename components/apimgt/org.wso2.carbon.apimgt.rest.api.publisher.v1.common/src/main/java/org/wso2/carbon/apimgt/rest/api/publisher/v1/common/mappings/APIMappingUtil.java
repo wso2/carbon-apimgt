@@ -370,6 +370,10 @@ public class APIMappingUtil {
         model.setCorsConfiguration(corsConfiguration);
         setMaxTpsFromApiDTOToModel(dto, model);
         model.setAuthorizationHeader(dto.getAuthorizationHeader());
+        model.setApiKeyHeader(dto.getApiKeyHeader());
+        if (model.getApiKeyHeader() == null) {
+            model.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+        }
         model.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
 
         if (dto.getType().toString().equals(APIConstants.API_TYPE_WEBSUB)) {
@@ -1342,6 +1346,7 @@ public class APIMappingUtil {
         setMaxTpsFromModelToApiDTO(model, dto);
 
         dto.setAuthorizationHeader(model.getAuthorizationHeader());
+        dto.setApiKeyHeader(model.getApiKeyHeader());
         if (model.getApiSecurity() != null) {
             dto.setSecurityScheme(Arrays.asList(model.getApiSecurity().split(",")));
         }
@@ -2289,6 +2294,7 @@ public class APIMappingUtil {
         productDto.setDescription(product.getDescription());
         productDto.setApiType(APIProductDTO.ApiTypeEnum.fromValue(APIConstants.AuditLogConstants.API_PRODUCT));
         productDto.setAuthorizationHeader(product.getAuthorizationHeader());
+        productDto.setApiKeyHeader(product.getApiKeyHeader());
         productDto.setState(product.getState());
         if (product.getGatewayVendor() == null) {
             productDto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
@@ -2667,6 +2673,10 @@ public class APIMappingUtil {
         product.setProductResources(productResources);
         product.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
         product.setAuthorizationHeader(dto.getAuthorizationHeader());
+        product.setApiKeyHeader(dto.getApiKeyHeader());
+        if (product.getApiKeyHeader() == null) {
+            product.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+        }
 
         //attach api categories to API model
         setAPICategoriesToModel(dto, product, provider);

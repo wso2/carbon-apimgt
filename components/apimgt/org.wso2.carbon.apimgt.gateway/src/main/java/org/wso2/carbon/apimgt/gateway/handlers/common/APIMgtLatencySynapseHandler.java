@@ -139,10 +139,11 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
             if (responseLatencySpan != null) {
                 GatewayUtils.setAPIRelatedTags(responseLatencySpan, messageContext);
                 API api = GatewayUtils.getAPI(messageContext);
+                String tenantDomain = (String) messageContext.getProperty(APIMgtGatewayConstants.TENANT_DOMAIN);
                 if (api != null) {
                     TelemetryUtil.updateOperation(responseLatencySpan,
                             api.getApiName().concat("--").concat(api.getApiVersion()).concat("--")
-                                    .concat(GatewayUtils.getTenantDomain()));
+                                    .concat(tenantDomain));
                 }
                 TelemetryUtil.finishSpan(responseLatencySpan);
             }
@@ -157,10 +158,11 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
             if (responseLatencySpan != null) {
                 GatewayUtils.setAPIRelatedTags(responseLatencySpan, messageContext);
                 API api = GatewayUtils.getAPI(messageContext);
+                String tenantDomain = (String) messageContext.getProperty(APIMgtGatewayConstants.TENANT_DOMAIN);
                 if (api != null) {
                     Util.updateOperation(responseLatencySpan,
                             api.getApiName().concat("--").concat(api.getApiVersion()).concat("--")
-                                    .concat(GatewayUtils.getTenantDomain()));
+                                    .concat(tenantDomain));
                 }
                 if (responseLatencySpan != null) {
                     Util.finishSpan(responseLatencySpan);
