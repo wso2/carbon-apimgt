@@ -2,38 +2,20 @@ package org.wso2.carbon.apimgt.api.dto;
 
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class KeyManagerPermissionConfigurationDTO implements Serializable {
 
-    private Integer keyManagerPermissionID = null;
-    private String keyManagerUUID = null;
     private String permissionType = null;
-    private String role = null;
+    private List<String> roles = new ArrayList<String>();
 
     public KeyManagerPermissionConfigurationDTO () {
     }
 
-    public KeyManagerPermissionConfigurationDTO (Integer keyManagerPermissionID, String keyManagerUUID, String permissionType, String role) {
-        this.keyManagerPermissionID = keyManagerPermissionID;
-        this.keyManagerUUID = keyManagerUUID;
+    public KeyManagerPermissionConfigurationDTO(String permissionType, List<String> roles) {
         this.permissionType = permissionType;
-        this.role = role;
-    }
-
-    public Integer getKeyManagerPermissionID () {
-        return keyManagerPermissionID;
-    }
-
-    public void setKeyManagerPermissionID (Integer keyManagerPermissionID) {
-        this.keyManagerPermissionID = keyManagerPermissionID;
-    }
-
-    public String getKeyManagerUUID () {
-        return keyManagerUUID;
-    }
-
-    public void setKeyManagerUUID (String keyManagerUUID) {
-        this.keyManagerUUID = keyManagerUUID;
+        this.roles = roles;
     }
 
     public String getPermissionType () {
@@ -44,11 +26,11 @@ public class KeyManagerPermissionConfigurationDTO implements Serializable {
         this.permissionType = permissionType;
     }
 
-    public String getRole () {
-        return role;
+    public List<String> getRoles() {
+        return roles;
     }
 
-    public void setRole (String role) {
-        this.role = role;
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 }
