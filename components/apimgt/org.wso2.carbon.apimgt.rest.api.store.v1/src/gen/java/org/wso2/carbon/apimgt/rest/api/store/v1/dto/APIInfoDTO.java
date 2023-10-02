@@ -43,6 +43,7 @@ public class APIInfoDTO   {
     private String monetizationLabel = null;
     private String gatewayVendor = null;
     private List<APIInfoAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIInfoAdditionalPropertiesDTO>();
+    private Boolean monetizedInfo = null;
 
   /**
    **/
@@ -357,6 +358,23 @@ public class APIInfoDTO   {
     this.additionalProperties = additionalProperties;
   }
 
+  /**
+   **/
+  public APIInfoDTO monetizedInfo(Boolean monetizedInfo) {
+    this.monetizedInfo = monetizedInfo;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("monetizedInfo")
+  public Boolean isMonetizedInfo() {
+    return monetizedInfo;
+  }
+  public void setMonetizedInfo(Boolean monetizedInfo) {
+    this.monetizedInfo = monetizedInfo;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -384,12 +402,13 @@ public class APIInfoDTO   {
         Objects.equals(isSubscriptionAvailable, apIInfo.isSubscriptionAvailable) &&
         Objects.equals(monetizationLabel, apIInfo.monetizationLabel) &&
         Objects.equals(gatewayVendor, apIInfo.gatewayVendor) &&
-        Objects.equals(additionalProperties, apIInfo.additionalProperties);
+        Objects.equals(additionalProperties, apIInfo.additionalProperties) &&
+        Objects.equals(monetizedInfo, apIInfo.monetizedInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, type, createdTime, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies, advertiseInfo, businessInformation, isSubscriptionAvailable, monetizationLabel, gatewayVendor, additionalProperties);
+    return Objects.hash(id, name, description, context, version, type, createdTime, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies, advertiseInfo, businessInformation, isSubscriptionAvailable, monetizationLabel, gatewayVendor, additionalProperties, monetizedInfo);
   }
 
   @Override
@@ -415,6 +434,7 @@ public class APIInfoDTO   {
     sb.append("    monetizationLabel: ").append(toIndentedString(monetizationLabel)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
+    sb.append("    monetizedInfo: ").append(toIndentedString(monetizedInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }
