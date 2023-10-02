@@ -11686,10 +11686,6 @@ components:
         enabled:
           type: boolean
           example: true
-        isRoleRestricted:
-          type: boolean
-          description: |
-            Is this Key Manager role-restricted
         additionalProperties:
           type: array
           items:
