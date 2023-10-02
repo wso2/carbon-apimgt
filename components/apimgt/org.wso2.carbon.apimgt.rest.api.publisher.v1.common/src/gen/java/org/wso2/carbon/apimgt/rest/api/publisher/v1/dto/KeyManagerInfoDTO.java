@@ -28,7 +28,6 @@ public class KeyManagerInfoDTO   {
     private String type = null;
     private String description = null;
     private Boolean enabled = null;
-    private Boolean isRoleRestricted = null;
     private List<Object> additionalProperties = new ArrayList<Object>();
 
   /**
@@ -137,24 +136,6 @@ public class KeyManagerInfoDTO   {
   }
 
   /**
-   * Is this Key Manager role-restricted 
-   **/
-  public KeyManagerInfoDTO isRoleRestricted(Boolean isRoleRestricted) {
-    this.isRoleRestricted = isRoleRestricted;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "Is this Key Manager role-restricted ")
-  @JsonProperty("isRoleRestricted")
-  public Boolean isIsRoleRestricted() {
-    return isRoleRestricted;
-  }
-  public void setIsRoleRestricted(Boolean isRoleRestricted) {
-    this.isRoleRestricted = isRoleRestricted;
-  }
-
-  /**
    **/
   public KeyManagerInfoDTO additionalProperties(List<Object> additionalProperties) {
     this.additionalProperties = additionalProperties;
@@ -187,13 +168,12 @@ public class KeyManagerInfoDTO   {
         Objects.equals(type, keyManagerInfo.type) &&
         Objects.equals(description, keyManagerInfo.description) &&
         Objects.equals(enabled, keyManagerInfo.enabled) &&
-        Objects.equals(isRoleRestricted, keyManagerInfo.isRoleRestricted) &&
         Objects.equals(additionalProperties, keyManagerInfo.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, type, description, enabled, isRoleRestricted, additionalProperties);
+    return Objects.hash(id, name, displayName, type, description, enabled, additionalProperties);
   }
 
   @Override
@@ -207,7 +187,6 @@ public class KeyManagerInfoDTO   {
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
-    sb.append("    isRoleRestricted: ").append(toIndentedString(isRoleRestricted)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
