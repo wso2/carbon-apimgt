@@ -117,7 +117,7 @@
             <artifactId>validation-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.swagger</groupId>
+            <groupId>org.wso2.orbit.io.swagger.core</groupId>
             <artifactId>swagger-core</artifactId>
         </dependency>
         <dependency>
@@ -244,7 +244,7 @@
                                 <bundleDef>com.github.ben-manes.caffeine:caffeine:${caffeine.version}</bundleDef>
                                 <bundleDef>javax.validation:validation-api</bundleDef>
                                 <bundleDef>com.google.guava:guava:${google.guava.version}</bundleDef>
-                                <bundleDef>io.swagger:swagger-core</bundleDef>
+                                <bundleDef>org.wso2.orbit.io.swagger.core:swagger-core</bundleDef>
                                 <bundleDef>io.swagger:swagger-models</bundleDef>
                                 <bundleDef>io.swagger:swagger-annotations</bundleDef>
                                 <bundleDef>com.samskivert:jmustache</bundleDef>
@@ -252,7 +252,7 @@
                                 <bundleDef>com.fasterxml.jackson.core:jackson-core</bundleDef>
                                 <bundleDef>com.fasterxml.jackson.core:jackson-annotations</bundleDef>
                                 <bundleDef>com.fasterxml.jackson.core:jackson-databind</bundleDef>
-                                <bundleDef>org.yaml:snakeyaml</bundleDef>
+                                <bundleDef>org.yaml:snakeyaml:${version.snake.yaml}</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.output.adapter.http:${carbon.apimgt.version}
