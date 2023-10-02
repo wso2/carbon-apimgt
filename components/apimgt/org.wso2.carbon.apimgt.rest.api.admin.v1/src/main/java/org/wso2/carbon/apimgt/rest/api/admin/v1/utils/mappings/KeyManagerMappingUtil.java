@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class KeyManagerMappingUtil {
 
@@ -68,9 +67,12 @@ public class KeyManagerMappingUtil {
         keyManagerDTO.setTokenType(KeyManagerDTO.TokenTypeEnum.valueOf(keyManagerConfigurationDTO.getTokenType()));
         keyManagerDTO.setAlias(keyManagerConfigurationDTO.getAlias());
         keyManagerDTO.setTokenType(KeyManagerDTO.TokenTypeEnum.fromValue(keyManagerConfigurationDTO.getTokenType()));
-        List<KeyManagerPermissionConfigurationDTO> permissions = keyManagerConfigurationDTO.getPermissions();
-        if(permissions != null && permissions.size() > 0){
-            keyManagerDTO.setPermissions(createKeyManagerPermissionDTO(permissions));
+        KeyManagerPermissionConfigurationDTO permissions = keyManagerConfigurationDTO.getPermissions();
+        if(permissions != null){
+            KeyManagerPermissionsDTO keyManagerPermissionsDTO = new KeyManagerPermissionsDTO();
+            keyManagerPermissionsDTO.setPermissionType(permissions.getPermissionType());
+            keyManagerPermissionsDTO.setRoles(permissions.getRoles());
+            keyManagerDTO.setPermissions(keyManagerPermissionsDTO);
         }
 
         JsonObject jsonObject = fromConfigurationMapToJson(keyManagerConfigurationDTO.getAdditionalProperties());
@@ -202,8 +204,6 @@ public class KeyManagerMappingUtil {
             jsonObject.remove(APIConstants.KeyManager.CONSUMER_KEY_CLAIM);
         }
         keyManagerDTO.setAdditionalProperties(new Gson().fromJson(jsonObject, Map.class));
-
-
         return keyManagerDTO;
     }
 
@@ -222,13 +222,11 @@ public class KeyManagerMappingUtil {
         keyManagerConfigurationDTO.setAlias(keyManagerDTO.getAlias());
         KeyManagerPermissionsDTO permissions = keyManagerDTO.getPermissions();
         if(permissions != null) {
-            String permissionType = permissions.getPermissionType();
-            List <KeyManagerPermissionConfigurationDTO> permissionsConfiguration = permissions.getRoles().stream()
-                    .map(role -> createKeyManagerPermissionConfigurationDTO(keyManagerDTO.getId(), permissionType, role))
-                    .collect(Collectors.toList());
+            KeyManagerPermissionConfigurationDTO permissionsConfiguration = new KeyManagerPermissionConfigurationDTO();
+            permissionsConfiguration.setPermissionType(permissions.getPermissionType());
+            permissionsConfiguration.setRoles(permissions.getRoles());
             keyManagerConfigurationDTO.setPermissions(permissionsConfiguration);
         }
-
         Map<String,Object> additionalProperties = new HashMap();
         if (keyManagerDTO.getAdditionalProperties() != null && keyManagerDTO.getAdditionalProperties() instanceof Map) {
             additionalProperties.putAll((Map) keyManagerDTO.getAdditionalProperties());
@@ -334,27 +332,6 @@ public class KeyManagerMappingUtil {
         }
         keyManagerConfigurationDTO.setAdditionalProperties(additionalProperties);
         return keyManagerConfigurationDTO;
-    }
-
-    public static KeyManagerPermissionConfigurationDTO createKeyManagerPermissionConfigurationDTO(String keyManagerID, String permissionType, String role) {
-        KeyManagerPermissionConfigurationDTO permissionConfigurationDTO = new KeyManagerPermissionConfigurationDTO();
-        permissionConfigurationDTO.setKeyManagerUUID(keyManagerID);
-        permissionConfigurationDTO.setPermissionType(permissionType);
-        permissionConfigurationDTO.setRole(role);
-        return permissionConfigurationDTO;
-    }
-
-    public static KeyManagerPermissionsDTO createKeyManagerPermissionDTO(List<KeyManagerPermissionConfigurationDTO> permissionsConfigurationDTO) {
-        KeyManagerPermissionsDTO permissionsDTO = new KeyManagerPermissionsDTO();
-        if(permissionsConfigurationDTO != null && permissionsConfigurationDTO.size() > 0) {
-            permissionsDTO.setPermissionType(permissionsConfigurationDTO.get(0).getPermissionType());
-            List<String> roles = new ArrayList<String>();
-            for (KeyManagerPermissionConfigurationDTO permission : permissionsConfigurationDTO) {
-                roles.add(permission.getRole());
-            }
-            permissionsDTO.setRoles(roles);
-        }
-        return permissionsDTO;
     }
 
     public static JsonObject fromConfigurationMapToJson(Map configuration) {
