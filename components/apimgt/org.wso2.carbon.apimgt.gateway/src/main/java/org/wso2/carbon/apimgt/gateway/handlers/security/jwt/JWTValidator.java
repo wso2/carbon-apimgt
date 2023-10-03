@@ -167,8 +167,7 @@ public class JWTValidator {
                     // If cachedClientCertHash is not null, the signedJWTInfo object is obtained from the cache. This
                     // means a request has been sent previously and the signedJWTInfo resultant object has been stored
                     // in the cache.
-                    if (SignedJWTInfo.ValidationStatus.INVALID.equals(signedJWTInfo.getValidationStatus()) &&
-                            !cachedClientCertHash.equals(signedJWTInfo.getClientCertificateHash())) {
+                    if (!cachedClientCertHash.equals(signedJWTInfo.getClientCertificateHash())) {
                         // This scenario can happen when the first request contains an invalid certificate and the
                         // next requests contain a valid certificate. Since the validationStatus of the signedJWTInfo
                         // object obtained from the cache is INVALID due to the invalid certificate and the certificate
@@ -176,6 +175,8 @@ public class JWTValidator {
                         // in the request header, the token has to be validated again.
                         signedJWTInfo.setValidationStatus(SignedJWTInfo.ValidationStatus.NOT_VALIDATED);
                     }
+                } else if (signedJWTInfo.getClientCertificateHash() != null) {
+                    signedJWTInfo.setValidationStatus(SignedJWTInfo.ValidationStatus.NOT_VALIDATED);
                 }
             } catch (APIManagementException e) {
                 log.error("Error while obtaining client certificate. " + GatewayUtils.getMaskedToken(jwtHeader));
