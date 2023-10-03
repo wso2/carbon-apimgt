@@ -70,11 +70,10 @@ public class KeyManagerMappingUtil {
         KeyManagerPermissionConfigurationDTO permissions = keyManagerConfigurationDTO.getPermissions();
         if(permissions != null){
             KeyManagerPermissionsDTO keyManagerPermissionsDTO = new KeyManagerPermissionsDTO();
-            keyManagerPermissionsDTO.setPermissionType(permissions.getPermissionType());
+            keyManagerPermissionsDTO.setPermissionType(KeyManagerPermissionsDTO.PermissionTypeEnum.fromValue(permissions.getPermissionType()));
             keyManagerPermissionsDTO.setRoles(permissions.getRoles());
             keyManagerDTO.setPermissions(keyManagerPermissionsDTO);
         }
-
         JsonObject jsonObject = fromConfigurationMapToJson(keyManagerConfigurationDTO.getAdditionalProperties());
 
         JsonElement clientRegistrationElement = jsonObject.get(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
@@ -223,7 +222,7 @@ public class KeyManagerMappingUtil {
         KeyManagerPermissionsDTO permissions = keyManagerDTO.getPermissions();
         if(permissions != null) {
             KeyManagerPermissionConfigurationDTO permissionsConfiguration = new KeyManagerPermissionConfigurationDTO();
-            permissionsConfiguration.setPermissionType(permissions.getPermissionType());
+            permissionsConfiguration.setPermissionType(permissions.getPermissionType().toString());
             permissionsConfiguration.setRoles(permissions.getRoles());
             keyManagerConfigurationDTO.setPermissions(permissionsConfiguration);
         }

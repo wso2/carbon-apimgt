@@ -336,55 +336,10 @@ public interface APIAdmin  {
     /**
      * This method used to get key manager permissions with key manager id and role
      * @param id uuid of key manager
-     * @param role role of the user
      * @return key manager permissions
      * @throws APIManagementException
      */
-    KeyManagerPermissionConfigurationDTO getKeyManagerPermissionForRole(String id, String role) throws APIManagementException;
-
-    /**
-     * This method used to get key manager permissions with key manager id and role
-     * @param id uuid of key manager
-     * @return key manager permissions
-     * @throws APIManagementException
-     */
-    List<KeyManagerPermissionConfigurationDTO> getKeyManagerPermissions(String id) throws APIManagementException;
-
-    /**
-     * This method used to create key Manager
-     * @param id uuid of key manager
-     * @param permissions key manager permission data
-     * @return created key manager permissions
-     * @throws APIManagementException
-     */
-    List<KeyManagerPermissionConfigurationDTO> addKeyManagerPermissions(String id, List<KeyManagerPermissionConfigurationDTO> permissions)
-            throws APIManagementException;
-
-    /**
-     * This method used to update key Manager
-     * @param permissions key manager permission data
-     * @return updated key manager permissions
-     * @throws APIManagementException
-     */
-    List<KeyManagerPermissionConfigurationDTO> updateKeyManagerPermissions(List<KeyManagerPermissionConfigurationDTO> permissions)
-            throws APIManagementException;
-
-    /**
-     * This method used to delete key manager permission by role
-     * @param id uuid of key manager
-     * @param role role of the user
-     * @throws APIManagementException
-     */
-    void deleteKeyManagerPermissionByRole(String id, String role)
-            throws APIManagementException;
-
-    /**
-     * This method used to delete key manager permissions
-     * @param id uuid of key manager
-     * @throws APIManagementException
-     */
-    void deleteKeyManagerPermissionsByUUID(String id)
-            throws APIManagementException;
+    KeyManagerPermissionConfigurationDTO getKeyManagerPermissions(String id) throws APIManagementException;
 
     /**
      * hTis method used to delete IDP mapped with key manager

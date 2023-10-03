@@ -4244,18 +4244,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         List<KeyManagerConfigurationDTO> keyManagerConfigurations =
                 apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
         APIKeyMgtRemoteUserStoreMgtService apiKeyMgtRemoteUserStoreMgtService = new APIKeyMgtRemoteUserStoreMgtService();
-        String[] userRoles = apiKeyMgtRemoteUserStoreMgtService.getUserRoles(username);
-        System.out.println(Arrays.toString(userRoles));
         List<KeyManagerConfigurationDTO> permittedKeyManagerConfigurations = new ArrayList<>();
         if(keyManagerConfigurations.size() > 0) {
+            String[] userRoles = apiKeyMgtRemoteUserStoreMgtService.getUserRoles(username);
             for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
-                List<KeyManagerPermissionConfigurationDTO> permissions=
+                KeyManagerPermissionConfigurationDTO permissions =
                         apiAdmin.getKeyManagerPermissions(keyManagerConfiguration.getUuid());
-                if (permissions != null && permissions.size() > 0) {
-                    String permissionType = permissions.get(0).getPermissionType();
-                    String[] permissionRoles = permissions
+                String permissionType = permissions.getPermissionType();
+                if (permissions != null && !permissionType.equals("PUBLIC")) {
+                    String[] permissionRoles = permissions.getRoles()
                             .stream()
-                            .map(permission -> permission.getRole())
                             .toArray(String[]::new);
                     if (permissionType.equals("ALLOW") && hasIntersection(userRoles,permissionRoles)) {
                         permittedKeyManagerConfigurations.add(keyManagerConfiguration);
@@ -4271,14 +4269,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
     public boolean isKeyManagerAllowedForUser(String uuid, String username) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
-        List<KeyManagerPermissionConfigurationDTO> permissions= apiAdmin.getKeyManagerPermissions(uuid);
+        KeyManagerPermissionConfigurationDTO permissions= apiAdmin.getKeyManagerPermissions(uuid);
         APIKeyMgtRemoteUserStoreMgtService apiKeyMgtRemoteUserStoreMgtService = new APIKeyMgtRemoteUserStoreMgtService();
         String[] userRoles = apiKeyMgtRemoteUserStoreMgtService.getUserRoles(username);
-        if (permissions != null && permissions.size() > 0) {
-            String permissionType = permissions.get(0).getPermissionType();
-            String[] permissionRoles = permissions
+        String permissionType = permissions.getPermissionType();
+        if (permissions != null && !permissionType.equals("PUBLIC")) {
+            String[] permissionRoles = permissions.getRoles()
                     .stream()
-                    .map(permission -> permission.getRole())
                     .toArray(String[]::new);
             if (permissionType.equals("ALLOW") && hasIntersection(userRoles,permissionRoles)) {
                 return true;

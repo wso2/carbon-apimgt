@@ -22,23 +22,55 @@ import javax.validation.Valid;
 
 public class KeyManagerPermissionsDTO   {
   
-    private String permissionType = null;
+
+    @XmlType(name="PermissionTypeEnum")
+    @XmlEnum(String.class)
+    public enum PermissionTypeEnum {
+        PUBLIC("PUBLIC"),
+        ALLOW("ALLOW"),
+        DENY("DENY");
+        private String value;
+
+        PermissionTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static PermissionTypeEnum fromValue(String v) {
+            for (PermissionTypeEnum b : PermissionTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private PermissionTypeEnum permissionType = PermissionTypeEnum.PUBLIC;
     private List<String> roles = new ArrayList<String>();
 
   /**
    **/
-  public KeyManagerPermissionsDTO permissionType(String permissionType) {
+  public KeyManagerPermissionsDTO permissionType(PermissionTypeEnum permissionType) {
     this.permissionType = permissionType;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "ALLOW", value = "")
   @JsonProperty("permissionType")
-  public String getPermissionType() {
+  public PermissionTypeEnum getPermissionType() {
     return permissionType;
   }
-  public void setPermissionType(String permissionType) {
+  public void setPermissionType(PermissionTypeEnum permissionType) {
     this.permissionType = permissionType;
   }
 

@@ -746,71 +746,15 @@ public class APIAdminImpl implements APIAdmin {
                 .notify(decryptedKeyManagerConfiguration, APIConstants.KeyManager.KeyManagerEvent.ACTION_UPDATE);
         return keyManagerConfigurationDTO;
     }
-
     @Override
-    public KeyManagerPermissionConfigurationDTO getKeyManagerPermissionForRole (String id, String role) throws APIManagementException {
-        KeyManagerPermissionConfigurationDTO keyManagerPermissionConfigurationDTO = null;
+    public KeyManagerPermissionConfigurationDTO getKeyManagerPermissions (String id) throws APIManagementException {
+        KeyManagerPermissionConfigurationDTO keyManagerPermissionConfigurationDTO;
         try {
-            keyManagerPermissionConfigurationDTO = apiMgtDAO.getKeyManagerPermission(id, role);
-        } catch (Exception e) {
-            throw new APIManagementException("Key Manager Permissions deletion failed " + e.getMessage());
-        }
-        return keyManagerPermissionConfigurationDTO;
-    }
-
-    @Override
-    public List<KeyManagerPermissionConfigurationDTO> getKeyManagerPermissions (String id) throws APIManagementException {
-        List<KeyManagerPermissionConfigurationDTO> keyManagerPermissionConfigurationDTOs = new ArrayList<>();;
-        try {
-            keyManagerPermissionConfigurationDTOs = apiMgtDAO.getKeyManagerPermissions(id);
+            keyManagerPermissionConfigurationDTO = apiMgtDAO.getKeyManagerPermissions(id);
         } catch (Exception e) {
             throw new APIManagementException("Key Manager Permissions retrieval failed " + e.getMessage());
         }
-        return keyManagerPermissionConfigurationDTOs;
-    }
-
-    @Override
-    public List<KeyManagerPermissionConfigurationDTO> addKeyManagerPermissions (String id, List<KeyManagerPermissionConfigurationDTO> permissions) throws APIManagementException {
-        try{
-            for (KeyManagerPermissionConfigurationDTO permission : permissions) {
-                apiMgtDAO.updateKeyManagerPermission(id,
-                        permission.getRole(), permission.getPermissionType());
-            }
-        } catch (Exception e) {
-            throw new APIManagementException("Key Manager Permission creation failed " + e.getMessage());
-        }
-        return permissions;
-    }
-
-    @Override
-    public List<KeyManagerPermissionConfigurationDTO> updateKeyManagerPermissions (List<KeyManagerPermissionConfigurationDTO> permissions) throws APIManagementException {
-        try{
-            for (KeyManagerPermissionConfigurationDTO permission : permissions) {
-                apiMgtDAO.updateKeyManagerPermission(permission.getKeyManagerUUID(),
-                        permission.getRole(), permission.getPermissionType());
-            }
-        } catch (Exception e) {
-            throw new APIManagementException("Key Manager Permission updation failed " + e.getMessage());
-        }
-        return permissions;
-    }
-
-    @Override
-    public void deleteKeyManagerPermissionByRole (String id, String role) throws APIManagementException {
-        try {
-            apiMgtDAO.deleteKeyManagerPermission(id, role);
-        } catch (Exception e) {
-            throw new APIManagementException("Key Manager Permissions deletion failed " + e.getMessage());
-        }
-    }
-
-    @Override
-    public void deleteKeyManagerPermissionsByUUID (String id) throws APIManagementException {
-        try {
-            apiMgtDAO.deleteAllKeyManagerPermission(id);
-        } catch (Exception e) {
-            throw new APIManagementException("Key Manager Permissions deletion failed " + e.getMessage());
-        }
+        return keyManagerPermissionConfigurationDTO;
     }
 
     private IdentityProvider updatedIDP(IdentityProvider retrievedIDP,

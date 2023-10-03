@@ -3629,9 +3629,6 @@ public class SQLConstants {
                         " WHERE " +
                         "   KEY_MANAGER_PERMISSION_ID = ? ";
 
-        public static final String DELETE_KEY_MANAGER_PERMISSION_SQL = "DELETE FROM AM_KEY_MANAGER_PERMISSIONS WHERE " +
-                "KEY_MANAGER_PERMISSION_ID = ?";
-
         public static final String DELETE_ALL_KEY_MANAGER_PERMISSION_SQL = "DELETE FROM AM_KEY_MANAGER_PERMISSIONS WHERE " +
                 "KEY_MANAGER_UUID = ?";
 
