@@ -134,9 +134,12 @@ import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.user.mgt.UserAdmin;
 import org.wso2.carbon.user.mgt.common.UserAdminException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -4243,24 +4246,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIAdmin apiAdmin = new APIAdminImpl();
         List<KeyManagerConfigurationDTO> keyManagerConfigurations =
                 apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
-        APIKeyMgtRemoteUserStoreMgtService apiKeyMgtRemoteUserStoreMgtService = new APIKeyMgtRemoteUserStoreMgtService();
         List<KeyManagerConfigurationDTO> permittedKeyManagerConfigurations = new ArrayList<>();
-        if(keyManagerConfigurations.size() > 0) {
-            String[] userRoles = apiKeyMgtRemoteUserStoreMgtService.getUserRoles(username);
+        if (keyManagerConfigurations.size() > 0) {
             for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
-                KeyManagerPermissionConfigurationDTO permissions =
-                        apiAdmin.getKeyManagerPermissions(keyManagerConfiguration.getUuid());
-                String permissionType = permissions.getPermissionType();
-                if (permissions != null && !permissionType.equals("PUBLIC")) {
-                    String[] permissionRoles = permissions.getRoles()
-                            .stream()
-                            .toArray(String[]::new);
-                    if (permissionType.equals("ALLOW") && hasIntersection(userRoles,permissionRoles)) {
-                        permittedKeyManagerConfigurations.add(keyManagerConfiguration);
-                    } else if (permissionType.equals("DENY") && !(hasIntersection(userRoles,permissionRoles))){
-                        permittedKeyManagerConfigurations.add(keyManagerConfiguration);
-                    }
-                } else {
+                if (isKeyManagerAllowedForUser(keyManagerConfiguration.getUuid(), username)) {
                     permittedKeyManagerConfigurations.add(keyManagerConfiguration);
                 }
             }
@@ -4269,21 +4258,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
     public boolean isKeyManagerAllowedForUser(String uuid, String username) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
-        KeyManagerPermissionConfigurationDTO permissions= apiAdmin.getKeyManagerPermissions(uuid);
-        APIKeyMgtRemoteUserStoreMgtService apiKeyMgtRemoteUserStoreMgtService = new APIKeyMgtRemoteUserStoreMgtService();
-        String[] userRoles = apiKeyMgtRemoteUserStoreMgtService.getUserRoles(username);
+        KeyManagerPermissionConfigurationDTO permissions = apiAdmin.getKeyManagerPermissions(uuid);
         String permissionType = permissions.getPermissionType();
         if (permissions != null && !permissionType.equals("PUBLIC")) {
             String[] permissionRoles = permissions.getRoles()
                     .stream()
                     .toArray(String[]::new);
-            if (permissionType.equals("ALLOW") && hasIntersection(userRoles,permissionRoles)) {
-                return true;
-            } else if (permissionType.equals("DENY") && !(hasIntersection(userRoles,permissionRoles))){
+            String[] userRoles = APIUtil.getListOfRoles(username);
+            boolean roleIsRestricted = hasIntersection(userRoles,permissionRoles);
+            if ("ALLOW".equals(permissionType) && roleIsRestricted
+                    || "DENY".equals(permissionType) && !roleIsRestricted) {
                 return true;
             }
         }
-        return false;
+        return true;
     }
 
     public static boolean hasIntersection(String[] arr1, String[] arr2) {
