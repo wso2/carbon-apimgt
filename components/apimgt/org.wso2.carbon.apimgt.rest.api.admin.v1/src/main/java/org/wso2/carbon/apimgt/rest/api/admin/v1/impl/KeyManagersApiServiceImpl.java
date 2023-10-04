@@ -116,6 +116,16 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                     KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
+            KeyManagerPermissionConfigurationDTO keyManagerPermissionConfigurationDTO =
+                    keyManagerConfigurationDTO.getPermissions();
+            if (keyManagerPermissionConfigurationDTO != null && keyManagerPermissionConfigurationDTO.getRoles() != null) {
+                String username = RestApiCommonUtil.getLoggedInUsername();
+                for (String role: keyManagerPermissionConfigurationDTO.getRoles()) {
+                    if (!APIUtil.isRoleNameExist(username, role)) {
+                        throw new IllegalArgumentException("Invalid user roles found in visibleRoles list");
+                    }
+                }
+            }
             keyManagerConfigurationDTO.setUuid(keyManagerId);
             KeyManagerConfigurationDTO oldKeyManagerConfigurationDTO =
                     apiAdmin.getKeyManagerConfigurationById(organization, keyManagerId);
@@ -138,6 +148,10 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                     "Error while Retrieving Key Manager configuration for " + keyManagerId + " in organization " +
                             organization;
             throw new APIManagementException(error, e, ExceptionCodes.INTERNAL_ERROR);
+        } catch (IllegalArgumentException e) {
+            String error = "Error while Storing key manager permission roles with name "
+                    + body.getName() + " in tenant " + organization;
+            throw new APIManagementException(error, e, ExceptionCodes.ROLE_DOES_NOT_EXIST);
         }
     }
 
@@ -148,6 +162,16 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                     KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
+            KeyManagerPermissionConfigurationDTO keyManagerPermissionConfigurationDTO =
+                    keyManagerConfigurationDTO.getPermissions();
+            if (keyManagerPermissionConfigurationDTO != null && keyManagerPermissionConfigurationDTO.getRoles() != null) {
+                String username = RestApiCommonUtil.getLoggedInUsername();
+                for (String role: keyManagerPermissionConfigurationDTO.getRoles()) {
+                    if (!APIUtil.isRoleNameExist(username, role)) {
+                        throw new IllegalArgumentException("Invalid user roles found in visibleRoles list");
+                    }
+                }
+            }
             KeyManagerConfigurationDTO createdKeyManagerConfiguration =
                     apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
@@ -159,6 +183,10 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         } catch (URISyntaxException e) {
             String error = "Error while Creating Key Manager configuration in organization " + organization;
             throw new APIManagementException(error, e, ExceptionCodes.INTERNAL_ERROR);
+        } catch (IllegalArgumentException e) {
+            String error = "Error while Storing key manager permission roles with name "
+                    + body.getName() + " in tenant " + organization;
+            throw new APIManagementException(error, e, ExceptionCodes.ROLE_DOES_NOT_EXIST);
         }
     }
 }

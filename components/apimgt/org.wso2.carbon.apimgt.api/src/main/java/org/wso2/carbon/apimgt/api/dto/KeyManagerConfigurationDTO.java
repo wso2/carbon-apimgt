@@ -61,6 +61,7 @@ public class KeyManagerConfigurationDTO implements Serializable {
         this.tokenType = keyManagerConfigurationDTO.getTokenType();
         this.externalReferenceId = keyManagerConfigurationDTO.getExternalReferenceId();
         this.endpoints = keyManagerConfigurationDTO.getEndpoints();
+        this.permissions = keyManagerConfigurationDTO.getPermissions();
     }
     public String getName() {
 

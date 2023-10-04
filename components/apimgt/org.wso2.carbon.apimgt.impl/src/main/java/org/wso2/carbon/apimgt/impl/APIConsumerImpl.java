@@ -4266,9 +4266,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     .toArray(String[]::new);
             String[] userRoles = APIUtil.getListOfRoles(username);
             boolean roleIsRestricted = hasIntersection(userRoles,permissionRoles);
-            if ("ALLOW".equals(permissionType) && roleIsRestricted
-                    || "DENY".equals(permissionType) && !roleIsRestricted) {
-                return true;
+            if (("ALLOW".equals(permissionType) && !roleIsRestricted)
+                    || ("DENY".equals(permissionType) && roleIsRestricted)) {
+                return false;
             }
         }
         return true;
