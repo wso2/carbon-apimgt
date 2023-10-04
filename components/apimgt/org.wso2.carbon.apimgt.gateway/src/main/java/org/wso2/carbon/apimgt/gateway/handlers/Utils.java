@@ -641,6 +641,14 @@ public class Utils {
         return selectedAPIMap;
     }
 
+    /**
+     * Get the security scheme of the given API
+     *
+     * @param context      API context
+     * @param version      API version
+     * @param tenantDomain Tenant domain
+     * @return List of security schemes
+     */
     public static List<String> getSecuritySchemeOfWebSocketAPI(String context, String version, String tenantDomain) {
 
         List<String> securitySchemeList = new ArrayList<>();

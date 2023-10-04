@@ -1,13 +1,13 @@
-/**
+/*
  * Copyright (c) 2023, WSO2 LLC. (https://www.wso2.com/).
- * <p>
+ *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -50,18 +51,22 @@ public class ApiKeyAuthenticator implements Authenticator {
     private String[] splitToken;
     private JWSHeader decodedHeader;
     private JWTClaimsSet payload;
+    private SignedJWT signedJWT;
 
     @Override
-    public boolean validateToken(InboundMessageContext inboundMessageContext) {
+    public boolean validateToken(InboundMessageContext inboundMessageContext) throws APISecurityException {
+
         if (InboundWebsocketProcessorUtil.isAuthenticatorEnabled(APIConstants.API_SECURITY_API_KEY,
                 inboundMessageContext)) {
+            log.debug("ApiKey Authentication initialized");
             try {
                 apiKey = inboundMessageContext.getRequestHeaders().get(APIConstants.API_KEY_HEADER_QUERY_PARAM);
                 splitToken = apiKey.split("\\.");
-                SignedJWT signedJWT = SignedJWT.parse(apiKey);
+                ApiKeyAuthenticatorUtils.validateAPIKeyFormat(splitToken);
+                signedJWT = SignedJWT.parse(apiKey);
                 decodedHeader = signedJWT.getHeader();
                 payload = signedJWT.getJWTClaimsSet();
-                return ApiKeyAuthenticatorUtils.validateAPIKeyFormat(splitToken, decodedHeader, payload);
+                return ApiKeyAuthenticatorUtils.isAPIKey(splitToken, decodedHeader, payload);
             } catch (ParseException e) {
                 log.error("Error while parsing API Key", e);
                 return false;
@@ -76,11 +81,6 @@ public class ApiKeyAuthenticator implements Authenticator {
 
         if (InboundWebsocketProcessorUtil.isAuthenticatorEnabled(APIConstants.API_SECURITY_API_KEY,
                 inboundMessageContext)) {
-
-            if (log.isDebugEnabled()) {
-                log.debug("ApiKey Authentication initialized");
-            }
-
             try {
                 String certAlias = decodedHeader.getKeyID();
                 String tokenIdentifier = payload.getJWTID();
@@ -91,32 +91,35 @@ public class ApiKeyAuthenticator implements Authenticator {
                 String cacheKey = GatewayUtils.getAccessTokenCacheKey(tokenIdentifier, apiContext, apiVersion,
                         matchingResource, null);
                 boolean isGatewayTokenCacheEnabled = GatewayUtils.isGatewayTokenCacheEnabled();
-                boolean isVerified = ApiKeyAuthenticatorUtils.verifyAPIKeySignature(isGatewayTokenCacheEnabled,
-                        tokenIdentifier, cacheKey, apiKey, splitToken[0], certAlias, tenantDomain);
+                boolean isVerified = ApiKeyAuthenticatorUtils.verifyAPIKeySignatureFromTokenCache(isGatewayTokenCacheEnabled,
+                        tokenIdentifier, cacheKey, apiKey, splitToken[0]);
+                if (!isVerified) {
+                    // Not found in cache or caching disabled
+                    isVerified = ApiKeyAuthenticatorUtils.verifyAPIKeySignature(signedJWT, certAlias);
+                }
+                ApiKeyAuthenticatorUtils.addTokenToTokenCache(isGatewayTokenCacheEnabled, tokenIdentifier, isVerified,
+                        tenantDomain);
 
                 // If Api Key signature is verified
                 if (isVerified) {
                     ExtendedJWTConfigurationDto jwtConfigurationDto = ServiceReferenceHolder.getInstance().
                             getAPIManagerConfiguration().getJwtConfigurationDto();
-                    boolean jwtGenerationEnabled = false;
-                    if (jwtConfigurationDto != null) {
-                        jwtGenerationEnabled = jwtConfigurationDto.isEnabled();
-                    }
-                    AuthenticationContext authenticationContext = ApiKeyAuthenticatorUtils.
-                            authenticateUsingAPIKey(isGatewayTokenCacheEnabled, cacheKey, tokenIdentifier, tenantDomain,
-                                    inboundMessageContext.getUserIP(), apiContext, apiVersion,
-                                    inboundMessageContext.getRequestHeaders().get("Referer"), apiKey, splitToken[0],
-                                    jwtGenerationEnabled, jwtConfigurationDto,
-                                    APIUtil.getTenantIdFromTenantDomain(tenantDomain), null, null);
+                    payload = ApiKeyAuthenticatorUtils.checkTokenExpired(isGatewayTokenCacheEnabled, cacheKey,
+                            tokenIdentifier, apiKey, tenantDomain, payload);
+                    ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(payload, inboundMessageContext.getUserIP(),
+                            apiContext, apiVersion, inboundMessageContext.getRequestHeaders().
+                                    get(APIMgtGatewayConstants.REFERER));
+                    AuthenticationContext authenticationContext = ApiKeyAuthenticatorUtils.authenticateUsingAPIKey(
+                            isGatewayTokenCacheEnabled, tokenIdentifier, apiContext, apiVersion, apiKey, splitToken[0],
+                            jwtConfigurationDto, APIUtil.getTenantIdFromTenantDomain(tenantDomain), null,
+                            null, signedJWT, payload);
                     if (!InboundWebsocketProcessorUtil.validateAuthenticationContext(authenticationContext,
                             inboundMessageContext)) {
                         return InboundWebsocketProcessorUtil.getFrameErrorDTO(
                                 WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS,
                                 APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, true);
                     }
-                    if (log.isDebugEnabled()) {
-                        log.debug("User is authorized to access the resource using Api Key.");
-                    }
+                    log.debug("User is authorized to access the resource using Api Key.");
                     InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
                     inboundProcessorResponseDTO.setErrorCode(0);
                     inboundProcessorResponseDTO.setErrorMessage(null);

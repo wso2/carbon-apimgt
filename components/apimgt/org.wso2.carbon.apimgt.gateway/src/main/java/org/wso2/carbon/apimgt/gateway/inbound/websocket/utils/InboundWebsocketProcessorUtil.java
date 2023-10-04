@@ -542,7 +542,7 @@ public class InboundWebsocketProcessorUtil {
         if (!Utils.getSecuritySchemeOfWebSocketAPI(inboundMessageContext.getApiContext(), inboundMessageContext.
                 getVersion(), inboundMessageContext.getTenantDomain()).contains(authenticationType)) {
             if (log.isDebugEnabled()) {
-                log.debug("Authentication has not enabled for the Authentication type: " + authenticationType);
+                log.debug("Authentication has not been enabled for the Authenticator type: " + authenticationType);
             }
             return false;
         }

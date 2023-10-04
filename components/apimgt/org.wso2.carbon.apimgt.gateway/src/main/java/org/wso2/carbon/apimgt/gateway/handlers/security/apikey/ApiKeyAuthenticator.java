@@ -82,19 +82,18 @@ public class ApiKeyAuthenticator implements Authenticator {
 
     @Override
     public AuthenticationResponse authenticate(MessageContext synCtx) {
-        if (log.isDebugEnabled()) {
-            log.info("ApiKey Authentication initialized");
-        }
 
+        log.debug("ApiKey Authentication initialized");
         try {
             // Extract apikey from the request while removing it from the msg context.
             String apiKey = extractApiKey(synCtx);
             String[] splitToken = apiKey.split("\\.");
+            ApiKeyAuthenticatorUtils.validateAPIKeyFormat(splitToken);
             SignedJWT signedJWT = SignedJWT.parse(apiKey);
             JWSHeader decodedHeader = signedJWT.getHeader();
             JWTClaimsSet payload = signedJWT.getJWTClaimsSet();
 
-            if (!ApiKeyAuthenticatorUtils.validateAPIKeyFormat(splitToken, decodedHeader, payload)) {
+            if (!ApiKeyAuthenticatorUtils.isAPIKey(splitToken, decodedHeader, payload)) {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
             }
@@ -132,8 +131,14 @@ public class ApiKeyAuthenticator implements Authenticator {
             String cacheKey = GatewayUtils.getAccessTokenCacheKey(tokenIdentifier, apiContext, apiVersion,
                     matchingResource, httpMethod);
             boolean isGatewayTokenCacheEnabled = GatewayUtils.isGatewayTokenCacheEnabled();
-            boolean isVerified = ApiKeyAuthenticatorUtils.verifyAPIKeySignature(isGatewayTokenCacheEnabled,
-                    tokenIdentifier, cacheKey, apiKey, splitToken[0], certAlias, tenantDomain);
+            boolean isVerified = ApiKeyAuthenticatorUtils.verifyAPIKeySignatureFromTokenCache(isGatewayTokenCacheEnabled,
+                    tokenIdentifier, cacheKey, apiKey, splitToken[0]);
+            if (!isVerified) {
+                // Not found in cache or caching disabled
+                isVerified = ApiKeyAuthenticatorUtils.verifyAPIKeySignature(signedJWT, certAlias);
+            }
+            ApiKeyAuthenticatorUtils.addTokenToTokenCache(isGatewayTokenCacheEnabled, tokenIdentifier, isVerified,
+                    tenantDomain);
             org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synCtx).
                     getAxis2MessageContext();
             Map<String, String> transportHeaderMap = (Map<String, String>)
@@ -141,7 +146,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                             (org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             String referer = null;
             if (transportHeaderMap != null) {
-                referer = transportHeaderMap.get("Referer");
+                referer = transportHeaderMap.get(APIMgtGatewayConstants.REFERER);
             }
 
             // If Api Key signature is verified
@@ -152,21 +157,21 @@ public class ApiKeyAuthenticator implements Authenticator {
                 if (jwtConfigurationDto != null) {
                     jwtGenerationEnabled = jwtConfigurationDto.isEnabled();
                 }
-                AuthenticationContext authenticationContext = ApiKeyAuthenticatorUtils.
-                        authenticateUsingAPIKey(isGatewayTokenCacheEnabled, cacheKey, tokenIdentifier, tenantDomain,
-                                GatewayUtils.getIp(axis2MessageContext), apiContext, apiVersion, referer, apiKey,
-                                splitToken[0], jwtGenerationEnabled, jwtConfigurationDto,
-                                APIUtil.getTenantIdFromTenantDomain(tenantDomain), getApiLevelPolicy(), synCtx);
+                payload = ApiKeyAuthenticatorUtils.checkTokenExpired(isGatewayTokenCacheEnabled, cacheKey,
+                        tokenIdentifier, apiKey, tenantDomain, payload);
+                ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(payload, GatewayUtils.getIp(axis2MessageContext),
+                        apiContext, apiVersion, referer);
+                AuthenticationContext authenticationContext = ApiKeyAuthenticatorUtils.authenticateUsingAPIKey(
+                        isGatewayTokenCacheEnabled, tokenIdentifier, apiContext, apiVersion, apiKey, splitToken[0],
+                        jwtConfigurationDto, APIUtil.getTenantIdFromTenantDomain(tenantDomain), getApiLevelPolicy(),
+                        synCtx, signedJWT, payload);
                 APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext,
                         jwtGenerationEnabled ? getContextHeader() : null);
                 synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, authenticationContext.getUsername());
-                if (log.isDebugEnabled()) {
-                    log.debug("User is authorized to access the resource using Api Key.");
-                }
+                log.debug("User is authorized to access the resource using Api Key.");
                 return new AuthenticationResponse(true, isMandatory, false,
                         0, null);
             }
-
             if (log.isDebugEnabled()) {
                 log.debug("Api Key signature verification failure. Api Key: " +
                         GatewayUtils.getMaskedToken(splitToken[0]));

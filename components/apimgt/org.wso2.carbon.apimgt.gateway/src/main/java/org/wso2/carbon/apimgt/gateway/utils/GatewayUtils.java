@@ -900,7 +900,7 @@ public class GatewayUtils {
      * @throws APISecurityException if the user is not subscribed to the API
      */
     public static JSONObject validateAPISubscription(String apiContext, String apiVersion, JWTClaimsSet payload,
-                                                     String token, boolean isOauth)
+                                                     String token)
             throws APISecurityException {
 
         JSONObject api = null;
@@ -960,15 +960,7 @@ public class GatewayUtils {
                         APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
             }
         } else {
-            if (log.isDebugEnabled()) {
-                log.debug("No subscription information found in the token.");
-            }
-            // we perform mandatory authentication for Api Keys
-            if (!isOauth) {
-                log.error("User is not subscribed to access the API.");
-                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
-                        APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
-            }
+            log.debug("No subscription information found in the token.");
         }
         return api;
     }

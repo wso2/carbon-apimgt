@@ -1650,10 +1650,11 @@ public interface APIProvider extends APIManager {
 
     /**
      * Returns security scheme of an API
-     * @param uuid   UUID of the API's registry artifact
-     * @param organization  Identifier of an organization
-     * @return A String related to the given artifact id or null
-     * @throws APIManagementException if failed get API from APIIdentifier
+     *
+     * @param uuid         UUID of the API's registry artifact
+     * @param uuid         UUID of the API's registry artifact
+     * @param organization Identifier of an organization
+     * @return A String containing security scheme of the API
      */
     String getSecuritySchemeOfAPI(String uuid, String organization) throws APIManagementException;
 
