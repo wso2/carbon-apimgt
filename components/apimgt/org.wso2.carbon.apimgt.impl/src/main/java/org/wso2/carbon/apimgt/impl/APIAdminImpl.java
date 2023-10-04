@@ -747,12 +747,13 @@ public class APIAdminImpl implements APIAdmin {
         return keyManagerConfigurationDTO;
     }
     @Override
-    public KeyManagerPermissionConfigurationDTO getKeyManagerPermissions (String id) throws APIManagementException {
+    public KeyManagerPermissionConfigurationDTO getKeyManagerPermissions(String id) throws APIManagementException {
+
         KeyManagerPermissionConfigurationDTO keyManagerPermissionConfigurationDTO;
         try {
             keyManagerPermissionConfigurationDTO = apiMgtDAO.getKeyManagerPermissions(id);
-        } catch (Exception e) {
-            throw new APIManagementException("Key Manager Permissions retrieval failed " + e.getMessage());
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Key Manager Permissions retrieval failed for Key Manager id " + id);
         }
         return keyManagerPermissionConfigurationDTO;
     }

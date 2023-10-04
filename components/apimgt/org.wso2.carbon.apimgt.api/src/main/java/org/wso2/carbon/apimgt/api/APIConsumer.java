@@ -809,12 +809,12 @@ public interface APIConsumer extends APIManager {
     List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization, String username) throws APIManagementException;
 
     /**
-     * This method used to retrieve key manager configurations for tenant
-     * @param uuid uuid of the key manager
-     * @param user username of the logged in user
+     * This method used to check if key manager configuration is allowed for user
+     * @param keyManagerId uuid of the key manager
+     * @param username username of the logged in user
      * @return boolean
      * @throws APIManagementException if error occurred
      */
-    boolean isKeyManagerAllowedForUser(String uuid, String username) throws APIManagementException;
+    boolean isKeyManagerAllowedForUser(String keyManagerId, String username) throws APIManagementException;
 
 }

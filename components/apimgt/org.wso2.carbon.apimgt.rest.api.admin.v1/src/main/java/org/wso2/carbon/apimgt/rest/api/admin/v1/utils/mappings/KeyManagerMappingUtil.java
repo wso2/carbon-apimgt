@@ -68,9 +68,10 @@ public class KeyManagerMappingUtil {
         keyManagerDTO.setAlias(keyManagerConfigurationDTO.getAlias());
         keyManagerDTO.setTokenType(KeyManagerDTO.TokenTypeEnum.fromValue(keyManagerConfigurationDTO.getTokenType()));
         KeyManagerPermissionConfigurationDTO permissions = keyManagerConfigurationDTO.getPermissions();
-        if(permissions != null){
+        if (permissions != null) {
             KeyManagerPermissionsDTO keyManagerPermissionsDTO = new KeyManagerPermissionsDTO();
-            keyManagerPermissionsDTO.setPermissionType(KeyManagerPermissionsDTO.PermissionTypeEnum.fromValue(permissions.getPermissionType()));
+            keyManagerPermissionsDTO.setPermissionType(KeyManagerPermissionsDTO.PermissionTypeEnum
+                    .fromValue(permissions.getPermissionType()));
             keyManagerPermissionsDTO.setRoles(permissions.getRoles());
             keyManagerDTO.setPermissions(keyManagerPermissionsDTO);
         }

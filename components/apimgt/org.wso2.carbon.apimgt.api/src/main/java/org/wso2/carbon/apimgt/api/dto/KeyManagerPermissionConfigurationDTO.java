@@ -5,12 +5,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *KeyManagerPermissionConfiguration model
+ */
 public class KeyManagerPermissionConfigurationDTO implements Serializable {
 
     private String permissionType = null;
     private List<String> roles = new ArrayList<String>();
 
     public KeyManagerPermissionConfigurationDTO () {
+        this.setPermissionType("PUBLIC");
     }
 
     public KeyManagerPermissionConfigurationDTO(String permissionType, List<String> roles) {
@@ -31,6 +35,9 @@ public class KeyManagerPermissionConfigurationDTO implements Serializable {
     }
 
     public void setRoles(List<String> roles) {
+        if (roles == null) {
+            roles = new ArrayList<String>();
+        }
         this.roles = roles;
     }
 }

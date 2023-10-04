@@ -101,7 +101,6 @@ import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
-import org.wso2.carbon.apimgt.impl.service.APIKeyMgtRemoteUserStoreMgtService;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
@@ -134,12 +133,9 @@ import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
-import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.user.mgt.UserAdmin;
 import org.wso2.carbon.user.mgt.common.UserAdminException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -4237,12 +4233,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
-     * This method used to retrieve key manager configurations for tenant
+     * This method is used to retrieve key manager configurations for tenant
      * @param organization organization of the key manager
      * @return KeyManagerConfigurationDTO list
      * @throws APIManagementException if error occurred
      */
-    public List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization, String username) throws APIManagementException{
+    @Override
+    public List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(
+            String organization, String username) throws APIManagementException {
+
         APIAdmin apiAdmin = new APIAdminImpl();
         List<KeyManagerConfigurationDTO> keyManagerConfigurations =
                 apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
@@ -4256,16 +4255,26 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return permittedKeyManagerConfigurations;
     }
-    public boolean isKeyManagerAllowedForUser(String uuid, String username) throws APIManagementException {
+
+    /**
+     * This method is used to check if key manager configuration is allowed for user
+     * @param keyManagerId uuid of the key manager
+     * @param username username of the logged in user
+     * @return boolean
+     * @throws APIManagementException if error occurred
+     */
+    @Override
+    public boolean isKeyManagerAllowedForUser(String keyManagerId, String username) throws APIManagementException {
+
         APIAdmin apiAdmin = new APIAdminImpl();
-        KeyManagerPermissionConfigurationDTO permissions = apiAdmin.getKeyManagerPermissions(uuid);
+        KeyManagerPermissionConfigurationDTO permissions = apiAdmin.getKeyManagerPermissions(keyManagerId);
         String permissionType = permissions.getPermissionType();
         if (permissions != null && !permissionType.equals("PUBLIC")) {
             String[] permissionRoles = permissions.getRoles()
                     .stream()
                     .toArray(String[]::new);
             String[] userRoles = APIUtil.getListOfRoles(username);
-            boolean roleIsRestricted = hasIntersection(userRoles,permissionRoles);
+            boolean roleIsRestricted = hasIntersection(userRoles, permissionRoles);
             if (("ALLOW".equals(permissionType) && !roleIsRestricted)
                     || ("DENY".equals(permissionType) && roleIsRestricted)) {
                 return false;

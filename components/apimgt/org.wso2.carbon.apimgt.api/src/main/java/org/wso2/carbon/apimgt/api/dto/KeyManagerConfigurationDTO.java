@@ -42,10 +42,9 @@ public class KeyManagerConfigurationDTO implements Serializable {
     private String tokenType;
     private String externalReferenceId = null;
     private String alias = null;
-    private KeyManagerPermissionConfigurationDTO permissions = null;
+    private KeyManagerPermissionConfigurationDTO permissions = new KeyManagerPermissionConfigurationDTO();
 
     public KeyManagerConfigurationDTO() {
-
     }
 
     public KeyManagerConfigurationDTO(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
@@ -61,7 +60,7 @@ public class KeyManagerConfigurationDTO implements Serializable {
         this.tokenType = keyManagerConfigurationDTO.getTokenType();
         this.externalReferenceId = keyManagerConfigurationDTO.getExternalReferenceId();
         this.endpoints = keyManagerConfigurationDTO.getEndpoints();
-        this.permissions = keyManagerConfigurationDTO.getPermissions();
+        this.setPermissions(keyManagerConfigurationDTO.getPermissions());
     }
     public String getName() {
 
@@ -192,6 +191,9 @@ public class KeyManagerConfigurationDTO implements Serializable {
     }
 
     public void setPermissions (KeyManagerPermissionConfigurationDTO permissions) {
+        if (permissions == null) {
+            permissions = new KeyManagerPermissionConfigurationDTO();
+        }
         this.permissions = permissions;
     }
 }
