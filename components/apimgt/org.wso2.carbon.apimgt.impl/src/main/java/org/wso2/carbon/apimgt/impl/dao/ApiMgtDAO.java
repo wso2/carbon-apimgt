@@ -9242,16 +9242,18 @@ public class ApiMgtDAO {
                 preparedStatement.setString(9, keyManagerConfigurationDTO.getTokenType());
                 preparedStatement.setString(10, keyManagerConfigurationDTO.getExternalReferenceId());
                 preparedStatement.executeUpdate();
-                try (PreparedStatement addPermissionStatement = conn
-                        .prepareStatement(SQLConstants.KeyManagerPermissionsSqlConstants.ADD_KEY_MANAGER_PERMISSION_SQL)) {
-                    for (String role : keyManagerConfigurationDTO.getPermissions().getRoles()) {
-                        addPermissionStatement.setString(1, keyManagerConfigurationDTO.getUuid());
-                        addPermissionStatement.setString(2, keyManagerConfigurationDTO
-                                .getPermissions().getPermissionType());
-                        addPermissionStatement.setString(3, role);
-                        addPermissionStatement.addBatch();
+                if (keyManagerConfigurationDTO.getPermissions() != null) {
+                    try (PreparedStatement addPermissionStatement = conn
+                            .prepareStatement(SQLConstants.KeyManagerPermissionsSqlConstants.ADD_KEY_MANAGER_PERMISSION_SQL)) {
+                        for (String role : keyManagerConfigurationDTO.getPermissions().getRoles()) {
+                            addPermissionStatement.setString(1, keyManagerConfigurationDTO.getUuid());
+                            addPermissionStatement.setString(2, keyManagerConfigurationDTO
+                                    .getPermissions().getPermissionType());
+                            addPermissionStatement.setString(3, role);
+                            addPermissionStatement.addBatch();
+                        }
+                        addPermissionStatement.executeBatch();
                     }
-                    addPermissionStatement.executeBatch();
                 }
                 conn.commit();
             } catch (SQLException e) {
