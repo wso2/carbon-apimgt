@@ -168,14 +168,23 @@ public class JWTValidator {
                     // means a request has been sent previously and the signedJWTInfo resultant object has been stored
                     // in the cache.
                     if (!cachedClientCertHash.equals(signedJWTInfo.getClientCertificateHash())) {
-                        // This scenario can happen when the first request contains an invalid certificate and the
-                        // next requests contain a valid certificate. Since the validationStatus of the signedJWTInfo
-                        // object obtained from the cache is INVALID due to the invalid certificate and the certificate
-                        // of the signedJWTInfo object obtained from the cache is different from the certificate sent
-                        // in the request header, the token has to be validated again.
+                        // This scenario can happen when the previous request and the current request contains two
+                        // different certificates. In such a scenario, we cannot guarantee the validationStatus
+                        // signedJWTInfo object obtained from the cache to be correct. Hence, the validationStatus of
+                        // the signedJWTInfo is set to NOT_VALIDATED so that the JWT token will be validated again.
                         signedJWTInfo.setValidationStatus(SignedJWTInfo.ValidationStatus.NOT_VALIDATED);
                     }
                 } else if (signedJWTInfo.getClientCertificateHash() != null) {
+                    // This scenario can happen in two different instances.
+                    // 1. When the signedJWTInfo object is not obtained from the cache and the current request contains
+                    //    a certificate in the request header. This scenario depicts a situation where the JWT has not
+                    //    been validated yet. Hence, the validationStatus of the signedJWTInfo is set to NOT_VALIDATED.
+                    // 2. When the signedJWTInfo object is obtained from the cache (cachedClientCertHash becomes null
+                    //    when the previous request do not contain a certificate in the request header) and the current
+                    //    request contains a certificate in the request header. In such a scenario, we cannot guarantee
+                    //    the validationStatus signedJWTInfo object as the certificate has not been validated. Hence,
+                    //    the validationStatus of the signedJWTInfo is set to NOT_VALIDATED so that the JWT token will
+                    //    be validated again.
                     signedJWTInfo.setValidationStatus(SignedJWTInfo.ValidationStatus.NOT_VALIDATED);
                 }
             } catch (APIManagementException e) {
