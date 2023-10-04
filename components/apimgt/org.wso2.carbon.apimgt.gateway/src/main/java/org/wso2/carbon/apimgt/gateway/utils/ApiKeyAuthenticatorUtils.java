@@ -384,8 +384,7 @@ public class ApiKeyAuthenticatorUtils {
         if (jwtGenerationEnabled) {
             SignedJWTInfo signedJWTInfo = new SignedJWTInfo(apiKey, signedJWT, payload);
             JWTValidationInfo jwtValidationInfo = getJwtValidationInfo(signedJWTInfo);
-            JWTInfoDto jwtInfoDto = GatewayUtils.generateJWTInfoDto(api, jwtValidationInfo,
-                    null, apiContext, apiVersion);
+            JWTInfoDto jwtInfoDto = GatewayUtils.generateJWTInfoDto(api, jwtValidationInfo, apiContext, apiVersion);
             endUserToken = generateAndRetrieveBackendJWTToken(tokenIdentifier, jwtInfoDto, isGatewayTokenCacheEnabled,
                     apiMgtGatewayJWTGenerator);
         }
