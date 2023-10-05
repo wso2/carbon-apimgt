@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.inbound.websocket.Authentication;
 
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,7 +38,6 @@ import org.wso2.carbon.apimgt.gateway.utils.ApiKeyAuthenticatorUtils;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.text.ParseException;
 
@@ -63,7 +63,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                 apiKey = inboundMessageContext.getRequestHeaders().get(APIConstants.API_KEY_HEADER_QUERY_PARAM);
                 splitToken = apiKey.split("\\.");
                 ApiKeyAuthenticatorUtils.validateAPIKeyFormat(splitToken);
-                signedJWT = SignedJWT.parse(apiKey);
+                signedJWT = (SignedJWT) JWTParser.parse(apiKey);
                 decodedHeader = signedJWT.getHeader();
                 payload = signedJWT.getJWTClaimsSet();
                 return ApiKeyAuthenticatorUtils.isAPIKey(splitToken, decodedHeader, payload);
@@ -104,15 +104,18 @@ public class ApiKeyAuthenticator implements Authenticator {
                 if (isVerified) {
                     ExtendedJWTConfigurationDto jwtConfigurationDto = ServiceReferenceHolder.getInstance().
                             getAPIManagerConfiguration().getJwtConfigurationDto();
-                    payload = ApiKeyAuthenticatorUtils.checkTokenExpired(isGatewayTokenCacheEnabled, cacheKey,
-                            tokenIdentifier, apiKey, tenantDomain, payload);
+                    ApiKeyAuthenticatorUtils.overridePayloadFromDataCache(isGatewayTokenCacheEnabled, cacheKey, payload);
+                    ApiKeyAuthenticatorUtils.checkTokenExpired(isGatewayTokenCacheEnabled, cacheKey, tokenIdentifier,
+                            apiKey, tenantDomain, payload);
                     ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(payload, inboundMessageContext.getUserIP(),
                             apiContext, apiVersion, inboundMessageContext.getRequestHeaders().
                                     get(APIMgtGatewayConstants.REFERER));
-                    AuthenticationContext authenticationContext = ApiKeyAuthenticatorUtils.authenticateUsingAPIKey(
-                            isGatewayTokenCacheEnabled, tokenIdentifier, apiContext, apiVersion, apiKey, splitToken[0],
-                            jwtConfigurationDto, APIUtil.getTenantIdFromTenantDomain(tenantDomain), null,
-                            null, signedJWT, payload);
+                    net.minidev.json.JSONObject api = GatewayUtils.validateAPISubscription(apiContext, apiVersion,
+                            payload, splitToken[0]);
+                    String endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(api, jwtConfigurationDto, apiKey,
+                            signedJWT, payload, tokenIdentifier, isGatewayTokenCacheEnabled);
+                    AuthenticationContext authenticationContext = GatewayUtils.generateAuthenticationContext(
+                            tokenIdentifier, payload, api, null, endUserToken, null);
                     if (!InboundWebsocketProcessorUtil.validateAuthenticationContext(authenticationContext,
                             inboundMessageContext)) {
                         return InboundWebsocketProcessorUtil.getFrameErrorDTO(
@@ -125,7 +128,6 @@ public class ApiKeyAuthenticator implements Authenticator {
                     inboundProcessorResponseDTO.setErrorMessage(null);
                     return inboundProcessorResponseDTO;
                 }
-
                 if (log.isDebugEnabled()) {
                     log.debug("Api Key signature verification failure. Api Key: " +
                             GatewayUtils.getMaskedToken(splitToken[0]));
@@ -133,9 +135,6 @@ public class ApiKeyAuthenticator implements Authenticator {
                 log.error("Invalid Api Key. Signature verification failed.");
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-
-            } catch (APISecurityException e) {
-                return InboundWebsocketProcessorUtil.getFrameErrorDTO(e.getErrorCode(), e.getMessage(), true);
             } catch (ParseException e) {
                 log.error("Error while parsing API Key", e);
                 return InboundWebsocketProcessorUtil.getFrameErrorDTO(APISecurityConstants.API_AUTH_GENERAL_ERROR,

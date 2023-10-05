@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJ
 import org.wso2.carbon.apimgt.gateway.dto.JWTTokenPayloadInfo;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
-import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -48,10 +47,8 @@ import org.wso2.carbon.apimgt.impl.utils.SigningUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-import org.apache.synapse.MessageContext;
 
 import javax.cache.Cache;
-import java.text.ParseException;
 import java.util.Base64;
 import java.util.HashMap;
 
@@ -120,8 +117,9 @@ public class ApiKeyAuthenticatorUtils {
      * @return true if the API Key is valid.
      * @throws APISecurityException If the key is not valid and found in the invalid key cache or revoke map.
      */
-    public static boolean verifyAPIKeySignatureFromTokenCache(boolean isGatewayTokenCacheEnabled, String
-            tokenIdentifier, String cacheKey, String apiKey, String header) throws APISecurityException {
+    public static boolean verifyAPIKeySignatureFromTokenCache(boolean isGatewayTokenCacheEnabled, String tokenIdentifier,
+                                                              String cacheKey, String apiKey, String header)
+            throws APISecurityException {
 
         boolean isVerified = false;
         if (isGatewayTokenCacheEnabled) {
@@ -159,8 +157,7 @@ public class ApiKeyAuthenticatorUtils {
      * @return true if the signature of the API Key is verified.
      * @throws APISecurityException If an error occurs while verifying the signature of the API Key.
      */
-    public static boolean verifyAPIKeySignature(SignedJWT signedJWT, String certAlias)
-            throws APISecurityException {
+    public static boolean verifyAPIKeySignature(SignedJWT signedJWT, String certAlias) throws APISecurityException {
 
         log.debug("Api Key not found in the cache.");
         boolean isVerified;
@@ -218,9 +215,25 @@ public class ApiKeyAuthenticatorUtils {
     }
 
     /**
-     * This method is used to check whether the token is expired or not. If the token is found in the cache, then the
-     * payload is retrieved from the cache. Else, the payload is retrieved from the API Key. If the token is expired,
-     * then the token is removed from the cache and added to the invalid gateway API Key cache.
+     * If the token is found in the cache, then the payload is retrieved from the cache.
+     *
+     * @param isGatewayTokenCacheEnabled Whether the gateway token cache is enabled or not.
+     * @param cacheKey                   The cache key.
+     * @param payload                    The payload of the API Key.
+     */
+    public static void overridePayloadFromDataCache(boolean isGatewayTokenCacheEnabled, String cacheKey,
+                                                    JWTClaimsSet payload) {
+
+        if (isGatewayTokenCacheEnabled && getGatewayApiKeyDataCache().get(cacheKey) != null) {
+            JWTTokenPayloadInfo payloadInfo = (JWTTokenPayloadInfo) getGatewayApiKeyDataCache().get(cacheKey);
+            if (payloadInfo != null) {
+                payload = payloadInfo.getPayload();
+            }
+        }
+    }
+
+    /**
+     * This method is used to check whether the token is expired or not.
      *
      * @param isGatewayTokenCacheEnabled Whether the gateway token cache is enabled or not.
      * @param cacheKey                   The cache key.
@@ -228,20 +241,13 @@ public class ApiKeyAuthenticatorUtils {
      * @param apiKey                     The API Key.
      * @param tenantDomain               The tenant domain.
      * @param payload                    The payload of the API Key.
-     * @return The payload of the API Key.
      * @throws APISecurityException If the token is expired.
      */
-    public static JWTClaimsSet checkTokenExpired(boolean isGatewayTokenCacheEnabled, String cacheKey,
-                                                 String tokenIdentifier, String apiKey, String tenantDomain,
-                                                 JWTClaimsSet payload) throws APISecurityException {
+    public static void checkTokenExpired(boolean isGatewayTokenCacheEnabled, String cacheKey, String tokenIdentifier,
+                                         String apiKey, String tenantDomain, JWTClaimsSet payload)
+            throws APISecurityException {
 
         log.debug("Api Key signature is verified and started checking whether the token is expired or not.");
-        if (isGatewayTokenCacheEnabled && getGatewayApiKeyDataCache().get(cacheKey) != null) {
-            JWTTokenPayloadInfo payloadInfo = (JWTTokenPayloadInfo) getGatewayApiKeyDataCache().get(cacheKey);
-            if (payloadInfo != null) {
-                payload = payloadInfo.getPayload();
-            }
-        }
         if (isJwtTokenExpired(payload)) {
             if (isGatewayTokenCacheEnabled) {
                 getGatewayApiKeyCache().remove(tokenIdentifier);
@@ -257,9 +263,7 @@ public class ApiKeyAuthenticatorUtils {
             jwtTokenPayloadInfo.setAccessToken(apiKey);
             getGatewayApiKeyDataCache().put(cacheKey, jwtTokenPayloadInfo);
         }
-        return payload;
     }
-
 
     /**
      * This method is used to validate the API Key against the given restrictions.
@@ -326,38 +330,28 @@ public class ApiKeyAuthenticatorUtils {
     }
 
     /**
-     * This method is used to authenticate using the received API Key.
+     * This method is used to get the end user token for the API Key.
      *
-     * @param isGatewayTokenCacheEnabled Whether the gateway token cache is enabled or not.
-     * @param tokenIdentifier            The token identifier.
-     * @param apiContext                 The API context.
-     * @param apiVersion                 The API version.
-     * @param apiKey                     The API Key.
-     * @param header                     The API Key header.
+     * @param api                        The API object returned after validating API subscription.
      * @param jwtConfigurationDto        The JWT configuration DTO.
-     * @param tenantId                   The tenant ID.
-     * @param apiLevelPolicy             The API level tier policy. Value of this will be null in the websocket API
-     *                                   authentication flow.
-     * @param synCtx                     The message context. Value of this will be null in the websocket API
-     *                                   authentication flow.
+     * @param apiKey                     The API Key.
      * @param signedJWT                  The signed JWT.
      * @param payload                    The payload of the API Key.
-     * @return The authentication context.
-     * @throws APISecurityException   If an error occurs while validating API subscription.
-     * @throws ParseException         If an error occurs while parsing the API Key.
-     * @throws APIManagementException If an error occurs while generating the backend JWT token.
+     * @param tokenIdentifier            The token identifier.
+     * @param isGatewayTokenCacheEnabled Whether the gateway token cache is enabled or not.
+     * @return The backend JWT token.
+     * @throws APIManagementException If an error occurs while getting Public Certificate or Signing Key.
+     * @throws APISecurityException   If an error occurs while generating the backend JWT token.
      */
-    public static AuthenticationContext authenticateUsingAPIKey(boolean isGatewayTokenCacheEnabled, String tokenIdentifier,
-                                                                String apiContext, String apiVersion, String apiKey,
-                                                                String header, ExtendedJWTConfigurationDto jwtConfigurationDto,
-                                                                int tenantId, String apiLevelPolicy, MessageContext synCtx,
-                                                                SignedJWT signedJWT, JWTClaimsSet payload)
-            throws APISecurityException, ParseException, APIManagementException {
+    public static String getEndUserToken(net.minidev.json.JSONObject api,
+                                         ExtendedJWTConfigurationDto jwtConfigurationDto, String apiKey,
+                                         SignedJWT signedJWT, JWTClaimsSet payload, String tokenIdentifier,
+                                         boolean isGatewayTokenCacheEnabled) throws APIManagementException,
+            APISecurityException {
 
-        net.minidev.json.JSONObject api = GatewayUtils.validateAPISubscription(apiContext, apiVersion, payload, header);
-        log.debug("Api Key authentication successful.");
         AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator = null;
         boolean jwtGenerationEnabled = false;
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(api.getAsString("subscriberTenantDomain"));
         if (jwtConfigurationDto != null) {
             apiMgtGatewayJWTGenerator = ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
                     .get(jwtConfigurationDto.getGatewayJWTGeneratorImpl());
@@ -384,12 +378,12 @@ public class ApiKeyAuthenticatorUtils {
         if (jwtGenerationEnabled) {
             SignedJWTInfo signedJWTInfo = new SignedJWTInfo(apiKey, signedJWT, payload);
             JWTValidationInfo jwtValidationInfo = getJwtValidationInfo(signedJWTInfo);
-            JWTInfoDto jwtInfoDto = GatewayUtils.generateJWTInfoDto(api, jwtValidationInfo, apiContext, apiVersion);
+            JWTInfoDto jwtInfoDto = GatewayUtils.generateJWTInfoDto(api, jwtValidationInfo,
+                    api.getAsString("context"), api.getAsString("version"));
             endUserToken = generateAndRetrieveBackendJWTToken(tokenIdentifier, jwtInfoDto, isGatewayTokenCacheEnabled,
                     apiMgtGatewayJWTGenerator);
         }
-        return GatewayUtils.generateAuthenticationContext(tokenIdentifier, payload, api, apiLevelPolicy, endUserToken,
-                synCtx);
+        return endUserToken;
     }
 
     /**

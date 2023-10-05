@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.apikey;
 
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.axis2.Constants;
@@ -89,7 +90,7 @@ public class ApiKeyAuthenticator implements Authenticator {
             String apiKey = extractApiKey(synCtx);
             String[] splitToken = apiKey.split("\\.");
             ApiKeyAuthenticatorUtils.validateAPIKeyFormat(splitToken);
-            SignedJWT signedJWT = SignedJWT.parse(apiKey);
+            SignedJWT signedJWT = (SignedJWT) JWTParser.parse(apiKey);
             JWSHeader decodedHeader = signedJWT.getHeader();
             JWTClaimsSet payload = signedJWT.getJWTClaimsSet();
 
@@ -157,14 +158,17 @@ public class ApiKeyAuthenticator implements Authenticator {
                 if (jwtConfigurationDto != null) {
                     jwtGenerationEnabled = jwtConfigurationDto.isEnabled();
                 }
-                payload = ApiKeyAuthenticatorUtils.checkTokenExpired(isGatewayTokenCacheEnabled, cacheKey,
-                        tokenIdentifier, apiKey, tenantDomain, payload);
+                ApiKeyAuthenticatorUtils.overridePayloadFromDataCache(isGatewayTokenCacheEnabled, cacheKey, payload);
+                ApiKeyAuthenticatorUtils.checkTokenExpired(isGatewayTokenCacheEnabled, cacheKey, tokenIdentifier, apiKey,
+                        tenantDomain, payload);
                 ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(payload, GatewayUtils.getIp(axis2MessageContext),
                         apiContext, apiVersion, referer);
-                AuthenticationContext authenticationContext = ApiKeyAuthenticatorUtils.authenticateUsingAPIKey(
-                        isGatewayTokenCacheEnabled, tokenIdentifier, apiContext, apiVersion, apiKey, splitToken[0],
-                        jwtConfigurationDto, APIUtil.getTenantIdFromTenantDomain(tenantDomain), getApiLevelPolicy(),
-                        synCtx, signedJWT, payload);
+                net.minidev.json.JSONObject api = GatewayUtils.validateAPISubscription(apiContext, apiVersion, payload,
+                        splitToken[0]);
+                String endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(api, jwtConfigurationDto, apiKey,
+                        signedJWT, payload, tokenIdentifier, isGatewayTokenCacheEnabled);
+                AuthenticationContext authenticationContext = GatewayUtils.generateAuthenticationContext(tokenIdentifier,
+                        payload, api, apiLevelPolicy, endUserToken, synCtx);
                 APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext,
                         jwtGenerationEnabled ? getContextHeader() : null);
                 synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, authenticationContext.getUsername());
@@ -179,7 +183,6 @@ public class ApiKeyAuthenticator implements Authenticator {
             log.error("Invalid Api Key. Signature verification failed.");
             throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-
         } catch (APISecurityException e) {
             return new AuthenticationResponse(false, isMandatory, true,
                     e.getErrorCode(), e.getMessage());
@@ -249,10 +252,6 @@ public class ApiKeyAuthenticator implements Authenticator {
         APIManagerConfiguration apimConf = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         JWTConfigurationDto jwtConfigDto = apimConf.getJwtConfigurationDto();
         return jwtConfigDto.getJwtHeader();
-    }
-
-    private String getApiLevelPolicy() {
-        return apiLevelPolicy;
     }
 
     @Override
