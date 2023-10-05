@@ -106,8 +106,8 @@ public class ApiKeyAuthenticatorUtils {
     }
 
     /**
-     * This method is used to compare the received API Key with the API Key in the cache. If the API Key is found in the
-     * cache, then the signature of the API Key is verified.
+     * This method is used to verify the signature of the API Key. It uses the API Key cache to check the received APIKey
+     * is in it. If the APIKey is in the cache, then the signature of the APIKey is verified.
      *
      * @param isGatewayTokenCacheEnabled Whether the gateway token cache is enabled or not.
      * @param tokenIdentifier            The token identifier.
@@ -150,7 +150,8 @@ public class ApiKeyAuthenticatorUtils {
     }
 
     /**
-     * This method is used to verify the signature of the API Key.
+     * This method is used to verify the signature of the API Key. This method will be called if the signature verification
+     * is not successful using the API Key cache.
      *
      * @param signedJWT The signed JWT.
      * @param certAlias The key ID of the decoded header.
@@ -182,7 +183,6 @@ public class ApiKeyAuthenticatorUtils {
      * @param tokenIdentifier            The token identifier.
      * @param isVerified                 Whether the signature of the API Key is verified or not.
      * @param tenantDomain               The tenant domain.
-     * @return The gateway API Key cache.
      */
     public static void addTokenToTokenCache(boolean isGatewayTokenCacheEnabled, String tokenIdentifier,
                                             boolean isVerified, String tenantDomain) {
@@ -215,7 +215,8 @@ public class ApiKeyAuthenticatorUtils {
     }
 
     /**
-     * If the token is found in the cache, then the payload is retrieved from the cache.
+     * This method is used to override the payload of the API Key from the cache.
+     * If the token is found in the cache, then the payload is retrieved from the cache and override the existing payload.
      *
      * @param isGatewayTokenCacheEnabled Whether the gateway token cache is enabled or not.
      * @param cacheKey                   The cache key.
@@ -330,7 +331,7 @@ public class ApiKeyAuthenticatorUtils {
     }
 
     /**
-     * This method is used to get the end user token for the API Key.
+     * This method is used to get the end user token for the API Key when backend JWT token generation is needed.
      *
      * @param api                        The API object returned after validating API subscription.
      * @param jwtConfigurationDto        The JWT configuration DTO.
@@ -339,7 +340,7 @@ public class ApiKeyAuthenticatorUtils {
      * @param payload                    The payload of the API Key.
      * @param tokenIdentifier            The token identifier.
      * @param isGatewayTokenCacheEnabled Whether the gateway token cache is enabled or not.
-     * @return The backend JWT token.
+     * @return The end user token.
      * @throws APIManagementException If an error occurs while getting Public Certificate or Signing Key.
      * @throws APISecurityException   If an error occurs while generating the backend JWT token.
      */
@@ -351,7 +352,8 @@ public class ApiKeyAuthenticatorUtils {
 
         AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator = null;
         boolean jwtGenerationEnabled = false;
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(api.getAsString("subscriberTenantDomain"));
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(api.getAsString(APIConstants.JwtTokenConstants.
+                SUBSCRIBER_TENANT_DOMAIN));
         if (jwtConfigurationDto != null) {
             apiMgtGatewayJWTGenerator = ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
                     .get(jwtConfigurationDto.getGatewayJWTGeneratorImpl());
@@ -379,7 +381,8 @@ public class ApiKeyAuthenticatorUtils {
             SignedJWTInfo signedJWTInfo = new SignedJWTInfo(apiKey, signedJWT, payload);
             JWTValidationInfo jwtValidationInfo = getJwtValidationInfo(signedJWTInfo);
             JWTInfoDto jwtInfoDto = GatewayUtils.generateJWTInfoDto(api, jwtValidationInfo,
-                    api.getAsString("context"), api.getAsString("version"));
+                    api.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT),
+                    api.getAsString(APIConstants.JwtTokenConstants.API_VERSION));
             endUserToken = generateAndRetrieveBackendJWTToken(tokenIdentifier, jwtInfoDto, isGatewayTokenCacheEnabled,
                     apiMgtGatewayJWTGenerator);
         }
