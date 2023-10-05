@@ -37,6 +37,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EmptyCallbackURLForCodeGrantsException;
+import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -47,7 +48,6 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIConsumerImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
@@ -99,6 +99,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
@@ -741,7 +742,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             if (!(apiConsumer.isKeyManagerAllowedForUser(body.getKeyManager(), username))) {
-                return Response.status(403, "Key Manager is Restricted for this user").build();
+                throw new APIManagementException("Key Manager is permission restricted",
+                        ExceptionCodes.KEY_MANAGER_RESTRICTED_FOR_USER);
             }
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {

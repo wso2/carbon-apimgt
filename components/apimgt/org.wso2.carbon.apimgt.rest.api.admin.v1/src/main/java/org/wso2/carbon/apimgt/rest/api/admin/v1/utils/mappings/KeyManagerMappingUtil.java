@@ -221,11 +221,13 @@ public class KeyManagerMappingUtil {
         keyManagerConfigurationDTO.setTokenType(keyManagerDTO.getTokenType().toString());
         keyManagerConfigurationDTO.setAlias(keyManagerDTO.getAlias());
         KeyManagerPermissionsDTO permissions = keyManagerDTO.getPermissions();
-        if(permissions != null) {
+        if(permissions != null && permissions.getPermissionType() != null) {
             KeyManagerPermissionConfigurationDTO permissionsConfiguration = new KeyManagerPermissionConfigurationDTO();
             permissionsConfiguration.setPermissionType(permissions.getPermissionType().toString());
             permissionsConfiguration.setRoles(permissions.getRoles());
             keyManagerConfigurationDTO.setPermissions(permissionsConfiguration);
+        } else {
+            keyManagerConfigurationDTO.setPermissions(new KeyManagerPermissionConfigurationDTO());
         }
         Map<String,Object> additionalProperties = new HashMap();
         if (keyManagerDTO.getAdditionalProperties() != null && keyManagerDTO.getAdditionalProperties() instanceof Map) {
