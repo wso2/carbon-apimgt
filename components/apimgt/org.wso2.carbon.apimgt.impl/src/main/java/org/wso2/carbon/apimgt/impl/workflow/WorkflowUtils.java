@@ -29,7 +29,9 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Workflow;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIGatewayManager;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -51,6 +53,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * This class used to handle notifications in Workflow.
@@ -180,6 +184,8 @@ public class WorkflowUtils {
                     appRegWFDto.getApplication().getTokenType(), appRegWFDto.getKeyManager());
             APIUtil.sendNotification(applicationRegistrationEvent,
                     APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+        } else if (WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT.equalsIgnoreCase(wfType)) {
+            completeDeploymentWorkFlow(workflowDTO);
         }
     }
 
@@ -305,6 +311,66 @@ public class WorkflowUtils {
             log.error(errorMsg, e);
         } catch (APIPersistenceException e) {
             log.error("Error while accessing lifecycle information ", e);
+        }
+    }
+
+    /**
+     * Complete the revision deployment workflow
+     *
+     * @param workflowDTO Workflow DTO object
+     * @throws WorkflowException Exception when completing the workflow
+     */
+    protected static void completeDeploymentWorkFlow(WorkflowDTO workflowDTO) {
+
+        String externalWorkflowRef = workflowDTO.getExternalWorkflowReference();
+        try {
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            Workflow workflow = apiMgtDAO.getworkflowReferenceByExternalWorkflowReference(externalWorkflowRef);
+            String revisionId = workflow.getMetadata("revisionId");
+            String apiId = workflow.getMetadata("apiId");
+            String providerName = workflow.getMetadata("apiProvider");
+            String environment = workflow.getMetadata("environment");
+            String organization = workflow.getTenantDomain();
+            String invoker = workflow.getMetadata("userName");
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(invoker);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization);
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(providerName);
+            APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+            APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
+
+            API api = apiProvider.getLightweightAPIByUUID(apiId, organization);
+            api.setRevisionedApiId(workflowDTO.getWorkflowReference());
+            api.setRevisionId(Integer.parseInt(revisionId));
+
+            Set<String> environmentToPublish = new HashSet<>();
+            environmentToPublish.add(environment);
+            if (!environmentToPublish.isEmpty()) {
+                // TODO remove this to organization once the microgateway can build gateway based on organization.
+                gatewayManager.deployToGateway(api, organization, environmentToPublish);
+            }
+            String publishedDefaultVersion = apiProvider.getPublishedDefaultVersion(apiIdentifier);
+            String defaultVersion = apiProvider.getDefaultVersion(apiIdentifier);
+            apiMgtDAO.updateDefaultAPIPublishedVersion(apiIdentifier);
+            if (publishedDefaultVersion != null) {
+                if (apiIdentifier.getVersion().equals(defaultVersion)) {
+                    api.setAsPublishedDefaultVersion(true);
+                }
+                if (api.isPublishedDefaultVersion() && !apiIdentifier.getVersion().equals(publishedDefaultVersion)) {
+                    APIIdentifier previousDefaultVersionIdentifier = new APIIdentifier(api.getId().getProviderName(),
+                            api.getId().getApiName(), publishedDefaultVersion);
+                    APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                            APIConstants.EventType.API_UPDATE.name(), workflowDTO.getTenantId(), organization,
+                            previousDefaultVersionIdentifier.getApiName(), api.getId().getId(), api.getUuid(),
+                            api.getId().getVersion(), api.getType(), api.getContext(),
+                            APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(),
+                            APIConstants.EventAction.DEFAULT_VERSION);
+                    APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+                }
+            }
+        } catch (APIManagementException e) {
+            log.error("Error while getting API info ", e);
+        } catch (NumberFormatException e) {
+            log.error("Invalid revision id ", e);
         }
     }
 }

@@ -5658,6 +5658,61 @@ public class ApiMgtDAO {
         return workflowDTO;
     }
 
+    /**
+     * Returns a workflow object for a given internal workflow reference and the workflow type.
+     *
+     * @param workflowReference Internal workflow reference
+     * @param workflowType      Workflow type
+     * @return List<WorkflowDTO> List of workflow objects
+     * @throws APIManagementException
+     */
+    public List<WorkflowDTO> retrieveAllWorkflowFromInternalReference(String workflowReference, String workflowType)
+            throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        List<WorkflowDTO> workflowDTOList = new ArrayList<>();
+
+        String query = SQLConstants.GET_ALL_WORKFLOW_ENTRY_FROM_INTERNAL_REF_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, workflowReference);
+            prepStmt.setString(2, workflowType);
+
+            rs = prepStmt.executeQuery();
+            while (rs.next()) {
+                WorkflowDTO workflowDTO = WorkflowExecutorFactory.getInstance()
+                        .createWorkflowDTO(rs.getString("WF_TYPE"));
+                workflowDTO.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
+                workflowDTO.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
+                workflowDTO.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").getTime());
+                workflowDTO.setWorkflowReference(rs.getString("WF_REFERENCE"));
+                workflowDTO.setTenantDomain(rs.getString("TENANT_DOMAIN"));
+                workflowDTO.setTenantId(rs.getInt("TENANT_ID"));
+                workflowDTO.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
+                workflowDTOList.add(workflowDTO);
+                InputStream metadataBlob = rs.getBinaryStream("WF_METADATA");
+
+                if (metadataBlob != null) {
+                    String metadata = APIMgtDBUtil.getStringFromInputStream(metadataBlob);
+                    Gson metadataGson = new Gson();
+                    JSONObject metadataJson = metadataGson.fromJson(metadata, JSONObject.class);
+                    workflowDTO.setMetadata(metadataJson);
+                } else {
+                    JSONObject metadataJson = new JSONObject();
+                    workflowDTO.setMetadata(metadataJson);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving workflow details for " + workflowReference, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return workflowDTOList;
+    }
+
     private void setPublishedDefVersion(APIIdentifier apiId, Connection connection, String value)
             throws APIManagementException {
 
@@ -16738,6 +16793,48 @@ public class ApiMgtDAO {
                 handleException("Failed to add deployed API Revision for Revision UUID " + apiRevisionId,
                         e);
             }
+        }
+    }
+
+    /**
+     * Update the status of the Revision deployment process
+     *
+     * @param revisionUUID UUID of the Revision
+     * @param status       Status of the Revision deployment
+     * @param environment  Environment of the Revision deployment
+     * @throws APIManagementException
+     */
+    public void updateAPIRevisionDeploymentStatus(String revisionUUID, String status, String environment)
+            throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            String updateSqlQuery = SQLConstants.APIRevisionSqlConstants.UPDATE_API_REVISION_STATUS_SQL;
+
+            ps = conn.prepareStatement(updateSqlQuery);
+            ps.setString(1, status);
+            ps.setString(2, revisionUUID);
+            ps.setString(3, environment);
+
+            ps.executeUpdate();
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the update Application ", e1);
+                }
+            }
+            handleException("Failed to update Application", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
     }
 
