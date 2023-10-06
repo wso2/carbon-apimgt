@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.APIRevisionWorkflowDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
@@ -123,6 +124,9 @@ public class WorkflowExecutorFactory {
         } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equals(wfType) ||
                 WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE.equals(wfType)) {
             workflowDTO = new APIStateWorkflowDTO();
+            workflowDTO.setWorkflowType(wfType);
+        } else if (WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT.equals(wfType)) {
+            workflowDTO = new APIRevisionWorkflowDTO();
             workflowDTO.setWorkflowType(wfType);
         }
         return workflowDTO;
