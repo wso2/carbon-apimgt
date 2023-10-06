@@ -1694,4 +1694,30 @@ public interface APIProvider extends APIManager {
      */
     boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification, OperationPolicy
             appliedPolicy, String apiType) throws APIManagementException;
+
+    /***
+     * Get the default version of the API
+     * @param apiid Id of the API
+     * @return version value
+     * @throws APIManagementException
+     */
+    String getDefaultVersion(APIIdentifier apiid) throws APIManagementException;
+
+    /***
+     * Get the default version of the published API
+     * @param apiid Id of the API
+     * @return version value
+     * @throws APIManagementException
+     */
+    String getPublishedDefaultVersion(APIIdentifier apiid) throws APIManagementException;
+
+    /***
+     * Cleanup pending or rejected revision workflows
+     * @param apiId Id of the API
+     * @param externalRef external Id of the revision
+     * @return 200 response if deleted successfully
+     * @throws APIManagementException
+     */
+    void cleanupAPIRevisionDeploymentWorkflows(String apiId, String externalRef) throws APIManagementException;
+
 }
