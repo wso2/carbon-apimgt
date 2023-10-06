@@ -23,11 +23,13 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -117,6 +119,8 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
                     workflowType = "AM_API_STATE";
                 } else if (workflowType.equals("API_PRODUCT_STATE")) {
                     workflowType = "AM_API_PRODUCT_STATE";
+                } else if (workflowType.equals("AM_REVISION_DEPLOYMENT")) {
+                    workflowType = "AM_REVISION_DEPLOYMENT";
                 }
             }
             workflows = apiAdmin.getworkflows(workflowType, status, tenantDomain);
@@ -197,6 +201,13 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
                 WorkflowUtils.sendNotificationAfterWFComplete(workflowDTO, workflowType);
 
+            }
+            if (WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT.equals(workflowType) && WorkflowStatus.REJECTED.equals(
+                    workflowDTO.getStatus())) {
+                APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(username);
+                String externalRef = workflowDTO.getExternalWorkflowReference();
+                String apiId = workflowDTO.getMetadata("apiId");
+                apiProvider.cleanupAPIRevisionDeploymentWorkflows(apiId, externalRef);
             }
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.WORKFLOW_STATUS, new Gson().toJson(workflowDTO),
                     APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
