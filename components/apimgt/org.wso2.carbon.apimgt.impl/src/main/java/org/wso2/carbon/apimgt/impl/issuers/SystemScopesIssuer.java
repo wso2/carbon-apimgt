@@ -95,6 +95,7 @@ public class SystemScopesIssuer implements ScopeValidator {
     private IdentityProvider identityProvider = null;
     // set role based scopes issuer as the default
     private static final String ISSUER_PREFIX = "default";
+    private static final String DEFAULT_ADMIN_ROLE = "admin";
 
     @Override
     public boolean validateScope(OAuthAuthzReqMessageContext oAuthAuthzReqMessageContext) throws
@@ -214,7 +215,7 @@ public class SystemScopesIssuer implements ScopeValidator {
                 return true;
             }
             userRoles = getUserRoles(authenticatedUser);
-            authorizedScopes = getAuthorizedScopes(userRoles, requestedScopes, appScopes);
+            authorizedScopes = getAuthorizedScopes(userRoles, requestedScopes, appScopes, authenticatedUser);
             oAuth2TokenValidationMessageContext.getResponseDTO().setScope(authorizedScopes.toArray(
                     new String[authorizedScopes.size()]));
         }
@@ -278,7 +279,7 @@ public class SystemScopesIssuer implements ScopeValidator {
                 return getAllowedScopes(requestedScopes);
             }
             String[] userRoles = getUserRoles(authenticatedUser);
-            authorizedScopes = getAuthorizedScopes(userRoles, requestedScopes, appScopes);
+            authorizedScopes = getAuthorizedScopes(userRoles, requestedScopes, appScopes, authenticatedUser);
         }
         return authorizedScopes;
     }
@@ -303,7 +304,7 @@ public class SystemScopesIssuer implements ScopeValidator {
                 return getAllowedScopes(requestedScopes);
             }
             String[] userRoles = getUserRoles(authenticatedUser);
-            authorizedScopes = getAuthorizedScopes(userRoles, requestedScopes, appScopes);
+            authorizedScopes = getAuthorizedScopes(userRoles, requestedScopes, appScopes, authenticatedUser);
         }
         return authorizedScopes;
     }
@@ -352,7 +353,7 @@ public class SystemScopesIssuer implements ScopeValidator {
             } else {
                 userRoles = getUserRoles(authenticatedUser);
             }
-            authorizedScopes = getAuthorizedScopes(userRoles, requestedScopes, appScopes);
+            authorizedScopes = getAuthorizedScopes(userRoles, requestedScopes, appScopes, authenticatedUser);
         }
         return authorizedScopes;
     }
@@ -397,13 +398,14 @@ public class SystemScopesIssuer implements ScopeValidator {
     /**
      * This method is used to get authorized scopes for user from the requested scopes based on roles.
      *
-     * @param userRoles       Roles list of user
-     * @param requestedScopes Requested scopes
-     * @param appScopes       Scopes of the Application
+     * @param userRoles         Roles list of user
+     * @param requestedScopes   Requested scopes
+     * @param appScopes         Scopes of the Application
+     * @param authenticatedUser Current authenticated user
      * @return authorized scopes list
      */
     private List<String> getAuthorizedScopes(String[] userRoles, List<String> requestedScopes,
-                                             Map<String, String> appScopes) {
+                                             Map<String, String> appScopes, AuthenticatedUser authenticatedUser) {
 
         List<String> defaultScope = new ArrayList<>();
         defaultScope.add(DEFAULT_SCOPE_NAME);
@@ -425,6 +427,13 @@ public class SystemScopesIssuer implements ScopeValidator {
             }
         }
 
+        // Check whether the admin role has been changed
+        boolean isAdminRoleChanged = false;
+        String adminRole = getAdminRole(authenticatedUser);
+        if (!DEFAULT_ADMIN_ROLE.equals(adminRole)) {
+            isAdminRoleChanged = true;
+        }
+
         //Iterate the requested scopes list.
         for (String scope : requestedScopes) {
             //Get the set of roles associated with the requested scope.
@@ -433,6 +442,7 @@ public class SystemScopesIssuer implements ScopeValidator {
             if (roles != null && roles.length() != 0) {
                 List<String> roleList = new ArrayList<>();
                 for (String aRole : roles.split(",")) {
+                    aRole = checkAndReplaceAdminRole(aRole.trim(), isAdminRoleChanged, adminRole);
                     if (preservedCaseSensitive) {
                         roleList.add(aRole.trim());
                     } else {
@@ -449,6 +459,57 @@ public class SystemScopesIssuer implements ScopeValidator {
             }
         }
         return (!authorizedScopes.isEmpty()) ? authorizedScopes : defaultScope;
+    }
+
+    /**
+     * Returns the admin role of the current tenant
+     *
+     * @param authenticatedUser Current authenticated user
+     * @return Admin role of the current tenant
+     */
+    private String getAdminRole(AuthenticatedUser authenticatedUser) {
+        String adminRole = null;
+
+        String tenantDomain;
+        String username;
+        if (authenticatedUser.isFederatedUser()) {
+            tenantDomain = MultitenantUtils.getTenantDomain(authenticatedUser.getAuthenticatedSubjectIdentifier());
+            username = MultitenantUtils.getTenantAwareUsername(authenticatedUser.getAuthenticatedSubjectIdentifier());
+        } else {
+            tenantDomain = authenticatedUser.getTenantDomain();
+            username = authenticatedUser.getUserName();
+        }
+        RealmService realmService = getRealmService();
+        try {
+            int tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
+            // If tenant ID is not set in the tokenReqContext, deriving it from username.
+            if (tenantId == 0 || tenantId == -1) {
+                tenantId = getTenantIdOfUser(username);
+            }
+            adminRole = realmService.getTenantUserRealm(tenantId).getRealmConfiguration().getAdminRoleName();
+        } catch (UserStoreException e) {
+            //Log and return since we do not want to stop issuing the token in case of scope validation failures.
+            log.error("Error when getting the tenant's UserStoreManager or when getting admin role ", e);
+        }
+        return adminRole;
+    }
+
+    /**
+     * Checks and replaces the admin role name if the admin role has been changed for the admin user
+     *
+     * @param role               The role allocated for the scope
+     * @param isAdminRoleChanged Has the admin role changed
+     * @param newAdminRole       The new admin role
+     * @return Updated admin role name
+     */
+    private String checkAndReplaceAdminRole(String role, boolean isAdminRoleChanged, String newAdminRole) {
+        String updatedRole;
+        if (isAdminRoleChanged && DEFAULT_ADMIN_ROLE.equals(role)) {
+            updatedRole = newAdminRole;
+        } else {
+            updatedRole = role;
+        }
+        return updatedRole;
     }
 
     /**

@@ -8493,6 +8493,21 @@ components:
         advertiseOnly:
           type: boolean
           example: true
+        monetizedInfo:
+          type: boolean
+          example: true
+        businessOwner:
+          type: string
+          example: Business Owner
+        businessOwnerEmail:
+          type: string
+          example: businessowner@abc.com
+        TechnicalOwner:
+          type: string
+          example: Technical Owner
+        TechnicalOwnerEmail:
+          type: string
+          example: technicalowner@abc.com
     APIMetadata:
       title: API Info object with basic minimal API details.
       type: object
@@ -9242,6 +9257,21 @@ components:
         gatewayVendor:
           type: string
           example: wso2
+        monetizedInfo:
+          type: boolean
+          example: true
+        businessOwner:
+          type: string
+          example: Business Owner
+        businessOwnerEmail:
+          type: string
+          example: businessowner@abc.com
+        TechnicalOwner:
+          type: string
+          example: Technical Owner
+        TechnicalOwnerEmail:
+          type: string
+          example: technicalowner@abc.com
     APIProduct:
       title: API Product object
       required:
@@ -11221,6 +11251,21 @@ components:
             hasThumbnail:
               type: boolean
               example: true
+            monetizedInfo:
+              type: boolean
+              example: true
+            businessOwner:
+              type: string
+              example: Business Owner
+            businessOwnerEmail:
+              type: string
+              example: businessowner@abc.com
+            TechnicalOwner:
+              type: string
+              example: Technical Owner
+            TechnicalOwnerEmail:
+              type: string
+              example: technicalowner@abc.com
     APIProductSearchResult:
       title: API Result
       allOf:
@@ -11255,6 +11300,21 @@ components:
             hasThumbnail:
               type: boolean
               example: true
+            monetizedInfo:
+              type: boolean
+              example: true
+            businessOwner:
+              type: string
+              example: Business Owner
+            businessOwnerEmail:
+              type: string
+              example: businessowner@abc.com
+            TechnicalOwner:
+              type: string
+              example: Technical Owner
+            TechnicalOwnerEmail:
+              type: string
+              example: technicalowner@abc.com
     APIMonetizationInfo:
       title: API monetization object
       required:

@@ -176,10 +176,16 @@ public class OASTestBase {
     }
 
     public void testGenerateAPIDefinition2(APIDefinition parser, String content, OASParserEvaluator evaluator) throws Exception {
+        String updateApiName = "updatedAPI";
+        String updateApiVersion = "2.0.0";
+        String INFO_KEY = "info";
+        String TITLE_KEY = "title";
+        String VERSION_KEY = "version";
+
         JSONObject jsonObject = new JSONObject(content);
         String equalNoOfResources = jsonObject.getJSONObject("equalNoOfResources").toString();
 
-        APIIdentifier identifier = new APIIdentifier("admin", "simple", "1.0.0");
+        APIIdentifier identifier = new APIIdentifier("admin", updateApiName, updateApiVersion);
         API api = new API(identifier);
         api.setScopes(new HashSet<>(Arrays.asList(sampleScope, extensionScope)));
         api.setUriTemplates(new HashSet<>(Arrays.asList(petGet, petPost, itemGet, itemPost)));
@@ -188,6 +194,16 @@ public class OASTestBase {
         APIDefinitionValidationResponse response = parser.validateAPIDefinition(definition, false);
         Assert.assertTrue(response.isValid());
         Assert.assertTrue(response.getParser().getClass().equals(parser.getClass()));
+
+        JSONObject jsonDefinition = new JSONObject(definition);
+        // Access the "info" object in the swagger definition
+        JSONObject infoObject = jsonDefinition.getJSONObject(INFO_KEY);
+        String title = infoObject.getString(TITLE_KEY);
+        String version = infoObject.getString(VERSION_KEY);
+
+        // Assert the updated title and version in the swagger definition
+        Assert.assertEquals(updateApiName, title);
+        Assert.assertEquals(updateApiVersion, version);
 
         Set<URITemplate> uriTemplates = parser.getURITemplates(definition);
         Assert.assertEquals(4, uriTemplates.size());

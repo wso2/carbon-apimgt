@@ -40,6 +40,11 @@ public class DevPortalAPIInfo {
     private String description;
     private String gatewayVendor;
     private Map<String, String> additionalProperties;
+    private String businessOwnerEmail;
+    private String technicalOwner;
+    private String technicalOwnerEmail;
+    private Boolean isMonetizationEnabled;
+    private boolean advertiseOnly;
 
     public void setGatewayVendor(String gatewayVendor) {
         this.gatewayVendor = gatewayVendor;
@@ -145,13 +150,56 @@ public class DevPortalAPIInfo {
         this.additionalProperties = additionalProperties;
     }
 
+    public String getBusinessOwnerEmail() {
+        return businessOwnerEmail;
+    }
+
+    public void setBusinessOwnerEmail(String businessOwnerEmail) {
+        this.businessOwnerEmail = businessOwnerEmail;
+    }
+
+    public String getTechnicalOwner() {
+        return technicalOwner;
+    }
+
+    public void setTechnicalOwner(String technicalOwner) {
+        this.technicalOwner = technicalOwner;
+    }
+
+    public String getTechnicalOwnerEmail() {
+        return technicalOwnerEmail;
+    }
+
+    public void setTechnicalOwnerEmail(String technicalOwnerEmail) {
+        this.technicalOwnerEmail = technicalOwnerEmail;
+    }
+
+    public Boolean getMonetizationStatus() {
+        return isMonetizationEnabled;
+    }
+
+    public void setMonetizationStatus(Boolean isMonetizationEnabled) {
+        this.isMonetizationEnabled = isMonetizationEnabled;
+    }
+
+    public boolean isAdvertiseOnly() {
+        return advertiseOnly;
+    }
+
+    public void setAdvertiseOnly(boolean advertiseOnly) {
+        this.advertiseOnly = advertiseOnly;
+    }
+
     @Override
     public String toString() {
         return "DevPortalAPIInfo [id=" + id + ", apiName=" + apiName + ", description=" + description + ", version="
                 + version + ", providerName=" + providerName + ", context=" + context + ", type=" + type + ", " +
-                "thumbnail=" + thumbnail + ", businessOwner=" + businessOwner + ", status=" + status + ", " +
-                "availableTierNames=" + availableTierNames + ", subscriptionAvailability=" + subscriptionAvailability
-                + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs + "]";
+                "thumbnail=" + thumbnail + ", businessOwner=" + businessOwner + ", businessOwnerEmail="
+                + businessOwnerEmail + ", technicalOwner=" + technicalOwner + ", technicalOwnerEmail="
+                + technicalOwnerEmail + ", status=" + status + ", " + "availableTierNames=" + availableTierNames +
+                ", subscriptionAvailability=" + subscriptionAvailability + ", subscriptionAvailableOrgs="
+                + subscriptionAvailableOrgs + ", isMonetizationEnabled=" + isMonetizationEnabled + ", advertiseOnly="
+                + advertiseOnly +"]";
     }
 
 }

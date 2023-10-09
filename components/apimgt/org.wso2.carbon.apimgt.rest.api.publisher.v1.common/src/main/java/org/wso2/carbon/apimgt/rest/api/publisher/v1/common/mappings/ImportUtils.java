@@ -130,6 +130,22 @@ public class ImportUtils {
     private static final Log log = LogFactory.getLog(ImportUtils.class);
     private static final String SOAPTOREST = "SoapToRest";
 
+    public static APIDTO getImportAPIDto(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
+                                         String userName) throws APIManagementException {
+        try {
+            if (importedApiDTO == null) {
+                JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider,
+                        userName, ImportExportConstants.TYPE_API);
+                importedApiDTO = new Gson().fromJson(jsonObject, APIDTO.class);
+            }
+        } catch (IOException e) {
+            throw new APIManagementException(
+                    "Error while reading API meta information from path: " + extractedFolderPath, e,
+                    ExceptionCodes.ERROR_READING_META_DATA);
+        }
+        return importedApiDTO;
+    }
+
     /**
      * This method imports an API.
      *
@@ -163,13 +179,30 @@ public class ImportUtils {
         JsonArray deploymentInfoArray = null;
         JsonObject paramsConfigObject;
 
-        try {
-            if (importedApiDTO == null) {
-                JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider, userName,
-                        ImportExportConstants.TYPE_API);
-                importedApiDTO = new Gson().fromJson(jsonObject, APIDTO.class);
-            }
+        importedApiDTO = ImportUtils.getImportAPIDto(extractedFolderPath, importedApiDTO, preserveProvider,
+                RestApiCommonUtil.getLoggedInUsername());
 
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+
+        // get the api provider of the 1st row of the resultset matching the API name and organization
+        // (revisions list for the logged in tenant)
+        String previousApiProvider = apiProvider.getAPIProviderByNameAndOrganization(importedApiDTO.getName(),
+                RestApiCommonUtil.getLoggedInUserTenantDomain());
+
+        if (!StringUtils.isEmpty(previousApiProvider)) {
+            //current provider is updated based on the preserve-provider input.
+            //tenant domain is verified already
+            // [only allows preserve-provider = false in cross tenant. (provider is set to logged-in user)]
+            //check if current provider not equals to previous provider and throw error
+
+            if (!(previousApiProvider.equalsIgnoreCase(importedApiDTO.getProvider()))) {
+                throw new APIManagementException(
+                        "Cannot create a new version of an API from a different provider. ",
+                        ExceptionCodes.CANNOT_CREATE_API_VERSION);
+            }
+        }
+
+        try {
             // If the provided dependent APIs params config is null, it means this happening when importing an API (not
             // because when importing a dependent API of an API Product). Hence, try to retrieve the definition from
             // the API folder path
@@ -190,8 +223,6 @@ public class ImportUtils {
             }
 
             String apiType = importedApiDTO.getType().toString();
-
-            APIProvider apiProvider = RestApiCommonUtil.getProvider(importedApiDTO.getProvider());
 
             // Validate swagger content except for streaming APIs
             if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
@@ -248,8 +279,8 @@ public class ImportUtils {
                     setOperationsToDTO(importedApiDTO, validationResponse);
                 }
                 targetApi.setOrganization(organization);
-                importedApi = PublisherCommonUtils
-                        .updateApi(targetApi, importedApiDTO, RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes);
+                importedApi = PublisherCommonUtils.updateApiAndDefinition(targetApi, importedApiDTO,
+                        RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes, validationResponse);
             } else {
                 if (targetApi == null && Boolean.TRUE.equals(overwrite)) {
                     log.info("Cannot find : " + importedApiDTO.getName() + "-" + importedApiDTO.getVersion()
@@ -262,6 +293,14 @@ public class ImportUtils {
                     importedApi = PublisherCommonUtils
                             .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
                                     importedApiDTO.getProvider(), organization);
+                    // Add/update swagger content except for streaming APIs and GraphQL APIs
+                    if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
+                            && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
+                        // Add the validated swagger separately since the UI does the same procedure
+                        PublisherCommonUtils.updateSwagger(importedApi.getUuid(), validationResponse, false,
+                                organization);
+                        importedApi =  apiProvider.getAPIbyUUID(importedApi.getUuid(), currentTenantDomain);
+                    }
                 } else {
                     importedApi = PublisherCommonUtils.importAsyncAPIWithDefinition(validationResponse, Boolean.FALSE,
                             importedApiDTO, null, currentTenantDomain, apiProvider);
@@ -286,13 +325,6 @@ public class ImportUtils {
             // Retrieving the life cycle actions to do the lifecycle state change explicitly later
             lifecycleActions = getLifeCycleActions(currentStatus, targetStatus);
 
-            // Add/update swagger content except for streaming APIs and GraphQL APIs
-            if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
-                    && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
-                // Add the validated swagger separately since the UI does the same procedure
-                PublisherCommonUtils.updateSwagger(importedApi.getUuid(), validationResponse, false, organization);
-                importedApi =  apiProvider.getAPIbyUUID(importedApi.getUuid(), currentTenantDomain);
-            }
             // Add the GraphQL schema
             if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                 importedApi.setOrganization(organization);
@@ -2540,9 +2572,8 @@ public class ImportUtils {
                 String apiDirectoryPath =
                         path + File.separator + ImportExportConstants.APIS_DIRECTORY + File.separator + apiDirectory
                                 .getName();
-                JsonElement jsonObject = retrieveValidatedDTOObject(apiDirectoryPath, preserveProvider, currentUser,
-                        ImportExportConstants.TYPE_API);
-                APIDTO apiDto = new Gson().fromJson(jsonObject, APIDTO.class);
+                APIDTO apiDto = ImportUtils.getImportAPIDto(apiDirectoryPath, null,
+                        preserveProvider, currentUser);
                 String apiName = apiDto.getName();
                 String apiVersion = apiDto.getVersion();
 
@@ -2657,9 +2688,8 @@ public class ImportUtils {
                     }
                 }
 
-                JsonElement jsonObject = retrieveValidatedDTOObject(apiDirectoryPath, isDefaultProviderAllowed,
-                        currentUser, ImportExportConstants.TYPE_API);
-                APIDTO apiDtoToImport = new Gson().fromJson(jsonObject, APIDTO.class);
+                APIDTO apiDtoToImport = getImportAPIDto(apiDirectoryPath, null,
+                        isDefaultProviderAllowed, currentUser);
                 API importedApi = null;
                 String apiName = apiDtoToImport.getName();
                 String apiVersion = apiDtoToImport.getVersion();

@@ -455,6 +455,16 @@ public interface APIManager {
             throws APIManagementException;
 
     /**
+     * Get the provider of a given API or set of API Revisions, given the API name and the organization
+     *
+     * @param name , name of the API
+     * @param organization
+     * @return String APIProvider
+     * @throws APIManagementException if failed to get set of API
+     */
+    String getAPIProviderByNameAndOrganization(String name, String organization) throws APIManagementException;
+
+    /**
      * Returns the wsdl content in registry specified by the wsdl name. If it is a single WSDL, the content will be
      * returned as String or if it is an archive, an InputStream pointed to the content will be returned.
      *

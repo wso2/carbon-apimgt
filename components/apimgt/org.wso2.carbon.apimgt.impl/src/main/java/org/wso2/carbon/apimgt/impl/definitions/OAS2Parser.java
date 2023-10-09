@@ -43,8 +43,10 @@ import io.swagger.models.RefPath;
 import io.swagger.models.RefResponse;
 import io.swagger.models.Response;
 import io.swagger.models.Scheme;
-import io.swagger.models.SecurityRequirement;
 import io.swagger.models.Swagger;
+import io.swagger.models.auth.ApiKeyAuthDefinition;
+import io.swagger.models.auth.BasicAuthDefinition;
+import io.swagger.models.auth.In;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.parameters.PathParameter;
@@ -614,12 +616,9 @@ public class OAS2Parser extends APIDefinition {
         updateSwaggerSecurityDefinition(swaggerObj, swaggerData, "https://test.com");
         updateLegacyScopesFromSwagger(swaggerObj, swaggerData);
         
-        if (StringUtils.isEmpty(swaggerObj.getInfo().getTitle())) {
-            swaggerObj.getInfo().setTitle(swaggerData.getTitle());
-        }
-        if (StringUtils.isEmpty(swaggerObj.getInfo().getVersion())) {
-            swaggerObj.getInfo().setVersion(swaggerData.getVersion());
-        }
+        swaggerObj.getInfo().setTitle(swaggerData.getTitle());
+        swaggerObj.getInfo().setVersion(swaggerData.getVersion());
+
         preserveResourcePathOrderFromAPI(swaggerData, swaggerObj);
         return getSwaggerJsonString(swaggerObj);
     }
@@ -902,25 +901,11 @@ public class OAS2Parser extends APIDefinition {
      * @param swaggerData Swagger related data
      */
     private void updateSwaggerSecurityDefinition(Swagger swagger, SwaggerData swaggerData, String authUrl) {
+
         OAuth2Definition oAuth2Definition = new OAuth2Definition().implicit(authUrl);
-        Set<Scope> scopes = swaggerData.getScopes();
-        if (scopes != null && !scopes.isEmpty()) {
-            Map<String, String> scopeBindings = new HashMap<>();
-            for (Scope scope : scopes) {
-                String description = scope.getDescription() != null ? scope.getDescription() : "";
-                oAuth2Definition.addScope(scope.getKey(), description);
-                String roles = (StringUtils.isNotBlank(scope.getRoles())
-                        && scope.getRoles().trim().split(",").length > 0) ? scope.getRoles() : StringUtils.EMPTY;
-                scopeBindings.put(scope.getKey(), roles);
-            }
-            oAuth2Definition.setVendorExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
-        }
+        OASParserUtil.setScopesFromAPIToSecurityScheme(swaggerData, oAuth2Definition);
         swagger.addSecurityDefinition(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, oAuth2Definition);
-        if (swagger.getSecurity() == null) {
-            SecurityRequirement securityRequirement = new SecurityRequirement();
-            securityRequirement.setRequirements(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, new ArrayList<String>());
-            swagger.addSecurity(securityRequirement);
-        }
+        OASParserUtil.addSecurityRequirementToSwagger(swagger, SWAGGER_APIM_DEFAULT_SECURITY);
     }
 
     /**
@@ -945,12 +930,14 @@ public class OAS2Parser extends APIDefinition {
         // AWS Lambda: set arn & timeout to swagger
         if (resource.getAmznResourceName() != null) {
             operation.setVendorExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME, resource.getAmznResourceName());
+            if (resource.isAmznResourceContentEncoded()) {
+                operation.setVendorExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED,
+                        resource.isAmznResourceContentEncoded());
+            }
         }
         if (resource.getAmznResourceTimeout() != 0) {
             operation.setVendorExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT, resource.getAmznResourceTimeout());
         }
-        operation.setVendorExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED,
-                resource.isAmznResourceContentEncoded());
 
         updateLegacyScopesFromOperation(resource, operation);
         String oauth2SchemeKey = APIConstants.SWAGGER_APIM_DEFAULT_SECURITY;
@@ -1338,8 +1325,101 @@ public class OAS2Parser extends APIDefinition {
         } else {
             authUrl = (hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL)).concat("/authorize");
         }
-        updateSwaggerSecurityDefinition(swagger, swaggerData, authUrl);
+        updateSwaggerSecurityDefinitionForStore(swagger, swaggerData, authUrl);
         return getSwaggerJsonString(swagger);
+    }
+
+
+    /**
+     * Update Swagger security definition for dev portal only.
+     *
+     * @param swagger     Swagger
+     * @param swaggerData SwaggerData
+     * @param authUrl     Authorization URL
+     */
+    private void updateSwaggerSecurityDefinitionForStore(Swagger swagger, SwaggerData swaggerData, String authUrl) {
+
+        // Get the security defined for the current API.
+        List<String> secList = swaggerData.getSecurity() != null ? Arrays.asList(swaggerData.getSecurity().split(","))
+                : new ArrayList<>();
+        if (secList.isEmpty() || secList.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+            // Add oauth to global security requirement to the OAS definition.
+            if (log.isDebugEnabled()) {
+                log.debug("Updating the Swagger definition with default oauth2 security of API: " + swaggerData.getTitle()
+                        + " Version: " + swaggerData.getVersion());
+            }
+            OASParserUtil.addSecurityRequirementToSwagger(swagger, APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
+            OAuth2Definition oAuth2Definition = new OAuth2Definition().implicit(authUrl);
+            OASParserUtil.setScopesFromAPIToSecurityScheme(swaggerData, oAuth2Definition);
+            swagger.addSecurityDefinition(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, oAuth2Definition);
+        }
+        // If the Basic Auth security is in API, add basic security to the OAS definition.
+        if (secList.contains(APIConstants.API_SECURITY_BASIC_AUTH)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Updating the Swagger definition with basic_auth security of API: " + swaggerData.getTitle()
+                        + " Version: " + swaggerData.getVersion());
+            }
+            OASParserUtil.addSecurityRequirementToSwagger(swagger, APIConstants.API_SECURITY_BASIC_AUTH);
+            BasicAuthDefinition basicAuthDefinition = new BasicAuthDefinition();
+            OASParserUtil.setScopesFromAPIToSecurityScheme(swaggerData, basicAuthDefinition);
+            swagger.addSecurityDefinition(APIConstants.API_SECURITY_BASIC_AUTH, basicAuthDefinition);
+        }
+        if (secList.contains(APIConstants.API_SECURITY_API_KEY)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Updating the Swagger definition with api_key security of API: " + swaggerData.getTitle()
+                        + " Version: " + swaggerData.getVersion());
+            }
+            OASParserUtil.addSecurityRequirementToSwagger(swagger, APIConstants.API_SECURITY_API_KEY);
+            ApiKeyAuthDefinition apiKeyAuthDefinition = new ApiKeyAuthDefinition();
+            apiKeyAuthDefinition.setName(APIConstants.API_KEY_HEADER_QUERY_PARAM);
+            apiKeyAuthDefinition.setIn(In.HEADER);
+            swagger.addSecurityDefinition(APIConstants.API_SECURITY_API_KEY, apiKeyAuthDefinition);
+        }
+        // Add security requirements with scopes to the operations in OAS definition.
+        for (Map.Entry<String, Path> pathEntry : swagger.getPaths().entrySet()) {
+            for (Operation operation : pathEntry.getValue().getOperations()) {
+                List<Map<String, List<String>>> oldSecList = operation.getSecurity();
+                if (oldSecList == null) {
+                    oldSecList = new ArrayList<>();
+                }
+                // Get scopes from default oauth2 security of each resource.
+                List<String> operationScopes = oldSecList.stream()
+                        .filter(security -> security.containsKey(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY))
+                        .findFirst()
+                        .map(security -> security.get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY))
+                        .orElse(new ArrayList<>());
+                // Add operation level security for basic_auth and api_key.
+                OASParserUtil.addSwaggerBasicAuthResourceScopesFromAPI(operationScopes, secList, operation);
+                OASParserUtil.addSwaggerOperationSecurityReqFromAPI(oldSecList, secList,
+                        APIConstants.API_SECURITY_BASIC_AUTH, new ArrayList<>());
+                OASParserUtil.addSwaggerOperationSecurityReqFromAPI(oldSecList, secList,
+                        APIConstants.API_SECURITY_API_KEY, new ArrayList<>());
+                if (!secList.isEmpty() && !secList.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        && operation.getSecurity() != null) {
+                    // If oauth2 is not set for the API, remove oauth security scheme from resource level if exists.
+                    operation.setSecurity(operation.getSecurity().stream()
+                            .filter(securityRequirement -> !securityRequirement
+                                    .containsKey(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY))
+                            .collect(Collectors.toList()));
+                }
+            }
+        }
+        if (!secList.isEmpty() && !secList.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+            // If oauth2 is not set for the API, remove oauth security scheme from global level if exists.
+            if (log.isDebugEnabled()) {
+                log.debug("Removing default oauth2 security of API: " + swaggerData.getTitle()
+                        + " Version: " + swaggerData.getVersion() + " from Swagger definition");
+            }
+            if (swagger.getSecurityDefinitions() != null) {
+                swagger.getSecurityDefinitions().remove(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
+            }
+            if (swagger.getSecurity() != null) {
+                swagger.setSecurity(swagger.getSecurity().stream().filter(
+                                securityRequirement -> !securityRequirement.getRequirements()
+                                        .containsKey(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY))
+                        .collect(Collectors.toList()));
+            }
+        }
     }
 
     @Override
