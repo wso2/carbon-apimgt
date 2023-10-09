@@ -3843,10 +3843,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
-     * Validate AsyncAPI Specification and retrieve as the response
+     * Delete a pending task for API revision deployment
      *
      * @param apiId          Id of the API
      * @param revisionId     Id of the revision
+     * @param envName        Name of the gateway
      * @param messageContext CXF message context
      * @return 200 response if deleted successfully
      */
@@ -3870,9 +3871,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
 
-            if (externalRef != null) {
-                apiProvider.cleanupAPIRevisionDeploymentWorkflows(apiId, externalRef);
+            if (externalRef == null) {
+                throw new APIMgtResourceNotFoundException(
+                        "Couldn't retrieve existing API Revision with Revision Id: " + revisionId,
+                        ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, revisionId));
             }
+            apiProvider.cleanupAPIRevisionDeploymentWorkflows(apiId, externalRef);
             return Response.ok().build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting task ";

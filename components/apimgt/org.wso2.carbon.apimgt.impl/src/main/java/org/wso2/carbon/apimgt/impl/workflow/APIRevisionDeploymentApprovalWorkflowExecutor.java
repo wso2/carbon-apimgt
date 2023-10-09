@@ -131,7 +131,8 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
 
         String errorMsg;
         if (log.isDebugEnabled()) {
-            log.debug("Starting cleanup task for APIRevisionDeploymentApprovalWorkflowExecutor for :" + workflowExtRef);
+            log.debug("Starting cleanup task for APIRevisionDeploymentApprovalWorkflowExecutor for :" +
+                    workflowExtRef);
         }
         super.cleanUpPendingTask(workflowExtRef);
         try {
@@ -144,7 +145,11 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
         }
     }
 
-    // Helper method to map WorkflowStatus to API Revision Status
+    /**
+     * Return the status of the workflowDTO
+     *
+     * @param workflowStatus - status of the workflow
+     */
     private String mapWorkflowStatusToAPIRevisionStatus(WorkflowStatus workflowStatus) {
         switch (workflowStatus) {
         case CREATED:

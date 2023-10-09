@@ -89,7 +89,11 @@ public class APIRevisionDeploymentSimpleWorkflowExecutor extends WorkflowExecuto
         return null;
     }
 
-    // Helper method to map WorkflowStatus to API Revision Status
+    /**
+     * Return the status of the workflowDTO
+     *
+     * @param workflowStatus - status of the workflow
+     */
     private String mapWorkflowStatusToAPIRevisionStatus(WorkflowStatus workflowStatus) {
         switch (workflowStatus) {
         case CREATED:

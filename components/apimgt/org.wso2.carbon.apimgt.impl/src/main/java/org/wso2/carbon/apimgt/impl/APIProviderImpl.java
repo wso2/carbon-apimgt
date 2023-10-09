@@ -5638,10 +5638,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (wfDTO == null || WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                 Set<String> environmentToPublish = new HashSet<>();
                 environmentToPublish.add(apiRevisionDeployment.getDeployment());
-                if (!environmentToPublish.isEmpty()) {
-                    // TODO remove this to organization once the microgateway can build gateway based on organization.
-                    gatewayManager.deployToGateway(api, organization, environmentToPublish);
-                }
+
+                // TODO remove this to organization once the microgateway can build gateway based on organization.
+                gatewayManager.deployToGateway(api, organization, environmentToPublish);
+
                 String publishedDefaultVersion = getPublishedDefaultVersion(apiIdentifier);
                 String defaultVersion = getDefaultVersion(apiIdentifier);
                 apiMgtDAO.updateDefaultAPIPublishedVersion(apiIdentifier);

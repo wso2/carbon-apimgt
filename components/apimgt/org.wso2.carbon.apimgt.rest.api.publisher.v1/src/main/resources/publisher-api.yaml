@@ -1808,6 +1808,9 @@ paths:
             "https://127.0.0.1:9443/api/am/publisher/v4/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/restore-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /apis/{apiId}/cancel-revision-workflow/{revisionId}/{envName}:
+    #--------------------------------------------------------
+    # Cancel a pending revision deployment workflow task given revision id and environment name
+    #--------------------------------------------------------
     delete:
       tags:
         - API Revisions

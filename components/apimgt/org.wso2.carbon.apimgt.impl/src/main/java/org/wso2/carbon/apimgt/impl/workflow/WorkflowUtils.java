@@ -344,10 +344,10 @@ public class WorkflowUtils {
 
             Set<String> environmentToPublish = new HashSet<>();
             environmentToPublish.add(environment);
-            if (!environmentToPublish.isEmpty()) {
-                // TODO remove this to organization once the microgateway can build gateway based on organization.
-                gatewayManager.deployToGateway(api, organization, environmentToPublish);
-            }
+
+            // TODO remove this to organization once the microgateway can build gateway based on organization.
+            gatewayManager.deployToGateway(api, organization, environmentToPublish);
+
             String publishedDefaultVersion = apiProvider.getPublishedDefaultVersion(apiIdentifier);
             String defaultVersion = apiProvider.getDefaultVersion(apiIdentifier);
             apiMgtDAO.updateDefaultAPIPublishedVersion(apiIdentifier);
