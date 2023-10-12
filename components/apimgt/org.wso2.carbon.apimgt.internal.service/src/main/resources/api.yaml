@@ -80,6 +80,22 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /revokedUsers:
+    get:
+      summary: Users of revoked jwt
+      description: |
+        This will provide access to Users of revoked JWTs by internal user events.
+      responses:
+        200:
+          description: An array of revoke JWTs
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/RevokedJWTUserList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /revokedconsumerkeys:
     get:
       summary: Consumer keys of revoked jwt
@@ -739,6 +755,19 @@ definitions:
         type: integer
         format: int64
         description: expiry timestamp.
+  RevokedJWTUserList:
+    type: array
+    items:
+      $ref: '#/definitions/RevokedJWTUser'
+  RevokedJWTUser:
+    properties:
+      user_uuid:
+        type: string
+        description: User UUID of revoked JWT(s).
+      revocation_time:
+        type: integer
+        format: int64
+        description: revocation timestamp.
   RevokedJWTConsumerKeyList:
     type: array
     items:
@@ -747,11 +776,14 @@ definitions:
     properties:
       consumer_key:
         type: string
-        description: concumer key of the JWT.
-      expiry_time:
+        description: consumer key of the JWT.
+      is_revoke_app_only:
+        type: boolean
+        description: whether the consumer key is revoked only for the application type.
+      revocation_time:
         type: integer
         format: int64
-        description: expiry timestamp.
+        description: revocation timestamp.
       type:
         type: string
         description: revoked consumer key type.

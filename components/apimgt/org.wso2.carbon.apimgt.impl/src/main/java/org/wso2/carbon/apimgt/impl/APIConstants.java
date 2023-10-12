@@ -565,6 +565,10 @@ public final class APIConstants {
     public static final String IS_ENABLED = "is_enabled";
     public static final String BLOCKING_CONDITIONS_STREAM_ID = "org.wso2.blocking.request.stream:1.0.0";
     public static final String TOKEN_REVOCATION_STREAM_ID = "org.wso2.apimgt.token.revocation.stream:1.0.0";
+    public static final String TOKEN_REVOCATION_USER_EVENT_STREAM_ID
+            = "org.wso2.apimgt.token.revocation.internal.user.event.stream:1.0.0";
+    public static final String TOKEN_REVOCATION_CONSUMER_KEY_EVENT_STREAM_ID
+            = "org.wso2.apimgt.token.revocation.internal.consumer.key.event.stream:1.0.0";
     public static final String CACHE_INVALIDATION_STREAM_ID = "org.wso2.apimgt.cache.invalidation.stream:1.0.0";
     public static final String NOTIFICATION_STREAM_ID = "org.wso2.apimgt.notification.stream:1.0.0";
     public static final String WEBHOOKS_SUBSCRIPTION_STREAM_ID = "org.wso2.apimgt.webhooks.request.stream:1.0.0";
@@ -2793,7 +2797,10 @@ public final class APIConstants {
 
         public static final String TOKEN_TYPE = "token_type";
         public static final String TOKEN_REVOCATION_EVENT = "token_revocation";
-        public static final String INTERNAL_TOKEN_REVOCATION_EVENT = "internal_token_revocation";
+        public static final String INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENT
+                = "internal_token_revocation_consumer_key_event";
+        public static final String INTERNAL_TOKEN_REVOCATION_USER_EVENT
+                = "internal_token_revocation_user_event";
         public static final String CONSUMER_KEY = "consumer_key";
         public static final String EVENT_ID = "eventId";
         public static final String TENANT_ID = "tenantId";

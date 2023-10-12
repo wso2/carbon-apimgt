@@ -3381,11 +3381,19 @@ public class SQLConstants {
 
         public static final String ADD_JWT_SIGNATURE = "INSERT INTO AM_REVOKED_JWT (UUID, SIGNATURE," +
                 "EXPIRY_TIMESTAMP, TENANT_ID, TOKEN_TYPE) VALUES(?,?,?,?,?)";
-        public static final String ADD_CONSUMER_KEY = "INSERT INTO AM_INTERNAL_TOKEN_REVOCATION (ID, CONSUMER_KEY," +
-                "TOKEN_TYPE, TIME_REVOKED, TENANT_ID) VALUES(?,?,?,?,?)";
+        public static final String ADD_OR_UPDATE_REVOKED_RULE_BY_CONSUMER_KEY_EVENT = "INSERT " +
+                "INTO AM_INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENTS\n" +
+                "(CONSUMER_KEY, IS_REVOKE_APP_ONLY, TIME_REVOKED, TENANT_ID)\n" +
+                "VALUES (?, ?, ?, ?) AS COLS\n" +
+                "ON DUPLICATE KEY UPDATE\n" +
+                "TIME_REVOKED = COLS.TIME_REVOKED";
+        public static final String ADD_OR_UPDATE_REVOKED_RULE_BY_USER_EVENT = "INSERT " +
+                "INTO AM_INTERNAL_TOKEN_REVOCATION_USER_EVENTS\n" +
+                "(USER_ID, TIME_REVOKED)\n" +
+                "VALUES (?, ?) AS COLS\n" +
+                "ON DUPLICATE KEY UPDATE\n" +
+                "TIME_REVOKED = COLS.TIME_REVOKED";
         public static final String CHECK_REVOKED_TOKEN_EXIST = "SELECT 1 FROM AM_REVOKED_JWT WHERE UUID = ?";
-        public static final String CHECK_REVOKED_CONSUMER_KEY_EXIST = "SELECT 1 FROM AM_INTERNAL_TOKEN_REVOCATION " +
-                "WHERE CONSUMER_KEY = ?";
         public static final String DELETE_REVOKED_JWT = "DELETE FROM AM_REVOKED_JWT WHERE EXPIRY_TIMESTAMP < ?";
     }
 

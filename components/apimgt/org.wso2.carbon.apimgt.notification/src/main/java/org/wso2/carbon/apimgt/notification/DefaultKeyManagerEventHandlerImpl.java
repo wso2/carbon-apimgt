@@ -22,7 +22,8 @@ import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.notification.event.ConsumerKeyEvent;
+import org.wso2.carbon.apimgt.notification.event.InternalTokenRevocationConKeyEvent;
+import org.wso2.carbon.apimgt.notification.event.InternalTokenRevocationUserEvent;
 import org.wso2.carbon.apimgt.notification.event.TokenRevocationEvent;
 
 import java.util.List;
@@ -37,8 +38,11 @@ public class DefaultKeyManagerEventHandlerImpl extends AbstractKeyManagerEventHa
     public boolean handleEvent(String event, Map<String, List<String>> headers) throws APIManagementException {
 
         if (StringUtils.isNotEmpty(event)
-                && event.contains(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_EVENT)) {
-            handleInternalTokenRevocationEvent(event);
+                && event.contains(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENT)) {
+            handleInternalTokenRevocationConsumerKeyEvent(event);
+        } else if (StringUtils.isNotEmpty(event)
+                && event.contains(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_USER_EVENT)) {
+            handleInternalTokenRevocationByUserEvent(event);
         } else if (StringUtils.isNotEmpty(event)
                 && event.contains(APIConstants.NotificationEvent.TOKEN_REVOCATION_EVENT)) {
             handleTokenRevocationEvent(event);
@@ -59,10 +63,18 @@ public class DefaultKeyManagerEventHandlerImpl extends AbstractKeyManagerEventHa
         return true;
     }
 
-    private boolean handleInternalTokenRevocationEvent(String event) throws APIManagementException {
+    private boolean handleInternalTokenRevocationConsumerKeyEvent(String event) throws APIManagementException {
 
-        ConsumerKeyEvent tokenRevocationEvent = new Gson().fromJson(event, ConsumerKeyEvent.class);
-        handleConsumerKeyEvent(tokenRevocationEvent);
+        InternalTokenRevocationConKeyEvent tokenRevocationEvent = new Gson()
+                .fromJson(event, InternalTokenRevocationConKeyEvent.class);
+        handleInternalTokenRevocationByConsumerKeyEvent(tokenRevocationEvent);
+        return true;
+    }
+
+    private boolean handleInternalTokenRevocationByUserEvent(String event) throws APIManagementException {
+        InternalTokenRevocationUserEvent tokenRevocationEvent =
+                new Gson().fromJson(event, InternalTokenRevocationUserEvent.class);
+        handleInternalTokenRevocationByUserEvent(tokenRevocationEvent);
         return true;
     }
 }

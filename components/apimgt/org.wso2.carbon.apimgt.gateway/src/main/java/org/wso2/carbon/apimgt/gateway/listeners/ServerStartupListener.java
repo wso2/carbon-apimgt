@@ -52,8 +52,8 @@ public class ServerStartupListener implements ServerStartupObserver {
         ServiceReferenceHolder.getInstance().setAPIThrottleDataService(throttleDataServiceImpl);
         ServiceReferenceHolder.getInstance().setThrottleDataHolder(throttleDataHolder);
         ServiceReferenceHolder.getInstance().setRevokedTokenService(new RevokedTokenDataImpl());
-        ServiceReferenceHolder.getInstance().setRevokedConsumerKeyService(new RevokedConsumerKeyServiceImpl());
-//        ServiceReferenceHolder.getInstance().set(new RevokedTokenDataImpl());
+        ServiceReferenceHolder.getInstance().setRevokedConsumerKeyService(new RevokedConsumerKeyEventServiceImpl());
+        ServiceReferenceHolder.getInstance().setRevokedUserEventService(new RevokedUserEventServiceImpl());
         SubscriptionsDataService subscriptionsDataService = new SubscriptionsDataServiceImpl();
         ServiceReferenceHolder.getInstance().setSubscriptionsDataService(subscriptionsDataService);
         log.debug("APIThrottleDataService Registered...");

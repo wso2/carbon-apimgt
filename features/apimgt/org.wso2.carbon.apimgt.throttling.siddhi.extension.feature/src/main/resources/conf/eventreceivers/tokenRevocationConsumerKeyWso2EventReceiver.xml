@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<eventReceiver name="consumerKeyWso2EventReceiver" statistics="disable"
+<eventReceiver name="tokenRevocationConsumerKeyWso2EventReceiver" statistics="disable"
     trace="disable" xmlns="http://wso2.org/carbon/eventreceiver">
     <from eventAdapterType="wso2event">
         <property name="events.duplicated.in.cluster">false</property>
     </from>
     <mapping customMapping="disable" type="wso2event"/>
-    <to streamName="org.wso2.apimgt.consumerkey.revocation.stream" version="1.0.0"/>
+    <to streamName="org.wso2.apimgt.token.revocation.internal.consumer.key.event.stream" version="1.0.0"/>
 </eventReceiver>

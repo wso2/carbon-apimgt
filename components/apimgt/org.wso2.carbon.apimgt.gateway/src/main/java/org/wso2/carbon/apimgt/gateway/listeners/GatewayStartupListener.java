@@ -353,6 +353,9 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             InternallyRevokedJWTConsumerKeyRetriever internallyRevokedJWTConsumerKeyRetriever
                     = new InternallyRevokedJWTConsumerKeyRetriever();
             internallyRevokedJWTConsumerKeyRetriever.startRevokedJWTConsumerKeyssRetriever();
+            InternallyRevokedRuleByUserEventRetriever internallyRevokedRuleByUserEventRetriever
+                    = new InternallyRevokedRuleByUserEventRetriever();
+            internallyRevokedRuleByUserEventRetriever.startRevokedJWTUsersRetrievalTask();
         }
     }
 

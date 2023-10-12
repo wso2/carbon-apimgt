@@ -15249,7 +15249,7 @@ public class ApiMgtDAO {
                 ps.execute();
                 conn.commit();
             } catch (SQLIntegrityConstraintViolationException e) {
-                boolean isRevokedTokenExist = isRevokedJWTConsumerKeyExist(conn, eventId);
+                boolean isRevokedTokenExist = isRevokedJWTSignatureExist(conn, eventId);
 
                 if (isRevokedTokenExist) {
                     log.warn("Revoked Token already persisted");
@@ -15269,53 +15269,35 @@ public class ApiMgtDAO {
      * Persist revoked jwt signatures to database.
      *
      * @param eventId
-     * @param consumerKey  consumer key of the JWT.
-     * @param expiryTime   expiry time of the token.
-     * @param tenantId     tenant id of the jwt subject.
+     * @param consumerKey      consumer key of the JWT.
+     * @param revocationTime   revocation time of the token.
+     * @param tenantId      tenant id of the jwt subject.
      */
-    public void addRevokedConsumerKey(String eventId, String consumerKey,
-                                       String expiryTime, int tenantId) throws APIManagementException {
-
-        String addConsumerKey = SQLConstants.RevokedJWTConstants.ADD_CONSUMER_KEY;
+    public void addRevokedConsumerKey(String consumerKey, boolean isRevokeAppOnly,
+                                       long revocationTime, int tenantId) throws APIManagementException {
+        String addConsumerKey = SQLConstants.RevokedJWTConstants.ADD_OR_UPDATE_REVOKED_RULE_BY_CONSUMER_KEY_EVENT;
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(addConsumerKey)) {
-                ps.setString(1, eventId);
-                ps.setString(2, consumerKey);
-                ps.setString(3, "REVOKED");
-                ps.setString(4, expiryTime);
-                ps.setInt(5, tenantId);
-                ps.execute();
-                conn.commit();
-            } catch (SQLIntegrityConstraintViolationException e) {
-                boolean isRevokedJWTConsumerKeyExist = isRevokedJWTConsumerKeyExist(conn, consumerKey);
-                if (isRevokedJWTConsumerKeyExist) {
-                    log.warn("Revoked Consumer Key already persisted");
-                } else {
-                    handleException("Failed to add Consumer key Token Event.", e);
+                ps.setString(1, consumerKey);
+                ps.setBoolean(2, isRevokeAppOnly);
+                ps.setTimestamp(3, new Timestamp(revocationTime));
+                ps.setInt(4, tenantId);
+                int rowsAffected = ps.executeUpdate();
+                if (log.isDebugEnabled()) {
+                    if (rowsAffected == 1) {
+                        log.debug("Consumer key event token revocation rule inserted successfully.");
+                    }
+                    if (rowsAffected == 2) {
+                        log.debug("Consumer key token revocation rule updated successfully.");
+                    }
                 }
+                conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
             }
         } catch (SQLException e) {
-            handleException("Error in adding revoked jwt signature to database : " + e.getMessage(), e);
-        }
-    }
-
-
-    /**
-     * Check revoked Token Identifier exist
-     *
-     * @param eventId
-     */
-    private boolean isRevokedJWTConsumerKeyExist(Connection conn, String consumerKey) throws SQLException {
-
-        String checkRevokedConsumerKeyExist = SQLConstants.RevokedJWTConstants.CHECK_REVOKED_CONSUMER_KEY_EXIST;
-        try (PreparedStatement ps = conn.prepareStatement(checkRevokedConsumerKeyExist)) {
-            ps.setString(1, consumerKey);
-            try (ResultSet resultSet = ps.executeQuery()) {
-                return resultSet.next();
-            }
+            handleException("Error while inserting consumer key event token revocation rule to AM db." + e.getMessage(), e);
         }
     }
 
@@ -15324,7 +15306,7 @@ public class ApiMgtDAO {
      *
      * @param eventId
      */
-    private boolean isConsumerKeyExist(Connection conn, String eventId) throws SQLException {
+    private boolean isRevokedJWTSignatureExist(Connection conn, String eventId) throws SQLException {
 
         String checkRevokedTokenExist = SQLConstants.RevokedJWTConstants.CHECK_REVOKED_TOKEN_EXIST;
         try (PreparedStatement ps = conn.prepareStatement(checkRevokedTokenExist)) {
@@ -15333,6 +15315,35 @@ public class ApiMgtDAO {
                 return resultSet.next();
             }
         }
+    }
+
+    public boolean addRevokedRuleByUserEvent(String userID, long revocationTime) throws APIManagementException {
+
+        String sql = SQLConstants.RevokedJWTConstants.ADD_OR_UPDATE_REVOKED_RULE_BY_USER_EVENT;
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, userID);
+                ps.setTimestamp(2, new Timestamp(revocationTime));
+                int rowsAffected = ps.executeUpdate();
+                if (log.isDebugEnabled()){
+                    if (log.isDebugEnabled()) {
+                        if (rowsAffected == 1) {
+                            log.debug("User event token revocation rule inserted successfully.");
+                        }
+                        if (rowsAffected == 2) {
+                            log.debug("User event token revocation rule updated successfully.");
+                        }
+                    }
+                }
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+            }
+        } catch (SQLException e) {
+            handleException("Error while inserting user event token revocation rule to AM db." + e.getMessage(), e);
+        }
+        return true;
     }
 
     /**

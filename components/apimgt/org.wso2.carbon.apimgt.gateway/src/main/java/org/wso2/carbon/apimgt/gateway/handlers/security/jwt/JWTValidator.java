@@ -194,6 +194,31 @@ public class JWTValidator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
+            if (jwtGeneratedTime != 0 && signedJWTInfo.getJwtClaimsSet().getSubject()
+                    .equals(signedJWTInfo.getJwtClaimsSet().getClaim("client_id"))
+                    && InternalRevokedJWTDataHolder.getInstance().isJWTTokenClientIdExistsInRevokedAppOnlyMap(
+                            signedJWTInfo.getJwtClaimsSet().getSubject(), jwtGeneratedTime)) {
+                // handle user event revocations of app tokens since the 'sub' claim is client id
+                if (log.isDebugEnabled()) {
+                    log.debug("Consumer key retrieved from the  jwt token map is in revoked consumer key map." +
+                            " Token: " + GatewayUtils.getMaskedToken(jwtHeader));
+                }
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Invalid JWT token");
+            }
+            if (jwtGeneratedTime != 0 && !signedJWTInfo.getJwtClaimsSet().getSubject()
+                    .equals(signedJWTInfo.getJwtClaimsSet().getClaim("client_id"))
+                    && InternalRevokedJWTDataHolder.getInstance().isJWTTokenUserIdExistsInRevokedMap(
+                            signedJWTInfo.getJwtClaimsSet().getSubject(), jwtGeneratedTime)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User id retrieved from the  jwt token map is in revoked user id map." +
+                            " Token: " + GatewayUtils.getMaskedToken(jwtHeader));
+                }
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Invalid JWT token");
+            }
         }
 
         JWTValidationInfo jwtValidationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);

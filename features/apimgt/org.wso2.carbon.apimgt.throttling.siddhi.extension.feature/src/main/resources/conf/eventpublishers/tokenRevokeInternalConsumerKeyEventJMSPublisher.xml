@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<eventPublisher name="consumerKeyEventJMSPublisher" statistics="disable"
+<eventPublisher name="tokenRevocationInternalConsumerKeyEventJMSPublisher" statistics="disable"
                 trace="disable" xmlns="http://wso2.org/carbon/eventpublisher">
-  <from streamName="org.wso2.apimgt.consumerkey.revocation.stream" version="1.0.0"/>
+  <from streamName="org.wso2.apimgt.token.revocation.internal.consumer.key.event.stream" version="1.0.0"/>
   <mapping customMapping="disable" type="json"/>
   <to eventAdapterType="jms">
     <property name="java.naming.factory.initial">org.wso2.andes.jndi.PropertiesFileInitialContextFactory</property>

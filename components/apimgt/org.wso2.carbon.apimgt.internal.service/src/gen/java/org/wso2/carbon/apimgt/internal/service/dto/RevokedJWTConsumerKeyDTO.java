@@ -17,12 +17,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 public class RevokedJWTConsumerKeyDTO   {
   
     private String consumerKey = null;
-    private Long expiryTime = null;
+    private Boolean isRevokeAppOnly = null;
+    private Long revocationTime = null;
     private String type = null;
     private String tenantId = null;
 
   /**
-   * concumer key of the JWT.
+   * consumer key of the JWT.
    **/
   public RevokedJWTConsumerKeyDTO consumerKey(String consumerKey) {
     this.consumerKey = consumerKey;
@@ -30,7 +31,7 @@ public class RevokedJWTConsumerKeyDTO   {
   }
 
   
-  @ApiModelProperty(value = "concumer key of the JWT.")
+  @ApiModelProperty(value = "consumer key of the JWT.")
   @JsonProperty("consumer_key")
   public String getConsumerKey() {
     return consumerKey;
@@ -40,21 +41,39 @@ public class RevokedJWTConsumerKeyDTO   {
   }
 
   /**
-   * expiry timestamp.
+   * whether the consumer key is revoked only for the application type.
    **/
-  public RevokedJWTConsumerKeyDTO expiryTime(Long expiryTime) {
-    this.expiryTime = expiryTime;
+  public RevokedJWTConsumerKeyDTO isRevokeAppOnly(Boolean isRevokeAppOnly) {
+    this.isRevokeAppOnly = isRevokeAppOnly;
     return this;
   }
 
   
-  @ApiModelProperty(value = "expiry timestamp.")
-  @JsonProperty("expiry_time")
-  public Long getExpiryTime() {
-    return expiryTime;
+  @ApiModelProperty(value = "whether the consumer key is revoked only for the application type.")
+  @JsonProperty("is_revoke_app_only")
+  public Boolean isIsRevokeAppOnly() {
+    return isRevokeAppOnly;
   }
-  public void setExpiryTime(Long expiryTime) {
-    this.expiryTime = expiryTime;
+  public void setIsRevokeAppOnly(Boolean isRevokeAppOnly) {
+    this.isRevokeAppOnly = isRevokeAppOnly;
+  }
+
+  /**
+   * revocation timestamp.
+   **/
+  public RevokedJWTConsumerKeyDTO revocationTime(Long revocationTime) {
+    this.revocationTime = revocationTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "revocation timestamp.")
+  @JsonProperty("revocation_time")
+  public Long getRevocationTime() {
+    return revocationTime;
+  }
+  public void setRevocationTime(Long revocationTime) {
+    this.revocationTime = revocationTime;
   }
 
   /**
@@ -104,14 +123,15 @@ public class RevokedJWTConsumerKeyDTO   {
     }
     RevokedJWTConsumerKeyDTO revokedJWTConsumerKey = (RevokedJWTConsumerKeyDTO) o;
     return Objects.equals(consumerKey, revokedJWTConsumerKey.consumerKey) &&
-        Objects.equals(expiryTime, revokedJWTConsumerKey.expiryTime) &&
+        Objects.equals(isRevokeAppOnly, revokedJWTConsumerKey.isRevokeAppOnly) &&
+        Objects.equals(revocationTime, revokedJWTConsumerKey.revocationTime) &&
         Objects.equals(type, revokedJWTConsumerKey.type) &&
         Objects.equals(tenantId, revokedJWTConsumerKey.tenantId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(consumerKey, expiryTime, type, tenantId);
+    return Objects.hash(consumerKey, isRevokeAppOnly, revocationTime, type, tenantId);
   }
 
   @Override
@@ -120,7 +140,8 @@ public class RevokedJWTConsumerKeyDTO   {
     sb.append("class RevokedJWTConsumerKeyDTO {\n");
     
     sb.append("    consumerKey: ").append(toIndentedString(consumerKey)).append("\n");
-    sb.append("    expiryTime: ").append(toIndentedString(expiryTime)).append("\n");
+    sb.append("    isRevokeAppOnly: ").append(toIndentedString(isRevokeAppOnly)).append("\n");
+    sb.append("    revocationTime: ").append(toIndentedString(revocationTime)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
     sb.append("}");

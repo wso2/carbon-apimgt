@@ -1,0 +1,24 @@
+{
+  "name": "org.wso2.apimgt.token.revocation.internal.user.event.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name": "eventId",
+      "type": "STRING"
+    },
+    {
+      "name": "userUUID",
+      "type": "STRING"
+    },
+    {
+      "name": "revocationTime",
+      "type": "LONG"
+    },
+    {
+      "name": "type",
+      "type": "STRING"
+    }
+  ]
+}

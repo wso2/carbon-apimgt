@@ -29,11 +29,11 @@ import org.wso2.carbon.apimgt.impl.keymgt.ExpiredJWTCleaner;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
 import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.notification.event.ConsumerKeyEvent;
+import org.wso2.carbon.apimgt.notification.event.InternalTokenRevocationConKeyEvent;
+import org.wso2.carbon.apimgt.notification.event.InternalTokenRevocationUserEvent;
 import org.wso2.carbon.apimgt.notification.event.TokenRevocationEvent;
 
 import java.util.Properties;
-import java.util.UUID;
 
 /**
  *  Abstract Implementation of KeyManagerEventHandler.
@@ -78,27 +78,43 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
         return true;
     }
 
-    public boolean handleConsumerKeyEvent(ConsumerKeyEvent consumerKeyEvent) throws APIManagementException {
+    public boolean handleInternalTokenRevocationByConsumerKeyEvent(InternalTokenRevocationConKeyEvent consumerKeyEvent)
+            throws APIManagementException {
 
-        Properties properties = new Properties();
-        properties.setProperty(APIConstants.NotificationEvent.EVENT_ID, consumerKeyEvent.getEventId());
-        properties.put(APIConstants.NotificationEvent.CONSUMER_KEY, consumerKeyEvent.getConsumerKey());
-        properties.put(consumerKeyEvent, properties);
-
-        ApiMgtDAO.getInstance().addRevokedConsumerKey(UUID.randomUUID().toString(), consumerKeyEvent.getConsumerKey(),
-            consumerKeyEvent.getRevocationTime(), consumerKeyEvent.getTenantId());
+        ApiMgtDAO.getInstance().addRevokedConsumerKey(
+                consumerKeyEvent.getConsumerKey(), consumerKeyEvent.isRevokeAppOnly(),
+                consumerKeyEvent.getRevocationTime(), consumerKeyEvent.getTenantId());
 
         // TODO: check whether we need to implement RevocationRequestPublisher based mechanism to send events
         // realtime or persistent storage as done in revocationRequestPublisher.publishRevocationEvents() method
         // in handleTokenRevocationEvent()
-        Object[] objects = new Object[] { consumerKeyEvent.getEventId(), consumerKeyEvent
-                .getConsumerKey(), consumerKeyEvent.getRevocationTime(),
-                consumerKeyEvent.getType(), consumerKeyEvent.getTenantId() };
+        Object[] objects = new Object[]{consumerKeyEvent.getEventId(), consumerKeyEvent.getConsumerKey(),
+                consumerKeyEvent.isRevokeAppOnly(), consumerKeyEvent.getRevocationTime(),
+                consumerKeyEvent.getType(), consumerKeyEvent.getTenantId()};
         EventPublisherEvent tokenRevocationEvent = new EventPublisherEvent(
-                "org.wso2.apimgt.consumerkey.revocation.stream:1.0.0", System.currentTimeMillis(), objects);
-        APIUtil.publishEvent(EventPublisherType.CONSUMER_KEY_REVOKED, tokenRevocationEvent,
+                APIConstants.TOKEN_REVOCATION_CONSUMER_KEY_EVENT_STREAM_ID,
+                System.currentTimeMillis(), objects);
+        APIUtil.publishEvent(EventPublisherType.TOKEN_REVOKE_BY_CONSUMER_KEY_EVENT, tokenRevocationEvent,
                 tokenRevocationEvent.toString());
 
         return true;
+    }
+
+    public void handleInternalTokenRevocationByUserEvent(InternalTokenRevocationUserEvent internalTokenRevocationEvent)
+            throws APIManagementException {
+        //persist two revocation rules in the AM database to hande `sub` claim in both scenarios (username and uuid)
+        ApiMgtDAO.getInstance().addRevokedRuleByUserEvent(internalTokenRevocationEvent.getUserUUID(),
+                internalTokenRevocationEvent.getRevocationTime());
+
+        Object[] objects = new Object[]{internalTokenRevocationEvent.getEventId(),
+                internalTokenRevocationEvent.getUserUUID(),
+                internalTokenRevocationEvent.getRevocationTime(),
+                internalTokenRevocationEvent.getType()
+        };
+        EventPublisherEvent tokenRevocationEvent = new EventPublisherEvent(
+                APIConstants.TOKEN_REVOCATION_USER_EVENT_STREAM_ID,
+                System.currentTimeMillis(), objects);
+        APIUtil.publishEvent(EventPublisherType.TOKEN_REVOKE_BY_USER_EVENT, tokenRevocationEvent,
+                tokenRevocationEvent.toString());
     }
 }

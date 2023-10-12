@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
@@ -19,41 +18,31 @@
 
 package org.wso2.carbon.apimgt.gateway.dto;
 
-import com.google.gson.annotations.*;
+import com.google.gson.annotations.SerializedName;
 
 /**
- * DTO of revoked JWT Consumer key event
+ * DTO of revoked JWT User event
  */
-public class RevokedJWTConsumerKeyDTO {
+public class RevokedJWTUserDTO {
 
-    @SerializedName("consumer_key")
-    private String consumerKey;
-    @SerializedName("is_revoke_app_only")
-    private boolean isRevokedAppOnly;
+    @SerializedName("user_uuid")
+    private String userUUID;
     @SerializedName("revocation_time")
     private Long revocationTime;
 
-    public void setRevocationTime(Long revocationTime) {
-        this.revocationTime = revocationTime;
+    public String getUserUUID() {
+        return userUUID;
+    }
+
+    public void setUserUUID(String userUUID) {
+        this.userUUID = userUUID;
     }
 
     public Long getRevocationTime() {
         return revocationTime;
     }
 
-    public String getConsumerKey() {
-        return consumerKey;
-    }
-
-    public void setConsumerKey(String consumerKey) {
-        this.consumerKey = consumerKey;
-    }
-
-    public boolean isRevokedAppOnly() {
-        return isRevokedAppOnly;
-    }
-
-    public void setRevokedAppOnly(boolean revokedAppOnly) {
-        isRevokedAppOnly = revokedAppOnly;
+    public void setRevocationTime(Long revocationTime) {
+        this.revocationTime = revocationTime;
     }
 }

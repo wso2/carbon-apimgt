@@ -32,6 +32,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -203,23 +204,26 @@ public final class BlockConditionDBUtil {
     }
 
     /**
-     * Fetches all revoked JWTs from DB.
+     * Fetches all consumer keys for revoked JWTs from DB.
      *
-     * @return list fo revoked JWTs
+     * @return list of consumer keys for revoked JWTs
      */
     public static RevokedJWTConsumerKeyListDTO getRevokedJWTConsumerKeys() {
 
         RevokedJWTConsumerKeyListDTO revokedJWTConsumerKeyListDTO = new RevokedJWTConsumerKeyListDTO();
-        String sqlQuery = "SELECT CONSUMER_KEY,TOKEN_TYPE,TIME_REVOKED FROM AM_INTERNAL_TOKEN_REVOCATION";
+        String sqlQuery = "SELECT CONSUMER_KEY, IS_REVOKE_APP_ONLY, TIME_REVOKED " +
+                "FROM AM_INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENTS";
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sqlQuery);) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     String consumerKey = rs.getString("CONSUMER_KEY");
-                    Long expiryTimestamp = rs.getLong("TIME_REVOKED");
+                    boolean isRevokeAppOnly = rs.getBoolean("IS_REVOKE_APP_ONLY");
+                    Timestamp revocationTime = rs.getTimestamp("TIME_REVOKED");
                     RevokedJWTConsumerKeyDTO revokedJWTConsumerKeyDTO = new RevokedJWTConsumerKeyDTO();
                     revokedJWTConsumerKeyDTO.setConsumerKey(consumerKey);
-                    revokedJWTConsumerKeyDTO.setExpiryTime(expiryTimestamp);
+                    revokedJWTConsumerKeyDTO.setIsRevokeAppOnly(isRevokeAppOnly);
+                    revokedJWTConsumerKeyDTO.setRevocationTime(revocationTime.getTime());
                     revokedJWTConsumerKeyListDTO.add(revokedJWTConsumerKeyDTO);
                 }
             }
@@ -227,5 +231,32 @@ public final class BlockConditionDBUtil {
             log.error("Error while fetching revoked JWTs from database. ", e);
         }
         return revokedJWTConsumerKeyListDTO;
+    }
+
+    /**
+     * Fetches all users for revoked JWTs from DB.
+     *
+     * @return list of users for revoked JWTs
+     */
+    public static RevokedJWTUserListDTO getRevokedJWTUsers() {
+
+        RevokedJWTUserListDTO revokedJWTUserListDTO = new RevokedJWTUserListDTO();
+        String sqlQuery = "SELECT USER_ID, TIME_REVOKED FROM AM_INTERNAL_TOKEN_REVOCATION_USER_EVENTS";
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sqlQuery);) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String userUuid = rs.getString("USER_ID");
+                    Timestamp revocationTime = rs.getTimestamp("TIME_REVOKED");
+                    RevokedJWTUserDTO revokedJWTUserDTO = new RevokedJWTUserDTO();
+                    revokedJWTUserDTO.setUserUuid(userUuid);
+                    revokedJWTUserDTO.setRevocationTime(revocationTime.getTime());
+                    revokedJWTUserListDTO.add(revokedJWTUserDTO);
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error while fetching revoked JWTs from database. ", e);
+        }
+        return revokedJWTUserListDTO;
     }
 }

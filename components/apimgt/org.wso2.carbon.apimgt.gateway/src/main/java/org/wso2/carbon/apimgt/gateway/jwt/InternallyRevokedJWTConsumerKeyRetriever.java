@@ -37,7 +37,7 @@ import java.nio.charset.*;
 import java.util.*;
 
 /**
- * Class which is responsible to fetch the revoked JWT signatures via webservice database during startup
+ * This class will fetch consumer keys of revoked JWTs via webservice database during startup
  */
 public class InternallyRevokedJWTConsumerKeyRetriever extends TimerTask {
 
@@ -107,9 +107,16 @@ public class InternallyRevokedJWTConsumerKeyRetriever extends TimerTask {
         RevokedJWTConsumerKeyDTO[] revokedJWTConsumerKeyDTOS = retrieveRevokedJWTConsumerKeysData();
         if (revokedJWTConsumerKeyDTOS != null) {
             for (RevokedJWTConsumerKeyDTO revokedJWTConsumerKey : revokedJWTConsumerKeyDTOS) {
-                InternalRevokedJWTDataHolder.getInstance().
-                        addInternalRevokedJWTClientIDToMap(revokedJWTConsumerKey.getConsumerKey(),
-                                revokedJWTConsumerKey.getExpiryTime());
+                if (revokedJWTConsumerKey.isRevokedAppOnly()) {
+                    // handle user event revocations of app tokens since the 'sub' claim is client id
+                    InternalRevokedJWTDataHolder.getInstance().
+                            addInternalRevokedJWTClientIDToAppOnlyMap(revokedJWTConsumerKey.getConsumerKey(),
+                                    revokedJWTConsumerKey.getRevocationTime());
+                } else {
+                    InternalRevokedJWTDataHolder.getInstance().
+                            addInternalRevokedJWTClientIDToMap(revokedJWTConsumerKey.getConsumerKey(),
+                                    revokedJWTConsumerKey.getRevocationTime());
+                }
                 if (log.isDebugEnabled()) {
                     log.debug("JWT signature : " + revokedJWTConsumerKey.getConsumerKey()
                             + " added to the revoke map.");

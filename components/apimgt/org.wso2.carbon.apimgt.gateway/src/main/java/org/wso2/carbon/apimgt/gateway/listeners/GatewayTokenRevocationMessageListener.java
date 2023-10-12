@@ -47,9 +47,16 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                             path(APIConstants.EVENT_PAYLOAD_DATA);
 
                     if (payloadData.get("type") != null && payloadData.get("type").asText()
-                            .equals("internal_token_revocation")) {
+                            .equals(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENT)) {
                         handleInternallyRevokedConsumerKeyMessage(payloadData.get("consumerKey").asText()
-                                , payloadData.get("timeStamp").asLong(), payloadData.get("type").asText());
+                                , payloadData.get("isRevokeAppOnly").asBoolean()
+                                , payloadData.get("revocationTime").asLong(), payloadData.get("type").asText());
+                    }
+
+                    if (payloadData.get("type") != null && payloadData.get("type").asText()
+                            .equals(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_USER_EVENT)) {
+                        handleInternallyRevokedUserEventMessage(payloadData.get("userUUID").asText(),
+                                payloadData.get("revocationTime").asLong(), payloadData.get("type").asText());
                     }
 
                     if (APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
@@ -99,13 +106,18 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
         }
     }
 
-    private void handleInternallyRevokedConsumerKeyMessage(String consumerKey, long expiryTime, String tokenType) {
-        if("internal_token_revocation".equals(tokenType)){
+    private void handleInternallyRevokedConsumerKeyMessage(String consumerKey, boolean isRevokeAppOnly,
+                                                           long revocationTime, String type) {
+        if (APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENT.equals(type)) {
             ServiceReferenceHolder.getInstance().getRevokedConsumerKeyService()
-                    .addConsumerKeyIntoMap(consumerKey, expiryTime);
-        } else {
-            ServiceReferenceHolder.getInstance().
-                    getRevokedConsumerKeyService().removeConsumerKeyFromGatewayCache(consumerKey);
+                    .addConsumerKeyIntoMap(consumerKey, isRevokeAppOnly, revocationTime);
+        }
+    }
+
+    private void handleInternallyRevokedUserEventMessage(String userUUID, long revocationTime, String type) {
+        if (APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_USER_EVENT.equals(type)) {
+            ServiceReferenceHolder.getInstance().getRevokedUserEventService()
+                    .addUserEventIntoMap(userUUID, revocationTime);
         }
     }
 }
