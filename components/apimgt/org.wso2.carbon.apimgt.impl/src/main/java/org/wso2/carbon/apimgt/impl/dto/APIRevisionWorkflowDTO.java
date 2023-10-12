@@ -29,6 +29,7 @@ public class APIRevisionWorkflowDTO extends WorkflowDTO {
     private String revisionId;
     private String apiName;
     private String apiProvider;
+    private String apiVersion;
 
     public APIRevision getAPIRevision() {
         return revision;
@@ -76,5 +77,13 @@ public class APIRevisionWorkflowDTO extends WorkflowDTO {
 
     public void setApiName(String apiName) {
         this.apiName = apiName;
+    }
+
+    public String getApiVersion() {
+        return apiVersion;
+    }
+
+    public void setApiVersion(String apiVersion) {
+        this.apiVersion = apiVersion;
     }
 }
