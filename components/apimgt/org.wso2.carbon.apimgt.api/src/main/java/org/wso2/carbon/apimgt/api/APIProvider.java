@@ -1695,28 +1695,24 @@ public interface APIProvider extends APIManager {
     boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification, OperationPolicy
             appliedPolicy, String apiType) throws APIManagementException;
 
-    /***
-     * Get the default version of the API
-     * @param apiid Id of the API
-     * @return version value
-     * @throws APIManagementException
+    /**
+     * Resume API revision deployment process
+     *
+     * @param apiId        API Id using for the revision deployment
+     * @param organization organization identifier
+     * @param revisionUUID revision UUID
+     * @param revisionId   revision number
+     * @param environment  environment the deployment is happening
      */
-    String getDefaultVersion(APIIdentifier apiid) throws APIManagementException;
-
-    /***
-     * Get the default version of the published API
-     * @param apiid Id of the API
-     * @return version value
-     * @throws APIManagementException
-     */
-    String getPublishedDefaultVersion(APIIdentifier apiid) throws APIManagementException;
+    void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID, String revisionId,
+            String environment);
 
     /***
      * Cleanup pending or rejected revision workflows
+     *
      * @param apiId Id of the API
      * @param externalRef external Id of the revision
-     * @return 200 response if deleted successfully
-     * @throws APIManagementException
+     * @throws APIManagementException if an exception occurs while cleaning up revision deployment
      */
     void cleanupAPIRevisionDeploymentWorkflows(String apiId, String externalRef) throws APIManagementException;
 

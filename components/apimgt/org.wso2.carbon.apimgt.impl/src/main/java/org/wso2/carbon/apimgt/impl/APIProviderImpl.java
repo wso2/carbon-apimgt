@@ -738,7 +738,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return field.length() <= maxLength;
     }
 
-    public String getDefaultVersion(APIIdentifier apiid) throws APIManagementException {
+    private String getDefaultVersion(APIIdentifier apiid) throws APIManagementException {
 
         String defaultVersion = null;
         try {
@@ -750,7 +750,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
 
-    public String getPublishedDefaultVersion(APIIdentifier apiid) throws APIManagementException {
+    private String getPublishedDefaultVersion(APIIdentifier apiid) throws APIManagementException {
 
         String defaultVersion = null;
         try {
@@ -5572,35 +5572,40 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + apiRevisionUUID, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionUUID));
         }
         int revisionId = apiRevision.getId();
-        List<APIRevisionDeployment> currentApiRevisionDeploymentList =
-                apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         API api = getLightweightAPIByUUID(apiId, organization);
         api.setRevisionedApiId(apiRevision.getRevisionUUID());
         api.setRevisionId(revisionId);
         api.setUuid(apiId);
         api.getId().setUuid(apiId);
         api.setOrganization(organization);
-        Set<String> environmentsToAdd = new HashSet<>();
-        Map<String, String> gatewayVhosts = new HashMap<>();
-        Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
-        for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
-            for (APIRevisionDeployment currentapiRevisionDeployment : currentApiRevisionDeploymentList) {
-                if (StringUtils.equalsIgnoreCase(currentapiRevisionDeployment.getDeployment(),
-                        apiRevisionDeployment.getDeployment())) {
-                    environmentsToRemove.add(currentapiRevisionDeployment);
+
+        List<APIRevisionDeployment> currentDeployments = apiMgtDAO.getAPIRevisionDeployments();
+
+        Set<APIRevisionDeployment> matchingRevisions = new HashSet<>();
+
+        for (APIRevisionDeployment pendingRevision : apiRevisionDeployments) {
+            for (APIRevisionDeployment currentRevision : currentDeployments) {
+                if (pendingRevision.getDeployment().equals(currentRevision.getDeployment())
+                        && org.wso2.carbon.apimgt.api.WorkflowStatus.CREATED.equals(currentRevision.getStatus())) {
+                    matchingRevisions.add(currentRevision);
                 }
             }
-            environmentsToAdd.add(apiRevisionDeployment.getDeployment());
-            gatewayVhosts.put(apiRevisionDeployment.getDeployment(), apiRevisionDeployment.getVhost());
         }
-        if (environmentsToRemove.size() > 0) {
-            apiMgtDAO.removeAPIRevisionDeployment(apiId, environmentsToRemove);
-            removeFromGateway(api, environmentsToRemove, environmentsToAdd);
+        if (!matchingRevisions.isEmpty()) {
+            WorkflowExecutor apiRevisionDeploymentExecutor = getWorkflowExecutor(
+                    WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
+            apiMgtDAO.removeAPIRevisionDeployment(apiId, matchingRevisions);
+            for (APIRevisionDeployment matchingRevision : matchingRevisions) {
+                WorkflowDTO matchingWFDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(
+                        matchingRevision.getRevisionUUID(), WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
+                try {
+                    apiRevisionDeploymentExecutor.cleanUpPendingTask(matchingWFDTO.getExternalWorkflowReference());
+                } catch (WorkflowException e) {
+                    log.error("Unable to clean pending task for workflow reference id "
+                            + matchingWFDTO.getExternalWorkflowReference(), e);
+                }
+            }
         }
-        GatewayArtifactsMgtDAO.getInstance()
-                .addAndRemovePublishedGatewayLabels(apiId, apiRevisionUUID, environmentsToAdd, gatewayVhosts,
-                        environmentsToRemove);
 
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionUUID, apiRevisionDeployments);
 
@@ -5621,13 +5626,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 revisionWFDto.setCreatedTime(System.currentTimeMillis());
                 revisionWFDto.setUserName(userNameWithoutChange);
                 revisionWFDto.setApiName(apiIdentifier.getApiName());
+                revisionWFDto.setApiVersion(apiIdentifier.getVersion());
                 revisionWFDto.setApiProvider(apiIdentifier.getProviderName());
                 revisionWFDto.setEnvironment(apiRevisionDeployment.getDeployment());
                 revisionWFDto.setRevisionId(String.valueOf(revisionId));
                 revisionDeploymentWFExecutor.execute(revisionWFDto);
+                revisionDeploymentWFExecutor.complete(revisionWFDto);
             } catch (WorkflowException e) {
-                log.error("Unable to execute Revision Deployment Workflow", e);
-                handleException("Unable to execute Revision Deployment Workflow", e);
+                log.error("Unable to execute Revision Deployment Workflow for revision: " + apiRevisionUUID, e);
+                handleException("Unable to execute Revision Deployment Workflow for revision: " + apiRevisionUUID, e);
             }
 
             // get the workflow state once the executor is executed.
@@ -5636,26 +5643,71 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // only send the notification if approved
             // wfDTO is null when simple wf executor is used because wf state is not stored in the db.
             if (wfDTO == null || WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
-                Set<String> environmentToPublish = new HashSet<>();
-                environmentToPublish.add(apiRevisionDeployment.getDeployment());
+                resumeDeployedAPIRevision(apiId, organization, apiRevisionUUID, String.valueOf(revisionId),
+                        apiRevisionDeployment.getDeployment());
+            }
+        }
+    }
 
-                // TODO remove this to organization once the microgateway can build gateway based on organization.
-                gatewayManager.deployToGateway(api, organization, environmentToPublish);
+    /**
+     * Resume API revision deployment process
+     *
+     * @param apiId        API Id using for the revision deployment
+     * @param organization organization identifier
+     * @param revisionUUID revision UUID
+     * @param revisionId   revision number
+     * @param environment  environment the deployment is happening
+     */
+    @Override public void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID,
+            String revisionId, String environment) {
 
-                String publishedDefaultVersion = getPublishedDefaultVersion(apiIdentifier);
-                String defaultVersion = getDefaultVersion(apiIdentifier);
-                apiMgtDAO.updateDefaultAPIPublishedVersion(apiIdentifier);
-                if (publishedDefaultVersion != null) {
-                    if (apiIdentifier.getVersion().equals(defaultVersion)) {
-                        api.setAsPublishedDefaultVersion(true);
-                    }
-                    if (api.isPublishedDefaultVersion() && !apiIdentifier.getVersion().equals(publishedDefaultVersion)) {
-                        APIIdentifier previousDefaultVersionIdentifier = new APIIdentifier(api.getId().getProviderName(),
-                                api.getId().getApiName(), publishedDefaultVersion);
-                        sendUpdateEventToPreviousDefaultVersion(previousDefaultVersionIdentifier, organization);
-                    }
+        try {
+            APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+            APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
+            APIRevisionDeployment apiRevisionDeployment = getAPIRevisionDeployment(environment, revisionUUID);
+            API api = getLightweightAPIByUUID(apiId, organization);
+            api.setRevisionedApiId(apiId);
+            api.setRevisionId(Integer.parseInt(revisionId));
+            List<APIRevisionDeployment> currentApiRevisionDeploymentList = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(
+                    apiId);
+            
+            Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
+            for (APIRevisionDeployment currentAPIRevisionDeployment : currentApiRevisionDeploymentList) {
+                if (StringUtils.equalsIgnoreCase(currentAPIRevisionDeployment.getDeployment(), environment)
+                        && !currentAPIRevisionDeployment.getRevisionUUID().equals(revisionUUID)) {
+                    environmentsToRemove.add(currentAPIRevisionDeployment);
                 }
             }
+
+            Set<String> environmentToPublish = Collections.singleton(environment);
+            Map<String, String> gatewayVhosts = new HashMap<>();
+            gatewayVhosts.put(environment, apiRevisionDeployment.getVhost());
+            if (!environmentsToRemove.isEmpty()) {
+                apiMgtDAO.removeAPIRevisionDeployment(apiId, environmentsToRemove);
+                removeFromGateway(api, environmentsToRemove, environmentToPublish);
+            }
+            GatewayArtifactsMgtDAO.getInstance()
+                    .addAndRemovePublishedGatewayLabels(apiId, revisionUUID, environmentToPublish, gatewayVhosts,
+                            environmentsToRemove);
+
+            // TODO remove this to organization once the microgateway can build gateway based on organization.
+            gatewayManager.deployToGateway(api, organization, environmentToPublish);
+
+            String publishedDefaultVersion = getPublishedDefaultVersion(apiIdentifier);
+            String defaultVersion = getDefaultVersion(apiIdentifier);
+            apiMgtDAO.updateDefaultAPIPublishedVersion(apiIdentifier);
+            if (publishedDefaultVersion != null) {
+                if (apiIdentifier.getVersion().equals(defaultVersion)) {
+                    api.setAsPublishedDefaultVersion(true);
+                }
+                if (api.isPublishedDefaultVersion() && !apiIdentifier.getVersion().equals(publishedDefaultVersion)) {
+                    APIIdentifier previousDefaultVersionIdentifier = new APIIdentifier(api.getId().getProviderName(),
+                            api.getId().getApiName(), publishedDefaultVersion);
+                    sendUpdateEventToPreviousDefaultVersion(previousDefaultVersionIdentifier, organization);
+                }
+            }
+        } catch (APIManagementException e) {
+            log.error("Error while getting API info from API: " + apiId, e);
         }
     }
 
