@@ -16796,7 +16796,7 @@ public class ApiMgtDAO {
      * @param revisionUUID UUID of the Revision
      * @param status       Status of the Revision deployment
      * @param environment  Environment of the Revision deployment
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs when updating the status of the Revision deployment
      */
     public void updateAPIRevisionDeploymentStatus(String revisionUUID, String status, String environment)
             throws APIManagementException {

@@ -750,7 +750,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
 
-    private String getPublishedDefaultVersion(APIIdentifier apiid) throws APIManagementException {
+    public String getPublishedDefaultVersion(APIIdentifier apiid) throws APIManagementException {
 
         String defaultVersion = null;
         try {
@@ -5670,7 +5670,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setRevisionId(Integer.parseInt(revisionId));
             List<APIRevisionDeployment> currentApiRevisionDeploymentList = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(
                     apiId);
-            
+
             Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
             for (APIRevisionDeployment currentAPIRevisionDeployment : currentApiRevisionDeploymentList) {
                 if (StringUtils.equalsIgnoreCase(currentAPIRevisionDeployment.getDeployment(), environment)
@@ -5771,8 +5771,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Cleanup pending or rejected revision workflows
      * @param apiId Id of the API
      * @param externalRef external Id of the revision
-     * @return 200 response if deleted successfully
-     * @throws APIManagementException
+     * @throws APIManagementException if failed to cleanup workflows
      */
     @Override
     public void cleanupAPIRevisionDeploymentWorkflows(String apiId, String externalRef)
