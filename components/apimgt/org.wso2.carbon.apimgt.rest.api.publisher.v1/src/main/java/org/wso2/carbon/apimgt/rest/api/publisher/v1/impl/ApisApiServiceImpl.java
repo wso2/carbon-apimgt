@@ -3715,6 +3715,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                                       List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                       MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        if (revisionId.isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Revision Id is not provided").build();
+        }
 
         //validate if api exists
         APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);

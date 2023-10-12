@@ -34,40 +34,45 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
  */
 public class APIRevisionDeploymentSimpleWorkflowExecutor extends WorkflowExecutor {
     private static final Log log = LogFactory.getLog(APIRevisionDeploymentSimpleWorkflowExecutor.class);
+    private static final String ENVIRONMENT_PROPERTY = "environment";
 
     @Override public String getWorkflowType() {
         return WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT;
     }
 
     /**
-     * Execute the workflow executor
+     * Execute the API Revision Deployment workflow simple process.
      *
-     * @param workFlowDTO - {@link APIRevisionWorkflowDTO}
-     * @throws WorkflowException
+     * @param workFlowDTO WorkflowDTO object
+     * @return WorkflowResponse object
+     * @throws WorkflowException if failed to execute the workflow
      */
-
+    @Override
     public WorkflowResponse execute(WorkflowDTO workFlowDTO) throws WorkflowException {
-        if (log.isDebugEnabled()) {
-            log.info("Executing API Revision Deployment Workflow");
-        }
         APIRevisionWorkflowDTO revisionWorkFlowDTO = (APIRevisionWorkflowDTO) workFlowDTO;
 
+        if (log.isDebugEnabled()) {
+            log.debug("Executing API Revision Deployment Workflow: " + revisionWorkFlowDTO.getWorkflowReference());
+        }
+
         workFlowDTO.setStatus(WorkflowStatus.APPROVED);
-        workFlowDTO.setMetadata("environment", revisionWorkFlowDTO.getEnvironment());
-        complete(workFlowDTO);
+        workFlowDTO.setMetadata(ENVIRONMENT_PROPERTY, revisionWorkFlowDTO.getEnvironment());
         return new GeneralWorkflowResponse();
     }
 
     /**
-     * Complete the external process status
-     * Based on the workflow status, will update the status column of the
-     * API Revision Mapping table
+     * Complete the API Revision Deployment simple workflow process.
      *
-     * @param workFlowDTO - WorkflowDTO
+     * @param workFlowDTO WorkflowDTO object
+     * @return WorkflowResponse object
+     * @throws WorkflowException if failed to complete the workflow
      */
+    @Override
     public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
+        String revisionId = workFlowDTO.getWorkflowReference();
+
         if (log.isDebugEnabled()) {
-            log.info("Complete  API Revision Deployment Workflow..");
+            log.debug("Complete  API Revision Deployment Workflow: " + revisionId);
         }
 
         String status = mapWorkflowStatusToAPIRevisionStatus(workFlowDTO.getStatus());
@@ -76,16 +81,18 @@ public class APIRevisionDeploymentSimpleWorkflowExecutor extends WorkflowExecuto
 
         try {
             dao.updateAPIRevisionDeploymentStatus(workFlowDTO.getWorkflowReference(), status,
-                    workFlowDTO.getMetadata("environment"));
+                    workFlowDTO.getMetadata(ENVIRONMENT_PROPERTY));
         } catch (APIManagementException e) {
-            String msg = "Error occurred when updating the status of the API revision deployment process";
+            String msg = "Error occurred when updating the status of the API revision: " + revisionId
+                    + " deployment process";
             log.error(msg, e);
             throw new WorkflowException(msg, e);
         }
         return new GeneralWorkflowResponse();
     }
 
-    @Override public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {
+    @Override
+    public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {
         return null;
     }
 
@@ -93,6 +100,7 @@ public class APIRevisionDeploymentSimpleWorkflowExecutor extends WorkflowExecuto
      * Return the status of the workflowDTO
      *
      * @param workflowStatus - status of the workflow
+     * @return status of the workflowDTO
      */
     private String mapWorkflowStatusToAPIRevisionStatus(WorkflowStatus workflowStatus) {
         switch (workflowStatus) {

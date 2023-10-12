@@ -37,40 +37,55 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
 
     private static final Log log = LogFactory.getLog(APIRevisionDeploymentApprovalWorkflowExecutor.class);
 
-    @Override public String getWorkflowType() {
+    private static final String REVISION_ID_PROPERTY = "revisionId";
+    private static final String API_NAME_PROPERTY = "apiName";
+    private static final String API_VERSION_PROPERTY = "apiVersion";
+    private static final String ENVIRONMENT_PROPERTY = "environment";
+    private static final String USERNAME_PROPERTY = "userName";
+    private static final String API_PROVIDER_PROPERTY = "apiProvider";
+    private static final String API_ID_PROPERTY = "apiId";
+
+    @Override
+    public String getWorkflowType() {
         return WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT;
     }
 
     /**
      * Execute the API Revision Deployment workflow approval process.
      *
-     * @param workflowDTO
+     * @param workflowDTO WorkflowDTO object
+     * @return WorkflowResponse object
+     * @throws WorkflowException if failed to execute the workflow
      */
-    @Override public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
-        if (log.isDebugEnabled()) {
-            log.debug("Executing API Revision Deployment Workflow");
-        }
+    @Override
+    public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
         APIRevisionWorkflowDTO revisionWorkFlowDTO = (APIRevisionWorkflowDTO) workflowDTO;
         APIRevision revision = revisionWorkFlowDTO.getAPIRevision();
+
+        if (log.isDebugEnabled()) {
+            log.debug("Executing API Revision Deployment Workflow: " + revisionWorkFlowDTO.getWorkflowReference());
+        }
+
         String message = "Approve revision " + revision.getId() + " deployment request from the user "
                 + revisionWorkFlowDTO.getUserName() + " for the environment " + revisionWorkFlowDTO.getEnvironment()
                 + " of the API " + revisionWorkFlowDTO.getApiName();
         workflowDTO.setWorkflowDescription(message);
 
-        workflowDTO.setProperties("revisionId", String.valueOf(revision.getId()));
-        workflowDTO.setProperties("apiName", revisionWorkFlowDTO.getApiName());
-        workflowDTO.setProperties("environment", revisionWorkFlowDTO.getEnvironment());
-        workflowDTO.setProperties("userName", revisionWorkFlowDTO.getUserName());
+        // set properties for Admin UI rendering
+        workflowDTO.setProperties(REVISION_ID_PROPERTY, String.valueOf(revision.getId()));
+        workflowDTO.setProperties(API_NAME_PROPERTY, revisionWorkFlowDTO.getApiName());
+        workflowDTO.setProperties(API_VERSION_PROPERTY, revisionWorkFlowDTO.getApiVersion());
+        workflowDTO.setProperties(ENVIRONMENT_PROPERTY, revisionWorkFlowDTO.getEnvironment());
+        workflowDTO.setProperties(USERNAME_PROPERTY, revisionWorkFlowDTO.getUserName());
 
-        workflowDTO.setMetadata("revisionId", revisionWorkFlowDTO.getRevisionId());
-        workflowDTO.setMetadata("environment", revisionWorkFlowDTO.getEnvironment());
-        workflowDTO.setMetadata("userName", revisionWorkFlowDTO.getUserName());
-        workflowDTO.setMetadata("apiProvider", revisionWorkFlowDTO.getApiProvider());
-        workflowDTO.setMetadata("apiId", revision.getApiUUID());
+        // set properties for Admin backend logic
+        workflowDTO.setMetadata(REVISION_ID_PROPERTY, revisionWorkFlowDTO.getRevisionId());
+        workflowDTO.setMetadata(ENVIRONMENT_PROPERTY, revisionWorkFlowDTO.getEnvironment());
+        workflowDTO.setMetadata(USERNAME_PROPERTY, revisionWorkFlowDTO.getUserName());
+        workflowDTO.setMetadata(API_PROVIDER_PROPERTY, revisionWorkFlowDTO.getApiProvider());
+        workflowDTO.setMetadata(API_ID_PROPERTY, revision.getApiUUID());
 
         super.execute(workflowDTO);
-
-        complete(workflowDTO);
 
         return new GeneralWorkflowResponse();
     }
@@ -78,17 +93,25 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
     /**
      * Complete the API Revision Deployment approval workflow process.
      *
-     * @param workFlowDTO
+     * @param workFlowDTO WorkflowDTO object
+     * @return WorkflowResponse object
+     * @throws WorkflowException if failed to complete the workflow
      */
-    @Override public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
+    @Override
+    public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
 
         workFlowDTO.setUpdatedTime(System.currentTimeMillis());
         String revisionId = workFlowDTO.getWorkflowReference();
+
+        if (log.isDebugEnabled()) {
+            log.debug("Complete  API Revision Deployment Workflow: " + revisionId);
+        }
+
         ApiMgtDAO dao = ApiMgtDAO.getInstance();
         WorkflowStatus revisionWFState = workFlowDTO.getStatus();
-        String environment = workFlowDTO.getMetadata("environment");
+        String environment = workFlowDTO.getMetadata(ENVIRONMENT_PROPERTY);
         try {
-            if (dao.getAPIRevisionDeploymentByRevisionUUID(revisionId) != null) {
+            if (dao.getAPIRevisionDeploymentByNameAndRevsionID(environment, revisionId) != null) {
                 super.complete(workFlowDTO);
                 if (log.isDebugEnabled()) {
                     String logMessage = "API Revision Deployment [Complete] Workflow Invoked. Workflow ID : "
@@ -99,12 +122,14 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
                 try {
                     dao.updateAPIRevisionDeploymentStatus(revisionId, status, environment);
                 } catch (APIManagementException e) {
-                    String msg = "Error occurred when updating the status of the API Revision Deployment process";
+                    String msg = "Error occurred when updating the status of the API Revision: " + revisionId
+                            + " for the API: " + workFlowDTO.getMetadata(API_NAME_PROPERTY) + "-"
+                            + workFlowDTO.getMetadata(API_VERSION_PROPERTY);
                     log.error(msg, e);
                     throw new WorkflowException(msg, e);
                 }
             } else {
-                String msg = "Revision does not exist";
+                String msg = "Revision Id: " + revisionId + "does not exist";
                 throw new WorkflowException(msg);
             }
         } catch (APIManagementException e) {
@@ -116,7 +141,8 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
         return new GeneralWorkflowResponse();
     }
 
-    @Override public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {
+    @Override
+    public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {
         // implemetation is not provided in this version
         return null;
     }
@@ -127,12 +153,12 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
      *
      * @param workflowExtRef Workflow external reference of pending workflow request
      */
-    @Override public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
+    @Override
+    public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
 
         String errorMsg;
         if (log.isDebugEnabled()) {
-            log.debug("Starting cleanup task for APIRevisionDeploymentApprovalWorkflowExecutor for :" +
-                    workflowExtRef);
+            log.debug("Starting cleanup task for APIRevisionDeploymentApprovalWorkflowExecutor for :" + workflowExtRef);
         }
         super.cleanUpPendingTask(workflowExtRef);
         try {
@@ -149,6 +175,7 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
      * Return the status of the workflowDTO
      *
      * @param workflowStatus - status of the workflow
+     * @return status of the workflowDTO
      */
     private String mapWorkflowStatusToAPIRevisionStatus(WorkflowStatus workflowStatus) {
         switch (workflowStatus) {
