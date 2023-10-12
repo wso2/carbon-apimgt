@@ -5809,7 +5809,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             + wfDTO.getExternalWorkflowReference(), e);
                 }
             }
-            GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, revisionId, environmentsToRemove);
+            if (WorkflowStatus.REJECTED == wfDTO.getStatus()) {
+                GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, revisionId, environmentsToRemove);
+            }
         }
     }
 
