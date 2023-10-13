@@ -3857,6 +3857,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override public Response deleteAPIRevisionDeploymentPendingTask(String apiId, String revisionId, String envName,
             MessageContext messageContext) {
         try {
+            String environment = "environment";
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             if (apiIdentifierFromTable == null) {
@@ -3869,7 +3870,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
             String externalRef = null;
             for (WorkflowDTO workflowDTO : workflowDTOList) {
-                if (envName.equals(workflowDTO.getMetadata("environment"))) {
+                if (envName.equals(workflowDTO.getMetadata(environment))) {
                     externalRef = workflowDTO.getExternalWorkflowReference();
                 }
             }

@@ -16905,7 +16905,9 @@ public class ApiMgtDAO {
                     String vhost = rs.getString("VHOST");
                     String status = rs.getString("REVISION_STATUS");
                     apiRevisionDeployment.setDeployment(environmentName);
-                    apiRevisionDeployment.setStatus(org.wso2.carbon.apimgt.api.WorkflowStatus.valueOf(status));
+                    if (!StringUtils.isEmpty(status)){
+                        apiRevisionDeployment.setStatus(org.wso2.carbon.apimgt.api.WorkflowStatus.valueOf(status));
+                    }
                     apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));

@@ -67,12 +67,11 @@ public class APIRevisionDeploymentSimpleWorkflowExecutor extends WorkflowExecuto
      * @return WorkflowResponse object
      * @throws WorkflowException if failed to complete the workflow
      */
-    @Override
-    public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
-        String revisionId = workFlowDTO.getWorkflowReference();
+    @Override public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
+        APIRevisionWorkflowDTO revisionWorkFlowDTO = (APIRevisionWorkflowDTO) workFlowDTO;
 
         if (log.isDebugEnabled()) {
-            log.debug("Complete  API Revision Deployment Workflow: " + revisionId);
+            log.debug("Complete  API Revision Deployment Workflow: " + revisionWorkFlowDTO.getWorkflowReference());
         }
 
         String status = mapWorkflowStatusToAPIRevisionStatus(workFlowDTO.getStatus());
@@ -81,10 +80,10 @@ public class APIRevisionDeploymentSimpleWorkflowExecutor extends WorkflowExecuto
 
         try {
             dao.updateAPIRevisionDeploymentStatus(workFlowDTO.getWorkflowReference(), status,
-                    workFlowDTO.getMetadata(ENVIRONMENT_PROPERTY));
+                    revisionWorkFlowDTO.getEnvironment());
         } catch (APIManagementException e) {
-            String msg = "Error occurred when updating the status of the API revision: " + revisionId
-                    + " deployment process";
+            String msg = "Error occurred when updating the status of the API revision: "
+                    + revisionWorkFlowDTO.getWorkflowReference() + " deployment process";
             log.error(msg, e);
             throw new WorkflowException(msg, e);
         }
