@@ -12041,6 +12041,7 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 policy = new ApplicationPolicy(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
                 setCommonPolicyDetails(policy, resultSet);
+                setRateLimitDetails(policy, resultSet);
             }
         } catch (SQLException e) {
             handleException("Failed to get application policy: " + policyName + '-' + tenantId, e);
@@ -12079,8 +12080,7 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 policy = new ApplicationPolicy(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
                 setCommonPolicyDetails(policy, resultSet);
-                policy.setRateLimitCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
-                policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+                setRateLimitDetails(policy, resultSet);
             }
         } catch (SQLException e) {
             handleException("Failed to get application policy: " + uuid, e);
@@ -12897,6 +12897,12 @@ public class ApiMgtDAO {
 
     }
 
+    private void setRateLimitDetails(ApplicationPolicy policy, ResultSet resultSet) throws SQLException {
+        if(resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT) > 0) {
+            policy.setRateLimitCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
+            policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+        }
+    }
     /**
      * Populated common attributes of policy type objects to <code>policy</code>
      * from <code>resultSet</code>
