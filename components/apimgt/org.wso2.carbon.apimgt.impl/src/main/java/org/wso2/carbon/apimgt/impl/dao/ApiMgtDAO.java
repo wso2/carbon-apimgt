@@ -9388,13 +9388,10 @@ public class ApiMgtDAO {
                 ps.setString(1, keyManagerUUID);
                 ResultSet resultSet = ps.executeQuery();
                 ArrayList<String> roles = new ArrayList<>();
-                if (resultSet.next()) {
+                keyManagerPermissions.setPermissionType("PUBLIC");
+                while (resultSet.next()) {
                     roles.add(resultSet.getString("ROLE"));
-                }
-                if (roles.size() > 0) {
                     keyManagerPermissions.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
-                } else {
-                    keyManagerPermissions.setPermissionType("PUBLIC");
                 }
                 keyManagerPermissions.setRoles(roles);
                 conn.commit();
