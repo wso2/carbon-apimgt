@@ -4,8 +4,26 @@ package org.wso2.carbon.apimgt.notification.event;
  * Event to notify token revocation of a user by user events.
  */
 public class InternalTokenRevocationUserEvent extends Event {
+    private String subjectId;
+    private String subjectIdType;
     private long revocationTime;
-    private String userUUID;
+    private String organization;
+
+    public String getSubjectId() {
+        return subjectId;
+    }
+
+    public void setSubjectId(String subjectId) {
+        this.subjectId = subjectId;
+    }
+
+    public String getSubjectIdType() {
+        return subjectIdType;
+    }
+
+    public void setSubjectIdType(String subjectIdType) {
+        this.subjectIdType = subjectIdType;
+    }
 
     public long getRevocationTime() {
         return revocationTime;
@@ -15,11 +33,11 @@ public class InternalTokenRevocationUserEvent extends Event {
         this.revocationTime = revocationTime;
     }
 
-    public String getUserUUID() {
-        return userUUID;
+    public String getOrganization() {
+        return organization;
     }
 
-    public void setUserUUID(String userUUID) {
-        this.userUUID = userUUID;
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 }

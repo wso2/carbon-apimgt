@@ -25,17 +25,29 @@ import com.google.gson.annotations.SerializedName;
  */
 public class RevokedJWTUserDTO {
 
-    @SerializedName("user_uuid")
-    private String userUUID;
+    @SerializedName("subject_id")
+    private String subjectId;
+    @SerializedName("subject_id_type")
+    private String subjectIdType;
     @SerializedName("revocation_time")
     private Long revocationTime;
+    @SerializedName("organization")
+    private String organization;
 
-    public String getUserUUID() {
-        return userUUID;
+    public String getSubjectId() {
+        return subjectId;
     }
 
-    public void setUserUUID(String userUUID) {
-        this.userUUID = userUUID;
+    public void setSubjectId(String subjectId) {
+        this.subjectId = subjectId;
+    }
+
+    public String getSubjectIdType() {
+        return subjectIdType;
+    }
+
+    public void setSubjectIdType(String subjectIdType) {
+        this.subjectIdType = subjectIdType;
     }
 
     public Long getRevocationTime() {
@@ -44,5 +56,13 @@ public class RevokedJWTUserDTO {
 
     public void setRevocationTime(Long revocationTime) {
         this.revocationTime = revocationTime;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 }

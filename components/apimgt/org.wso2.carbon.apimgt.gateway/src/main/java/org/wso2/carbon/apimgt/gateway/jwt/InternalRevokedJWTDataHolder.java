@@ -41,6 +41,7 @@ public class InternalRevokedJWTDataHolder {
 
     /**
      * This method can be used to get the singleton instance of this class.
+     *
      * @return the singleton instance.
      */
     public static InternalRevokedJWTDataHolder getInstance() {
@@ -59,13 +60,12 @@ public class InternalRevokedJWTDataHolder {
 
     public boolean isJWTTokenClientIdExistsInRevokedMap(String consumerKey, Long jwtGeneratedTimestamp) {
 
-        if (internalRevokedConsumerKeyMap.containsKey(consumerKey)) {
-            Long jwtRevokedTime = internalRevokedConsumerKeyMap.get(consumerKey);
+        Long jwtRevokedTime = internalRevokedConsumerKeyMap.get(consumerKey);
 
-            if (jwtRevokedTime != null) {
-                Timestamp jwtRevokedTimestamp = new Timestamp(jwtRevokedTime);
-                return jwtRevokedTimestamp.after(new Timestamp(jwtGeneratedTimestamp));
-            }
+        if (jwtRevokedTime != null) {
+            Timestamp jwtRevokedTimestamp = new Timestamp(jwtRevokedTime);
+            jwtRevokedTimestamp.toLocalDateTime();
+            return jwtRevokedTimestamp.after(new Timestamp(jwtGeneratedTimestamp));
         }
         return false;
     }
@@ -81,14 +81,13 @@ public class InternalRevokedJWTDataHolder {
 
     public boolean isJWTTokenClientIdExistsInRevokedAppOnlyMap(String consumerKey, Long jwtGeneratedTimestamp) {
 
-        if (internalRevokedConsumerKeyAppOnlyMap.containsKey(consumerKey)) {
-            Long jwtRevokedTime = internalRevokedConsumerKeyAppOnlyMap.get(consumerKey);
+        Long jwtRevokedTime = internalRevokedConsumerKeyAppOnlyMap.get(consumerKey);
 
-            if (jwtRevokedTime != null) {
-                Timestamp jwtRevokedTimestamp = new Timestamp(jwtRevokedTime);
-                return jwtRevokedTimestamp.after(new Timestamp(jwtGeneratedTimestamp));
-            }
+        if (jwtRevokedTime != null) {
+            Timestamp jwtRevokedTimestamp = new Timestamp(jwtRevokedTime);
+            return jwtRevokedTimestamp.after(new Timestamp(jwtGeneratedTimestamp));
         }
+
         return false;
     }
 
@@ -103,13 +102,11 @@ public class InternalRevokedJWTDataHolder {
 
     public boolean isJWTTokenUserIdExistsInRevokedMap(String user, Long jwtGeneratedTimestamp) {
 
-        if (internalRevokedUserEventRuleMap.containsKey(user)) {
-            Long jwtRevokedTime = internalRevokedUserEventRuleMap.get(user);
+        Long jwtRevokedTime = internalRevokedUserEventRuleMap.get(user);
 
-            if (jwtRevokedTime != null) {
-                Timestamp jwtRevokedTimestamp = new Timestamp(jwtRevokedTime);
-                return jwtRevokedTimestamp.after(new Timestamp(jwtGeneratedTimestamp));
-            }
+        if (jwtRevokedTime != null) {
+            Timestamp jwtRevokedTimestamp = new Timestamp(jwtRevokedTime);
+            return jwtRevokedTimestamp.after(new Timestamp(jwtGeneratedTimestamp));
         }
         return false;
     }

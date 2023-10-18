@@ -33,10 +33,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Database utility to retrieve allow list,keyTemplates and Revoked Tokens.
@@ -211,19 +208,20 @@ public final class BlockConditionDBUtil {
     public static RevokedJWTConsumerKeyListDTO getRevokedJWTConsumerKeys() {
 
         RevokedJWTConsumerKeyListDTO revokedJWTConsumerKeyListDTO = new RevokedJWTConsumerKeyListDTO();
-        String sqlQuery = "SELECT CONSUMER_KEY, IS_REVOKE_APP_ONLY, TIME_REVOKED " +
+        String sqlQuery = "SELECT CONSUMER_KEY, TIME_REVOKED, ORGANIZATION " +
                 "FROM AM_INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENTS";
         try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sqlQuery);) {
+             PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     String consumerKey = rs.getString("CONSUMER_KEY");
-                    boolean isRevokeAppOnly = rs.getBoolean("IS_REVOKE_APP_ONLY");
-                    Timestamp revocationTime = rs.getTimestamp("TIME_REVOKED");
+                    Timestamp revocationTime = rs.getTimestamp("TIME_REVOKED",
+                            Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+                    String organization = rs.getString("ORGANIZATION");
                     RevokedJWTConsumerKeyDTO revokedJWTConsumerKeyDTO = new RevokedJWTConsumerKeyDTO();
                     revokedJWTConsumerKeyDTO.setConsumerKey(consumerKey);
-                    revokedJWTConsumerKeyDTO.setIsRevokeAppOnly(isRevokeAppOnly);
                     revokedJWTConsumerKeyDTO.setRevocationTime(revocationTime.getTime());
+                    revokedJWTConsumerKeyDTO.setOrganization(organization);
                     revokedJWTConsumerKeyListDTO.add(revokedJWTConsumerKeyDTO);
                 }
             }
@@ -241,16 +239,22 @@ public final class BlockConditionDBUtil {
     public static RevokedJWTUserListDTO getRevokedJWTUsers() {
 
         RevokedJWTUserListDTO revokedJWTUserListDTO = new RevokedJWTUserListDTO();
-        String sqlQuery = "SELECT USER_ID, TIME_REVOKED FROM AM_INTERNAL_TOKEN_REVOCATION_USER_EVENTS";
+        String sqlQuery = "SELECT SUBJECT_ID, SUBJECT_ID_TYPE, TIME_REVOKED, ORGANIZATION " +
+                "FROM AM_INTERNAL_TOKEN_REVOCATION_USER_EVENTS";
         try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sqlQuery);) {
+             PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    String userUuid = rs.getString("USER_ID");
-                    Timestamp revocationTime = rs.getTimestamp("TIME_REVOKED");
+                    String subjectId = rs.getString("SUBJECT_ID");
+                    String subjectIdType = rs.getString("SUBJECT_ID_TYPE");
+                    Timestamp revocationTime = rs.getTimestamp("TIME_REVOKED",
+                            Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+                    String organization = rs.getString("ORGANIZATION");
                     RevokedJWTUserDTO revokedJWTUserDTO = new RevokedJWTUserDTO();
-                    revokedJWTUserDTO.setUserUuid(userUuid);
+                    revokedJWTUserDTO.setSubjectId(subjectId);
+                    revokedJWTUserDTO.setSubjectIdType(subjectIdType);
                     revokedJWTUserDTO.setRevocationTime(revocationTime.getTime());
+                    revokedJWTUserDTO.setOrganization(organization);
                     revokedJWTUserListDTO.add(revokedJWTUserDTO);
                 }
             }

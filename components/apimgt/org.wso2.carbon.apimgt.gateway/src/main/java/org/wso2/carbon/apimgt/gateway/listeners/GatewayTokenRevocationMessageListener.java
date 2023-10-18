@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.jwt.InternalRevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import javax.jms.*;
@@ -49,14 +50,14 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                     if (payloadData.get("type") != null && payloadData.get("type").asText()
                             .equals(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENT)) {
                         handleInternallyRevokedConsumerKeyMessage(payloadData.get("consumerKey").asText()
-                                , payloadData.get("isRevokeAppOnly").asBoolean()
                                 , payloadData.get("revocationTime").asLong(), payloadData.get("type").asText());
                     }
 
                     if (payloadData.get("type") != null && payloadData.get("type").asText()
                             .equals(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_USER_EVENT)) {
-                        handleInternallyRevokedUserEventMessage(payloadData.get("userUUID").asText(),
-                                payloadData.get("revocationTime").asLong(), payloadData.get("type").asText());
+                        handleInternallyRevokedUserEventMessage(payloadData.get("subjectId").asText(),
+                                payloadData.get("subjectIdType").asText(), payloadData.get("revocationTime").asLong(),
+                                payloadData.get("type").asText());
                     }
 
                     if (APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
@@ -106,18 +107,21 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
         }
     }
 
-    private void handleInternallyRevokedConsumerKeyMessage(String consumerKey, boolean isRevokeAppOnly,
-                                                           long revocationTime, String type) {
+    private void handleInternallyRevokedConsumerKeyMessage(String consumerKey, long revocationTime, String type) {
         if (APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENT.equals(type)) {
-            ServiceReferenceHolder.getInstance().getRevokedConsumerKeyService()
-                    .addConsumerKeyIntoMap(consumerKey, isRevokeAppOnly, revocationTime);
+            InternalRevokedJWTDataHolder.getInstance().addInternalRevokedJWTClientIDToMap(consumerKey, revocationTime);
         }
     }
 
-    private void handleInternallyRevokedUserEventMessage(String userUUID, long revocationTime, String type) {
+    private void handleInternallyRevokedUserEventMessage(String subjectId, String subjectIdType,
+                                                         long revocationTime, String type) {
         if (APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_USER_EVENT.equals(type)) {
-            ServiceReferenceHolder.getInstance().getRevokedUserEventService()
-                    .addUserEventIntoMap(userUUID, revocationTime);
+            if ("USER_ID".equals(subjectIdType)) {
+                InternalRevokedJWTDataHolder.getInstance().addInternalRevokedJWTUserIDToMap(subjectId, revocationTime);
+            } else if ("CLIENT_ID".equals(subjectIdType)) {
+                InternalRevokedJWTDataHolder.getInstance().addInternalRevokedJWTClientIDToAppOnlyMap(subjectId,
+                        revocationTime);
+            }
         }
     }
 }

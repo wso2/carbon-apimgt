@@ -761,13 +761,19 @@ definitions:
       $ref: '#/definitions/RevokedJWTUser'
   RevokedJWTUser:
     properties:
-      user_uuid:
+      subject_id:
         type: string
-        description: User UUID of revoked JWT(s).
+        description: Subject Id of the revoked JWT(s). Can be user id or client id.
+      subject_id_type:
+        type: string
+        description: Type of the subject id. User id or client id.
       revocation_time:
         type: integer
         format: int64
         description: revocation timestamp.
+      organization:
+        type: string
+        description: Organization of the revoked user.
   RevokedJWTConsumerKeyList:
     type: array
     items:
@@ -777,9 +783,6 @@ definitions:
       consumer_key:
         type: string
         description: consumer key of the JWT.
-      is_revoke_app_only:
-        type: boolean
-        description: whether the consumer key is revoked only for the application type.
       revocation_time:
         type: integer
         format: int64
@@ -787,9 +790,9 @@ definitions:
       type:
         type: string
         description: revoked consumer key type.
-      tenant_id:
+      organization:
         type: string
-        description: revoked consumer key's respective tenant Id.
+        description: organization of the revoked consumer key
   RevokeAPIKey:
     properties:
       apiKey:

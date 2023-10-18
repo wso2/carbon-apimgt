@@ -35,8 +35,6 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
 import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
-import org.wso2.carbon.apimgt.impl.token.RevokedConsumerKeyEventService;
-import org.wso2.carbon.apimgt.impl.token.RevokedUserEventService;
 import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.webhooks.SubscriptionsDataService;
@@ -110,8 +108,6 @@ public class ServiceReferenceHolder {
     }
     private ArtifactRetriever artifactRetriever;
     private int gatewayCount = 1;
-    private RevokedConsumerKeyEventService revokedConsumerKeyEventService;
-    private RevokedUserEventService revokedUserEventService;
 
     private ServiceReferenceHolder() {
 
@@ -423,21 +419,6 @@ public class ServiceReferenceHolder {
         this.redisPool = redisPool;
     }
 
-    public RevokedConsumerKeyEventService getRevokedConsumerKeyService() {
-        return revokedConsumerKeyEventService;
-    }
-
-    public void setRevokedConsumerKeyService(RevokedConsumerKeyEventService revokedConsumerKeyEventService) {
-        this.revokedConsumerKeyEventService = revokedConsumerKeyEventService;
-    }
-
-    public RevokedUserEventService getRevokedUserEventService() {
-        return revokedUserEventService;
-    }
-
-    public void setRevokedUserEventService(RevokedUserEventService revokedUserEventService) {
-        this.revokedUserEventService = revokedUserEventService;
-    }
     public AnalyticsCustomDataProvider getAnalyticsCustomDataProvider() {
         return analyticsCustomDataProvider;
     }

@@ -39,11 +39,17 @@ public class InternallyRevokedRuleByUserEventRetriever extends TimerTask {
         RevokedJWTUserDTO[] revokedJWTUserDTOs = retrieveRevokedJWTUsersData();
         if (revokedJWTUserDTOs != null) {
             for (RevokedJWTUserDTO revokedJWTUserDTO : revokedJWTUserDTOs) {
-                InternalRevokedJWTDataHolder.getInstance().
-                        addInternalRevokedJWTUserIDToMap(revokedJWTUserDTO.getUserUUID(),
-                                revokedJWTUserDTO.getRevocationTime());
+                if ("USER_ID".equals(revokedJWTUserDTO.getSubjectIdType())) {
+                    InternalRevokedJWTDataHolder.getInstance().
+                            addInternalRevokedJWTUserIDToMap(revokedJWTUserDTO.getSubjectId(),
+                                    revokedJWTUserDTO.getRevocationTime());
+                } else if ("CLIENT_ID".equals(revokedJWTUserDTO.getSubjectIdType())) {
+                    InternalRevokedJWTDataHolder.getInstance().
+                            addInternalRevokedJWTClientIDToAppOnlyMap(revokedJWTUserDTO.getSubjectId(),
+                                    revokedJWTUserDTO.getRevocationTime());
+                }
                 if (log.isDebugEnabled()) {
-                    log.debug("User uuid : " + revokedJWTUserDTO.getUserUUID()
+                    log.debug("Subject Id : " + revokedJWTUserDTO.getSubjectId()
                             + " added to the user event revoke map.");
                 }
             }

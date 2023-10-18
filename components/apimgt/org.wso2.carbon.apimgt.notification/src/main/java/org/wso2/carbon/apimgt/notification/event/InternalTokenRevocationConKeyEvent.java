@@ -25,8 +25,8 @@ public class InternalTokenRevocationConKeyEvent extends Event {
 
 
     private String consumerKey;
-    private boolean isRevokeAppOnly;
     private long revocationTime;
+    private String organization;
 
     public String getConsumerKey() {
         return consumerKey;
@@ -44,11 +44,11 @@ public class InternalTokenRevocationConKeyEvent extends Event {
         this.revocationTime = revocationTime;
     }
 
-    public boolean isRevokeAppOnly() {
-        return isRevokeAppOnly;
+    public String getOrganization() {
+        return organization;
     }
 
-    public void setRevokeAppOnly(boolean revokeAppOnly) {
-        isRevokeAppOnly = revokeAppOnly;
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 }

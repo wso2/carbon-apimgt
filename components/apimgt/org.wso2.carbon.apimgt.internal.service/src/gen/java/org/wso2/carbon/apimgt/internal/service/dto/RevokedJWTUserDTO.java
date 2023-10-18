@@ -16,25 +16,45 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 public class RevokedJWTUserDTO   {
   
-    private String userUuid = null;
+    private String subjectId = null;
+    private String subjectIdType = null;
     private Long revocationTime = null;
+    private String organization = null;
 
   /**
-   * User UUID of revoked JWT(s).
+   * Subject Id of the revoked JWT(s). Can be user id or client id.
    **/
-  public RevokedJWTUserDTO userUuid(String userUuid) {
-    this.userUuid = userUuid;
+  public RevokedJWTUserDTO subjectId(String subjectId) {
+    this.subjectId = subjectId;
     return this;
   }
 
   
-  @ApiModelProperty(value = "User UUID of revoked JWT(s).")
-  @JsonProperty("user_uuid")
-  public String getUserUuid() {
-    return userUuid;
+  @ApiModelProperty(value = "Subject Id of the revoked JWT(s). Can be user id or client id.")
+  @JsonProperty("subject_id")
+  public String getSubjectId() {
+    return subjectId;
   }
-  public void setUserUuid(String userUuid) {
-    this.userUuid = userUuid;
+  public void setSubjectId(String subjectId) {
+    this.subjectId = subjectId;
+  }
+
+  /**
+   * Type of the subject id. User id or client id.
+   **/
+  public RevokedJWTUserDTO subjectIdType(String subjectIdType) {
+    this.subjectIdType = subjectIdType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Type of the subject id. User id or client id.")
+  @JsonProperty("subject_id_type")
+  public String getSubjectIdType() {
+    return subjectIdType;
+  }
+  public void setSubjectIdType(String subjectIdType) {
+    this.subjectIdType = subjectIdType;
   }
 
   /**
@@ -55,6 +75,24 @@ public class RevokedJWTUserDTO   {
     this.revocationTime = revocationTime;
   }
 
+  /**
+   * Organization of the revoked user.
+   **/
+  public RevokedJWTUserDTO organization(String organization) {
+    this.organization = organization;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Organization of the revoked user.")
+  @JsonProperty("organization")
+  public String getOrganization() {
+    return organization;
+  }
+  public void setOrganization(String organization) {
+    this.organization = organization;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -65,13 +103,15 @@ public class RevokedJWTUserDTO   {
       return false;
     }
     RevokedJWTUserDTO revokedJWTUser = (RevokedJWTUserDTO) o;
-    return Objects.equals(userUuid, revokedJWTUser.userUuid) &&
-        Objects.equals(revocationTime, revokedJWTUser.revocationTime);
+    return Objects.equals(subjectId, revokedJWTUser.subjectId) &&
+        Objects.equals(subjectIdType, revokedJWTUser.subjectIdType) &&
+        Objects.equals(revocationTime, revokedJWTUser.revocationTime) &&
+        Objects.equals(organization, revokedJWTUser.organization);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(userUuid, revocationTime);
+    return Objects.hash(subjectId, subjectIdType, revocationTime, organization);
   }
 
   @Override
@@ -79,8 +119,10 @@ public class RevokedJWTUserDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class RevokedJWTUserDTO {\n");
     
-    sb.append("    userUuid: ").append(toIndentedString(userUuid)).append("\n");
+    sb.append("    subjectId: ").append(toIndentedString(subjectId)).append("\n");
+    sb.append("    subjectIdType: ").append(toIndentedString(subjectIdType)).append("\n");
     sb.append("    revocationTime: ").append(toIndentedString(revocationTime)).append("\n");
+    sb.append("    organization: ").append(toIndentedString(organization)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -17,10 +17,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 public class RevokedJWTConsumerKeyDTO   {
   
     private String consumerKey = null;
-    private Boolean isRevokeAppOnly = null;
     private Long revocationTime = null;
     private String type = null;
-    private String tenantId = null;
+    private String organization = null;
 
   /**
    * consumer key of the JWT.
@@ -38,24 +37,6 @@ public class RevokedJWTConsumerKeyDTO   {
   }
   public void setConsumerKey(String consumerKey) {
     this.consumerKey = consumerKey;
-  }
-
-  /**
-   * whether the consumer key is revoked only for the application type.
-   **/
-  public RevokedJWTConsumerKeyDTO isRevokeAppOnly(Boolean isRevokeAppOnly) {
-    this.isRevokeAppOnly = isRevokeAppOnly;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "whether the consumer key is revoked only for the application type.")
-  @JsonProperty("is_revoke_app_only")
-  public Boolean isIsRevokeAppOnly() {
-    return isRevokeAppOnly;
-  }
-  public void setIsRevokeAppOnly(Boolean isRevokeAppOnly) {
-    this.isRevokeAppOnly = isRevokeAppOnly;
   }
 
   /**
@@ -95,21 +76,21 @@ public class RevokedJWTConsumerKeyDTO   {
   }
 
   /**
-   * revoked consumer key&#39;s respective tenant Id.
+   * organization of the revoked consumer key
    **/
-  public RevokedJWTConsumerKeyDTO tenantId(String tenantId) {
-    this.tenantId = tenantId;
+  public RevokedJWTConsumerKeyDTO organization(String organization) {
+    this.organization = organization;
     return this;
   }
 
   
-  @ApiModelProperty(value = "revoked consumer key's respective tenant Id.")
-  @JsonProperty("tenant_id")
-  public String getTenantId() {
-    return tenantId;
+  @ApiModelProperty(value = "organization of the revoked consumer key")
+  @JsonProperty("organization")
+  public String getOrganization() {
+    return organization;
   }
-  public void setTenantId(String tenantId) {
-    this.tenantId = tenantId;
+  public void setOrganization(String organization) {
+    this.organization = organization;
   }
 
 
@@ -123,15 +104,14 @@ public class RevokedJWTConsumerKeyDTO   {
     }
     RevokedJWTConsumerKeyDTO revokedJWTConsumerKey = (RevokedJWTConsumerKeyDTO) o;
     return Objects.equals(consumerKey, revokedJWTConsumerKey.consumerKey) &&
-        Objects.equals(isRevokeAppOnly, revokedJWTConsumerKey.isRevokeAppOnly) &&
         Objects.equals(revocationTime, revokedJWTConsumerKey.revocationTime) &&
         Objects.equals(type, revokedJWTConsumerKey.type) &&
-        Objects.equals(tenantId, revokedJWTConsumerKey.tenantId);
+        Objects.equals(organization, revokedJWTConsumerKey.organization);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(consumerKey, isRevokeAppOnly, revocationTime, type, tenantId);
+    return Objects.hash(consumerKey, revocationTime, type, organization);
   }
 
   @Override
@@ -140,10 +120,9 @@ public class RevokedJWTConsumerKeyDTO   {
     sb.append("class RevokedJWTConsumerKeyDTO {\n");
     
     sb.append("    consumerKey: ").append(toIndentedString(consumerKey)).append("\n");
-    sb.append("    isRevokeAppOnly: ").append(toIndentedString(isRevokeAppOnly)).append("\n");
     sb.append("    revocationTime: ").append(toIndentedString(revocationTime)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
-    sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
+    sb.append("    organization: ").append(toIndentedString(organization)).append("\n");
     sb.append("}");
     return sb.toString();
   }

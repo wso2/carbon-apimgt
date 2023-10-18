@@ -28,10 +28,10 @@ public class RevokedJWTConsumerKeyDTO {
 
     @SerializedName("consumer_key")
     private String consumerKey;
-    @SerializedName("is_revoke_app_only")
-    private boolean isRevokedAppOnly;
     @SerializedName("revocation_time")
     private Long revocationTime;
+    @SerializedName("organization")
+    private String organization;
 
     public void setRevocationTime(Long revocationTime) {
         this.revocationTime = revocationTime;
@@ -49,11 +49,11 @@ public class RevokedJWTConsumerKeyDTO {
         this.consumerKey = consumerKey;
     }
 
-    public boolean isRevokedAppOnly() {
-        return isRevokedAppOnly;
+    public String getOrganization() {
+        return organization;
     }
 
-    public void setRevokedAppOnly(boolean revokedAppOnly) {
-        isRevokedAppOnly = revokedAppOnly;
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 }

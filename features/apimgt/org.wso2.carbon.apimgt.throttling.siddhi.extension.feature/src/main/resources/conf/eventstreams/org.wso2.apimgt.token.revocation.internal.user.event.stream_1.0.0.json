@@ -9,12 +9,20 @@
       "type": "STRING"
     },
     {
-      "name": "userUUID",
+      "name": "subjectId",
+      "type": "STRING"
+    },
+    {
+      "name": "subjectIdType",
       "type": "STRING"
     },
     {
       "name": "revocationTime",
       "type": "LONG"
+    },
+    {
+      "name": "organization",
+      "type": "STRING"
     },
     {
       "name": "type",

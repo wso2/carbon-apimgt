@@ -81,16 +81,19 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
     public boolean handleInternalTokenRevocationByConsumerKeyEvent(InternalTokenRevocationConKeyEvent consumerKeyEvent)
             throws APIManagementException {
 
-        ApiMgtDAO.getInstance().addRevokedConsumerKey(
-                consumerKeyEvent.getConsumerKey(), consumerKeyEvent.isRevokeAppOnly(),
-                consumerKeyEvent.getRevocationTime(), consumerKeyEvent.getTenantId());
+        ApiMgtDAO.getInstance().addRevokedConsumerKey(consumerKeyEvent.getConsumerKey(),
+                consumerKeyEvent.getRevocationTime(), consumerKeyEvent.getOrganization());
 
         // TODO: check whether we need to implement RevocationRequestPublisher based mechanism to send events
         // realtime or persistent storage as done in revocationRequestPublisher.publishRevocationEvents() method
         // in handleTokenRevocationEvent()
-        Object[] objects = new Object[]{consumerKeyEvent.getEventId(), consumerKeyEvent.getConsumerKey(),
-                consumerKeyEvent.isRevokeAppOnly(), consumerKeyEvent.getRevocationTime(),
-                consumerKeyEvent.getType(), consumerKeyEvent.getTenantId()};
+        Object[] objects = new Object[]{
+                consumerKeyEvent.getEventId(),
+                consumerKeyEvent.getConsumerKey(),
+                consumerKeyEvent.getRevocationTime(),
+                consumerKeyEvent.getOrganization(),
+                consumerKeyEvent.getType()
+        };
         EventPublisherEvent tokenRevocationEvent = new EventPublisherEvent(
                 APIConstants.TOKEN_REVOCATION_CONSUMER_KEY_EVENT_STREAM_ID,
                 System.currentTimeMillis(), objects);
@@ -102,13 +105,15 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
 
     public void handleInternalTokenRevocationByUserEvent(InternalTokenRevocationUserEvent internalTokenRevocationEvent)
             throws APIManagementException {
-        //persist two revocation rules in the AM database to hande `sub` claim in both scenarios (username and uuid)
-        ApiMgtDAO.getInstance().addRevokedRuleByUserEvent(internalTokenRevocationEvent.getUserUUID(),
-                internalTokenRevocationEvent.getRevocationTime());
+        ApiMgtDAO.getInstance().addRevokedRuleByUserEvent(internalTokenRevocationEvent.getSubjectId(),
+                internalTokenRevocationEvent.getSubjectIdType(), internalTokenRevocationEvent.getRevocationTime(),
+                internalTokenRevocationEvent.getOrganization());
 
         Object[] objects = new Object[]{internalTokenRevocationEvent.getEventId(),
-                internalTokenRevocationEvent.getUserUUID(),
+                internalTokenRevocationEvent.getSubjectId(),
+                internalTokenRevocationEvent.getSubjectIdType(),
                 internalTokenRevocationEvent.getRevocationTime(),
+                internalTokenRevocationEvent.getOrganization(),
                 internalTokenRevocationEvent.getType()
         };
         EventPublisherEvent tokenRevocationEvent = new EventPublisherEvent(
