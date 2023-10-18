@@ -5579,18 +5579,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.getId().setUuid(apiId);
         api.setOrganization(organization);
 
-        List<APIRevisionDeployment> currentDeployments = apiMgtDAO.getAPIRevisionDeployments();
-
+        // If there are pending deployments, get the details of those deployments
+        List<APIRevisionDeployment> currentPendingDeployments = apiMgtDAO.getAPIRevisionDeploymentsByWorkflowStatusAndApiUUID(
+                apiId, String.valueOf(WorkflowStatus.CREATED));
         Set<APIRevisionDeployment> matchingRevisions = new HashSet<>();
-
         for (APIRevisionDeployment pendingRevision : apiRevisionDeployments) {
-            for (APIRevisionDeployment currentRevision : currentDeployments) {
-                if (pendingRevision.getDeployment().equals(currentRevision.getDeployment())
-                        && org.wso2.carbon.apimgt.api.WorkflowStatus.CREATED.equals(currentRevision.getStatus())) {
+            // Set the displayOnDevportal to false for the pending revisions
+            pendingRevision.setDisplayOnDevportal(false);
+            for (APIRevisionDeployment currentRevision : currentPendingDeployments) {
+                if (pendingRevision.getDeployment().equals(currentRevision.getDeployment())) {
                     matchingRevisions.add(currentRevision);
                 }
             }
         }
+        // Remove pending deployments
         if (!matchingRevisions.isEmpty()) {
             WorkflowExecutor apiRevisionDeploymentExecutor = getWorkflowExecutor(
                     WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
@@ -5643,6 +5645,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // only send the notification if approved
             // wfDTO is null when simple wf executor is used because wf state is not stored in the db.
             if (wfDTO == null || WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
+                apiRevisionDeployment.setDisplayOnDevportal(true);
+                apiMgtDAO.updateAPIRevisionDeployment (apiId,Collections.singleton(apiRevisionDeployment));
                 resumeDeployedAPIRevision(apiId, organization, apiRevisionUUID, String.valueOf(revisionId),
                         apiRevisionDeployment.getDeployment());
             }

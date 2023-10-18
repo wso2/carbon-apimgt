@@ -29,9 +29,8 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Workflow;
-import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIGatewayManager;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -53,8 +52,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.Set;
-import java.util.HashSet;
 
 /**
  * This class used to handle notifications in Workflow.
@@ -336,6 +333,13 @@ public class WorkflowUtils {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(providerName);
             apiProvider.resumeDeployedAPIRevision(apiId, organization, workflow.getWorkflowReference(), revisionId,
                     environment);
+
+            //Set displayOnDevportal to true
+            APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+            apiRevisionDeployment.setRevisionUUID(workflow.getWorkflowReference());
+            apiRevisionDeployment.setDeployment(environment);
+            apiRevisionDeployment.setDisplayOnDevportal(true);
+            apiMgtDAO.updateAPIRevisionDeployment (apiId,Collections.singleton(apiRevisionDeployment));
         } catch (APIManagementException e) {
             String errorMsg = "Could not get workflow details for workflow reference id " + externalWorkflowRef;
             log.error(errorMsg, e);
