@@ -16889,29 +16889,26 @@ public class ApiMgtDAO {
     /**
      * Get APIRevisionDeployment details
      *
+     * @param apiUUID        API UUID
+     * @param workflowStatus Workflow status
      * @return List<APIRevisionDeployment> APIRevisionDeployment list
      * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
      */
-    public List<APIRevisionDeployment> getAPIRevisionDeployments() throws APIManagementException {
+    public List<APIRevisionDeployment> getAPIRevisionDeploymentsByWorkflowStatusAndApiUUID(String apiUUID,
+            String workflowStatus) throws APIManagementException {
 
         List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(
-                        SQLConstants.APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPINGS)) {
+                        SQLConstants.APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPINGS_BY_REVISION_STATUS_AND_API_UUID)) {
+            statement.setString(1, workflowStatus);
+            statement.setString(2, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
                     String environmentName = rs.getString("NAME");
-                    String vhost = rs.getString("VHOST");
-                    String status = rs.getString("REVISION_STATUS");
                     apiRevisionDeployment.setDeployment(environmentName);
-                    if (!StringUtils.isEmpty(status)){
-                        apiRevisionDeployment.setStatus(org.wso2.carbon.apimgt.api.WorkflowStatus.valueOf(status));
-                    }
-                    apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
-                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
-                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
                     apiRevisionDeploymentList.add(apiRevisionDeployment);
                 }
             }
