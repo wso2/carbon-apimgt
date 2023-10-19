@@ -99,13 +99,16 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         ThrottleProperties.JMSConnectionProperties jmsConnectionProperties =
                 throttleProperties.getJmsConnectionProperties();
         this.jmsTransportHandlerForTrafficManager =
-                new JMSTransportHandler(jmsConnectionProperties.getJmsConnectionProperties());
+                new JMSTransportHandler(jmsConnectionProperties.getJmsConnectionProperties(), null);
         EventHubConfigurationDto.EventHubReceiverConfiguration eventHubReceiverConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getEventHubConfigurationDto()
                         .getEventHubReceiverConfiguration();
+        ThrottleProperties.JMSConnectionProperties.JMSTaskManagerProperties jmsTaskManagerProperties =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getThrottleProperties()
+                        .getJmsConnectionProperties().getJmsTaskManagerProperties();
         if (eventHubReceiverConfiguration != null) {
-            this.jmsTransportHandlerForEventHub =
-                    new JMSTransportHandler(eventHubReceiverConfiguration.getJmsConnectionParameters());
+            this.jmsTransportHandlerForEventHub = new JMSTransportHandler(
+                    eventHubReceiverConfiguration.getJmsConnectionParameters(), jmsTaskManagerProperties);
         }
     }
 
