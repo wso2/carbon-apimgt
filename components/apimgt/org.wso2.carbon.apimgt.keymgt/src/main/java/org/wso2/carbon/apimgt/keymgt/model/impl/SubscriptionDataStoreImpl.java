@@ -182,6 +182,12 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public API getApiByContextAndVersion(String context, String version) {
 
+        if (context == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cannot retrieve API information with null context");
+            }
+            return null;
+        }
         String key = context + DELEM_PERIOD + version;
         String synchronizeKey = "SubscriptionDataStoreImpl-API-" + key;
         API api = apiMap.get(key);
