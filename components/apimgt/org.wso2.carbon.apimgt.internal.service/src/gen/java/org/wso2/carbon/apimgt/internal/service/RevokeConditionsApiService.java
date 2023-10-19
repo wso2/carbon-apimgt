@@ -10,7 +10,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.RevokedJWTListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.RevokedConditionsDTO;
 
 import java.util.List;
 
@@ -20,6 +20,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 
-public interface RevokedjwtApiService {
-      public Response revokedjwtGet(MessageContext messageContext) throws APIManagementException;
+public interface RevokeConditionsApiService {
+      public Response revokeConditionsGet(MessageContext messageContext) throws APIManagementException;
 }

@@ -178,9 +178,9 @@ public final class BlockConditionDBUtil {
      *
      * @return list fo revoked JWTs
      */
-    public static RevokedJWTListDTO getRevokedJWTs() {
+    public static List<RevokedJWTDTO> getRevokedJWTs() {
 
-        RevokedJWTListDTO revokedJWTListDTO = new RevokedJWTListDTO();
+        List<RevokedJWTDTO> revokedJWTListDTO = new ArrayList<>();
         String sqlQuery = "SELECT SIGNATURE,EXPIRY_TIMESTAMP FROM AM_REVOKED_JWT";
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sqlQuery);) {
@@ -205,9 +205,9 @@ public final class BlockConditionDBUtil {
      *
      * @return list of consumer keys for revoked JWTs
      */
-    public static RevokedJWTConsumerKeyListDTO getRevokedJWTConsumerKeys() {
+    public static List<RevokedJWTConsumerKeyDTO> getRevokedJWTConsumerKeys() {
 
-        RevokedJWTConsumerKeyListDTO revokedJWTConsumerKeyListDTO = new RevokedJWTConsumerKeyListDTO();
+        List<RevokedJWTConsumerKeyDTO> revokedJWTConsumerKeyListDTO = new ArrayList<>();
         String sqlQuery = "SELECT CONSUMER_KEY, TIME_REVOKED, ORGANIZATION " +
                 "FROM AM_INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENTS";
         try (Connection conn = APIMgtDBUtil.getConnection();
@@ -236,9 +236,9 @@ public final class BlockConditionDBUtil {
      *
      * @return list of users for revoked JWTs
      */
-    public static RevokedJWTUserListDTO getRevokedJWTUsers() {
+    public static List<RevokedJWTUserDTO> getRevokedJWTUsers() {
 
-        RevokedJWTUserListDTO revokedJWTUserListDTO = new RevokedJWTUserListDTO();
+        List<RevokedJWTUserDTO> revokedJWTUserListDTO = new ArrayList<>();
         String sqlQuery = "SELECT SUBJECT_ID, SUBJECT_ID_TYPE, TIME_REVOKED, ORGANIZATION " +
                 "FROM AM_INTERNAL_TOKEN_REVOCATION_USER_EVENTS";
         try (Connection conn = APIMgtDBUtil.getConnection();
@@ -262,5 +262,16 @@ public final class BlockConditionDBUtil {
             log.error("Error while fetching revoked JWTs from database. ", e);
         }
         return revokedJWTUserListDTO;
+    }
+
+    public static RevokedConditionsDTO getRevokedConditions() {
+
+        RevokedConditionsDTO revokedConditionsDTO = new RevokedConditionsDTO();
+
+        revokedConditionsDTO.setRevokedJWTList(getRevokedJWTs());
+        revokedConditionsDTO.setRevokedJWTConsumerKeyList(getRevokedJWTConsumerKeys());
+        revokedConditionsDTO.setRevokedJWTUserList(getRevokedJWTUsers());
+
+        return revokedConditionsDTO;
     }
 }

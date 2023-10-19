@@ -83,66 +83,18 @@
         }
       }
     },
-    "/revokedjwt" : {
+    "/revoke-conditions" : {
       "get" : {
-        "summary" : "JTIs of revoked jwt tokens",
-        "description" : "This will provide access to JTIs of revoked JWT tokens in database.\n",
+        "summary" : "get JTIs of revoked jwt tokens, users and consumer keys of revoked jwt tokens",
+        "description" : "This will provide access to JTIs of revoked JWT tokens in database.\nUsers of revoked JWTs by internal user events.\nConsumer keys of revoked JWTs by internal consumer key events.\n",
         "parameters" : [ ],
         "responses" : {
           "200" : {
-            "description" : "An array of revoke JWTs",
+            "description" : "An object containing arrays of revoke JWTs, revoked users, revoked consumer keys.",
             "schema" : {
               "type" : "array",
               "items" : {
-                "$ref" : "#/definitions/RevokedJWTList"
-              }
-            }
-          },
-          "default" : {
-            "description" : "Unexpected error",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/revokedUsers" : {
-      "get" : {
-        "summary" : "Users of revoked jwt",
-        "description" : "This will provide access to Users of revoked JWTs by internal user events.\n",
-        "parameters" : [ ],
-        "responses" : {
-          "200" : {
-            "description" : "An array of revoke JWTs",
-            "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/RevokedJWTUserList"
-              }
-            }
-          },
-          "default" : {
-            "description" : "Unexpected error",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/revokedconsumerkeys" : {
-      "get" : {
-        "summary" : "Consumer keys of revoked jwt",
-        "description" : "This will provide access to Consumer keys of revoked JWT's in database.\n",
-        "parameters" : [ ],
-        "responses" : {
-          "200" : {
-            "description" : "An array of revoke JWTs",
-            "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/RevokedJWTConsumerKeyList"
+                "$ref" : "#/definitions/RevokedConditions"
               }
             }
           },
@@ -959,10 +911,26 @@
         }
       }
     },
-    "RevokedJWTList" : {
-      "type" : "array",
-      "items" : {
-        "$ref" : "#/definitions/RevokedJWT"
+    "RevokedConditions" : {
+      "properties" : {
+        "revokedJWTList" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/RevokedJWT"
+          }
+        },
+        "revokedJWTUserList" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/RevokedJWTUser"
+          }
+        },
+        "revokedJWTConsumerKeyList" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/RevokedJWTConsumerKey"
+          }
+        }
       }
     },
     "RevokedJWT" : {
@@ -976,12 +944,6 @@
           "format" : "int64",
           "description" : "expiry timestamp."
         }
-      }
-    },
-    "RevokedJWTUserList" : {
-      "type" : "array",
-      "items" : {
-        "$ref" : "#/definitions/RevokedJWTUser"
       }
     },
     "RevokedJWTUser" : {
@@ -1003,12 +965,6 @@
           "type" : "string",
           "description" : "Organization of the revoked user."
         }
-      }
-    },
-    "RevokedJWTConsumerKeyList" : {
-      "type" : "array",
-      "items" : {
-        "$ref" : "#/definitions/RevokedJWTConsumerKey"
       }
     },
     "RevokedJWTConsumerKey" : {
