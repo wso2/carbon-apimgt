@@ -9150,7 +9150,7 @@ public class ApiMgtDAO {
 
     private KeyManagerConfigurationDTO getKeyManagerConfigurationByName(Connection connection, String organization,
                                                                         String name)
-            throws SQLException, IOException {
+            throws SQLException, IOException, APIManagementException {
 
         final String query = "SELECT * FROM AM_KEY_MANAGER WHERE NAME = ? AND ORGANIZATION = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -9174,6 +9174,7 @@ public class ApiMgtDAO {
                         Map map = new Gson().fromJson(configurationContent, Map.class);
                         keyManagerConfigurationDTO.setAdditionalProperties(map);
                     }
+                    keyManagerConfigurationDTO.setPermissions(getKeyManagerPermissions(uuid));
                     return keyManagerConfigurationDTO;
                 }
             }

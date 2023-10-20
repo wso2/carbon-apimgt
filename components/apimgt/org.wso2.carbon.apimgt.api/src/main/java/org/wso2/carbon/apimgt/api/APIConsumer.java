@@ -817,4 +817,14 @@ public interface APIConsumer extends APIManager {
      */
     boolean isKeyManagerAllowedForUser(String keyManagerId, String username) throws APIManagementException;
 
+    /**
+     * This method used to check if key manager configuration by name is allowed for user
+     * @param keyManagerName name of the key manager
+     * @param organization organization of the logged in user
+     * @param username username of the logged in user
+     * @return boolean
+     * @throws APIManagementException if error occurred
+     */
+    boolean isKeyManagerByNameAllowedForUser(String keyManagerName, String organization, String username) throws APIManagementException;
+
 }

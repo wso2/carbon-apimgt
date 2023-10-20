@@ -4283,6 +4283,28 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return true;
     }
 
+    @Override
+    public boolean isKeyManagerByNameAllowedForUser(String keyManagerName, String organization, String username)
+            throws APIManagementException {
+        APIAdmin apiAdmin = new APIAdminImpl();
+        KeyManagerConfigurationDTO keyManagerConfiguration = apiAdmin
+                .getKeyManagerConfigurationByName(organization, keyManagerName);
+        KeyManagerPermissionConfigurationDTO permissions = keyManagerConfiguration.getPermissions();
+        String permissionType = permissions.getPermissionType();
+        if (permissions != null && !permissionType.equals("PUBLIC")) {
+            String[] permissionRoles = permissions.getRoles()
+                    .stream()
+                    .toArray(String[]::new);
+            String[] userRoles = APIUtil.getListOfRoles(username);
+            boolean roleIsRestricted = hasIntersection(userRoles, permissionRoles);
+            if (("ALLOW".equals(permissionType) && !roleIsRestricted)
+                    || ("DENY".equals(permissionType) && roleIsRestricted)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static boolean hasIntersection(String[] arr1, String[] arr2) {
         for (String element : arr1) {
             for (String element2 : arr2) {
