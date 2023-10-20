@@ -21,14 +21,11 @@ package org.wso2.carbon.apimgt.notification;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
-import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.keymgt.ExpiredJWTCleaner;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
 import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.notification.event.InternalTokenRevocationConKeyEvent;
 import org.wso2.carbon.apimgt.notification.event.InternalTokenRevocationUserEvent;
 import org.wso2.carbon.apimgt.notification.event.TokenRevocationEvent;
@@ -58,6 +55,9 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
         properties.put(APIConstants.NotificationEvent.TOKEN_TYPE, tokenRevocationEvent.getTokenType());
         properties.put(APIConstants.NotificationEvent.TENANT_ID, tokenRevocationEvent.getTenantId());
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tokenRevocationEvent.getTenantDomain());
+        properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.TOKEN_REVOCATION_STREAM_ID);
+        properties.setProperty(APIConstants.NotificationEvent.EXPIRY_TIME,
+                Long.toString(tokenRevocationEvent.getExpiryTime()));
         ApiMgtDAO.getInstance().addRevokedJWTSignature(tokenRevocationEvent.getEventId(),
                 tokenRevocationEvent.getAccessToken(), tokenRevocationEvent.getTokenType(),
                 tokenRevocationEvent.getExpiryTime(), tokenRevocationEvent.getTenantId());
@@ -68,8 +68,7 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
             properties.put(APIConstants.NotificationEvent.ORG_ID, orgId);
         }
 
-        revocationRequestPublisher.publishRevocationEvents(tokenRevocationEvent.getAccessToken(),
-                tokenRevocationEvent.getExpiryTime(), properties);
+        revocationRequestPublisher.publishRevocationEvents(tokenRevocationEvent.getAccessToken(), properties);
 
         // Cleanup expired revoked tokens from db.
         Runnable expiredJWTCleaner = new ExpiredJWTCleaner();
@@ -81,45 +80,46 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
     public boolean handleInternalTokenRevocationByConsumerKeyEvent(InternalTokenRevocationConKeyEvent consumerKeyEvent)
             throws APIManagementException {
 
+        // rule persistence
         ApiMgtDAO.getInstance().addRevokedConsumerKey(consumerKeyEvent.getConsumerKey(),
                 consumerKeyEvent.getRevocationTime(), consumerKeyEvent.getOrganization());
 
-        // TODO: check whether we need to implement RevocationRequestPublisher based mechanism to send events
-        // realtime or persistent storage as done in revocationRequestPublisher.publishRevocationEvents() method
-        // in handleTokenRevocationEvent()
-        Object[] objects = new Object[]{
-                consumerKeyEvent.getEventId(),
-                consumerKeyEvent.getConsumerKey(),
-                consumerKeyEvent.getRevocationTime(),
-                consumerKeyEvent.getOrganization(),
-                consumerKeyEvent.getType()
-        };
-        EventPublisherEvent tokenRevocationEvent = new EventPublisherEvent(
-                APIConstants.TOKEN_REVOCATION_CONSUMER_KEY_EVENT_STREAM_ID,
-                System.currentTimeMillis(), objects);
-        APIUtil.publishEvent(EventPublisherType.TOKEN_REVOKE_BY_CONSUMER_KEY_EVENT, tokenRevocationEvent,
-                tokenRevocationEvent.toString());
+        // set properties
+        Properties properties = new Properties();
+        properties.setProperty(APIConstants.NotificationEvent.EVENT_ID, consumerKeyEvent.getEventId());
+        properties.setProperty(APIConstants.NotificationEvent.CONSUMER_KEY, consumerKeyEvent.getConsumerKey());
+        properties.setProperty(APIConstants.NotificationEvent.REVOCATION_TIME,
+                Long.toString(consumerKeyEvent.getRevocationTime()));
+        properties.setProperty(APIConstants.NotificationEvent.ORGANIZATION, consumerKeyEvent.getOrganization());
+        properties.setProperty(APIConstants.NotificationEvent.EVENT_TYPE, consumerKeyEvent.getType());
+        properties.setProperty(APIConstants.NotificationEvent.STREAM_ID,
+                APIConstants.TOKEN_REVOCATION_CONSUMER_KEY_EVENT_STREAM_ID);
 
+        // publish event
+        revocationRequestPublisher.publishRevocationEvents(consumerKeyEvent.getConsumerKey(), properties);
         return true;
     }
 
-    public void handleInternalTokenRevocationByUserEvent(InternalTokenRevocationUserEvent internalTokenRevocationEvent)
+    public void handleInternalTokenRevocationByUserEvent(InternalTokenRevocationUserEvent userEvent)
             throws APIManagementException {
-        ApiMgtDAO.getInstance().addRevokedRuleByUserEvent(internalTokenRevocationEvent.getSubjectId(),
-                internalTokenRevocationEvent.getSubjectIdType(), internalTokenRevocationEvent.getRevocationTime(),
-                internalTokenRevocationEvent.getOrganization());
+        // persistence
+        ApiMgtDAO.getInstance().addRevokedRuleByUserEvent(userEvent.getSubjectId(),
+                userEvent.getSubjectIdType(), userEvent.getRevocationTime(),
+                userEvent.getOrganization());
 
-        Object[] objects = new Object[]{internalTokenRevocationEvent.getEventId(),
-                internalTokenRevocationEvent.getSubjectId(),
-                internalTokenRevocationEvent.getSubjectIdType(),
-                internalTokenRevocationEvent.getRevocationTime(),
-                internalTokenRevocationEvent.getOrganization(),
-                internalTokenRevocationEvent.getType()
-        };
-        EventPublisherEvent tokenRevocationEvent = new EventPublisherEvent(
-                APIConstants.TOKEN_REVOCATION_USER_EVENT_STREAM_ID,
-                System.currentTimeMillis(), objects);
-        APIUtil.publishEvent(EventPublisherType.TOKEN_REVOKE_BY_USER_EVENT, tokenRevocationEvent,
-                tokenRevocationEvent.toString());
+        // set properties
+        Properties properties = new Properties();
+        properties.setProperty(APIConstants.NotificationEvent.EVENT_ID, userEvent.getEventId());
+        properties.setProperty(APIConstants.NotificationEvent.SUBJECT_ID, userEvent.getSubjectId());
+        properties.setProperty(APIConstants.NotificationEvent.SUBJECT_ID_TYPE, userEvent.getSubjectIdType());
+        properties.setProperty(APIConstants.NotificationEvent.REVOCATION_TIME,
+                Long.toString(userEvent.getRevocationTime()));
+        properties.setProperty(APIConstants.NotificationEvent.ORGANIZATION, userEvent.getOrganization());
+        properties.setProperty(APIConstants.NotificationEvent.EVENT_TYPE, userEvent.getType());
+        properties.setProperty(APIConstants.NotificationEvent.STREAM_ID,
+                APIConstants.TOKEN_REVOCATION_USER_EVENT_STREAM_ID);
+
+        // publish event
+        revocationRequestPublisher.publishRevocationEvents(userEvent.getSubjectId(), properties);
     }
 }

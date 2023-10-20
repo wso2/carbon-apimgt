@@ -30,6 +30,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.message.BasicNameValuePair;
+import org.jetbrains.annotations.NotNull;
 import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
 import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -57,11 +58,24 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
     /**
      * Method to publish the revoked token on to the realtime message broker
      *
-     * @param revokedToken requested revoked token
+     * @param key requested revoked token JTI, user id or consumer key
      * @param properties realtime notifier properties read from the config
      */
     @Override
-    public void sendMessageOnRealtime(String revokedToken, Properties properties) {
+    public void sendMessageOnRealtime(String key, Properties properties) {
+        if (APIConstants.TOKEN_REVOCATION_STREAM_ID.equals(properties
+                .getProperty(APIConstants.NotificationEvent.STREAM_ID))) {
+            sendRevokedTokenOnRealtime(key, properties);
+        } else if (APIConstants.TOKEN_REVOCATION_CONSUMER_KEY_EVENT_STREAM_ID.equals(properties
+                .getProperty(APIConstants.NotificationEvent.STREAM_ID))) {
+            sendInternalRevokedConsumeKeyOnRealtime(key, properties);
+        } else if (APIConstants.TOKEN_REVOCATION_USER_EVENT_STREAM_ID.equals(properties
+                .getProperty(APIConstants.NotificationEvent.STREAM_ID))) {
+            sendInternalRevokedUserOnRealtime(key, properties);
+        }
+    }
+
+    private void sendRevokedTokenOnRealtime(String revokedToken, Properties properties) {
         //Variables related to Realtime Notifier
         String realtimeNotifierTTL = realTimeNotifierProperties.getProperty("ttl", DEFAULT_TTL);
         long expiryTimeForJWT = Long.parseLong(properties.getProperty("expiryTime"));
@@ -78,26 +92,66 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
                 tokenRevocationEvent.toString());
     }
 
+    private void sendInternalRevokedConsumeKeyOnRealtime(String consumerKey, Properties properties) {
+        Object[] objects = new Object[]{
+                properties.getProperty(APIConstants.NotificationEvent.EVENT_ID),
+                properties.getProperty(APIConstants.NotificationEvent.CONSUMER_KEY),
+                properties.getProperty(APIConstants.NotificationEvent.REVOCATION_TIME),
+                properties.getProperty(APIConstants.NotificationEvent.ORGANIZATION),
+                properties.getProperty(APIConstants.NotificationEvent.EVENT_TYPE)
+        };
+        EventPublisherEvent tokenRevocationEvent = new EventPublisherEvent(
+                APIConstants.TOKEN_REVOCATION_CONSUMER_KEY_EVENT_STREAM_ID,
+                System.currentTimeMillis(), objects);
+        APIUtil.publishEvent(EventPublisherType.TOKEN_REVOKE_BY_CONSUMER_KEY_EVENT, tokenRevocationEvent,
+                tokenRevocationEvent.toString());
+    }
+
+    private void sendInternalRevokedUserOnRealtime(String userId, Properties properties) {
+        Object[] objects = new Object[]{
+                properties.getProperty(APIConstants.NotificationEvent.EVENT_ID),
+                properties.getProperty(APIConstants.NotificationEvent.SUBJECT_ID),
+                properties.getProperty(APIConstants.NotificationEvent.SUBJECT_ID_TYPE),
+                properties.getProperty(APIConstants.NotificationEvent.REVOCATION_TIME),
+                properties.getProperty(APIConstants.NotificationEvent.ORGANIZATION),
+                properties.getProperty(APIConstants.NotificationEvent.EVENT_TYPE)
+        };
+        EventPublisherEvent tokenRevocationEvent = new EventPublisherEvent(
+                APIConstants.TOKEN_REVOCATION_USER_EVENT_STREAM_ID,
+                System.currentTimeMillis(), objects);
+        APIUtil.publishEvent(EventPublisherType.TOKEN_REVOKE_BY_USER_EVENT, tokenRevocationEvent,
+                tokenRevocationEvent.toString());
+    }
+
     /**
      * Method to send the revoked token to the persistent storage
      *
-     * @param revokedToken token to be revoked
+     * @param key token to be revoked, user id or consumer key
      * @param properties persistent notifier properties read from the config
      */
     @Override
-    public void sendMessageToPersistentStorage(String revokedToken, Properties properties) {
+    public void sendMessageToPersistentStorage(String key, Properties properties) {
         //Variables related to Persistent Notifier
         String defaultPersistentNotifierHostname = "https://localhost:2379/v2/keys/jti/";
+        if (APIConstants.TOKEN_REVOCATION_STREAM_ID.equals(properties
+                .getProperty(APIConstants.NotificationEvent.STREAM_ID))) {
+            defaultPersistentNotifierHostname = "https://localhost:2379/v2/keys/jti/";
+        } else if (APIConstants.TOKEN_REVOCATION_CONSUMER_KEY_EVENT_STREAM_ID.equals(properties
+                .getProperty(APIConstants.NotificationEvent.STREAM_ID))) {
+            defaultPersistentNotifierHostname = "https://localhost:2379/v2/keys/consumer-keys/";
+        } else if (APIConstants.TOKEN_REVOCATION_USER_EVENT_STREAM_ID.equals(properties
+                .getProperty(APIConstants.NotificationEvent.STREAM_ID))) {
+            defaultPersistentNotifierHostname = "https://localhost:2379/v2/keys/users/";
+        }
         String persistentNotifierHostname = properties
                 .getProperty("hostname", defaultPersistentNotifierHostname);
-        String persistentNotifierTTL = properties.getProperty("ttl", DEFAULT_TTL);
         String defaultPersistentNotifierUsername = "root";
         String persistentNotifierUsername = properties
                 .getProperty("username", defaultPersistentNotifierUsername);
         String defaultPersistentNotifierPassword = "root";
         String persistentNotifierPassword = properties
                 .getProperty("password", defaultPersistentNotifierPassword);
-        String etcdEndpoint = persistentNotifierHostname + revokedToken;
+        String etcdEndpoint = persistentNotifierHostname + key;
         URL etcdEndpointURL = new URL(etcdEndpoint);
         String etcdEndpointProtocol = etcdEndpointURL.getProtocol();
         int etcdEndpointPort = etcdEndpointURL.getPort();
@@ -107,10 +161,7 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
                 getBytes(StandardCharsets.UTF_8));
         String authHeader = "Basic " + new String(encodedAuth, StandardCharsets.UTF_8);
         httpETCDPut.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
-        List<NameValuePair> etcdParams = new ArrayList<>(2);
-        etcdParams.add(new BasicNameValuePair("value", "true"));
-        etcdParams.add(new BasicNameValuePair("ttl", persistentNotifierTTL));
-
+        List<NameValuePair> etcdParams = getEtcdParams(properties);
         //Send the revoked token to the persistent storage Server
         httpETCDPut.setEntity(new UrlEncodedFormEntity(etcdParams, StandardCharsets.UTF_8));
         HttpResponse etcdResponse;
@@ -130,6 +181,35 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
             log.error("Error while sending revoked token to the persistent storage :", e);
         }
     }
+
+    @NotNull
+    private List<NameValuePair> getEtcdParams(Properties properties) {
+
+        List<NameValuePair> etcdParams = new ArrayList<>(2);
+        etcdParams.add(new BasicNameValuePair("value", "true"));
+        etcdParams.add(new BasicNameValuePair("ttl", properties.getProperty("ttl", DEFAULT_TTL)));
+        if (APIConstants.TOKEN_REVOCATION_STREAM_ID.equals(properties
+                .getProperty(APIConstants.NotificationEvent.STREAM_ID))) {
+            etcdParams.add(new BasicNameValuePair(APIConstants.NotificationEvent.EXPIRY_TIME,
+                    properties.getProperty(APIConstants.NotificationEvent.EXPIRY_TIME)));
+        } else if (APIConstants.TOKEN_REVOCATION_CONSUMER_KEY_EVENT_STREAM_ID.equals(properties
+                .getProperty(APIConstants.NotificationEvent.STREAM_ID))) {
+            etcdParams.add(new BasicNameValuePair(APIConstants.NotificationEvent.CONSUMER_KEY,
+                    properties.getProperty(APIConstants.NotificationEvent.CONSUMER_KEY)));
+            etcdParams.add(new BasicNameValuePair(APIConstants.NotificationEvent.REVOCATION_TIME,
+                    properties.getProperty(APIConstants.NotificationEvent.REVOCATION_TIME)));
+        } else if (APIConstants.TOKEN_REVOCATION_USER_EVENT_STREAM_ID.equals(properties
+                .getProperty(APIConstants.NotificationEvent.STREAM_ID))) {
+            etcdParams.add(new BasicNameValuePair(APIConstants.NotificationEvent.SUBJECT_ID,
+                    properties.getProperty(APIConstants.NotificationEvent.SUBJECT_ID)));
+            etcdParams.add(new BasicNameValuePair(APIConstants.NotificationEvent.SUBJECT_ID_TYPE,
+                    properties.getProperty(APIConstants.NotificationEvent.SUBJECT_ID_TYPE)));
+            etcdParams.add(new BasicNameValuePair(APIConstants.NotificationEvent.REVOCATION_TIME,
+                    properties.getProperty(APIConstants.NotificationEvent.REVOCATION_TIME)));
+        }
+        return etcdParams;
+    }
+
 
     @Override
     public void init(Properties realTimeNotifierProperties, Properties persistentNotifierProperties) {

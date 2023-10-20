@@ -2807,6 +2807,13 @@ public final class APIConstants {
         public static final String TENANT_DOMAIN = "tenant_domain";
         public static final String ORG_ID = "org_id";
         public static final String APPLICATION_TOKEN_TYPE_OAUTH2 = "Default";
+        public static final String EXPIRY_TIME = "expiryTime";
+        public static final String REVOCATION_TIME = "revocationTime";
+        public static final String ORGANIZATION = "organization";
+        public static final String STREAM_ID = "streamId";
+        public static final String SUBJECT_ID = "subjectId";
+        public static final String SUBJECT_ID_TYPE = "subjectIdType";
+        public static final String EVENT_TYPE = "eventType";
     }
 
     //Constants related to user password

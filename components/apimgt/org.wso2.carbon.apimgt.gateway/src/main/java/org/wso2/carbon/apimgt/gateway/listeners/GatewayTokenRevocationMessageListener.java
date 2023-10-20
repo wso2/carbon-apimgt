@@ -47,19 +47,6 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                     JsonNode payloadData =  new ObjectMapper().readTree(textMessage).path(APIConstants.EVENT_PAYLOAD).
                             path(APIConstants.EVENT_PAYLOAD_DATA);
 
-                    if (payloadData.get("type") != null && payloadData.get("type").asText()
-                            .equals(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENT)) {
-                        handleInternallyRevokedConsumerKeyMessage(payloadData.get("consumerKey").asText()
-                                , payloadData.get("revocationTime").asLong(), payloadData.get("type").asText());
-                    }
-
-                    if (payloadData.get("type") != null && payloadData.get("type").asText()
-                            .equals(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_USER_EVENT)) {
-                        handleInternallyRevokedUserEventMessage(payloadData.get("subjectId").asText(),
-                                payloadData.get("subjectIdType").asText(), payloadData.get("revocationTime").asLong(),
-                                payloadData.get("type").asText());
-                    }
-
                     if (APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
                         if (payloadData.get(APIConstants.REVOKED_TOKEN_KEY) != null
                                 && payloadData.get(APIConstants.REVOKED_TOKEN_KEY).asText() != null) {
@@ -71,6 +58,19 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                                 handleRevokedTokenMessage(payloadData.get(APIConstants.REVOKED_TOKEN_KEY).asText(),
                                     payloadData.get(APIConstants.REVOKED_TOKEN_EXPIRY_TIME).asLong(),
                                     payloadData.get(APIConstants.REVOKED_TOKEN_TYPE).asText());
+                        }
+
+                        if (payloadData.get("type") != null && payloadData.get("type").asText()
+                                .equals(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENT)) {
+                            handleInternallyRevokedConsumerKeyMessage(payloadData.get("consumerKey").asText()
+                                    , payloadData.get("revocationTime").asLong(), payloadData.get("type").asText());
+                        }
+
+                        if (payloadData.get("type") != null && payloadData.get("type").asText()
+                                .equals(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_USER_EVENT)) {
+                            handleInternallyRevokedUserEventMessage(payloadData.get("subjectId").asText(),
+                                    payloadData.get("subjectIdType").asText(), payloadData.get("revocationTime").asLong(),
+                                    payloadData.get("type").asText());
                         }
                     }
                 } else {
