@@ -90,6 +90,7 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
         event.setProxyResponseCode(provider.getProxyResponseCode());
         event.setRequestTimestamp(offsetDateTime);
         event.setMetaInfo(metaInfo);
+        event.setUserAgentHeader(provider.getUserAgentHeader());
 
         return event;
     }
