@@ -98,8 +98,9 @@ public class OperationPolicy implements Comparable<OperationPolicy> {
         if (o == null || getClass() != o.getClass())
             return false;
         OperationPolicy policyObj = (OperationPolicy) o;
-        return policyId == policyObj.policyId && policyName == policyObj.policyName && policyVersion == policyObj.policyVersion
-                && direction.equals(policyObj.direction) && parameters.equals(policyObj.parameters);
+        return Objects.equals(policyName, policyObj.policyName) && Objects.equals(policyVersion,
+                policyObj.policyVersion) && Objects.equals(direction, policyObj.direction) && Objects.equals(
+                parameters, policyObj.parameters) && Objects.equals(policyId, policyObj.policyId);
     }
 
     @Override
@@ -112,5 +113,17 @@ public class OperationPolicy implements Comparable<OperationPolicy> {
     public int compareTo(OperationPolicy o) {
 
         return this.order - o.getOrder();
+    }
+
+    @Override
+    public String toString() {
+
+        return "operationPolicies {" +
+                ", policyName ='" + policyName + '\'' +
+                ", policyVersion ='" + policyVersion + '\'' +
+                ", direction ='" + direction + '\'' +
+                ", order ='" + order + '\'' +
+                ", policyId ='" + policyId + '\'' +
+                '}';
     }
 }

@@ -18,9 +18,13 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class URLMapping {
 
@@ -29,6 +33,7 @@ public class URLMapping {
     private String httpMethod;
     private String urlPattern;
     private List<String> scopes = new ArrayList<>();
+    private Set<OperationPolicy> operationPolicies = new HashSet<>();
 
 
     public String getHttpMethod() {
@@ -79,6 +84,13 @@ public class URLMapping {
         return scopes;
     }
 
+    public void setOperationPolicies(OperationPolicy operationPolicy){
+        this.operationPolicies.add(operationPolicy);
+    }
+    public Set<OperationPolicy> getOperationPolicies(){
+        return operationPolicies;
+    }
+
     @Override
     public boolean equals(Object o) {
 
@@ -105,6 +117,7 @@ public class URLMapping {
                 ", authScheme ='" + authScheme + '\'' +
                 ", httpMethod ='" + httpMethod + '\'' +
                 ", urlPattern ='" + urlPattern + '\'' +
+                ", operationPolicies ='" + operationPolicies + '\'' +
                 '}';
     }
 }

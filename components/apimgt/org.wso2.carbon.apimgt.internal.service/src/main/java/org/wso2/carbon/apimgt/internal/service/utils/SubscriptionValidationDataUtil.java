@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
@@ -57,6 +58,7 @@ import org.wso2.carbon.apimgt.internal.service.dto.EventCountLimitDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.GroupIdDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.OperationPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.RequestCountLimitDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ScopesListDTO;
@@ -104,6 +106,17 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setThrottlingPolicy(urlMapping.getThrottlingPolicy());
                 urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
                 urlMappingDTO.setScopes(urlMapping.getScopes());
+                List<OperationPolicyDTO> operationPolicyDTOList = new ArrayList<>();
+                for(OperationPolicy operationPolicy: urlMapping.getOperationPolicies()) {
+                    OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
+                    operationPolicyDTO.setPolicyId(operationPolicy.getPolicyId());
+                    operationPolicyDTO.setPolicyName(operationPolicy.getPolicyName());
+                    operationPolicyDTO.setPolicyVersion(operationPolicy.getPolicyVersion());
+                    operationPolicyDTO.setDirection(operationPolicy.getDirection());
+                    operationPolicyDTO.setOrder(operationPolicy.getOrder());
+                    operationPolicyDTOList.add(operationPolicyDTO);
+                }
+                urlMappingDTO.setOperationPolicies(operationPolicyDTOList);
                 urlMappingsDTO.add(urlMappingDTO);
             }
             apidto.setUrlMappings(urlMappingsDTO);
@@ -138,6 +151,17 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setThrottlingPolicy(urlMapping.getThrottlingPolicy());
                 urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
                 urlMappingDTO.setScopes(urlMapping.getScopes());
+                List<OperationPolicyDTO> operationPolicyDTOList = new ArrayList<>();
+                for(OperationPolicy operationPolicy: urlMapping.getOperationPolicies()) {
+                    OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
+                    operationPolicyDTO.setPolicyId(operationPolicy.getPolicyId());
+                    operationPolicyDTO.setPolicyName(operationPolicy.getPolicyName());
+                    operationPolicyDTO.setPolicyVersion(operationPolicy.getPolicyVersion());
+                    operationPolicyDTO.setDirection(operationPolicy.getDirection());
+                    operationPolicyDTO.setOrder(operationPolicy.getOrder());
+                    operationPolicyDTOList.add(operationPolicyDTO);
+                }
+                urlMappingDTO.setOperationPolicies(operationPolicyDTOList);
                 urlMappingsDTO.add(urlMappingDTO);
             }
             apidto.setUrlMappings(urlMappingsDTO);
