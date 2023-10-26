@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -1173,7 +1174,6 @@ public class SubscriptionValidationDAO {
     }
 
     public API getAPIByContextAndVersion(String context, String version, String deployment, boolean isExpand) {
-
         String sql = SubscriptionValidationSQLConstants.GET_API_BY_CONTEXT_AND_VERSION_SQL;
         String contextWhenContextTemplateIsNull = context;
 
@@ -1260,6 +1260,39 @@ public class SubscriptionValidationDAO {
                 }
             }
         }
+
+        // Attach the relevant operation policies to the resources.
+        attachOperationPolicies(connection, revisionId, api);
+    }
+
+    private void attachOperationPolicies(Connection connection, String revisionId, API api) throws SQLException {
+        try(PreparedStatement preparedStatement = connection.prepareStatement(SubscriptionValidationSQLConstants.GET_OPERATION_POLICIES_PER_URI_BY_API_SQL)){
+            preparedStatement.setInt(1, api.getApiId());
+            preparedStatement.setString(2, revisionId);
+            try(ResultSet resultSet = preparedStatement.executeQuery()){
+                    while (resultSet.next()){
+                        String httpMethod = resultSet.getString("HTTP_METHOD");
+                        String urlPattern = resultSet.getString("URL_PATTERN");
+                        String policyName = resultSet.getString("POLICY_NAME");
+                        String policyVersion = resultSet.getString("POLICY_VERSION");
+                        String direction = resultSet.getString("DIRECTION");
+                        String policyID = resultSet.getString("POLICY_UUID");
+                        URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
+                        if(urlMapping!=null){
+                            if (StringUtils.isNotEmpty(policyID) && StringUtils.isNotEmpty(policyName)
+                                    && StringUtils.isNotEmpty(policyVersion) && StringUtils.isNotEmpty(direction)) {
+                                OperationPolicy operationPolicy = new OperationPolicy();
+                                operationPolicy.setPolicyId(policyID);
+                                operationPolicy.setPolicyName(policyName);
+                                operationPolicy.setPolicyVersion(policyVersion);
+                                operationPolicy.setDirection(direction);
+                                urlMapping.setOperationPolicies(operationPolicy);
+                            }
+                            api.addResource(urlMapping);
+                        }
+                    }
+                }
+            }
     }
 
     private boolean isAPIDefaultVersion(Connection connection, String provider, String name, String version)
