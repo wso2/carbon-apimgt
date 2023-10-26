@@ -91,6 +91,7 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
         event.setRequestTimestamp(offsetDateTime);
         event.setMetaInfo(metaInfo);
         event.setUserAgentHeader(provider.getUserAgentHeader());
+        event.setOperation(provider.getOperation());
 
         return event;
     }
