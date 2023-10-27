@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 
@@ -41,6 +42,7 @@ public class API implements CacheableEntity<String> {
     private String organization;
     private boolean deployed = false;
     private boolean isDefaultVersion = false;
+    private List<OperationPolicy> apiPolicies = new ArrayList<>();
 
     public API() {
     }
@@ -205,6 +207,7 @@ public class API implements CacheableEntity<String> {
                 ", status='" + status + '\'' +
                 ", isDefaultVersion=" + isDefaultVersion +
                 ", urlMappings=" + urlMappings +
+                ", apiPolicies=" + apiPolicies +
                 '}';
     }
 
@@ -294,5 +297,13 @@ public class API implements CacheableEntity<String> {
 
     public void setDeployed(boolean deployed) {
         this.deployed = deployed;
+    }
+
+    public void setApiPolicies(List<OperationPolicy> apiPolicies) {
+        this.apiPolicies = apiPolicies;
+    }
+
+    public List<OperationPolicy> getApiPolicies() {
+        return apiPolicies;
     }
 }

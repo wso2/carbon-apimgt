@@ -115,6 +115,17 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setOperationPolicies(operationPolicyDTOList);
                 urlMappingsDTO.add(urlMappingDTO);
             }
+            List<OperationPolicyDTO> apiPolicies = new ArrayList<>();
+            for(OperationPolicy apiPolicy: model.getApiPolicies()) {
+                OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
+                operationPolicyDTO.setPolicyId(apiPolicy.getPolicyId());
+                operationPolicyDTO.setPolicyName(apiPolicy.getPolicyName());
+                operationPolicyDTO.setPolicyVersion(apiPolicy.getPolicyVersion());
+                operationPolicyDTO.setDirection(apiPolicy.getDirection());
+                operationPolicyDTO.setOrder(apiPolicy.getOrder());
+                apiPolicies.add(operationPolicyDTO);
+            }
+            apidto.setApiPolicies(apiPolicies);
             apidto.setUrlMappings(urlMappingsDTO);
         }
         return apidto;
@@ -158,6 +169,17 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setOperationPolicies(operationPolicyDTOList);
                 urlMappingsDTO.add(urlMappingDTO);
             }
+            List<OperationPolicyDTO> apiPolicies = new ArrayList<>();
+            for(OperationPolicy apiPolicy: model.getApiPolicies()) {
+                OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
+                operationPolicyDTO.setPolicyId(apiPolicy.getPolicyId());
+                operationPolicyDTO.setPolicyName(apiPolicy.getPolicyName());
+                operationPolicyDTO.setPolicyVersion(apiPolicy.getPolicyVersion());
+                operationPolicyDTO.setDirection(apiPolicy.getDirection());
+                operationPolicyDTO.setOrder(apiPolicy.getOrder());
+                apiPolicies.add(operationPolicyDTO);
+            }
+            apidto.setApiPolicies(apiPolicies);
             apidto.setUrlMappings(urlMappingsDTO);
             apiListdto.setCount(1);
             apiListdto.getList().add(apidto);

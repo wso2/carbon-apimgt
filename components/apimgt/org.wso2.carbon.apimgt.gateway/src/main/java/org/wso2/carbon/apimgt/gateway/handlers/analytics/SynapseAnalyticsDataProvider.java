@@ -193,7 +193,18 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                     uriTemplates.add(uriTemplateObj);
                 }
             }
+            List<org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy> apiPolicyList = new ArrayList<>();
+            for(OperationPolicy apiPolicy: apiObj.getApiPolicies()){
+                org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy operationPolicyObj = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy();
+                operationPolicyObj.setPolicyVersion(apiPolicy.getPolicyVersion());
+                operationPolicyObj.setPolicyName(apiPolicy.getPolicyName());
+                operationPolicyObj.setPolicyId(apiPolicy.getPolicyId());
+                operationPolicyObj.setDirection(apiPolicy.getDirection());
+                operationPolicyObj.setOrder(apiPolicy.getOrder());
+                apiPolicyList.add(operationPolicyObj);
+            }
             api.setUriTemplates(uriTemplates);
+            api.setApiPolicies(apiPolicyList);
         }
         return api;
     }
