@@ -345,7 +345,6 @@ public class ImportUtils {
             // implementation
             ApiTypeWrapper apiTypeWrapperWithUpdatedApi = new ApiTypeWrapper(importedApi);
             addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider, organization);
-            addAPIWsdl(extractedFolderPath, importedApi, apiProvider);
             if (StringUtils
                     .equals(importedApi.getType().toLowerCase(), APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
                 addSOAPToREST(importedApi, validationResponse.getContent(), apiProvider);
@@ -371,6 +370,7 @@ public class ImportUtils {
             // lifecycle transition state, it will override the thumbnail RXT field as it is null in the api object
             // and without it, thumbnail is not be visible in publisher portal.
             addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
+            addAPIWsdl(extractedFolderPath, importedApi, apiProvider);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             if (deploymentInfoArray == null && !isAdvertiseOnlyAPI(importedApiDTO)) {
                 //If the params have not overwritten the deployment environments, yaml file will be read
