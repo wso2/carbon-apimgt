@@ -266,6 +266,14 @@
         "Roles": "admin"
       },
       {
+        "Name": "apim:keymanagers_manage",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:api_category",
+        "Roles": "admin"
+      },
+      {
         "Name": "apim:shared_scope_manage",
         "Roles": "admin"
       },
