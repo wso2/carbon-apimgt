@@ -189,7 +189,6 @@
                                     </directory>
                                     <includes>
                                         <include>tenant/tenant-conf.json</include>
-                                        <include>workflowextensions/default-workflow-extensions.xml</include>
                                     </includes>
                                 </resource>
                                 <resource>

@@ -127,8 +127,6 @@ public class CommonConfigDeployerTestCase {
         PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
         APIUtil.loadTenantGAConfig(TENANT_DOMAIN);
         PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
-        APIUtil.loadTenantWorkFlowExtensions(TENANT_DOMAIN);
-        PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
         APIUtil.loadAndSyncTenantConf(TENANT_DOMAIN);
         PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
         APIUtil.createDefaultRoles(TENANT_ID);

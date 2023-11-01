@@ -87,8 +87,7 @@ public class APIProductStateChangeApprovalWorkflowExecutor extends WorkflowExecu
             }
         } else {
             String msg =
-                    "State change list is not provided. Please check <stateList> element in workflow-extensions" +
-                            ".xml";
+                    "State change list is not provided. Please check \"StateList\" property in the workflow configuration.";
             log.error(msg);
             throw new WorkflowException(msg);
         }

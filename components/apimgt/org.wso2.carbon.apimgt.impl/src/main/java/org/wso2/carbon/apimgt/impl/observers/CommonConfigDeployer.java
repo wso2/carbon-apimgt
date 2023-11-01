@@ -95,13 +95,6 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         }
 
         try {
-            //load workflow-extension configuration to the registry
-            APIUtil.loadTenantWorkFlowExtensions(tenantDomain);
-        } catch (Exception e) {
-            log.error("Failed to load workflow-extension.xml to tenant " + tenantDomain + "'s registry", e);
-        }
-
-        try {
             APIUtil.loadAndSyncTenantConf(tenantDomain);
         } catch (APIManagementException e) {
             log.error("Failed to load " + APIConstants.API_TENANT_CONF + " for tenant " + tenantDomain, e);

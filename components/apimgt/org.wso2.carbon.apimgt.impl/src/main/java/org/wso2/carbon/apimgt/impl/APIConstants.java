@@ -235,10 +235,6 @@ public final class APIConstants {
     public static final String GA_CONF_KEY = "ga-config-key";
     public static final String GA_CONF_MEDIA_TYPE = "ga-config";
 
-    public static final String WORKFLOW_EXECUTOR_LOCATION = API_APPLICATION_DATA_LOCATION + "/workflow-extensions.xml";
-
-    public static final String WORKFLOW_MEDIA_TYPE = "workflow-config";
-
     // Constants used in API Security Audit feature
     // For configs
     public static final String API_SECURITY_AUDIT = "APISecurityAudit.";
@@ -1468,8 +1464,6 @@ public final class APIConstants {
             API_STORE + "RESTApiGroupingExtractor";
     public static final String API_CUSTOM_SEQUENCES_FOLDER_LOCATION =
             "repository" + File.separator + "resources" + File.separator + "customsequences";
-    public static final String WORKFLOW_EXTENSION_LOCATION =
-            "repository" + File.separator + "resources" + File.separator + "default-workflow-extensions.xml";
     public static final String API_CUSTOM_SEQUENCE_TYPE_IN = "in";
     public static final String API_CUSTOM_SEQUENCE_TYPE_OUT = "out";
     public static final String API_CUSTOM_SEQUENCE_TYPE_FAULT = "fault";

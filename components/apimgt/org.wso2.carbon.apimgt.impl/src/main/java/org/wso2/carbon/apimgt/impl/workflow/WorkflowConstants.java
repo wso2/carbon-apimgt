@@ -136,19 +136,65 @@ public class WorkflowConstants {
         public static final String VARIABLE_INVOKER = "invoker";
 
         public static final String API_ID = "apiId";
-        
+
         public static final String DATA = "data";
         public static final String ID = "id";
-        
+
         public static final String KEY_OAUTH_APPNAME = "clientName";
         public static final String KEY_OAUTH_OWNER = "owner";
         public static final String KEY_OAUTH_SAASAPP = "saasApp";
         public static final String KEY_OAUTH_GRANT_TYPES = "grantType";
-        
-        private PayloadConstants(){
-            
+
+        private PayloadConstants() {
+
         }
-        
+
+    }
+
+    public static final String WF_TENANT_CONF_NAME = "Workflows";
+    public static final String WF_TENANT_CONF_ENABLED = "Enabled";
+    public static final String WF_TENANT_CONF_CLASS = "Class";
+    public static final String WF_TENANT_CONF_PROPERTIES = "Properties";
+
+    public static final String WF_PACKAGE_PATH = "org.wso2.carbon.apimgt.impl.workflow.";
+
+    public static class WorkflowClasses {
+        public static final String APPLICATION_CREATION_SIMPLE_FLOW_CLASS
+                = WF_PACKAGE_PATH + "ApplicationCreationSimpleWorkflowExecutor";
+        public static final String APPLICATION_CREATION_APPROVAL_FLOW_CLASS
+                = WF_PACKAGE_PATH + "ApplicationCreationApprovalWorkflowExecutor";
+        public static final String APPLICATION_DELETION_SIMPLE_FLOW_CLASS
+                = WF_PACKAGE_PATH + "ApplicationDeletionSimpleWorkflowExecutor";
+        public static final String APPLICATION_DELETION_APPROVAL_FLOW_CLASS
+                = WF_PACKAGE_PATH + "ApplicationDeletionApprovalWorkflowExecutor";
+        public static final String APPLICATION_REGISTRATION_SIMPLE_FLOW_CLASS
+                = WF_PACKAGE_PATH + "ApplicationRegistrationSimpleWorkflowExecutor";
+        public static final String APPLICATION_REGISTRATION_APPROVAL_FLOW_CLASS
+                = WF_PACKAGE_PATH + "ApplicationRegistrationApprovalWorkflowExecutor";
+        public static final String SUBSCRIPTION_CREATION_SIMPLE_FLOW_CLASS
+                = WF_PACKAGE_PATH + "SubscriptionCreationSimpleWorkflowExecutor";
+        public static final String SUBSCRIPTION_CREATION_APPROVAL_FLOW_CLASS
+                = WF_PACKAGE_PATH + "SubscriptionCreationApprovalWorkflowExecutor";
+        public static final String SUBSCRIPTION_DELETION_SIMPLE_FLOW_CLASS
+                = WF_PACKAGE_PATH + "SubscriptionDeletionSimpleWorkflowExecutor";
+        public static final String SUBSCRIPTION_DELETION_APPROVAL_FLOW_CLASS
+                = WF_PACKAGE_PATH + "SubscriptionDeletionApprovalWorkflowExecutor";
+        public static final String SUBSCRIPTION_UPDATE_SIMPLE_FLOW_CLASS
+                = WF_PACKAGE_PATH + "SubscriptionUpdateSimpleWorkflowExecutor";
+        public static final String SUBSCRIPTION_UPDATE_APPROVAL_FLOW_CLASS
+                = WF_PACKAGE_PATH + "SubscriptionUpdateApprovalWorkflowExecutor";
+        public static final String USER_SIGNUP_SIMPLE_FLOW_CLASS
+                = WF_PACKAGE_PATH + "UserSignUpSimpleWorkflowExecutor";
+        public static final String USER_SIGNUP_APPROVAL_FLOW_CLASS
+                = WF_PACKAGE_PATH + "UserSignUpApprovalWorkflowExecutor";
+        public static final String API_STATE_CHANGE_SIMPLE_FLOW_CLASS
+                = WF_PACKAGE_PATH + "APIStateChangeSimpleWorkflowExecutor";
+        public static final String API_STATE_CHANGE_APPROVAL_FLOW_CLASS
+                = WF_PACKAGE_PATH + "APIStateChangeApprovalWorkflowExecutor";
+        public static final String API_PRODUCT_STATE_CHANGE_SIMPLE_FLOW_CLASS
+                = WF_PACKAGE_PATH + "APIProductStateChangeSimpleWorkflowExecutor";
+        public static final String API_PRODUCT_STATE_CHANGE_APPROVAL_FLOW_CLASS
+                = WF_PACKAGE_PATH + "APIProductStateChangeApprovalWorkflowExecutor";
     }
 
 }

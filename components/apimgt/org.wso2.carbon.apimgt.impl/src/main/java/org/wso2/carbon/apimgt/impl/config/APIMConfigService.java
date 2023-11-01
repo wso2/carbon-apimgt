@@ -79,13 +79,13 @@ public interface APIMConfigService {
     public void updateTenantConfig(String organization, String tenantConfig) throws APIManagementException;
 
     /**
-     * Retrieve workflow configuration relevant to to organization.
+     * Retrieve workflow configuration relevant to organization.
      *
      * @param organization organization of the user.
      * @return workflow configuration.
      * @throws APIManagementException throw if workflow-config couldn't retrieve.
      */
-    public String getWorkFlowConfig(String organization) throws APIManagementException;
+    public Object getWorkFlowConfig(String organization) throws APIManagementException;
 
     /**
      * Update workflow configuration relevant to to organization.

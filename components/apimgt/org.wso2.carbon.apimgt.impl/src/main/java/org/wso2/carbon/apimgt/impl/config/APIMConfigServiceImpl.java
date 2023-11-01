@@ -30,8 +30,10 @@ import org.wso2.carbon.apimgt.impl.APIConstants.ConfigType;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.SystemConfigurationsDAO;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -42,13 +44,17 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.UserStoreException;
+
 import javax.cache.Cache;
+import javax.cache.Caching;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Config Service Implementation for retrieve configurations.
@@ -245,14 +251,18 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         Cache tenantConfigCache = CacheProvider.getTenantConfigCache();
         String cacheName = organization + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
         tenantConfigCache.remove(cacheName);
-        
+        String workflowCacheName = organization + "_" + APIConstants.WORKFLOW_CACHE_NAME;
+        Cache workflowCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                .getCache(APIConstants.WORKFLOW_CACHE_NAME);
+        workflowCache.remove(workflowCacheName);
+
         // Clear restapi scope cache
         CacheProvider.getRESTAPIScopeCache().remove(organization);
         systemConfigurationsDAO.updateSystemConfig(organization, ConfigType.TENANT.toString(), tenantConfig);
     }
 
     @Override
-    public String getWorkFlowConfig(String organization) throws APIManagementException {
+    public WorkflowConfigDTO getWorkFlowConfig(String organization) throws APIManagementException {
 
         if (organization == null) {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -260,89 +270,41 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
-            int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                APIUtil.loadTenantRegistry(tenantId);
-            }
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.WORKFLOW_EXECUTOR_LOCATION)) {
-                Resource resource = registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION);
-                return new String((byte[]) resource.getContent(), Charset.defaultCharset());
-            } else {
-                return null;
-            }
-
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving External Stores Configuration from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            JsonObject tenantConfig = JsonParser.parseString(getTenantConfig(organization)).getAsJsonObject();
+            return getWorkFlowConfigDTO((JsonObject)
+                    tenantConfig.get(WorkflowConstants.WF_TENANT_CONF_NAME));
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
+    }
+
+    private WorkflowConfigDTO getWorkFlowConfigDTO(JsonObject workflowConfig) {
+        WorkflowConfigDTO config = new WorkflowConfigDTO();
+        if (workflowConfig != null) {
+            Set<Map.Entry<String, JsonElement>> configEntries = workflowConfig.entrySet();
+            for (Map.Entry<String, JsonElement> entry : configEntries) {
+                String workflowName = entry.getKey();
+                JsonObject workflowConfigEntry = (JsonObject) entry.getValue();
+
+                boolean isEnabled = workflowConfigEntry.get(WorkflowConstants.WF_TENANT_CONF_ENABLED) != null
+                        && workflowConfigEntry.get(WorkflowConstants.WF_TENANT_CONF_ENABLED).getAsBoolean();
+                String className = workflowConfigEntry.get(WorkflowConstants.WF_TENANT_CONF_CLASS) != null ?
+                        workflowConfigEntry.get(WorkflowConstants.WF_TENANT_CONF_CLASS).getAsString() : "";
+                JsonObject properties = workflowConfigEntry.get(WorkflowConstants.WF_TENANT_CONF_PROPERTIES) != null ?
+                        workflowConfigEntry.get(WorkflowConstants.WF_TENANT_CONF_PROPERTIES).getAsJsonObject() : null;
+
+                config.addWorkflowConfig(workflowName, isEnabled, className, properties);
+            }
+        }
+        return config;
     }
 
     @Override
     public void updateWorkflowConfig(String organization, String workflowConfig) throws APIManagementException {
-
-        if (organization == null) {
-            organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
-            int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                APIUtil.loadTenantRegistry(tenantId);
-            }
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.WORKFLOW_EXECUTOR_LOCATION)) {
-                Resource resource = registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION);
-                byte[] data = IOUtils.toByteArray(new StringReader(workflowConfig));
-                resource.setContent(data);
-                resource.setMediaType(APIConstants.WORKFLOW_MEDIA_TYPE);
-                registry.put(APIConstants.WORKFLOW_EXECUTOR_LOCATION, resource);
-            }
-        } catch (RegistryException | IOException e) {
-            String msg = "Error while retrieving External Stores Configuration from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
     }
 
     @Override
     public void addWorkflowConfig(String organization, String workflowConfig) throws APIManagementException {
-
-        if (organization == null) {
-            organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
-            int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                APIUtil.loadTenantRegistry(tenantId);
-            }
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceSystemRegistry(tenantId);
-            if (!registry.resourceExists(APIConstants.WORKFLOW_EXECUTOR_LOCATION)) {
-                Resource resource = registry.newResource();
-                byte[] data = IOUtils.toByteArray(new StringReader(workflowConfig));
-                resource.setContent(data);
-                resource.setMediaType(APIConstants.WORKFLOW_MEDIA_TYPE);
-                registry.put(APIConstants.WORKFLOW_EXECUTOR_LOCATION, resource);
-            }
-
-        } catch (RegistryException | IOException e) {
-            String msg = "Error while retrieving External Stores Configuration from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
     }
 
     @Override
