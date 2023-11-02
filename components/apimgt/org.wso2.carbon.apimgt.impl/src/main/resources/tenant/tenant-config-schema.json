@@ -1337,10 +1337,42 @@
           }
         }
       },
-      "required": ["States"]
+      "required": [
+        "States"
+      ]
+    },
+    "Workflows": {
+      "type": "object",
+      "default": {},
+      "title": "Configure different workflows using this configuration.",
+      "additionalProperties": {
+        "$ref": "#/definitions/workflow"
+      }
     },
     "LinterCustomRules": {
-      "required": ["rules"]
+      "required": [
+        "rules"
+      ]
+    }
+  },
+  "definitions": {
+    "workflow": {
+      "type": "object",
+      "title": "Define the corresponding workflow configuration",
+      "properties": {
+        "Enabled": {
+          "type": "boolean",
+          "title": "Set this as true to enable the approval/custom workflow"
+        },
+        "Class": {
+          "type": "string",
+          "title": "For a custom flow, define the full class path here"
+        },
+        "Properties": {
+          "type": "object",
+          "title": "Define any class-specific properties here"
+        }
+      }
     }
   },
   "additionalProperties": true
