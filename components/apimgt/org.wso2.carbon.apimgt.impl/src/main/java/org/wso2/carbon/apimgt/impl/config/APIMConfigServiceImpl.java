@@ -188,6 +188,9 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         Cache tenantConfigCache = CacheProvider.getTenantConfigCache();
         String cacheName = organization + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
         tenantConfigCache.remove(cacheName);
+        
+        // Clear restapi scope cache
+        CacheProvider.getRESTAPIScopeCache().remove(organization);
         systemConfigurationsDAO.updateSystemConfig(organization, ConfigType.TENANT.toString(), tenantConfig);
     }
 
