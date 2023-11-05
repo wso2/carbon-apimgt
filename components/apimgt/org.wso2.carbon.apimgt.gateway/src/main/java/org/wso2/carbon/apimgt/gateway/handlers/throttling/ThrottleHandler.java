@@ -639,7 +639,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             context.stop();
         }
 
-        if(authenticationContext != null && authenticationContext.getApplicationSpikesArrestLimit() > 0) {
+        if (authenticationContext != null && authenticationContext.getApplicationSpikesArrestLimit() > 0) {
             Timer timer = getTimer(MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), INIT_APPLICATION_SPIKE_ARREST));
             Timer.Context context = timer.start();
@@ -872,6 +872,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         try {
             parsedPolicy = AXIOMUtil.stringToOM(policy.toString());
         } catch (XMLStreamException e) {
+            // runtime flow is not interrupted even if the policy creation fails
             log.error("Error occurred while creating policy file for Hard Throttling.", e);
         }
         return parsedPolicy;
@@ -879,10 +880,10 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     private void initThrottleForApplicationLevelSpikeArrest(MessageContext synCtx,
                                                             AuthenticationContext authenticationContext) {
         policyKeyApplication = authenticationContext.getApplicationTier();
-        String applicationLevelThrottleKey = authenticationContext.getApplicationId()+":"+authenticationContext.getUsername();
+        String applicationLevelThrottleKey = authenticationContext.getApplicationId() + ":" + authenticationContext.getUsername();
         int maxRequestCount = authenticationContext.getApplicationSpikesArrestLimit();
         int applicationSpikeArrestWindowUnitTime = 0;
-        if(maxRequestCount != 0) {
+        if (maxRequestCount != 0) {
             String unitTime = authenticationContext.getApplicationSpikesArrestUnit();
             if (APIThrottleConstants.MIN.equalsIgnoreCase(unitTime)) {
                 applicationSpikeArrestWindowUnitTime = 60000;
@@ -933,7 +934,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 }
             }
         } catch (ThrottleException e) {
-            log.error("Error while initializing throttling object for  level spike arrest policy" +
+            log.error("Error while initializing throttling object for application level spike arrest policy" +
                     e.getMessage());
         }
     }

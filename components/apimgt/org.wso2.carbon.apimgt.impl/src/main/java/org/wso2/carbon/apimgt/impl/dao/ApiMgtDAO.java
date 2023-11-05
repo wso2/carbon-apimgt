@@ -12898,7 +12898,7 @@ public class ApiMgtDAO {
     }
 
     private void setRateLimitDetails(ApplicationPolicy policy, ResultSet resultSet) throws SQLException {
-        if(resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT) > 0) {
+        if (resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT) > 0) {
             policy.setRateLimitCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
             policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
         }
