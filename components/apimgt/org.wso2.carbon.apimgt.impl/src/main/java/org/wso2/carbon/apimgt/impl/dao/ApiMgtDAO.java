@@ -16802,6 +16802,7 @@ public class ApiMgtDAO {
             throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
             try (PreparedStatement statement = connection
                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.UPDATE_API_REVISION_STATUS_SQL)) {
                 statement.setString(1, status);
@@ -16811,10 +16812,10 @@ public class ApiMgtDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to update API Revision deployment mapping details for revision: " +
-                        revisionUUID, e);
+                handleException(
+                        "Failed to update API Revision deployment mapping details for revision: " + revisionUUID, e);
             }
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             handleException("Could not open database connection", e);
         }
 
