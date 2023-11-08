@@ -594,6 +594,11 @@ public final class APIConstants {
     public static final String KEY_MANAGER_CONSUMER_KEY = "consumer_key";
     public static final String KEY_MANAGER_CONSUMER_SECRET = "consumer_secret";
     public static final String REVOKED_TOKEN_TYPE = "type";
+    public static final String INTERNAL_REVOCATION_EVENT_TYPE = "type";
+    public static final String INTERNAL_REVOCATION_TIME = "revocationTime";
+    public static final String INTERNAL_REVOCATION_CONSUMER_KEY = "consumerKey";
+    public static final String INTERNAL_REVOCATION_SUBJECT_ID = "subjectId";
+    public static final String INTERNAL_REVOCATION_SUBJECT_ID_TYPE = "subjectIdType";
     public static final String IDENTITY_REVOKE_ENDPOINT = "/oauth2/revoke";
     public static final String IDENTITY_TOKEN_ENDPOINT_CONTEXT = "/oauth2/token";
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";

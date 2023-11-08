@@ -53,4 +53,5 @@ public class JWTConstants {
     public static final String ORGANIZATIONS = "organizations";
     public static final String GATEWAY_JWKS_API_CONTEXT = "/jwks";
     public static final String GATEWAY_JWKS_API_NAME = "_JwksEndpoint_";
+    public static final String CLIENT_ID = "client_id";
 }

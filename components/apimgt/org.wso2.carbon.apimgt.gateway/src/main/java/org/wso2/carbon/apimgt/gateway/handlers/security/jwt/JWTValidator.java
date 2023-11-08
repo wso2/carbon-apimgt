@@ -30,6 +30,7 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
@@ -43,7 +44,8 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.jwt.*;
+import org.wso2.carbon.apimgt.gateway.jwt.InternalRevokedJWTDataHolder;
+import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -185,7 +187,7 @@ public class JWTValidator {
             }
             if (jwtGeneratedTime != 0 && InternalRevokedJWTDataHolder.getInstance()
                     .isJWTTokenClientIdExistsInRevokedMap((String) signedJWTInfo.getJwtClaimsSet()
-                            .getClaim("client_id"), jwtGeneratedTime)) {
+                            .getClaim(JWTConstants.CLIENT_ID), jwtGeneratedTime)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Consumer key retrieved from the  jwt token map is in revoked consumer key map." +
                             " Token: " + GatewayUtils.getMaskedToken(jwtHeader));
@@ -195,7 +197,7 @@ public class JWTValidator {
                         "Invalid JWT token");
             }
             if (jwtGeneratedTime != 0 && signedJWTInfo.getJwtClaimsSet().getSubject()
-                    .equals(signedJWTInfo.getJwtClaimsSet().getClaim("client_id"))
+                    .equals(signedJWTInfo.getJwtClaimsSet().getClaim(JWTConstants.CLIENT_ID))
                     && InternalRevokedJWTDataHolder.getInstance().isJWTTokenClientIdExistsInRevokedAppOnlyMap(
                             signedJWTInfo.getJwtClaimsSet().getSubject(), jwtGeneratedTime)) {
                 // handle user event revocations of app tokens since the 'sub' claim is client id
@@ -208,7 +210,7 @@ public class JWTValidator {
                         "Invalid JWT token");
             }
             if (jwtGeneratedTime != 0 && !signedJWTInfo.getJwtClaimsSet().getSubject()
-                    .equals(signedJWTInfo.getJwtClaimsSet().getClaim("client_id"))
+                    .equals(signedJWTInfo.getJwtClaimsSet().getClaim(JWTConstants.CLIENT_ID))
                     && InternalRevokedJWTDataHolder.getInstance().isJWTTokenUserIdExistsInRevokedMap(
                             signedJWTInfo.getJwtClaimsSet().getSubject(), jwtGeneratedTime)) {
                 if (log.isDebugEnabled()) {

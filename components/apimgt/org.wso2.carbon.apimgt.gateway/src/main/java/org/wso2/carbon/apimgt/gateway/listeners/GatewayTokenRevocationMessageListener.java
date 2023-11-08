@@ -60,17 +60,23 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                                     payloadData.get(APIConstants.REVOKED_TOKEN_TYPE).asText());
                         }
 
-                        if (payloadData.get("type") != null && payloadData.get("type").asText()
+                        if (payloadData.get(APIConstants.INTERNAL_REVOCATION_EVENT_TYPE) != null
+                                && payloadData.get(APIConstants.INTERNAL_REVOCATION_EVENT_TYPE).asText()
                                 .equals(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENT)) {
-                            handleInternallyRevokedConsumerKeyMessage(payloadData.get("consumerKey").asText()
-                                    , payloadData.get("revocationTime").asLong(), payloadData.get("type").asText());
+                            handleInternallyRevokedConsumerKeyMessage(
+                                    payloadData.get(APIConstants.INTERNAL_REVOCATION_CONSUMER_KEY).asText(),
+                                    payloadData.get(APIConstants.INTERNAL_REVOCATION_TIME).asLong(),
+                                    payloadData.get(APIConstants.INTERNAL_REVOCATION_EVENT_TYPE).asText());
                         }
 
-                        if (payloadData.get("type") != null && payloadData.get("type").asText()
+                        if (payloadData.get(APIConstants.INTERNAL_REVOCATION_EVENT_TYPE) != null
+                                && payloadData.get(APIConstants.INTERNAL_REVOCATION_EVENT_TYPE).asText()
                                 .equals(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_USER_EVENT)) {
-                            handleInternallyRevokedUserEventMessage(payloadData.get("subjectId").asText(),
-                                    payloadData.get("subjectIdType").asText(), payloadData.get("revocationTime").asLong(),
-                                    payloadData.get("type").asText());
+                            handleInternallyRevokedUserEventMessage(
+                                    payloadData.get(APIConstants.INTERNAL_REVOCATION_SUBJECT_ID).asText(),
+                                    payloadData.get(APIConstants.INTERNAL_REVOCATION_SUBJECT_ID_TYPE).asText(),
+                                    payloadData.get(APIConstants.INTERNAL_REVOCATION_TIME).asLong(),
+                                    payloadData.get(APIConstants.INTERNAL_REVOCATION_EVENT_TYPE).asText());
                         }
                     }
                 } else {
