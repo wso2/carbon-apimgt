@@ -46,6 +46,8 @@ import javax.cache.Cache;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -176,7 +178,62 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         if (organization == null) {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-        return systemConfigurationsDAO.getSystemConfig(organization, ConfigType.TENANT.toString());
+        return addMissingScopes(systemConfigurationsDAO.getSystemConfig(organization, ConfigType.TENANT.toString()));
+    }
+
+    /*
+     *  This method facilitates the on-the-fly migration of the scope section in the tenant-config.json. This
+     *  checks whether RESTAPIScopes section has newly introduced scopes and add them to the json String if it
+     *  is not available. 
+     */
+    private String addMissingScopes(String systemConfig) {
+        if (systemConfig == null) {
+            return null;
+        }
+        // List of newly introduced scopes
+        String[] scopesToCheck = {
+                "apim:admin_tier_view",
+                "apim:admin_tier_manage",
+                "apim:keymanagers_manage",
+                "apim:api_category"
+            };
+        
+        ArrayList<String> missingScopesList = new ArrayList<>(Arrays.asList(scopesToCheck));
+        
+        JsonParser jsonParser = new JsonParser();
+        JsonObject jsonObject = jsonParser.parse(systemConfig).getAsJsonObject();
+
+        // Get the existing rest api scopes
+        if (jsonObject.has("RESTAPIScopes")) {
+            JsonObject restApiScopes = jsonObject.getAsJsonObject("RESTAPIScopes");
+            if (restApiScopes.has("Scope")) {
+                JsonArray scopeArray = restApiScopes.getAsJsonArray("Scope");                
+                for (int i = 0; i < scopeArray.size(); i++) {
+                    String existingScope = scopeArray.get(i).getAsJsonObject().get("Name").getAsString();
+                    if (missingScopesList.contains(existingScope)) {
+                        missingScopesList.remove(existingScope);
+                    }
+                }
+            }
+        }
+        
+        // Check if there is no missing scopes in the tenant-conf.json and return the original file
+        if (missingScopesList.isEmpty()) {
+            return systemConfig;
+        }
+                
+        JsonArray scopeArray = jsonObject.getAsJsonObject("RESTAPIScopes").getAsJsonArray("Scope"); 
+        // Add the missing scopes to the tenant-conf 
+        for (String missingScope : missingScopesList) {
+            JsonObject newScope = new JsonObject();
+            newScope.addProperty("Name", missingScope);
+            newScope.addProperty("Roles", "admin");
+            scopeArray.add(newScope);
+        }
+              
+        // Convert the modified JSON back to a string
+        String modifiedJson = jsonObject.toString();
+        return modifiedJson;
     }
 
     @Override
