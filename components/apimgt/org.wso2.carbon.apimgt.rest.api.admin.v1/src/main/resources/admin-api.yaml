@@ -74,14 +74,14 @@ info:
     ```
     curl https://localhost:9443/oauth2/token -k \
     -H "Authorization: Basic Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h" \
-    -d "grant_type=password&username=admin&password=admin&scope=apim:admin apim:admin_tier_view"
+    -d "grant_type=password&username=admin&password=admin&scope=apim:admin apim:tier_view"
     ```
     Shown below is a sample response to the above request.
     ```
     {
     "access_token": "e79bda48-3406-3178-acce-f6e4dbdcbb12",
     "refresh_token": "a757795d-e69f-38b8-bd85-9aded677a97c",
-    "scope": "apim:admin apim:admin_tier_view",
+    "scope": "apim:admin apim:tier_view",
     "token_type": "Bearer",
     "expires_in": 3600
     }
@@ -144,6 +144,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_view
             - apim:admin_tier_view
             - apim:policies_import_export
       x-code-samples:
@@ -184,6 +185,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_view
             - apim:admin_tier_view
       x-code-samples:
         - lang: Curl
@@ -247,6 +249,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_manage
             - apim:admin_tier_manage
       x-code-samples:
         - lang: Curl
@@ -300,6 +303,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_view
             - apim:admin_tier_view
       x-code-samples:
         - lang: Curl
@@ -363,6 +367,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_manage
             - apim:admin_tier_manage
       x-code-samples:
         - lang: Curl
@@ -388,6 +393,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_manage
             - apim:admin_tier_manage
             - apim:policies_import_export
       x-code-samples:
@@ -428,6 +434,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_view
             - apim:admin_tier_view
       x-code-samples:
         - lang: Curl
@@ -496,6 +503,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_manage
             - apim:admin_tier_manage
       x-code-samples:
         - lang: Curl
@@ -554,6 +562,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_view
             - apim:admin_tier_view
       x-code-samples:
         - lang: Curl
@@ -622,6 +631,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_manage
             - apim:admin_tier_manage
       x-code-samples:
         - lang: Curl
@@ -647,6 +657,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_manage
             - apim:admin_tier_manage
             - apim:policies_import_export
       x-code-samples:
@@ -689,6 +700,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_view
             - apim:admin_tier_view
       x-code-samples:
         - lang: Curl
@@ -754,6 +766,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_manage
             - apim:admin_tier_manage
       x-code-samples:
         - lang: Curl
@@ -809,6 +822,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_view
             - apim:admin_tier_view
       x-code-samples:
         - lang: Curl
@@ -874,6 +888,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_manage
             - apim:admin_tier_manage
       x-code-samples:
         - lang: Curl
@@ -902,6 +917,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_manage
             - apim:admin_tier_manage
             - apim:policies_import_export
       x-code-samples:
@@ -941,6 +957,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_view
             - apim:admin_tier_view
       x-code-samples:
         - lang: Curl
@@ -1004,6 +1021,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_manage
             - apim:admin_tier_manage
       x-code-samples:
         - lang: Curl
@@ -1057,6 +1075,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_view
             - apim:admin_tier_view
       x-code-samples:
         - lang: Curl
@@ -1120,6 +1139,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_manage
             - apim:admin_tier_manage
       x-code-samples:
         - lang: Curl
@@ -1145,6 +1165,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_manage
             - apim:admin_tier_manage
             - apim:policies_import_export
       x-code-samples:
@@ -1232,6 +1253,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_manage
             - apim:admin_tier_manage
             - apim:policies_import_export
       x-code-samples:
@@ -1285,6 +1307,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:tier_manage
             - apim:admin_tier_manage
             - apim:policies_import_export
       x-code-samples:
@@ -5206,6 +5229,8 @@ components:
             openid: Authorize access to user details
             apim:policies_import_export: Export and import policies related operations
             apim:admin: Manage all admin operations
+            apim:tier_view: View throttling policies
+            apim:tier_manage: Update and delete throttling policies
             apim:admin_tier_view: View throttling policies
             apim:admin_tier_manage: Update and delete throttling policies
             apim:bl_view: View deny policies
