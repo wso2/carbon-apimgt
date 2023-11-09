@@ -57,6 +57,7 @@ public class APIRevisionDeploymentSimpleWorkflowExecutor extends WorkflowExecuto
 
         workFlowDTO.setStatus(WorkflowStatus.APPROVED);
         workFlowDTO.setMetadata(ENVIRONMENT_PROPERTY, revisionWorkFlowDTO.getEnvironment());
+        complete(workFlowDTO);
         return new GeneralWorkflowResponse();
     }
 

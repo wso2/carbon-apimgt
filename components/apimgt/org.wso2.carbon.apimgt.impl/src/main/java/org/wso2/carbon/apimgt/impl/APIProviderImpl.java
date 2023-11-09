@@ -5633,7 +5633,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 revisionWFDto.setEnvironment(apiRevisionDeployment.getDeployment());
                 revisionWFDto.setRevisionId(String.valueOf(revisionId));
                 revisionDeploymentWFExecutor.execute(revisionWFDto);
-                revisionDeploymentWFExecutor.complete(revisionWFDto);
             } catch (WorkflowException e) {
                 log.error("Unable to execute Revision Deployment Workflow for revision: " + apiRevisionUUID, e);
                 handleException("Unable to execute Revision Deployment Workflow for revision: " + apiRevisionUUID, e);
@@ -5641,6 +5640,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             // get the workflow state once the executor is executed.
             WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflow(revisionWFDto.getExternalWorkflowReference());
+            WorkflowStatus apiWFState = null;
+            if (wfDTO != null) {
+                apiWFState = wfDTO.getStatus();
+            }
+            // if the workflow has started, then executor should not fire again
+            if (WorkflowStatus.CREATED.equals(apiWFState)) {
+                try {
+                    revisionDeploymentWFExecutor.complete(wfDTO);
+                } catch (WorkflowException e) {
+                    log.error("Unable to update status of the revision: " + apiRevisionUUID, e);
+                }
+            }
 
             // only send the notification if approved
             // wfDTO is null when simple wf executor is used because wf state is not stored in the db.
