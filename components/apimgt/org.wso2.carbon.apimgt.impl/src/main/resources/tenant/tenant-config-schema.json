@@ -1362,7 +1362,8 @@
               "type": "object",
               "title": "Define any class-specific properties here"
             }
-          }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false
