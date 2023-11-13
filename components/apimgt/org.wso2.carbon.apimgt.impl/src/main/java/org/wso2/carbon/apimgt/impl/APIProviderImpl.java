@@ -5185,6 +5185,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setContext(publiserAPI.getContext());
                         api.setContextTemplate(publiserAPI.getContext());
                         api.setStatus(publiserAPI.getStatus());
+                        api.setDescription(publiserAPI.getDescription());
+                        api.setType(publiserAPI.getTransportType());
                         api.setThumbnailUrl(publiserAPI.getThumbnailUri());
                         api.setBusinessOwner(publiserAPI.getBusinessOwner());
                         api.setBusinessOwnerEmail(publiserAPI.getBusinessOwnerEmail());
@@ -5201,6 +5203,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setUuid(publiserAPI.getId());
                         api.setContextTemplate(publiserAPI.getContext());
                         api.setState(publiserAPI.getStatus());
+                        api.setDescription(publiserAPI.getDescription());
                         api.setThumbnailUrl(publiserAPI.getThumbnailUri());
                         api.setBusinessOwner(publiserAPI.getBusinessOwner());
                         api.setBusinessOwnerEmail(publiserAPI.getBusinessOwnerEmail());
