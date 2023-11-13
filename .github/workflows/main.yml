@@ -101,7 +101,7 @@ jobs:
           fetch-depth: '10'
           path: product-apim
       - name: Build product-apim with tests
-        run: mvn clean install -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file product-apim/pom.xml -DskipBenchMarkTest=true -DskipBenchMarkTest=true
+        run: mvn clean install -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file product-apim/pom.xml -DskipBenchMarkTest=true -DskipRestartTests=true
         env:
           PRODUCT_APIM_TEST_GROUPS: ${{ matrix.segment }}
       - name: Publish Test Report
