@@ -1393,6 +1393,10 @@ definitions:
         type: string
       order:
         type: integer
+      parameters:
+        type: object
+        additionalProperties:
+          type: object
   #-----------------------------------------------------
   # The pagination resource
   #-----------------------------------------------------
