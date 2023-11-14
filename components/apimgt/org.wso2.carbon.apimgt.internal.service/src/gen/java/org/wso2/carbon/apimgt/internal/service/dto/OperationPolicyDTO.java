@@ -6,6 +6,8 @@ import javax.validation.constraints.*;
 
 
 import io.swagger.annotations.*;
+
+import java.util.Map;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
@@ -21,6 +23,8 @@ public class OperationPolicyDTO   {
     private String direction = null;
     private String policyId = null;
     private Integer order = null;
+
+    private Map<String, Object> parameters = null;
 
   /**
    **/

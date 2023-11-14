@@ -105,7 +105,6 @@ public class OperationPolicy implements Comparable<OperationPolicy> {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(policyName, policyVersion, direction, parameters, policyId);
     }
 
@@ -124,6 +123,7 @@ public class OperationPolicy implements Comparable<OperationPolicy> {
                 ", direction ='" + direction + '\'' +
                 ", order ='" + order + '\'' +
                 ", policyId ='" + policyId + '\'' +
+                ", parameters ='" + parameters + '\'' +
                 '}';
     }
 }
