@@ -109,6 +109,7 @@ public class SubscriptionValidationDataUtil {
                     operationPolicyDTO.setPolicyName(operationPolicy.getPolicyName());
                     operationPolicyDTO.setPolicyVersion(operationPolicy.getPolicyVersion());
                     operationPolicyDTO.setDirection(operationPolicy.getDirection());
+                    operationPolicyDTO.setParameters(operationPolicy.getParameters());
                     operationPolicyDTO.setOrder(operationPolicy.getOrder());
                     operationPolicyDTOList.add(operationPolicyDTO);
                 }
@@ -123,6 +124,7 @@ public class SubscriptionValidationDataUtil {
                 operationPolicyDTO.setPolicyVersion(apiPolicy.getPolicyVersion());
                 operationPolicyDTO.setDirection(apiPolicy.getDirection());
                 operationPolicyDTO.setOrder(apiPolicy.getOrder());
+                operationPolicyDTO.setParameters(apiPolicy.getParameters());
                 apiPolicies.add(operationPolicyDTO);
             }
             apidto.setApiPolicies(apiPolicies);
@@ -164,6 +166,7 @@ public class SubscriptionValidationDataUtil {
                     operationPolicyDTO.setPolicyVersion(operationPolicy.getPolicyVersion());
                     operationPolicyDTO.setDirection(operationPolicy.getDirection());
                     operationPolicyDTO.setOrder(operationPolicy.getOrder());
+                    operationPolicyDTO.setParameters(operationPolicy.getParameters());
                     operationPolicyDTOList.add(operationPolicyDTO);
                 }
                 urlMappingDTO.setOperationPolicies(operationPolicyDTOList);
@@ -176,6 +179,7 @@ public class SubscriptionValidationDataUtil {
                 operationPolicyDTO.setPolicyName(apiPolicy.getPolicyName());
                 operationPolicyDTO.setPolicyVersion(apiPolicy.getPolicyVersion());
                 operationPolicyDTO.setDirection(apiPolicy.getDirection());
+                operationPolicyDTO.setParameters(apiPolicy.getParameters());
                 operationPolicyDTO.setOrder(apiPolicy.getOrder());
                 apiPolicies.add(operationPolicyDTO);
             }
