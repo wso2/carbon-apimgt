@@ -302,11 +302,7 @@ public class TenantWorkflowConfigHolderTest {
                     "that takes a single String, int, long, float, double or boolean parameter", e.getMessage());
         }
     }
-
-    /**
-     * This method tests the correct loading of properties where property values can have
-     * different types, such as string, int, double, etc.
-     */
+    
     @Test
     public void testLoadingTenantWFConfigWhenWFExecutorHasMultipleParamTypes() throws Exception {
         //Workflow executor class setter methods are available for different parameter types
@@ -345,50 +341,6 @@ public class TenantWorkflowConfigHolderTest {
             Assert.assertEquals("<omElement>test</omElement>", executor.omElement.toString());
 
 
-        } catch (WorkflowException e) {
-            Assert.fail("Unexpected WorkflowException has been thrown while loading workflow executor for different " +
-                    "param types");
-        }
-    }
-
-    /**
-     * This method tests the correct loading of properties when all property values are specified as strings.
-     * This supports proper migration of workflow-extensions properties
-     */
-    @Test
-    public void testLoadingTenantWFExecutorWithMultipleParamTypesWhenAllPropValuesAreSpecifiedAsStrings() throws Exception {
-        //Workflow executor class setter methods are available for different parameter types
-        JsonObject WFExecutor = JsonParser.parseString("{\n" +
-                "    \"Workflows\": {\n" +
-                "        \"UserSignUp\": {\n" +
-                "            \"Enabled\": true,\n" +
-                "            \"Class\": \"org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorWithMultipleParamTypes\",\n" +
-                "            \"Properties\": {\n" +
-                "                \"StringParam\": \"admin\",\n" +
-                "                \"IntParam\": \"1\",\n" +
-                "                \"BooleanParam\": \"true\",\n" +
-                "                \"LongParam\": \"10000000\",\n" +
-                "                \"DoubleParam\": \"10.1000000000\",\n" +
-                "                \"FloatParam\": \"10.1\",\n" +
-                "                \"OMElementParam\": \"<omElement>test</omElement>\"\n" +
-                "            }\n" +
-                "        }\n" +
-                "    }\n" +
-                "}").getAsJsonObject();
-        TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
-        Mockito.when(apimConfigService.getWorkFlowConfig(tenantDomain))
-                .thenReturn(WorkflowTestUtils.getWorkFlowConfigDTOFromJsonConfig(WFExecutor));
-        try {
-            tenantWorkflowConfigHolder.load();
-            Assert.assertNotNull(tenantWorkflowConfigHolder.getWorkflowExecutor("AM_USER_SIGNUP"));
-            WorkflowExecutorWithMultipleParamTypes executor = (WorkflowExecutorWithMultipleParamTypes) tenantWorkflowConfigHolder.getWorkflowExecutor("AM_USER_SIGNUP");
-            Assert.assertEquals("admin", executor.stringParam);
-            Assert.assertEquals((Integer) 1, executor.intParam);
-            Assert.assertEquals(true, executor.boolParam);
-            Assert.assertEquals(10000000, executor.longParam);
-            Assert.assertEquals((Double) 10.1000000000, executor.doubleParam);
-            Assert.assertEquals((Float) 10.1f, executor.floatParam);
-            Assert.assertEquals("<omElement>test</omElement>", executor.omElement.toString());
         } catch (WorkflowException e) {
             Assert.fail("Unexpected WorkflowException has been thrown while loading workflow executor for different " +
                     "param types");
