@@ -275,11 +275,11 @@ public class TenantWorkflowConfigHolder implements Serializable {
      * Find and invoke the setter method with the name of form setXXX passing in the value given
      * on the POJO object.
      *
-     * @param name name of the setter field
-     * @param val  value to be set
-     * @param obj  POJO instance
+     * @param name    name of the setter field
+     * @param valElem value to be set
+     * @param obj     POJO instance
      */
-    public void setInstanceProperty(String name, JsonElement val, Object obj) throws WorkflowException {
+    public void setInstanceProperty(String name, JsonElement valElem, Object obj) throws WorkflowException {
 
         String mName = "set" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
         Method method;
@@ -295,39 +295,41 @@ public class TenantWorkflowConfigHolder implements Serializable {
                         handleException("Did not find a setter method named : " + mName +
                                 "() that takes a single String, int, long, float, double ," +
                                 "OMElement or boolean parameter");
-                    } else if (val.isJsonPrimitive() && val.getAsJsonPrimitive().isString()) {
-                        String value = val.getAsJsonPrimitive().getAsString();
+                    } else if (valElem.isJsonPrimitive()) {
+                        JsonElement primitive = valElem.getAsJsonPrimitive();
                         if (String.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, String.class);
-                            method.invoke(obj, new String[]{value});
+                            method.invoke(obj, new String[]{primitive.getAsString()});
                         } else if (int.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, int.class);
-                            method.invoke(obj, new Integer[]{Integer.valueOf(value)});
+                            method.invoke(obj, new Integer[]{primitive.getAsInt()});
                         } else if (long.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, long.class);
-                            method.invoke(obj, new Long[]{Long.valueOf(value)});
+                            method.invoke(obj, new Long[]{primitive.getAsLong()});
                         } else if (float.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, float.class);
-                            method.invoke(obj, new Float[]{new Float(value)});
+                            method.invoke(obj, new Float[]{primitive.getAsFloat()});
                         } else if (double.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, double.class);
-                            method.invoke(obj, new Double[]{new Double(value)});
+                            method.invoke(obj, new Double[]{primitive.getAsDouble()});
                         } else if (boolean.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, boolean.class);
-                            method.invoke(obj, new Boolean[]{Boolean.valueOf(value)});
+                            method.invoke(obj, new Boolean[]{primitive.getAsBoolean()});
                         } else if (Class.forName("[C").equals(params[0])) {
                             method = obj.getClass().getMethod(mName, Class.forName("[C"));
-                            method.invoke(obj, value.toCharArray());
+                            method.invoke(obj, primitive.getAsString().toCharArray());
                         } else if (OMElement.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, OMElement.class);
-                            OMElement el = AXIOMUtil.stringToOM(value);
+                            OMElement el = AXIOMUtil.stringToOM(primitive.getAsString());
                             method.invoke(obj, new OMElement[]{el});
-                        } else if (JsonElement.class.equals(params[0])) {
-                            method = obj.getClass().getMethod(mName, JsonElement.class);
-                            method.invoke(obj, new JsonElement[]{val});
                         } else {
                             continue;
                         }
+                    } else if (!valElem.isJsonPrimitive() && JsonElement.class.equals(params[0])) {
+                        method = obj.getClass().getMethod(mName, JsonElement.class);
+                        method.invoke(obj, new JsonElement[]{valElem});
+                    } else {
+                        continue;
                     }
                     invoked = true;
                     break;

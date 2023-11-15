@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Workflow configurations DTO
+ * Workflow configurations DTO to hold the workflow config
  */
 public class WorkflowConfigDTO {
 
@@ -34,6 +34,14 @@ public class WorkflowConfigDTO {
         workflowConfigMap = new HashMap<>();
     }
 
+    /**
+     * Method adds each WorkflowConfig to the workflowConfigMap
+     *
+     * @param workflowName type of workflow
+     * @param enabled      whether the approval/custom workflow is enabled
+     * @param className    executor class name (org.wso2.......ExampleWorkflowExecutor)
+     * @param properties   the class specific properties
+     */
     public void addWorkflowConfig(String workflowName, boolean enabled, String className, JsonObject properties) {
         WorkflowConfig workflowConfig = new WorkflowConfig(enabled, className, properties);
         workflowConfigMap.put(workflowName, workflowConfig);
@@ -44,6 +52,9 @@ public class WorkflowConfigDTO {
     }
 
 
+    /**
+     * Represents configuration of each workflow type
+     */
     public static class WorkflowConfig {
         private boolean enabled;
         private String className;

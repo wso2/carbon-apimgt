@@ -22,8 +22,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
@@ -41,13 +39,8 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
-import javax.xml.stream.XMLStreamException;
 
 /**
  * TenantWorkflowConfigHolder test cases
@@ -310,6 +303,10 @@ public class TenantWorkflowConfigHolderTest {
         }
     }
 
+    /**
+     * This method tests the correct loading of properties where property values can have
+     * different types, such as string, int, double, etc.
+     */
     @Test
     public void testLoadingTenantWFConfigWhenWFExecutorHasMultipleParamTypes() throws Exception {
         //Workflow executor class setter methods are available for different parameter types
@@ -336,7 +333,62 @@ public class TenantWorkflowConfigHolderTest {
                 .thenReturn(WorkflowTestUtils.getWorkFlowConfigDTOFromJsonConfig(WFExecutor));
         try {
             tenantWorkflowConfigHolder.load();
-            Assert.assertNotNull(tenantWorkflowConfigHolder.getWorkflowExecutor("AM_APPLICATION_CREATION"));
+            Assert.assertNotNull(tenantWorkflowConfigHolder.getWorkflowExecutor("AM_USER_SIGNUP"));
+            WorkflowExecutorWithMultipleParamTypes executor = (WorkflowExecutorWithMultipleParamTypes) tenantWorkflowConfigHolder.getWorkflowExecutor("AM_USER_SIGNUP");
+            Assert.assertEquals("admin", executor.stringParam);
+            Assert.assertEquals((Integer) 1, executor.intParam);
+            Assert.assertEquals(true, executor.boolParam);
+            Assert.assertEquals(10000000, executor.longParam);
+            Assert.assertEquals((Double) 10.1000000000, executor.doubleParam);
+            Assert.assertEquals((Float) 10.1f, executor.floatParam);
+            Assert.assertEquals("{\"key\":\"value\"}", executor.jsonElement.toString());
+            Assert.assertEquals("<omElement>test</omElement>", executor.omElement.toString());
+
+
+        } catch (WorkflowException e) {
+            Assert.fail("Unexpected WorkflowException has been thrown while loading workflow executor for different " +
+                    "param types");
+        }
+    }
+
+    /**
+     * This method tests the correct loading of properties when all property values are specified as strings.
+     * This supports proper migration of workflow-extensions properties
+     */
+    @Test
+    public void testLoadingTenantWFExecutorWithMultipleParamTypesWhenAllPropValuesAreSpecifiedAsStrings() throws Exception {
+        //Workflow executor class setter methods are available for different parameter types
+        JsonObject WFExecutor = JsonParser.parseString("{\n" +
+                "    \"Workflows\": {\n" +
+                "        \"UserSignUp\": {\n" +
+                "            \"Enabled\": true,\n" +
+                "            \"Class\": \"org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorWithMultipleParamTypes\",\n" +
+                "            \"Properties\": {\n" +
+                "                \"StringParam\": \"admin\",\n" +
+                "                \"IntParam\": \"1\",\n" +
+                "                \"BooleanParam\": \"true\",\n" +
+                "                \"LongParam\": \"10000000\",\n" +
+                "                \"DoubleParam\": \"10.1000000000\",\n" +
+                "                \"FloatParam\": \"10.1\",\n" +
+                "                \"OMElementParam\": \"<omElement>test</omElement>\"\n" +
+                "            }\n" +
+                "        }\n" +
+                "    }\n" +
+                "}").getAsJsonObject();
+        TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
+        Mockito.when(apimConfigService.getWorkFlowConfig(tenantDomain))
+                .thenReturn(WorkflowTestUtils.getWorkFlowConfigDTOFromJsonConfig(WFExecutor));
+        try {
+            tenantWorkflowConfigHolder.load();
+            Assert.assertNotNull(tenantWorkflowConfigHolder.getWorkflowExecutor("AM_USER_SIGNUP"));
+            WorkflowExecutorWithMultipleParamTypes executor = (WorkflowExecutorWithMultipleParamTypes) tenantWorkflowConfigHolder.getWorkflowExecutor("AM_USER_SIGNUP");
+            Assert.assertEquals("admin", executor.stringParam);
+            Assert.assertEquals((Integer) 1, executor.intParam);
+            Assert.assertEquals(true, executor.boolParam);
+            Assert.assertEquals(10000000, executor.longParam);
+            Assert.assertEquals((Double) 10.1000000000, executor.doubleParam);
+            Assert.assertEquals((Float) 10.1f, executor.floatParam);
+            Assert.assertEquals("<omElement>test</omElement>", executor.omElement.toString());
         } catch (WorkflowException e) {
             Assert.fail("Unexpected WorkflowException has been thrown while loading workflow executor for different " +
                     "param types");
@@ -371,7 +423,16 @@ class InvalidWorkFlowExecutor2 extends WorkflowExecutor{
     }
 }
 
-class WorkflowExecutorWithMultipleParamTypes extends WorkflowExecutor{
+class WorkflowExecutorWithMultipleParamTypes extends WorkflowExecutor {
+    public String stringParam;
+    public Integer intParam;
+    public Float floatParam;
+    public Double doubleParam;
+    public Boolean boolParam;
+    public long longParam;
+    public OMElement omElement;
+    public JsonElement jsonElement;
+
 
     @Override
     public String getWorkflowType() {
@@ -384,26 +445,34 @@ class WorkflowExecutorWithMultipleParamTypes extends WorkflowExecutor{
     }
 
     public void setStringParam(String stringParam) {
+        this.stringParam = stringParam;
     }
 
     public void setIntParam(int intParam) {
+        this.intParam = intParam;
     }
 
     public void setLongParam(long longParam) {
+        this.longParam = longParam;
     }
 
     public void setFloatParam(float floatParam) {
+        this.floatParam = floatParam;
     }
 
     public void setDoubleParam(double doubleParam) {
+        this.doubleParam = doubleParam;
     }
 
-    public void setBooleanParam(boolean booleanParam) {
+    public void setBooleanParam(boolean boolParam) {
+        this.boolParam = boolParam;
     }
 
     public void setOMElementParam(OMElement omElement) {
+        this.omElement = omElement;
     }
 
     public void setJsonElement(JsonElement jsonElement) {
+        this.jsonElement = jsonElement;
     }
 }

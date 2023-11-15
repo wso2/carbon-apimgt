@@ -251,6 +251,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         Cache tenantConfigCache = CacheProvider.getTenantConfigCache();
         String cacheName = organization + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
         tenantConfigCache.remove(cacheName);
+        // Clear workflow config while updating advanced config
         String workflowCacheName = organization + "_" + APIConstants.WORKFLOW_CACHE_NAME;
         Cache workflowCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                 .getCache(APIConstants.WORKFLOW_CACHE_NAME);
@@ -278,6 +279,12 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         }
     }
 
+    /**
+     * Populate and returns the WorkflowConfigDTO when JSON workflow config is given
+     *
+     * @param workflowConfig JsonObject
+     * @return WorkflowConfigDTO
+     */
     private WorkflowConfigDTO getWorkFlowConfigDTO(JsonObject workflowConfig) {
         WorkflowConfigDTO config = new WorkflowConfigDTO();
         if (workflowConfig != null) {

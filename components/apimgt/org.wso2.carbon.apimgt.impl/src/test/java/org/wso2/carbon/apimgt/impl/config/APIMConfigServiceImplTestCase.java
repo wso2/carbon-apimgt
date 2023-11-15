@@ -87,6 +87,12 @@ public class APIMConfigServiceImplTestCase {
         Assert.assertNull(userRegistrationConfigDTO);
     }
 
+    /**
+     * Test the population proper WorkflowConfigDTO when config json is given as input
+     *
+     * @throws IOException
+     * @throws APIManagementException
+     */
     @Test
     public void testGetWorkflowConfigWhenConfigured() throws IOException, APIManagementException {
         System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
@@ -115,6 +121,12 @@ public class APIMConfigServiceImplTestCase {
         Assert.assertEquals("Created:Publish,Published:Block", properties.get("StateList").getAsString());
     }
 
+    /**
+     * Test the population proper WorkflowConfigDTO when no explicit workflow JSON config is given
+     *
+     * @throws IOException
+     * @throws APIManagementException
+     */
     @Test
     public void testGetWorkflowConfigWhenNotConfigured() throws IOException, APIManagementException {
         System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
