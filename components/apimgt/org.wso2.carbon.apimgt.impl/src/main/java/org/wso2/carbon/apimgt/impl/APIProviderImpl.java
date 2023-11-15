@@ -5608,13 +5608,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         }
-
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionUUID, apiRevisionDeployments);
-
         WorkflowExecutor revisionDeploymentWFExecutor = getWorkflowExecutor(
                 WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
 
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
+            apiMgtDAO.updateAPIRevisionDeploymentStatus(apiRevisionUUID,
+                    APIConstants.APIRevisionStatus.API_REVISION_CREATED, apiRevisionDeployment.getDeployment());
             APIRevisionWorkflowDTO revisionWFDto = new APIRevisionWorkflowDTO();
             try {
                 revisionWFDto.setAPIRevision(apiRevision);
@@ -5638,26 +5638,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 handleException("Unable to execute Revision Deployment Workflow for revision: " + apiRevisionUUID, e);
             }
 
-            // get the workflow state once the executor is executed.
             WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflow(revisionWFDto.getExternalWorkflowReference());
-            WorkflowStatus apiWFState = null;
-            if (wfDTO != null) {
-                apiWFState = wfDTO.getStatus();
-            }
-            // if the workflow has started, then executor should not fire again
-            if (WorkflowStatus.CREATED.equals(apiWFState)) {
-                try {
-                    revisionDeploymentWFExecutor.complete(wfDTO);
-                } catch (WorkflowException e) {
-                    log.error("Unable to update status of the revision: " + apiRevisionUUID, e);
-                }
-            }
-
             // only send the notification if approved
             // wfDTO is null when simple wf executor is used because wf state is not stored in the db.
             if (wfDTO == null || WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                 apiRevisionDeployment.setDisplayOnDevportal(true);
-                apiMgtDAO.updateAPIRevisionDeployment (apiId,Collections.singleton(apiRevisionDeployment));
+                apiMgtDAO.updateAPIRevisionDeployment(apiId, Collections.singleton(apiRevisionDeployment));
                 resumeDeployedAPIRevision(apiId, organization, apiRevisionUUID, String.valueOf(revisionId),
                         apiRevisionDeployment.getDeployment());
             }
