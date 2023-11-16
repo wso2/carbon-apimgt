@@ -348,6 +348,14 @@
       {
         "Name": "apim:policies_import_export",
         "Roles": "admin,Internal/devops"
+      },
+      {
+        "Name": "apim:admin_tier_manage",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:admin_tier_view",
+        "Roles": "admin"
       }
     ]
   },
