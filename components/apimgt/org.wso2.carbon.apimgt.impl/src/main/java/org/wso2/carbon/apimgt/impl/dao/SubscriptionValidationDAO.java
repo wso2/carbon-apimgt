@@ -69,6 +69,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SubscriptionValidationDAO {
 
     private static Log log = LogFactory.getLog(SubscriptionValidationDAO.class);
+    private static String OPERATION_POLICY_ENABLE_WITH_ANALYTICS_EVENT = "operationPolicyEnableWithAnalyticsEvent";
 
     /*
      * This method can be used to retrieve all the Subscriptions in the database
@@ -1173,7 +1174,9 @@ public class SubscriptionValidationDAO {
             }
         }
 
-        attachPolicies(connection, revisionId, api);
+        if (Boolean.parseBoolean(System.getProperty(OPERATION_POLICY_ENABLE_WITH_ANALYTICS_EVENT))) {
+            attachPolicies(connection, revisionId, api);
+        }
     }
 
     public API getAPIByContextAndVersion(String context, String version, String deployment, boolean isExpand) {
@@ -1264,9 +1267,10 @@ public class SubscriptionValidationDAO {
             }
         }
 
-        // Attach the relevant operation policies and api to the resources and to the API.
-        attachPolicies(connection, revisionId, api);
-
+        if (Boolean.parseBoolean(System.getProperty(OPERATION_POLICY_ENABLE_WITH_ANALYTICS_EVENT))) {
+            // Attach the relevant operation policies and api to the resources and to the API.
+            attachPolicies(connection, revisionId, api);
+        }
     }
 
     // Attach API and Operation Policies based on the API type (API/API Product)
