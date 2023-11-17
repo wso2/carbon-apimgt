@@ -169,9 +169,10 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             api.setApiCreator(apiObj.getApiProvider());
             api.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(api.getApiCreator()));
             List<URITemplate> uriTemplates = new ArrayList<>();
+
             for (URLMapping uriTemplate : apiObj.getUrlMappings()) {
-                org.wso2.carbon.apimgt.common.analytics.publishers.dto.URITemplate uriTemplateObj = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.URITemplate();
-                // messageContext.getProperty("API_ELECTED_RESOURCE").equals(uriTemplate.getUrlPattern()) instead of uriTemplate.getUrlPattern().equals(messageContext.getProperty("api.ut.resource"))
+                org.wso2.carbon.apimgt.common.analytics.publishers.dto.URITemplate uriTemplateObj
+                        = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.URITemplate();
                 if (uriTemplate.getHttpMethod() != null && uriTemplate.getHttpMethod()
                         .equals(messageContext.getProperty("api.ut.HTTP_METHOD")) && uriTemplate.getUrlPattern() != null
                         && uriTemplate.getUrlPattern().equals(messageContext.getProperty("API_ELECTED_RESOURCE"))) {
@@ -179,9 +180,11 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                     uriTemplateObj.setResourceURI(uriTemplate.getUrlPattern());
                     uriTemplateObj.setHttpVerb(uriTemplate.getHttpMethod());
                     uriTemplateObj.setAuthScheme(uriTemplate.getAuthScheme());
-                    List<org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy> operationPolicies = new ArrayList<>();
+                    List<org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy> operationPolicies
+                            = new ArrayList<>();
                     for (OperationPolicy operationPolicy : uriTemplate.getOperationPolicies()) {
-                        org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy operationPolicyObj = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy();
+                        org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy operationPolicyObj
+                                = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy();
                         operationPolicyObj.setPolicyVersion(operationPolicy.getPolicyVersion());
                         operationPolicyObj.setPolicyName(operationPolicy.getPolicyName());
                         operationPolicyObj.setPolicyId(operationPolicy.getPolicyId());
@@ -191,13 +194,14 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                     }
                     uriTemplateObj.setOperationPolicies(operationPolicies);
                     uriTemplates.add(uriTemplateObj);
+                    break;
                 }
             }
             List<org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy> apiPolicyList =
                     new ArrayList<>();
             for (OperationPolicy apiPolicy : apiObj.getApiPolicies()) {
-                org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy operationPolicyObj =
-                        new org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy();
+                org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy operationPolicyObj
+                        = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy();
                 operationPolicyObj.setPolicyVersion(apiPolicy.getPolicyVersion());
                 operationPolicyObj.setPolicyName(apiPolicy.getPolicyName());
                 operationPolicyObj.setPolicyId(apiPolicy.getPolicyId());

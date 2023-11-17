@@ -1269,6 +1269,7 @@ public class SubscriptionValidationDAO {
 
     }
 
+    // Attach API and Operation Policies based on the API type (API/API Product)
     private void attachPolicies(Connection connection, String revisionId, API api) throws SQLException {
 
         // Find an optimistic solution to separate out
@@ -1305,31 +1306,6 @@ public class SubscriptionValidationDAO {
                             }
                         }
                     }
-                    //                    while (resultSet.next()) {
-                    //                        String httpMethod = resultSet.getString("HTTP_METHOD");
-                    //                        String urlPattern = resultSet.getString("URL_PATTERN");
-                    //                        String policyName = resultSet.getString("POLICY_NAME");
-                    //                        String policyVersion = resultSet.getString("POLICY_VERSION");
-                    //                        String policyDirection = resultSet.getString("DIRECTION");
-                    //                        String policyUUID = resultSet.getString("POLICY_UUID");
-                    //                        URLMapping urlMapping = null;
-                    //                        if (StringUtils.isNotEmpty(httpMethod) && StringUtils.isNotEmpty(urlPattern)) {
-                    //                            urlMapping = api.getResource(urlPattern, httpMethod);
-                    //                        }
-                    //                        if (urlMapping != null) {
-                    //                            if (StringUtils.isNotEmpty(policyUUID) && StringUtils.isNotEmpty(policyName)
-                    //                                    && StringUtils.isNotEmpty(policyVersion) && StringUtils.isNotEmpty(
-                    //                                    policyDirection)) {
-                    //                                OperationPolicy operationPolicy = new OperationPolicy();
-                    //                                operationPolicy.setPolicyId(policyUUID);
-                    //                                operationPolicy.setPolicyName(policyName);
-                    //                                operationPolicy.setPolicyVersion(policyVersion);
-                    //                                operationPolicy.setDirection(policyDirection);
-                    //                                urlMapping.setOperationPolicies(operationPolicy);
-                    //                                api.addResource(urlMapping);
-                    //                            }
-                    //                        }
-                    //                    }
                 }
             } catch (APIManagementException e) {
                 log.error("Error while converting parameters to map for API : " + api.getApiUUID() + " Revision: "
