@@ -22,6 +22,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.http.entity.ContentType;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -3736,5 +3737,76 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 RegistryPersistenceUtil.endTenantFlow();
             }
         }
+    }
+
+    @Override
+    public String changeApiProvider(String providerName, String apiId, String org, MessageContext ctx)
+            throws APIPersistenceException, APIManagementException {
+
+        boolean isTenantFlowStarted = false;
+        boolean transactionCommitted = false;
+        RegistryHolder holder = getRegistry(org);
+        Registry userRegistry = holder.getRegistry();
+        isTenantFlowStarted = holder.isTenantFlowStarted();
+        try {
+            String oldArtifactPath = GovernanceUtils.getArtifactPath(userRegistry, apiId);
+            Resource apiResource = userRegistry.get(oldArtifactPath);
+            if (apiResource != null) {
+                //userRegistry.beginTransaction();
+                GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(userRegistry,
+                        APIConstants.API_KEY);
+                if (artifactManager == null) {
+                    String errorMessage = "Artifact manager is null when changing the provider name of " + apiId;
+                    log.error(errorMessage);
+                    throw new APIPersistenceException(errorMessage);
+                }
+                //Moving the registry file
+                GenericArtifact artifact = getAPIArtifact(apiId, userRegistry);
+                String oldProvider = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+                String newProvider = providerName;
+                String[] artifactPathChunks = oldArtifactPath.split(oldProvider);
+                String newArtifactApiPath = artifactPathChunks[0] + newProvider + artifactPathChunks[1];
+                userRegistry.move(oldArtifactPath, newArtifactApiPath);
+                String oldArtifactSwaggerPath = oldArtifactPath.replaceFirst("/api$",
+                        "/swagger.json");
+                String newArtifactSwaggerPath = newArtifactApiPath.replaceFirst("/api$",
+                        "/swagger.json");
+                userRegistry.move(oldArtifactSwaggerPath, newArtifactSwaggerPath);
+                int time=0;
+                while (!userRegistry.resourceExists(newArtifactSwaggerPath) &&
+                        !userRegistry.resourceExists(newArtifactApiPath) || time > 5000) {
+                    Thread.sleep(1000);
+                    log.info("-------------Resource Not Existed-------------");
+                    time += 1000;
+                }
+                Resource newAPIArtifact = userRegistry.get(newArtifactApiPath);
+                Resource newSwaggerArtifact = userRegistry.get(newArtifactSwaggerPath);
+                userRegistry.put(newArtifactApiPath,newAPIArtifact);
+                userRegistry.put(newArtifactSwaggerPath,newSwaggerArtifact);
+                //Thread.sleep(10000);
+                artifact = getAPIArtifact(apiId, userRegistry);
+                artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, newProvider);
+                artifactManager.updateGenericArtifact(artifact);
+
+                //userRegistry.commitTransaction();
+                transactionCommitted=true;
+            }
+        } catch (RegistryException e) {
+            throw new APIManagementException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                if (userRegistry != null && !transactionCommitted) {
+                    userRegistry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                log.error("Error while rolling back the transaction for Api Provider Change");
+            }
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return null;
     }
 }

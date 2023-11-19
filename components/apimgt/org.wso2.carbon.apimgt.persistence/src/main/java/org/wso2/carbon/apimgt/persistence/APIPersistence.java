@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.persistence;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
@@ -508,4 +510,15 @@ public interface APIPersistence {
      */
     Set<Tag> getAllTags(Organization org, UserContext ctx) throws APIPersistenceException;
 
+    /**
+     *
+     * @param providerName
+     * @param apiId
+     * @param org
+     * @param ctx
+     * @return
+     * @throws APIPersistenceException
+     */
+    String changeApiProvider(String providerName, String apiId, String org, MessageContext ctx)
+            throws APIPersistenceException, APIManagementException;
 }

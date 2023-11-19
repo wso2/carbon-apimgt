@@ -3202,6 +3202,43 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F "type=WSO2-IS" "https://127.0.0.1:9443/api/am/admin/v4/key-managers/discover"'
 
+  ######################################################
+  # API Provider Resource
+  ######################################################
+  /provider/{providerName}/apis/{apiId}:
+    put:
+      tags:
+        - Api Provider Change
+      summary: Update the api provider
+      description: |
+        Update the api provider
+      parameters:
+        - $ref: '#/components/parameters/providerName'
+        - $ref: '#/components/parameters/apiId'
+      operationId: providerProviderNameApisApiIdPut
+      responses:
+        200:
+          description: |
+            OK.
+            Api Provider updated.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" "https://127.0.0.1:9443/api/am/admin/v4/provider/admin/apis/33662a62-8db1-4d75-af08-afd63c6bd0b4"'
+
 components:
   schemas:
     Error:
@@ -5196,6 +5233,22 @@ components:
       required: true
       schema:
         type: string
+    providerName:
+      name: providerName
+      in: path
+      description: |
+        Provider Name
+      required: true
+      schema:
+        type: string
+    apiId:
+      name: apiId
+      in: path
+      description: |
+        API Id
+      required: true
+      schema:
+        type: string
   securitySchemes:
     OAuth2Security:
       type: oauth2
@@ -5235,3 +5288,4 @@ components:
             apim:role_manage: Manage system roles
             apim:admin_application_view: View Applications
             apim:keymanagers_manage: Manage Key Managers
+            apim:api_provider_change: Retrieve and manage applications
