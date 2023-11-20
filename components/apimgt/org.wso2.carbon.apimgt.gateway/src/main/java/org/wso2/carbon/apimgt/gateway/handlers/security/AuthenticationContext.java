@@ -42,6 +42,7 @@ public class AuthenticationContext {
     private String subscriber;
     private List<String> throttlingDataList;
     private int spikeArrestLimit;
+    private int applicationSpikesArrestLimit;
     private String subscriberTenantDomain;
     private String spikeArrestUnit;
     private boolean stopOnQuotaReach;
@@ -179,8 +180,6 @@ public class AuthenticationContext {
     public void setConsumerKey(String consumerKey) {
         this.consumerKey = consumerKey;
     }
-
-    private int applicationSpikesArrestLimit;
 
     public String getApplicationSpikesArrestUnit() {
         return applicationSpikesArrestUnit;
