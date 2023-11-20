@@ -459,7 +459,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (!RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
-
+            if (body.getName() != null && !body.getName().equalsIgnoreCase(oldApplication.getName())) {
+                if (APIUtil.isApplicationExist(username, body.getName(),
+                        oldApplication.getGroupId(), oldApplication.getOrganization())) {
+                    APIUtil.handleResourceAlreadyExistsException(
+                            "A duplicate application already exists by the name - " + body.getName());
+                }
+            }
             Application updatedApplication = preProcessAndUpdateApplication(username, body, oldApplication,
                     applicationId);
             ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);

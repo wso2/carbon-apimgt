@@ -563,6 +563,10 @@ public class OASParserUtil {
 
         PathItem pathItem = paths.get(uriTemplate.getUriTemplate());
         pathItem.operation(httpMethod, srcOperation);
+        if (pathItem.getParameters() == null && srcPathItem.getParameters() != null) {
+            pathItem.setParameters(srcPathItem.getParameters());
+            setRefOfParameters(srcPathItem.getParameters(), context);
+        }
 
         readReferenceObjects(srcOperation, context);
 
@@ -632,8 +636,11 @@ public class OASParserUtil {
                 if (headers != null) {
                     for (Header header : headers.values()) {
                         Content content = header.getContent();
-
                         extractReferenceFromContent(content, context);
+                        String ref = header.get$ref();
+                        if (ref != null) {
+                            addToReferenceObjectMap(ref, context);
+                        }
                     }
                 }
             }

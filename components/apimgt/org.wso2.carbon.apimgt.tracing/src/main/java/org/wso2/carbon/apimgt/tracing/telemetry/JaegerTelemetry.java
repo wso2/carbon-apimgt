@@ -19,16 +19,13 @@
 package org.wso2.carbon.apimgt.tracing.telemetry;
 
 import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter;
 import io.opentelemetry.extension.trace.propagation.JaegerPropagator;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -68,11 +65,9 @@ public class JaegerTelemetry implements APIMOpenTelemetry {
             log.debug("Jaeger exporter: " + jaegerExporter + " is configured at http://" + hostname + ":" + port);
         }
 
-        Resource serviceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, serviceName));
-
         sdkTracerProvider = SdkTracerProvider.builder()
                 .addSpanProcessor(BatchSpanProcessor.builder(jaegerExporter).build())
-                .setResource(Resource.getDefault().merge(serviceNameResource))
+                .setResource(TelemetryUtil.getTracerProviderResource(serviceName))
                 .build();
 
         openTelemetry = OpenTelemetrySdk.builder()
