@@ -45,14 +45,12 @@ public class WorkflowTestUtils {
                 String workflowName = entry.getKey();
                 JsonObject workflowConfigEntry = (JsonObject) entry.getValue();
 
-                boolean isEnabled = workflowConfigEntry.get("Enabled") != null
-                        && workflowConfigEntry.get("Enabled").getAsBoolean();
                 String className = workflowConfigEntry.get("Class") != null ?
                         workflowConfigEntry.get("Class").getAsString() : "";
                 JsonObject properties = workflowConfigEntry.get("Properties") != null ?
                         workflowConfigEntry.get("Properties").getAsJsonObject() : null;
 
-                config.addWorkflowConfig(workflowName, isEnabled, className, properties);
+                config.addWorkflowConfig(workflowName, className, properties);
             }
         }
         return config;

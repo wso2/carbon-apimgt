@@ -38,12 +38,11 @@ public class WorkflowConfigDTO {
      * Method adds each WorkflowConfig to the workflowConfigMap
      *
      * @param workflowName type of workflow
-     * @param enabled      whether the approval/custom workflow is enabled
      * @param className    executor class name (org.wso2.......ExampleWorkflowExecutor)
      * @param properties   the class specific properties
      */
-    public void addWorkflowConfig(String workflowName, boolean enabled, String className, JsonObject properties) {
-        WorkflowConfig workflowConfig = new WorkflowConfig(enabled, className, properties);
+    public void addWorkflowConfig(String workflowName, String className, JsonObject properties) {
+        WorkflowConfig workflowConfig = new WorkflowConfig(className, properties);
         workflowConfigMap.put(workflowName, workflowConfig);
     }
 
@@ -56,25 +55,13 @@ public class WorkflowConfigDTO {
      * Represents configuration of each workflow type
      */
     public static class WorkflowConfig {
-        private boolean enabled;
         private String className;
         private JsonObject properties;
 
-        private WorkflowConfig(boolean enabled, String className, JsonObject properties) {
+        private WorkflowConfig(String className, JsonObject properties) {
 
-            this.enabled = enabled;
             this.className = className;
             this.properties = properties;
-        }
-
-        public boolean isEnabled() {
-
-            return enabled;
-        }
-
-        public void setEnabled(boolean enabled) {
-
-            this.enabled = enabled;
         }
 
         public String getClassName() {

@@ -89,38 +89,18 @@ public class TenantWorkflowConfigHolderTest {
     @Test
     public void testLoadingApprovalTenantWorkflowConfig() throws IOException, APIManagementException {
         JsonObject WFConfig = JsonParser.parseString("{\n" +
-                "    \"Workflows\": {\n" +
-                "        \"ApplicationCreation\": {\n" +
-                "            \"Enabled\": true\n" +
-                "        },\n" +
-                "        \"ProductionApplicationRegistration\": {\n" +
-                "            \"Enabled\": true\n" +
-                "        },\n" +
-                "        \"SandboxApplicationRegistration\": {\n" +
-                "            \"Enabled\": true\n" +
-                "        },\n" +
-                "        \"SubscriptionCreation\": {\n" +
-                "            \"Enabled\": true\n" +
-                "        },\n" +
-                "        \"SubscriptionUpdate\": {\n" +
-                "            \"Enabled\": true\n" +
-                "        },\n" +
-                "        \"UserSignUp\": {\n" +
-                "            \"Enabled\": true\n" +
-                "        },\n" +
-                "        \"SubscriptionDeletion\": {\n" +
-                "            \"Enabled\": true\n" +
-                "        },\n" +
-                "        \"ApplicationDeletion\": {\n" +
-                "            \"Enabled\": true\n" +
-                "        },\n" +
-                "        \"APIStateChange\": {\n" +
-                "            \"Enabled\": true\n" +
-                "        },\n" +
-                "        \"APIProductStateChange\": {\n" +
-                "            \"Enabled\": true\n" +
-                "        }\n" +
-                "    }\n" +
+                "  \"Workflows\": {\n" +
+                "    \"ApplicationCreation\": {},\n" +
+                "    \"ProductionApplicationRegistration\": {},\n" +
+                "    \"SandboxApplicationRegistration\": {},\n" +
+                "    \"SubscriptionCreation\": {},\n" +
+                "    \"SubscriptionUpdate\": {},\n" +
+                "    \"UserSignUp\": {},\n" +
+                "    \"SubscriptionDeletion\": {},\n" +
+                "    \"ApplicationDeletion\": {},\n" +
+                "    \"APIStateChange\": {},\n" +
+                "    \"APIProductStateChange\": {}\n" +
+                "  }\n" +
                 "}").getAsJsonObject();
 
         TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
@@ -159,7 +139,6 @@ public class TenantWorkflowConfigHolderTest {
         JsonObject invalidWFExecutor = JsonParser.parseString("{\n" +
                 "    \"Workflows\": {\n" +
                 "        \"UserSignUp\": {\n" +
-                "            \"Enabled\": true,\n" +
                 "            \"Class\": \"TestUserSignUpSimpleWorkflowExecutor\"\n" +
                 "        }\n" +
                 "    }\n" +
@@ -180,7 +159,6 @@ public class TenantWorkflowConfigHolderTest {
         JsonObject invalidWFExecutor = JsonParser.parseString("{\n" +
                 "    \"Workflows\": {\n" +
                 "        \"ApplicationCreation\": {\n" +
-                "            \"Enabled\": true,\n" +
                 "            \"Class\": \"org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor\"\n" +
                 "        }\n" +
                 "    }\n" +
@@ -204,7 +182,6 @@ public class TenantWorkflowConfigHolderTest {
         JsonObject invalidWFExecutor = JsonParser.parseString("{\n" +
                 "    \"Workflows\": {\n" +
                 "        \"ApplicationCreation\": {\n" +
-                "            \"Enabled\": true,\n" +
                 "            \"Class\": \"org.wso2.carbon.apimgt.impl.workflow.InvalidWorkFlowExecutor1\"\n" +
                 "        }\n" +
                 "    }\n" +
@@ -227,7 +204,6 @@ public class TenantWorkflowConfigHolderTest {
         JsonObject invalidWFExecutor = JsonParser.parseString("{\n" +
                 "    \"Workflows\": {\n" +
                 "        \"UserSignUp\": {\n" +
-                "            \"Enabled\": true,\n" +
                 "            \"Class\": \"org.wso2.carbon.apimgt.impl.workflow.ApplicationCreationApprovalWorkflowExecutor\",\n" +
                 "            \"Properties\": {\n" +
                 "                \"\": \"xxx\"\n" +
@@ -253,7 +229,6 @@ public class TenantWorkflowConfigHolderTest {
         JsonObject invalidWFExecutor = JsonParser.parseString("{\n" +
                 "    \"Workflows\": {\n" +
                 "        \"UserSignUp\": {\n" +
-                "            \"Enabled\": true,\n" +
                 "            \"Class\": \"org.wso2.carbon.apimgt.impl.workflow.ApplicationCreationApprovalWorkflowExecutor\",\n" +
                 "            \"Properties\": {\n" +
                 "                \"TestParam\": \"xxx\"\n" +
@@ -282,7 +257,6 @@ public class TenantWorkflowConfigHolderTest {
         JsonObject invalidWFExecutor = JsonParser.parseString("{\n" +
                 "    \"Workflows\": {\n" +
                 "        \"UserSignUp\": {\n" +
-                "            \"Enabled\": true,\n" +
                 "            \"Class\": \"org.wso2.carbon.apimgt.impl.workflow.InvalidWorkFlowExecutor2\",\n" +
                 "            \"Properties\": {\n" +
                 "                \"Username\": \"admin\"\n" +
@@ -313,7 +287,6 @@ public class TenantWorkflowConfigHolderTest {
         JsonObject WFExecutor = JsonParser.parseString("{\n" +
                 "    \"Workflows\": {\n" +
                 "        \"UserSignUp\": {\n" +
-                "            \"Enabled\": true,\n" +
                 "            \"Class\": \"org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorWithMultipleParamTypes\",\n" +
                 "            \"Properties\": {\n" +
                 "                \"StringParam\": \"admin\",\n" +
@@ -321,9 +294,7 @@ public class TenantWorkflowConfigHolderTest {
                 "                \"BooleanParam\": true,\n" +
                 "                \"LongParam\": 10000000,\n" +
                 "                \"DoubleParam\": 10.1000000000,\n" +
-                "                \"FloatParam\": 10.1,\n" +
-                "                \"JsonElement\": {\"key\":\"value\"},\n" +
-                "                \"OMElementParam\": \"<omElement>test</omElement>\"\n" +
+                "                \"FloatParam\": 10.1\n" +
                 "            }\n" +
                 "        }\n" +
                 "    }\n" +
@@ -341,8 +312,6 @@ public class TenantWorkflowConfigHolderTest {
             Assert.assertEquals(10000000, executor.longParam);
             Assert.assertEquals((Double) 10.1000000000, executor.doubleParam);
             Assert.assertEquals((Float) 10.1f, executor.floatParam);
-            Assert.assertEquals("{\"key\":\"value\"}", executor.jsonElement.toString());
-            Assert.assertEquals("<omElement>test</omElement>", executor.omElement.toString());
 
 
         } catch (WorkflowException e) {
@@ -361,7 +330,6 @@ public class TenantWorkflowConfigHolderTest {
         JsonObject WFExecutor = JsonParser.parseString("{\n" +
                 "    \"Workflows\": {\n" +
                 "        \"UserSignUp\": {\n" +
-                "            \"Enabled\": true,\n" +
                 "            \"Class\": \"org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorWithMultipleParamTypes\",\n" +
                 "            \"Properties\": {\n" +
                 "                \"StringParam\": \"admin\",\n" +
@@ -369,8 +337,7 @@ public class TenantWorkflowConfigHolderTest {
                 "                \"BooleanParam\": \"true\",\n" +
                 "                \"LongParam\": \"10000000\",\n" +
                 "                \"DoubleParam\": \"10.1000000000\",\n" +
-                "                \"FloatParam\": \"10.1\",\n" +
-                "                \"OMElementParam\": \"<omElement>test</omElement>\"\n" +
+                "                \"FloatParam\": \"10.1\"\n" +
                 "            }\n" +
                 "        }\n" +
                 "    }\n" +
@@ -388,7 +355,6 @@ public class TenantWorkflowConfigHolderTest {
             Assert.assertEquals(10000000, executor.longParam);
             Assert.assertEquals((Double) 10.1000000000, executor.doubleParam);
             Assert.assertEquals((Float) 10.1f, executor.floatParam);
-            Assert.assertEquals("<omElement>test</omElement>", executor.omElement.toString());
         } catch (WorkflowException e) {
             Assert.fail("Unexpected WorkflowException has been thrown while loading workflow executor for different " +
                     "param types");

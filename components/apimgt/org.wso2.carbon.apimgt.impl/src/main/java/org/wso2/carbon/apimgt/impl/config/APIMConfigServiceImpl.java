@@ -292,15 +292,12 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             for (Map.Entry<String, JsonElement> entry : configEntries) {
                 String workflowName = entry.getKey();
                 JsonObject workflowConfigEntry = (JsonObject) entry.getValue();
-
-                boolean isEnabled = workflowConfigEntry.get(WorkflowConstants.WF_TENANT_CONF_ENABLED) != null
-                        && workflowConfigEntry.get(WorkflowConstants.WF_TENANT_CONF_ENABLED).getAsBoolean();
                 String className = workflowConfigEntry.get(WorkflowConstants.WF_TENANT_CONF_CLASS) != null ?
                         workflowConfigEntry.get(WorkflowConstants.WF_TENANT_CONF_CLASS).getAsString() : "";
                 JsonObject properties = workflowConfigEntry.get(WorkflowConstants.WF_TENANT_CONF_PROPERTIES) != null ?
                         workflowConfigEntry.get(WorkflowConstants.WF_TENANT_CONF_PROPERTIES).getAsJsonObject() : null;
 
-                config.addWorkflowConfig(workflowName, isEnabled, className, properties);
+                config.addWorkflowConfig(workflowName, className, properties);
             }
         }
         return config;

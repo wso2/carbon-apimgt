@@ -110,12 +110,10 @@ public class APIMConfigServiceImplTestCase {
         APIMConfigServiceImpl configServiceImpl = new APIMConfigServiceImpl();
         WorkflowConfigDTO workflowConfigDTO = configServiceImpl.getWorkFlowConfig("carbon.super");
         Assert.assertEquals(4, workflowConfigDTO.getWorkflowConfigMap().size());
-        Assert.assertFalse(workflowConfigDTO.getWorkflowConfigMap().get("ApplicationCreation").isEnabled());
-        Assert.assertTrue(workflowConfigDTO.getWorkflowConfigMap().get("ApplicationDeletion").isEnabled());
-        Assert.assertTrue(workflowConfigDTO.getWorkflowConfigMap().get("UserSignUp").isEnabled());
+        Assert.assertNotNull(workflowConfigDTO.getWorkflowConfigMap().get("ApplicationCreation"));
+        Assert.assertNotNull(workflowConfigDTO.getWorkflowConfigMap().get("ApplicationDeletion").getClassName());
         Assert.assertEquals("org.wso2.example.UserSignUpCustomFlowExecutor",
                 workflowConfigDTO.getWorkflowConfigMap().get("UserSignUp").getClassName());
-        Assert.assertTrue(workflowConfigDTO.getWorkflowConfigMap().get("UserSignUp").isEnabled());
 
         JsonObject properties = workflowConfigDTO.getWorkflowConfigMap().get("APIStateChange").getProperties();
         Assert.assertEquals("Created:Publish,Published:Block", properties.get("StateList").getAsString());

@@ -1350,17 +1350,20 @@
           "type": "object",
           "title": "Define the corresponding workflow configuration",
           "properties": {
-            "Enabled": {
-              "type": "boolean",
-              "title": "Set this as true to enable the approval/custom workflow"
-            },
             "Class": {
               "type": "string",
               "title": "For a custom flow, define the full class path here"
             },
             "Properties": {
               "type": "object",
-              "title": "Define any class-specific properties here"
+              "title": "Define any class-specific properties here",
+              "additionalProperties": {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean"
+                ]
+              }
             }
           },
           "additionalProperties": false

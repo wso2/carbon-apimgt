@@ -38,6 +38,7 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(APIStateChangeWSWorkflowExecutor.class);
     private String stateList;
+    private static String DEFAULT_STATE_LIST = "Created:Publish,Published:Block"; //default value
 
     public String getStateList() {
         return stateList;
@@ -68,26 +69,24 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
         if (log.isDebugEnabled()) {
             log.debug("Executing API State change Workflow.");
         }
-        if (stateList != null) {
-            Map<String, List<String>> stateActionMap = getSelectedStatesToApprove(stateList);
-            APIStateWorkflowDTO apiStateWorkFlowDTO = (APIStateWorkflowDTO) workflowDTO;
-
-            if (stateActionMap.containsKey(apiStateWorkFlowDTO.getApiCurrentState().toUpperCase())
-                    && stateActionMap.get(apiStateWorkFlowDTO.getApiCurrentState().toUpperCase())
-                    .contains(apiStateWorkFlowDTO.getApiLCAction())) {
-                setWorkflowParameters(apiStateWorkFlowDTO);
-                super.execute(workflowDTO);
-            } else {
-                // For any other states, act as simple workflow executor.
-                workflowDTO.setStatus(WorkflowStatus.APPROVED);
-                // calling super.complete() instead of complete() to act as the simpleworkflow executor
-                super.complete(workflowDTO);
-            }
-        } else {
-            String msg = "State change list is not provided. Please check \"StateList\" property in the workflow configuration.";
-            log.error(msg);
-            throw new WorkflowException(msg);
+        if (stateList == null) {
+            stateList = DEFAULT_STATE_LIST;
         }
+        Map<String, List<String>> stateActionMap = getSelectedStatesToApprove(stateList);
+        APIStateWorkflowDTO apiStateWorkFlowDTO = (APIStateWorkflowDTO) workflowDTO;
+
+        if (stateActionMap.containsKey(apiStateWorkFlowDTO.getApiCurrentState().toUpperCase())
+                && stateActionMap.get(apiStateWorkFlowDTO.getApiCurrentState().toUpperCase())
+                .contains(apiStateWorkFlowDTO.getApiLCAction())) {
+            setWorkflowParameters(apiStateWorkFlowDTO);
+            super.execute(workflowDTO);
+        } else {
+            // For any other states, act as simple workflow executor.
+            workflowDTO.setStatus(WorkflowStatus.APPROVED);
+            // calling super.complete() instead of complete() to act as the simpleworkflow executor
+            super.complete(workflowDTO);
+        }
+
         return new GeneralWorkflowResponse();
     }
 

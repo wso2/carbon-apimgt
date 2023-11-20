@@ -310,18 +310,12 @@
     ]
   },
   "Workflows": {
-    "ApplicationCreation": {
-      "Enabled": false
-    },
-    "ApplicationDeletion": {
-      "Enabled": true
-    },
+    "ApplicationCreation": {},
+    "ApplicationDeletion": {},
     "UserSignUp": {
-      "Enabled": true,
       "Class": "org.wso2.example.UserSignUpCustomFlowExecutor"
     },
     "APIStateChange": {
-      "Enabled": true,
       "Properties": {
         "StateList": "Created:Publish,Published:Block"
       }
