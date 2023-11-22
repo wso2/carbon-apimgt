@@ -285,7 +285,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (apiArtifact != null) {
                 API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
                 APIIdentifier apiId = api.getId();
-                String apiPath = RegistryPersistenceUtil.getAPIPath(apiId);
+                String apiPath = getAPIArtifact(api.getUuid(),registry).getPath();
                 int prependIndex = apiPath.lastIndexOf("/api");
                 String apiSourcePath = apiPath.substring(0, prependIndex);
                 String revisionTargetPath = RegistryPersistenceUtil.getRevisionPath(apiId.getUUID(), revisionId);
@@ -475,7 +475,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             tenantFlowStarted = holder.isTenantFlowStarted();
 
             registry.beginTransaction();
-            String apiArtifactId = registry.get(RegistryPersistenceUtil.getAPIPath(api.getId())).getUUID();
+            String apiArtifactId = api.getUuid();
             GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY);
             if (artifactManager == null) {
                 String errorMessage = "Artifact manager is null when updating API artifact ID " + api.getId();
@@ -800,8 +800,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                     identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                     identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
-            Resource apiResource = registry.get(path);
-            String artifactId = apiResource.getUUID();
+            String artifactId = getAPIArtifact(apiId,registry).getId();
             artifactManager.removeGenericArtifact(artifactId);
 
             String thumbPath = RegistryPersistenceUtil.getIconPath(identifier);
