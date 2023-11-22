@@ -224,6 +224,30 @@ public class TenantWorkflowConfigHolderTest {
     }
 
     @Test
+    public void testFailureToLoadTenantWFConfigWhenWFExecutorPropertyAreNotPrimitive() throws Exception {
+        // When property values are not primitives, this will throw WorkflowException
+        JsonObject invalidWFExecutor = JsonParser.parseString("{\n" +
+                "    \"Workflows\": {\n" +
+                "        \"UserSignUp\": {\n" +
+                "            \"Class\": \"org.wso2.carbon.apimgt.impl.workflow.ApplicationCreationApprovalWorkflowExecutor\",\n" +
+                "            \"Properties\": {\n" +
+                "                \"Example\": {}\n" +
+                "            }\n" +
+                "        }\n" +
+                "    }\n" +
+                "}").getAsJsonObject();
+        TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
+        Mockito.when(apimConfigService.getWorkFlowConfig(tenantDomain))
+                .thenReturn(WorkflowTestUtils.getWorkFlowConfigDTOFromJsonConfig(invalidWFExecutor));
+        try {
+            tenantWorkflowConfigHolder.load();
+            Assert.fail("Workflow Exception is not thrown when workflow property value is not a json primitive.");
+        } catch (WorkflowException e) {
+            Assert.assertEquals("Property values can only be string, number or boolean.", e.getMessage());
+        }
+    }
+
+    @Test
     public void testFailureToLoadTenantWFConfigWhenWFExecutorPropertySetterNotDefined() throws Exception {
         //Workflow executor class does not have setter method for 'TestParam'
         JsonObject invalidWFExecutor = JsonParser.parseString("{\n" +

@@ -19,18 +19,20 @@
 package org.wso2.carbon.apimgt.impl.workflow;
 
 import com.google.gson.JsonElement;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.securevault.SecretResolver;
+import org.wso2.securevault.SecretResolverFactory;
+import org.wso2.securevault.commons.MiscellaneousUtil;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.namespace.QName;
 
@@ -253,21 +255,36 @@ public class TenantWorkflowConfigHolder implements Serializable {
         }
     }
 
-    private void loadProperties(WorkflowConfigDTO.WorkflowConfig workflowElem,
+    private void loadProperties(WorkflowConfigDTO.WorkflowConfig workflowConfig,
                                 Object workflowExecutorClass) throws WorkflowException {
 
-        // Iterate through the JSON object
-        if (workflowElem != null && workflowElem.getProperties() != null) {
-            for (java.util.Map.Entry<String, JsonElement> entry :
-                    workflowElem.getProperties().entrySet()) {
-                String propName = entry.getKey();
-                JsonElement value = entry.getValue();
-                if (!propName.isEmpty()) {
-                    setInstanceProperty(propName, value, workflowExecutorClass);
-                } else {
-                    handleException("An Executor class property must specify a name.");
-                }
+        if (workflowConfig == null || workflowConfig.getProperties() == null) {
+            return; // Early exit if there are no properties to process
+        }
+
+        // Create and populate Properties object
+        Properties properties = new Properties();
+
+        for (java.util.Map.Entry<String, JsonElement> entry : workflowConfig.getProperties().entrySet()) {
+            String propertyName = entry.getKey();
+
+            if (StringUtils.isEmpty(propertyName)) {
+                handleException("An Executor class property must specify a name.");
+                return;
             }
+            JsonElement propertyValJsonElem = entry.getValue();
+            if (!propertyValJsonElem.isJsonPrimitive()) {
+                handleException("Property values can only be string, number or boolean.");
+                return;
+            }
+            String propertyValue = propertyValJsonElem.getAsJsonPrimitive().getAsString();
+            properties.setProperty(propertyName, propertyValue);
+        }
+        secretResolver = SecretResolverFactory.create(properties);
+
+        for (String propertyName : properties.stringPropertyNames()) {
+            String resolvedValue = MiscellaneousUtil.resolve(properties.getProperty(propertyName), secretResolver);
+            setInstanceProperty(propertyName, resolvedValue, workflowExecutorClass);
         }
     }
 
@@ -275,11 +292,11 @@ public class TenantWorkflowConfigHolder implements Serializable {
      * Find and invoke the setter method with the name of form setXXX passing in the value given
      * on the POJO object.
      *
-     * @param name    name of the setter field
-     * @param valElem value to be set
-     * @param obj     POJO instance
+     * @param name  name of the setter field
+     * @param value value to be set
+     * @param obj   POJO instance
      */
-    public void setInstanceProperty(String name, JsonElement valElem, Object obj) throws WorkflowException {
+    public void setInstanceProperty(String name, String value, Object obj) throws WorkflowException {
 
         String mName = "set" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
         Method method;
@@ -295,34 +312,31 @@ public class TenantWorkflowConfigHolder implements Serializable {
                         handleException("Did not find a setter method named : " + mName +
                                 "() that takes a single String, int, long, float, double ," +
                                 "OMElement or boolean parameter");
-                    } else if (valElem.isJsonPrimitive()) {
-                        JsonElement primitive = valElem.getAsJsonPrimitive();
+                    } else {
                         if (String.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, String.class);
-                            method.invoke(obj, new String[]{primitive.getAsString()});
+                            method.invoke(obj, new String[]{value});
                         } else if (int.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, int.class);
-                            method.invoke(obj, new Integer[]{primitive.getAsInt()});
+                            method.invoke(obj, new Integer[]{Integer.valueOf(value)});
                         } else if (long.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, long.class);
-                            method.invoke(obj, new Long[]{primitive.getAsLong()});
+                            method.invoke(obj, new Long[]{Long.valueOf(value)});
                         } else if (float.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, float.class);
-                            method.invoke(obj, new Float[]{primitive.getAsFloat()});
+                            method.invoke(obj, new Float[]{new Float(value)});
                         } else if (double.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, double.class);
-                            method.invoke(obj, new Double[]{primitive.getAsDouble()});
+                            method.invoke(obj, new Double[]{new Double(value)});
                         } else if (boolean.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, boolean.class);
-                            method.invoke(obj, new Boolean[]{primitive.getAsBoolean()});
+                            method.invoke(obj, new Boolean[]{Boolean.valueOf(value)});
                         } else if (Class.forName("[C").equals(params[0])) {
                             method = obj.getClass().getMethod(mName, Class.forName("[C"));
-                            method.invoke(obj, primitive.getAsString().toCharArray());
+                            method.invoke(obj, value.toCharArray());
                         } else {
                             continue;
                         }
-                    } else {
-                        continue;
                     }
                     invoked = true;
                     break;
