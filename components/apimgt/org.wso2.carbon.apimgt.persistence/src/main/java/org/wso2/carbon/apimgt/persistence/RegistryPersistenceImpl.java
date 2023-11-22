@@ -3751,7 +3751,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String oldArtifactPath = GovernanceUtils.getArtifactPath(userRegistry, apiId);
             Resource apiResource = userRegistry.get(oldArtifactPath);
             if (apiResource != null) {
-                //userRegistry.beginTransaction();
+                userRegistry.beginTransaction();
                 GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(userRegistry,
                         APIConstants.API_KEY);
                 if (artifactManager == null) {
@@ -3759,41 +3759,14 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     log.error(errorMessage);
                     throw new APIPersistenceException(errorMessage);
                 }
-                //Moving the registry file
                 GenericArtifact artifact = getAPIArtifact(apiId, userRegistry);
-                String oldProvider = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
-                String newProvider = providerName;
-                String[] artifactPathChunks = oldArtifactPath.split(oldProvider);
-                String newArtifactApiPath = artifactPathChunks[0] + newProvider + artifactPathChunks[1];
-                userRegistry.move(oldArtifactPath, newArtifactApiPath);
-                String oldArtifactSwaggerPath = oldArtifactPath.replaceFirst("/api$",
-                        "/swagger.json");
-                String newArtifactSwaggerPath = newArtifactApiPath.replaceFirst("/api$",
-                        "/swagger.json");
-                userRegistry.move(oldArtifactSwaggerPath, newArtifactSwaggerPath);
-                int time=0;
-                while (!userRegistry.resourceExists(newArtifactSwaggerPath) &&
-                        !userRegistry.resourceExists(newArtifactApiPath) || time > 5000) {
-                    Thread.sleep(1000);
-                    log.info("-------------Resource Not Existed-------------");
-                    time += 1000;
-                }
-                Resource newAPIArtifact = userRegistry.get(newArtifactApiPath);
-                Resource newSwaggerArtifact = userRegistry.get(newArtifactSwaggerPath);
-                userRegistry.put(newArtifactApiPath,newAPIArtifact);
-                userRegistry.put(newArtifactSwaggerPath,newSwaggerArtifact);
-                //Thread.sleep(10000);
-                artifact = getAPIArtifact(apiId, userRegistry);
-                artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, newProvider);
+                artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, providerName);
                 artifactManager.updateGenericArtifact(artifact);
-
-                //userRegistry.commitTransaction();
+                userRegistry.commitTransaction();
                 transactionCommitted=true;
             }
         } catch (RegistryException e) {
             throw new APIManagementException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         } finally {
             try {
                 if (userRegistry != null && !transactionCommitted) {
