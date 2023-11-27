@@ -510,15 +510,5 @@ public interface APIPersistence {
      */
     Set<Tag> getAllTags(Organization org, UserContext ctx) throws APIPersistenceException;
 
-    /**
-     *
-     * @param providerName
-     * @param apiId
-     * @param org
-     * @param ctx
-     * @return
-     * @throws APIPersistenceException
-     */
-    String changeApiProvider(String providerName, String apiId, String org, MessageContext ctx)
-            throws APIPersistenceException, APIManagementException;
+    void changeApiProvider(String providerName, String apiId, String org, MessageContext ctx) throws APIManagementException, APIPersistenceException;
 }

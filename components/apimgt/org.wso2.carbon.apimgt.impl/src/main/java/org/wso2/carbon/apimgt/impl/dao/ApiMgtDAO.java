@@ -18066,6 +18066,18 @@ public class ApiMgtDAO {
         }
     }
 
+    public void updateApiProvider(String apiUuid, String providerName)
+            throws APIManagementException, SQLException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_PROVIDER_SQL);
+            statement.setString(1, providerName);
+            statement.setString(2, apiUuid);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Error while updating the change API provider of " + apiUuid, e);
+        }
+    }
+
     private void updateLatestRevisionNumber(Connection connection, String apiUUID, int revisionId) throws SQLException {
 
         try (PreparedStatement preparedStatement =

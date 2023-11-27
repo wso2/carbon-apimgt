@@ -175,6 +175,8 @@ public class SQLConstants {
             "   MD5 = ? " +
             "   WHERE API_ID = ?";
 
+    public static final String UPDATE_API_PROVIDER_SQL = "UPDATE AM_API SET API_PROVIDER = ? WHERE API_UUID = ?";
+
     public static final String GET_MD5_VALUE_OF_SERVICE_BY_API_ID_SQL = "SELECT " +
             "   AM_SERVICE_CATALOG.MD5 AS SERVICE_MD5, " +
             "   AM_SERVICE_CATALOG.SERVICE_NAME, " +

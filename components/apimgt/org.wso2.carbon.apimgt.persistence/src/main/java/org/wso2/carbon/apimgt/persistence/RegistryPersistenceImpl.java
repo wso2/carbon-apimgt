@@ -3739,8 +3739,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public String changeApiProvider(String providerName, String apiId, String org, MessageContext ctx)
-            throws APIPersistenceException, APIManagementException {
+    public void changeApiProvider(String providerName, String apiId, String org, MessageContext ctx)
+            throws APIPersistenceException {
 
         boolean isTenantFlowStarted = false;
         boolean transactionCommitted = false;
@@ -3766,7 +3766,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 transactionCommitted=true;
             }
         } catch (RegistryException e) {
-            throw new APIManagementException(e);
+            throw new APIPersistenceException("Error while Changing the api Provider", e);
         } finally {
             try {
                 if (userRegistry != null && !transactionCommitted) {
@@ -3779,6 +3779,5 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-        return null;
     }
 }
