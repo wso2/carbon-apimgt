@@ -89,6 +89,7 @@ public class APIInfoMappingUtil {
         apiInfoDTO.setName(apiId.getName());
         apiInfoDTO.setVersion(apiId.getVersion());
         apiInfoDTO.setProvider(apiId.getProviderName());
+        apiInfoDTO.setId(api.getUuid());
         return apiInfoDTO;
     }
 
