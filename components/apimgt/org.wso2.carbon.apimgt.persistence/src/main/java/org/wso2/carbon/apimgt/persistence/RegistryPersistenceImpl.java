@@ -794,14 +794,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     registry.delete(artifact.getPath());
                 }
             }
-
-            artifactManager.removeGenericArtifact(apiArtifact);
-
-            String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                    identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
-            String artifactId = getAPIArtifact(apiId,registry).getId();
+            String artifactId = getAPIArtifact(apiId, registry).getId();
             artifactManager.removeGenericArtifact(artifactId);
+            artifactManager.removeGenericArtifact(apiArtifact);
 
             String thumbPath = RegistryPersistenceUtil.getIconPath(identifier);
             if (registry.resourceExists(thumbPath)) {
