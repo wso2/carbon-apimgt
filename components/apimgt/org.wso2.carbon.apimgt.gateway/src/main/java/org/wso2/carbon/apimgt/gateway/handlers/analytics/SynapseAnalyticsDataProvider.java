@@ -252,6 +252,13 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
+    public Map<String, String> getMaskProperties() {
+        Map<String, String> maskProperties = ServiceReferenceHolder.getInstance().getApiManagerConfigurationService()
+                .getAPIAnalyticsConfiguration().getMaskDataProperties();
+        return maskProperties;
+    }
+
+    @Override
     public int getProxyResponseCode() {
 
         Object clientResponseCodeObj = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
