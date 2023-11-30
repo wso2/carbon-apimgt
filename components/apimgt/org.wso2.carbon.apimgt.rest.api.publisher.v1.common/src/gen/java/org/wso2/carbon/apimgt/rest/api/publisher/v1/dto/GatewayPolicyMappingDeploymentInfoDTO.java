@@ -20,26 +20,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import javax.validation.constraints.*;
 
 import java.util.Objects;
 
-import javax.validation.Valid;
-
-/**
- * Data transfer object for gateway policy mapping metadata.
- */
-public class GatewayPolicyMappingsDTO   {
+public class GatewayPolicyMappingDeploymentInfoDTO   {
   
     private String id = null;
-    private APIOperationPoliciesDTO policyMapping = null;
     private String description = null;
     private String displayName = null;
     private List<String> appliedGatewayLabels = new ArrayList<String>();
 
   /**
    **/
-  public GatewayPolicyMappingsDTO id(String id) {
+  public GatewayPolicyMappingDeploymentInfoDTO id(String id) {
     this.id = id;
     return this;
   }
@@ -55,28 +48,9 @@ public class GatewayPolicyMappingsDTO   {
   }
 
   /**
-   **/
-  public GatewayPolicyMappingsDTO policyMapping(APIOperationPoliciesDTO policyMapping) {
-    this.policyMapping = policyMapping;
-    return this;
-  }
-
-  
-  @ApiModelProperty(required = true, value = "")
-      @Valid
-  @JsonProperty("policyMapping")
-  @NotNull
-  public APIOperationPoliciesDTO getPolicyMapping() {
-    return policyMapping;
-  }
-  public void setPolicyMapping(APIOperationPoliciesDTO policyMapping) {
-    this.policyMapping = policyMapping;
-  }
-
-  /**
    * A brief description about the policy mapping
    **/
-  public GatewayPolicyMappingsDTO description(String description) {
+  public GatewayPolicyMappingDeploymentInfoDTO description(String description) {
     this.description = description;
     return this;
   }
@@ -94,15 +68,14 @@ public class GatewayPolicyMappingsDTO   {
   /**
    * Meaningful name to identify the policy mapping
    **/
-  public GatewayPolicyMappingsDTO displayName(String displayName) {
+  public GatewayPolicyMappingDeploymentInfoDTO displayName(String displayName) {
     this.displayName = displayName;
     return this;
   }
 
   
-  @ApiModelProperty(example = "item_type_setter", required = true, value = "Meaningful name to identify the policy mapping")
+  @ApiModelProperty(example = "item_type_setter", value = "Meaningful name to identify the policy mapping")
   @JsonProperty("displayName")
-  @NotNull
   public String getDisplayName() {
     return displayName;
   }
@@ -112,7 +85,7 @@ public class GatewayPolicyMappingsDTO   {
 
   /**
    **/
-  public GatewayPolicyMappingsDTO appliedGatewayLabels(List<String> appliedGatewayLabels) {
+  public GatewayPolicyMappingDeploymentInfoDTO appliedGatewayLabels(List<String> appliedGatewayLabels) {
     this.appliedGatewayLabels = appliedGatewayLabels;
     return this;
   }
@@ -136,26 +109,24 @@ public class GatewayPolicyMappingsDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    GatewayPolicyMappingsDTO gatewayPolicyMappings = (GatewayPolicyMappingsDTO) o;
-    return Objects.equals(id, gatewayPolicyMappings.id) &&
-        Objects.equals(policyMapping, gatewayPolicyMappings.policyMapping) &&
-        Objects.equals(description, gatewayPolicyMappings.description) &&
-        Objects.equals(displayName, gatewayPolicyMappings.displayName) &&
-        Objects.equals(appliedGatewayLabels, gatewayPolicyMappings.appliedGatewayLabels);
+    GatewayPolicyMappingDeploymentInfoDTO gatewayPolicyMappingDeploymentInfo = (GatewayPolicyMappingDeploymentInfoDTO) o;
+    return Objects.equals(id, gatewayPolicyMappingDeploymentInfo.id) &&
+        Objects.equals(description, gatewayPolicyMappingDeploymentInfo.description) &&
+        Objects.equals(displayName, gatewayPolicyMappingDeploymentInfo.displayName) &&
+        Objects.equals(appliedGatewayLabels, gatewayPolicyMappingDeploymentInfo.appliedGatewayLabels);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, policyMapping, description, displayName, appliedGatewayLabels);
+    return Objects.hash(id, description, displayName, appliedGatewayLabels);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class GatewayPolicyMappingsDTO {\n");
+    sb.append("class GatewayPolicyMappingDeploymentInfoDTO {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    policyMapping: ").append(toIndentedString(policyMapping)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    appliedGatewayLabels: ").append(toIndentedString(appliedGatewayLabels)).append("\n");

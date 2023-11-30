@@ -4166,10 +4166,21 @@ public class SQLConstants {
                         + "AND ORGANIZATION = ?";
         public static final String DELETE_GATEWAY_POLICY_METADATA = "DELETE FROM AM_GATEWAY_POLICY_METADATA WHERE "
                 + "GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String UPDATE_GATEWAY_POLICY_METADATA = "UPDATE AM_GATEWAY_POLICY_METADATA"
+                + "SET DISPLAY_NAME = ?, DESCRIPTION = ?, ORGANIZATION = ? WHERE GLOBAL_POLICY_MAPPING_UUID = ?";
         public static final String GET_ALL_GATEWAY_POLICY_METADATA_FOR_ORGANIZATION =
                 "SELECT * FROM AM_GATEWAY_POLICY_METADATA WHERE ORGANIZATION = ?";
         public static final String GET_GATEWAY_POLICY_METADATA_BY_POLICY_MAPPING_UUID =
                 "SELECT * FROM AM_GATEWAY_POLICY_METADATA WHERE GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String GET_GATEWAY_POLICY_METADATA_BY_GATEWAY_LABEL =
+                "SELECT meta.GLOBAL_POLICY_MAPPING_UUID, " +
+                        "meta.DISPLAY_NAME AS METADATA_DISPLAY_NAME, " +
+                        "meta.DESCRIPTION AS METADATA_DESCRIPTION, " +
+                        "meta.ORGANIZATION AS METADATA_ORGANIZATION " +
+                        "FROM AM_GATEWAY_POLICY_METADATA meta JOIN AM_GATEWAY_POLICY_DEPLOYMENT deploy ON " +
+                        "meta.GLOBAL_POLICY_MAPPING_UUID = deploy.GLOBAL_POLICY_MAPPING_UUID WHERE " +
+                        "deploy.GATEWAY_LABEL = ? AND meta.ORGANIZATION = ?";
+
     }
 
     /**

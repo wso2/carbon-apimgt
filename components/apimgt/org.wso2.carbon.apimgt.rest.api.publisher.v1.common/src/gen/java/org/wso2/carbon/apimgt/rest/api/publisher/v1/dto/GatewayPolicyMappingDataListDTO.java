@@ -18,11 +18,12 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
-
-import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+
 import java.util.Objects;
+
+import javax.validation.Valid;
 
 /**
  * Data transfer object for Gateway Policy Mapping List
@@ -30,7 +31,7 @@ import java.util.Objects;
 public class GatewayPolicyMappingDataListDTO   {
   
     private Integer count = null;
-    private List<GatewayPolicyMappingsDTO> list = new ArrayList<GatewayPolicyMappingsDTO>();
+    private List<GatewayPolicyMappingDeploymentInfoDTO> list = new ArrayList<GatewayPolicyMappingDeploymentInfoDTO>();
     private PaginationDTO pagination = null;
 
   /**
@@ -53,7 +54,7 @@ public class GatewayPolicyMappingDataListDTO   {
 
   /**
    **/
-  public GatewayPolicyMappingDataListDTO list(List<GatewayPolicyMappingsDTO> list) {
+  public GatewayPolicyMappingDataListDTO list(List<GatewayPolicyMappingDeploymentInfoDTO> list) {
     this.list = list;
     return this;
   }
@@ -62,10 +63,10 @@ public class GatewayPolicyMappingDataListDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("list")
-  public List<GatewayPolicyMappingsDTO> getList() {
+  public List<GatewayPolicyMappingDeploymentInfoDTO> getList() {
     return list;
   }
-  public void setList(List<GatewayPolicyMappingsDTO> list) {
+  public void setList(List<GatewayPolicyMappingDeploymentInfoDTO> list) {
     this.list = list;
   }
 

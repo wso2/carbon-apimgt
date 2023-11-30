@@ -35,16 +35,17 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayPolicyDeploymentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayPolicyMappingDataListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayPolicyMappingInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayPolicyMappingsDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
-
-import static org.wso2.carbon.apimgt.impl.APIConstants.UN_AUTHORIZED_ERROR_MESSAGE;
 
 /**
  * This is the service implementation class for managing gateway policies.
@@ -59,6 +60,7 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
      * @param messageContext           message context
      * @return Response object containing gateway policy mapping DTO
      */
+    @Override
     public Response addGatewayPoliciesToFlows(GatewayPolicyMappingsDTO gatewayPolicyMappingsDTO,
             MessageContext messageContext) {
 
@@ -74,16 +76,26 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
             String displayName = gatewayPolicyMappingsDTO.getDisplayName();
             String policyMappingUUID = apiProvider.applyGatewayGlobalPolicies(gatewayPolicyList, mappingDescription,
                     displayName, tenantDomain);
-            gatewayPolicyMappingsDTO.setId(policyMappingUUID);
-
-            return Response.ok(gatewayPolicyMappingsDTO).build();
+            GatewayPolicyData gatewayPolicyData = new GatewayPolicyData();
+            gatewayPolicyData.setPolicyMappingId(policyMappingUUID);
+            gatewayPolicyData.setPolicyMappingName(displayName);
+            gatewayPolicyData.setPolicyMappingDescription(mappingDescription);
+            GatewayPolicyMappingInfoDTO gatewayPolicyMappingInfoDTO =
+                    GatewayPolicyMappingUtil.fromGatewayPolicyDataToInfoDTO(gatewayPolicyData);
+            URI createdGatewayPolicyMappingUri = new URI(RestApiConstants.REST_API_PUBLISHER_VERSION
+                    + "/" + RestApiConstants.RESOURCE_PATH_GATEWAY_POLICIES + "/" + policyMappingUUID);
+            return Response.created(createdGatewayPolicyMappingUri).entity(gatewayPolicyMappingInfoDTO).build();
         } catch (APIManagementException e) {
-            if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("User is not authorized to apply policies ", e, log);
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                String errorMessage = "One or more policy IDs in the policy mapping are invalid. " + e.getMessage();
+                RestApiUtil.handleResourceNotFoundError(errorMessage, e, log);
             } else {
-                String errorMessage = "Error while adding gateway policy mapping ";
+                String errorMessage = "Error while adding a gateway policy mapping. " + e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        } catch (Exception e) {
+            RestApiUtil.handleInternalServerError("An Error has occurred while adding gateway policy mapping ",
+                    e, log);
         }
         return null;
     }
@@ -96,32 +108,41 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
      * @param messageContext                 message context
      * @return Response object containing gateway policy deployment DTO list
      */
+    @Override
     public Response engageGlobalPolicy(String gatewayPolicyMappingId,
             List<GatewayPolicyDeploymentDTO> gatewayPolicyDeploymentDTOList, MessageContext messageContext) {
 
-        if (gatewayPolicyDeploymentDTOList == null) {
+        if (StringUtils.isBlank(gatewayPolicyMappingId)) {
+            RestApiUtil.handleBadRequest("Gateway policy mapping ID is empty", log);
+        } else if (gatewayPolicyDeploymentDTOList == null) {
             RestApiUtil.handleBadRequest("Gateway policy deployment list is empty", log);
         }
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap = GatewayPolicyMappingUtil.fromDTOToGatewayPolicyDeploymentMap(
-                    gatewayPolicyMappingId, gatewayPolicyDeploymentDTOList);
-            apiProvider.engageGatewayGlobalPolicies(gatewayPolicyDeploymentMap, tenantDomain, gatewayPolicyMappingId);
-            for (GatewayPolicyDeploymentDTO gatewayPolicyDeploymentDTO : gatewayPolicyDeploymentDTOList) {
-                gatewayPolicyDeploymentDTO.setMappingUUID(gatewayPolicyMappingId);
-            }
-            GenericEntity<List<GatewayPolicyDeploymentDTO>> entity = new GenericEntity<List<GatewayPolicyDeploymentDTO>>(
-                    gatewayPolicyDeploymentDTOList) {
-            };
-            return Response.ok(entity).build();
-        } catch (APIManagementException e) {
-            if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("User is not authorized to apply policies ", e, log);
+            List<OperationPolicyData> operationPolicyDataList = apiProvider.getGatewayPolicyDataListByPolicyId(
+                    gatewayPolicyMappingId, false);
+            if (!operationPolicyDataList.isEmpty()) {
+                Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap = GatewayPolicyMappingUtil.fromDTOToGatewayPolicyDeploymentMap(
+                        gatewayPolicyMappingId, gatewayPolicyDeploymentDTOList);
+                apiProvider.engageGatewayGlobalPolicies(gatewayPolicyDeploymentMap, tenantDomain, gatewayPolicyMappingId);
+                for (GatewayPolicyDeploymentDTO gatewayPolicyDeploymentDTO : gatewayPolicyDeploymentDTOList) {
+                    gatewayPolicyDeploymentDTO.setMappingUUID(gatewayPolicyMappingId);
+                }
+                GenericEntity<List<GatewayPolicyDeploymentDTO>> entity = new GenericEntity<List<GatewayPolicyDeploymentDTO>>(
+                        gatewayPolicyDeploymentDTOList) {
+                };
+                return Response.ok(entity).build();
             } else {
-                String errorMessage = "Error while deploying gateway policy ";
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                RestApiUtil.handleResourceNotFoundError("Policy mapping not found for the given ID : "
+                        + gatewayPolicyMappingId, log);
             }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while deploying gateway policy mapping. " + e.getMessage();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (Exception e) {
+            RestApiUtil.handleInternalServerError("An Error has occurred while deploying gateway policy mapping ",
+                    e, log);
         }
         return null;
     }
@@ -132,6 +153,7 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
      * @param gatewayPolicyMappingId gateway policy mapping id
      * @param messageContext         message context
      */
+    @Override
     public Response deleteGatewayPolicyByPolicyId(String gatewayPolicyMappingId, MessageContext messageContext) {
 
         if (StringUtils.isBlank(gatewayPolicyMappingId)) {
@@ -143,6 +165,11 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
             List<OperationPolicyData> operationPolicyDataList = apiProvider.getGatewayPolicyDataListByPolicyId(
                     gatewayPolicyMappingId, false);
             if (!operationPolicyDataList.isEmpty()) {
+                if (apiProvider.isPolicyMappingDeploymentExists(gatewayPolicyMappingId, tenantDomain)) {
+                    String errorMessage = "Gateway policy mapping ID: " + gatewayPolicyMappingId
+                            + " has active deployments.";
+                    RestApiUtil.handlePreconditionFailedError(errorMessage, log);
+                }
                 apiProvider.deleteGatewayPolicyMappingByPolicyMappingId(gatewayPolicyMappingId, tenantDomain);
                 return Response.ok().build();
             } else {
@@ -151,13 +178,11 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
                                 gatewayPolicyMappingId, log);
             }
         } catch (APIManagementException e) {
-            if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("User is not authorized to delete policy mapping ",
-                        e, log);
-            } else {
-                String errorMessage = "Error while deleting the gateway policy mapping ";
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            String errorMessage = "Error while deleting the gateway policy mapping. " + e.getMessage();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (Exception e) {
+            RestApiUtil.handleInternalServerError("An Error has occurred while deleting the gateway policy mapping. ",
+                    e, log);
         }
         return null;
     }
@@ -171,26 +196,38 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
      * @return Response object containing gateway policy mapping DTO list
      */
     @Override
-    public Response getAllGatewayPolicies(Integer limit, Integer offset, MessageContext messageContext) {
+    public Response getAllGatewayPolicies(Integer limit, Integer offset, String query,
+            MessageContext messageContext) {
 
+        GatewayPolicyMappingDataListDTO gatewayPolicyMappingDataListDTO = null;
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-            List<GatewayPolicyData> gatewayPolicyData = apiProvider.getAllGatewayPolicyMappings(tenantDomain);
-            // Set limit to the query param value or the count of all policy mappings
-            limit = limit != null ? limit : gatewayPolicyData.size();
-            GatewayPolicyMappingDataListDTO gatewayPolicyMappingDataListDTO =
-                    GatewayPolicyMappingUtil.fromGatewayPolicyDataListToDTO(gatewayPolicyData, offset, limit);
+            // If gateway label is provided, retrieve the gateway policy mappings for the given label
+            if (query != null) {
+                String gatewayLabel = GatewayPolicyMappingUtil.getQueryParams(query);
+                if (gatewayLabel != null) {
+                    GatewayPolicyData gatewayPolicyData = apiProvider.getLightweightGatewayPolicyMappings(
+                            tenantDomain, gatewayLabel);
+                    gatewayPolicyData.setGatewayLabels(Collections.singleton(gatewayLabel));
+                    gatewayPolicyMappingDataListDTO = GatewayPolicyMappingUtil.fromGatewayPolicyDataListToDTO(
+                            Collections.singletonList(gatewayPolicyData), offset, limit);
+                } else {
+                    RestApiUtil.handleBadRequest("Query parameter is not supported for this request", log);
+                }
+            } else {
+                offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+                List<GatewayPolicyData> gatewayPolicyData = apiProvider.getAllLightweightGatewayPolicyMappings(
+                        tenantDomain);
+                // Set limit to the query param value or the count of all policy mappings
+                limit = limit != null ? limit : gatewayPolicyData.size();
+                gatewayPolicyMappingDataListDTO = GatewayPolicyMappingUtil.fromGatewayPolicyDataListToDTO(
+                        gatewayPolicyData, offset, limit);
+            }
             return Response.ok().entity(gatewayPolicyMappingDataListDTO).build();
         } catch (APIManagementException e) {
-            if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("User is not authorized to retrieve policy mappings ",
-                        e, log);
-            } else {
-                String errorMessage = "Error while retrieving the gateway policy mappings ";
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            String errorMessage = "Error while retrieving the gateway policy mappings ";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -215,13 +252,8 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
                     gatewayPolicyData);
             return Response.ok().entity(gatewayPolicyMappingsDTO).build();
         } catch (APIManagementException e) {
-            if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("User is not authorized to retrieve policy mapping ",
-                        e, log);
-            } else {
-                String errorMessage = "Error while retrieving the gateway policy mapping ";
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            String errorMessage = "Error while retrieving the gateway policy mapping ";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -238,33 +270,35 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
     public Response updateGatewayPoliciesToFlows(String gatewayPolicyMappingId,
             GatewayPolicyMappingsDTO gatewayPolicyMappingsDTO, MessageContext messageContext) {
 
-        if (gatewayPolicyMappingsDTO == null) {
+        if (StringUtils.isBlank(gatewayPolicyMappingId)) {
+            RestApiUtil.handleBadRequest("Gateway policy mapping ID is empty", log);
+        } else if (gatewayPolicyMappingsDTO == null) {
             RestApiUtil.handleBadRequest("Gateway policy mapping list is empty", log);
         }
+
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            List<OperationPolicy> gatewayPolicyList = OperationPolicyMappingUtil.fromDTOToAPIOperationPoliciesList(
-                    gatewayPolicyMappingsDTO.getPolicyMapping());
-            String mappingDescription = gatewayPolicyMappingsDTO.getDescription();
-            String displayName = gatewayPolicyMappingsDTO.getDisplayName();
-            String mappingID = apiProvider.updateGatewayGlobalPolicies(gatewayPolicyList, mappingDescription,
-                    displayName, tenantDomain, gatewayPolicyMappingId);
-            gatewayPolicyMappingsDTO.id(mappingID);
+            List<OperationPolicyData> operationPolicyDataList = apiProvider.getGatewayPolicyDataListByPolicyId(
+                    gatewayPolicyMappingId, false);
+            if (!operationPolicyDataList.isEmpty()) {
+                List<OperationPolicy> gatewayPolicyList = OperationPolicyMappingUtil.fromDTOToAPIOperationPoliciesList(
+                        gatewayPolicyMappingsDTO.getPolicyMapping());
+                String mappingDescription = gatewayPolicyMappingsDTO.getDescription();
+                String displayName = gatewayPolicyMappingsDTO.getDisplayName();
+                String mappingID = apiProvider.updateGatewayGlobalPolicies(gatewayPolicyList, mappingDescription,
+                        displayName, tenantDomain, gatewayPolicyMappingId);
+                gatewayPolicyMappingsDTO.id(mappingID);
+            } else {
+                RestApiUtil.handleResourceNotFoundError(
+                        "Gateway policy mapping not found for the given Mapping ID : " +
+                                gatewayPolicyMappingId, log);
+            }
             return Response.ok(gatewayPolicyMappingsDTO).build();
         } catch (APIManagementException e) {
-            if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("User is not authorized to apply policies", e, log);
-            } else {
-                String errorMessage = "Error while applying gateway policy";
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            String errorMessage = "Error while applying gateway policy";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
-    }
-
-    private boolean isAuthorizationFailure(Exception e) {
-        String errorMessage = e.getMessage();
-        return errorMessage != null && errorMessage.contains(UN_AUTHORIZED_ERROR_MESSAGE);
     }
 }

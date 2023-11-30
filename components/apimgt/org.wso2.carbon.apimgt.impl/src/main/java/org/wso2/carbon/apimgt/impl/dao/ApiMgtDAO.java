@@ -20419,44 +20419,45 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            String mapping_uuid;
-            if (mappingUUID == null) {
-                mapping_uuid = UUID.randomUUID().toString();
-            } else {
-                // Policy mapping update flow
-                mapping_uuid = mappingUUID;
-            }
-            try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    SQLConstants.GatewayPolicyConstants.ADD_GATEWAY_POLICY_METADATA)) {
-                preparedStatement.setString(1, mapping_uuid);
-                preparedStatement.setString(2, orgId);
-                preparedStatement.setString(3, name);
-                preparedStatement.setString(4, description);
-                preparedStatement.execute();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleException("Error while adding gateway global policy metadata", e);
-            }
-            try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    SQLConstants.GatewayPolicyConstants.ADD_GATEWAY_POLICY_MAPPING)) {
-                if (gatewayGlobalPolicyList != null && !gatewayGlobalPolicyList.isEmpty()) {
-                    for (OperationPolicy gatewayGlobalPolicy : gatewayGlobalPolicyList) {
-                        Gson gson = new Gson();
-                        String paramJSON = gson.toJson(gatewayGlobalPolicy.getParameters());
-                        preparedStatement.setString(1, mapping_uuid);
-                        preparedStatement.setString(2, gatewayGlobalPolicy.getPolicyId());
-                        preparedStatement.setInt(3, gatewayGlobalPolicy.getOrder());
-                        preparedStatement.setString(4, gatewayGlobalPolicy.getDirection());
-                        preparedStatement.setString(5, paramJSON);
-                        preparedStatement.addBatch();
-                    }
-                }
-                preparedStatement.executeBatch();
+            try {
+                addGatewayPolicyMetadata(connection, mappingUUID, orgId, name, description);
+                addGatewayPolicyMapping(connection, gatewayGlobalPolicyList, mappingUUID, orgId);
                 connection.commit();
-                return mapping_uuid;
+                return mappingUUID;
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Error while updating global Policy mappings", e);
+                handleException("Error while adding gateway policy", e);
+            }
+        } catch (SQLException e) {
+            handleException("Error while updating global Policy information", e);
+        }
+        return null;
+    }
+
+    /**
+     * Update gateway global policy mappings in the database
+     *
+     * @param gatewayGlobalPolicyList      Updated list of applied policies for each direction in the gateways
+     * @param orgId                        organization ID
+     * @param name                         Name of the policy mapping
+     * @param description                  Description of the policy mapping
+     * @param mappingUUID                  UUID of the mapping when updating the policy mapping
+     * @return UUID of the policy mapping
+     * @throws APIManagementException
+     */
+    public String updateGatewayGlobalPolicy(List<OperationPolicy> gatewayGlobalPolicyList, String description,
+            String name, String orgId, String mappingUUID) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                updateGatewayGlobalPolicyMetadata(connection, mappingUUID, orgId, name, description);
+                addGatewayPolicyMapping(connection, gatewayGlobalPolicyList, mappingUUID, orgId);
+                connection.commit();
+                return mappingUUID;
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error while updating gateway policy", e);
             }
         } catch (SQLException e) {
             handleException("Error while updating global Policy information", e);
@@ -20575,11 +20576,12 @@ public class ApiMgtDAO {
         List<OperationPolicyData> policyDataList = new ArrayList<>();
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            connection.setAutoCommit(false);
             for (String policyUUID : policyUUIDList) {
                 OperationPolicyData gatewayPolicyData = getOperationPolicyByPolicyID(connection, policyUUID,
                         isWithPolicyDefinition);
-                policyDataList.add(gatewayPolicyData);
+                if (gatewayPolicyData != null) {
+                    policyDataList.add(gatewayPolicyData);
+                }
             }
         } catch (SQLException e) {
             handleException("Error while retrieving the policies under policy mapping UUID : " + policyMappingUUID, e);
@@ -20684,25 +20686,33 @@ public class ApiMgtDAO {
      * @return True if deleted successfully
      * @throws APIManagementException
      */
-    public void deleteGatewayPolicyMappingByPolicyId(String gatewayPolicyMappingId) throws APIManagementException {
+    public void deleteGatewayPolicyMappingByPolicyId(String gatewayPolicyMappingId, boolean shouldRemoveMetaData) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             if (!getPolicyUsageByPolicyId(connection, gatewayPolicyMappingId)) {
-                String dbQuery = SQLConstants.GatewayPolicyConstants.DELETE_GATEWAY_POLICY_MAPPING_BY_ID;
-                try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
-                    statement.setString(1, gatewayPolicyMappingId);
-                    statement.execute();
+                try {
+                    String dbQuery = SQLConstants.GatewayPolicyConstants.DELETE_GATEWAY_POLICY_MAPPING_BY_ID;
+                    try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+                        statement.setString(1, gatewayPolicyMappingId);
+                        statement.execute();
+                    }
+                    if (shouldRemoveMetaData) {
+                        deleteGatewayPolicyMetaData(connection, gatewayPolicyMappingId);
+                    }
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                    handleException("Failed to delete gateway policy mapping with id " + gatewayPolicyMappingId, e);
                 }
-                deleteGatewayPolicyMetaData(connection, gatewayPolicyMappingId);
-                connection.commit();
             } else {
                 throw new APIManagementException(
                         "Cannot delete gateway policy mapping with id " + gatewayPolicyMappingId
                                 + " as policy usages exists");
             }
         } catch (SQLException e) {
-            handleException("Failed to delete gateway policy mapping " + gatewayPolicyMappingId, e);
+            handleException("Failed to delete gateway policy mapping information for policy mapping id: "
+                    + gatewayPolicyMappingId, e);
         }
     }
 
@@ -20762,13 +20772,6 @@ public class ApiMgtDAO {
         return gatewayPolicyData;
     }
 
-    /**
-     * Retrieve list of policy UUIDs attached to a policy mapping.
-     *
-     * @param policyMappingUUID Policy mapping UUID
-     * @return List of policy UUIDs
-     * @throws APIManagementException
-     */
     private List<String> getPolicyUUIDsByPolicyMappingUUID(String policyMappingUUID) throws APIManagementException {
 
         String dbQueryToGetPolicyUUID =
@@ -20790,12 +20793,33 @@ public class ApiMgtDAO {
     }
 
     /**
-     * This method will read the result set and populate GatewayPolicyData object
+     * Retrieve gateway policy mapping metadata by gateway label
      *
-     * @param rs Result set
-     * @return GatewayPolicyData object
-     * @throws SQLException
+     * @param gatewayLabel Gateway label
+     * @param organization Organization
+     * @return Gateway policy metadata
+     * @throws APIManagementException
      */
+    public GatewayPolicyData getPolicyMappingUUIDByGatewayLabel(String gatewayLabel, String organization) throws APIManagementException {
+
+        String dbQuery = SQLConstants.GatewayPolicyConstants.GET_GATEWAY_POLICY_METADATA_BY_GATEWAY_LABEL;
+        GatewayPolicyData gatewayPolicyData = new GatewayPolicyData();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+            statement.setString(1, gatewayLabel);
+            statement.setString(2, organization);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    gatewayPolicyData = populateGatewayPolicyDataWithRS(rs);
+                }
+            }
+        } catch (SQLException e) {
+            handleException(
+                    "Failed to retrieve the gateway policy mapping metadata for gateway label: " + gatewayLabel, e);
+        }
+        return gatewayPolicyData;
+    }
+
     private GatewayPolicyData populateGatewayPolicyDataWithRS(ResultSet rs) throws SQLException {
 
         GatewayPolicyData gatewayPolicyData = new GatewayPolicyData();
@@ -20806,13 +20830,62 @@ public class ApiMgtDAO {
         return gatewayPolicyData;
     }
 
-    /**
-     * This method will delete the policy mapping metadata entries for a given policy mapping UUID
-     *
-     * @param connection            Database connection
-     * @param policyMappingUUID     Policy mapping UUID
-     * @throws SQLException
-     */
+    private void addGatewayPolicyMetadata(Connection connection, String policyMappingUUID, String orgId, String name,
+                                          String description) throws SQLException {
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(
+                SQLConstants.GatewayPolicyConstants.ADD_GATEWAY_POLICY_METADATA)) {
+            preparedStatement.setString(1, policyMappingUUID);
+            preparedStatement.setString(2, orgId);
+            preparedStatement.setString(3, name);
+            preparedStatement.setString(4, description);
+            preparedStatement.execute();
+        }
+    }
+
+    private void updateGatewayGlobalPolicyMetadata(Connection connection, String description, String name,
+            String orgId, String mappingUUID) throws SQLException {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(
+                SQLConstants.GatewayPolicyConstants.UPDATE_GATEWAY_POLICY_METADATA)) {
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, description);
+            preparedStatement.setString(3, orgId);
+            preparedStatement.setString(4, mappingUUID);
+            preparedStatement.execute();
+        }
+    }
+
+    private void addGatewayPolicyMapping(Connection connection, List<OperationPolicy> gatewayPolicyList,
+                                         String policyMappingUUID, String orgId)
+            throws SQLException, APIMgtResourceNotFoundException {
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(
+                SQLConstants.GatewayPolicyConstants.ADD_GATEWAY_POLICY_MAPPING)) {
+            if (gatewayPolicyList != null && !gatewayPolicyList.isEmpty()) {
+                for (OperationPolicy gatewayGlobalPolicy : gatewayPolicyList) {
+                    // Validate whether the policy mapping has invalid policy IDs
+                    String operationPolicyId = gatewayGlobalPolicy.getPolicyId();
+                    OperationPolicyData existingPolicy = getCommonOperationPolicyByPolicyID(connection,
+                            operationPolicyId, orgId, false);
+                    if (existingPolicy == null) {
+                        throw new APIMgtResourceNotFoundException(
+                                "Couldn't retrieve an existing common policy with ID: " + operationPolicyId,
+                                ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND, operationPolicyId));
+                    }
+                    Gson gson = new Gson();
+                    String paramJSON = gson.toJson(gatewayGlobalPolicy.getParameters());
+                    preparedStatement.setString(1, policyMappingUUID);
+                    preparedStatement.setString(2, gatewayGlobalPolicy.getPolicyId());
+                    preparedStatement.setInt(3, gatewayGlobalPolicy.getOrder());
+                    preparedStatement.setString(4, gatewayGlobalPolicy.getDirection());
+                    preparedStatement.setString(5, paramJSON);
+                    preparedStatement.addBatch();
+                }
+            }
+            preparedStatement.executeBatch();
+        }
+    }
+
     private void deleteGatewayPolicyMetaData(Connection connection, String policyMappingUUID) throws SQLException {
 
         try (PreparedStatement preparedStatement =

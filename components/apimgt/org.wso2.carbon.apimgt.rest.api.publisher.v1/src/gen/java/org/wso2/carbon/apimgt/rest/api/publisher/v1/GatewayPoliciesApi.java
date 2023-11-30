@@ -1,24 +1,9 @@
-/*
- * Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayPolicyDeploymentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayPolicyMappingDataListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayPolicyMappingInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayPolicyMappingsDTO;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.GatewayPoliciesApiService;
@@ -59,13 +44,13 @@ GatewayPoliciesApiService delegate = new GatewayPoliciesApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Engage gateway policies to the request, response, fault flows", notes = "This operation can be used to apply gateway policies to the request, response, fault flows. ", response = GatewayPolicyMappingsDTO.class, authorizations = {
+    @ApiOperation(value = "Engage gateway policies to the request, response, fault flows", notes = "This operation can be used to apply gateway policies to the request, response, fault flows. ", response = GatewayPolicyMappingInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Gateway Policies",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Policy mapping added successfully. ", response = GatewayPolicyMappingsDTO.class),
+        @ApiResponse(code = 201, message = "OK. Policy mapping created successfully. ", response = GatewayPolicyMappingInfoDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
@@ -79,7 +64,7 @@ GatewayPoliciesApiService delegate = new GatewayPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a gateway policy mapping", notes = "This operation can be used to delete an existing gateway policy mapping by providing the Id of the policy mapping. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Gateway Policies",  })
     @ApiResponses(value = { 
@@ -97,7 +82,7 @@ GatewayPoliciesApiService delegate = new GatewayPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Engage gateway policy mapping to the gateways", notes = "This operation can be used to engage gateway policy mapping to the gateway/s. ", response = GatewayPolicyDeploymentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Gateway Policies",  })
     @ApiResponses(value = { 
@@ -115,15 +100,15 @@ GatewayPoliciesApiService delegate = new GatewayPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all gateway policies mapping information ", notes = "This operation provides you a list of all gateway policies mapping information. ", response = GatewayPolicyMappingDataListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Gateway Policies",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of gateway policies is returned. ", response = GatewayPolicyMappingDataListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response getAllGatewayPolicies( @ApiParam(value = "Maximum size of policy array to return. ")  @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIManagementException{
-        return delegate.getAllGatewayPolicies(limit, offset, securityContext);
+    public Response getAllGatewayPolicies( @ApiParam(value = "Maximum size of policy array to return. ")  @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"gatewayLabel:\"** modifier.  Eg. The entry \"gatewayLabel:gateway1\" will result in a match with a Gateway Policy Mapping only if the policy mapping is deployed on \"gateway1\".  If query attribute is provided, this returns the Gateway policy Mapping available under the given limit.  Please note that you need to use encoded URL (URL encoding) if you are using a client which does not support URL encoding (such as curl) ")  @QueryParam("query") String query) throws APIManagementException{
+        return delegate.getAllGatewayPolicies(limit, offset, query, securityContext);
     }
 
     @GET
@@ -132,7 +117,7 @@ GatewayPoliciesApiService delegate = new GatewayPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve information of a selected gateway policy mapping", notes = "This operation can be used to retrieve information of a selected gateway policy mapping. ", response = GatewayPolicyMappingsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Gateway Policies",  })
     @ApiResponses(value = { 
@@ -149,7 +134,7 @@ GatewayPoliciesApiService delegate = new GatewayPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update gateway policies added to the request, response, fault flows", notes = "This operation can be used to update already added gateway policies to the request, response, fault flows. ", response = GatewayPolicyMappingsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Gateway Policies" })
     @ApiResponses(value = { 
