@@ -22,7 +22,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.http.entity.ContentType;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -3734,7 +3733,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public void changeApiProvider(String providerName, String apiId, String org, MessageContext ctx)
+    public void changeApiProvider(String providerName, String apiId, String org)
             throws APIPersistenceException {
 
         boolean isTenantFlowStarted = false;
