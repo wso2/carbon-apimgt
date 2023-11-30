@@ -21,10 +21,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.internal.service.impl.GatewayPolicyArtifactsApiServiceImpl;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -33,6 +32,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+
+import org.apache.cxf.jaxrs.ext.MessageContext;
 
 @Path("/gateway-policy-artifacts")
 

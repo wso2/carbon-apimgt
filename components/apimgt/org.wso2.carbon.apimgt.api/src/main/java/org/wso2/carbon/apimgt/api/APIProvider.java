@@ -1777,7 +1777,18 @@ public interface APIProvider extends APIManager {
      * @return List of Gateway Policies
      * @throws APIManagementException
      */
-    List<GatewayPolicyData> getAllGatewayPolicyMappings(String organization) throws APIManagementException;
+    List<GatewayPolicyData> getAllLightweightGatewayPolicyMappings(String organization) throws APIManagementException;
+
+    /**
+     * Get a lightweight version of deployment information for the gateway policy mapping associated with the provided
+     * gateway label within the tenant domain. This will not include the policy definition as it is bulky.
+     *
+     * @param organization Organization name
+     * @param gatewayLabel Gateway label
+     * @return List of Gateway Policies
+     * @throws APIManagementException
+     */
+    GatewayPolicyData getLightweightGatewayPolicyMappings(String organization, String gatewayLabel) throws APIManagementException;
 
     /**
      * Get a lightweight policy mapping data for a particular mapping ID. This will not include the policy
@@ -1789,5 +1800,16 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     GatewayPolicyData getGatewayPolicyMappingDataByPolicyMappingId(String policyMappingUUID, String tenantDomain)
+            throws APIManagementException;
+
+    /**
+     * Checks whether a policy mapping deployment exists for a given policy mapping ID.
+     *
+     * @param gatewayPolicyMappingId Policy mapping UUID
+     * @param tenantDomain           Tenant domain
+     * @return true if a policy mapping deployment exists for a given policy mapping ID
+     * @throws APIManagementException
+     */
+    boolean isPolicyMappingDeploymentExists(String gatewayPolicyMappingId, String tenantDomain)
             throws APIManagementException;
 }
