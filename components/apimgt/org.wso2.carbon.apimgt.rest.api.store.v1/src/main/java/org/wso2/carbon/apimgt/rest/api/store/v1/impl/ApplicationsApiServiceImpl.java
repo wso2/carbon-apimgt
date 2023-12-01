@@ -631,7 +631,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                         new String(Base64.getUrlDecoder().decode(splitToken[1])));
                     org.json.JSONObject appInfo = decodedBody.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION);
                     if (appInfo != null && application != null) {
-                        if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+                        if (RestAPIStoreUtils.isUserOwnerOfApplication(application)
+                                || RestAPIStoreUtils.isApplicationSharedtoUser(application)) {
                             String appUuid = appInfo.getString(APIConstants.JwtTokenConstants.APPLICATION_UUID);
                             if (applicationId.equals(appUuid)) {
                                 long expiryTime = Long.MAX_VALUE;
