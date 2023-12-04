@@ -18067,7 +18067,7 @@ public class ApiMgtDAO {
     }
 
     public void updateApiProvider(String apiUuid, String providerName)
-            throws APIManagementException, SQLException {
+            throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_PROVIDER_SQL);
             statement.setString(1, providerName);

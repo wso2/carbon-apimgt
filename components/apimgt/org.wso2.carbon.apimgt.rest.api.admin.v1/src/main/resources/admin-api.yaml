@@ -3234,7 +3234,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
-            #- apim:api_provider_change
+            - apim:api_provider_change
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3314,7 +3314,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
-            #- apim:api_provider_change
+            - apim:api_provider_change
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
