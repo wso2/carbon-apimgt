@@ -57,9 +57,6 @@ public class APIKeyValidationInfoDTO implements Serializable {
     //should be its first element.
     private  List<String> throttlingDataList;
     private int spikeArrestLimit;
-
-
-
     private int applicationSpikeArrestLimit;
     private String subscriberTenantDomain;
     private String spikeArrestUnit;

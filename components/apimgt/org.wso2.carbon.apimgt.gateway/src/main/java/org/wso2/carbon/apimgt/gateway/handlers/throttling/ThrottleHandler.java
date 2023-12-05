@@ -917,7 +917,10 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
                 if (createApplicationLevelSpikeArrestPolicy) {
                     synchronized (authenticationContext.getSubscriberTenantDomain() +
-                            authenticationContext.getApplicationTier().intern()) {
+                            authenticationContext.getApplicationTier().intern() + "_appSpikeArrest") {
+                        if (throttle.getThrottleContext(applicationLevelThrottleKey) != null) {
+                            return;
+                        }
                         OMElement spikeArrestApplicationLevelPolicy = createSpikeArrestApplicationLevelPolicy(
                                 applicationLevelThrottleKey, maxRequestCount, applicationSpikeArrestWindowUnitTime);
                         if (spikeArrestApplicationLevelPolicy != null) {
