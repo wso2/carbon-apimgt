@@ -21,14 +21,52 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.Objects;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Data Transfer Object for Gateway Policy Deployment
  */
-public class GatewayPolicyDeploymentDTO   {
+public class GatewayPolicyDeploymentDTO {
   
-    private String mappingUUID = null;
     private String gatewayLabel = null;
     private Boolean gatewayDeployment = null;
+    private String mappingUUID = null;
+
+  /**
+   **/
+  public GatewayPolicyDeploymentDTO gatewayLabel(String gatewayLabel) {
+    this.gatewayLabel = gatewayLabel;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "gatewayLabel_1", required = true, value = "")
+  @JsonProperty("gatewayLabel")
+  @NotNull
+  public String getGatewayLabel() {
+    return gatewayLabel;
+  }
+  public void setGatewayLabel(String gatewayLabel) {
+    this.gatewayLabel = gatewayLabel;
+  }
+
+  /**
+   **/
+  public GatewayPolicyDeploymentDTO gatewayDeployment(Boolean gatewayDeployment) {
+    this.gatewayDeployment = gatewayDeployment;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", required = true, value = "")
+  @JsonProperty("gatewayDeployment")
+  @NotNull
+  public Boolean isGatewayDeployment() {
+    return gatewayDeployment;
+  }
+  public void setGatewayDeployment(Boolean gatewayDeployment) {
+    this.gatewayDeployment = gatewayDeployment;
+  }
 
   /**
    **/
@@ -47,40 +85,6 @@ public class GatewayPolicyDeploymentDTO   {
     this.mappingUUID = mappingUUID;
   }
 
-  /**
-   **/
-  public GatewayPolicyDeploymentDTO gatewayLabel(String gatewayLabel) {
-    this.gatewayLabel = gatewayLabel;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "gatewayLabel_1", value = "")
-  @JsonProperty("gatewayLabel")
-  public String getGatewayLabel() {
-    return gatewayLabel;
-  }
-  public void setGatewayLabel(String gatewayLabel) {
-    this.gatewayLabel = gatewayLabel;
-  }
-
-  /**
-   **/
-  public GatewayPolicyDeploymentDTO gatewayDeployment(Boolean gatewayDeployment) {
-    this.gatewayDeployment = gatewayDeployment;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "true", value = "")
-  @JsonProperty("gatewayDeployment")
-  public Boolean isGatewayDeployment() {
-    return gatewayDeployment;
-  }
-  public void setGatewayDeployment(Boolean gatewayDeployment) {
-    this.gatewayDeployment = gatewayDeployment;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -91,14 +95,14 @@ public class GatewayPolicyDeploymentDTO   {
       return false;
     }
     GatewayPolicyDeploymentDTO gatewayPolicyDeployment = (GatewayPolicyDeploymentDTO) o;
-    return Objects.equals(mappingUUID, gatewayPolicyDeployment.mappingUUID) &&
-        Objects.equals(gatewayLabel, gatewayPolicyDeployment.gatewayLabel) &&
-        Objects.equals(gatewayDeployment, gatewayPolicyDeployment.gatewayDeployment);
+    return Objects.equals(gatewayLabel, gatewayPolicyDeployment.gatewayLabel) &&
+        Objects.equals(gatewayDeployment, gatewayPolicyDeployment.gatewayDeployment) &&
+        Objects.equals(mappingUUID, gatewayPolicyDeployment.mappingUUID);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(mappingUUID, gatewayLabel, gatewayDeployment);
+    return Objects.hash(gatewayLabel, gatewayDeployment, mappingUUID);
   }
 
   @Override
@@ -106,9 +110,9 @@ public class GatewayPolicyDeploymentDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class GatewayPolicyDeploymentDTO {\n");
     
-    sb.append("    mappingUUID: ").append(toIndentedString(mappingUUID)).append("\n");
     sb.append("    gatewayLabel: ").append(toIndentedString(gatewayLabel)).append("\n");
     sb.append("    gatewayDeployment: ").append(toIndentedString(gatewayDeployment)).append("\n");
+    sb.append("    mappingUUID: ").append(toIndentedString(mappingUUID)).append("\n");
     sb.append("}");
     return sb.toString();
   }

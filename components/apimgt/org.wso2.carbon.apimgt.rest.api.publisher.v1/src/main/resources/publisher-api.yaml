@@ -12244,6 +12244,9 @@ components:
           example: item_type_setter
     GatewayPolicyDeployment:
       title: Details to map, deploy, undeploy policy mappings to gateways
+      required:
+        - gatewayLabel
+        - gatewayDeployment
       type: object
       properties:
         gatewayLabel:
@@ -12252,6 +12255,9 @@ components:
         gatewayDeployment:
           type: boolean
           example: true
+        mappingUUID:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
     GatewayPolicyMappingDataList:
       title: Gateway Policy Mapping List
       type: object
