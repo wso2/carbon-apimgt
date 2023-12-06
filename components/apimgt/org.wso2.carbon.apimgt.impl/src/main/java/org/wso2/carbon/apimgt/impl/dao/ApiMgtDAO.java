@@ -20043,6 +20043,70 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Get gateway policies mapping UUID attached to the gateway
+     *
+     * @param gatewayLabel Gateway label
+     * @param orgId        Organization Id
+     * @return Policy mapping UUID
+     * @throws APIManagementException
+     */
+    public String getGatewayPolicyMappingByGatewayLabel(String gatewayLabel, String orgId)
+            throws APIManagementException {
+
+        String dbQuery = SQLConstants.GatewayPolicyConstants.GET_POLICY_DEPLOYMENT_BY_GATEWAY;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+            statement.setString(1, gatewayLabel);
+            statement.setString(2, orgId);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("GLOBAL_POLICY_MAPPING_UUID");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve the policy mapping UUID deployed in the " + gatewayLabel, e);
+        }
+        return null;
+    }
+
+    /**
+     * Updates the label name in the AM_GATEWAY_POLICY_DEPLOYMENT table separately, without creating a foreign key constraint.
+     * This is essential due to the potential presence of read-only gateway labels.
+     * Adding a foreign key constraint could lead to breakage when adding new deployments with read-only gateway labels.
+     *
+     * @param oldLabel     Old label name
+     * @param newLabel     New label name
+     * @param organization Tenant domain
+     * @throws APIManagementException
+     */
+    public void updateGatewayLabelName(String oldLabel, String newLabel, String organization)
+            throws APIManagementException {
+
+        if (!StringUtils.isBlank(newLabel)) {
+            String dbQuery = SQLConstants.GatewayPolicyConstants.UPDATE_GATEWAY_POLICY_DEPLOYMENT_BY_GATEWAY_LABEL;
+
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                connection.setAutoCommit(false);
+                try {
+                    try (PreparedStatement ps = connection.prepareStatement(dbQuery)) {
+                        ps.setString(1, newLabel);
+                        ps.setString(2, oldLabel);
+                        ps.setString(3, organization);
+                        ps.executeUpdate();
+                    }
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                }
+            } catch (SQLException e) {
+                handleException(
+                        "Error updating the gateway label name of the AM_GATEWAY_POLICY_DEPLOYMENT table " + "where "
+                                + "GATEWAY_LABEL = " + oldLabel + " and ORGANIZATION = " + organization, e);
+            }
+        }
+    }
+
+    /**
      * Get the gateway labels attached to the gateway policy mapping
      *
      * @param policyMappingUUID Policy mapping UUID

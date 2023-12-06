@@ -19,12 +19,15 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.GatewayPoliciesApiService;
@@ -40,6 +43,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayPolicyMappingsDTO
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -94,7 +98,7 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (Exception e) {
-            RestApiUtil.handleInternalServerError("An Error has occurred while adding gateway policy mapping ",
+            RestApiUtil.handleInternalServerError("An Error has occurred while adding gateway policy mapping. ",
                     e, log);
         }
         return null;
@@ -117,6 +121,8 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
         } else if (gatewayPolicyDeploymentDTOList == null) {
             RestApiUtil.handleBadRequest("Gateway policy deployment list is empty", log);
         }
+        String organization = RestApiUtil.getOrganization(messageContext);
+        validateGatewayLabels(gatewayPolicyDeploymentDTOList, organization);
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -141,10 +147,44 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
             String errorMessage = "Error while deploying gateway policy mapping. " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (Exception e) {
-            RestApiUtil.handleInternalServerError("An Error has occurred while deploying gateway policy mapping ",
+            RestApiUtil.handleInternalServerError("An Error has occurred while deploying gateway policy mapping. ",
                     e, log);
         }
         return null;
+    }
+
+    private void validateGatewayLabels(List<GatewayPolicyDeploymentDTO> gatewayPolicyDeploymentDTOList,
+            String organization) {
+        APIAdmin apiAdmin = new APIAdminImpl();
+        try {
+            List<Environment> allEnvs = apiAdmin.getAllEnvironments(organization);
+            if (allEnvs.isEmpty()) {
+                RestApiUtil.handleBadRequest("No environments found", log);
+            }
+            boolean allLabelsValid = true;
+            List<String> invalidLabels = new ArrayList<>();
+
+            for (GatewayPolicyDeploymentDTO dto : gatewayPolicyDeploymentDTOList) {
+                String labelToCheck = dto.getGatewayLabel();
+                boolean labelFound = false;
+                for (Environment env : allEnvs) {
+                    if (env.getDisplayName().equals(labelToCheck)) {
+                        labelFound = true;
+                        break;
+                    }
+                }
+                if (!labelFound) {
+                    allLabelsValid = false;
+                    invalidLabels.add(labelToCheck);
+                }
+            }
+            if (!allLabelsValid) {
+                String invalidLabelsJoined = String.join(", ", invalidLabels);
+                RestApiUtil.handleResourceNotFoundError("Invalid gateway labels: " + invalidLabelsJoined, log);
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("An Error has occurred while validating gateway labels. ", e, log);
+        }
     }
 
     /**
@@ -226,7 +266,7 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
             }
             return Response.ok().entity(gatewayPolicyMappingDataListDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving the gateway policy mappings ";
+            String errorMessage = "Error while retrieving the gateway policy mappings. ";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -252,7 +292,7 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
                     gatewayPolicyData);
             return Response.ok().entity(gatewayPolicyMappingsDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving the gateway policy mapping ";
+            String errorMessage = "Error while retrieving the gateway policy mapping. ";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -296,7 +336,7 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
             }
             return Response.ok(gatewayPolicyMappingsDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while applying gateway policy";
+            String errorMessage = "Error while applying gateway policy. ";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;

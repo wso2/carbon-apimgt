@@ -175,6 +175,13 @@ public class APIAdminImpl implements APIAdmin {
         }
         apiMgtDAO.deleteEnvironment(uuid);
     }
+    @Override
+    public boolean hasExistingDeployments(String tenantDomain, String uuid) throws APIManagementException {
+        Environment existingEnv = getEnvironment(tenantDomain, uuid);
+        // check if the policy mapping exists for the given environment
+        return StringUtils.isNotEmpty(
+                apiMgtDAO.getGatewayPolicyMappingByGatewayLabel(existingEnv.getDisplayName(), tenantDomain));
+    }
 
     @Override
     public Environment updateEnvironment(String tenantDomain, Environment environment) throws APIManagementException {
@@ -198,7 +205,19 @@ public class APIAdminImpl implements APIAdmin {
 
         validateForUniqueVhostNames(environment);
         environment.setId(existingEnv.getId());
-        return apiMgtDAO.updateEnvironment(environment);
+        Environment updatedEnvironment = apiMgtDAO.updateEnvironment(environment);
+        // If the update is successful without throwing an exception
+        // Perform a separate task of updating gateway label names
+        updateGatewayLabelNameForGatewayPolicies(existingEnv.getDisplayName(), updatedEnvironment.getDisplayName(),
+                tenantDomain);
+        return updatedEnvironment;
+    }
+
+    private void updateGatewayLabelNameForGatewayPolicies(String oldLabel, String newLabel, String tenantDomain)
+            throws APIManagementException {
+        if (StringUtils.isNotEmpty(apiMgtDAO.getGatewayPolicyMappingByGatewayLabel(oldLabel, tenantDomain))) {
+            apiMgtDAO.updateGatewayLabelName(oldLabel, newLabel, tenantDomain);
+        }
     }
 
     private void validateForUniqueVhostNames(Environment environment) throws APIManagementException {
