@@ -348,7 +348,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiUUID);
-            String lcState = ((GenericArtifactImpl) apiArtifact).getLcState();
             if (apiArtifact != null) {
                 String existingVersionComparable = apiArtifact.getAttribute(APIConstants
                         .API_OVERVIEW_VERSION_COMPARABLE);
@@ -359,6 +358,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     visibleRoles = visibleRolesList.split(",");
                 }
                 String apiPath = GovernanceUtils.getArtifactPath(registry, apiUUID);
+                String lifecycleStatus = artifactManager.getGenericArtifact(apiUUID)
+                        .getAttribute(APIConstants.API_OVERVIEW_STATUS);
                 int prependIndex = apiPath.lastIndexOf("/api");
                 String apiSourcePath = apiPath.substring(0, prependIndex);
                 String revisionTargetPath = RegistryPersistenceUtil.getRevisionPath(apiUUID, revisionId);
@@ -366,8 +367,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 registry.copy(revisionTargetPath, apiSourcePath);
                 Resource newAPIArtifact = registry.get(apiPath);
                 newAPIArtifact.setUUID(apiUUID);
-                newAPIArtifact.setProperty("registry.lifecycle.APILifeCycle.state", java.util.Arrays.asList((lcState)));
                 registry.put(apiPath, newAPIArtifact);
+                GenericArtifact artifact = getAPIArtifact(apiUUID, registry);
+                artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, lifecycleStatus);
+                artifactManager.updateGenericArtifact(apiArtifact);
                 RegistryPersistenceUtil.clearResourcePermissions(apiPath, api.getId(),
                         ((UserRegistry) registry).getTenantId());
                 RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
