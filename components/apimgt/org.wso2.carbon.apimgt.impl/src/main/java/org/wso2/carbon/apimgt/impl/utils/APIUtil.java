@@ -3829,9 +3829,9 @@ public final class APIUtil {
      *
      * @param inputStream
      * @return
-     * @throws Exception
+     * @throws APIManagementException
      */
-    public static OMElement buildOMElement(InputStream inputStream) throws Exception {
+    public static OMElement buildOMElement(InputStream inputStream) throws APIManagementException {
 
         XMLStreamReader parser;
         StAXOMBuilder builder;
@@ -3843,7 +3843,7 @@ public final class APIUtil {
         } catch (XMLStreamException e) {
             String msg = "Error in initializing the parser.";
             log.error(msg, e);
-            throw new Exception(msg, e);
+            throw new APIManagementException(msg, e);
         }
 
         return builder.getDocumentElement();
@@ -3853,9 +3853,9 @@ public final class APIUtil {
      * Build OMElement from input stream with securely configured parser.
      * @param inputStream Input Stream
      * @return  OMElement
-     * @throws Exception XMLStreamException while parsing the inputStream
+     * @throws APIManagementException XMLStreamException while parsing the inputStream
      */
-    public static OMElement buildSecuredOMElement(InputStream inputStream) throws Exception {
+    public static OMElement buildSecuredOMElement(InputStream inputStream) throws APIManagementException {
 
         XMLStreamReader parser;
         StAXOMBuilder builder;
@@ -3870,7 +3870,7 @@ public final class APIUtil {
         } catch (XMLStreamException e) {
             String msg = "Error in initializing the parser.";
             log.error(msg, e);
-            throw new Exception(msg, e);
+            throw new APIManagementException(msg, e);
         }
         return builder.getDocumentElement();
     }
