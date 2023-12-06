@@ -71,7 +71,7 @@ import javax.xml.stream.XMLStreamException;
 public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
 
     private static final Log log = LogFactory.getLog(SynapseArtifactGenerator.class);
-    private static final String EXT_SEQUENCE_PREFIX = "WSO2AM--Ext";
+    private static final String GATEWAY_EXT_SEQUENCE_PREFIX = "WSO2AMGW--Ext";
 
     @Override
     public RuntimeArtifactDto generateGatewayArtifact(List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList)
@@ -218,7 +218,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
         GatewayContentDTO gatewayPolicySequenceContentDto = new GatewayContentDTO();
 
         String policySequence;
-        String seqExt = EXT_SEQUENCE_PREFIX + SynapsePolicyAggregator.getSequenceExtensionFlow(flow);
+        String seqExt = GATEWAY_EXT_SEQUENCE_PREFIX + SynapsePolicyAggregator.getSequenceExtensionFlow(flow);
         try {
             policySequence = SynapsePolicyAggregator.generateGatewayPolicySequenceForPolicyMapping(
                     gatewayPolicyDataList, gatewayPolicyList, flow, seqExt);
