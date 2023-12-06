@@ -58,6 +58,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 
 /**
  * This class used to generate Synapse Artifact.
@@ -236,7 +237,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                     gatewayPolicySequenceContentDto.setContent(APIUtil.convertOMtoString(omElement));
                     return gatewayPolicySequenceContentDto;
                 }
-            } catch (Exception e) {
+            } catch (APIManagementException | XMLStreamException e) {
                 throw new APIManagementException(e);
             }
         }
