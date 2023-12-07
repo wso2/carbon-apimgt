@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.language.FieldDefinition;
 import graphql.language.ObjectTypeDefinition;
@@ -29,11 +31,12 @@ import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
+import io.swagger.v3.parser.ObjectMapperFactory;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -1063,7 +1066,7 @@ public class PublisherCommonUtils {
             if (endpointObj != null) {
                 endpoints.add(endpointConfigObj.getJSONObject(endpointType).getString(APIConstants.API_DATA_URL));
             } else {
-                JSONArray endpointArray = endpointConfigObj.getJSONArray(endpointType);
+                org.json.JSONArray endpointArray = endpointConfigObj.getJSONArray(endpointType);
                 for (int i = 0; i < endpointArray.length(); i++) {
                     endpoints.add((String) endpointArray.getJSONObject(i).get(APIConstants.API_DATA_URL));
                 }
@@ -1467,6 +1470,105 @@ public class PublisherCommonUtils {
 
         existingAPI.setUriTemplates(uriTemplates);
         existingAPI.setScopes(scopes);
+        try {
+            ObjectMapper mapper = ObjectMapperFactory.createJson();
+            JsonNode newProductionEndpointJson = mapper.readTree(apiDefinition)
+                    .get(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
+            JsonNode newSandboxEndpointJson = mapper.readTree(apiDefinition)
+                    .get(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
+            String existingEndpointConfigString = existingAPI.getEndpointConfig();
+
+            if (StringUtils.isNotEmpty(existingEndpointConfigString)) { //check if endpoints are configured
+                JSONObject existingEndpointConfigJson = (JSONObject) new JSONParser()
+                        .parse(existingEndpointConfigString);
+                if (newProductionEndpointJson != null) {
+                    if (existingEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) != null) {
+                        //put as a value under the ENDPOINT_PRODUCTION_ENDPOINTS key
+                        //if loadbalance endpoints, get relevant jsonobject from array
+                        if (existingEndpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                                .equals(APIConstants.ENDPOINT_TYPE_LOADBALANCE)) {
+                            JSONArray productionConfigsJson = (JSONArray) existingEndpointConfigJson
+                                    .get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+                            for (int i = 0; i < productionConfigsJson.size(); i++) {
+                                if (!(((JSONObject) productionConfigsJson.get(i)).containsKey(APIConstants
+                                        .API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                                    if (newProductionEndpointJson.has(APIConstants
+                                            .ADVANCE_ENDPOINT_CONFIG)) {
+                                        JsonNode advanceConfig = newProductionEndpointJson
+                                                .get(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+                                        ((JSONObject) productionConfigsJson.get(i))
+                                                .put(APIConstants.ADVANCE_ENDPOINT_CONFIG, advanceConfig);
+                                    } else {
+                                        ((JSONObject) productionConfigsJson.get(i))
+                                                .remove(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+                                    }
+                                    break;
+                                }
+                            }
+                            existingEndpointConfigJson.put(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS,
+                                    productionConfigsJson);
+                        } else {
+                            JSONObject productionConfigsJson = (JSONObject) existingEndpointConfigJson
+                                    .get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+                            if (newProductionEndpointJson.has(APIConstants.ADVANCE_ENDPOINT_CONFIG)) {
+                                JsonNode advanceConfig = newProductionEndpointJson
+                                        .get(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+                                productionConfigsJson.put(APIConstants.ADVANCE_ENDPOINT_CONFIG, advanceConfig);
+                            } else {
+                                productionConfigsJson.remove(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+                            }
+                            existingEndpointConfigJson.put(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS,
+                                    productionConfigsJson);
+                        }
+                    }
+                }
+                if (newSandboxEndpointJson != null) {
+                    if (existingEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) != null) {
+                        //put as a value under the ENDPOINT_SANDBOX_ENDPOINTS key
+                        //if loadbalance endpoints, get relevant jsonobject from array
+                        if (existingEndpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                                .equals(APIConstants.ENDPOINT_TYPE_LOADBALANCE)) {
+                            JSONArray sandboxConfigsJson = (JSONArray) existingEndpointConfigJson
+                                    .get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+                            for (int i = 0; i < sandboxConfigsJson.size(); i++) {
+                                if (!(((JSONObject) sandboxConfigsJson.get(i)).containsKey(APIConstants
+                                        .API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                                    if (newSandboxEndpointJson.has(APIConstants
+                                            .ADVANCE_ENDPOINT_CONFIG)) {
+                                        JsonNode advanceConfig = newSandboxEndpointJson
+                                                .get(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+                                        ((JSONObject) sandboxConfigsJson.get(i))
+                                                .put(APIConstants.ADVANCE_ENDPOINT_CONFIG, advanceConfig);
+                                    } else {
+                                        ((JSONObject) sandboxConfigsJson.get(i))
+                                                .remove(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+                                    }
+                                    break;
+                                }
+                            }
+                            existingEndpointConfigJson.put(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS,
+                                    sandboxConfigsJson);
+                        } else {
+                            JSONObject sandboxConfigsJson = (JSONObject) existingEndpointConfigJson
+                                    .get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+                            if (newSandboxEndpointJson.has(APIConstants.ADVANCE_ENDPOINT_CONFIG)) {
+                                JsonNode advanceConfig = newSandboxEndpointJson
+                                        .get(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+                                sandboxConfigsJson.put(APIConstants.ADVANCE_ENDPOINT_CONFIG, advanceConfig);
+                            } else {
+                                sandboxConfigsJson.remove(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+                            }
+                            existingEndpointConfigJson.put(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS,
+                                    sandboxConfigsJson);
+                        }
+                    }
+                }
+                existingAPI.setEndpointConfig(existingEndpointConfigJson.toString());
+            }
+        } catch (ParseException | JsonProcessingException e) {
+            throw new APIManagementException("Error when parsing endpoint configurations ", e);
+        }
+
         PublisherCommonUtils.validateScopes(existingAPI);
 
         SwaggerData swaggerData = new SwaggerData(existingAPI);
