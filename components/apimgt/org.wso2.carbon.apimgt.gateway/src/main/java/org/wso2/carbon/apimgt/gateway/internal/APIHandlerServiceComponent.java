@@ -19,6 +19,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.commons.throttle.core.DistributedCounterManager;
+import org.apache.synapse.commons.throttle.core.internal.DistributedThrottleProcessor;
+import org.apache.synapse.commons.throttle.core.internal.ThrottleServiceDataHolder;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -34,11 +36,13 @@ import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGenera
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayUrlSafeJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.HybridThrottleProcessor;
 import org.wso2.carbon.apimgt.gateway.RedisBaseDistributedCountManager;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.listeners.GatewayStartupListener;
 import org.wso2.carbon.apimgt.gateway.listeners.ServerStartupListener;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
@@ -64,7 +68,6 @@ import org.wso2.carbon.sequences.services.SequenceAdmin;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
-import redis.clients.jedis.JedisMonitor;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
@@ -131,6 +134,18 @@ public class APIHandlerServiceComponent {
                     new RedisBaseDistributedCountManager(ServiceReferenceHolder.getInstance().getRedisPool());
             context.getBundleContext().registerService(DistributedCounterManager.class,
                     redisBaseDistributedCountManager, null);
+            ServiceReferenceHolder.getInstance().setRedisPool(getJedisPool(redisConfig));
+        }
+
+        if (ThrottleServiceDataHolder.getInstance().getThrottleProperties().isThrottleSyncAsyncHybridModeEnabled()) {
+            String hybridThrottleProcessorWindowType =
+                    ThrottleServiceDataHolder.getInstance().getThrottleProperties().getHybridThrottleProcessorWindowType();
+            if (APIConstants.HYBRID_THROTTLE_PROCESSOR_TYPE_START_TIME_BASED.equals(hybridThrottleProcessorWindowType)) {
+                HybridThrottleProcessor hybridDistributedThrottleProcessor =
+                        new HybridThrottleProcessor();
+                context.getBundleContext().registerService(DistributedThrottleProcessor.class,
+                        hybridDistributedThrottleProcessor, null);
+            }
         }
 
         // Create caches for the super tenant
@@ -479,10 +494,12 @@ public class APIHandlerServiceComponent {
             jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
                     redisConfig.getConnectionTimeout(), redisConfig.getUser(),
                     String.valueOf(redisConfig.getPassword()), redisConfig.isSslEnabled());
+        } else if (redisConfig.getPassword() != null) {
+            jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
+                    redisConfig.getConnectionTimeout(), String.valueOf(redisConfig.getPassword()), redisConfig.isSslEnabled());
         } else {
             jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
                     redisConfig.getConnectionTimeout(), redisConfig.isSslEnabled());
-
         }
         return jedisPool;
     }

@@ -1405,6 +1405,12 @@ public class RegistryPersistenceUtil {
             api.setAdvertiseOnly(Boolean.parseBoolean(apiArtifact
                     .getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
             api.setThumbnail(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
+            api.setBusinessOwner(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
+            api.setBusinessOwnerEmail(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
+            api.setTechnicalOwner(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
+            api.setTechnicalOwnerEmail(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
+            api.setMonetizationStatus(Boolean.parseBoolean(apiArtifact.
+                    getAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS)));
 
         } catch (GovernanceException e) {
             throw new APIPersistenceException("Error while extracting api attributes ", e);
@@ -1424,6 +1430,13 @@ public class RegistryPersistenceUtil {
             api.setProviderName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
             api.setVersion(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
             api.setBusinessOwner(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
+            api.setBusinessOwnerEmail(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
+            api.setTechnicalOwner(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
+            api.setTechnicalOwnerEmail(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
+            api.setMonetizationStatus(Boolean.parseBoolean(apiArtifact.
+                    getAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS)));
+            api.setAdvertiseOnly(Boolean.parseBoolean(apiArtifact
+                    .getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
 
         } catch (GovernanceException e) {
             throw new APIPersistenceException("Error while extracting api attributes ", e);

@@ -1423,6 +1423,12 @@ public final class APIConstants {
     public static final String CONFIG_REDIS_MIN_EVICTABLE_IDLE_TIME_IN_MILLIS = "minEvictableIdleTimeMillis";
     public static final String CONFIG_REDIS_TIME_BETWEEN_EVICTION_RUNS_IN_MILLIS = "timeBetweenEvictionRunsMillis";
     public static final String CONFIG_REDIS_NUM_TESTS_PER_EVICTION_RUNS = "numTestsPerEvictionRun";
+    public static final String CONFIG_REDIS_GATEWAY_ID = "GatewayId";
+
+    public static final String CONFIG_REDIS_MIN_GATEWAY_COUNT = "MinGatewayCount";
+
+    public static final String CONFIG_REDIS_KEY_LOCK_RETRIEVAL_TIMEOUT = "KeyLockRetrievalTimeout";
+    public static final String HYBRID_THROTTLE_PROCESSOR_TYPE_START_TIME_BASED = "start_time_based";
 
     // Primary/Secondary Login configuration
     public static final String USERID_LOGIN = "UserIdLogin";
@@ -1618,6 +1624,8 @@ public final class APIConstants {
     public static final String X_WSO2_REQUEST_INTERCEPTOR = "x-wso2-request-interceptor";
     public static final String X_WSO2_RESPONSE_INTERCEPTOR = "x-wso2-response-interceptor";
     public static final String X_WSO2_ENDPOINT_TYPE = "type";
+    public static final String ADVANCE_ENDPOINT_CONFIG = "advanceEndpointConfig";
+    public static final String TIMEOUT_IN_MILLIS = "timeoutInMillis";
 
     //API Constants
     public static final String API_DATA_NAME = "name";

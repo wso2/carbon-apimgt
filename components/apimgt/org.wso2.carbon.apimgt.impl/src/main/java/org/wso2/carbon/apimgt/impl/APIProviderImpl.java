@@ -841,14 +841,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
         apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
         apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
-        try {
-            api.setCreatedTime(existingAPI.getCreatedTime());
-            apiPersistenceInstance.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
-        } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while updating API details", e);
-        }
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
-                APIConstants.AuditLogConstants.UPDATED, this.username);
 
         //Validate Transports
         validateAndSetTransports(api);
@@ -859,7 +851,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while updating API details", e);
         }
-
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                APIConstants.AuditLogConstants.UPDATED, this.username);
 
         //notify key manager with API update
         registerOrUpdateResourceInKeyManager(api, tenantDomain);
@@ -5196,6 +5189,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setContextTemplate(publiserAPI.getContext());
                         api.setStatus(publiserAPI.getStatus());
                         api.setThumbnailUrl(publiserAPI.getThumbnailUri());
+                        api.setBusinessOwner(publiserAPI.getBusinessOwner());
+                        api.setBusinessOwnerEmail(publiserAPI.getBusinessOwnerEmail());
+                        api.setTechnicalOwner(publiserAPI.getTechnicalOwner());
+                        api.setTechnicalOwnerEmail(publiserAPI.getTechnicalOwnerEmail());
+                        api.setMonetizationEnabled(publiserAPI.getMonetizationStatus());
+                        api.setAdvertiseOnly(publiserAPI.getAdvertiseOnly());
                         apiSet.add(api);
                     } else if ("APIProduct".equals(item.getType())) {
 
@@ -5206,6 +5205,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setContextTemplate(publiserAPI.getContext());
                         api.setState(publiserAPI.getStatus());
                         api.setThumbnailUrl(publiserAPI.getThumbnailUri());
+                        api.setBusinessOwner(publiserAPI.getBusinessOwner());
+                        api.setBusinessOwnerEmail(publiserAPI.getBusinessOwnerEmail());
+                        api.setTechnicalOwner(publiserAPI.getTechnicalOwner());
+                        api.setTechnicalOwnerEmail(publiserAPI.getTechnicalOwnerEmail());
+                        api.setMonetizationEnabled(publiserAPI.getMonetizationStatus());
                         apiProductSet.add(api);
                     } else if (item instanceof DocumentSearchContent) {
                         // doc item
@@ -5354,6 +5358,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     mappedAPI.setContext(publisherAPIInfo.getContext());
                     mappedAPI.setApiSecurity(publisherAPIInfo.getApiSecurity());
                     mappedAPI.setThumbnailUrl(publisherAPIInfo.getThumbnail());
+                    mappedAPI.setBusinessOwner(publisherAPIInfo.getBusinessOwner());
+                    mappedAPI.setBusinessOwnerEmail(publisherAPIInfo.getBusinessOwnerEmail());
+                    mappedAPI.setTechnicalOwner(publisherAPIInfo.getTechnicalOwner());
+                    mappedAPI.setTechnicalOwnerEmail(publisherAPIInfo.getTechnicalOwnerEmail());
+                    mappedAPI.setMonetizationEnabled(publisherAPIInfo.getMonetizationStatus());
                     populateAPIStatus(mappedAPI);
                     productList.add(mappedAPI);
                 }

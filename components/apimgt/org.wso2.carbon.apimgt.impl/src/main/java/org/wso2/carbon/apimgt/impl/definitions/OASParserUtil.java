@@ -563,6 +563,10 @@ public class OASParserUtil {
 
         PathItem pathItem = paths.get(uriTemplate.getUriTemplate());
         pathItem.operation(httpMethod, srcOperation);
+        if (pathItem.getParameters() == null && srcPathItem.getParameters() != null) {
+            pathItem.setParameters(srcPathItem.getParameters());
+            setRefOfParameters(srcPathItem.getParameters(), context);
+        }
 
         readReferenceObjects(srcOperation, context);
 
@@ -632,8 +636,11 @@ public class OASParserUtil {
                 if (headers != null) {
                     for (Header header : headers.values()) {
                         Content content = header.getContent();
-
                         extractReferenceFromContent(content, context);
+                        String ref = header.get$ref();
+                        if (ref != null) {
+                            addToReferenceObjectMap(ref, context);
+                        }
                     }
                 }
             }
@@ -1388,6 +1395,17 @@ public class OASParserUtil {
             ObjectNode endpointResult = objectMapper.createObjectNode();
             endpointResult.set(APIConstants.ENDPOINT_URLS, endpointsArray);
             endpointResult.put(APIConstants.X_WSO2_ENDPOINT_TYPE, type);
+            if (primaryEndpoints.has(APIConstants.ADVANCE_ENDPOINT_CONFIG)
+                    && primaryEndpoints.get(APIConstants.ADVANCE_ENDPOINT_CONFIG) != JSONObject.NULL) {
+                JSONObject advanceEndpointConfig = primaryEndpoints.getJSONObject(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+                ObjectNode advanceEndpointsObject = objectMapper.createObjectNode();
+                if (advanceEndpointConfig.has(APIConstants.TIMEOUT_IN_MILLIS)
+                        && advanceEndpointConfig.get(APIConstants.TIMEOUT_IN_MILLIS) != JSONObject.NULL) {
+                    advanceEndpointsObject.put(APIConstants.TIMEOUT_IN_MILLIS,
+                            advanceEndpointConfig.getInt(APIConstants.TIMEOUT_IN_MILLIS));
+                    endpointResult.set(APIConstants.ADVANCE_ENDPOINT_CONFIG, advanceEndpointsObject);
+                }
+            }
             return endpointResult;
         }
         return null;

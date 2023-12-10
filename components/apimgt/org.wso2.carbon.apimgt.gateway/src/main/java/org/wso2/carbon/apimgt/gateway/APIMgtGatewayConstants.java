@@ -150,6 +150,7 @@ public class APIMgtGatewayConstants {
     public static final String HTTP_REQUEST_METHOD = "HTTP_METHOD_OBJECT";
     public static final String REST_CONTENT_TYPE = "ContentType";
     public static final String REST_MESSAGE_TYPE = "messageType";
+    public static final String SCHEMA_VALIDATION_REPORT = "schema-validation-report";
 
 
     /**

@@ -31,6 +31,11 @@ public class APIProductInfoDTO   {
     private String state = null;
     private List<String> securityScheme = new ArrayList<String>();
     private String gatewayVendor = null;
+    private Boolean monetizedInfo = null;
+    private String businessOwner = null;
+    private String businessOwnerEmail = null;
+    private String technicalOwner = null;
+    private String technicalOwnerEmail = null;
 
   /**
    * UUID of the api product 
@@ -191,6 +196,91 @@ public class APIProductInfoDTO   {
     this.gatewayVendor = gatewayVendor;
   }
 
+  /**
+   **/
+  public APIProductInfoDTO monetizedInfo(Boolean monetizedInfo) {
+    this.monetizedInfo = monetizedInfo;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("monetizedInfo")
+  public Boolean isMonetizedInfo() {
+    return monetizedInfo;
+  }
+  public void setMonetizedInfo(Boolean monetizedInfo) {
+    this.monetizedInfo = monetizedInfo;
+  }
+
+  /**
+   **/
+  public APIProductInfoDTO businessOwner(String businessOwner) {
+    this.businessOwner = businessOwner;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Business Owner", value = "")
+  @JsonProperty("businessOwner")
+  public String getBusinessOwner() {
+    return businessOwner;
+  }
+  public void setBusinessOwner(String businessOwner) {
+    this.businessOwner = businessOwner;
+  }
+
+  /**
+   **/
+  public APIProductInfoDTO businessOwnerEmail(String businessOwnerEmail) {
+    this.businessOwnerEmail = businessOwnerEmail;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "businessowner@abc.com", value = "")
+  @JsonProperty("businessOwnerEmail")
+  public String getBusinessOwnerEmail() {
+    return businessOwnerEmail;
+  }
+  public void setBusinessOwnerEmail(String businessOwnerEmail) {
+    this.businessOwnerEmail = businessOwnerEmail;
+  }
+
+  /**
+   **/
+  public APIProductInfoDTO technicalOwner(String technicalOwner) {
+    this.technicalOwner = technicalOwner;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Technical Owner", value = "")
+  @JsonProperty("TechnicalOwner")
+  public String getTechnicalOwner() {
+    return technicalOwner;
+  }
+  public void setTechnicalOwner(String technicalOwner) {
+    this.technicalOwner = technicalOwner;
+  }
+
+  /**
+   **/
+  public APIProductInfoDTO technicalOwnerEmail(String technicalOwnerEmail) {
+    this.technicalOwnerEmail = technicalOwnerEmail;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "technicalowner@abc.com", value = "")
+  @JsonProperty("TechnicalOwnerEmail")
+  public String getTechnicalOwnerEmail() {
+    return technicalOwnerEmail;
+  }
+  public void setTechnicalOwnerEmail(String technicalOwnerEmail) {
+    this.technicalOwnerEmail = technicalOwnerEmail;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -209,12 +299,17 @@ public class APIProductInfoDTO   {
         Objects.equals(hasThumbnail, apIProductInfo.hasThumbnail) &&
         Objects.equals(state, apIProductInfo.state) &&
         Objects.equals(securityScheme, apIProductInfo.securityScheme) &&
-        Objects.equals(gatewayVendor, apIProductInfo.gatewayVendor);
+        Objects.equals(gatewayVendor, apIProductInfo.gatewayVendor) &&
+        Objects.equals(monetizedInfo, apIProductInfo.monetizedInfo) &&
+        Objects.equals(businessOwner, apIProductInfo.businessOwner) &&
+        Objects.equals(businessOwnerEmail, apIProductInfo.businessOwnerEmail) &&
+        Objects.equals(technicalOwner, apIProductInfo.technicalOwner) &&
+        Objects.equals(technicalOwnerEmail, apIProductInfo.technicalOwnerEmail);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, securityScheme, gatewayVendor);
+    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, securityScheme, gatewayVendor, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail);
   }
 
   @Override
@@ -231,6 +326,11 @@ public class APIProductInfoDTO   {
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
+    sb.append("    monetizedInfo: ").append(toIndentedString(monetizedInfo)).append("\n");
+    sb.append("    businessOwner: ").append(toIndentedString(businessOwner)).append("\n");
+    sb.append("    businessOwnerEmail: ").append(toIndentedString(businessOwnerEmail)).append("\n");
+    sb.append("    technicalOwner: ").append(toIndentedString(technicalOwner)).append("\n");
+    sb.append("    technicalOwnerEmail: ").append(toIndentedString(technicalOwnerEmail)).append("\n");
     sb.append("}");
     return sb.toString();
   }
