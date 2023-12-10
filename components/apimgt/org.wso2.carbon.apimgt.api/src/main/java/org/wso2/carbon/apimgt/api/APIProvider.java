@@ -1854,4 +1854,12 @@ public interface APIProvider extends APIManager {
      */
     boolean isPolicyMetadataExists(String gatewayPolicyMappingId)
             throws APIManagementException;
+
+    /**
+     * Checks whether a common policy exists based on the provided common policy UUID within gateway policy mappings.
+     * @param commonPolicyUUID Common policy UUID
+     * @return count of the common policy usage
+     * @throws APIManagementException
+     */
+    int getPolicyUsageByPolicyUUIDInGatewayPolicies(String commonPolicyUUID) throws APIManagementException;
 }
