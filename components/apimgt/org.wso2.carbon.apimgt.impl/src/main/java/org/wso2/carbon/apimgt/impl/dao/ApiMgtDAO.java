@@ -20278,6 +20278,32 @@ public class ApiMgtDAO {
         return gatewayPolicyData;
     }
 
+    /**
+     * Retrieve common policy usage count based on the provided common policy UUID within gateway policy mappings.
+     *
+     * @param policyUUID Common Policy UUID
+     * @return count of the common policy usage
+     * @throws APIManagementException
+     */
+    public int getPolicyUUIDCount(String policyUUID) throws APIManagementException {
+        String dbQuery = SQLConstants.GatewayPolicyConstants.GET_COMMON_POLICY_USAGE_COUNT_BY_POLICY_UUID;
+        int count = 0;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+            statement.setString(1, policyUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    count = rs.getInt("count_occurrences");
+                }
+            }
+        } catch (SQLException e) {
+            handleException(
+                    "Failed to retrieve the common policy usages in gateway policy mappings for common policy UUID: "
+                            + policyUUID, e);
+        }
+        return count;
+    }
+
     private GatewayPolicyData populateGatewayPolicyDataWithRS(ResultSet rs) throws SQLException {
 
         GatewayPolicyData gatewayPolicyData = new GatewayPolicyData();

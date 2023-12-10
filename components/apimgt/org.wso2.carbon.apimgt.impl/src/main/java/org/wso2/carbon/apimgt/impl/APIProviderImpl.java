@@ -6554,6 +6554,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return metadata != null && Objects.equals(metadata.getPolicyMappingId(), gatewayPolicyMappingId);
     }
 
+    @Override
+    public int getPolicyUsageByPolicyUUIDInGatewayPolicies(String commonPolicyUUID)
+            throws APIManagementException {
+        return apiMgtDAO.getPolicyUUIDCount(commonPolicyUUID);
+    }
+
     /**
      * To get the hashmap of what mappingId is deployed or undeployed in which gateway
      */
